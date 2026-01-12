@@ -1138,16 +1138,6 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  
-  // DEBUG: Log component mount with version timestamp
-  useEffect(() => {
-    console.log(`🔍 DEBUG: KnowledgeAvatars v2.1 mounted at ${new Date().toISOString()}`);
-    console.log(`🔍 DEBUG: Using native overflow-x-auto with .scrollbar-visible class`);
-  }, []);
-  const [isSwipeActive, setIsSwipeActive] = useState(false);
-  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const isTransitioningRef = useRef(false);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -1251,63 +1241,6 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
     setTimeout(() => {
       isTransitioningRef.current = false;
     }, 600);
-  };
-
-  // Touch handling for mobile swipe gestures
-  const minSwipeDistance = 50;
-  const previewDistance = 15; // Visual feedback threshold
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-    setIsSwipeActive(true);
-    setSwipeDirection(null);
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    if (!touchStart) return;
-    const currentX = e.targetTouches[0].clientX;
-    setTouchEnd(currentX);
-    
-    // Provide visual feedback during swipe
-    const distance = touchStart - currentX;
-    if (Math.abs(distance) > previewDistance) {
-      setSwipeDirection(distance > 0 ? 'left' : 'right');
-    } else {
-      setSwipeDirection(null);
-    }
-  };
-
-  const onTouchEnd = () => {
-    if (!touchStart) {
-      setIsSwipeActive(false);
-      setSwipeDirection(null);
-      return;
-    }
-    
-    // If touchEnd is null, it means no movement occurred (just a tap)
-    if (!touchEnd) {
-      setIsSwipeActive(false);
-      setSwipeDirection(null);
-      return;
-    }
-    
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    // Only trigger slide if it was an actual swipe (not just a small movement)
-    if (isLeftSwipe && canGoNext) {
-      nextSlide();
-    } else if (isRightSwipe && canGoPrev) {
-      prevSlide();
-    }
-    
-    // Reset swipe state
-    setIsSwipeActive(false);
-    setSwipeDirection(null);
-    setTouchStart(null);
-    setTouchEnd(null);
   };
 
   const handleFollow = async (avatarId: string) => {
@@ -1537,14 +1470,45 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
             </>
           )}
           
+          {/* Mobile Indicators - positioned above carousel */}
+          {isMobile && avatars.length > 1 && (
+            <div className="flex justify-center gap-2 mb-4">
+              {avatars.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    setCurrentIndex(idx);
+                    if (containerRef.current) {
+                      const cardWidth = 304; // 280px card + 24px gap
+                      containerRef.current.scrollTo({
+                        left: idx * cardWidth,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }}
+                  className={`transition-all duration-300 rounded-full ${
+                    idx === currentIndex 
+                      ? 'w-8 h-2 bg-primary' 
+                      : 'w-2 h-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                  }`}
+                  data-testid={`carousel-indicator-${idx}`}
+                />
+              ))}
+            </div>
+          )}
+          
           {/* Working Carousel - CSS scroll-snap for mobile, transforms for desktop */}
           <div 
-            className={`${isMobile ? 'overflow-x-auto snap-x snap-mandatory scrollbar-visible flex justify-center' : 'overflow-x-auto scrollbar-visible'} px-4 md:px-12 pb-4`}
+            className={`${isMobile ? 'overflow-x-auto snap-x snap-mandatory' : 'overflow-x-auto scrollbar-visible'} pb-4`}
             ref={containerRef}
             style={{ 
               WebkitOverflowScrolling: 'touch',
-              scrollbarWidth: 'thin',
-              scrollbarColor: 'rgba(139, 92, 246, 0.5) rgba(30, 30, 50, 0.3)'
+              scrollbarWidth: isMobile ? 'none' : 'thin',
+              scrollbarColor: 'rgba(139, 92, 246, 0.5) rgba(30, 30, 50, 0.3)',
+              touchAction: 'pan-x',
+              scrollPaddingInline: isMobile ? 'calc(50vw - 140px)' : '48px',
+              paddingInline: isMobile ? 'calc(50vw - 140px)' : '48px',
+              msOverflowStyle: 'none',
             }}
             onScroll={(e) => {
               const container = e.currentTarget;
@@ -1556,33 +1520,6 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
               }
             }}
           >
-            {/* Mobile Indicators - sync with scroll position */}
-            {isMobile && avatars.length > 1 && (
-              <div className="flex justify-center gap-2 mb-6 sticky top-0 z-10">
-                {avatars.map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => {
-                      setCurrentIndex(idx);
-                      if (containerRef.current) {
-                        const cardWidth = 304; // 280px card + 24px gap
-                        containerRef.current.scrollTo({
-                          left: idx * cardWidth,
-                          behavior: 'smooth'
-                        });
-                      }
-                    }}
-                    className={`transition-all duration-300 rounded-full ${
-                      idx === currentIndex 
-                        ? 'w-8 h-2 bg-primary' 
-                        : 'w-2 h-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
-                    }`}
-                    data-testid={`carousel-indicator-${idx}`}
-                  />
-                ))}
-              </div>
-            )}
-            
             {/* Carousel Track - uses native scroll on all devices */}
             <div 
               className="flex gap-6"
@@ -1627,21 +1564,16 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 return (
                   <div 
                     key={avatar.id} 
-                    className={`flex-shrink-0 relative z-10 ${isMobile ? 'snap-start snap-always' : ''}`}
+                    className={`flex-shrink-0 relative z-10 ${isMobile ? 'snap-center snap-always' : ''}`}
                     style={{
                       width: isMobile ? '280px' : '320px',
-                      minWidth: isMobile ? '280px' : '320px'
+                      minWidth: isMobile ? '280px' : '320px',
+                      touchAction: 'pan-x',
                     }}
                   >
                     <Link 
                       href={`/knowledge-avatars/${avatar.id}`}
                       className="block w-full h-full"
-                      onClick={(e) => {
-                        if (isSwipeActive || swipeDirection) {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }
-                      }}
                     >
                       <div className="group cursor-pointer flex flex-col items-center p-6 md:p-8 rounded-3xl bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-xl border border-purple-500/20 hover:border-purple-400/50 hover:bg-slate-900/60 dark:hover:bg-slate-950/80 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-2">
                         {/* Floating Avatar with Glow */}
