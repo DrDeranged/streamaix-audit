@@ -935,6 +935,7 @@ export default function StreamViewPage() {
 
   const isLive = stream.status === 'live';
   const isScheduled = stream.status === 'scheduled';
+  const isEnded = stream.status === 'ended';
   const displayViewerCount = isConnected ? viewerCount : stream.currentViewers;
 
   // Determine effective connection state - prioritize LiveKit over WebRTC
@@ -951,6 +952,98 @@ export default function StreamViewPage() {
   
   // Get the effective video track (prioritize host's local track if they're the host, otherwise remote)
   const effectiveVideoTrack = isLiveKitHost ? localVideoTrack : remoteVideoTrack;
+
+  // Handle ended streams - show replay interface
+  if (isEnded) {
+    return (
+      <div className="min-h-[100dvh] bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950 safe-area-inset">
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          {/* Header */}
+          <div className="flex items-center gap-4 mb-6">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => window.history.back()}
+              className="text-slate-400 hover:text-white hover:bg-purple-500/20" 
+              data-testid="button-back"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div>
+              <Badge className="bg-slate-700/60 text-slate-300 mb-2">
+                <Video className="w-3 h-3 mr-1" />
+                Replay
+              </Badge>
+              <h1 className="text-xl font-bold text-white">{stream.title}</h1>
+            </div>
+          </div>
+
+          {/* Avatar / Thumbnail */}
+          <Card className="overflow-hidden bg-gradient-to-br from-slate-900/90 via-purple-900/20 to-slate-900/90 border border-purple-500/20 mb-6">
+            <div className="aspect-video bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center relative">
+              {stream.hostAvatar ? (
+                <img 
+                  src={stream.hostAvatar} 
+                  alt={stream.hostUsername || 'Host'} 
+                  className="w-32 h-32 rounded-full object-cover ring-4 ring-purple-500/30"
+                />
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center ring-4 ring-purple-500/30">
+                  <span className="text-4xl font-bold text-white">
+                    {(stream.hostUsername || 'H')[0]?.toUpperCase()}
+                  </span>
+                </div>
+              )}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2">
+                <Badge className="bg-purple-600/80 text-white">
+                  Stream Ended
+                </Badge>
+              </div>
+            </div>
+            <div className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center overflow-hidden">
+                  {stream.hostAvatar ? (
+                    <img src={stream.hostAvatar} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-sm font-bold text-white">
+                      {(stream.hostUsername || 'H')[0]?.toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <p className="font-semibold text-white">{stream.hostUsername || 'Anonymous'}</p>
+                  <p className="text-xs text-slate-400">Knowledge Avatar</p>
+                </div>
+              </div>
+              {stream.description && (
+                <p className="text-sm text-slate-400">{stream.description}</p>
+              )}
+            </div>
+          </Card>
+
+          {/* Replay Content - Conversation Replay */}
+          <Card className="bg-gradient-to-br from-slate-900/90 via-purple-900/20 to-slate-900/90 border border-purple-500/20 p-4">
+            <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+              <MessageCircle className="w-5 h-5 text-purple-400" />
+              Stream Transcript
+            </h2>
+            <ConversationReplay streamId={stream.id} />
+          </Card>
+
+          {/* Back to streams button */}
+          <div className="flex justify-center mt-6">
+            <Link href="/stream-replays">
+              <Button className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500">
+                <Video className="w-4 h-4 mr-2" />
+                Browse More Replays
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isImmersiveMode && stream && isLive) {
     return (
