@@ -4,7 +4,7 @@ import { eq, desc } from 'drizzle-orm';
 import { getStreamingService } from './streamingService';
 import { MarketDataService } from './marketDataService';
 import { AvatarVoiceService } from './avatarVoiceService';
-import { PushNotificationService } from './pushNotificationService';
+import { pushNotificationService } from './pushNotificationService';
 import OpenAI from 'openai';
 import * as cron from 'node-cron';
 
@@ -252,9 +252,8 @@ export class ScheduledMarketStreamService {
 
       // Send push notifications to all users about the scheduled stream going live
       try {
-        const pushService = PushNotificationService.getInstance();
         const streamTypeLabel = type === 'morning_update' ? 'Morning Market Update' : 'Market Close Recap';
-        await pushService.sendToAll({
+        await pushNotificationService.sendToAll({
           title: `📺 ${streamTypeLabel} is LIVE!`,
           body: `${avatar.name} is hosting the daily ${streamTypeLabel}. Join now to hear the latest market insights!`,
           url: `/streams/${stream.id}`,
