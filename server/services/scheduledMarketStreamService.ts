@@ -4,6 +4,7 @@ import { eq, desc } from 'drizzle-orm';
 import { getStreamingService } from './streamingService';
 import { MarketDataService } from './marketDataService';
 import { AvatarVoiceService } from './avatarVoiceService';
+import { PushNotificationService } from './pushNotificationService';
 import OpenAI from 'openai';
 import * as cron from 'node-cron';
 
@@ -247,6 +248,35 @@ export class ScheduledMarketStreamService {
       const streamingService = getStreamingService();
       if (streamingService) {
         await streamingService.createAvatarStreamSession(stream.id);
+      }
+
+      // Send push notifications to all users about the scheduled stream going live
+      try {
+        const pushService = PushNotificationService.getInstance();
+        const streamTypeLabel = type === 'morning_update' ? 'Morning Market Update' : 'Market Close Recap';
+        await pushService.sendToAll({
+          title: `📺 ${streamTypeLabel} is LIVE!`,
+          body: `${avatar.name} is hosting the daily ${streamTypeLabel}. Join now to hear the latest market insights!`,
+          url: `/streams/${stream.id}`,
+          icon: avatar.imageUrl || '/icon-192.png',
+          tag: `scheduled-stream-${stream.id}`,
+          requireInteraction: true,
+          actions: [
+            { action: 'watch_now', title: '👁️ Watch Now' },
+            { action: 'remind_later', title: '⏰ Later' }
+          ],
+          timestamp: Date.now(),
+          data: { 
+            type: 'stream_live', 
+            streamId: stream.id, 
+            streamerName: avatar.name, 
+            streamType: 'broadcast',
+            streamTitle 
+          }
+        }, 'stream_live');
+        console.log(`[Scheduled Streams] 🔔 Push notifications sent for ${streamTitle}`);
+      } catch (pushError) {
+        console.error('[Scheduled Streams] ⚠️ Failed to send push notifications:', pushError);
       }
 
       const commentary = await this.generateMarketCommentary(avatar, type, marketData);
