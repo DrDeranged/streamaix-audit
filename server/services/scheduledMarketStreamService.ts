@@ -1,5 +1,5 @@
 import { db } from '../db';
-import { liveStreams, knowledgeAvatars, streamRecordings } from '@shared/schema';
+import { liveStreams, knowledgeAvatars, streamRecordings, streamConversationMessages } from '@shared/schema';
 import { eq, desc } from 'drizzle-orm';
 import { getStreamingService } from './streamingService';
 import { MarketDataService } from './marketDataService';
@@ -477,8 +477,24 @@ Return the commentary as a single flowing script, broken into 4-6 paragraphs for
     for (let i = 0; i < segments.length; i++) {
       const segment = segments[i];
 
+      // Broadcast to WebSocket clients
       if (streamingService) {
         streamingService.sendAiMessage(streamId, avatar.id, avatar.name, segment);
+      }
+
+      // Save message to database for replay
+      try {
+        await db.insert(streamConversationMessages).values({
+          streamId,
+          participantId: avatar.id,
+          speakerType: 'avatar',
+          speakerAvatarId: avatar.id,
+          speakerName: avatar.name,
+          textContent: segment,
+          sourceType: 'scheduled_stream',
+        });
+      } catch (err) {
+        console.error('[Scheduled Streams] Error saving message to DB:', err);
       }
 
       if (this.activeStream) {
