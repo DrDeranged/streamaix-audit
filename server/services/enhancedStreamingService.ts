@@ -566,10 +566,13 @@ Focus on: market insights, price predictions, important announcements, and viewe
         const [stream] = await db.select({
           title: liveStreams.title,
           hostId: liveStreams.hostId,
+          hostAvatarId: liveStreams.hostAvatarId,
+          streamType: liveStreams.streamType,
           category: liveStreams.category,
           aiSummary: liveStreams.aiSummary,
           keyMoments: liveStreams.keyMoments,
           peakViewers: liveStreams.peakViewers,
+          totalViews: liveStreams.totalViews,
         })
         .from(liveStreams)
         .where(eq(liveStreams.id, replay.streamId))
@@ -577,23 +580,55 @@ Focus on: market insights, price predictions, important announcements, and viewe
 
         if (!stream) return null;
 
-        const [host] = await db.select({
-          username: users.username,
-          avatar: users.avatar,
-        })
-        .from(users)
-        .where(eq(users.id, stream.hostId))
-        .limit(1);
+        // Check if this is an avatar-hosted stream (scheduled market updates)
+        let hostUsername = 'Unknown';
+        let hostAvatar = replay.thumbnailUrl;
+        
+        if (stream.hostAvatarId) {
+          const [avatar] = await db.select({
+            name: knowledgeAvatars.name,
+            imageUrl: knowledgeAvatars.imageUrl,
+          })
+          .from(knowledgeAvatars)
+          .where(eq(knowledgeAvatars.id, stream.hostAvatarId))
+          .limit(1);
+          
+          if (avatar) {
+            hostUsername = avatar.name;
+            hostAvatar = avatar.imageUrl || replay.thumbnailUrl;
+          }
+        } else {
+          // Fall back to user host
+          const [host] = await db.select({
+            username: users.username,
+            avatar: users.avatar,
+          })
+          .from(users)
+          .where(eq(users.id, stream.hostId))
+          .limit(1);
+          
+          if (host) {
+            hostUsername = host.username;
+            hostAvatar = host.avatar || replay.thumbnailUrl;
+          }
+        }
 
         return {
-          ...replay,
+          id: replay.streamId, // Use streamId as id for navigation
+          streamId: replay.streamId,
           title: stream.title,
+          description: stream.aiSummary,
+          streamType: stream.streamType || 'creator_broadcast',
           category: stream.category,
           aiSummary: stream.aiSummary,
           keyMoments: stream.keyMoments,
           peakViewers: stream.peakViewers,
-          hostUsername: host?.username,
-          hostAvatar: host?.avatar,
+          hostUsername,
+          hostAvatar,
+          thumbnailUrl: replay.thumbnailUrl,
+          duration: replay.durationSeconds || 0, // Map durationSeconds to duration
+          viewCount: stream.totalViews || stream.peakViewers || 0,
+          recordedAt: replay.createdAt ? new Date(replay.createdAt).toISOString() : new Date().toISOString(),
         };
       }));
 
