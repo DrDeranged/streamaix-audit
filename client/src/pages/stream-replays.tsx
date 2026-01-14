@@ -82,8 +82,8 @@ function RecordingCard({ recording }: { recording: Recording }) {
     if (recording.streamType === 'debate') {
       return `/debate/${recording.id}`;
     }
-    // Use streamId for streams page which handles both live and replay views
-    return `/streams/${recording.streamId || recording.id}`;
+    // Use streamId for stream page which handles both live and replay views
+    return `/stream/${recording.streamId || recording.id}`;
   };
   
   return (
