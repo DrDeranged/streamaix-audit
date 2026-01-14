@@ -87,14 +87,8 @@ function RecordingCard({ recording }: { recording: Recording }) {
   };
   
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.2 }}
-    >
-      <Link href={getReplayLink()}>
-        <Card className="overflow-hidden bg-gradient-to-br from-slate-900/90 via-purple-900/20 to-slate-900/90 border border-purple-500/20 hover:border-purple-500/40 transition-all cursor-pointer group">
+    <Link href={getReplayLink()}>
+      <Card className="overflow-hidden bg-gradient-to-br from-slate-900/90 via-purple-900/20 to-slate-900/90 border border-purple-500/20 hover:border-purple-500/40 transition-all cursor-pointer group hover:-translate-y-1">
           {/* Thumbnail */}
           <div className="relative aspect-video bg-gradient-to-br from-slate-800 to-slate-900">
             {recording.thumbnailUrl ? (
@@ -173,7 +167,6 @@ function RecordingCard({ recording }: { recording: Recording }) {
           </div>
         </Card>
       </Link>
-    </motion.div>
   );
 }
 
