@@ -671,7 +671,7 @@ class PushNotificationService {
     const payload: PushPayload = {
       title: `${config.emoji} @${streamerName} ${config.label}!`,
       body: this.truncate(streamTitle, 60),
-      url: `/streams/${streamId}`,
+      url: `/stream/${streamId}`,
       icon: streamerAvatar || '/icon-192.png',
       tag: `stream-live-${streamId}`,
       requireInteraction: true,
@@ -713,7 +713,7 @@ class PushNotificationService {
     const payload: PushPayload = {
       title: `${emoji} +${formatNumber(tipAmount)} STREAM Tip!`,
       body,
-      url: `/streams/${streamId}`,
+      url: `/stream/${streamId}`,
       tag: `stream-tip-${streamId}-${Date.now()}`,
       requireInteraction: isLargeTip,
       actions: [
@@ -770,7 +770,7 @@ class PushNotificationService {
     const payload: PushPayload = {
       title: config.title,
       body: config.body,
-      url: `/streams/${streamId}`,
+      url: `/stream/${streamId}`,
       tag: `stream-milestone-${milestoneType}-${milestoneValue}`,
       requireInteraction: false,
       actions: [
@@ -806,7 +806,7 @@ class PushNotificationService {
     const payload: PushPayload = {
       title: `🔔 @${streamerName} is about to go live`,
       body: `${timeLabel}\n${this.truncate(streamTitle, 50)}`,
-      url: `/streams/${streamId}`,
+      url: `/stream/${streamId}`,
       tag: `stream-reminder-${streamId}`,
       requireInteraction: true,
       actions: [
