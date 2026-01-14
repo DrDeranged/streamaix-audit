@@ -86,7 +86,7 @@ import {
   avatarTrades as avatarTradesTable, avatarPositions, streamConversationMessages, pointsTransactions, dailyLoginStreak,
   scheduledDebates
 } from "../shared/schema";
-import { eq, and, desc, gte, lte, sql, asc } from "drizzle-orm";
+import { eq, and, desc, gte, lte, sql, asc, isNotNull, isNull } from "drizzle-orm";
 
 // Helper function to handle validation errors
 const validateRequest = <T>(schema: any, data: any): { success: boolean; data?: T; error?: string } => {
@@ -7853,6 +7853,139 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
   console.log('✅ Admin reseed endpoint registered');
+
+  // Admin endpoint to retroactively generate TTS audio for existing stream replays
+  app.post('/api/admin/generate-replay-audio', asyncHandler(async (req: Request, res: Response) => {
+    const { count = 2 } = req.body;
+    
+    // Verify admin access
+    const adminSecret = req.headers['x-admin-secret'] as string;
+    const expectedSecret = process.env.ADMIN_RESEED_SECRET || 'streamaix-reseed-2024';
+    
+    // @ts-ignore - req.user may be added by optional auth
+    const user = req.user;
+    const isAdminUser = user && ADMIN_USERNAMES.includes(user.username);
+    const hasValidSecret = adminSecret === expectedSecret;
+    
+    if (!isAdminUser && !hasValidSecret) {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Unauthorized. Provide admin auth or X-Admin-Secret header.' 
+      });
+    }
+
+    try {
+      // Get streams that have recordings but no audio, ordered by most recent
+      const recordingsWithoutAudio = await db.select({
+        recordingId: streamRecordings.id,
+        streamId: streamRecordings.streamId,
+        streamTitle: liveStreams.title,
+        hostAvatarId: liveStreams.hostAvatarId,
+      })
+      .from(streamRecordings)
+      .innerJoin(liveStreams, eq(streamRecordings.streamId, liveStreams.id))
+      .where(and(
+        eq(streamRecordings.status, 'ready'),
+        isNull(streamRecordings.audioData)
+      ))
+      .orderBy(desc(streamRecordings.createdAt))
+      .limit(count);
+
+      if (recordingsWithoutAudio.length === 0) {
+        return res.json({ success: true, message: 'No recordings found that need audio generation', generated: [] });
+      }
+
+      const results: Array<{ streamId: string; title: string; success: boolean; error?: string }> = [];
+
+      for (const recording of recordingsWithoutAudio) {
+        try {
+          // Get messages for this stream
+          const messages = await db.select()
+            .from(streamMessages)
+            .where(eq(streamMessages.streamId, recording.streamId))
+            .orderBy(streamMessages.createdAt);
+
+          if (messages.length === 0) {
+            results.push({ streamId: recording.streamId, title: recording.streamTitle || 'Unknown', success: false, error: 'No messages found' });
+            continue;
+          }
+
+          // Get voice for this avatar
+          let voice = 'onyx'; // default
+          if (recording.hostAvatarId) {
+            const [avatar] = await db.select({ voice: knowledgeAvatars.voice })
+              .from(knowledgeAvatars)
+              .where(eq(knowledgeAvatars.id, recording.hostAvatarId))
+              .limit(1);
+            if (avatar?.voice) {
+              voice = avatar.voice;
+            }
+          }
+
+          // Combine all messages into one text
+          const fullText = messages.map(m => m.content).join(' ');
+
+          // Generate TTS audio using OpenAI
+          const openaiApiKey = process.env.OPENAI_API_KEY;
+          if (!openaiApiKey) {
+            results.push({ streamId: recording.streamId, title: recording.streamTitle || 'Unknown', success: false, error: 'OpenAI API key not configured' });
+            continue;
+          }
+
+          console.log(`[Retroactive TTS] Generating audio for: ${recording.streamTitle}`);
+          
+          const response = await fetch('https://api.openai.com/v1/audio/speech', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${openaiApiKey}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              model: 'tts-1',
+              input: fullText,
+              voice: voice as 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer',
+              response_format: 'mp3'
+            })
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            results.push({ streamId: recording.streamId, title: recording.streamTitle || 'Unknown', success: false, error: `TTS API error: ${response.status}` });
+            console.error(`[Retroactive TTS] Failed for ${recording.streamId}: ${errorText}`);
+            continue;
+          }
+
+          // Convert to base64
+          const audioBuffer = await response.arrayBuffer();
+          const audioBase64 = Buffer.from(audioBuffer).toString('base64');
+
+          // Save to database
+          await db.update(streamRecordings)
+            .set({ audioData: audioBase64 })
+            .where(eq(streamRecordings.id, recording.recordingId));
+
+          console.log(`[Retroactive TTS] ✅ Generated and saved audio for: ${recording.streamTitle}`);
+          results.push({ streamId: recording.streamId, title: recording.streamTitle || 'Unknown', success: true });
+
+        } catch (err: any) {
+          console.error(`[Retroactive TTS] Error for ${recording.streamId}:`, err.message);
+          results.push({ streamId: recording.streamId, title: recording.streamTitle || 'Unknown', success: false, error: err.message });
+        }
+      }
+
+      const successCount = results.filter(r => r.success).length;
+      res.json({ 
+        success: successCount > 0, 
+        message: `Generated audio for ${successCount}/${results.length} recordings`,
+        generated: results 
+      });
+
+    } catch (error: any) {
+      console.error('[Retroactive TTS] Error:', error.message);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }));
+  console.log('✅ Admin generate-replay-audio endpoint registered');
   
   // =============================================================================
   // REAL PROCESSING ENDPOINTS
@@ -13710,10 +13843,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true, schedule, replays });
   }));
 
-  // Get stream replays (VODs)
+  // Get stream replays (VODs) - only those with TTS audio
   app.get("/api/stream-replays", asyncHandler(async (req: Request, res: Response) => {
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
     
+    // Only return replays that have TTS audio stored
     const replays = await db.select({
       id: streamRecordings.id,
       streamId: streamRecordings.streamId,
@@ -13729,7 +13863,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     })
     .from(streamRecordings)
     .innerJoin(liveStreams, eq(streamRecordings.streamId, liveStreams.id))
-    .where(eq(streamRecordings.status, 'ready'))
+    .where(and(
+      eq(streamRecordings.status, 'ready'),
+      isNotNull(streamRecordings.audioData)
+    ))
     .orderBy(desc(streamRecordings.createdAt))
     .limit(limit);
 
