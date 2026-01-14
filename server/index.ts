@@ -30,6 +30,21 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Health check endpoint - responds immediately, no dependencies
+app.get('/health', (_req, res) => {
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage().heapUsed,
+  });
+});
+
+// Root health check for Cloud Run
+app.get('/_health', (_req, res) => {
+  res.status(200).send('OK');
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -103,10 +118,14 @@ app.use((req, res, next) => {
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
-    log(`serving on port ${port}`);
+    log(`🚀 Server listening on port ${port}`);
+    console.log(`✅ Server ready to accept requests on port ${port}`);
   });
 
-  setImmediate(async () => {
+  // Delay background services in production to ensure server starts first
+  const startupDelay = app.get("env") === "production" ? 10000 : 100;
+  setTimeout(async () => {
+    console.log('🔄 Starting background services...');
     try {
       const resendKey = process.env.RESEND_API_KEY;
       if (resendKey) {
@@ -221,5 +240,5 @@ app.use((req, res, next) => {
     } catch (error) {
       console.error('⚠️  Error starting background services:', error);
     }
-  });
+  }, startupDelay);
 })();
