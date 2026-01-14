@@ -90,21 +90,35 @@ function RecordingCard({ recording }: { recording: Recording }) {
     <Link href={getReplayLink()}>
       <Card className="overflow-hidden bg-gradient-to-br from-slate-900/90 via-purple-900/20 to-slate-900/90 border border-purple-500/20 hover:border-purple-500/40 transition-all cursor-pointer group hover:-translate-y-1">
           {/* Thumbnail */}
-          <div className="relative aspect-video bg-gradient-to-br from-slate-800 to-slate-900">
-            {recording.thumbnailUrl ? (
+          <div className="relative aspect-video bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden">
+            {/* Fallback gradient background with avatar/icon */}
+            <div className={cn(
+              "absolute inset-0 flex items-center justify-center bg-gradient-to-br",
+              colorGradient
+            )}>
+              {recording.hostAvatar ? (
+                <img 
+                  src={recording.hostAvatar} 
+                  alt={recording.hostUsername}
+                  className="w-20 h-20 rounded-full object-cover border-4 border-white/20"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              ) : (
+                <Icon className="w-16 h-16 text-white/50" />
+              )}
+            </div>
+            {/* Thumbnail overlay - covers fallback when loaded */}
+            {recording.thumbnailUrl && (
               <img 
                 src={recording.thumbnailUrl} 
                 alt={recording.title}
-                className="w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover z-10"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
               />
-            ) : (
-              <div className={cn(
-                "absolute inset-0 flex items-center justify-center bg-gradient-to-br",
-                colorGradient,
-                "opacity-20"
-              )}>
-                <Icon className="w-16 h-16 text-white/30" />
-              </div>
             )}
             
             {/* Duration Badge */}
