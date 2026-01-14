@@ -39,7 +39,7 @@ export function ConversationReplay({
   limit = 50,
 }: ConversationReplayProps) {
   const { data, isLoading, error } = useQuery<{ success: boolean; messages: ConversationMessage[] }>({
-    queryKey: ['/api/streams', streamId, 'conversation', 'history', limit],
+    queryKey: [`/api/streams/${streamId}/conversation/history?limit=${limit}`],
     enabled: !!streamId,
   });
 
@@ -80,7 +80,7 @@ export function ConversationReplay({
     );
   }
 
-  const uniqueSpeakers = new Set(messages.map(m => m.speakerName)).size;
+  const uniqueSpeakers = new Set(messages.map(m => m.speakerName || 'Unknown')).size;
   const avatarMessages = messages.filter(m => m.speakerType === 'avatar').length;
 
   return (
@@ -162,7 +162,7 @@ function ReplayMessageBubble({
               "text-xs",
               isAvatar ? "bg-gradient-to-br from-cyan-600 to-purple-600 text-white" : "bg-slate-700 text-white"
             )}>
-              {message.speakerName.charAt(0).toUpperCase()}
+              {(message.speakerName || 'U').charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           {isAvatar && (
@@ -176,7 +176,7 @@ function ReplayMessageBubble({
               "text-sm font-medium",
               isAvatar ? "text-cyan-300" : "text-white"
             )}>
-              {message.speakerName}
+              {message.speakerName || 'Unknown'}
             </span>
             <span className="text-xs text-slate-500">
               {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -186,7 +186,7 @@ function ReplayMessageBubble({
             )}
           </div>
           <p className="text-sm text-slate-300 mt-0.5 whitespace-pre-wrap">
-            {message.textContent}
+            {message.textContent || ''}
           </p>
           {message.audioUrl && (
             <audio 
