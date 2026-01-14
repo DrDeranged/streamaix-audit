@@ -137,7 +137,7 @@ function RecordingCard({ recording }: { recording: Recording }) {
               )}
             >
               <Icon className="w-3 h-3 mr-1" />
-              {recording.streamType.replace('_', ' ')}
+              {(recording.streamType || 'broadcast').replace('_', ' ')}
             </Badge>
           </div>
           
@@ -152,10 +152,10 @@ function RecordingCard({ recording }: { recording: Recording }) {
                 {recording.hostAvatar ? (
                   <img src={recording.hostAvatar} alt="" className="w-full h-full rounded-full object-cover" />
                 ) : (
-                  recording.hostUsername[0]?.toUpperCase()
+                  (recording.hostUsername || 'A')[0]?.toUpperCase()
                 )}
               </div>
-              <span className="text-xs text-slate-400">@{recording.hostUsername}</span>
+              <span className="text-xs text-slate-400">@{recording.hostUsername || 'Anonymous'}</span>
             </div>
             
             <div className="flex items-center justify-between text-[10px] sm:text-xs text-slate-500">
@@ -200,8 +200,8 @@ export default function StreamReplays() {
   const filteredRecordings = recordings.filter(rec => {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      return rec.title.toLowerCase().includes(query) || 
-             rec.hostUsername.toLowerCase().includes(query);
+      return (rec.title || '').toLowerCase().includes(query) || 
+             (rec.hostUsername || '').toLowerCase().includes(query);
     }
     return true;
   });
