@@ -1663,6 +1663,11 @@ export async function autoSeedDatabase() {
           console.log(`🎉 Backfilled ${backfilledCount} stream recordings (${existingRecordings.length + backfilledCount}/${endedStreams.length} total)`);
         }
       }
+      
+      // Generate TTS audio for any stream recordings that don't have audio
+      console.log('🎙️ Checking for stream recordings missing TTS audio...');
+      await generateMissingTTSAudio();
+      
     } catch (error: any) {
       console.error('⚠️ Stream recording backfill failed:', error.message);
       // Don't throw - continue with server startup
@@ -1671,5 +1676,102 @@ export async function autoSeedDatabase() {
   } catch (error) {
     console.error('❌ Auto-seed failed:', error);
     // Don't throw - allow server to start even if seeding fails
+  }
+}
+
+// Generate TTS audio for streams that don't have it
+async function generateMissingTTSAudio() {
+  const { streamMessages } = await import('@shared/schema');
+  const { isNull } = await import('drizzle-orm');
+  
+  try {
+    // Find recordings without audio
+    const recordingsWithoutAudio = await db.select({
+      id: streamRecordings.id,
+      streamId: streamRecordings.streamId,
+      streamTitle: liveStreams.title,
+      hostAvatarId: liveStreams.hostAvatarId,
+    })
+    .from(streamRecordings)
+    .innerJoin(liveStreams, eq(streamRecordings.streamId, liveStreams.id))
+    .where(isNull(streamRecordings.audioData));
+    
+    if (recordingsWithoutAudio.length === 0) {
+      console.log('✅ All stream recordings have TTS audio');
+      return;
+    }
+    
+    console.log(`🔧 Generating TTS audio for ${recordingsWithoutAudio.length} recordings...`);
+    
+    // Import OpenAI and TTS service
+    const OpenAI = (await import('openai')).default;
+    const openai = new OpenAI();
+    
+    let generatedCount = 0;
+    let errorCount = 0;
+    
+    for (const recording of recordingsWithoutAudio) {
+      try {
+        // Get messages for this stream
+        const messages = await db.select({ content: streamMessages.content })
+          .from(streamMessages)
+          .where(eq(streamMessages.streamId, recording.streamId))
+          .orderBy(streamMessages.createdAt);
+        
+        if (messages.length === 0) {
+          console.log(`  ⏭️  Skipping ${recording.streamTitle?.slice(0, 40)}... (no messages)`);
+          continue;
+        }
+        
+        // Combine messages into full text
+        const fullText = messages
+          .filter(m => m.content && typeof m.content === 'string')
+          .map(m => m.content)
+          .join('\n\n');
+        
+        if (fullText.length < 10) {
+          console.log(`  ⏭️  Skipping ${recording.streamTitle?.slice(0, 40)}... (text too short)`);
+          continue;
+        }
+        
+        // Truncate to OpenAI TTS limit (4096 chars)
+        const truncatedText = fullText.slice(0, 4096);
+        
+        console.log(`  🎙️ Generating TTS for: ${recording.streamTitle?.slice(0, 40)}... (${truncatedText.length} chars)`);
+        
+        // Generate TTS audio using OpenAI
+        const response = await openai.audio.speech.create({
+          model: 'tts-1',
+          voice: 'onyx',
+          input: truncatedText,
+          response_format: 'mp3',
+        });
+        
+        // Convert to base64
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const audioBase64 = buffer.toString('base64');
+        
+        // Save to database
+        await db.update(streamRecordings)
+          .set({ audioData: audioBase64 })
+          .where(eq(streamRecordings.id, recording.id));
+        
+        generatedCount++;
+        console.log(`  ✅ Generated TTS (${(audioBase64.length / 1024).toFixed(1)} KB)`);
+        
+        // Small delay between API calls to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+      } catch (error: any) {
+        errorCount++;
+        console.error(`  ❌ Failed to generate TTS for ${recording.streamTitle?.slice(0, 40)}...:`, error.message);
+      }
+    }
+    
+    console.log(`🎉 TTS generation complete: ${generatedCount} generated, ${errorCount} failed`);
+    
+  } catch (error: any) {
+    console.error('⚠️ TTS audio generation failed:', error.message);
   }
 }
