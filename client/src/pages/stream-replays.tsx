@@ -175,22 +175,34 @@ export default function StreamReplays() {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('recent');
 
-  const { data: recordingsData, isLoading } = useQuery<{ recordings: Recording[] }>({
-    queryKey: ['/api/streams/replays', typeFilter, sortBy],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (typeFilter && typeFilter !== 'all') params.append('type', typeFilter);
-      if (sortBy) params.append('sort', sortBy);
-      const url = `/api/streams/replays${params.toString() ? `?${params.toString()}` : ''}`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('Failed to fetch recordings');
-      return res.json();
-    },
+  const { data: recordingsData, isLoading } = useQuery<{ success: boolean; replays: any[] }>({
+    queryKey: ['/api/stream-replays'],
   });
 
-  const recordings = recordingsData?.recordings || [];
+  const recordings: Recording[] = (recordingsData?.replays || []).map((r: any) => ({
+    id: r.id,
+    streamId: r.streamId,
+    title: r.streamTitle || 'Untitled Stream',
+    description: r.streamDescription,
+    streamType: r.streamCategory === 'market_update' ? 'broadcast' : (r.streamCategory || 'broadcast'),
+    hostUsername: r.hostAvatar?.name || 'Anonymous',
+    hostAvatar: r.hostAvatar?.imageUrl || r.thumbnailUrl,
+    duration: r.durationSeconds || 0,
+    viewCount: 0,
+    thumbnailUrl: r.thumbnailUrl || r.hostAvatar?.imageUrl,
+    recordedAt: r.createdAt,
+    category: r.streamCategory,
+    tags: [],
+  }));
   
-  const filteredRecordings = recordings.filter(rec => {
+  const filteredByType = typeFilter === 'all' ? recordings : recordings.filter(rec => rec.streamType === typeFilter);
+  const sortedRecordings = [...filteredByType].sort((a, b) => {
+    if (sortBy === 'popular') return b.viewCount - a.viewCount;
+    if (sortBy === 'longest') return b.duration - a.duration;
+    return new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime();
+  });
+  
+  const filteredRecordings = sortedRecordings.filter(rec => {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       return (rec.title || '').toLowerCase().includes(query) || 

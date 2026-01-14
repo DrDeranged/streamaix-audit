@@ -1028,7 +1028,11 @@ export default function StreamViewPage() {
               <MessageCircle className="w-5 h-5 text-purple-400" />
               Stream Transcript
             </h2>
-            <ConversationReplay streamId={stream.id} />
+            <ConversationReplay 
+              streamId={stream.id} 
+              hostName={stream.hostUsername || 'AI Host'}
+              limit={100}
+            />
           </Card>
 
           {/* Back to streams button */}
@@ -1974,6 +1978,7 @@ export default function StreamViewPage() {
                     streamId={streamId}
                     className="h-full border-0"
                     limit={100}
+                    hostName={stream?.hostUsername || 'AI Host'}
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full p-6 text-center">

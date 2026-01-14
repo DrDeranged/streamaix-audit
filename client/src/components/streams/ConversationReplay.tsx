@@ -14,6 +14,15 @@ import {
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 
+interface StreamMessage {
+  id: string;
+  userId: string;
+  content: string;
+  messageType: string;
+  createdAt: string;
+  metadata?: any;
+}
+
 interface ConversationMessage {
   id: string;
   participantId: string;
@@ -31,19 +40,34 @@ interface ConversationReplayProps {
   streamId: string;
   className?: string;
   limit?: number;
+  hostName?: string;
 }
 
 export function ConversationReplay({
   streamId,
   className,
   limit = 50,
+  hostName,
 }: ConversationReplayProps) {
-  const { data, isLoading, error } = useQuery<{ success: boolean; messages: ConversationMessage[] }>({
-    queryKey: [`/api/streams/${streamId}/conversation/history?limit=${limit}`],
+  const { data: messagesData, isLoading, error } = useQuery<{ success: boolean; messages: StreamMessage[] }>({
+    queryKey: [`/api/streams/${streamId}/messages?limit=${limit}`],
     enabled: !!streamId,
   });
 
-  const messages = data?.messages || [];
+  const rawMessages = messagesData?.messages || [];
+  
+  const messages: ConversationMessage[] = rawMessages.map(msg => ({
+    id: msg.id,
+    participantId: msg.userId,
+    speakerType: msg.messageType === 'ai_comment' ? 'avatar' : 'user',
+    speakerName: msg.messageType === 'ai_comment' ? (hostName || 'AI Host') : 'Viewer',
+    textContent: msg.content,
+    audioUrl: null,
+    audioDurationMs: null,
+    sourceType: msg.messageType,
+    replyToMessageId: null,
+    createdAt: msg.createdAt,
+  }));
 
   if (isLoading) {
     return (
