@@ -7899,31 +7899,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       for (const recording of recordingsWithoutAudio) {
         try {
+          console.log(`[Retroactive TTS] Processing: ${recording.streamId} - ${recording.streamTitle}`);
+          
           // Get messages for this stream
           const messages = await db.select()
             .from(streamMessages)
             .where(eq(streamMessages.streamId, recording.streamId))
             .orderBy(streamMessages.createdAt);
 
+          console.log(`[Retroactive TTS] Found ${messages.length} messages`);
+
           if (messages.length === 0) {
             results.push({ streamId: recording.streamId, title: recording.streamTitle || 'Unknown', success: false, error: 'No messages found' });
             continue;
           }
 
-          // Get voice for this avatar
-          let voice = 'onyx'; // default
-          if (recording.hostAvatarId) {
-            const [avatar] = await db.select({ voice: knowledgeAvatars.voice })
-              .from(knowledgeAvatars)
-              .where(eq(knowledgeAvatars.id, recording.hostAvatarId))
-              .limit(1);
-            if (avatar?.voice) {
-              voice = avatar.voice;
-            }
+          // Use default voice (voice column doesn't exist in knowledge_avatars)
+          const voice = 'onyx';
+          console.log(`[Retroactive TTS] Using voice: ${voice}`);
+
+          // Combine all messages into one text (filter null/empty content)
+          const fullText = messages
+            .filter(m => m.content && typeof m.content === 'string')
+            .map(m => m.content)
+            .join(' ')
+            .trim();
+          
+          console.log(`[Retroactive TTS] Text length: ${fullText.length}`);
+
+          if (!fullText || fullText.length < 10) {
+            results.push({ streamId: recording.streamId, title: recording.streamTitle || 'Unknown', success: false, error: 'Not enough text content' });
+            continue;
           }
 
-          // Combine all messages into one text
-          const fullText = messages.map(m => m.content).join(' ');
+          // Truncate to TTS limit (4096 characters) - split into chunks if needed
+          const maxLength = 4096;
+          const textForTTS = fullText.length > maxLength ? fullText.slice(0, maxLength) : fullText;
 
           // Generate TTS audio using OpenAI
           const openaiApiKey = process.env.OPENAI_API_KEY;
@@ -7932,9 +7943,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             continue;
           }
 
-          console.log(`[Retroactive TTS] Generating audio for: ${recording.streamTitle}`);
+          console.log(`[Retroactive TTS] Generating audio for: ${recording.streamTitle} (${textForTTS.length} chars, voice: ${voice})`);
           
-          const response = await fetch('https://api.openai.com/v1/audio/speech', {
+          // Use fetch directly for more control
+          const ttsResponse = await fetch('https://api.openai.com/v1/audio/speech', {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${openaiApiKey}`,
@@ -7942,21 +7954,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
             },
             body: JSON.stringify({
               model: 'tts-1',
-              input: fullText,
-              voice: voice as 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer',
+              input: textForTTS,
+              voice: voice,
               response_format: 'mp3'
             })
           });
 
-          if (!response.ok) {
-            const errorText = await response.text();
-            results.push({ streamId: recording.streamId, title: recording.streamTitle || 'Unknown', success: false, error: `TTS API error: ${response.status}` });
-            console.error(`[Retroactive TTS] Failed for ${recording.streamId}: ${errorText}`);
+          if (!ttsResponse.ok) {
+            const errorBody = await ttsResponse.text();
+            console.error(`[Retroactive TTS] API error for ${recording.streamId}: ${ttsResponse.status} - ${errorBody}`);
+            results.push({ streamId: recording.streamId, title: recording.streamTitle || 'Unknown', success: false, error: `TTS API error: ${ttsResponse.status}` });
             continue;
           }
 
           // Convert to base64
-          const audioBuffer = await response.arrayBuffer();
+          const audioBuffer = await ttsResponse.arrayBuffer();
+          console.log(`[Retroactive TTS] Got ${audioBuffer.byteLength} bytes of audio`);
           const audioBase64 = Buffer.from(audioBuffer).toString('base64');
 
           // Save to database
