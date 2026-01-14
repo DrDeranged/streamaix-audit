@@ -957,73 +957,79 @@ export default function StreamViewPage() {
   if (isEnded) {
     return (
       <div className="min-h-[100dvh] bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950 safe-area-inset">
-        <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
           {/* Header */}
-          <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={() => window.history.back()}
-              className="text-slate-400 hover:text-white hover:bg-purple-500/20" 
+              className="text-slate-400 hover:text-white hover:bg-purple-500/20 shrink-0" 
               data-testid="button-back"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <div>
-              <Badge className="bg-slate-700/60 text-slate-300 mb-2">
+            <div className="min-w-0 flex-1">
+              <Badge className="bg-amber-500/20 text-amber-400 border border-amber-500/30 mb-2">
                 <Video className="w-3 h-3 mr-1" />
                 Replay
               </Badge>
-              <h1 className="text-xl font-bold text-white">{stream.title}</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-white truncate">{stream.title}</h1>
             </div>
           </div>
 
-          {/* Avatar / Thumbnail */}
-          <Card className="overflow-hidden bg-gradient-to-br from-slate-900/90 via-purple-900/20 to-slate-900/90 border border-purple-500/20 mb-6">
-            <div className="aspect-video bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center relative">
-              {stream.hostAvatar ? (
-                <img 
-                  src={stream.hostAvatar} 
-                  alt={stream.hostUsername || 'Host'} 
-                  className="w-32 h-32 rounded-full object-cover ring-4 ring-purple-500/30"
-                />
-              ) : (
-                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center ring-4 ring-purple-500/30">
-                  <span className="text-4xl font-bold text-white">
-                    {(stream.hostUsername || 'H')[0]?.toUpperCase()}
-                  </span>
-                </div>
-              )}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2">
-                <Badge className="bg-purple-600/80 text-white">
-                  Stream Ended
-                </Badge>
-              </div>
-            </div>
-            <div className="p-4">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center overflow-hidden">
+          {/* Host Info Card */}
+          <Card className="overflow-hidden bg-gradient-to-br from-slate-900/90 via-purple-900/20 to-slate-900/90 border border-purple-500/20 mb-4 sm:mb-6">
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center overflow-hidden ring-4 ring-purple-500/30 shrink-0">
                   {stream.hostAvatar ? (
                     <img src={stream.hostAvatar} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-sm font-bold text-white">
+                    <span className="text-2xl sm:text-3xl font-bold text-white">
                       {(stream.hostUsername || 'H')[0]?.toUpperCase()}
                     </span>
                   )}
                 </div>
-                <div>
-                  <p className="font-semibold text-white">{stream.hostUsername || 'Anonymous'}</p>
-                  <p className="text-xs text-slate-400">Knowledge Avatar</p>
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold text-lg sm:text-xl text-white">{stream.hostUsername || 'Anonymous'}</p>
+                  <p className="text-sm text-purple-400 mb-2">Knowledge Avatar</p>
+                  {stream.description && (
+                    <p className="text-sm text-slate-400 line-clamp-2">{stream.description}</p>
+                  )}
                 </div>
               </div>
-              {stream.description && (
-                <p className="text-sm text-slate-400">{stream.description}</p>
-              )}
+            </div>
+          </Card>
+
+          {/* Audio Player - if audio is available */}
+          <Card className="bg-gradient-to-br from-slate-900/90 via-cyan-900/10 to-slate-900/90 border border-cyan-500/20 mb-4 sm:mb-6 overflow-hidden">
+            <div className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                  <Volume2 className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-white">Audio Playback</h3>
+                  <p className="text-xs text-slate-400">AI-generated TTS commentary</p>
+                </div>
+              </div>
+              <audio 
+                controls 
+                className="w-full h-10 rounded-lg"
+                style={{ colorScheme: 'dark' }}
+                src={`/api/streams/${stream.id}/audio`}
+                onError={(e) => {
+                  (e.target as HTMLAudioElement).parentElement?.classList.add('hidden');
+                }}
+              >
+                Your browser does not support the audio element.
+              </audio>
             </div>
           </Card>
 
           {/* Replay Content - Conversation Replay */}
-          <Card className="bg-gradient-to-br from-slate-900/90 via-purple-900/20 to-slate-900/90 border border-purple-500/20 p-4">
+          <Card className="bg-gradient-to-br from-slate-900/90 via-purple-900/20 to-slate-900/90 border border-purple-500/20 p-4 mb-4 sm:mb-6">
             <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
               <MessageCircle className="w-5 h-5 text-purple-400" />
               Stream Transcript
@@ -1036,7 +1042,7 @@ export default function StreamViewPage() {
           </Card>
 
           {/* Back to streams button */}
-          <div className="flex justify-center mt-6">
+          <div className="flex justify-center">
             <Link href="/stream-replays">
               <Button className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500">
                 <Video className="w-4 h-4 mr-2" />
