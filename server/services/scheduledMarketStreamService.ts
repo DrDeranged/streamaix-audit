@@ -523,13 +523,24 @@ Return the commentary as a single flowing script, broken into 4-6 paragraphs for
       })
       .where(eq(liveStreams.id, streamId));
 
+    // Get TTS audio from in-memory cache to persist it
+    const audioData = scheduledStreamAudio.get(streamId) || null;
+    
     await db.insert(streamRecordings).values({
       streamId,
       recordingUrl: `/api/streams/${streamId}/replay`,
       thumbnailUrl: avatar.imageUrl,
       durationSeconds,
       status: 'ready',
+      audioData, // Persist TTS audio to database
     });
+
+    // Clear from memory cache after persisting to DB
+    if (audioData) {
+      console.log(`[Scheduled Streams] 💾 Audio saved to database (${(audioData.length / 1024).toFixed(1)} KB)`);
+      // Keep in memory for a short time for any immediate replays, then clean up
+      setTimeout(() => scheduledStreamAudio.delete(streamId), 60000);
+    }
 
     console.log(`[Scheduled Streams] ✅ Stream ${streamId.slice(0, 8)}... saved for replay (${durationSeconds}s)`);
     

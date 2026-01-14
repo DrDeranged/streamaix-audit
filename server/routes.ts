@@ -13787,9 +13787,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .orderBy(streamMessages.createdAt)
       .limit(100);
 
-    // Check if TTS audio is available
+    // Check if TTS audio is available (in memory or database)
     const { hasScheduledStreamAudio } = await import('./services/scheduledMarketStreamService');
-    const hasAudio = hasScheduledStreamAudio(streamId);
+    const hasAudioInMemory = hasScheduledStreamAudio(streamId);
+    const hasAudioInDb = !!recording?.audioData;
+    const hasAudio = hasAudioInMemory || hasAudioInDb;
 
     res.json({
       success: true,
@@ -13807,8 +13809,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/streams/:streamId/audio", asyncHandler(async (req: Request, res: Response) => {
     const { streamId } = req.params;
     
+    // First check in-memory cache (for recently ended streams)
     const { getScheduledStreamAudio } = await import('./services/scheduledMarketStreamService');
-    const audioBase64 = getScheduledStreamAudio(streamId);
+    let audioBase64 = getScheduledStreamAudio(streamId);
+    
+    // If not in memory, check database for persisted audio
+    if (!audioBase64) {
+      const [recording] = await db.select({ audioData: streamRecordings.audioData })
+        .from(streamRecordings)
+        .where(eq(streamRecordings.streamId, streamId))
+        .limit(1);
+      
+      if (recording?.audioData) {
+        audioBase64 = recording.audioData;
+      }
+    }
     
     if (!audioBase64) {
       return res.status(404).json({ success: false, error: 'Audio not available for this stream' });

@@ -5490,6 +5490,9 @@ export const streamRecordings = pgTable("stream_recordings", {
   durationSeconds: integer("duration_seconds"),
   fileSizeBytes: integer("file_size_bytes"),
   
+  // TTS Audio for replay (base64 encoded)
+  audioData: text("audio_data"),
+  
   // Processing status
   status: text("status").notNull().default("processing"), // processing, ready, failed, deleted
   
