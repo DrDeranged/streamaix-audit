@@ -978,72 +978,80 @@ export default function StreamViewPage() {
             </div>
           </div>
 
-          {/* Host Info Card */}
-          <Card className="overflow-hidden bg-gradient-to-br from-slate-900/90 via-purple-900/20 to-slate-900/90 border border-purple-500/20 mb-4 sm:mb-6">
-            <div className="p-4 sm:p-6">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center overflow-hidden ring-4 ring-purple-500/30 shrink-0">
-                  {stream.hostAvatar ? (
-                    <img src={stream.hostAvatar} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-2xl sm:text-3xl font-bold text-white">
-                      {(stream.hostUsername || 'H')[0]?.toUpperCase()}
-                    </span>
-                  )}
+          {/* Combined Host & Audio Player Card */}
+          <Card className="overflow-hidden bg-gradient-to-br from-slate-900/95 via-slate-800/50 to-slate-900/95 border border-slate-700/50 mb-6 sm:mb-8">
+            {/* Avatar Hero Section */}
+            <div className="relative bg-gradient-to-br from-slate-800 via-purple-900/30 to-slate-900 p-6 sm:p-8">
+              {/* Subtle pattern overlay */}
+              <div className="absolute inset-0 opacity-5" style={{
+                backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)',
+                backgroundSize: '24px 24px'
+              }} />
+              
+              <div className="relative flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+                {/* Large centered avatar */}
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/40 to-cyan-500/40 rounded-full blur-2xl scale-125" />
+                  <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 border-4 border-slate-600/50 flex items-center justify-center overflow-hidden shadow-2xl">
+                    {stream.hostAvatar ? (
+                      <img src={stream.hostAvatar} alt={stream.hostUsername} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-4xl sm:text-5xl font-bold text-slate-400">
+                        {(stream.hostUsername || 'H')[0]?.toUpperCase()}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-bold text-lg sm:text-xl text-white">{stream.hostUsername || 'Anonymous'}</p>
-                  <p className="text-sm text-purple-400 mb-2">Knowledge Avatar</p>
+                
+                {/* Host info */}
+                <div className="text-center sm:text-left flex-1 min-w-0">
+                  <p className="font-bold text-xl sm:text-2xl text-white mb-1">{stream.hostUsername || 'Anonymous'}</p>
+                  <div className="flex items-center justify-center sm:justify-start gap-2 mb-3">
+                    <Badge className="bg-purple-500/20 text-purple-400 border border-purple-500/30 text-xs">
+                      <Bot className="w-3 h-3 mr-1" />
+                      Knowledge Avatar
+                    </Badge>
+                  </div>
                   {stream.description && (
-                    <p className="text-sm text-slate-400 line-clamp-2">{stream.description}</p>
+                    <p className="text-sm text-slate-400 line-clamp-3 max-w-lg">{stream.description}</p>
                   )}
                 </div>
               </div>
             </div>
-          </Card>
-
-          {/* Audio Player - if audio is available */}
-          <Card className="bg-gradient-to-br from-slate-900/90 via-cyan-900/10 to-slate-900/90 border border-cyan-500/20 mb-4 sm:mb-6 overflow-hidden">
-            <div className="p-4">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
-                  <Volume2 className="w-5 h-5 text-white" />
+            
+            {/* Audio Player Section */}
+            <div className="p-4 sm:p-6 border-t border-slate-700/50 bg-gradient-to-b from-slate-800/30 to-transparent">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 flex items-center justify-center">
+                  <Volume2 className="w-5 h-5 text-cyan-400" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Audio Playback</h3>
-                  <p className="text-xs text-slate-400">AI-generated TTS commentary</p>
+                  <h3 className="text-sm font-semibold text-white">Listen to Market Update</h3>
+                  <p className="text-xs text-slate-500">AI-generated audio commentary</p>
                 </div>
               </div>
-              <audio 
-                controls 
-                className="w-full h-10 rounded-lg"
-                style={{ colorScheme: 'dark' }}
-                src={`/api/streams/${stream.id}/audio`}
-                onError={(e) => {
-                  (e.target as HTMLAudioElement).parentElement?.classList.add('hidden');
-                }}
-              >
-                Your browser does not support the audio element.
-              </audio>
+              <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
+                <audio 
+                  controls 
+                  className="w-full h-10"
+                  style={{ colorScheme: 'dark' }}
+                  src={`/api/streams/${stream.id}/audio`}
+                  onError={(e) => {
+                    const parent = (e.target as HTMLAudioElement).parentElement;
+                    if (parent) {
+                      parent.innerHTML = '<p class="text-center text-slate-500 text-sm py-2">Audio not available for this replay</p>';
+                    }
+                  }}
+                >
+                  Your browser does not support the audio element.
+                </audio>
+              </div>
             </div>
-          </Card>
-
-          {/* Replay Content - Conversation Replay */}
-          <Card className="bg-gradient-to-br from-slate-900/90 via-purple-900/20 to-slate-900/90 border border-purple-500/20 p-4 mb-4 sm:mb-6">
-            <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-              <MessageCircle className="w-5 h-5 text-purple-400" />
-              Stream Transcript
-            </h2>
-            <ConversationReplay 
-              streamId={stream.id} 
-              hostName={stream.hostUsername || 'AI Host'}
-              limit={100}
-            />
           </Card>
 
           {/* Back to streams button */}
           <div className="flex justify-center">
-            <Link href="/stream-replays">
+            <Link href="/replays">
               <Button className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500">
                 <Video className="w-4 h-4 mr-2" />
                 Browse More Replays
