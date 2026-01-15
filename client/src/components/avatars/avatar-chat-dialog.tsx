@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Button } from "@/components/ui/button";
@@ -48,7 +48,7 @@ interface AvatarChatDialogProps {
 
 export function AvatarChatDialog({ open, onOpenChange, avatar }: AvatarChatDialogProps) {
   const [message, setMessage] = useState("");
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -95,11 +95,15 @@ export function AvatarChatDialog({ open, onOpenChange, avatar }: AvatarChatDialo
     }
   });
 
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  const scrollToBottom = useCallback(() => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
-  }, [messages, sendMessageMutation.isPending]);
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, sendMessageMutation.isPending, scrollToBottom]);
 
   useEffect(() => {
     if (open && inputRef.current) {
@@ -135,8 +139,7 @@ export function AvatarChatDialog({ open, onOpenChange, avatar }: AvatarChatDialo
         <DialogPrimitive.Overlay className="fixed inset-0 z-[200] bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
         <DialogPrimitive.Content 
           className="fixed left-[50%] top-[50%] z-[200] translate-x-[-50%] translate-y-[-50%] max-w-2xl w-[95vw] h-[80vh] max-h-[90vh] flex flex-col p-0 gap-0 bg-gradient-to-br from-slate-950 via-purple-950/30 to-slate-950 border border-purple-500/30 rounded-lg shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95" 
-          onClick={(e) => e.stopPropagation()} 
-          onTouchStart={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
         >
           <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none z-[210] text-white">
             <X className="h-4 w-4" />
