@@ -256,7 +256,7 @@ export class ScheduledMarketStreamService {
         await pushNotificationService.sendToAll({
           title: `📺 ${streamTypeLabel} is LIVE!`,
           body: `${avatar.name} is hosting the daily ${streamTypeLabel}. Join now to hear the latest market insights!`,
-          url: `/streams/${stream.id}`,
+          url: `/stream/${stream.id}`,
           icon: avatar.imageUrl || '/icon-192.png',
           tag: `scheduled-stream-${stream.id}`,
           requireInteraction: true,

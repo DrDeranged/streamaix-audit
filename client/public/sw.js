@@ -473,7 +473,7 @@ self.addEventListener('notificationclick', (event) => {
   const action = event.action;
   const notificationData = event.notification.data || {};
 
-  if (action === 'dismiss' || action === 'later') {
+  if (action === 'dismiss' || action === 'later' || action === 'remind_later') {
     return;
   }
 
@@ -493,7 +493,9 @@ self.addEventListener('notificationclick', (event) => {
     'view_balance': '/dashboard',
     'review': notificationData.url || '/bounty-board',
     'view_dashboard': '/dashboard',
-    'open': notificationData.url || '/'
+    'open': notificationData.url || '/',
+    'watch_now': notificationData.url || '/streams',
+    'remind_later': null
   };
 
   let urlToOpen = actionRoutes[action] || notificationData.url || '/';
