@@ -50,11 +50,23 @@ const STREAM_TYPE_ICONS = {
 };
 
 const STREAM_TYPE_COLORS = {
+  creator_broadcast: 'from-slate-800 via-purple-900/50 to-slate-900',
+  trading_room: 'from-slate-800 via-emerald-900/50 to-slate-900',
+  crypto_spaces: 'from-slate-800 via-amber-900/50 to-slate-900',
+  live_bounty: 'from-slate-800 via-blue-900/50 to-slate-900',
+  debate: 'from-slate-800 via-cyan-900/50 to-slate-900',
+  broadcast: 'from-slate-800 via-purple-900/50 to-slate-900',
+  market_update: 'from-slate-800 via-cyan-900/50 to-slate-900',
+};
+
+const BADGE_COLORS = {
   creator_broadcast: 'from-purple-500 to-fuchsia-500',
   trading_room: 'from-emerald-500 to-cyan-500',
   crypto_spaces: 'from-amber-500 to-orange-500',
   live_bounty: 'from-blue-500 to-indigo-500',
   debate: 'from-cyan-500 to-blue-500',
+  broadcast: 'from-purple-500 to-fuchsia-500',
+  market_update: 'from-cyan-500 to-blue-500',
 };
 
 function formatDuration(seconds: number) {
@@ -76,107 +88,105 @@ function formatViewCount(count: number) {
 
 function RecordingCard({ recording }: { recording: Recording }) {
   const Icon = STREAM_TYPE_ICONS[recording.streamType as keyof typeof STREAM_TYPE_ICONS] || Video;
-  const colorGradient = STREAM_TYPE_COLORS[recording.streamType as keyof typeof STREAM_TYPE_COLORS] || 'from-purple-500 to-fuchsia-500';
+  const colorGradient = STREAM_TYPE_COLORS[recording.streamType as keyof typeof STREAM_TYPE_COLORS] || 'from-slate-800 via-purple-900/50 to-slate-900';
+  const badgeGradient = BADGE_COLORS[recording.streamType as keyof typeof BADGE_COLORS] || 'from-purple-500 to-fuchsia-500';
   
   const getReplayLink = () => {
     if (recording.streamType === 'debate') {
       return `/debate/${recording.id}`;
     }
-    // Use streamId for stream page which handles both live and replay views
     return `/stream/${recording.streamId || recording.id}`;
   };
+
+  const streamLabel = recording.title?.includes('Morning') ? 'Morning Update' 
+    : recording.title?.includes('Market Close') ? 'Market Close' 
+    : (recording.streamType || 'broadcast').replace('_', ' ');
   
   return (
     <Link href={getReplayLink()}>
-      <Card className="overflow-hidden bg-gradient-to-br from-slate-900/90 via-purple-900/20 to-slate-900/90 border border-purple-500/20 hover:border-purple-500/40 transition-all cursor-pointer group hover:-translate-y-1">
-          {/* Thumbnail */}
-          <div className="relative aspect-video bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden">
-            {/* Fallback gradient background with avatar/icon */}
-            <div className={cn(
-              "absolute inset-0 flex items-center justify-center bg-gradient-to-br",
-              colorGradient
-            )}>
+      <Card className="overflow-hidden bg-gradient-to-br from-slate-900/95 via-slate-800/50 to-slate-900/95 border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 cursor-pointer group hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/10">
+          {/* Thumbnail with centered avatar */}
+          <div className={cn(
+            "relative aspect-video overflow-hidden bg-gradient-to-br",
+            colorGradient
+          )}>
+            {/* Subtle grid pattern overlay */}
+            <div className="absolute inset-0 opacity-10" style={{
+              backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0)',
+              backgroundSize: '20px 20px'
+            }} />
+            
+            {/* Centered Avatar */}
+            <div className="absolute inset-0 flex items-center justify-center">
               {recording.hostAvatar ? (
-                <img 
-                  src={recording.hostAvatar} 
-                  alt={recording.hostUsername}
-                  className="w-20 h-20 rounded-full object-cover border-4 border-white/20"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-cyan-500/30 rounded-full blur-xl scale-150" />
+                  <img 
+                    src={recording.hostAvatar} 
+                    alt={recording.hostUsername}
+                    className="relative w-24 h-24 rounded-full object-cover border-3 border-white/20 shadow-2xl group-hover:scale-110 transition-transform duration-300"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                </div>
               ) : (
-                <Icon className="w-16 h-16 text-white/50" />
+                <div className="w-20 h-20 rounded-full bg-slate-700/50 border border-slate-600/50 flex items-center justify-center">
+                  <Icon className="w-10 h-10 text-slate-400" />
+                </div>
               )}
             </div>
-            {/* Thumbnail overlay - covers fallback when loaded */}
-            {recording.thumbnailUrl && (
-              <img 
-                src={recording.thumbnailUrl} 
-                alt={recording.title}
-                className="absolute inset-0 w-full h-full object-cover z-10"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
-            )}
             
             {/* Duration Badge */}
-            <Badge className="absolute bottom-2 right-2 bg-black/80 text-white text-xs">
+            <Badge className="absolute bottom-2 right-2 bg-black/70 backdrop-blur-sm text-white text-xs font-mono border border-white/10">
               {formatDuration(recording.duration)}
             </Badge>
             
             {/* Play Overlay */}
-            <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors">
+            <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-colors duration-300">
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileHover={{ opacity: 1, scale: 1 }}
-                className="p-4 rounded-full bg-white/20 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                className="p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 opacity-0 group-hover:opacity-100 transition-all duration-300"
               >
-                <Play className="w-8 h-8 text-white fill-white" />
+                <Play className="w-6 h-6 text-white fill-white" />
               </motion.div>
             </div>
             
             {/* Stream Type Badge */}
             <Badge 
               className={cn(
-                "absolute top-2 left-2 bg-gradient-to-r text-white text-xs",
-                colorGradient
+                "absolute top-2 left-2 bg-gradient-to-r text-white text-xs border-0 shadow-lg",
+                badgeGradient
               )}
             >
               <Icon className="w-3 h-3 mr-1" />
-              {(recording.streamType || 'broadcast').replace('_', ' ')}
+              {streamLabel}
             </Badge>
           </div>
           
           {/* Content */}
-          <div className="p-3 sm:p-4">
-            <h3 className="text-sm sm:text-base font-semibold text-white mb-2 line-clamp-2 group-hover:text-purple-400 transition-colors">
+          <div className="p-3 sm:p-4 bg-gradient-to-b from-transparent to-slate-900/50">
+            <h3 className="text-sm sm:text-base font-semibold text-white mb-3 line-clamp-2 group-hover:text-purple-400 transition-colors leading-tight">
               {recording.title}
             </h3>
             
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center text-[10px] font-bold text-white">
-                {recording.hostAvatar ? (
-                  <img src={recording.hostAvatar} alt="" className="w-full h-full rounded-full object-cover" />
-                ) : (
-                  (recording.hostUsername || 'A')[0]?.toUpperCase()
-                )}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 border border-slate-600/50 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden">
+                  {recording.hostAvatar ? (
+                    <img src={recording.hostAvatar} alt="" className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    (recording.hostUsername || 'A')[0]?.toUpperCase()
+                  )}
+                </div>
+                <span className="text-xs text-slate-400 font-medium">@{recording.hostUsername || 'Anonymous'}</span>
               </div>
-              <span className="text-xs text-slate-400">@{recording.hostUsername || 'Anonymous'}</span>
-            </div>
-            
-            <div className="flex items-center justify-between text-[10px] sm:text-xs text-slate-500">
-              <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1">
-                  <Eye className="w-3 h-3" />
-                  {formatViewCount(recording.viewCount)}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-3 h-3" />
-                  {new Date(recording.recordedAt).toLocaleDateString()}
-                </span>
-              </div>
+              
+              <span className="flex items-center gap-1 text-[10px] sm:text-xs text-slate-500">
+                <Calendar className="w-3 h-3" />
+                {new Date(recording.recordedAt).toLocaleDateString()}
+              </span>
             </div>
           </div>
         </Card>
