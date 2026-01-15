@@ -991,13 +991,27 @@ export default function StreamViewPage() {
               <div className="relative flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
                 {/* Large centered avatar */}
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/40 to-cyan-500/40 rounded-full blur-2xl scale-125" />
-                  <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 border-4 border-slate-600/50 flex items-center justify-center overflow-hidden shadow-2xl">
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/50 to-cyan-500/50 rounded-full blur-2xl scale-150" />
+                  <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-purple-600 via-fuchsia-500 to-cyan-500 border-4 border-white/20 flex items-center justify-center overflow-hidden shadow-2xl">
                     {stream.hostAvatar ? (
-                      <img src={stream.hostAvatar} alt={stream.hostUsername} className="w-full h-full object-cover" />
+                      <img 
+                        src={stream.hostAvatar} 
+                        alt={stream.hostUsername} 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                          const parent = (e.target as HTMLImageElement).parentElement;
+                          if (parent) {
+                            const fallback = document.createElement('span');
+                            fallback.className = 'text-4xl sm:text-5xl font-bold text-white drop-shadow-lg';
+                            fallback.textContent = (stream.hostUsername || 'A')[0]?.toUpperCase() || 'A';
+                            parent.appendChild(fallback);
+                          }
+                        }}
+                      />
                     ) : (
-                      <span className="text-4xl sm:text-5xl font-bold text-slate-400">
-                        {(stream.hostUsername || 'H')[0]?.toUpperCase()}
+                      <span className="text-4xl sm:text-5xl font-bold text-white drop-shadow-lg">
+                        {(stream.hostUsername || 'A')[0]?.toUpperCase()}
                       </span>
                     )}
                   </div>
