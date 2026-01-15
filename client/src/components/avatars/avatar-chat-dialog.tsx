@@ -4,7 +4,6 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { 
   Send, 
@@ -191,7 +190,11 @@ export function AvatarChatDialog({ open, onOpenChange, avatar }: AvatarChatDialo
           </div>
         </div>
 
-        <ScrollArea className="flex-1 px-6 py-4" ref={scrollRef}>
+        <div 
+          ref={messagesContainerRef}
+          className="flex-1 px-6 py-4 overflow-y-auto overscroll-contain touch-pan-y"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
           <div className="space-y-4">
             {historyLoading ? (
               <div className="flex items-center justify-center py-12">
@@ -297,7 +300,7 @@ export function AvatarChatDialog({ open, onOpenChange, avatar }: AvatarChatDialo
               </motion.div>
             )}
           </div>
-        </ScrollArea>
+        </div>
 
         <div className="px-6 py-4 border-t border-purple-500/20 bg-slate-950/80 backdrop-blur-xl">
           <div className="flex gap-3">
