@@ -121,20 +121,19 @@ function RecordingCard({ recording }: { recording: Recording }) {
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/40 to-cyan-500/40 rounded-full blur-xl scale-150" />
                 <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-purple-600 via-fuchsia-500 to-cyan-500 border-3 border-white/20 shadow-2xl flex items-center justify-center overflow-hidden group-hover:scale-110 transition-transform duration-300">
-                  {recording.hostAvatar ? (
+                  {recording.hostAvatar && (
                     <img 
                       src={recording.hostAvatar} 
                       alt={recording.hostUsername}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover absolute inset-0"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = 'none';
                       }}
                     />
-                  ) : (
-                    <span className="text-3xl font-bold text-white drop-shadow-lg">
-                      {(recording.hostUsername || 'A')[0]?.toUpperCase()}
-                    </span>
                   )}
+                  <span className="text-3xl font-bold text-white drop-shadow-lg select-none">
+                    {(recording.hostUsername || 'A')[0]?.toUpperCase()}
+                  </span>
                 </div>
               </div>
             </div>
