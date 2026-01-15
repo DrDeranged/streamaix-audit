@@ -230,7 +230,7 @@ const steps: OnboardingStep[] = [
     ],
     action: {
       label: "Sign Up Now",
-      path: "/signup"
+      path: "/auth"
     }
   }
 ];
