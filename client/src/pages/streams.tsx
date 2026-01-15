@@ -134,6 +134,29 @@ interface TopStreamer {
   badges: string[];
 }
 
+interface ScheduledStream {
+  id: string;
+  title: string;
+  description?: string;
+  scheduledStart: string;
+  type: string;
+  hostAvatar?: {
+    id: string;
+    name: string;
+    imageUrl?: string;
+  };
+}
+
+interface StreamReplay {
+  id: string;
+  streamId: string;
+  title: string;
+  duration: number;
+  createdAt: string;
+  hostUsername?: string;
+  hostAvatar?: string;
+}
+
 const streamTypeConfig: Record<string, { icon: any; label: string; color: string; bgColor: string; gradient: string; borderColor: string }> = {
   broadcast: { 
     icon: Video, 
@@ -985,7 +1008,21 @@ export default function StreamsPage() {
     queryKey: ['/api/streams/ended', { limit: 10 }],
   });
 
+  // Fetch upcoming scheduled daily market briefings
+  const { data: upcomingBriefingsData } = useQuery<{ success: boolean; scheduledStreams: ScheduledStream[] }>({
+    queryKey: ['/api/scheduled-streams'],
+    refetchInterval: 60000,
+  });
+
+  // Fetch recent replays with TTS audio
+  const { data: replaysData } = useQuery<{ success: boolean; recordings: StreamReplay[] }>({
+    queryKey: ['/api/stream-replays', { limit: 6 }],
+    refetchInterval: 60000,
+  });
+
   const liveStreams = liveStreamsData?.streams || [];
+  const upcomingBriefings = upcomingBriefingsData?.scheduledStreams || [];
+  const recentReplays = replaysData?.recordings || [];
   const scheduledStreams = scheduledStreamsData?.streams || [];
   const pastStreams = pastStreamsData?.streams || [];
 
@@ -1104,6 +1141,189 @@ export default function StreamsPage() {
                 {featuredStreams.map((stream) => (
                   <FeaturedStreamCard key={stream.id} stream={stream} />
                 ))}
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </section>
+        )}
+
+        {/* Daily Market Briefings - Upcoming Scheduled Streams with TTS */}
+        <section className="py-2">
+          <div className="streaming-glass-panel rounded-2xl p-4 sm:p-6 border border-cyan-500/30 bg-gradient-to-br from-cyan-950/20 via-slate-900/50 to-purple-950/20">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-cyan-500/30 rounded-xl blur-lg" />
+                  <div className="relative p-2 sm:p-3 rounded-xl bg-gradient-to-br from-cyan-500/30 to-blue-500/30 border border-cyan-500/40">
+                    <Volume2 className="w-5 h-5 text-cyan-400" />
+                  </div>
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                    Daily Market Briefings
+                    <Badge className="bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 text-[10px] font-semibold">
+                      <Mic className="w-3 h-3 mr-1" />
+                      AI Voice
+                    </Badge>
+                  </h2>
+                  <p className="text-sm text-slate-400">Automated 8am & 4pm EST market updates with AI-generated audio</p>
+                </div>
+              </div>
+            </div>
+            
+            {upcomingBriefings.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {upcomingBriefings.slice(0, 4).map((briefing) => {
+                  const scheduledDate = new Date(briefing.scheduledStart);
+                  const now = new Date();
+                  const diffMs = scheduledDate.getTime() - now.getTime();
+                  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                  const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                  const isToday = scheduledDate.toDateString() === now.toDateString();
+                  const isMorning = briefing.type === 'morning_update';
+                  
+                  return (
+                    <div 
+                      key={briefing.id}
+                      className="group relative rounded-xl overflow-hidden bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-slate-700/50 hover:border-cyan-500/50 transition-all duration-300"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="relative p-4 flex items-center gap-4">
+                        <div className="relative flex-shrink-0">
+                          <div className={cn(
+                            "w-14 h-14 rounded-full flex items-center justify-center border-2",
+                            isMorning 
+                              ? "bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-amber-500/40"
+                              : "bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-500/40"
+                          )}>
+                            {briefing.hostAvatar?.imageUrl ? (
+                              <img 
+                                src={briefing.hostAvatar.imageUrl} 
+                                alt={briefing.hostAvatar.name}
+                                className="w-full h-full rounded-full object-cover"
+                                onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
+                              />
+                            ) : null}
+                            <span className={cn(
+                              "absolute inset-0 flex items-center justify-center text-xl font-bold",
+                              isMorning ? "text-amber-400" : "text-purple-400"
+                            )}>
+                              {isMorning ? '🌅' : '🌙'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-white text-sm truncate">{briefing.title}</p>
+                          <p className="text-xs text-slate-400 truncate">
+                            {briefing.hostAvatar?.name || 'AI Host'}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1.5">
+                            <Badge className={cn(
+                              "text-[10px] px-1.5 py-0.5",
+                              isMorning 
+                                ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
+                                : "bg-purple-500/20 text-purple-400 border-purple-500/30"
+                            )}>
+                              <Clock className="w-2.5 h-2.5 mr-0.5" />
+                              {isToday ? `${diffHours}h ${diffMins}m` : scheduledDate.toLocaleDateString()}
+                            </Badge>
+                            <Badge className="bg-cyan-500/10 text-cyan-400 border-cyan-500/20 text-[10px] px-1.5 py-0.5">
+                              <Volume2 className="w-2.5 h-2.5 mr-0.5" />
+                              TTS Audio
+                            </Badge>
+                          </div>
+                        </div>
+                        <Bell className="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition-colors flex-shrink-0" />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-slate-500">
+                <Calendar className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No upcoming briefings scheduled</p>
+                <p className="text-xs mt-1">Check back for 8am & 4pm EST updates</p>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Listen to Replays - Recent Streams with TTS Audio */}
+        {recentReplays.length > 0 && (
+          <section className="py-2">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Headphones className="w-5 h-5 text-purple-400" />
+                <h2 className="text-lg font-bold text-white">Listen to Replays</h2>
+                <Badge className="bg-purple-500/20 text-purple-400 border border-purple-500/30 text-[10px] font-semibold ml-2">
+                  <Volume2 className="w-3 h-3 mr-1" />
+                  With Audio
+                </Badge>
+              </div>
+              <Link href="/replays">
+                <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white text-xs">
+                  View All <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </Link>
+            </div>
+            <ScrollArea className="w-full">
+              <div className="flex gap-4 pb-4">
+                {recentReplays.map((replay) => {
+                  const mins = Math.floor(replay.duration / 60);
+                  const secs = replay.duration % 60;
+                  const durationStr = `${mins}:${secs.toString().padStart(2, '0')}`;
+                  
+                  return (
+                    <Link key={replay.id} href={`/stream/${replay.streamId}`}>
+                      <div className="group relative w-[200px] sm:w-[240px] flex-shrink-0 rounded-xl overflow-hidden bg-gradient-to-br from-slate-800/80 to-purple-900/40 border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300 cursor-pointer">
+                        {/* Gradient Background with Pattern */}
+                        <div className="relative h-28 bg-gradient-to-br from-purple-600/30 via-fuchsia-600/20 to-slate-800">
+                          <div className="absolute inset-0 opacity-10" style={{
+                            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.2) 1px, transparent 0)',
+                            backgroundSize: '16px 16px'
+                          }} />
+                          {/* Centered Avatar */}
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="relative">
+                              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/40 to-cyan-500/40 rounded-full blur-lg scale-125" />
+                              <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 via-fuchsia-500 to-cyan-500 border-2 border-white/20 flex items-center justify-center overflow-hidden group-hover:scale-110 transition-transform duration-300">
+                                {replay.hostAvatar && (
+                                  <img 
+                                    src={replay.hostAvatar} 
+                                    alt={replay.hostUsername || 'Host'}
+                                    className="w-full h-full object-cover absolute inset-0"
+                                    onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
+                                  />
+                                )}
+                                <span className="text-xl font-bold text-white drop-shadow-lg">
+                                  {(replay.hostUsername || 'A')[0]?.toUpperCase()}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          {/* Duration Badge */}
+                          <Badge className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] font-mono border border-white/10">
+                            {durationStr}
+                          </Badge>
+                          {/* Audio Badge */}
+                          <Badge className="absolute top-2 right-2 bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 text-[10px]">
+                            <Volume2 className="w-2.5 h-2.5" />
+                          </Badge>
+                        </div>
+                        {/* Content */}
+                        <div className="p-3">
+                          <p className="font-semibold text-white text-sm line-clamp-2 group-hover:text-purple-300 transition-colors">
+                            {replay.title}
+                          </p>
+                          <p className="text-xs text-slate-400 mt-1 truncate">
+                            {replay.hostUsername || 'AI Host'}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
