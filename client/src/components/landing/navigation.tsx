@@ -239,7 +239,7 @@ export function Navigation() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/stream-replays" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-amber-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/replays" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-amber-500/20 transition-all duration-200 rounded-md mx-1">
                       <History className="w-4 h-4 text-amber-400" />
                       <div>
                         <span className="font-medium block">Replays</span>
@@ -770,7 +770,7 @@ export function Navigation() {
                     Go Live
                   </button>
                 </Link>
-                <Link href="/stream-replays" className="block">
+                <Link href="/replays" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-amber-500/20 transition-all duration-200 font-medium text-sm"
