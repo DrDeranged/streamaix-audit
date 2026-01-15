@@ -217,6 +217,24 @@ const steps: OnboardingStep[] = [
     }
   },
   {
+    title: "Learning Hub",
+    subtitle: "Master Crypto & Trading Skills",
+    description: "Interactive courses on DeFi, technical analysis, blockchain fundamentals, and more. Earn STREAM points as you complete lessons and level up your knowledge.",
+    icon: GraduationCap,
+    gradient: "from-indigo-500 via-purple-500 to-pink-500",
+    glowColor: "rgba(99, 102, 241, 0.5)",
+    instructions: [
+      "Browse courses by skill level and topic",
+      "Complete interactive lessons and quizzes",
+      "Earn XP and unlock achievement badges"
+    ],
+    action: {
+      label: "Start Learning",
+      path: "/learn"
+    },
+    tip: "Complete courses to boost your prediction accuracy"
+  },
+  {
     title: "Get 2,500 STREAM Free!",
     subtitle: "Sign Up to Claim Your Bonus",
     description: "Create your account and receive 2,500 STREAM points instantly. Start trading, chatting with avatars, and earning more rewards.",
