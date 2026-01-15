@@ -134,27 +134,22 @@ interface TopStreamer {
   badges: string[];
 }
 
-interface ScheduledStream {
-  id: string;
-  title: string;
-  description?: string;
-  scheduledStart: string;
+interface ScheduledBriefing {
   type: string;
-  hostAvatar?: {
-    id: string;
-    name: string;
-    imageUrl?: string;
-  };
+  nextRun: string;
 }
 
 interface StreamReplay {
   id: string;
   streamId: string;
-  title: string;
-  duration: number;
+  streamTitle: string;
+  durationSeconds: number;
   createdAt: string;
-  hostUsername?: string;
-  hostAvatar?: string;
+  hostAvatar?: {
+    name: string;
+    imageUrl?: string;
+    expertise?: string;
+  } | null;
 }
 
 const streamTypeConfig: Record<string, { icon: any; label: string; color: string; bgColor: string; gradient: string; borderColor: string }> = {
@@ -1009,20 +1004,20 @@ export default function StreamsPage() {
   });
 
   // Fetch upcoming scheduled daily market briefings
-  const { data: upcomingBriefingsData } = useQuery<{ success: boolean; scheduledStreams: ScheduledStream[] }>({
+  const { data: upcomingBriefingsData } = useQuery<{ success: boolean; schedule: ScheduledBriefing[] }>({
     queryKey: ['/api/scheduled-streams'],
     refetchInterval: 60000,
   });
 
   // Fetch recent replays with TTS audio
-  const { data: replaysData } = useQuery<{ success: boolean; recordings: StreamReplay[] }>({
+  const { data: replaysData } = useQuery<{ success: boolean; replays: StreamReplay[] }>({
     queryKey: ['/api/stream-replays', { limit: 6 }],
     refetchInterval: 60000,
   });
 
   const liveStreams = liveStreamsData?.streams || [];
-  const upcomingBriefings = upcomingBriefingsData?.scheduledStreams || [];
-  const recentReplays = replaysData?.recordings || [];
+  const upcomingBriefings = upcomingBriefingsData?.schedule || [];
+  const recentReplays = replaysData?.replays || [];
   const scheduledStreams = scheduledStreamsData?.streams || [];
   const pastStreams = pastStreamsData?.streams || [];
 
@@ -1173,18 +1168,20 @@ export default function StreamsPage() {
             
             {upcomingBriefings.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {upcomingBriefings.slice(0, 4).map((briefing) => {
-                  const scheduledDate = new Date(briefing.scheduledStart);
+                {upcomingBriefings.slice(0, 4).map((briefing, idx) => {
+                  const scheduledDate = new Date(briefing.nextRun);
                   const now = new Date();
                   const diffMs = scheduledDate.getTime() - now.getTime();
                   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
                   const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
                   const isToday = scheduledDate.toDateString() === now.toDateString();
                   const isMorning = briefing.type === 'morning_update';
+                  const title = isMorning ? '🌅 Morning Market Update' : '🌙 Market Close Recap';
+                  const timeLabel = isMorning ? '8:00 AM EST' : '4:00 PM EST';
                   
                   return (
                     <div 
-                      key={briefing.id}
+                      key={`${briefing.type}-${idx}`}
                       className="group relative rounded-xl overflow-hidden bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-slate-700/50 hover:border-cyan-500/50 transition-all duration-300"
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -1196,16 +1193,8 @@ export default function StreamsPage() {
                               ? "bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-amber-500/40"
                               : "bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-500/40"
                           )}>
-                            {briefing.hostAvatar?.imageUrl ? (
-                              <img 
-                                src={briefing.hostAvatar.imageUrl} 
-                                alt={briefing.hostAvatar.name}
-                                className="w-full h-full rounded-full object-cover"
-                                onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
-                              />
-                            ) : null}
                             <span className={cn(
-                              "absolute inset-0 flex items-center justify-center text-xl font-bold",
+                              "flex items-center justify-center text-2xl",
                               isMorning ? "text-amber-400" : "text-purple-400"
                             )}>
                               {isMorning ? '🌅' : '🌙'}
@@ -1213,9 +1202,9 @@ export default function StreamsPage() {
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-white text-sm truncate">{briefing.title}</p>
+                          <p className="font-semibold text-white text-sm truncate">{title}</p>
                           <p className="text-xs text-slate-400 truncate">
-                            {briefing.hostAvatar?.name || 'AI Host'}
+                            {timeLabel} • AI Knowledge Avatar
                           </p>
                           <div className="flex items-center gap-2 mt-1.5">
                             <Badge className={cn(
@@ -1225,7 +1214,7 @@ export default function StreamsPage() {
                                 : "bg-purple-500/20 text-purple-400 border-purple-500/30"
                             )}>
                               <Clock className="w-2.5 h-2.5 mr-0.5" />
-                              {isToday ? `${diffHours}h ${diffMins}m` : scheduledDate.toLocaleDateString()}
+                              {diffMs > 0 ? (isToday ? `in ${diffHours}h ${diffMins}m` : scheduledDate.toLocaleDateString()) : 'Soon'}
                             </Badge>
                             <Badge className="bg-cyan-500/10 text-cyan-400 border-cyan-500/20 text-[10px] px-1.5 py-0.5">
                               <Volume2 className="w-2.5 h-2.5 mr-0.5" />
@@ -1270,9 +1259,11 @@ export default function StreamsPage() {
             <ScrollArea className="w-full">
               <div className="flex gap-4 pb-4">
                 {recentReplays.map((replay) => {
-                  const mins = Math.floor(replay.duration / 60);
-                  const secs = replay.duration % 60;
+                  const duration = replay.durationSeconds || 0;
+                  const mins = Math.floor(duration / 60);
+                  const secs = duration % 60;
                   const durationStr = `${mins}:${secs.toString().padStart(2, '0')}`;
+                  const hostName = replay.hostAvatar?.name || 'AI Host';
                   
                   return (
                     <Link key={replay.id} href={`/stream/${replay.streamId}`}>
@@ -1288,16 +1279,16 @@ export default function StreamsPage() {
                             <div className="relative">
                               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/40 to-cyan-500/40 rounded-full blur-lg scale-125" />
                               <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 via-fuchsia-500 to-cyan-500 border-2 border-white/20 flex items-center justify-center overflow-hidden group-hover:scale-110 transition-transform duration-300">
-                                {replay.hostAvatar && (
+                                {replay.hostAvatar?.imageUrl && (
                                   <img 
-                                    src={replay.hostAvatar} 
-                                    alt={replay.hostUsername || 'Host'}
+                                    src={replay.hostAvatar.imageUrl} 
+                                    alt={hostName}
                                     className="w-full h-full object-cover absolute inset-0"
                                     onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
                                   />
                                 )}
                                 <span className="text-xl font-bold text-white drop-shadow-lg">
-                                  {(replay.hostUsername || 'A')[0]?.toUpperCase()}
+                                  {hostName[0]?.toUpperCase()}
                                 </span>
                               </div>
                             </div>
@@ -1314,10 +1305,10 @@ export default function StreamsPage() {
                         {/* Content */}
                         <div className="p-3">
                           <p className="font-semibold text-white text-sm line-clamp-2 group-hover:text-purple-300 transition-colors">
-                            {replay.title}
+                            {replay.streamTitle}
                           </p>
                           <p className="text-xs text-slate-400 mt-1 truncate">
-                            {replay.hostUsername || 'AI Host'}
+                            {hostName}
                           </p>
                         </div>
                       </div>
