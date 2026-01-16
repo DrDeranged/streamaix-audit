@@ -106,7 +106,8 @@ class NewsletterService {
 
       try {
         await resend.emails.send({
-          from: 'StreamAiX <onboarding@resend.dev>',
+          from: 'StreamAiX <arslandin.founder@streamaix.com>',
+          replyTo: 'arslandin.founder@streamaix.com',
           to: recipient.email,
           subject: content.subject,
           html: htmlContent,
@@ -135,7 +136,8 @@ class NewsletterService {
     const textContent = generateNewsletterText(content);
 
     await resend.emails.send({
-      from: 'StreamAiX <onboarding@resend.dev>',
+      from: 'StreamAiX <arslandin.founder@streamaix.com>',
+      replyTo: 'arslandin.founder@streamaix.com',
       to: email,
       subject: `[TEST] ${content.subject}`,
       html: htmlContent,
