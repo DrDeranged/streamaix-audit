@@ -132,7 +132,7 @@ app.use((req, res, next) => {
         console.log('📧 Starting newsletter scheduler...');
         const { newsletterScheduler } = await import('./services/newsletterScheduler');
         newsletterScheduler.start();
-        console.log('✅ Newsletter scheduler active - Sends Monday & Friday 8am EST');
+        console.log('✅ Newsletter scheduler active - Sends 8am & 4pm EST daily');
       } else {
         console.log('⚠️  Newsletter scheduler disabled (RESEND_API_KEY not configured)');
       }

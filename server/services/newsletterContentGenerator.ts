@@ -1,4 +1,5 @@
 import { marketDataService } from './marketDataService';
+import { stockMarketService } from './stockMarketService';
 import { db } from '../db';
 import { predictionMarkets } from '@shared/schema';
 import { eq, desc } from 'drizzle-orm';
@@ -10,6 +11,16 @@ export interface MarketHighlight {
   change24h: number;
   changePercent: number;
   isPositive: boolean;
+}
+
+export interface StockHighlight {
+  symbol: string;
+  name: string;
+  price: number;
+  change: number;
+  changePercent: number;
+  isPositive: boolean;
+  sector: string;
 }
 
 export interface HotMarket {
@@ -30,13 +41,18 @@ export interface NewsletterContent {
   marketHighlights: MarketHighlight[];
   topGainers: MarketHighlight[];
   topLosers: MarketHighlight[];
+  stockGainers: StockHighlight[];
+  stockLosers: StockHighlight[];
   marketSummary: string;
+  alphaInsight: string;
   totalMarketCap: string;
   btcDominance: string;
   btcPrice: number;
   btcChange: number;
   ethPrice: number;
   ethChange: number;
+  spyPrice: number;
+  spyChange: number;
   fearGreedIndex: number;
   hotMarkets: HotMarket[];
   upcomingStreams: UpcomingStream[];
@@ -116,6 +132,89 @@ async function fetchHotMarkets(): Promise<HotMarket[]> {
 }
 
 /**
+ * Fetch top stock movers from Finnhub API
+ */
+async function fetchStockMovers(): Promise<{ gainers: StockHighlight[]; losers: StockHighlight[]; spy: { price: number; change: number } }> {
+  try {
+    const movers = await stockMarketService.getTechAiMovers();
+    
+    const formatStock = (s: any): StockHighlight => ({
+      symbol: s.symbol,
+      name: s.name,
+      price: s.price,
+      change: s.change,
+      changePercent: s.changePercent,
+      isPositive: s.changePercent > 0,
+      sector: s.sector
+    });
+    
+    const gainers = movers.gainers.slice(0, 5).map(formatStock);
+    const losers = movers.losers.slice(0, 5).map(formatStock);
+    
+    // Fetch SPY (S&P 500 ETF) for macro indicator
+    let spyData = { price: 0, change: 0 };
+    try {
+      const spyQuote = await stockMarketService.getStockQuote('SPY');
+      if (spyQuote && spyQuote.c > 0) {
+        spyData = { price: spyQuote.c, change: spyQuote.dp || 0 };
+      }
+    } catch (e) {
+      console.warn('Failed to fetch SPY quote');
+    }
+    
+    return { gainers, losers, spy: spyData };
+  } catch (error) {
+    console.error('Error fetching stock movers:', error);
+    return { gainers: [], losers: [], spy: { price: 0, change: 0 } };
+  }
+}
+
+/**
+ * Generate alpha insight based on market conditions
+ */
+function generateAlphaInsight(
+  btcChange: number,
+  ethChange: number,
+  spyChange: number,
+  fearGreedIndex: number,
+  stockGainers: StockHighlight[],
+  cryptoGainers: MarketHighlight[]
+): string {
+  const insights: string[] = [];
+  
+  // Correlation insight
+  const cryptoUp = btcChange > 0 && ethChange > 0;
+  const stocksUp = spyChange > 0;
+  
+  if (cryptoUp && stocksUp) {
+    insights.push("Risk-on mode: Both crypto and equities rallying. Consider momentum plays.");
+  } else if (cryptoUp && !stocksUp) {
+    insights.push("Crypto decoupling from stocks. Watch for Bitcoin-led altcoin rotation.");
+  } else if (!cryptoUp && stocksUp) {
+    insights.push("Stocks outperforming crypto. Capital may be rotating to traditional assets.");
+  } else {
+    insights.push("Risk-off environment. Consider defensive positions or stablecoins.");
+  }
+  
+  // Fear & Greed insight
+  if (fearGreedIndex < 25) {
+    insights.push("Extreme fear = potential buying opportunity for long-term holders.");
+  } else if (fearGreedIndex > 75) {
+    insights.push("Extreme greed = consider taking profits on overextended positions.");
+  }
+  
+  // Top mover insight
+  if (stockGainers.length > 0) {
+    const topStock = stockGainers[0];
+    if (topStock.changePercent > 5) {
+      insights.push(`${topStock.symbol} surging ${topStock.changePercent.toFixed(1)}% - check for catalyst.`);
+    }
+  }
+  
+  return insights.join(' ');
+}
+
+/**
  * Get upcoming scheduled streams (daily 8am/4pm EST market updates)
  */
 async function fetchUpcomingStreams(): Promise<UpcomingStream[]> {
@@ -162,11 +261,12 @@ async function fetchUpcomingStreams(): Promise<UpcomingStream[]> {
  */
 export async function generateNewsletterContent(): Promise<NewsletterContent> {
   try {
-    const [cryptoData, fearGreedIndex, hotMarkets, upcomingStreams] = await Promise.all([
+    const [cryptoData, fearGreedIndex, hotMarkets, upcomingStreams, stockData] = await Promise.all([
       marketDataService.getTopCryptos(50),
       fetchFearGreedIndex(),
       fetchHotMarkets(),
-      fetchUpcomingStreams()
+      fetchUpcomingStreams(),
+      fetchStockMovers()
     ]);
     
     if (!cryptoData || cryptoData.length === 0) {
@@ -205,6 +305,15 @@ export async function generateNewsletterContent(): Promise<NewsletterContent> {
     const ethData = allCoins.find(c => c.symbol === 'ETH');
     
     const marketSummary = generateMarketSummary(btcData, ethData, topGainers, topLosers, fearGreedIndex);
+    
+    const alphaInsight = generateAlphaInsight(
+      btcData?.changePercent || 0,
+      ethData?.changePercent || 0,
+      stockData.spy.change,
+      fearGreedIndex,
+      stockData.gainers,
+      topGainers
+    );
 
     let newsStories: Array<{ title: string; url: string; source: string; published: string }> = [];
     try {
@@ -224,17 +333,22 @@ export async function generateNewsletterContent(): Promise<NewsletterContent> {
     const dayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long' });
 
     return {
-      subject: `📈 StreamAiX Crypto Briefing - ${dayOfWeek}, ${dateStr}`,
+      subject: `📈 StreamAiX Market Alpha - ${dayOfWeek}, ${dateStr}`,
       marketHighlights,
       topGainers,
       topLosers,
+      stockGainers: stockData.gainers,
+      stockLosers: stockData.losers,
       marketSummary,
+      alphaInsight,
       totalMarketCap: '~$2.8T',
       btcDominance: btcData ? '~50%' : 'N/A',
       btcPrice: btcData?.price || 0,
       btcChange: btcData?.changePercent || 0,
       ethPrice: ethData?.price || 0,
       ethChange: ethData?.changePercent || 0,
+      spyPrice: stockData.spy.price,
+      spyChange: stockData.spy.change,
       fearGreedIndex,
       hotMarkets,
       upcomingStreams,
@@ -244,17 +358,22 @@ export async function generateNewsletterContent(): Promise<NewsletterContent> {
     console.error('Error generating newsletter content:', error);
     
     return {
-      subject: `📈 StreamAiX Crypto Briefing - ${new Date().toLocaleDateString()}`,
+      subject: `📈 StreamAiX Market Alpha - ${new Date().toLocaleDateString()}`,
       marketHighlights: [],
       topGainers: [],
       topLosers: [],
+      stockGainers: [],
+      stockLosers: [],
       marketSummary: 'Market data temporarily unavailable. Visit StreamAiX to explore our AI-powered prediction markets!',
+      alphaInsight: 'Check back soon for AI-powered market insights.',
       totalMarketCap: 'N/A',
       btcDominance: 'N/A',
       btcPrice: 0,
       btcChange: 0,
       ethPrice: 0,
       ethChange: 0,
+      spyPrice: 0,
+      spyChange: 0,
       fearGreedIndex: 50,
       hotMarkets: [],
       upcomingStreams: [],

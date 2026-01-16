@@ -545,9 +545,9 @@ export function generateNewsletterHTML(content: NewsletterContent, unsubscribeTo
       <div class="logo">StreamAiX</div>
       <div class="tagline">AI-Native Social Media & Prediction Markets</div>
       
-      <!-- BTC/ETH Price Badges -->
+      <!-- BTC/ETH/SPY Price Badges -->
       <div class="price-banner">
-        <div class="price-badge">
+        <div class="price-badge" style="width: 33.33%;">
           <div class="price-badge-inner">
             <div class="price-badge-symbol">BTC</div>
             <div class="price-badge-value">$${formatPrice(content.btcPrice || 0)}</div>
@@ -556,12 +556,21 @@ export function generateNewsletterHTML(content: NewsletterContent, unsubscribeTo
             </div>
           </div>
         </div>
-        <div class="price-badge">
+        <div class="price-badge" style="width: 33.33%;">
           <div class="price-badge-inner">
             <div class="price-badge-symbol">ETH</div>
             <div class="price-badge-value">$${formatPrice(content.ethPrice || 0)}</div>
             <div class="price-badge-change ${(content.ethChange || 0) >= 0 ? 'positive' : 'negative'}">
               ${(content.ethChange || 0) >= 0 ? '+' : ''}${(content.ethChange || 0).toFixed(2)}%
+            </div>
+          </div>
+        </div>
+        <div class="price-badge" style="width: 33.33%;">
+          <div class="price-badge-inner">
+            <div class="price-badge-symbol">S&P 500</div>
+            <div class="price-badge-value">$${formatPrice(content.spyPrice || 0)}</div>
+            <div class="price-badge-change ${(content.spyChange || 0) >= 0 ? 'positive' : 'negative'}">
+              ${(content.spyChange || 0) >= 0 ? '+' : ''}${(content.spyChange || 0).toFixed(2)}%
             </div>
           </div>
         </div>
@@ -592,6 +601,19 @@ export function generateNewsletterHTML(content: NewsletterContent, unsubscribeTo
           ${content.marketSummary}
         </div>
       </div>
+
+      <!-- Alpha Insight -->
+      ${content.alphaInsight ? `
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon"><div class="section-icon-inner">🎯</div></div>
+          <div class="section-title">Alpha Insight</div>
+        </div>
+        <div class="market-summary" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%); border-color: rgba(16, 185, 129, 0.3);">
+          <strong style="color: #34d399;">Today's Key Takeaway:</strong> ${content.alphaInsight}
+        </div>
+      </div>
+      ` : ''}
 
       <!-- Top Gainers -->
       ${content.topGainers.length > 0 ? `
@@ -643,6 +665,64 @@ export function generateNewsletterHTML(content: NewsletterContent, unsubscribeTo
                 <div class="coin-price-cell">
                   <div class="coin-price">$${formatPrice(coin.price || 0)}</div>
                   <div class="coin-change negative">${(coin.changePercent || 0).toFixed(2)}%</div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      ` : ''}
+
+      <!-- Stock Gainers -->
+      ${content.stockGainers && content.stockGainers.length > 0 ? `
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon"><div class="section-icon-inner">📈</div></div>
+          <div class="section-title">Top Tech Stocks (24h)</div>
+        </div>
+        <div class="coin-list">
+          ${content.stockGainers.slice(0, 5).map(stock => `
+            <div class="coin-card" style="border-left: 3px solid #10b981;">
+              <div class="coin-card-inner">
+                <div class="coin-icon-cell">
+                  <div class="coin-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); font-size: 11px;">${stock.symbol}</div>
+                </div>
+                <div class="coin-info-cell">
+                  <div class="coin-name">${stock.name}</div>
+                  <div class="coin-symbol" style="color: rgba(16, 185, 129, 0.7);">${stock.sector}</div>
+                </div>
+                <div class="coin-price-cell">
+                  <div class="coin-price">$${formatPrice(stock.price || 0)}</div>
+                  <div class="coin-change positive">+${(stock.changePercent || 0).toFixed(2)}%</div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      ` : ''}
+
+      <!-- Stock Losers -->
+      ${content.stockLosers && content.stockLosers.length > 0 ? `
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon"><div class="section-icon-inner">📉</div></div>
+          <div class="section-title">Tech Stocks Down (24h)</div>
+        </div>
+        <div class="coin-list">
+          ${content.stockLosers.slice(0, 5).map(stock => `
+            <div class="coin-card" style="border-left: 3px solid #ef4444;">
+              <div class="coin-card-inner">
+                <div class="coin-icon-cell">
+                  <div class="coin-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); font-size: 11px;">${stock.symbol}</div>
+                </div>
+                <div class="coin-info-cell">
+                  <div class="coin-name">${stock.name}</div>
+                  <div class="coin-symbol" style="color: rgba(239, 68, 68, 0.7);">${stock.sector}</div>
+                </div>
+                <div class="coin-price-cell">
+                  <div class="coin-price">$${formatPrice(stock.price || 0)}</div>
+                  <div class="coin-change negative">${(stock.changePercent || 0).toFixed(2)}%</div>
                 </div>
               </div>
             </div>

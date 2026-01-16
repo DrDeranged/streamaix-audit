@@ -4,18 +4,18 @@ import { storage } from '../storage';
 
 /**
  * Newsletter scheduler service
- * Sends automated newsletters every Monday and Friday at 8am EST
+ * Sends automated market alpha newsletters twice daily at 8am and 4pm EST
  * Also sends weekly push digest to subscribed users on Sundays
  */
 class NewsletterScheduler {
-  private mondayJob: cron.ScheduledTask | null = null;
-  private fridayJob: cron.ScheduledTask | null = null;
+  private morningJob: cron.ScheduledTask | null = null;
+  private afternoonJob: cron.ScheduledTask | null = null;
   private sundayDigestJob: cron.ScheduledTask | null = null;
   private isStarted = false;
 
   /**
    * Start the newsletter scheduler
-   * Sends newsletters Monday and Friday at 8am EST (12pm UTC in winter, 1pm UTC in summer)
+   * Sends market alpha newsletters twice daily at 8am and 4pm EST
    * Sends weekly push digest on Sundays at 10am EST
    */
   start(): void {
@@ -24,20 +24,19 @@ class NewsletterScheduler {
       return;
     }
 
-    // Monday at 8am EST (cron runs in UTC, so 12:00 or 13:00 depending on DST)
-    // Using 12:00 UTC as a compromise (8am EST during standard time)
-    this.mondayJob = cron.schedule('0 12 * * 1', async () => {
-      console.log('📧 Monday newsletter scheduled send starting...');
-      await this.sendNewsletter('Monday');
+    // Morning newsletter at 8am EST - Pre-market alpha
+    this.morningJob = cron.schedule('0 8 * * *', async () => {
+      console.log('📧 Morning market alpha newsletter starting...');
+      await this.sendNewsletter('Morning');
     }, {
       scheduled: true,
       timezone: "America/New_York"
     });
 
-    // Friday at 8am EST
-    this.fridayJob = cron.schedule('0 8 * * 5', async () => {
-      console.log('📧 Friday newsletter scheduled send starting...');
-      await this.sendNewsletter('Friday');
+    // Afternoon newsletter at 4pm EST - Market close recap
+    this.afternoonJob = cron.schedule('0 16 * * *', async () => {
+      console.log('📧 Market close newsletter starting...');
+      await this.sendNewsletter('Market Close');
     }, {
       scheduled: true,
       timezone: "America/New_York"
@@ -53,20 +52,20 @@ class NewsletterScheduler {
     });
 
     this.isStarted = true;
-    console.log('✅ Newsletter scheduler started - Sends Monday & Friday at 8am EST, Push Digest Sunday 10am EST');
+    console.log('✅ Newsletter scheduler started - Sends 8am & 4pm EST daily, Push Digest Sunday 10am EST');
   }
 
   /**
    * Stop the newsletter scheduler
    */
   stop(): void {
-    if (this.mondayJob) {
-      this.mondayJob.stop();
-      this.mondayJob = null;
+    if (this.morningJob) {
+      this.morningJob.stop();
+      this.morningJob = null;
     }
-    if (this.fridayJob) {
-      this.fridayJob.stop();
-      this.fridayJob = null;
+    if (this.afternoonJob) {
+      this.afternoonJob.stop();
+      this.afternoonJob = null;
     }
     if (this.sundayDigestJob) {
       this.sundayDigestJob.stop();
@@ -99,25 +98,26 @@ class NewsletterScheduler {
   /**
    * Get scheduler status
    */
-  getStatus(): { isRunning: boolean; nextMonday: string | null; nextFriday: string | null } {
+  getStatus(): { isRunning: boolean; nextMorning: string | null; nextAfternoon: string | null } {
     return {
       isRunning: this.isStarted,
-      nextMonday: this.mondayJob ? this.getNextRunTime('Monday') : null,
-      nextFriday: this.fridayJob ? this.getNextRunTime('Friday') : null
+      nextMorning: this.morningJob ? this.getNextRunTime(8) : null,
+      nextAfternoon: this.afternoonJob ? this.getNextRunTime(16) : null
     };
   }
 
   /**
    * Get next scheduled run time
    */
-  private getNextRunTime(day: string): string {
+  private getNextRunTime(hour: number): string {
     const now = new Date();
-    const targetDay = day === 'Monday' ? 1 : 5;
-    const daysUntilTarget = (targetDay - now.getDay() + 7) % 7 || 7;
-    
     const nextRun = new Date(now);
-    nextRun.setDate(now.getDate() + daysUntilTarget);
-    nextRun.setHours(8, 0, 0, 0);
+    nextRun.setHours(hour, 0, 0, 0);
+    
+    // If the time has passed today, schedule for tomorrow
+    if (nextRun <= now) {
+      nextRun.setDate(nextRun.getDate() + 1);
+    }
     
     return nextRun.toLocaleString('en-US', { 
       timeZone: 'America/New_York',
