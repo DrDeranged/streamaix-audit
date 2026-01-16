@@ -12439,6 +12439,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
+  app.post("/api/newsletter/test-welcome", asyncHandler(async (req: Request, res: Response) => {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+
+    const { sendWelcomeEmail } = await import('./services/welcomeEmailService');
+    
+    try {
+      console.log('📧 Test welcome email requested for:', email);
+      await sendWelcomeEmail(email);
+      res.json({
+        success: true,
+        message: `Welcome email sent to ${email}`
+      });
+    } catch (error) {
+      console.error('Welcome email failed:', error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to send welcome email"
+      });
+    }
+  }));
+
   app.get("/api/newsletter/preview", asyncHandler(async (req: Request, res: Response) => {
     const { generateNewsletterContent } = await import('./services/newsletterContentGenerator');
     const { generateNewsletterHTML } = await import('./services/newsletterTemplate');
