@@ -137,6 +137,8 @@ interface TopStreamer {
 interface ScheduledBriefing {
   type: string;
   nextRun: string;
+  streamId?: string;
+  status: 'upcoming' | 'completed';
 }
 
 interface StreamReplay {
@@ -1178,28 +1180,45 @@ export default function StreamsPage() {
                   const isMorning = briefing.type === 'morning_update';
                   const title = isMorning ? '🌅 Morning Market Update' : '🌙 Market Close Recap';
                   const timeLabel = isMorning ? '8:00 AM EST' : '4:00 PM EST';
+                  const isCompleted = briefing.status === 'completed' && briefing.streamId;
                   
-                  return (
+                  const cardContent = (
                     <div 
-                      key={`${briefing.type}-${idx}`}
-                      className="group relative rounded-xl overflow-hidden bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-slate-700/50 hover:border-cyan-500/50 transition-all duration-300"
+                      className={cn(
+                        "group relative rounded-xl overflow-hidden bg-gradient-to-br from-slate-800/60 to-slate-900/60 border transition-all duration-300",
+                        isCompleted 
+                          ? "border-emerald-500/50 hover:border-emerald-400/70 cursor-pointer" 
+                          : "border-slate-700/50 hover:border-cyan-500/50"
+                      )}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className={cn(
+                        "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity",
+                        isCompleted 
+                          ? "bg-gradient-to-r from-emerald-500/10 to-cyan-500/10" 
+                          : "bg-gradient-to-r from-cyan-500/5 to-blue-500/5"
+                      )} />
                       <div className="relative p-4 flex items-center gap-4">
                         <div className="relative flex-shrink-0">
                           <div className={cn(
                             "w-14 h-14 rounded-full flex items-center justify-center border-2",
-                            isMorning 
-                              ? "bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-amber-500/40"
-                              : "bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-500/40"
+                            isCompleted
+                              ? "bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border-emerald-500/40"
+                              : isMorning 
+                                ? "bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-amber-500/40"
+                                : "bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-500/40"
                           )}>
                             <span className={cn(
                               "flex items-center justify-center text-2xl",
-                              isMorning ? "text-amber-400" : "text-purple-400"
+                              isCompleted ? "text-emerald-400" : isMorning ? "text-amber-400" : "text-purple-400"
                             )}>
-                              {isMorning ? '🌅' : '🌙'}
+                              {isCompleted ? '🎧' : isMorning ? '🌅' : '🌙'}
                             </span>
                           </div>
+                          {isCompleted && (
+                            <div className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-1">
+                              <Play className="w-3 h-3 text-white fill-white" />
+                            </div>
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-white text-sm truncate">{title}</p>
@@ -1207,23 +1226,44 @@ export default function StreamsPage() {
                             {timeLabel} • AI Knowledge Avatar
                           </p>
                           <div className="flex items-center gap-2 mt-1.5">
-                            <Badge className={cn(
-                              "text-[10px] px-1.5 py-0.5",
-                              isMorning 
-                                ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
-                                : "bg-purple-500/20 text-purple-400 border-purple-500/30"
-                            )}>
-                              <Clock className="w-2.5 h-2.5 mr-0.5" />
-                              {diffMs > 0 ? (isToday ? `in ${diffHours}h ${diffMins}m` : scheduledDate.toLocaleDateString()) : 'Soon'}
-                            </Badge>
+                            {isCompleted ? (
+                              <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px] px-1.5 py-0.5">
+                                <Headphones className="w-2.5 h-2.5 mr-0.5" />
+                                Listen to Replay
+                              </Badge>
+                            ) : (
+                              <Badge className={cn(
+                                "text-[10px] px-1.5 py-0.5",
+                                isMorning 
+                                  ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
+                                  : "bg-purple-500/20 text-purple-400 border-purple-500/30"
+                              )}>
+                                <Clock className="w-2.5 h-2.5 mr-0.5" />
+                                {diffMs > 0 ? (isToday ? `in ${diffHours}h ${diffMins}m` : scheduledDate.toLocaleDateString()) : 'Soon'}
+                              </Badge>
+                            )}
                             <Badge className="bg-cyan-500/10 text-cyan-400 border-cyan-500/20 text-[10px] px-1.5 py-0.5">
                               <Volume2 className="w-2.5 h-2.5 mr-0.5" />
                               TTS Audio
                             </Badge>
                           </div>
                         </div>
-                        <Bell className="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition-colors flex-shrink-0" />
+                        {isCompleted ? (
+                          <ChevronRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+                        ) : (
+                          <Bell className="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition-colors flex-shrink-0" />
+                        )}
                       </div>
+                    </div>
+                  );
+                  
+                  return isCompleted ? (
+                    <Link key={`${briefing.type}-${idx}`} href={`/stream/${briefing.streamId}`}>
+                      {cardContent}
+                    </Link>
+                  ) : (
+                    <div key={`${briefing.type}-${idx}`}>
+                      {cardContent}
                     </div>
                   );
                 })}

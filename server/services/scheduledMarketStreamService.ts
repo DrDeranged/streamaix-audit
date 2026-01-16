@@ -547,34 +547,78 @@ Return the commentary as a single flowing script, broken into 4-6 paragraphs for
     this.activeStream = null;
   }
 
-  async getUpcomingSchedule(): Promise<Array<{ type: string; nextRun: Date }>> {
+  async getUpcomingSchedule(): Promise<Array<{ type: string; nextRun: Date; streamId?: string; status: 'upcoming' | 'completed' }>> {
     const now = new Date();
     const today = new Date(now);
     today.setHours(0, 0, 0, 0);
     
-    const schedule: Array<{ type: string; nextRun: Date }> = [];
+    // Get today's completed market streams
+    const todayStart = new Date(today);
+    const todayEnd = new Date(today);
+    todayEnd.setHours(23, 59, 59, 999);
+    
+    const todayStreams = await db.select({
+      id: liveStreams.id,
+      title: liveStreams.title,
+      tags: liveStreams.tags,
+      actualStart: liveStreams.actualStart,
+      status: liveStreams.status,
+    })
+    .from(liveStreams)
+    .where(eq(liveStreams.category, 'market_update'));
+    
+    const completedToday = todayStreams.filter(s => {
+      const streamDate = new Date(s.actualStart || new Date());
+      return streamDate >= todayStart && streamDate <= todayEnd && s.status === 'ended';
+    });
+    
+    const morningStreamToday = completedToday.find(s => 
+      s.title?.toLowerCase().includes('morning') || s.tags?.includes('morning_update')
+    );
+    const closeStreamToday = completedToday.find(s => 
+      s.title?.toLowerCase().includes('close') || s.title?.toLowerCase().includes('recap') || s.tags?.includes('market_close')
+    );
+    
+    const schedule: Array<{ type: string; nextRun: Date; streamId?: string; status: 'upcoming' | 'completed' }> = [];
     
     const morning = new Date(today);
     morning.setHours(8, 0, 0, 0);
-    if (morning > now) {
-      schedule.push({ type: 'morning_update', nextRun: morning });
+    
+    if (morningStreamToday) {
+      // Morning stream already completed today - show as completed with link
+      schedule.push({ type: 'morning_update', nextRun: morning, streamId: morningStreamToday.id, status: 'completed' });
+    } else if (morning > now) {
+      // Morning stream upcoming today
+      schedule.push({ type: 'morning_update', nextRun: morning, status: 'upcoming' });
     } else {
+      // Morning time passed but no stream - show next day
       const nextMorning = new Date(morning);
       nextMorning.setDate(nextMorning.getDate() + 1);
-      schedule.push({ type: 'morning_update', nextRun: nextMorning });
+      schedule.push({ type: 'morning_update', nextRun: nextMorning, status: 'upcoming' });
     }
     
     const evening = new Date(today);
     evening.setHours(16, 0, 0, 0);
-    if (evening > now) {
-      schedule.push({ type: 'market_close', nextRun: evening });
+    
+    if (closeStreamToday) {
+      // Market close stream already completed today - show as completed with link
+      schedule.push({ type: 'market_close', nextRun: evening, streamId: closeStreamToday.id, status: 'completed' });
+    } else if (evening > now) {
+      // Market close stream upcoming today
+      schedule.push({ type: 'market_close', nextRun: evening, status: 'upcoming' });
     } else {
+      // Evening time passed but no stream - show next day
       const nextEvening = new Date(evening);
       nextEvening.setDate(nextEvening.getDate() + 1);
-      schedule.push({ type: 'market_close', nextRun: nextEvening });
+      schedule.push({ type: 'market_close', nextRun: nextEvening, status: 'upcoming' });
     }
     
-    return schedule.sort((a, b) => a.nextRun.getTime() - b.nextRun.getTime());
+    return schedule.sort((a, b) => {
+      // Show completed first, then by time
+      if (a.status === 'completed' && b.status !== 'completed') return -1;
+      if (a.status !== 'completed' && b.status === 'completed') return 1;
+      return a.nextRun.getTime() - b.nextRun.getTime();
+    });
   }
 
   async getRecentReplays(limit: number = 10): Promise<any[]> {
