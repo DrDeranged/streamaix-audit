@@ -96,12 +96,56 @@ export default function NewsletterAdmin() {
   // Fetch newsletter status
   const { data: status } = useQuery<{
     isRunning: boolean;
-    nextMonday: string;
-    nextFriday: string;
+    nextMorning: string;
+    nextAfternoon: string;
     subscriberCount: number;
+    schedule: string;
   }>({
     queryKey: ['/api/newsletter/status'],
     refetchInterval: 30000
+  });
+
+  // Fetch user breakdown (real humans vs AI agents)
+  const { data: userBreakdown, isLoading: userBreakdownLoading } = useQuery<{
+    breakdown: {
+      total: number;
+      realHumans: {
+        total: number;
+        new24h: number;
+        new7d: number;
+        new30d: number;
+        active24h: number;
+        active7d: number;
+      };
+      aiAgents: {
+        total: number;
+      };
+      newsletter: {
+        subscribers: number;
+      };
+    };
+  }>({
+    queryKey: ['/api/admin/user-breakdown'],
+    refetchInterval: 60000
+  });
+
+  // Fetch API costs
+  const { data: apiCosts, isLoading: apiCostsLoading } = useQuery<{
+    costs: {
+      currentMonth: {
+        total: number;
+        breakdown: Record<string, number>;
+      };
+      projectedMonth: number;
+      budget: {
+        openai: number;
+        coingecko: number;
+        total: number;
+      };
+    };
+  }>({
+    queryKey: ['/api/admin/api-costs'],
+    refetchInterval: 60000
   });
 
   // Fetch newsletter history
@@ -516,6 +560,141 @@ export default function NewsletterAdmin() {
           </div>
         </div>
 
+        {/* Real Human Users Section */}
+        <Card className="neural-glass border-green-500/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-green-400" />
+              Real Human Users
+            </CardTitle>
+            <CardDescription>Focus on real user signups and engagement</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {userBreakdownLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-green-400" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-4 rounded-xl bg-gradient-to-br from-green-900/40 to-green-950/40 border border-green-500/30">
+                  <div className="text-3xl font-bold text-white mb-1">
+                    {userBreakdown?.breakdown?.realHumans?.total || 0}
+                  </div>
+                  <div className="text-sm text-green-300">Total Real Users</div>
+                </div>
+                <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-900/40 to-emerald-950/40 border border-emerald-500/30">
+                  <div className="text-3xl font-bold text-white mb-1">
+                    {userBreakdown?.breakdown?.realHumans?.new7d || 0}
+                  </div>
+                  <div className="text-sm text-emerald-300">New This Week</div>
+                </div>
+                <div className="p-4 rounded-xl bg-gradient-to-br from-teal-900/40 to-teal-950/40 border border-teal-500/30">
+                  <div className="text-3xl font-bold text-white mb-1">
+                    {userBreakdown?.breakdown?.realHumans?.active24h || 0}
+                  </div>
+                  <div className="text-sm text-teal-300">Active Today</div>
+                </div>
+                <div className="p-4 rounded-xl bg-gradient-to-br from-cyan-900/40 to-cyan-950/40 border border-cyan-500/30">
+                  <div className="text-3xl font-bold text-white mb-1">
+                    {userBreakdown?.breakdown?.newsletter?.subscribers || 0}
+                  </div>
+                  <div className="text-sm text-cyan-300">Newsletter Subs</div>
+                </div>
+              </div>
+            )}
+            
+            {/* AI Agents Summary (Secondary) */}
+            {!userBreakdownLoading && (
+              <div className="mt-4 p-3 rounded-lg bg-slate-900/50 border border-slate-700/50 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Bot className="w-4 h-4 text-slate-400" />
+                  <span className="text-sm text-slate-400">AI Agents</span>
+                </div>
+                <span className="text-sm font-semibold text-slate-300">
+                  {userBreakdown?.breakdown?.aiAgents?.total || 100} active
+                </span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* API Cost Tracking Section */}
+        <Card className="neural-glass border-amber-500/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="w-5 h-5 text-amber-400" />
+              API Cost Tracking
+            </CardTitle>
+            <CardDescription>Monitor spending across all external APIs</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {apiCostsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-amber-400" />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Cost Overview */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-xl bg-gradient-to-br from-amber-900/40 to-amber-950/40 border border-amber-500/30">
+                    <div className="text-2xl font-bold text-white mb-1">
+                      ${(apiCosts?.costs?.currentMonth?.total || 0).toFixed(2)}
+                    </div>
+                    <div className="text-sm text-amber-300">Current Month</div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-gradient-to-br from-orange-900/40 to-orange-950/40 border border-orange-500/30">
+                    <div className="text-2xl font-bold text-white mb-1">
+                      ${(apiCosts?.costs?.projectedMonth || 0).toFixed(2)}
+                    </div>
+                    <div className="text-sm text-orange-300">Projected Month</div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-gradient-to-br from-red-900/40 to-red-950/40 border border-red-500/30">
+                    <div className="text-2xl font-bold text-white mb-1">
+                      ${apiCosts?.costs?.budget?.total || 154}
+                    </div>
+                    <div className="text-sm text-red-300">Monthly Budget</div>
+                  </div>
+                </div>
+                
+                {/* Cost Breakdown */}
+                <div className="p-4 rounded-xl bg-slate-900/50 border border-slate-700/50">
+                  <h4 className="font-semibold text-white mb-3">Cost Breakdown</h4>
+                  <div className="space-y-2">
+                    {Object.entries(apiCosts?.costs?.currentMonth?.breakdown || {}).map(([service, cost]) => (
+                      <div key={service} className="flex items-center justify-between">
+                        <span className="text-sm text-slate-300">{service}</span>
+                        <span className="text-sm font-semibold text-slate-200">
+                          ${typeof cost === 'number' ? cost.toFixed(2) : '0.00'}
+                        </span>
+                      </div>
+                    ))}
+                    {Object.keys(apiCosts?.costs?.currentMonth?.breakdown || {}).length === 0 && (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-slate-300">OpenAI (estimated)</span>
+                          <span className="text-sm font-semibold text-slate-200">$15-25/mo</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-slate-300">CoinGecko Pro</span>
+                          <span className="text-sm font-semibold text-slate-200">$129/mo</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-slate-300">Resend (emails)</span>
+                          <span className="text-sm font-semibold text-slate-200">~$1/mo</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-slate-300">Finnhub (stocks)</span>
+                          <span className="text-sm font-semibold text-slate-200">Free tier</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Recent Activity Feed */}
         <Card className="neural-glass border-purple-500/20">
           <CardHeader>
@@ -887,13 +1066,13 @@ export default function NewsletterAdmin() {
                         </div>
                       </div>
 
-                      {/* Next Monday */}
+                      {/* Morning Send (8am EST) */}
                       <div className="relative group">
                         <div className="p-4 rounded-xl bg-gradient-to-br from-blue-900/40 to-indigo-900/30 border-2 border-blue-500/50 transition-all duration-300 hover:border-blue-400/70 hover:shadow-lg hover:shadow-blue-500/20">
                           <div className="font-bold text-white text-base mb-2">
-                            {status?.nextMonday || 'Loading...'}
+                            {status?.nextMorning || 'Loading...'}
                           </div>
-                          <p className="text-xs text-blue-200 uppercase tracking-wide mb-3">Next Monday Send</p>
+                          <p className="text-xs text-blue-200 uppercase tracking-wide mb-3">Morning Alpha (8am EST)</p>
                           <Button
                             variant="outline"
                             onClick={() => window.open('/api/newsletter/preview', '_blank')}
@@ -905,13 +1084,13 @@ export default function NewsletterAdmin() {
                         </div>
                       </div>
 
-                      {/* Next Friday */}
+                      {/* Afternoon Send (4pm EST) */}
                       <div className="relative group">
                         <div className="p-4 rounded-xl bg-gradient-to-br from-cyan-900/40 to-teal-900/30 border-2 border-cyan-500/50 transition-all duration-300 hover:border-cyan-400/70 hover:shadow-lg hover:shadow-cyan-500/20">
                           <div className="font-bold text-white text-base mb-2">
-                            {status?.nextFriday || 'Loading...'}
+                            {status?.nextAfternoon || 'Loading...'}
                           </div>
-                          <p className="text-xs text-cyan-200 uppercase tracking-wide mb-3">Next Friday Send</p>
+                          <p className="text-xs text-cyan-200 uppercase tracking-wide mb-3">Market Close Recap (4pm EST)</p>
                           <Button
                             variant="outline"
                             onClick={() => window.open('/api/newsletter/preview', '_blank')}

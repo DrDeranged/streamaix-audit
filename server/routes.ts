@@ -12340,12 +12340,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       unsubscribeToken
     });
 
-    // Send confirmation email to user and notification to admin
+    // Send confirmation email and welcome email to user, notification to admin
     try {
       const { emailService } = await import('./services/emailService');
+      const { sendWelcomeEmail } = await import('./services/welcomeEmailService');
       await Promise.all([
         emailService.sendWaitlistConfirmation(entry.email, entry.name || undefined),
-        emailService.sendAdminNotification(entry.email, entry.name || undefined)
+        emailService.sendAdminNotification(entry.email, entry.name || undefined),
+        sendWelcomeEmail(entry.email)
       ]);
     } catch (emailError) {
       console.error('Email sending failed:', emailError);
@@ -12452,7 +12454,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const { newsletterScheduler } = await import('./services/newsletterScheduler');
     const status = newsletterScheduler.getStatus();
     
-    res.json(status);
+    // Get subscriber count
+    const subscriberCount = await storage.getSubscribedWaitlistCount();
+    
+    res.json({
+      ...status,
+      subscriberCount,
+      schedule: 'Daily at 8am & 4pm EST'
+    });
   }));
 
   app.get("/api/newsletter/history", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -12476,6 +12485,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Get platform-wide statistics
     const stats = await storage.getAdminStats();
     res.json({ success: true, stats });
+  }));
+
+  // Get detailed user breakdown (real humans vs AI agents)
+  app.get("/api/admin/user-breakdown", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { users } = await import('../shared/schema');
+    const { sql, count, and, eq, gte, isNull, or, like } = await import('drizzle-orm');
+    
+    const now = new Date();
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    
+    // Get all users
+    const allUsers = await db.select().from(users);
+    
+    // AI agents have isAiAgent = true OR username starts with 'ai_' 
+    const aiAgents = allUsers.filter(u => u.isAiAgent || u.username.startsWith('ai_'));
+    const realHumans = allUsers.filter(u => !u.isAiAgent && !u.username.startsWith('ai_'));
+    
+    // Recent signups (real humans only)
+    const recentHumans24h = realHumans.filter(u => u.createdAt && new Date(u.createdAt) >= oneDayAgo);
+    const recentHumans7d = realHumans.filter(u => u.createdAt && new Date(u.createdAt) >= sevenDaysAgo);
+    const recentHumans30d = realHumans.filter(u => u.createdAt && new Date(u.createdAt) >= thirtyDaysAgo);
+    
+    // Active users (based on lastLoginAt)
+    const activeHumans24h = realHumans.filter(u => u.lastLoginAt && new Date(u.lastLoginAt) >= oneDayAgo);
+    const activeHumans7d = realHumans.filter(u => u.lastLoginAt && new Date(u.lastLoginAt) >= sevenDaysAgo);
+    
+    // Get newsletter subscribers
+    const subscriberCount = await storage.getSubscribedWaitlistCount();
+    
+    res.json({
+      success: true,
+      breakdown: {
+        total: allUsers.length,
+        realHumans: {
+          total: realHumans.length,
+          new24h: recentHumans24h.length,
+          new7d: recentHumans7d.length,
+          new30d: recentHumans30d.length,
+          active24h: activeHumans24h.length,
+          active7d: activeHumans7d.length,
+        },
+        aiAgents: {
+          total: aiAgents.length,
+        },
+        newsletter: {
+          subscribers: subscriberCount
+        }
+      }
+    });
+  }));
+
+  // Get API cost tracking data
+  app.get("/api/admin/api-costs", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { apiCostTracker } = await import('./services/apiCostTracker');
+    
+    const summary = apiCostTracker.getSummary();
+    const recentCalls = apiCostTracker.getRecentCalls(20);
+    const budget = apiCostTracker.getEstimatedBudget();
+    
+    res.json({
+      success: true,
+      costs: {
+        currentMonth: summary.currentMonth,
+        projectedMonth: summary.projectedMonth,
+        lastUpdated: summary.lastUpdated,
+        services: summary.services,
+        budget,
+        recentCalls
+      }
+    });
   }));
   
   app.get("/api/admin/activity", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {

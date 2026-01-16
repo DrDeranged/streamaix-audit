@@ -527,6 +527,7 @@ export interface IStorage {
   getWaitlistCount(): Promise<number>;
   getWaitlistByEmail(email: string): Promise<Waitlist | undefined>;
   getSubscribedWaitlist(): Promise<Waitlist[]>;
+  getSubscribedWaitlistCount(): Promise<number>;
   unsubscribeFromNewsletter(token: string): Promise<boolean>;
   updateWaitlistUnsubscribeToken(email: string, token: string): Promise<void>;
   
@@ -3133,6 +3134,14 @@ export class DatabaseStorage implements IStorage {
       .from(waitlist)
       .where(eq(waitlist.unsubscribed, false))
       .orderBy(desc(waitlist.createdAt));
+  }
+
+  async getSubscribedWaitlistCount(): Promise<number> {
+    const [result] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(waitlist)
+      .where(eq(waitlist.unsubscribed, false));
+    return result?.count || 0;
   }
 
   async unsubscribeFromNewsletter(token: string): Promise<boolean> {
