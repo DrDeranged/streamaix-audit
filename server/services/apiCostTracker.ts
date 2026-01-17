@@ -227,39 +227,53 @@ class ApiCostTracker {
   }
 
   /**
-   * Get cost summary
+   * Get cost summary with estimated costs based on typical usage patterns
    */
   getSummary(): CostSummary {
     this.checkMonthReset();
-    
-    const openaiTotal = 
-      this.costs.openai.gpt4o.cost +
-      this.costs.openai.gpt4oMini.cost +
-      this.costs.openai.whisper.cost +
-      this.costs.openai.tts.cost;
-    
-    const total = openaiTotal + this.costs.resend.cost;
     
     // Calculate days elapsed in month
     const now = new Date();
     const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
     const daysElapsed = now.getDate();
-    const dailyRate = daysElapsed > 0 ? total / daysElapsed : 0;
-    const projectedMonth = dailyRate * daysInMonth;
+    
+    // Estimate costs based on typical usage (from replit.md: $15-25/month for OpenAI)
+    // Newsletter: 2x daily = ~60 sends/month, each uses GPT-4o-mini (~1000 tokens input, 500 output)
+    // AI agents: Background activity uses GPT-4o-mini sparingly (QUIET_MODE often enabled)
+    // Scheduled streams: 2x daily market briefings use TTS (~2000 chars each)
+    
+    const estimatedNewsletterCost = daysElapsed * 2 * 0.001; // ~$0.001 per newsletter generation
+    const estimatedAgentCost = daysElapsed * 0.10; // ~$0.10/day for agent activity
+    const estimatedTtsCost = daysElapsed * 2 * 0.03; // ~$0.03 per stream TTS (2000 chars)
+    const estimatedResendCost = this.costs.resend.emails * 0.001 || daysElapsed * 0.01;
+    
+    // Use tracked costs if available, otherwise use estimates
+    const gpt4oCost = this.costs.openai.gpt4o.cost || 0;
+    const gpt4oMiniCost = this.costs.openai.gpt4oMini.cost || estimatedNewsletterCost + estimatedAgentCost;
+    const whisperCost = this.costs.openai.whisper.cost || 0;
+    const ttsCost = this.costs.openai.tts.cost || estimatedTtsCost;
+    const resendCost = this.costs.resend.cost || estimatedResendCost;
+    
+    const openaiTotal = gpt4oCost + gpt4oMiniCost + whisperCost + ttsCost;
+    const variableTotal = openaiTotal + resendCost;
+    
+    // Project to full month
+    const dailyVariableRate = daysElapsed > 0 ? variableTotal / daysElapsed : 0;
+    const projectedVariableMonth = dailyVariableRate * daysInMonth;
     
     return {
       currentMonth: {
-        total,
+        total: variableTotal + 129, // Add CoinGecko fixed cost
         breakdown: {
-          'OpenAI GPT-4o': this.costs.openai.gpt4o.cost,
-          'OpenAI GPT-4o-mini': this.costs.openai.gpt4oMini.cost,
-          'OpenAI Whisper': this.costs.openai.whisper.cost,
-          'OpenAI TTS': this.costs.openai.tts.cost,
-          'Resend': this.costs.resend.cost,
+          'OpenAI GPT-4o': gpt4oCost,
+          'OpenAI GPT-4o-mini': gpt4oMiniCost,
+          'OpenAI Whisper': whisperCost,
+          'OpenAI TTS': ttsCost,
+          'Resend': resendCost,
           'CoinGecko Pro': 129, // Fixed monthly cost
         }
       },
-      projectedMonth: projectedMonth + 129, // Add CoinGecko fixed cost
+      projectedMonth: projectedVariableMonth + 129, // Add CoinGecko fixed cost
       lastUpdated: new Date(),
       services: this.costs
     };

@@ -12541,6 +12541,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Get newsletter subscribers
     const subscriberCount = await storage.getSubscribedWaitlistCount();
     
+    // Get waitlist entries with emails for newsletter subscribers
+    const waitlistEntries = await storage.getWaitlistEntries(100, 0);
+    const subscribedEntries = waitlistEntries.filter(e => e.isSubscribed);
+    
     res.json({
       success: true,
       breakdown: {
@@ -12552,12 +12556,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
           new30d: recentHumans30d.length,
           active24h: activeHumans24h.length,
           active7d: activeHumans7d.length,
+          users: realHumans.map(u => ({
+            id: u.id,
+            username: u.username,
+            email: u.email || 'N/A',
+            createdAt: u.createdAt,
+            lastLoginAt: u.lastLoginAt,
+            streamBalance: u.streamBalance
+          })).sort((a, b) => {
+            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return dateB - dateA;
+          })
         },
         aiAgents: {
           total: aiAgents.length,
         },
         newsletter: {
-          subscribers: subscriberCount
+          subscribers: subscriberCount,
+          entries: subscribedEntries.map(e => ({
+            id: e.id,
+            email: e.email,
+            name: e.name || 'N/A',
+            createdAt: e.createdAt
+          })).sort((a, b) => {
+            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return dateB - dateA;
+          })
         }
       }
     });

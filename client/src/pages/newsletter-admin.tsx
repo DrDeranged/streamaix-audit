@@ -116,12 +116,26 @@ export default function NewsletterAdmin() {
         new30d: number;
         active24h: number;
         active7d: number;
+        users: Array<{
+          id: number;
+          username: string;
+          email: string;
+          createdAt: string;
+          lastLoginAt: string | null;
+          streamBalance: string;
+        }>;
       };
       aiAgents: {
         total: number;
       };
       newsletter: {
         subscribers: number;
+        entries: Array<{
+          id: number;
+          email: string;
+          name: string;
+          createdAt: string;
+        }>;
       };
     };
   }>({
@@ -575,31 +589,100 @@ export default function NewsletterAdmin() {
                 <Loader2 className="w-6 h-6 animate-spin text-green-400" />
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-4 rounded-xl bg-gradient-to-br from-green-900/40 to-green-950/40 border border-green-500/30">
-                  <div className="text-3xl font-bold text-white mb-1">
-                    {userBreakdown?.breakdown?.realHumans?.total || 0}
+              <div className="space-y-6">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-4 rounded-xl bg-gradient-to-br from-green-900/40 to-green-950/40 border border-green-500/30">
+                    <div className="text-3xl font-bold text-white mb-1">
+                      {userBreakdown?.breakdown?.realHumans?.total || 0}
+                    </div>
+                    <div className="text-sm text-green-300">Total Real Users</div>
                   </div>
-                  <div className="text-sm text-green-300">Total Real Users</div>
-                </div>
-                <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-900/40 to-emerald-950/40 border border-emerald-500/30">
-                  <div className="text-3xl font-bold text-white mb-1">
-                    {userBreakdown?.breakdown?.realHumans?.new7d || 0}
+                  <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-900/40 to-emerald-950/40 border border-emerald-500/30">
+                    <div className="text-3xl font-bold text-white mb-1">
+                      {userBreakdown?.breakdown?.realHumans?.new7d || 0}
+                    </div>
+                    <div className="text-sm text-emerald-300">New This Week</div>
                   </div>
-                  <div className="text-sm text-emerald-300">New This Week</div>
-                </div>
-                <div className="p-4 rounded-xl bg-gradient-to-br from-teal-900/40 to-teal-950/40 border border-teal-500/30">
-                  <div className="text-3xl font-bold text-white mb-1">
-                    {userBreakdown?.breakdown?.realHumans?.active24h || 0}
+                  <div className="p-4 rounded-xl bg-gradient-to-br from-teal-900/40 to-teal-950/40 border border-teal-500/30">
+                    <div className="text-3xl font-bold text-white mb-1">
+                      {userBreakdown?.breakdown?.realHumans?.active24h || 0}
+                    </div>
+                    <div className="text-sm text-teal-300">Active Today</div>
                   </div>
-                  <div className="text-sm text-teal-300">Active Today</div>
-                </div>
-                <div className="p-4 rounded-xl bg-gradient-to-br from-cyan-900/40 to-cyan-950/40 border border-cyan-500/30">
-                  <div className="text-3xl font-bold text-white mb-1">
-                    {userBreakdown?.breakdown?.newsletter?.subscribers || 0}
+                  <div className="p-4 rounded-xl bg-gradient-to-br from-cyan-900/40 to-cyan-950/40 border border-cyan-500/30">
+                    <div className="text-3xl font-bold text-white mb-1">
+                      {userBreakdown?.breakdown?.newsletter?.subscribers || 0}
+                    </div>
+                    <div className="text-sm text-cyan-300">Newsletter Subs</div>
                   </div>
-                  <div className="text-sm text-cyan-300">Newsletter Subs</div>
                 </div>
+
+                {/* Real Users Table */}
+                {userBreakdown?.breakdown?.realHumans?.users && userBreakdown.breakdown.realHumans.users.length > 0 && (
+                  <div className="rounded-xl bg-slate-900/50 border border-green-500/20 overflow-hidden">
+                    <div className="px-4 py-3 bg-green-900/20 border-b border-green-500/20">
+                      <h4 className="font-semibold text-green-300 text-sm">Registered Users ({userBreakdown.breakdown.realHumans.users.length})</h4>
+                    </div>
+                    <div className="max-h-64 overflow-y-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-slate-800/50 sticky top-0">
+                          <tr>
+                            <th className="px-4 py-2 text-left text-slate-400 font-medium">Username</th>
+                            <th className="px-4 py-2 text-left text-slate-400 font-medium">Email</th>
+                            <th className="px-4 py-2 text-left text-slate-400 font-medium">Joined</th>
+                            <th className="px-4 py-2 text-right text-slate-400 font-medium">STREAM</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-800">
+                          {userBreakdown.breakdown.realHumans.users.map((user) => (
+                            <tr key={user.id} className="hover:bg-slate-800/30">
+                              <td className="px-4 py-2 text-white font-medium">@{user.username}</td>
+                              <td className="px-4 py-2 text-slate-300">{user.email}</td>
+                              <td className="px-4 py-2 text-slate-400">
+                                {user.createdAt ? formatDistanceToNow(new Date(user.createdAt), { addSuffix: true }) : 'N/A'}
+                              </td>
+                              <td className="px-4 py-2 text-right text-emerald-400 font-mono">
+                                {Number(user.streamBalance || 0).toLocaleString()}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Newsletter Subscribers Table */}
+                {userBreakdown?.breakdown?.newsletter?.entries && userBreakdown.breakdown.newsletter.entries.length > 0 && (
+                  <div className="rounded-xl bg-slate-900/50 border border-cyan-500/20 overflow-hidden">
+                    <div className="px-4 py-3 bg-cyan-900/20 border-b border-cyan-500/20">
+                      <h4 className="font-semibold text-cyan-300 text-sm">Newsletter Subscribers ({userBreakdown.breakdown.newsletter.entries.length})</h4>
+                    </div>
+                    <div className="max-h-64 overflow-y-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-slate-800/50 sticky top-0">
+                          <tr>
+                            <th className="px-4 py-2 text-left text-slate-400 font-medium">Name</th>
+                            <th className="px-4 py-2 text-left text-slate-400 font-medium">Email</th>
+                            <th className="px-4 py-2 text-left text-slate-400 font-medium">Subscribed</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-800">
+                          {userBreakdown.breakdown.newsletter.entries.map((entry) => (
+                            <tr key={entry.id} className="hover:bg-slate-800/30">
+                              <td className="px-4 py-2 text-white">{entry.name}</td>
+                              <td className="px-4 py-2 text-slate-300">{entry.email}</td>
+                              <td className="px-4 py-2 text-slate-400">
+                                {entry.createdAt ? formatDistanceToNow(new Date(entry.createdAt), { addSuffix: true }) : 'N/A'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
             
