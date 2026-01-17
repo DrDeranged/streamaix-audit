@@ -3018,6 +3018,24 @@ function EditAssetDialog({ asset, portfolioId, onSuccess }: { asset: PortfolioAs
     },
   });
 
+  const recalculateMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest(`/api/portfolios/${portfolioId}/assets/${asset.id}/recalculate`, {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+    },
+    onSuccess: (data: any) => {
+      toast({ title: 'Price recalculated', description: data.message || 'Asset price and chart updated' });
+      queryClient.invalidateQueries({ queryKey: ['/api/portfolios', portfolioId] });
+      onSuccess();
+      setOpen(false);
+    },
+    onError: (error: any) => {
+      toast({ title: 'Failed to recalculate price', description: error.message, variant: 'destructive' });
+    },
+  });
+
   const handleSubmit = () => {
     if (!quantity || parseFloat(quantity) <= 0) {
       toast({ title: 'Please enter a valid quantity', variant: 'destructive' });
@@ -3123,24 +3141,37 @@ function EditAssetDialog({ asset, portfolioId, onSuccess }: { asset: PortfolioAs
             )}
           </div>
           
-          <div className="flex gap-2 pt-2">
-            <Button 
-              variant="outline" 
-              onClick={() => deleteMutation.mutate()} 
-              disabled={deleteMutation.isPending}
-              className="flex-1 border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-300"
-              data-testid={`delete-asset-${asset.symbol}`}
-            >
-              {deleteMutation.isPending ? 'Removing...' : <><Trash2 className="w-4 h-4 mr-2" /> Remove</>}
-            </Button>
-            <Button 
-              onClick={handleSubmit} 
-              disabled={updateMutation.isPending} 
-              className="flex-1 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400"
-              data-testid={`save-asset-${asset.symbol}`}
-            >
-              {updateMutation.isPending ? 'Saving...' : <><Check className="w-4 h-4 mr-2" /> Save Changes</>}
-            </Button>
+          <div className="flex flex-col gap-2 pt-2">
+            {/* Recalculate button - useful for fixing glitched prices */}
+            {!isCashLike && (
+              <Button 
+                variant="outline" 
+                onClick={() => recalculateMutation.mutate()} 
+                disabled={recalculateMutation.isPending}
+                className="w-full border-amber-500/30 text-amber-400 hover:bg-amber-500/10 hover:text-amber-300"
+              >
+                {recalculateMutation.isPending ? 'Recalculating...' : <><RefreshCw className="w-4 h-4 mr-2" /> Fix Price & Chart</>}
+              </Button>
+            )}
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => deleteMutation.mutate()} 
+                disabled={deleteMutation.isPending}
+                className="flex-1 border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+                data-testid={`delete-asset-${asset.symbol}`}
+              >
+                {deleteMutation.isPending ? 'Removing...' : <><Trash2 className="w-4 h-4 mr-2" /> Remove</>}
+              </Button>
+              <Button 
+                onClick={handleSubmit} 
+                disabled={updateMutation.isPending} 
+                className="flex-1 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400"
+                data-testid={`save-asset-${asset.symbol}`}
+              >
+                {updateMutation.isPending ? 'Saving...' : <><Check className="w-4 h-4 mr-2" /> Save Changes</>}
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>
