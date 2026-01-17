@@ -17363,6 +17363,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const stablecoinSymbols = ['USDC', 'USDT', 'DAI', 'BUSD', 'TUSD', 'USDP', 'GUSD', 'FRAX', 'LUSD', 'SUSD'];
     const isStablecoin = assetType === 'stablecoin' || stablecoinSymbols.includes(symbol.toUpperCase());
     
+    // Helper function to validate price isn't wildly off from cost basis
+    const validatePrice = (fetchedPrice: number, costBasis: number, sym: string): number => {
+      if (!costBasis || costBasis === 0) return fetchedPrice;
+      const ratio = fetchedPrice / costBasis;
+      // If price is more than 5x or less than 0.2x the cost basis, something is likely wrong
+      if (ratio > 5 || ratio < 0.2) {
+        console.warn(`⚠️ ${sym}: Price sanity check FAILED! Fetched $${fetchedPrice.toFixed(2)} but cost basis is $${costBasis.toFixed(2)} (ratio: ${ratio.toFixed(2)}x). Using cost basis.`);
+        return costBasis;
+      }
+      return fetchedPrice;
+    };
+
     try {
       if (isStablecoin) {
         // Stablecoins are always $1
@@ -17372,8 +17384,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const quotes = await marketDataService.getCryptoQuotes([symbol.toUpperCase()]);
         const coin = quotes?.find((c: any) => c.symbol.toUpperCase() === symbol.toUpperCase());
         if (coin?.price) {
-          currentPrice = coin.price;
-          console.log(`🪙 ${symbol}: $${currentPrice.toLocaleString()} from CoinGecko`);
+          const fetchedPrice = coin.price;
+          currentPrice = validatePrice(fetchedPrice, averageCostBasis || 0, symbol);
+          console.log(`🪙 ${symbol}: $${currentPrice.toLocaleString()} from CoinGecko (raw: $${fetchedPrice})`);
         } else {
           currentPrice = averageCostBasis || 0;
           console.log(`⚠️ ${symbol}: No API price, using cost basis $${currentPrice}`);
@@ -17382,8 +17395,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Use individual stock quote for accuracy
         const quote = await marketDataService.getStockQuote(symbol.toUpperCase());
         if (quote?.price) {
-          currentPrice = quote.price;
-          console.log(`📈 ${symbol}: $${currentPrice.toLocaleString()} from Finnhub`);
+          const fetchedPrice = quote.price;
+          currentPrice = validatePrice(fetchedPrice, averageCostBasis || 0, symbol);
+          console.log(`📈 ${symbol}: $${currentPrice.toLocaleString()} from Finnhub (raw: $${fetchedPrice})`);
         } else {
           currentPrice = averageCostBasis || 0;
           console.log(`⚠️ ${symbol}: No API price, using cost basis $${currentPrice}`);
