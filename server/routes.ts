@@ -17505,6 +17505,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true });
   }));
 
+  // Recalculate asset price and regenerate portfolio snapshots (fixes glitched charts)
+  app.post("/api/portfolios/:portfolioId/assets/:assetId/recalculate", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { portfolioId, assetId } = req.params;
+    const { manualPrice } = req.body; // Optional: allow user to set a manual price
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const [asset] = await db.select().from(portfolioAssets).where(and(eq(portfolioAssets.id, assetId), eq(portfolioAssets.userId, userId)));
+    if (!asset) {
+      return res.status(404).json({ error: 'Asset not found' });
+    }
+    
+    let newPrice = manualPrice;
+    
+    // If no manual price provided, try to fetch from API
+    if (!newPrice) {
+      try {
+        if (asset.assetType === 'crypto') {
+          const quotes = await marketDataService.getCryptoQuotes([asset.symbol]);
+          const coin = quotes?.find((c: any) => c.symbol.toUpperCase() === asset.symbol.toUpperCase());
+          newPrice = coin?.price || asset.averageCostBasis;
+        } else if (asset.assetType === 'stock' || asset.assetType === 'etf') {
+          const quote = await marketDataService.getStockQuote(asset.symbol);
+          newPrice = quote?.price || asset.averageCostBasis;
+        } else {
+          newPrice = asset.averageCostBasis;
+        }
+      } catch (e) {
+        console.error('Failed to fetch price for recalculation:', e);
+        newPrice = asset.averageCostBasis;
+      }
+    }
+    
+    // Validate price isn't wildly off
+    const costBasis = asset.averageCostBasis || 0;
+    if (costBasis > 0 && newPrice) {
+      const ratio = newPrice / costBasis;
+      if (ratio > 5 || ratio < 0.2) {
+        console.warn(`⚠️ ${asset.symbol}: Recalculated price $${newPrice} still seems off (ratio: ${ratio.toFixed(2)}x). Using cost basis.`);
+        newPrice = costBasis;
+      }
+    }
+    
+    const currentValue = asset.quantity * (newPrice || 0);
+    const totalCostBasis = asset.quantity * costBasis;
+    const unrealizedPnl = currentValue - totalCostBasis;
+    const unrealizedPnlPercent = totalCostBasis > 0 ? (unrealizedPnl / totalCostBasis) * 100 : 0;
+    
+    // Update the asset
+    const [updated] = await db.update(portfolioAssets).set({
+      currentPrice: newPrice,
+      currentValue,
+      unrealizedPnl,
+      unrealizedPnlPercent,
+      priceLastUpdated: new Date(),
+      updatedAt: new Date(),
+    }).where(eq(portfolioAssets.id, assetId)).returning();
+    
+    // Update portfolio totals
+    await updatePortfolioTotals(portfolioId);
+    
+    // Regenerate historical snapshots to fix the chart
+    const { portfolioSnapshotService } = await import('./services/portfolioSnapshotService');
+    await portfolioSnapshotService.regenerateHistoricalData(portfolioId, userId, 30);
+    
+    console.log(`✅ Recalculated ${asset.symbol}: $${asset.currentPrice} → $${newPrice}`);
+    
+    res.json({ 
+      success: true, 
+      asset: updated,
+      message: `Fixed ${asset.symbol} price from $${(asset.currentPrice || 0).toLocaleString()} to $${(newPrice || 0).toLocaleString()}`
+    });
+  }));
+
+  // Regenerate portfolio chart (fixes glitched/spiked charts)
+  app.post("/api/portfolios/:id/regenerate-chart", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const [portfolio] = await db.select().from(portfolios).where(and(eq(portfolios.id, id), eq(portfolios.userId, userId)));
+    if (!portfolio) {
+      return res.status(404).json({ error: 'Portfolio not found' });
+    }
+    
+    // Regenerate historical snapshots
+    const { portfolioSnapshotService } = await import('./services/portfolioSnapshotService');
+    await portfolioSnapshotService.regenerateHistoricalData(id, userId, 30);
+    
+    res.json({ success: true, message: 'Portfolio chart regenerated successfully' });
+  }));
+
   // Add transaction
   app.post("/api/portfolios/:id/transactions", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;

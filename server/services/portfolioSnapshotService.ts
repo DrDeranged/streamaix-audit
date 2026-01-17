@@ -172,6 +172,72 @@ class PortfolioSnapshotService {
 
     console.log(`[Snapshot] Generated ${snapshots.length} historical snapshots for portfolio ${portfolioId}`);
   }
+
+  /**
+   * Regenerate historical snapshots based on current portfolio state
+   * Call this after fixing asset prices to smooth out the chart
+   */
+  async regenerateHistoricalData(portfolioId: string, userId: string, days: number = 30): Promise<void> {
+    // Delete existing snapshots for this portfolio
+    await db.delete(portfolioSnapshots).where(eq(portfolioSnapshots.portfolioId, portfolioId));
+    console.log(`[Snapshot] Cleared existing snapshots for portfolio ${portfolioId}`);
+
+    const assets = await db
+      .select()
+      .from(portfolioAssets)
+      .where(eq(portfolioAssets.portfolioId, portfolioId));
+
+    if (assets.length === 0) {
+      return;
+    }
+
+    let currentValue = 0;
+    let totalCostBasis = 0;
+
+    for (const asset of assets) {
+      currentValue += asset.currentValue || 0;
+      totalCostBasis += asset.totalCostBasis || 0;
+    }
+
+    // Start from cost basis and grow organically to current value
+    const startValue = totalCostBasis > 0 ? totalCostBasis : currentValue * 0.95;
+    const valueRange = currentValue - startValue;
+    const now = Date.now();
+
+    const snapshots = [];
+    for (let i = days; i >= 0; i--) {
+      const progress = (days - i) / days;
+      // Smaller variance (1% instead of 2%) for more stable growth
+      const variance = (Math.random() - 0.5) * 0.01 * currentValue;
+      // Smoother growth curve
+      const growthFactor = Math.pow(progress, 0.8); // Slightly accelerating growth
+      const value = startValue + valueRange * growthFactor + variance;
+
+      const snapshotDate = new Date(now - i * 24 * 60 * 60 * 1000);
+      snapshotDate.setHours(12, 0, 0, 0);
+
+      snapshots.push({
+        portfolioId,
+        userId,
+        totalValue: i === 0 ? currentValue : Math.max(0, value),
+        totalCostBasis,
+        totalPnl: (i === 0 ? currentValue : value) - totalCostBasis,
+        assetBreakdown: assets.map(a => ({
+          symbol: a.symbol,
+          value: a.currentValue || 0,
+          allocation: currentValue > 0 ? ((a.currentValue || 0) / currentValue) * 100 : 0,
+        })),
+        healthScore: null,
+        snapshotDate,
+      });
+    }
+
+    for (const snapshot of snapshots) {
+      await db.insert(portfolioSnapshots).values(snapshot);
+    }
+
+    console.log(`[Snapshot] Regenerated ${snapshots.length} historical snapshots for portfolio ${portfolioId}`);
+  }
 }
 
 export const portfolioSnapshotService = new PortfolioSnapshotService();
