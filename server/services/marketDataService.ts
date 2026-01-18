@@ -1223,65 +1223,111 @@ export class MarketDataService {
    * Real-time stock data using current market prices (updated frequently)
    */
   
-  // Real-time stock data from Finnhub API
+  // Finnhub rate limiting: track last call times to stay within 60/min limit
+  private finnhubLastCallTime = 0;
+  private finnhubCallCount = 0;
+  private finnhubRateLimitReset = 0;
+  private readonly FINNHUB_RATE_LIMIT = 55; // Stay under 60/min with buffer
+  private readonly FINNHUB_WINDOW_MS = 60000;
+  
+  // Real-time stock data from Finnhub API with proper rate limiting
   private async getRealTimeStockDataFromFinnhub(): Promise<any[]> {
-    const symbols = [
-      // Major crypto companies
-      'MSTR', 'COIN', 'RIOT', 'MARA', 'CLSK', 'HUT', 'BITF', 'BTBT',
-      // Crypto mining stocks
-      'GLXY', 'WULF', 'CIFR', 'CORZ', 'IREN', 'BTDR', 'ARBK', 'DGHI', 'HIVE', 'GREE',
-      // Tech companies with crypto exposure
-      'NVDA', 'AMD', 'TSLA', 'PYPL', 'HOOD', 'SQ', 'INTC',
-      // Major tech
-      'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NFLX', 'ADBE', 'CRM', 'ORCL', 'IBM',
-      // ETFs and trusts
-      'GBTC', 'ETHE', 'IBIT', 'FBTC',
-      // Other fintech
-      'UBER', 'LYFT', 'SPOT', 'SNAP'
+    // Priority symbols (most important for crypto/market tracking)
+    const prioritySymbols = [
+      'MSTR', 'COIN', 'RIOT', 'MARA', 'CLSK', 'HUT', 'BITF',
+      'NVDA', 'AMD', 'TSLA', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META',
+      'GBTC', 'IBIT', 'FBTC'
     ];
+    
+    // Secondary symbols (fetched less frequently)
+    const secondarySymbols = [
+      'BTBT', 'GLXY', 'WULF', 'CIFR', 'CORZ', 'IREN', 'BTDR', 'ARBK', 'DGHI', 'HIVE', 'GREE',
+      'PYPL', 'HOOD', 'SQ', 'INTC', 'NFLX', 'ADBE', 'CRM', 'ORCL', 'IBM',
+      'ETHE', 'UBER', 'LYFT', 'SPOT', 'SNAP'
+    ];
+    
     const stockData = [];
-
-    // Fetch real-time quotes for each symbol
-    for (const symbol of symbols) {
+    
+    // Reset rate limit counter every minute
+    const now = Date.now();
+    if (now > this.finnhubRateLimitReset) {
+      this.finnhubCallCount = 0;
+      this.finnhubRateLimitReset = now + this.FINNHUB_WINDOW_MS;
+    }
+    
+    // Determine which symbols to fetch this cycle
+    // Always fetch priority, only fetch secondary every other cycle
+    const cycleCount = Math.floor(now / 300000); // 5-minute cycles
+    const includeSecondary = cycleCount % 2 === 0;
+    const symbolsToFetch = includeSecondary 
+      ? [...prioritySymbols, ...secondarySymbols.slice(0, 10)] // Limit secondary batch
+      : prioritySymbols;
+    
+    for (const symbol of symbolsToFetch) {
+      // Check rate limit
+      if (this.finnhubCallCount >= this.FINNHUB_RATE_LIMIT) {
+        console.log(`⏳ Finnhub rate limit reached (${this.finnhubCallCount}/${this.FINNHUB_RATE_LIMIT}), using cached data for remaining symbols`);
+        break;
+      }
+      
+      // Check individual symbol cache first (10 min cache for stocks)
+      const symbolCacheKey = `finnhub_quote_${symbol}`;
+      const cachedQuote = this.getFromCache(symbolCacheKey);
+      if (cachedQuote) {
+        stockData.push(cachedQuote);
+        continue;
+      }
+      
       try {
+        // Rate limit: ensure minimum 1.1s between calls (55 calls/60s)
+        const timeSinceLastCall = now - this.finnhubLastCallTime;
+        if (timeSinceLastCall < 1100) {
+          await new Promise(resolve => setTimeout(resolve, 1100 - timeSinceLastCall));
+        }
+        
+        this.finnhubLastCallTime = Date.now();
+        this.finnhubCallCount++;
+        
         const response = await axios.get(`${this.finnhubBaseUrl}/quote`, {
-          params: {
-            symbol: symbol,
-            token: this.finnhubApiKey
-          },
+          params: { symbol, token: this.finnhubApiKey },
           timeout: 5000
         });
 
         const quote = response.data;
-        if (quote && quote.c) { // c = current price
+        if (quote && quote.c) {
           const currentPrice = quote.c;
-          const change = quote.d || 0; // d = change
-          const changePercent = quote.dp || 0; // dp = percent change
+          const change = quote.d || 0;
+          const changePercent = quote.dp || 0;
           
-          // Determine momentum based on price change
           let momentum: 'up' | 'down' | 'neutral' = 'neutral';
           if (Math.abs(changePercent) > 0.5) {
             momentum = changePercent > 0 ? 'up' : 'down';
           }
 
-          stockData.push({
-            symbol: symbol,
+          const stockQuote = {
+            symbol,
             name: this.getStockName(symbol),
             price: parseFloat(currentPrice.toFixed(2)),
             change: parseFloat(change.toFixed(2)),
             changePercent: parseFloat(changePercent.toFixed(2)),
-            percentChange24h: parseFloat(changePercent.toFixed(2)), // For backward compatibility
+            percentChange24h: parseFloat(changePercent.toFixed(2)),
             momentum,
             volume: quote.v || 0,
             lastUpdated: new Date().toISOString()
-          });
+          };
+          
+          stockData.push(stockQuote);
+          // Cache individual quotes for 10 minutes
+          this.setCacheWithTimeout(symbolCacheKey, stockQuote, 600000);
         }
       } catch (error: any) {
+        if (error.response?.status === 429) {
+          console.log(`⏳ Finnhub 429 rate limit hit, pausing further requests this cycle`);
+          this.finnhubCallCount = this.FINNHUB_RATE_LIMIT; // Stop further requests
+          break;
+        }
         console.warn(`⚠️ Failed to fetch ${symbol} from Finnhub:`, error.message);
       }
-      
-      // Add small delay to respect rate limits (60 calls/minute)
-      await new Promise(resolve => setTimeout(resolve, 100));
     }
 
     return stockData;

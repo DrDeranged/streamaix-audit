@@ -1836,84 +1836,103 @@ export class PatternRecognitionService {
     return recommendations.length > 0 ? recommendations : ['Monitor for pattern completion'];
   }
 
+  // Track last alert time per symbol to prevent spam (30 min cooldown per symbol)
+  private lastAlertTimeBySymbol: Map<string, number> = new Map();
+  
   private async generatePatternAlerts(patterns: ChartPattern[], trendAnalysis: TrendAnalysisResult | null): Promise<void> {
+    // Deduplicate: only generate ONE alert per symbol per cycle (pick highest confidence)
+    const bestPatternBySymbol = new Map<string, ChartPattern>();
     for (const pattern of patterns) {
       if ((pattern.confidence || 0) > this.config.confidenceThreshold / 100) {
-        const alertId = `alert_${pattern.symbol}_${pattern.patternType}_${Date.now()}`;
-        
-        // Check cooldown period
-        const existingAlert = Array.from(this.activeAlerts.values())
-          .find(a => a.symbol === pattern.symbol && a.alertType === 'pattern_detected');
-        
-        if (existingAlert) {
-          const cooldownEnd = new Date(existingAlert.triggeredAt || existingAlert.createdAt || Date.now()).getTime() + 
-                             this.config.alertCooldownPeriod * 60 * 1000;
-          if (Date.now() < cooldownEnd) continue; // Skip due to cooldown
+        const existing = bestPatternBySymbol.get(pattern.symbol);
+        if (!existing || (pattern.confidence || 0) > (existing.confidence || 0)) {
+          bestPatternBySymbol.set(pattern.symbol, pattern);
         }
-
-        const alert: PatternAlert = {
-          id: alertId,
-          alertType: 'pattern_detected',
-          alertCategory: 'technical_analysis',
-          severity: (pattern.confidence || 0) > 0.9 ? 'high' : 
-                   (pattern.confidence || 0) > 0.7 ? 'medium' : 'low',
-          priority: (pattern.confidence || 0) > 0.8 ? 'high' : 'normal',
-          patternId: pattern.id,
-          symbol: pattern.symbol,
-          assetType: pattern.assetType,
-          currentPrice: pattern.currentPrice,
-          priceChange: 0, // Would calculate from previous price
-          priceChangePercent: 0,
-          title: `${pattern.patternType.replace('_', ' ').toUpperCase()} Pattern Detected`,
-          message: `High-confidence ${pattern.patternType} pattern detected on ${pattern.symbol} (${pattern.timeframe})`,
-          detailedDescription: `AI detected a ${pattern.patternType} pattern with ${Math.round((pattern.confidence || 0) * 100)}% confidence. Target direction: ${pattern.targetDirection}`,
-          technicalAnalysis: `Pattern shows ${pattern.patternQuality} quality formation with ${pattern.volumeConfirmation ? 'strong' : 'weak'} volume confirmation.`,
-          recommendations: [
-            `Monitor for breakout ${pattern.targetDirection === 'bullish' ? 'above' : 'below'} key levels`,
-            `Set stop loss at ${pattern.stopLoss}`,
-            `Target price: ${pattern.targetPrice}`
-          ],
-          tradingSignals: pattern.targetDirection !== 'neutral' ? [{
-            action: pattern.targetDirection === 'bullish' ? 'buy' : 'sell',
-            level: pattern.currentPrice,
-            confidence: pattern.confidence || 0.5
-          }] : [],
-          riskFactors: ['Pattern failure', 'Market volatility', 'Volume divergence'],
-          keyLevels: {
-            support: pattern.supportLevels,
-            resistance: pattern.resistanceLevels,
-            entry: pattern.currentPrice,
-            target: pattern.targetPrice,
-            stop: pattern.stopLoss
-          },
-          timeframe: '24-48 hours',
-          urgency: (pattern.confidence || 0) > 0.9 ? 'immediate' : 'within_24h',
-          confidence: pattern.confidence || 0.5,
-          signalStrength: pattern.confidence || 0.5,
-          historicalAccuracy: 0.75, // Mock historical accuracy
-          marketEnvironment: {
-            trend: trendAnalysis?.primaryTrend.direction || 'sideways',
-            volatility: 'normal',
-            regime: 'ranging'
-          },
-          correlatedAlerts: [],
-          sectorImpact: pattern.assetType === 'crypto' ? 'High crypto sector relevance' : 'Tech sector impact',
-          deliveryChannels: ['dashboard', 'email'],
-          generatedBy: 'pattern_ai',
-          algorithmVersion: 'v2.1',
-          dataSource: ['price_data', 'volume_data', 'technical_indicators'],
-          tags: [pattern.patternType, pattern.targetDirection || 'neutral', 'ai_detected'],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          isViewed: false,
-          isAcknowledged: false,
-          isTriggered: true,
-          triggeredAt: new Date().toISOString()
-        } as PatternAlert;
-
-        this.activeAlerts.set(alertId, alert);
-        console.log(`🔔 Pattern alert generated: ${alert.title} for ${alert.symbol}`);
       }
+    }
+    
+    for (const [symbol, pattern] of bestPatternBySymbol) {
+      const alertId = `alert_${pattern.symbol}_${pattern.patternType}_${Date.now()}`;
+      
+      // Check cooldown period PER SYMBOL (regardless of pattern type)
+      const lastAlertTime = this.lastAlertTimeBySymbol.get(symbol) || 0;
+      const cooldownMs = this.config.alertCooldownPeriod * 60 * 1000;
+      
+      if (Date.now() - lastAlertTime < cooldownMs) {
+        continue; // Skip due to cooldown for this symbol
+      }
+      
+      // Also check active alerts
+      const existingAlert = Array.from(this.activeAlerts.values())
+        .find(a => a.symbol === pattern.symbol && a.alertType === 'pattern_detected');
+      
+      if (existingAlert) {
+        const cooldownEnd = new Date(existingAlert.triggeredAt || existingAlert.createdAt || Date.now()).getTime() + cooldownMs;
+        if (Date.now() < cooldownEnd) continue; // Skip due to cooldown
+      }
+
+      const alert: PatternAlert = {
+        id: alertId,
+        alertType: 'pattern_detected',
+        alertCategory: 'technical_analysis',
+        severity: (pattern.confidence || 0) > 0.9 ? 'high' : (pattern.confidence || 0) > 0.7 ? 'medium' : 'low',
+        priority: (pattern.confidence || 0) > 0.8 ? 'high' : 'normal',
+        patternId: pattern.id,
+        symbol: pattern.symbol,
+        assetType: pattern.assetType,
+        currentPrice: pattern.currentPrice,
+        priceChange: 0,
+        priceChangePercent: 0,
+        title: `${pattern.patternType.replace('_', ' ').toUpperCase()} Pattern Detected`,
+        message: `High-confidence ${pattern.patternType} pattern detected on ${pattern.symbol} (${pattern.timeframe})`,
+        detailedDescription: `AI detected a ${pattern.patternType} pattern with ${Math.round((pattern.confidence || 0) * 100)}% confidence. Target direction: ${pattern.targetDirection}`,
+        technicalAnalysis: `Pattern shows ${pattern.patternQuality} quality formation with ${pattern.volumeConfirmation ? 'strong' : 'weak'} volume confirmation.`,
+        recommendations: [
+          `Monitor for breakout ${pattern.targetDirection === 'bullish' ? 'above' : 'below'} key levels`,
+          `Set stop loss at ${pattern.stopLoss}`,
+          `Target price: ${pattern.targetPrice}`
+        ],
+        tradingSignals: pattern.targetDirection !== 'neutral' ? [{
+          action: pattern.targetDirection === 'bullish' ? 'buy' : 'sell',
+          level: pattern.currentPrice,
+          confidence: pattern.confidence || 0.5
+        }] : [],
+        riskFactors: ['Pattern failure', 'Market volatility', 'Volume divergence'],
+        keyLevels: {
+          support: pattern.supportLevels,
+          resistance: pattern.resistanceLevels,
+          entry: pattern.currentPrice,
+          target: pattern.targetPrice,
+          stop: pattern.stopLoss
+        },
+        timeframe: '24-48 hours',
+        urgency: (pattern.confidence || 0) > 0.9 ? 'immediate' : 'within_24h',
+        confidence: pattern.confidence || 0.5,
+        signalStrength: pattern.confidence || 0.5,
+        historicalAccuracy: 0.75,
+        marketEnvironment: {
+          trend: trendAnalysis?.primaryTrend.direction || 'sideways',
+          volatility: 'normal',
+          regime: 'ranging'
+        },
+        correlatedAlerts: [],
+        sectorImpact: pattern.assetType === 'crypto' ? 'High crypto sector relevance' : 'Tech sector impact',
+        deliveryChannels: ['dashboard', 'email'],
+        generatedBy: 'pattern_ai',
+        algorithmVersion: 'v2.1',
+        dataSource: ['price_data', 'volume_data', 'technical_indicators'],
+        tags: [pattern.patternType, pattern.targetDirection || 'neutral', 'ai_detected'],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isViewed: false,
+        isAcknowledged: false,
+        isTriggered: true,
+        triggeredAt: new Date().toISOString()
+      } as PatternAlert;
+
+      this.activeAlerts.set(alertId, alert);
+      this.lastAlertTimeBySymbol.set(symbol, Date.now());
+      console.log(`🔔 Pattern alert generated: ${alert.title} for ${alert.symbol}`);
     }
   }
 
