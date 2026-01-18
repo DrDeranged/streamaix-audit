@@ -243,6 +243,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         walletAddress: user.walletAddress || undefined
       });
 
+      // Broadcast new user to admin dashboard via WebSocket
+      try {
+        const { adminWebSocketService } = await import('./services/adminWebSocketService');
+        adminWebSocketService.broadcastNewUser({
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          createdAt: user.createdAt,
+          streamBalance: signupBonusAmount.toString()
+        });
+      } catch (wsError) {
+        console.error('Failed to broadcast new user:', wsError);
+      }
+
       res.status(201).json({
         message: 'User created successfully',
         user: {
@@ -19438,6 +19452,27 @@ Keep responses under 200 words. Do not provide specific buy/sell recommendations
   });
 
   // =============================================================================
+  // ADMIN WEBSOCKET SERVER (Real-time dashboard updates)
+  // =============================================================================
+  
+  const adminWss = new WebSocketServer({ noServer: true });
+  const { adminWebSocketService } = await import('./services/adminWebSocketService');
+  
+  adminWss.on('connection', (ws: WebSocket, req) => {
+    console.log(`🔐 [WS] Admin WebSocket connection attempt received`);
+    
+    // Register the admin connection
+    adminWebSocketService.registerConnection(ws);
+    
+    // Send initial connection confirmation
+    ws.send(JSON.stringify({
+      type: 'connected',
+      message: 'Connected to admin dashboard real-time updates',
+      timestamp: new Date().toISOString()
+    }));
+  });
+
+  // =============================================================================
   // POINTS WEBSOCKET SERVER (Real-time balance updates)
   // =============================================================================
   
@@ -19675,6 +19710,11 @@ Keep responses under 200 words. Do not provide specific buy/sell recommendations
       console.log(`🔌 [WS Upgrade] Routing to prices WebSocket server (/ws/prices)`);
       pricesWss.handleUpgrade(request, socket, head, (ws) => {
         pricesWss.emit('connection', ws, request);
+      });
+    } else if (pathname === '/ws/admin') {
+      console.log(`🔌 [WS Upgrade] Routing to admin WebSocket server (/ws/admin)`);
+      adminWss.handleUpgrade(request, socket, head, (ws) => {
+        adminWss.emit('connection', ws, request);
       });
     } else {
       // Let other upgrade requests pass through (e.g., Vite HMR)

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import {
   Users, FileText, Target, TrendingUp, Activity, ChevronDown, ChevronUp,
   LayoutDashboard, BarChart3, UserPlus, Award, Zap, Home, Bot, Brain,
   Droplet, Sparkles, Shield, DollarSign, ArrowRightLeft, AlertTriangle,
-  Wallet, Coins, ExternalLink, Copy, RefreshCw
+  Wallet, Coins, ExternalLink, Copy, RefreshCw, Radio
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useLocation } from 'wouter';
@@ -19,6 +19,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { formatDistanceToNow } from 'date-fns';
 import { web3Manager, formatAddress } from '@/lib/web3';
 import { contractManager, formatTokenAmount, parseTokenAmount } from '@/lib/contracts';
+import { useAdminWebSocket } from '@/hooks/useAdminWebSocket';
 
 const ADMIN_USERNAMES = ['arslan'];
 
@@ -36,6 +37,21 @@ export default function NewsletterAdmin() {
   const [streamBalance, setStreamBalance] = useState('0');
   const [totalSupply, setTotalSupply] = useState('0');
   const [distributionAmount, setDistributionAmount] = useState('1000');
+
+  // Real-time WebSocket updates for admin dashboard
+  const handleNewUser = useCallback((newUser: { id: number; username: string; email: string; createdAt: string; streamBalance: string }) => {
+    toast({
+      title: 'New User Joined!',
+      description: `@${newUser.username} just registered`,
+    });
+    // Invalidate user breakdown to refresh the list
+    queryClient.invalidateQueries({ queryKey: ['/api/admin/user-breakdown'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+  }, [toast, queryClient]);
+
+  const { isConnected: wsConnected } = useAdminWebSocket({
+    onNewUser: handleNewUser,
+  });
 
   // Fetch current user
   const { user, isLoading: userLoading } = useAuth();
@@ -580,6 +596,12 @@ export default function NewsletterAdmin() {
             <CardTitle className="flex items-center gap-2">
               <Users className="w-5 h-5 text-green-400" />
               Real Human Users
+              {wsConnected && (
+                <span className="ml-2 flex items-center gap-1 text-xs font-normal text-green-400">
+                  <Radio className="w-3 h-3 animate-pulse" />
+                  Live
+                </span>
+              )}
             </CardTitle>
             <CardDescription>Focus on real user signups and engagement</CardDescription>
           </CardHeader>
