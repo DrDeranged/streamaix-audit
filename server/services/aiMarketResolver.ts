@@ -17,6 +17,8 @@ interface ResolutionData {
 
 export class AIMarketResolver {
   private isRunning: boolean = false;
+  private cryptoPriceCache: Map<string, { price: number; change24h: number; marketCap: number; timestamp: number }> = new Map();
+  private readonly CACHE_TTL = 30 * 60 * 1000; // 30 min cache for resolution cycle
 
   constructor() {
     console.log('🎯 AI Market Resolver initialized');
@@ -63,6 +65,9 @@ export class AIMarketResolver {
   private async resolveExpiredMarkets() {
     const startTime = Date.now();
     console.log('\n🎯 === Market Resolution Cycle Starting ===');
+
+    // Pre-fetch all crypto prices ONCE to avoid 429 rate limits
+    await this.prefetchCryptoPrices();
 
     // Find markets that are past deadline and not yet resolved
     const expiredMarkets = await db
@@ -195,50 +200,104 @@ IMPORTANT:
   }
 
   /**
-   * Fetch crypto market data from CoinGecko
+   * Pre-fetch all crypto prices in a single batch request to avoid 429 errors
    */
-  private async fetchCryptoData(question: string): Promise<string | null> {
+  private async prefetchCryptoPrices(): Promise<void> {
+    const now = Date.now();
+    
+    // Skip if cache is still fresh
+    const anyFresh = Array.from(this.cryptoPriceCache.values()).some(c => now - c.timestamp < this.CACHE_TTL);
+    if (anyFresh && this.cryptoPriceCache.size > 0) {
+      console.log(`📦 Using cached crypto prices (${this.cryptoPriceCache.size} coins)`);
+      return;
+    }
+
+    console.log('📊 Pre-fetching crypto prices in batch...');
+    
+    // All coins we might need for market resolution
+    const coinIds = [
+      'bitcoin', 'ethereum', 'solana', 'cardano', 'polkadot', 'chainlink',
+      'avalanche-2', 'polygon', 'uniswap', 'aave', 'toncoin', 'dogecoin',
+      'shiba-inu', 'ripple', 'tron', 'litecoin', 'monero', 'zcash',
+      'filecoin', 'the-sandbox', 'axie-infinity', 'decentraland'
+    ];
+
     try {
-      // Extract potential crypto symbols from question
-      const cryptoSymbols = ['bitcoin', 'ethereum', 'btc', 'eth', 'solana', 'sol'];
-      const questionLower = question.toLowerCase();
-      
-      const foundSymbol = cryptoSymbols.find(symbol => questionLower.includes(symbol));
-      
-      if (!foundSymbol) return null;
-
-      // Map common names to CoinGecko IDs
-      const symbolMap: Record<string, string> = {
-        'bitcoin': 'bitcoin',
-        'btc': 'bitcoin',
-        'ethereum': 'ethereum',
-        'eth': 'ethereum',
-        'solana': 'solana',
-        'sol': 'solana',
-      };
-
-      const coinId = symbolMap[foundSymbol];
-      if (!coinId) return null;
-
-      const response = await axios.get(`https://api.coingecko.com/api/v3/simple/price`, {
+      const response = await axios.get('https://api.coingecko.com/api/v3/simple/price', {
         params: {
-          ids: coinId,
+          ids: coinIds.join(','),
           vs_currencies: 'usd',
           include_24hr_change: true,
           include_market_cap: true,
         },
-        timeout: 5000,
+        headers: process.env.COINGECKO_PRO_API_KEY ? {
+          'x-cg-pro-api-key': process.env.COINGECKO_PRO_API_KEY
+        } : {},
+        timeout: 10000,
       });
 
-      const data = response.data[coinId];
-      if (!data) return null;
+      for (const [coinId, data] of Object.entries(response.data)) {
+        const coinData = data as any;
+        this.cryptoPriceCache.set(coinId, {
+          price: coinData.usd || 0,
+          change24h: coinData.usd_24h_change || 0,
+          marketCap: coinData.usd_market_cap || 0,
+          timestamp: now,
+        });
+      }
 
-      return `${coinId.toUpperCase()}: $${data.usd} (24h change: ${data.usd_24h_change?.toFixed(2)}%, Market cap: $${(data.usd_market_cap / 1e9).toFixed(2)}B)`;
-
+      console.log(`✅ Pre-fetched ${this.cryptoPriceCache.size} crypto prices in single request`);
     } catch (error: any) {
-      console.warn('⚠️  Failed to fetch crypto data:', error.message);
-      return null;
+      console.warn('⚠️ Failed to batch fetch crypto prices:', error.message);
+      // Continue with stale cache if available
     }
+  }
+
+  /**
+   * Get crypto market data from pre-fetched cache (no API calls during resolution)
+   */
+  private async fetchCryptoData(question: string): Promise<string | null> {
+    // Map of keywords to CoinGecko IDs
+    const keywordToCoinId: Record<string, string> = {
+      'bitcoin': 'bitcoin', 'btc': 'bitcoin',
+      'ethereum': 'ethereum', 'eth': 'ethereum',
+      'solana': 'solana', 'sol': 'solana',
+      'cardano': 'cardano', 'ada': 'cardano',
+      'polkadot': 'polkadot', 'dot': 'polkadot',
+      'chainlink': 'chainlink', 'link': 'chainlink',
+      'avalanche': 'avalanche-2', 'avax': 'avalanche-2',
+      'polygon': 'polygon', 'matic': 'polygon',
+      'uniswap': 'uniswap', 'uni': 'uniswap',
+      'aave': 'aave',
+      'toncoin': 'toncoin', 'ton': 'toncoin',
+      'dogecoin': 'dogecoin', 'doge': 'dogecoin',
+      'ripple': 'ripple', 'xrp': 'ripple',
+      'zcash': 'zcash', 'zec': 'zcash',
+      'filecoin': 'filecoin', 'fil': 'filecoin',
+      'firo': 'zcoin',
+      'ergo': 'ergo',
+    };
+
+    const questionLower = question.toLowerCase();
+    
+    // Find matching coin from question
+    let matchedCoinId: string | null = null;
+    for (const [keyword, coinId] of Object.entries(keywordToCoinId)) {
+      if (questionLower.includes(keyword)) {
+        matchedCoinId = coinId;
+        break;
+      }
+    }
+    
+    if (!matchedCoinId) return null;
+
+    // Use cached data instead of making API call
+    const cached = this.cryptoPriceCache.get(matchedCoinId);
+    if (cached) {
+      return `${matchedCoinId.toUpperCase()}: $${cached.price.toFixed(2)} (24h change: ${cached.change24h.toFixed(2)}%, Market cap: $${(cached.marketCap / 1e9).toFixed(2)}B)`;
+    }
+
+    return null; // No data available - skip rather than making individual API call
   }
 
   /**
