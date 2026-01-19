@@ -253,9 +253,26 @@ export class CorrelationAnalysisService {
         });
       }
 
-      // Removed: Mock stock prices - only return real crypto data
-      // Stock data would require Finnhub or similar API with valid key
-      console.log(`⚠️ Stock price data not available - only showing crypto assets`);
+      // Fetch stock data from MarketDataService (uses Finnhub with caching)
+      try {
+        const stockData = await this.marketDataService.getCryptoStocks();
+        if (stockData && stockData.length > 0) {
+          for (const stock of stockData.slice(0, 10)) { // Limit to top 10 stocks
+            allAssets.push({
+              symbol: stock.symbol,
+              name: stock.name,
+              type: 'stock',
+              price: stock.price,
+              change24h: stock.percentChange24h || stock.changePercent || 0
+            });
+          }
+          console.log(`✅ Added ${Math.min(stockData.length, 10)} stocks to correlation matrix`);
+        } else {
+          console.log(`⚠️ Stock price data not available - only showing crypto assets`);
+        }
+      } catch (stockError) {
+        console.log(`⚠️ Stock data fetch failed for correlation - using crypto only`);
+      }
 
     } catch (error) {
       console.error('❌ Error fetching asset prices for correlation:', error);
