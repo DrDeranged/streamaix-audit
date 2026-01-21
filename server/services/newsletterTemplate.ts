@@ -1,25 +1,33 @@
 import { NewsletterContent, getFeatureHighlights } from './newsletterContentGenerator';
 
 /**
- * Generate HTML email template for newsletter - Mobile-First Design
+ * Generate HTML email template for newsletter - Light Theme with Inline Styles
+ * Designed for maximum email client compatibility (Gmail, Outlook, Apple Mail, mobile)
  */
 export function generateNewsletterHTML(content: NewsletterContent, unsubscribeToken: string): string {
   const features = getFeatureHighlights().slice(0, 3);
   
-  const fearGreedColor = content.fearGreedIndex >= 60 ? '#10b981' : 
-                          content.fearGreedIndex >= 40 ? '#f59e0b' : '#ef4444';
+  const fearGreedColor = content.fearGreedIndex >= 60 ? '#059669' : 
+                          content.fearGreedIndex >= 40 ? '#d97706' : '#dc2626';
   const fearGreedLabel = content.fearGreedIndex >= 75 ? 'Extreme Greed' :
                           content.fearGreedIndex >= 60 ? 'Greed' :
                           content.fearGreedIndex >= 40 ? 'Neutral' :
                           content.fearGreedIndex >= 25 ? 'Fear' : 'Extreme Fear';
   
+  const positiveColor = '#059669';
+  const negativeColor = '#dc2626';
+  const positiveBg = '#dcfce7';
+  const negativeBg = '#fee2e2';
+  
   return `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
   <title>${content.subject}</title>
   <!--[if mso]>
   <noscript>
@@ -29,836 +37,505 @@ export function generateNewsletterHTML(content: NewsletterContent, unsubscribeTo
       </o:OfficeDocumentSettings>
     </xml>
   </noscript>
+  <style>
+    table, td, div, p, a, span { font-family: Arial, sans-serif !important; }
+  </style>
   <![endif]-->
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-      background-color: #0a0a0f;
-      color: #e5e5e5;
-      -webkit-text-size-adjust: 100%;
-      -ms-text-size-adjust: 100%;
-      line-height: 1.6;
-    }
-    .container {
-      max-width: 640px;
-      margin: 0 auto;
-      background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1e 100%);
-    }
-    
-    /* Header with gradient */
-    .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f472b6 100%);
-      padding: 32px 24px 24px;
-      text-align: center;
-    }
-    .logo {
-      font-size: 36px;
-      font-weight: 800;
-      color: #ffffff;
-      margin-bottom: 6px;
-      letter-spacing: -0.5px;
-    }
-    .tagline {
-      color: rgba(255, 255, 255, 0.9);
-      font-size: 15px;
-      font-weight: 500;
-      margin-bottom: 20px;
-    }
-    
-    /* Price Banner */
-    .price-banner {
-      display: table;
-      width: 100%;
-      margin-top: 16px;
-    }
-    .price-badge {
-      display: table-cell;
-      width: 50%;
-      padding: 0 6px;
-      vertical-align: top;
-    }
-    .price-badge-inner {
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(8px);
-      border-radius: 12px;
-      padding: 14px 12px;
-      text-align: center;
-    }
-    .price-badge-symbol {
-      font-size: 13px;
-      font-weight: 700;
-      color: rgba(255, 255, 255, 0.85);
-      letter-spacing: 0.5px;
-    }
-    .price-badge-value {
-      font-size: 22px;
-      font-weight: 800;
-      color: #ffffff;
-      margin: 4px 0;
-    }
-    .price-badge-change {
-      font-size: 14px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 6px;
-      display: inline-block;
-    }
-    .price-badge-change.positive {
-      background: rgba(16, 185, 129, 0.25);
-      color: #34d399;
-    }
-    .price-badge-change.negative {
-      background: rgba(239, 68, 68, 0.25);
-      color: #f87171;
-    }
-    
-    /* Fear & Greed Indicator */
-    .fear-greed-section {
-      padding: 20px 24px;
-      background: linear-gradient(180deg, rgba(102, 126, 234, 0.15) 0%, transparent 100%);
-    }
-    .fear-greed-card {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      padding: 20px;
-      text-align: center;
-    }
-    .fear-greed-label {
-      font-size: 13px;
-      color: rgba(255, 255, 255, 0.6);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 8px;
-    }
-    .fear-greed-value {
-      font-size: 48px;
-      font-weight: 800;
-      margin-bottom: 4px;
-    }
-    .fear-greed-status {
-      font-size: 18px;
-      font-weight: 700;
-    }
-    .fear-greed-bar {
-      margin-top: 16px;
-      height: 8px;
-      background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #10b981 100%);
-      border-radius: 4px;
-      position: relative;
-    }
-    .fear-greed-marker {
-      position: absolute;
-      top: -4px;
-      width: 16px;
-      height: 16px;
-      background: #ffffff;
-      border-radius: 50%;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    }
-    
-    /* Content sections */
-    .content {
-      padding: 24px;
-    }
-    .section {
-      margin-bottom: 32px;
-    }
-    .section-header {
-      display: table;
-      width: 100%;
-      margin-bottom: 16px;
-    }
-    .section-icon {
-      display: table-cell;
-      width: 36px;
-      vertical-align: middle;
-    }
-    .section-icon-inner {
-      width: 32px;
-      height: 32px;
-      background: rgba(102, 126, 234, 0.2);
-      border-radius: 8px;
-      text-align: center;
-      line-height: 32px;
-      font-size: 18px;
-    }
-    .section-title {
-      display: table-cell;
-      vertical-align: middle;
-      font-size: 20px;
-      font-weight: 700;
-      color: #ffffff;
-      padding-left: 12px;
-    }
-    
-    /* Market Summary */
-    .market-summary {
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-      border: 1px solid rgba(102, 126, 234, 0.25);
-      border-radius: 16px;
-      padding: 24px;
-      font-size: 17px;
-      line-height: 1.7;
-      color: rgba(255, 255, 255, 0.9);
-    }
-    
-    /* Coin Cards - Improved Mobile Design */
-    .coin-list {
-      margin-top: 16px;
-    }
-    .coin-card {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 14px;
-      padding: 18px 20px;
-      margin-bottom: 12px;
-    }
-    .coin-card-inner {
-      display: table;
-      width: 100%;
-    }
-    .coin-icon-cell {
-      display: table-cell;
-      width: 48px;
-      vertical-align: middle;
-    }
-    .coin-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      text-align: center;
-      line-height: 42px;
-      font-size: 22px;
-      font-weight: 700;
-    }
-    .coin-icon.btc { background: linear-gradient(135deg, #f7931a 0%, #e88a15 100%); color: #fff; }
-    .coin-icon.eth { background: linear-gradient(135deg, #627eea 0%, #4a5adc 100%); color: #fff; }
-    .coin-icon.sol { background: linear-gradient(135deg, #9945ff 0%, #14f195 100%); color: #fff; }
-    .coin-icon.generic { background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); color: #fff; }
-    .coin-info-cell {
-      display: table-cell;
-      vertical-align: middle;
-      padding-left: 14px;
-    }
-    .coin-name {
-      font-size: 17px;
-      font-weight: 700;
-      color: #ffffff;
-    }
-    .coin-symbol {
-      font-size: 13px;
-      color: rgba(255, 255, 255, 0.5);
-      text-transform: uppercase;
-      margin-top: 2px;
-    }
-    .coin-price-cell {
-      display: table-cell;
-      vertical-align: middle;
-      text-align: right;
-    }
-    .coin-price {
-      font-size: 19px;
-      font-weight: 800;
-      color: #ffffff;
-    }
-    .coin-change {
-      font-size: 15px;
-      font-weight: 700;
-      padding: 5px 12px;
-      border-radius: 8px;
-      margin-top: 6px;
-      display: inline-block;
-    }
-    .coin-change.positive {
-      background: rgba(16, 185, 129, 0.15);
-      color: #34d399;
-    }
-    .coin-change.negative {
-      background: rgba(239, 68, 68, 0.15);
-      color: #f87171;
-    }
-    
-    /* Hot Markets Section */
-    .market-card {
-      background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
-      border: 1px solid rgba(245, 158, 11, 0.25);
-      border-radius: 14px;
-      padding: 18px 20px;
-      margin-bottom: 12px;
-    }
-    .market-question {
-      font-size: 16px;
-      font-weight: 600;
-      color: #ffffff;
-      line-height: 1.5;
-      margin-bottom: 12px;
-    }
-    .market-stats {
-      display: table;
-      width: 100%;
-    }
-    .market-stat {
-      display: table-cell;
-      width: 33.33%;
-      text-align: center;
-    }
-    .market-stat-value {
-      font-size: 18px;
-      font-weight: 800;
-      color: #f59e0b;
-    }
-    .market-stat-label {
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.5);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-top: 2px;
-    }
-    
-    /* Upcoming Streams */
-    .stream-card {
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
-      border: 1px solid rgba(139, 92, 246, 0.25);
-      border-radius: 14px;
-      padding: 18px 20px;
-      margin-bottom: 12px;
-    }
-    .stream-card-inner {
-      display: table;
-      width: 100%;
-    }
-    .stream-icon-cell {
-      display: table-cell;
-      width: 52px;
-      vertical-align: middle;
-    }
-    .stream-icon {
-      width: 46px;
-      height: 46px;
-      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-      border-radius: 12px;
-      text-align: center;
-      line-height: 46px;
-      font-size: 22px;
-    }
-    .stream-info-cell {
-      display: table-cell;
-      vertical-align: middle;
-      padding-left: 14px;
-    }
-    .stream-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: #ffffff;
-      line-height: 1.4;
-    }
-    .stream-time {
-      font-size: 13px;
-      color: rgba(255, 255, 255, 0.6);
-      margin-top: 4px;
-    }
-    .stream-badge {
-      display: inline-block;
-      background: rgba(139, 92, 246, 0.2);
-      color: #a78bfa;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 4px 8px;
-      border-radius: 4px;
-      margin-top: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    /* News Cards */
-    .news-card {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 12px;
-    }
-    .news-title {
-      font-size: 17px;
-      font-weight: 600;
-      color: #ffffff;
-      line-height: 1.5;
-      margin-bottom: 10px;
-    }
-    .news-title a {
-      color: #ffffff;
-      text-decoration: none;
-    }
-    .news-meta {
-      font-size: 13px;
-      color: rgba(255, 255, 255, 0.5);
-    }
-    .news-source {
-      color: #667eea;
-      font-weight: 600;
-    }
-    
-    /* Feature Cards */
-    .feature-grid {
-      margin-top: 16px;
-    }
-    .feature-card {
-      background: rgba(102, 126, 234, 0.08);
-      border: 1px solid rgba(102, 126, 234, 0.2);
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 12px;
-    }
-    .feature-card-inner {
-      display: table;
-      width: 100%;
-    }
-    .feature-icon-cell {
-      display: table-cell;
-      width: 48px;
-      vertical-align: top;
-    }
-    .feature-icon {
-      font-size: 28px;
-    }
-    .feature-content-cell {
-      display: table-cell;
-      vertical-align: top;
-      padding-left: 14px;
-    }
-    .feature-title {
-      font-size: 17px;
-      font-weight: 700;
-      color: #ffffff;
-      margin-bottom: 4px;
-    }
-    .feature-description {
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.7);
-      line-height: 1.5;
-    }
-    
-    /* CTA Button */
-    .cta-section {
-      text-align: center;
-      padding: 24px 0 8px;
-    }
-    .cta-button {
-      display: inline-block;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #ffffff !important;
-      text-decoration: none;
-      padding: 18px 40px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 17px;
-      letter-spacing: 0.3px;
-    }
-    
-    /* Footer */
-    .footer {
-      background: rgba(0, 0, 0, 0.4);
-      padding: 32px 24px;
-      text-align: center;
-    }
-    .social-links {
-      margin-bottom: 20px;
-    }
-    .social-link {
-      display: inline-block;
-      background: rgba(255, 255, 255, 0.1);
-      color: rgba(255, 255, 255, 0.8) !important;
-      text-decoration: none;
-      padding: 10px 18px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      margin: 0 6px 8px;
-    }
-    .footer-text {
-      color: rgba(255, 255, 255, 0.5);
-      font-size: 13px;
-      line-height: 1.6;
-    }
-    .footer-text a {
-      color: #667eea;
-      text-decoration: none;
-    }
-    
-    /* Mobile responsiveness */
-    @media only screen and (max-width: 480px) {
-      .header {
-        padding: 24px 16px 20px;
-      }
-      .logo {
-        font-size: 30px;
-      }
-      .tagline {
-        font-size: 14px;
-      }
-      .price-badge-inner {
-        padding: 12px 8px;
-      }
-      .price-badge-value {
-        font-size: 18px;
-      }
-      .fear-greed-section {
-        padding: 16px;
-      }
-      .fear-greed-value {
-        font-size: 40px;
-      }
-      .content {
-        padding: 16px;
-      }
-      .section-title {
-        font-size: 18px;
-      }
-      .market-summary {
-        padding: 18px;
-        font-size: 16px;
-      }
-      .coin-card {
-        padding: 16px;
-      }
-      .coin-name {
-        font-size: 16px;
-      }
-      .coin-price {
-        font-size: 17px;
-      }
+    body { margin: 0; padding: 0; width: 100%; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }
+    @media only screen and (max-width: 600px) {
+      .mobile-full { width: 100% !important; }
+      .mobile-padding { padding: 16px !important; }
+      .mobile-center { text-align: center !important; }
     }
   </style>
 </head>
-<body>
-  <div class="container">
-    <!-- Header with Price Badges -->
-    <div class="header">
-      <div class="logo">StreamAiX</div>
-      <div class="tagline">AI-Native Social Media & Prediction Markets</div>
-      
-      <!-- BTC/ETH/SPY Price Badges -->
-      <div class="price-banner">
-        <div class="price-badge" style="width: 33.33%;">
-          <div class="price-badge-inner">
-            <div class="price-badge-symbol">BTC</div>
-            <div class="price-badge-value">$${formatPrice(content.btcPrice || 0)}</div>
-            <div class="price-badge-change ${(content.btcChange || 0) >= 0 ? 'positive' : 'negative'}">
-              ${(content.btcChange || 0) >= 0 ? '+' : ''}${(content.btcChange || 0).toFixed(2)}%
-            </div>
-          </div>
-        </div>
-        <div class="price-badge" style="width: 33.33%;">
-          <div class="price-badge-inner">
-            <div class="price-badge-symbol">ETH</div>
-            <div class="price-badge-value">$${formatPrice(content.ethPrice || 0)}</div>
-            <div class="price-badge-change ${(content.ethChange || 0) >= 0 ? 'positive' : 'negative'}">
-              ${(content.ethChange || 0) >= 0 ? '+' : ''}${(content.ethChange || 0).toFixed(2)}%
-            </div>
-          </div>
-        </div>
-        <div class="price-badge" style="width: 33.33%;">
-          <div class="price-badge-inner">
-            <div class="price-badge-symbol">S&P 500</div>
-            <div class="price-badge-value">$${formatPrice(content.spyPrice || 0)}</div>
-            <div class="price-badge-change ${(content.spyChange || 0) >= 0 ? 'positive' : 'negative'}">
-              ${(content.spyChange || 0) >= 0 ? '+' : ''}${(content.spyChange || 0).toFixed(2)}%
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Fear & Greed Index -->
-    <div class="fear-greed-section">
-      <div class="fear-greed-card">
-        <div class="fear-greed-label">Crypto Fear & Greed Index</div>
-        <div class="fear-greed-value" style="color: ${fearGreedColor};">${content.fearGreedIndex || 50}</div>
-        <div class="fear-greed-status" style="color: ${fearGreedColor};">${fearGreedLabel}</div>
-        <div class="fear-greed-bar">
-          <div class="fear-greed-marker" style="left: ${Math.min(Math.max(content.fearGreedIndex || 50, 5), 95)}%;"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Content -->
-    <div class="content">
-      <!-- Market Summary -->
-      <div class="section">
-        <div class="section-header">
-          <div class="section-icon"><div class="section-icon-inner">📊</div></div>
-          <div class="section-title">Market Summary</div>
-        </div>
-        <div class="market-summary">
-          ${content.marketSummary}
-        </div>
-      </div>
-
-      <!-- Alpha Insight -->
-      ${content.alphaInsight ? `
-      <div class="section">
-        <div class="section-header">
-          <div class="section-icon"><div class="section-icon-inner">🎯</div></div>
-          <div class="section-title">Alpha Insight</div>
-        </div>
-        <div class="market-summary" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%); border-color: rgba(16, 185, 129, 0.3);">
-          <strong style="color: #34d399;">Today's Key Takeaway:</strong> ${content.alphaInsight}
-        </div>
-      </div>
-      ` : ''}
-
-      <!-- Top Gainers -->
-      ${content.topGainers.length > 0 ? `
-      <div class="section">
-        <div class="section-header">
-          <div class="section-icon"><div class="section-icon-inner">🚀</div></div>
-          <div class="section-title">Top Gainers (24h)</div>
-        </div>
-        <div class="coin-list">
-          ${content.topGainers.slice(0, 5).map(coin => `
-            <div class="coin-card">
-              <div class="coin-card-inner">
-                <div class="coin-icon-cell">
-                  <div class="coin-icon ${getCoinIconClass(coin.symbol)}">${coin.symbol.charAt(0)}</div>
-                </div>
-                <div class="coin-info-cell">
-                  <div class="coin-name">${coin.name}</div>
-                  <div class="coin-symbol">${coin.symbol}</div>
-                </div>
-                <div class="coin-price-cell">
-                  <div class="coin-price">$${formatPrice(coin.price || 0)}</div>
-                  <div class="coin-change positive">+${(coin.changePercent || 0).toFixed(2)}%</div>
-                </div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      ` : ''}
-
-      <!-- Top Losers -->
-      ${content.topLosers.length > 0 ? `
-      <div class="section">
-        <div class="section-header">
-          <div class="section-icon"><div class="section-icon-inner">📉</div></div>
-          <div class="section-title">Top Losers (24h)</div>
-        </div>
-        <div class="coin-list">
-          ${content.topLosers.slice(0, 5).map(coin => `
-            <div class="coin-card">
-              <div class="coin-card-inner">
-                <div class="coin-icon-cell">
-                  <div class="coin-icon ${getCoinIconClass(coin.symbol)}">${coin.symbol.charAt(0)}</div>
-                </div>
-                <div class="coin-info-cell">
-                  <div class="coin-name">${coin.name}</div>
-                  <div class="coin-symbol">${coin.symbol}</div>
-                </div>
-                <div class="coin-price-cell">
-                  <div class="coin-price">$${formatPrice(coin.price || 0)}</div>
-                  <div class="coin-change negative">${(coin.changePercent || 0).toFixed(2)}%</div>
-                </div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      ` : ''}
-
-      <!-- Stock Gainers -->
-      ${content.stockGainers && content.stockGainers.length > 0 ? `
-      <div class="section">
-        <div class="section-header">
-          <div class="section-icon"><div class="section-icon-inner">📈</div></div>
-          <div class="section-title">Top Tech Stocks (24h)</div>
-        </div>
-        <div class="coin-list">
-          ${content.stockGainers.slice(0, 5).map(stock => `
-            <div class="coin-card" style="border-left: 3px solid #10b981;">
-              <div class="coin-card-inner">
-                <div class="coin-icon-cell">
-                  <div class="coin-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); font-size: 11px;">${stock.symbol}</div>
-                </div>
-                <div class="coin-info-cell">
-                  <div class="coin-name">${stock.name}</div>
-                  <div class="coin-symbol" style="color: rgba(16, 185, 129, 0.7);">${stock.sector}</div>
-                </div>
-                <div class="coin-price-cell">
-                  <div class="coin-price">$${formatPrice(stock.price || 0)}</div>
-                  <div class="coin-change positive">+${(stock.changePercent || 0).toFixed(2)}%</div>
-                </div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      ` : ''}
-
-      <!-- Stock Losers -->
-      ${content.stockLosers && content.stockLosers.length > 0 ? `
-      <div class="section">
-        <div class="section-header">
-          <div class="section-icon"><div class="section-icon-inner">📉</div></div>
-          <div class="section-title">Tech Stocks Down (24h)</div>
-        </div>
-        <div class="coin-list">
-          ${content.stockLosers.slice(0, 5).map(stock => `
-            <div class="coin-card" style="border-left: 3px solid #ef4444;">
-              <div class="coin-card-inner">
-                <div class="coin-icon-cell">
-                  <div class="coin-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); font-size: 11px;">${stock.symbol}</div>
-                </div>
-                <div class="coin-info-cell">
-                  <div class="coin-name">${stock.name}</div>
-                  <div class="coin-symbol" style="color: rgba(239, 68, 68, 0.7);">${stock.sector}</div>
-                </div>
-                <div class="coin-price-cell">
-                  <div class="coin-price">$${formatPrice(stock.price || 0)}</div>
-                  <div class="coin-change negative">${(stock.changePercent || 0).toFixed(2)}%</div>
-                </div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      ` : ''}
-
-      <!-- Hot Prediction Markets -->
-      ${content.hotMarkets && content.hotMarkets.length > 0 ? `
-      <div class="section">
-        <div class="section-header">
-          <div class="section-icon"><div class="section-icon-inner">🔥</div></div>
-          <div class="section-title">Hot Prediction Markets</div>
-        </div>
-        <div class="coin-list">
-          ${content.hotMarkets.slice(0, 3).map(market => `
-            <div class="market-card">
-              <div class="market-question">${market.question}</div>
-              <div class="market-stats">
-                <div class="market-stat">
-                  <div class="market-stat-value">${market.yesPercent}%</div>
-                  <div class="market-stat-label">Yes Odds</div>
-                </div>
-                <div class="market-stat">
-                  <div class="market-stat-value">${formatVolume(market.volume)}</div>
-                  <div class="market-stat-label">Volume</div>
-                </div>
-                <div class="market-stat">
-                  <div class="market-stat-value">${market.traders}</div>
-                  <div class="market-stat-label">Traders</div>
-                </div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      ` : ''}
-
-      <!-- Upcoming Streams -->
-      ${content.upcomingStreams && content.upcomingStreams.length > 0 ? `
-      <div class="section">
-        <div class="section-header">
-          <div class="section-icon"><div class="section-icon-inner">🎙️</div></div>
-          <div class="section-title">Upcoming AI Streams</div>
-        </div>
-        <div class="coin-list">
-          ${content.upcomingStreams.slice(0, 2).map(stream => `
-            <div class="stream-card">
-              <div class="stream-card-inner">
-                <div class="stream-icon-cell">
-                  <div class="stream-icon">${stream.emoji || '🎤'}</div>
-                </div>
-                <div class="stream-info-cell">
-                  <div class="stream-title">${stream.title}</div>
-                  <div class="stream-time">${stream.time}</div>
-                  <div class="stream-badge">AI-Powered TTS</div>
-                </div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      ` : ''}
-
-      <!-- Latest News -->
-      ${content.newsStories && content.newsStories.length > 0 ? `
-      <div class="section">
-        <div class="section-header">
-          <div class="section-icon"><div class="section-icon-inner">📰</div></div>
-          <div class="section-title">Latest Crypto News</div>
-        </div>
-        <div class="coin-list">
-          ${content.newsStories.slice(0, 3).map(news => `
-            <div class="news-card">
-              <div class="news-title">
-                <a href="${news.url}" target="_blank" rel="noopener noreferrer">
-                  ${news.title}
-                </a>
-              </div>
-              <div class="news-meta">
-                <span class="news-source">${news.source}</span> • ${getTimeAgo(new Date(news.published))}
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      ` : ''}
-
-      <!-- Platform Features -->
-      <div class="section">
-        <div class="section-header">
-          <div class="section-icon"><div class="section-icon-inner">✨</div></div>
-          <div class="section-title">What's on StreamAiX</div>
-        </div>
-        <div class="feature-grid">
-          ${features.map(feature => `
-            <div class="feature-card">
-              <div class="feature-card-inner">
-                <div class="feature-icon-cell">
-                  <div class="feature-icon">${feature.emoji}</div>
-                </div>
-                <div class="feature-content-cell">
-                  <div class="feature-title">${feature.title}</div>
-                  <div class="feature-description">${feature.description}</div>
-                </div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-
-      <!-- CTA -->
-      <div class="cta-section">
-        <a href="https://streamaix.com" class="cta-button">
-          Visit StreamAiX Platform →
-        </a>
-      </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="footer">
-      <div class="social-links">
-        <a href="https://twitter.com/streamaix" class="social-link">Twitter</a>
-        <a href="https://discord.gg/streamaix" class="social-link">Discord</a>
-        <a href="https://t.me/streamaix" class="social-link">Telegram</a>
-      </div>
-      <p class="footer-text">
-        You're receiving this email because you joined the StreamAiX waitlist.<br>
-        <a href="https://streamaix.com/unsubscribe/${unsubscribeToken}">Unsubscribe</a>
-      </p>
-      <p class="footer-text" style="margin-top: 16px;">
-        © ${new Date().getFullYear()} StreamAiX. All rights reserved.
-      </p>
-    </div>
-  </div>
+<body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  
+  <!-- Wrapper Table -->
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f3f4f6;">
+    <tr>
+      <td align="center" style="padding: 24px 16px;">
+        
+        <!-- Main Container -->
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="mobile-full" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+          
+          <!-- Header with Gradient -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #ec4899 100%); padding: 32px 24px; text-align: center;">
+              <h1 style="margin: 0; font-size: 32px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">StreamAiX</h1>
+              <p style="margin: 8px 0 0; font-size: 14px; color: rgba(255, 255, 255, 0.9);">Autonomous Market Intelligence</p>
+            </td>
+          </tr>
+          
+          <!-- Price Banner -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 0 24px 24px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <!-- BTC -->
+                  <td width="33%" style="padding: 0 4px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: rgba(255, 255, 255, 0.15); border-radius: 10px;">
+                      <tr>
+                        <td style="padding: 14px 8px; text-align: center;">
+                          <p style="margin: 0; font-size: 12px; font-weight: 700; color: rgba(255, 255, 255, 0.85); letter-spacing: 0.5px;">BTC</p>
+                          <p style="margin: 4px 0; font-size: 18px; font-weight: 800; color: #ffffff;">$${formatPrice(content.btcPrice || 0)}</p>
+                          <span style="display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px; background-color: ${(content.btcChange || 0) >= 0 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}; color: ${(content.btcChange || 0) >= 0 ? '#6ee7b7' : '#fca5a5'};">
+                            ${(content.btcChange || 0) >= 0 ? '+' : ''}${(content.btcChange || 0).toFixed(2)}%
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <!-- ETH -->
+                  <td width="33%" style="padding: 0 4px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: rgba(255, 255, 255, 0.15); border-radius: 10px;">
+                      <tr>
+                        <td style="padding: 14px 8px; text-align: center;">
+                          <p style="margin: 0; font-size: 12px; font-weight: 700; color: rgba(255, 255, 255, 0.85); letter-spacing: 0.5px;">ETH</p>
+                          <p style="margin: 4px 0; font-size: 18px; font-weight: 800; color: #ffffff;">$${formatPrice(content.ethPrice || 0)}</p>
+                          <span style="display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px; background-color: ${(content.ethChange || 0) >= 0 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}; color: ${(content.ethChange || 0) >= 0 ? '#6ee7b7' : '#fca5a5'};">
+                            ${(content.ethChange || 0) >= 0 ? '+' : ''}${(content.ethChange || 0).toFixed(2)}%
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <!-- S&P 500 -->
+                  <td width="33%" style="padding: 0 4px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: rgba(255, 255, 255, 0.15); border-radius: 10px;">
+                      <tr>
+                        <td style="padding: 14px 8px; text-align: center;">
+                          <p style="margin: 0; font-size: 12px; font-weight: 700; color: rgba(255, 255, 255, 0.85); letter-spacing: 0.5px;">S&P 500</p>
+                          <p style="margin: 4px 0; font-size: 18px; font-weight: 800; color: #ffffff;">$${formatPrice(content.spyPrice || 0)}</p>
+                          <span style="display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px; background-color: ${(content.spyChange || 0) >= 0 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}; color: ${(content.spyChange || 0) >= 0 ? '#6ee7b7' : '#fca5a5'};">
+                            ${(content.spyChange || 0) >= 0 ? '+' : ''}${(content.spyChange || 0).toFixed(2)}%
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Fear & Greed Index -->
+          <tr>
+            <td style="padding: 24px; background-color: #f8fafc;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;">
+                <tr>
+                  <td style="padding: 20px; text-align: center;">
+                    <p style="margin: 0; font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Crypto Fear & Greed Index</p>
+                    <p style="margin: 8px 0 4px; font-size: 48px; font-weight: 800; color: ${fearGreedColor};">${content.fearGreedIndex || 50}</p>
+                    <p style="margin: 0; font-size: 16px; font-weight: 700; color: ${fearGreedColor};">${fearGreedLabel}</p>
+                    <!-- Gradient Bar -->
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top: 16px;">
+                      <tr>
+                        <td>
+                          <div style="position: relative; height: 8px; background: linear-gradient(90deg, #dc2626 0%, #d97706 50%, #059669 100%); border-radius: 4px;">
+                          </div>
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top: -12px;">
+                            <tr>
+                              <td width="${Math.min(Math.max(content.fearGreedIndex || 50, 5), 95)}%" style="text-align: right;">
+                                <span style="display: inline-block; width: 16px; height: 16px; background-color: #1e293b; border: 2px solid #ffffff; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></span>
+                              </td>
+                              <td></td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Content Section -->
+          <tr>
+            <td style="padding: 0 24px 24px;">
+              
+              <!-- Market Summary -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 24px;">
+                <tr>
+                  <td>
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;">
+                      <tr>
+                        <td style="width: 32px; height: 32px; background-color: #ede9fe; border-radius: 8px; text-align: center; vertical-align: middle; font-size: 16px;">📊</td>
+                        <td style="padding-left: 12px; font-size: 18px; font-weight: 700; color: #1e293b;">Market Summary</td>
+                      </tr>
+                    </table>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 12px;">
+                      <tr>
+                        <td style="padding: 20px; font-size: 15px; line-height: 1.7; color: #334155;">
+                          ${content.marketSummary}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Alpha Insight -->
+              ${content.alphaInsight ? `
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 24px;">
+                <tr>
+                  <td>
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;">
+                      <tr>
+                        <td style="width: 32px; height: 32px; background-color: #dcfce7; border-radius: 8px; text-align: center; vertical-align: middle; font-size: 16px;">🎯</td>
+                        <td style="padding-left: 12px; font-size: 18px; font-weight: 700; color: #1e293b;">Alpha Insight</td>
+                      </tr>
+                    </table>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px;">
+                      <tr>
+                        <td style="padding: 20px; font-size: 15px; line-height: 1.7; color: #065f46;">
+                          <strong style="color: #047857;">Today's Key Takeaway:</strong> ${content.alphaInsight}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
+              
+              <!-- Top Gainers -->
+              ${content.topGainers.length > 0 ? `
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 24px;">
+                <tr>
+                  <td>
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;">
+                      <tr>
+                        <td style="width: 32px; height: 32px; background-color: #dcfce7; border-radius: 8px; text-align: center; vertical-align: middle; font-size: 16px;">🚀</td>
+                        <td style="padding-left: 12px; font-size: 18px; font-weight: 700; color: #1e293b;">Top Gainers (24h)</td>
+                      </tr>
+                    </table>
+                    ${content.topGainers.slice(0, 5).map(coin => `
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 8px;">
+                      <tr>
+                        <td style="padding: 14px 16px;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                              <td width="40" style="vertical-align: middle;">
+                                <div style="width: 36px; height: 36px; background: ${getCoinGradient(coin.symbol)}; border-radius: 50%; text-align: center; line-height: 36px; font-size: 14px; font-weight: 700; color: #ffffff;">${coin.symbol.charAt(0)}</div>
+                              </td>
+                              <td style="padding-left: 12px; vertical-align: middle;">
+                                <p style="margin: 0; font-size: 15px; font-weight: 600; color: #1e293b;">${coin.name}</p>
+                                <p style="margin: 2px 0 0; font-size: 12px; color: #64748b; text-transform: uppercase;">${coin.symbol}</p>
+                              </td>
+                              <td style="text-align: right; vertical-align: middle;">
+                                <p style="margin: 0; font-size: 16px; font-weight: 700; color: #1e293b;">$${formatPrice(coin.price || 0)}</p>
+                                <span style="display: inline-block; margin-top: 4px; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px; background-color: ${positiveBg}; color: ${positiveColor};">+${(coin.changePercent || 0).toFixed(2)}%</span>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                    `).join('')}
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
+              
+              <!-- Top Losers -->
+              ${content.topLosers.length > 0 ? `
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 24px;">
+                <tr>
+                  <td>
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;">
+                      <tr>
+                        <td style="width: 32px; height: 32px; background-color: #fee2e2; border-radius: 8px; text-align: center; vertical-align: middle; font-size: 16px;">📉</td>
+                        <td style="padding-left: 12px; font-size: 18px; font-weight: 700; color: #1e293b;">Top Losers (24h)</td>
+                      </tr>
+                    </table>
+                    ${content.topLosers.slice(0, 5).map(coin => `
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 8px;">
+                      <tr>
+                        <td style="padding: 14px 16px;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                              <td width="40" style="vertical-align: middle;">
+                                <div style="width: 36px; height: 36px; background: ${getCoinGradient(coin.symbol)}; border-radius: 50%; text-align: center; line-height: 36px; font-size: 14px; font-weight: 700; color: #ffffff;">${coin.symbol.charAt(0)}</div>
+                              </td>
+                              <td style="padding-left: 12px; vertical-align: middle;">
+                                <p style="margin: 0; font-size: 15px; font-weight: 600; color: #1e293b;">${coin.name}</p>
+                                <p style="margin: 2px 0 0; font-size: 12px; color: #64748b; text-transform: uppercase;">${coin.symbol}</p>
+                              </td>
+                              <td style="text-align: right; vertical-align: middle;">
+                                <p style="margin: 0; font-size: 16px; font-weight: 700; color: #1e293b;">$${formatPrice(coin.price || 0)}</p>
+                                <span style="display: inline-block; margin-top: 4px; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px; background-color: ${negativeBg}; color: ${negativeColor};">${(coin.changePercent || 0).toFixed(2)}%</span>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                    `).join('')}
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
+              
+              <!-- Stock Gainers -->
+              ${content.stockGainers && content.stockGainers.length > 0 ? `
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 24px;">
+                <tr>
+                  <td>
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;">
+                      <tr>
+                        <td style="width: 32px; height: 32px; background-color: #dbeafe; border-radius: 8px; text-align: center; vertical-align: middle; font-size: 16px;">📈</td>
+                        <td style="padding-left: 12px; font-size: 18px; font-weight: 700; color: #1e293b;">Top Tech Stocks (24h)</td>
+                      </tr>
+                    </table>
+                    ${content.stockGainers.slice(0, 5).map(stock => `
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-left: 3px solid #059669; border-radius: 10px; margin-bottom: 8px;">
+                      <tr>
+                        <td style="padding: 14px 16px;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                              <td width="40" style="vertical-align: middle;">
+                                <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #059669 0%, #047857 100%); border-radius: 8px; text-align: center; line-height: 36px; font-size: 10px; font-weight: 700; color: #ffffff;">${stock.symbol}</div>
+                              </td>
+                              <td style="padding-left: 12px; vertical-align: middle;">
+                                <p style="margin: 0; font-size: 15px; font-weight: 600; color: #1e293b;">${stock.name}</p>
+                                <p style="margin: 2px 0 0; font-size: 12px; color: #64748b;">${stock.sector}</p>
+                              </td>
+                              <td style="text-align: right; vertical-align: middle;">
+                                <p style="margin: 0; font-size: 16px; font-weight: 700; color: #1e293b;">$${formatPrice(stock.price || 0)}</p>
+                                <span style="display: inline-block; margin-top: 4px; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px; background-color: ${positiveBg}; color: ${positiveColor};">+${(stock.changePercent || 0).toFixed(2)}%</span>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                    `).join('')}
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
+              
+              <!-- Stock Losers -->
+              ${content.stockLosers && content.stockLosers.length > 0 ? `
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 24px;">
+                <tr>
+                  <td>
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;">
+                      <tr>
+                        <td style="width: 32px; height: 32px; background-color: #fee2e2; border-radius: 8px; text-align: center; vertical-align: middle; font-size: 16px;">📉</td>
+                        <td style="padding-left: 12px; font-size: 18px; font-weight: 700; color: #1e293b;">Tech Stocks Down (24h)</td>
+                      </tr>
+                    </table>
+                    ${content.stockLosers.slice(0, 5).map(stock => `
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-left: 3px solid #dc2626; border-radius: 10px; margin-bottom: 8px;">
+                      <tr>
+                        <td style="padding: 14px 16px;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                              <td width="40" style="vertical-align: middle;">
+                                <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-radius: 8px; text-align: center; line-height: 36px; font-size: 10px; font-weight: 700; color: #ffffff;">${stock.symbol}</div>
+                              </td>
+                              <td style="padding-left: 12px; vertical-align: middle;">
+                                <p style="margin: 0; font-size: 15px; font-weight: 600; color: #1e293b;">${stock.name}</p>
+                                <p style="margin: 2px 0 0; font-size: 12px; color: #64748b;">${stock.sector}</p>
+                              </td>
+                              <td style="text-align: right; vertical-align: middle;">
+                                <p style="margin: 0; font-size: 16px; font-weight: 700; color: #1e293b;">$${formatPrice(stock.price || 0)}</p>
+                                <span style="display: inline-block; margin-top: 4px; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px; background-color: ${negativeBg}; color: ${negativeColor};">${(stock.changePercent || 0).toFixed(2)}%</span>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                    `).join('')}
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
+              
+              <!-- Hot Prediction Markets -->
+              ${content.hotMarkets && content.hotMarkets.length > 0 ? `
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 24px;">
+                <tr>
+                  <td>
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;">
+                      <tr>
+                        <td style="width: 32px; height: 32px; background-color: #fef3c7; border-radius: 8px; text-align: center; vertical-align: middle; font-size: 16px;">🔥</td>
+                        <td style="padding-left: 12px; font-size: 18px; font-weight: 700; color: #1e293b;">Hot Prediction Markets</td>
+                      </tr>
+                    </table>
+                    ${content.hotMarkets.slice(0, 3).map(market => `
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; margin-bottom: 8px;">
+                      <tr>
+                        <td style="padding: 16px;">
+                          <p style="margin: 0 0 12px; font-size: 15px; font-weight: 600; color: #1e293b; line-height: 1.4;">${market.question}</p>
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                              <td width="33%" style="text-align: center;">
+                                <p style="margin: 0; font-size: 18px; font-weight: 800; color: #d97706;">${market.yesPercent}%</p>
+                                <p style="margin: 2px 0 0; font-size: 11px; color: #92400e; text-transform: uppercase; letter-spacing: 0.5px;">Yes Odds</p>
+                              </td>
+                              <td width="33%" style="text-align: center;">
+                                <p style="margin: 0; font-size: 18px; font-weight: 800; color: #d97706;">${formatVolume(market.volume)}</p>
+                                <p style="margin: 2px 0 0; font-size: 11px; color: #92400e; text-transform: uppercase; letter-spacing: 0.5px;">Volume</p>
+                              </td>
+                              <td width="33%" style="text-align: center;">
+                                <p style="margin: 0; font-size: 18px; font-weight: 800; color: #d97706;">${market.traders}</p>
+                                <p style="margin: 2px 0 0; font-size: 11px; color: #92400e; text-transform: uppercase; letter-spacing: 0.5px;">Traders</p>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                    `).join('')}
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
+              
+              <!-- Upcoming Streams -->
+              ${content.upcomingStreams && content.upcomingStreams.length > 0 ? `
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 24px;">
+                <tr>
+                  <td>
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;">
+                      <tr>
+                        <td style="width: 32px; height: 32px; background-color: #ede9fe; border-radius: 8px; text-align: center; vertical-align: middle; font-size: 16px;">🎙️</td>
+                        <td style="padding-left: 12px; font-size: 18px; font-weight: 700; color: #1e293b;">Upcoming AI Streams</td>
+                      </tr>
+                    </table>
+                    ${content.upcomingStreams.slice(0, 2).map(stream => `
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 10px; margin-bottom: 8px;">
+                      <tr>
+                        <td style="padding: 16px;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                              <td width="46" style="vertical-align: middle;">
+                                <div style="width: 42px; height: 42px; background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); border-radius: 10px; text-align: center; line-height: 42px; font-size: 20px;">${stream.emoji || '🎤'}</div>
+                              </td>
+                              <td style="padding-left: 14px; vertical-align: middle;">
+                                <p style="margin: 0; font-size: 14px; font-weight: 600; color: #1e293b; line-height: 1.4;">${stream.title}</p>
+                                <p style="margin: 4px 0 0; font-size: 12px; color: #6b7280;">${stream.time}</p>
+                                <span style="display: inline-block; margin-top: 6px; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; background-color: #ddd6fe; color: #6d28d9; text-transform: uppercase; letter-spacing: 0.5px;">AI-Powered TTS</span>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                    `).join('')}
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
+              
+              <!-- Latest News -->
+              ${content.newsStories && content.newsStories.length > 0 ? `
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 24px;">
+                <tr>
+                  <td>
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;">
+                      <tr>
+                        <td style="width: 32px; height: 32px; background-color: #e0e7ff; border-radius: 8px; text-align: center; vertical-align: middle; font-size: 16px;">📰</td>
+                        <td style="padding-left: 12px; font-size: 18px; font-weight: 700; color: #1e293b;">Latest Crypto News</td>
+                      </tr>
+                    </table>
+                    ${content.newsStories.slice(0, 3).map(news => `
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 8px;">
+                      <tr>
+                        <td style="padding: 16px;">
+                          <p style="margin: 0 0 8px; font-size: 15px; font-weight: 600; color: #1e293b; line-height: 1.4;">
+                            <a href="${news.url}" target="_blank" rel="noopener noreferrer" style="color: #1e293b; text-decoration: none;">${news.title}</a>
+                          </p>
+                          <p style="margin: 0; font-size: 12px; color: #64748b;">
+                            <span style="color: #667eea; font-weight: 600;">${news.source}</span> • ${getTimeAgo(new Date(news.published))}
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                    `).join('')}
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
+              
+              <!-- Platform Features -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 24px;">
+                <tr>
+                  <td>
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;">
+                      <tr>
+                        <td style="width: 32px; height: 32px; background-color: #fce7f3; border-radius: 8px; text-align: center; vertical-align: middle; font-size: 16px;">✨</td>
+                        <td style="padding-left: 12px; font-size: 18px; font-weight: 700; color: #1e293b;">What's on StreamAiX</td>
+                      </tr>
+                    </table>
+                    ${features.map(feature => `
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 8px;">
+                      <tr>
+                        <td style="padding: 16px;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                              <td width="40" style="vertical-align: top; font-size: 24px;">${feature.emoji}</td>
+                              <td style="padding-left: 12px; vertical-align: top;">
+                                <p style="margin: 0; font-size: 15px; font-weight: 700; color: #1e293b;">${feature.title}</p>
+                                <p style="margin: 4px 0 0; font-size: 13px; color: #64748b; line-height: 1.5;">${feature.description}</p>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                    `).join('')}
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- CTA Button -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 8px;">
+                <tr>
+                  <td style="text-align: center; padding: 16px 0;">
+                    <a href="https://streamaix.com" target="_blank" rel="noopener noreferrer" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-weight: 700; font-size: 16px;">Visit StreamAiX Platform →</a>
+                  </td>
+                </tr>
+              </table>
+              
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f1f5f9; padding: 28px 24px; text-align: center; border-top: 1px solid #e2e8f0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 16px;">
+                <tr>
+                  <td style="text-align: center;">
+                    <a href="https://twitter.com/streamaix" target="_blank" rel="noopener noreferrer" style="display: inline-block; background-color: #e2e8f0; color: #475569; text-decoration: none; padding: 10px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; margin: 0 4px 8px;">Twitter</a>
+                    <a href="https://discord.gg/streamaix" target="_blank" rel="noopener noreferrer" style="display: inline-block; background-color: #e2e8f0; color: #475569; text-decoration: none; padding: 10px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; margin: 0 4px 8px;">Discord</a>
+                    <a href="https://t.me/streamaix" target="_blank" rel="noopener noreferrer" style="display: inline-block; background-color: #e2e8f0; color: #475569; text-decoration: none; padding: 10px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; margin: 0 4px 8px;">Telegram</a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin: 0; font-size: 12px; color: #64748b; line-height: 1.6;">
+                You're receiving this email because you joined the StreamAiX waitlist.<br>
+                <a href="https://streamaix.com/unsubscribe/${unsubscribeToken}" style="color: #667eea; text-decoration: none;">Unsubscribe</a>
+              </p>
+              <p style="margin: 16px 0 0; font-size: 12px; color: #94a3b8;">
+                © ${new Date().getFullYear()} StreamAiX. All rights reserved.
+              </p>
+            </td>
+          </tr>
+          
+        </table>
+        
+      </td>
+    </tr>
+  </table>
+  
 </body>
 </html>
   `.trim();
@@ -890,14 +567,18 @@ function formatVolume(volume: number): string {
 }
 
 /**
- * Get CSS class for coin icon based on symbol
+ * Get gradient background for coin icon based on symbol
  */
-function getCoinIconClass(symbol: string): string {
+function getCoinGradient(symbol: string): string {
   const lower = symbol.toLowerCase();
-  if (lower === 'btc') return 'btc';
-  if (lower === 'eth') return 'eth';
-  if (lower === 'sol') return 'sol';
-  return 'generic';
+  if (lower === 'btc') return 'linear-gradient(135deg, #f7931a 0%, #e88a15 100%)';
+  if (lower === 'eth') return 'linear-gradient(135deg, #627eea 0%, #4a5adc 100%)';
+  if (lower === 'sol') return 'linear-gradient(135deg, #9945ff 0%, #14f195 100%)';
+  if (lower === 'xrp') return 'linear-gradient(135deg, #23292f 0%, #444f5c 100%)';
+  if (lower === 'bnb') return 'linear-gradient(135deg, #f3ba2f 0%, #d4a429 100%)';
+  if (lower === 'ada') return 'linear-gradient(135deg, #0033ad 0%, #0044cc 100%)';
+  if (lower === 'doge') return 'linear-gradient(135deg, #c2a633 0%, #a08c2a 100%)';
+  return 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)';
 }
 
 /**
@@ -925,7 +606,7 @@ export function generateNewsletterText(content: NewsletterContent): string {
   const features = getFeatureHighlights();
   
   let text = `
-STREAMAIX CRYPTO BRIEFING
+STREAMAIX MARKET ALPHA
 ${content.subject}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -933,6 +614,7 @@ ${content.subject}
 💰 MARKET SNAPSHOT
 BTC: $${formatPrice(content.btcPrice || 0)} (${(content.btcChange || 0) >= 0 ? '+' : ''}${(content.btcChange || 0).toFixed(2)}%)
 ETH: $${formatPrice(content.ethPrice || 0)} (${(content.ethChange || 0) >= 0 ? '+' : ''}${(content.ethChange || 0).toFixed(2)}%)
+S&P 500: $${formatPrice(content.spyPrice || 0)} (${(content.spyChange || 0) >= 0 ? '+' : ''}${(content.spyChange || 0).toFixed(2)}%)
 
 😨 Fear & Greed Index: ${content.fearGreedIndex || 50}/100
 
@@ -940,6 +622,10 @@ ETH: $${formatPrice(content.ethPrice || 0)} (${(content.ethChange || 0) >= 0 ? '
 ${content.marketSummary}
 
 `;
+
+  if (content.alphaInsight) {
+    text += `\n🎯 ALPHA INSIGHT\n${content.alphaInsight}\n`;
+  }
 
   if (content.topGainers.length > 0) {
     text += `\n🚀 TOP GAINERS (24H)\n`;
@@ -952,6 +638,13 @@ ${content.marketSummary}
     text += `\n📉 TOP LOSERS (24H)\n`;
     content.topLosers.forEach(coin => {
       text += `  ${coin.name} (${coin.symbol}): $${formatPrice(coin.price)} (${coin.changePercent.toFixed(2)}%)\n`;
+    });
+  }
+
+  if (content.stockGainers && content.stockGainers.length > 0) {
+    text += `\n📈 TOP TECH STOCKS (24H)\n`;
+    content.stockGainers.forEach(stock => {
+      text += `  ${stock.name} (${stock.symbol}): $${formatPrice(stock.price)} (+${stock.changePercent.toFixed(2)}%)\n`;
     });
   }
 
