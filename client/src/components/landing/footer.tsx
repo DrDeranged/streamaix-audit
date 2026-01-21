@@ -267,10 +267,6 @@ export function Footer() {
             <div className="text-slate-500 dark:text-gray-400 text-sm">
               <span className="inline-flex items-center gap-2 flex-wrap justify-center">
                 <span className="text-slate-400 dark:text-gray-500">Powered by</span>
-                <span className="px-2 py-1 rounded-md bg-gradient-to-r from-purple-500/10 to-purple-600/10 border border-purple-500/30 dark:border-purple-500/20 text-purple-600 dark:text-purple-300 font-semibold text-xs">
-                  OpenAI
-                </span>
-                <span className="text-slate-400 dark:text-gray-600">·</span>
                 <span className="px-2 py-1 rounded-md bg-gradient-to-r from-cyan-500/10 to-blue-600/10 border border-cyan-500/30 dark:border-cyan-500/20 text-cyan-600 dark:text-cyan-300 font-semibold text-xs">
                   Base Network
                 </span>
