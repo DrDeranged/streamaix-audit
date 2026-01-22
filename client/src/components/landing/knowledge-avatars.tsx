@@ -1453,7 +1453,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
         </motion.div>
         
         {/* Enhanced Carousel Container */}
-        <div className="relative max-w-[95vw] mx-auto" style={{ isolation: 'isolate' }}>
+        <div className={`relative mx-auto ${isMobile ? 'px-14' : 'max-w-[95vw]'}`} style={{ isolation: 'isolate' }}>
           {/* Professional Navigation Buttons - Now visible on all devices */}
           {avatars.length > (isMobile ? 1 : itemsPerView) && (
             <>
@@ -1462,7 +1462,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 size="icon"
                 variant="ghost"
                 disabled={!canGoPrev}
-                className={`absolute left-1 md:-left-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-950/95 to-purple-950/95 text-white rounded-full md:rounded-xl w-12 h-12 md:w-12 md:h-12 lg:w-14 lg:h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 ${
+                className={`absolute left-0 md:-left-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-950/95 to-purple-950/95 text-white rounded-full w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 ${
                   canGoPrev 
                     ? 'hover:from-slate-900 hover:to-purple-900 hover:scale-110 hover:shadow-purple-500/30 cursor-pointer active:scale-95' 
                     : 'opacity-40 cursor-not-allowed'
@@ -1470,7 +1470,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 style={{ pointerEvents: 'auto', isolation: 'isolate' }}
                 data-testid="button-carousel-prev"
               >
-                <ChevronLeft className="h-6 w-6 md:h-6 md:w-6 lg:h-7 lg:w-7" />
+                <ChevronLeft className="h-5 w-5 md:h-6 md:w-6 lg:h-7 lg:w-7" />
               </Button>
               
               <Button
@@ -1478,7 +1478,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 size="icon"
                 variant="ghost"
                 disabled={!canGoNext}
-                className={`absolute right-1 md:-right-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-950/95 to-purple-950/95 text-white rounded-full md:rounded-xl w-12 h-12 md:w-12 md:h-12 lg:w-14 lg:h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 ${
+                className={`absolute right-0 md:-right-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-950/95 to-purple-950/95 text-white rounded-full w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 ${
                   canGoNext 
                     ? 'hover:from-slate-900 hover:to-purple-900 hover:scale-110 hover:shadow-purple-500/30 cursor-pointer active:scale-95' 
                     : 'opacity-40 cursor-not-allowed'
@@ -1486,7 +1486,7 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 style={{ pointerEvents: 'auto', isolation: 'isolate' }}
                 data-testid="button-carousel-next"
               >
-                <ChevronRight className="h-6 w-6 md:h-6 md:w-6 lg:h-7 lg:w-7" />
+                <ChevronRight className="h-5 w-5 md:h-6 md:w-6 lg:h-7 lg:w-7" />
               </Button>
             </>
           )}
@@ -1518,36 +1518,34 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
             </div>
           )}
           
-          {/* Working Carousel - controlled scroll for mobile (arrows only), native scroll for desktop */}
+          {/* Working Carousel - controlled for mobile (arrows only), native scroll for desktop */}
           <div 
-            className={`${isMobile ? 'overflow-hidden' : 'overflow-x-auto scrollbar-visible'} pb-4`}
+            className={`${isMobile ? 'overflow-hidden flex justify-center' : 'overflow-x-auto scrollbar-visible'} pb-4`}
             ref={containerRef}
             style={{ 
               WebkitOverflowScrolling: isMobile ? 'auto' : 'touch',
               scrollbarWidth: isMobile ? 'none' : 'thin',
               scrollbarColor: 'rgba(139, 92, 246, 0.5) rgba(30, 30, 50, 0.3)',
               touchAction: isMobile ? 'pan-y' : 'pan-x',
-              scrollPaddingInline: isMobile ? 'calc(50vw - 140px)' : '48px',
-              paddingInline: isMobile ? 'calc(50vw - 140px)' : '48px',
+              paddingInline: isMobile ? '0' : '48px',
               msOverflowStyle: 'none',
             }}
             onScroll={(e) => {
               if (isMobile) return;
               const container = e.currentTarget;
               const scrollLeft = container.scrollLeft;
-              const cardWidth = isMobile ? 304 : 344; // 280px + 24px gap (mobile), 320px + 24px gap (desktop)
+              const cardWidth = 344; // 320px + 24px gap (desktop)
               const newIndex = Math.round(scrollLeft / cardWidth);
               if (newIndex !== currentIndex && newIndex >= 0 && newIndex < avatars.length) {
                 setCurrentIndex(newIndex);
               }
             }}
           >
-            {/* Carousel Track - CSS transform for mobile, native scroll for desktop */}
+            {/* Carousel Track - single card display for mobile, scrollable for desktop */}
             <div 
-              className="flex gap-6 transition-transform duration-300 ease-out"
+              className={`flex gap-6 ${isMobile ? '' : ''}`}
               style={{
-                minWidth: 'max-content',
-                transform: isMobile ? `translateX(calc(50vw - 140px - ${currentIndex * 304}px))` : 'none',
+                minWidth: isMobile ? 'auto' : 'max-content',
               }}
             >
               {avatars.map((avatar, index) => {
@@ -1583,6 +1581,11 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 const worstCallsData = (avatar.worstCalls && avatar.worstCalls.length > 0)
                   ? avatar.worstCalls
                   : getWorstCalls(avatar.name);
+                
+                // On mobile, only render the current card
+                if (isMobile && index !== currentIndex) {
+                  return null;
+                }
                 
                 return (
                   <div 
