@@ -1219,28 +1219,49 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
     'Balaji Srinivasan': balajiSentiment,
     'Paul Graham': paulSentiment,
   };
-  const maxIndex = Math.max(0, avatars.length - itemsPerView);
+  const maxIndex = isMobile ? avatars.length - 1 : Math.max(0, avatars.length - itemsPerView);
   const canGoNext = currentIndex < maxIndex;
   const canGoPrev = currentIndex > 0;
 
   const nextSlide = () => {
-    if (isTransitioningRef.current || !containerRef.current) return;
+    if (isTransitioningRef.current) return;
     isTransitioningRef.current = true;
-    const cardWidth = 320 + 24; // card width + gap
-    containerRef.current.scrollBy({ left: cardWidth * 2, behavior: 'smooth' });
+    
+    if (isMobile) {
+      // Mobile: use transform-based navigation (one card at a time)
+      const maxIndex = avatars.length - 1;
+      if (currentIndex < maxIndex) {
+        setCurrentIndex(prev => Math.min(prev + 1, maxIndex));
+      }
+    } else if (containerRef.current) {
+      // Desktop: scroll-based navigation
+      const cardWidth = 320 + 24; // card width + gap
+      containerRef.current.scrollBy({ left: cardWidth * 2, behavior: 'smooth' });
+    }
+    
     setTimeout(() => {
       isTransitioningRef.current = false;
-    }, 600);
+    }, 350);
   };
 
   const prevSlide = () => {
-    if (isTransitioningRef.current || !containerRef.current) return;
+    if (isTransitioningRef.current) return;
     isTransitioningRef.current = true;
-    const cardWidth = 320 + 24; // card width + gap
-    containerRef.current.scrollBy({ left: -cardWidth * 2, behavior: 'smooth' });
+    
+    if (isMobile) {
+      // Mobile: use transform-based navigation (one card at a time)
+      if (currentIndex > 0) {
+        setCurrentIndex(prev => Math.max(prev - 1, 0));
+      }
+    } else if (containerRef.current) {
+      // Desktop: scroll-based navigation
+      const cardWidth = 320 + 24; // card width + gap
+      containerRef.current.scrollBy({ left: -cardWidth * 2, behavior: 'smooth' });
+    }
+    
     setTimeout(() => {
       isTransitioningRef.current = false;
-    }, 600);
+    }, 350);
   };
 
   const handleFollow = async (avatarId: string) => {
@@ -1433,23 +1454,23 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
         
         {/* Enhanced Carousel Container */}
         <div className="relative max-w-[95vw] mx-auto" style={{ isolation: 'isolate' }}>
-          {/* Professional Navigation Buttons - Fixed positioning */}
-          {!isMobile && avatars.length > itemsPerView && (
+          {/* Professional Navigation Buttons - Now visible on all devices */}
+          {avatars.length > (isMobile ? 1 : itemsPerView) && (
             <>
               <Button
                 onClick={prevSlide}
                 size="icon"
                 variant="ghost"
                 disabled={!canGoPrev}
-                className={`absolute -left-4 md:-left-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-950/95 to-purple-950/95 text-white rounded-lg md:rounded-xl w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 ${
+                className={`absolute left-1 md:-left-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-950/95 to-purple-950/95 text-white rounded-full md:rounded-xl w-12 h-12 md:w-12 md:h-12 lg:w-14 lg:h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 ${
                   canGoPrev 
-                    ? 'hover:from-slate-900 hover:to-purple-900 hover:scale-110 hover:shadow-purple-500/30 cursor-pointer' 
+                    ? 'hover:from-slate-900 hover:to-purple-900 hover:scale-110 hover:shadow-purple-500/30 cursor-pointer active:scale-95' 
                     : 'opacity-40 cursor-not-allowed'
                 }`}
                 style={{ pointerEvents: 'auto', isolation: 'isolate' }}
                 data-testid="button-carousel-prev"
               >
-                <ChevronLeft className="h-5 w-5 md:h-6 md:w-6 lg:h-7 lg:w-7" />
+                <ChevronLeft className="h-6 w-6 md:h-6 md:w-6 lg:h-7 lg:w-7" />
               </Button>
               
               <Button
@@ -1457,15 +1478,15 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 size="icon"
                 variant="ghost"
                 disabled={!canGoNext}
-                className={`absolute -right-4 md:-right-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-950/95 to-purple-950/95 text-white rounded-lg md:rounded-xl w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 ${
+                className={`absolute right-1 md:-right-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-950/95 to-purple-950/95 text-white rounded-full md:rounded-xl w-12 h-12 md:w-12 md:h-12 lg:w-14 lg:h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 ${
                   canGoNext 
-                    ? 'hover:from-slate-900 hover:to-purple-900 hover:scale-110 hover:shadow-purple-500/30 cursor-pointer' 
+                    ? 'hover:from-slate-900 hover:to-purple-900 hover:scale-110 hover:shadow-purple-500/30 cursor-pointer active:scale-95' 
                     : 'opacity-40 cursor-not-allowed'
                 }`}
                 style={{ pointerEvents: 'auto', isolation: 'isolate' }}
                 data-testid="button-carousel-next"
               >
-                <ChevronRight className="h-5 w-5 md:h-6 md:w-6 lg:h-7 lg:w-7" />
+                <ChevronRight className="h-6 w-6 md:h-6 md:w-6 lg:h-7 lg:w-7" />
               </Button>
             </>
           )}
@@ -1497,20 +1518,21 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
             </div>
           )}
           
-          {/* Working Carousel - CSS scroll-snap for mobile, transforms for desktop */}
+          {/* Working Carousel - controlled scroll for mobile (arrows only), native scroll for desktop */}
           <div 
-            className={`${isMobile ? 'overflow-x-auto snap-x snap-mandatory' : 'overflow-x-auto scrollbar-visible'} pb-4`}
+            className={`${isMobile ? 'overflow-hidden' : 'overflow-x-auto scrollbar-visible'} pb-4`}
             ref={containerRef}
             style={{ 
-              WebkitOverflowScrolling: 'touch',
+              WebkitOverflowScrolling: isMobile ? 'auto' : 'touch',
               scrollbarWidth: isMobile ? 'none' : 'thin',
               scrollbarColor: 'rgba(139, 92, 246, 0.5) rgba(30, 30, 50, 0.3)',
-              touchAction: 'pan-x',
+              touchAction: isMobile ? 'pan-y' : 'pan-x',
               scrollPaddingInline: isMobile ? 'calc(50vw - 140px)' : '48px',
               paddingInline: isMobile ? 'calc(50vw - 140px)' : '48px',
               msOverflowStyle: 'none',
             }}
             onScroll={(e) => {
+              if (isMobile) return;
               const container = e.currentTarget;
               const scrollLeft = container.scrollLeft;
               const cardWidth = isMobile ? 304 : 344; // 280px + 24px gap (mobile), 320px + 24px gap (desktop)
@@ -1520,11 +1542,12 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
               }
             }}
           >
-            {/* Carousel Track - uses native scroll on all devices */}
+            {/* Carousel Track - CSS transform for mobile, native scroll for desktop */}
             <div 
-              className="flex gap-6"
+              className="flex gap-6 transition-transform duration-300 ease-out"
               style={{
                 minWidth: 'max-content',
+                transform: isMobile ? `translateX(calc(50vw - 140px - ${currentIndex * 304}px))` : 'none',
               }}
             >
               {avatars.map((avatar, index) => {
@@ -1564,11 +1587,10 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 return (
                   <div 
                     key={avatar.id} 
-                    className={`flex-shrink-0 relative z-10 ${isMobile ? 'snap-center snap-always' : ''}`}
+                    className="flex-shrink-0 relative z-10"
                     style={{
                       width: isMobile ? '280px' : '320px',
                       minWidth: isMobile ? '280px' : '320px',
-                      touchAction: 'pan-x',
                     }}
                   >
                     <Link 
