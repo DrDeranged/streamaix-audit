@@ -13,6 +13,7 @@ interface AIAvatarStreamProps {
   currentMessage?: string;
   viewerCount?: number;
   onAudioMessage?: (callback: (audio: AvatarAudioData) => void) => () => void;
+  streamId?: string;
 }
 
 interface AvatarAudioData {
@@ -472,7 +473,8 @@ export function AIAvatarStream({
   isLive,
   currentMessage,
   viewerCount,
-  onAudioMessage
+  onAudioMessage,
+  streamId
 }: AIAvatarStreamProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -486,6 +488,8 @@ export function AIAvatarStream({
   const audioQueueRef = useRef<AudioQueueItem[]>([]);
   const isProcessingRef = useRef(false);
   const currentSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const preRecordedAudioRef = useRef<HTMLAudioElement | null>(null);
+  const preRecordedLoadedRef = useRef(false);
   
   const style = avatarStyles[streamType] || avatarStyles.broadcast;
   const persona = useMemo(() => getPersonaFromName(hostName), [hostName]);
@@ -586,18 +590,65 @@ export function AIAvatarStream({
     }
   }, [isMuted, playNextInQueue]);
 
+  const playPreRecordedAudio = useCallback(async () => {
+    if (!streamId || preRecordedLoadedRef.current) return;
+    preRecordedLoadedRef.current = true;
+    
+    try {
+      const response = await fetch(`/api/streams/${streamId}/audio`);
+      if (!response.ok) return;
+      
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      preRecordedAudioRef.current = audio;
+      
+      audio.onplay = () => {
+        setIsPlayingAudio(true);
+        setIsSpeaking(true);
+        setCurrentSegmentType('market_analysis');
+      };
+      audio.onended = () => {
+        setIsPlayingAudio(false);
+        setIsSpeaking(false);
+        setCurrentSpeechText(null);
+        URL.revokeObjectURL(url);
+        preRecordedAudioRef.current = null;
+      };
+      audio.onerror = () => {
+        setIsPlayingAudio(false);
+        setIsSpeaking(false);
+        URL.revokeObjectURL(url);
+        preRecordedAudioRef.current = null;
+      };
+      
+      audio.play().catch(() => {});
+    } catch (err) {
+      preRecordedLoadedRef.current = false;
+    }
+  }, [streamId]);
+
   const handleEnableAudio = useCallback(() => {
     setShowMobileOverlay(false);
     setHasUserInteracted(true);
     initAudioContext();
     setIsMuted(false);
-  }, [initAudioContext]);
+    playPreRecordedAudio();
+  }, [initAudioContext, playPreRecordedAudio]);
 
   const toggleMute = useCallback(() => {
     setHasUserInteracted(true);
     if (isMuted) {
       initAudioContext();
+      if (preRecordedAudioRef.current) {
+        preRecordedAudioRef.current.play().catch(() => {});
+      } else {
+        playPreRecordedAudio();
+      }
     } else {
+      if (preRecordedAudioRef.current) {
+        preRecordedAudioRef.current.pause();
+      }
       if (currentSourceRef.current) {
         currentSourceRef.current.stop();
         currentSourceRef.current = null;
@@ -607,10 +658,14 @@ export function AIAvatarStream({
       isProcessingRef.current = false;
     }
     setIsMuted(!isMuted);
-  }, [isMuted, initAudioContext]);
+  }, [isMuted, initAudioContext, playPreRecordedAudio]);
 
   useEffect(() => {
     return () => {
+      if (preRecordedAudioRef.current) {
+        preRecordedAudioRef.current.pause();
+        preRecordedAudioRef.current = null;
+      }
       if (currentSourceRef.current) {
         currentSourceRef.current.stop();
       }

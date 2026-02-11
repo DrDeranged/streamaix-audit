@@ -1111,6 +1111,7 @@ export default function StreamViewPage() {
             currentMessage={messages.length > 0 ? messages[messages.length - 1]?.content : undefined}
             viewerCount={displayViewerCount}
             onAudioMessage={onAvatarAudio}
+            streamId={stream.id}
           />
         )}
       </ImmersiveStreamView>
@@ -1267,6 +1268,7 @@ export default function StreamViewPage() {
                 currentMessage={messages.length > 0 ? messages[messages.length - 1]?.content : undefined}
                 viewerCount={displayViewerCount}
                 onAudioMessage={onAvatarAudio}
+                streamId={stream.id}
               />
             ) : isLive && liveKitConnected && hasLiveKitVideo ? (
               <div className="absolute inset-0">
