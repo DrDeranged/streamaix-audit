@@ -225,7 +225,7 @@ export class ScheduledMarketStreamService {
         streamType: 'broadcast',
         hostId: avatar.id,
         hostAvatarId: avatar.id,
-        status: 'live',
+        status: 'scheduled',
         category: 'market_update',
         tags: [type, 'daily', 'market-update', 'scheduled', avatar.name.toLowerCase().replace(/\s+/g, '-')],
         actualStart: new Date(),
@@ -242,7 +242,7 @@ export class ScheduledMarketStreamService {
         startTime: new Date(),
         endTime: new Date(Date.now() + STREAM_DURATION_SECONDS * 1000),
         transcript: [],
-        status: 'live'
+        status: 'scheduled'
       };
 
       const streamingService = getStreamingService();
@@ -250,7 +250,30 @@ export class ScheduledMarketStreamService {
         await streamingService.createAvatarStreamSession(stream.id);
       }
 
-      // Send push notifications to all users about the scheduled stream going live
+      console.log(`[Scheduled Streams] 📝 Step 1: Stream created with status 'scheduled' - pre-recording phase`);
+
+      // Step 2: Generate commentary (pre-recording)
+      const commentary = await this.generateMarketCommentary(avatar, type, marketData);
+      console.log(`[Scheduled Streams] 📝 Step 2: Commentary generated (${commentary.length} segments)`);
+      
+      // Step 3: Deliver commentary (generates TTS, saves messages to DB)
+      await this.deliverCommentary(stream.id, avatar, commentary);
+      console.log(`[Scheduled Streams] 📝 Step 3: Commentary delivered and saved to DB`);
+
+      // Step 4: Save stream recording with audio to DB (without setting status to 'ended')
+      await this.saveStreamRecording(stream.id, avatar);
+      console.log(`[Scheduled Streams] 📝 Step 4: Stream recording saved to DB`);
+
+      // Step 5: Set stream status to 'live' now that everything is pre-recorded
+      await db.update(liveStreams)
+        .set({ status: 'live' })
+        .where(eq(liveStreams.id, stream.id));
+      if (this.activeStream) {
+        this.activeStream.status = 'live';
+      }
+      console.log(`[Scheduled Streams] 📝 Step 5: Stream status set to 'live' - going live!`);
+
+      // Step 6: Send push notifications now that stream is live with all content ready
       try {
         const streamTypeLabel = type === 'morning_update' ? 'Morning Market Update' : 'Market Close Recap';
         await pushNotificationService.sendToAll({
@@ -273,16 +296,25 @@ export class ScheduledMarketStreamService {
             streamTitle 
           }
         }, 'stream_live');
-        console.log(`[Scheduled Streams] 🔔 Push notifications sent for ${streamTitle}`);
+        console.log(`[Scheduled Streams] 🔔 Step 6: Push notifications sent for ${streamTitle}`);
       } catch (pushError) {
         console.error('[Scheduled Streams] ⚠️ Failed to send push notifications:', pushError);
       }
 
-      const commentary = await this.generateMarketCommentary(avatar, type, marketData);
-      
-      await this.deliverCommentary(stream.id, avatar, commentary);
-
-      await this.endAndSaveStream(stream.id, avatar, commentary);
+      // Step 7: Schedule auto-end timer (10 minutes)
+      const autoEndMs = 10 * 60 * 1000;
+      console.log(`[Scheduled Streams] ⏰ Step 7: Auto-end timer set for 10 minutes`);
+      setTimeout(async () => {
+        try {
+          await db.update(liveStreams)
+            .set({ status: 'ended', actualEnd: new Date() })
+            .where(eq(liveStreams.id, stream.id));
+          this.activeStream = null;
+          console.log(`[Scheduled Streams] ✅ Stream ${stream.id.slice(0, 8)}... auto-ended after 10 minutes`);
+        } catch (err) {
+          console.error(`[Scheduled Streams] ⚠️ Error auto-ending stream:`, err);
+        }
+      }, autoEndMs);
 
       return stream.id;
     } catch (error) {
@@ -510,6 +542,30 @@ Return the commentary as a single flowing script, broken into 4-6 paragraphs for
     return audioBase64;
   }
 
+  private async saveStreamRecording(streamId: string, avatar: any): Promise<void> {
+    const now = new Date();
+    const startTime = this.activeStream?.startTime || new Date(Date.now() - STREAM_DURATION_SECONDS * 1000);
+    const durationSeconds = Math.floor((now.getTime() - startTime.getTime()) / 1000);
+
+    const audioData = scheduledStreamAudio.get(streamId) || null;
+    
+    await db.insert(streamRecordings).values({
+      streamId,
+      recordingUrl: `/api/streams/${streamId}/replay`,
+      thumbnailUrl: avatar.imageUrl,
+      durationSeconds,
+      status: 'ready',
+      audioData,
+    });
+
+    if (audioData) {
+      console.log(`[Scheduled Streams] 💾 Audio saved to database (${(audioData.length / 1024).toFixed(1)} KB)`);
+      setTimeout(() => scheduledStreamAudio.delete(streamId), 60000);
+    }
+
+    console.log(`[Scheduled Streams] ✅ Recording for stream ${streamId.slice(0, 8)}... saved (${durationSeconds}s)`);
+  }
+
   private async endAndSaveStream(streamId: string, avatar: any, transcript: string[]): Promise<void> {
     const endTime = new Date();
     const startTime = this.activeStream?.startTime || new Date(Date.now() - STREAM_DURATION_SECONDS * 1000);
@@ -523,7 +579,6 @@ Return the commentary as a single flowing script, broken into 4-6 paragraphs for
       })
       .where(eq(liveStreams.id, streamId));
 
-    // Get TTS audio from in-memory cache to persist it
     const audioData = scheduledStreamAudio.get(streamId) || null;
     
     await db.insert(streamRecordings).values({
@@ -532,13 +587,11 @@ Return the commentary as a single flowing script, broken into 4-6 paragraphs for
       thumbnailUrl: avatar.imageUrl,
       durationSeconds,
       status: 'ready',
-      audioData, // Persist TTS audio to database
+      audioData,
     });
 
-    // Clear from memory cache after persisting to DB
     if (audioData) {
       console.log(`[Scheduled Streams] 💾 Audio saved to database (${(audioData.length / 1024).toFixed(1)} KB)`);
-      // Keep in memory for a short time for any immediate replays, then clean up
       setTimeout(() => scheduledStreamAudio.delete(streamId), 60000);
     }
 
