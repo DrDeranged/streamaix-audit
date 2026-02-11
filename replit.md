@@ -95,6 +95,7 @@ Comprehensive performance optimizations have been applied to reduce lag and impr
       - Uses real market data from CoinGecko Pro and Finnhub APIs (BTC/ETH prices, Fear & Greed Index, crypto stocks)
       - AI-generated 2-3 minute commentary using GPT-4o-mini
       - Auto-saves as VOD/replays in stream_recordings table
+      - **Pre-record-then-go-live flow (February 2026)**: Stream creates with 'scheduled' status, generates all commentary + TTS audio, saves recording to DB, THEN sets status to 'live' and sends notifications. 10-minute auto-end timer. Frontend auto-plays pre-recorded audio from `/api/streams/:streamId/audio` when user enables audio.
       - API endpoints: `/api/scheduled-streams`, `/api/stream-replays`, `/api/streams/:streamId/replay`
       - Manual trigger: `POST /api/admin/trigger-scheduled-stream` with type `morning_update` or `market_close`
 
