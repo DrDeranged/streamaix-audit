@@ -171,29 +171,45 @@ export default function LessonViewer() {
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
   const [startTime] = useState(Date.now());
 
-  const { data: moduleData, isLoading: moduleLoading, error: moduleError } = useQuery<{
-    success: boolean;
-    module: LearningModule;
-    lessons: Lesson[];
-  }>({
-    queryKey: ['/api/learning/modules', moduleId],
+  const { data: moduleData, isLoading: moduleLoading, error: moduleError } = useQuery({
+    queryKey: ['learning-module-detail', moduleId],
+    queryFn: async () => {
+      const res = await fetch(`/api/learning/modules/${moduleId}`, {
+        credentials: 'include',
+        headers: {
+          ...(localStorage.getItem('auth_token') ? { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` } : {}),
+        },
+      });
+      if (!res.ok) throw new Error('Failed to load course');
+      const data = await res.json();
+      return data as { success: boolean; module: LearningModule; lessons: Lesson[] };
+    },
     enabled: !!moduleId,
     retry: 2,
+    staleTime: 5 * 60 * 1000,
   });
 
-  const module = moduleData?.module;
+  const courseModule = moduleData?.module;
   const lessons = moduleData?.lessons || [];
   const currentLesson = lessons[currentLessonIndex];
   const currentLessonId = currentLesson?.id || lessonId;
 
-  const { data: lessonData } = useQuery<{
-    success: boolean;
-    lesson: Lesson;
-    quizzes: Quiz[];
-  }>({
-    queryKey: ['/api/learning/lessons', currentLessonId],
+  const { data: lessonData } = useQuery({
+    queryKey: ['learning-lesson-detail', currentLessonId],
+    queryFn: async () => {
+      const res = await fetch(`/api/learning/lessons/${currentLessonId}`, {
+        credentials: 'include',
+        headers: {
+          ...(localStorage.getItem('auth_token') ? { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` } : {}),
+        },
+      });
+      if (!res.ok) throw new Error('Failed to load lesson');
+      const data = await res.json();
+      return data as { success: boolean; lesson: Lesson; quizzes: Quiz[] };
+    },
     enabled: !!currentLessonId,
     retry: 1,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: progressData } = useQuery({
@@ -277,7 +293,7 @@ export default function LessonViewer() {
     );
   }
 
-  if (!module && !moduleLoading) {
+  if (!courseModule && !moduleLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 pt-20 flex flex-col items-center justify-center gap-4">
         <p className="text-gray-400">{moduleError ? 'Failed to load course. Please try again.' : 'Course not found'}</p>
@@ -304,7 +320,7 @@ export default function LessonViewer() {
           <div className="flex items-center justify-between mb-3">
             <div>
               <Badge variant="outline" className="mb-2 border-purple-500/30 text-purple-400">
-                {module?.title || 'Course'}
+                {courseModule?.title || 'Course'}
               </Badge>
               <h1 className="text-xl font-bold text-white">{currentLesson?.title || 'Loading...'}</h1>
             </div>
