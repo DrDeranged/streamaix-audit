@@ -10537,7 +10537,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       isActive: aiAgents.isActive,
       totalStaked: sql<number>`COALESCE((SELECT SUM(${botStakes.amount}) FROM ${botStakes} WHERE ${botStakes.agentId} = ${aiAgents.id} AND ${botStakes.status} = 'active'), 0)`,
       backerCount: sql<number>`COALESCE((SELECT COUNT(*) FROM ${botStakes} WHERE ${botStakes.agentId} = ${aiAgents.id} AND ${botStakes.status} = 'active'), 0)`,
-      recentTradeCount: sql<number>`COALESCE((SELECT COUNT(*) FROM ${botSimTrades} WHERE ${botSimTrades.agentId} = ${aiAgents.id}), 0)`,
+      recentTradeCount: sql<number>`COALESCE(${aiAgents.totalPredictions}, 0)`,
     })
     .from(aiAgents)
     .where(and(...conditions))
@@ -10550,7 +10550,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     .limit(limit)
     .offset(offset);
 
-    res.json(bots);
+    const [countResult] = await db.select({ count: sql<number>`COUNT(*)::int` })
+      .from(aiAgents)
+      .where(and(...conditions));
+
+    res.json({ bots, total: countResult?.count || 0 });
   }));
 
   // GET /api/bot-trading/bots/:id - Get bot detail with trade history

@@ -15,7 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 import {
   Cpu, TrendingUp, TrendingDown, Users, Coins, Activity, Target, Flame,
   BarChart3, ArrowUpRight, ArrowDownRight, Wallet, Eye, LogIn, Zap,
-  Shield, Crosshair, Clock, Trophy, ChevronRight, Sparkles, BarChart2,
+  Shield, Crosshair, Clock, Trophy, ChevronRight, ChevronLeft, Sparkles, BarChart2,
   Bot, AlertTriangle, DollarSign,
 } from 'lucide-react';
 
@@ -500,6 +500,8 @@ export default function BotTradingPage() {
   const [strategy, setStrategy] = useState('all');
   const [sort, setSort] = useState('roi');
   const [selectedBotId, setSelectedBotId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const BOTS_PER_PAGE = 9;
 
   const { data: statsData } = useQuery({ queryKey: ['/api/bot-trading/stats'] });
   const stats = statsData as any;
@@ -508,13 +510,17 @@ export default function BotTradingPage() {
     const params = new URLSearchParams();
     if (strategy !== 'all') params.set('strategy', strategy);
     params.set('sort', sort);
-    params.set('limit', '50');
+    params.set('limit', String(BOTS_PER_PAGE));
+    params.set('offset', String((page - 1) * BOTS_PER_PAGE));
     const qs = params.toString();
     return [`/api/bot-trading/bots?${qs}`];
-  }, [strategy, sort]);
+  }, [strategy, sort, page]);
 
   const { data: botsData, isLoading: botsLoading } = useQuery({ queryKey: botsQueryKey });
-  const bots = Array.isArray(botsData) ? botsData : (botsData as any)?.bots || [];
+  const botsResponse = botsData as any;
+  const bots = botsResponse?.bots || (Array.isArray(botsData) ? botsData : []);
+  const totalBots = botsResponse?.total || bots.length;
+  const totalPages = Math.ceil(totalBots / BOTS_PER_PAGE);
 
   const { data: stakesData, isLoading: stakesLoading } = useQuery({
     queryKey: ['/api/bot-trading/my-stakes'],
@@ -621,7 +627,7 @@ export default function BotTradingPage() {
             <TabsList className="bg-slate-900/60 border border-slate-700/40 p-1">
               <TabsTrigger value="all" className="data-[state=active]:bg-cyan-600/20 data-[state=active]:text-cyan-400 data-[state=active]:shadow-sm px-5">
                 <Bot className="w-4 h-4 mr-1.5" /> All Bots
-                <Badge variant="outline" className="ml-2 text-[10px] border-slate-600 text-slate-400">{bots.length}</Badge>
+                <Badge variant="outline" className="ml-2 text-[10px] border-slate-600 text-slate-400">{totalBots}</Badge>
               </TabsTrigger>
               <TabsTrigger value="my" className="data-[state=active]:bg-purple-600/20 data-[state=active]:text-purple-400 data-[state=active]:shadow-sm px-5">
                 <Wallet className="w-4 h-4 mr-1.5" /> My Bots
@@ -631,7 +637,7 @@ export default function BotTradingPage() {
 
             {activeTab === 'all' && (
               <div className="flex flex-wrap gap-2">
-                <Select value={strategy} onValueChange={setStrategy}>
+                <Select value={strategy} onValueChange={(v) => { setStrategy(v); setPage(1); }}>
                   <SelectTrigger className="w-[150px] bg-slate-900/60 border-slate-700/50 text-white text-sm h-9">
                     <SelectValue placeholder="Strategy" />
                   </SelectTrigger>
@@ -650,7 +656,7 @@ export default function BotTradingPage() {
                   </SelectContent>
                 </Select>
 
-                <Select value={sort} onValueChange={setSort}>
+                <Select value={sort} onValueChange={(v) => { setSort(v); setPage(1); }}>
                   <SelectTrigger className="w-[130px] bg-slate-900/60 border-slate-700/50 text-white text-sm h-9">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
@@ -677,11 +683,57 @@ export default function BotTradingPage() {
                 <p className="text-slate-500 text-sm">Try adjusting your filters</p>
               </motion.div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {bots.map((bot: any, i: number) => (
-                  <BotCard key={bot.id} bot={bot} rank={i + 1} onSelect={() => setSelectedBotId(bot.id)} />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {bots.map((bot: any, i: number) => (
+                    <BotCard key={bot.id} bot={bot} rank={(page - 1) * BOTS_PER_PAGE + i + 1} onSelect={() => setSelectedBotId(bot.id)} />
+                  ))}
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-8">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-slate-700/50 text-slate-400 hover:text-white hover:border-cyan-500/50 disabled:opacity-30"
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={page <= 1}
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                      <Button
+                        key={p}
+                        variant="outline"
+                        size="sm"
+                        className={`w-9 h-9 ${
+                          p === page
+                            ? 'bg-cyan-600/20 border-cyan-500/50 text-cyan-400'
+                            : 'border-slate-700/50 text-slate-400 hover:text-white hover:border-cyan-500/50'
+                        }`}
+                        onClick={() => setPage(p)}
+                      >
+                        {p}
+                      </Button>
+                    ))}
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-slate-700/50 text-slate-400 hover:text-white hover:border-cyan-500/50 disabled:opacity-30"
+                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                      disabled={page >= totalPages}
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+
+                    <span className="text-xs text-slate-500 ml-3">
+                      {(page - 1) * BOTS_PER_PAGE + 1}-{Math.min(page * BOTS_PER_PAGE, totalBots)} of {totalBots}
+                    </span>
+                  </div>
+                )}
+              </>
             )}
           </TabsContent>
 
