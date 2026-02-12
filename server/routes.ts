@@ -10237,7 +10237,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     let conditions = [eq(aiAgents.isActive, true)];
     if (strategy) {
-      conditions.push(eq(aiAgents.strategy, strategy));
+      conditions.push(eq(aiAgents.personality, strategy));
     }
 
     const bots = await db.select({
