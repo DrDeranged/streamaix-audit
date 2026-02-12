@@ -12,7 +12,7 @@ import {
   Layers, TrendingUp as Gain, BarChart2, Percent, Lock, Bell,
   Gauge, Crosshair, Radio, Scale, CircleDot, Flame, Briefcase,
   Calendar, Receipt, FileText, Star, ChevronUp, ArrowRight, History, CheckCircle,
-  BookMarked, ShoppingCart, Wifi, WifiOff, MessageCircle, Send, Link2, Unlink
+  BookMarked, ShoppingCart, Wifi, WifiOff, MessageCircle, Send, Link2, Unlink, Bot
 } from 'lucide-react';
 import { useWebSocketPrices, type PriceUpdate } from '@/hooks/use-websocket-prices';
 import {
@@ -724,6 +724,109 @@ function AddToWatchlistDialog({ onSuccess }: { onSuccess: () => void }) {
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function BotTradingTab() {
+  const { data: myStakes, isLoading: stakesLoading } = useQuery<any[]>({
+    queryKey: ['/api/bot-trading/my-stakes'],
+    refetchInterval: 60000,
+  });
+
+  const { data: stats } = useQuery<any>({
+    queryKey: ['/api/bot-trading/stats'],
+    refetchInterval: 60000,
+  });
+
+  const [, navigate] = useLocation();
+
+  if (stakesLoading) {
+    return (
+      <div className="py-8 text-center">
+        <RefreshCw className="w-6 h-6 text-cyan-400 animate-spin mx-auto mb-2" />
+        <p className="text-gray-400 text-sm">Loading bot stakes...</p>
+      </div>
+    );
+  }
+
+  const stakes = myStakes || [];
+  const totalStaked = stakes.reduce((sum: number, s: any) => sum + Number(s.amount || 0), 0);
+  const totalPnL = stakes.reduce((sum: number, s: any) => sum + Number(s.currentValue || s.amount || 0) - Number(s.amount || 0), 0);
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+          <p className="text-[11px] text-gray-400 mb-1">Total Staked</p>
+          <p className="text-base font-bold text-white">{totalStaked.toLocaleString()} <span className="text-xs text-gray-400">STREAM</span></p>
+        </div>
+        <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+          <p className="text-[11px] text-gray-400 mb-1">Active Bots</p>
+          <p className="text-base font-bold text-cyan-400">{stakes.filter((s: any) => s.status === 'active').length}</p>
+        </div>
+        <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+          <p className="text-[11px] text-gray-400 mb-1">Est. P&L</p>
+          <p className={`text-base font-bold ${totalPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+            {totalPnL >= 0 ? '+' : ''}{totalPnL.toFixed(0)}
+          </p>
+        </div>
+      </div>
+
+      {stakes.length === 0 ? (
+        <div className="py-6 text-center">
+          <Bot className="w-10 h-10 text-cyan-400/50 mx-auto mb-3" />
+          <h3 className="text-sm font-semibold text-white mb-1">No Bot Stakes Yet</h3>
+          <p className="text-xs text-gray-400 mb-4">Stake STREAM points on AI trading bots to earn simulated returns.</p>
+          <Button
+            size="sm"
+            onClick={() => navigate('/bot-trading')}
+            className="bg-cyan-600 hover:bg-cyan-500 text-white text-xs"
+          >
+            <Bot className="w-3 h-3 mr-1" />
+            Browse Bots
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1">
+          {stakes.map((stake: any) => {
+            const pnl = Number(stake.currentValue || stake.amount || 0) - Number(stake.amount || 0);
+            const pnlPct = Number(stake.amount) > 0 ? (pnl / Number(stake.amount)) * 100 : 0;
+            return (
+              <div
+                key={stake.id}
+                className="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg border border-slate-700/30 hover:border-cyan-500/30 transition-colors cursor-pointer"
+                onClick={() => navigate('/bot-trading')}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{stake.botAvatar || '🤖'}</span>
+                  <div>
+                    <p className="text-sm font-medium text-white">{stake.botName || 'Trading Bot'}</p>
+                    <p className="text-[11px] text-gray-400">{Number(stake.amount).toLocaleString()} STREAM staked</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className={`text-sm font-semibold ${pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {pnl >= 0 ? '+' : ''}{pnl.toFixed(0)}
+                  </p>
+                  <p className={`text-[11px] ${pnlPct >= 0 ? 'text-green-400/70' : 'text-red-400/70'}`}>
+                    {pnlPct >= 0 ? '+' : ''}{pnlPct.toFixed(1)}%
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full mt-2 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10"
+            onClick={() => navigate('/bot-trading')}
+          >
+            View All Bots
+            <ChevronRight className="w-3 h-3 ml-1" />
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -3854,6 +3957,14 @@ export default function PortfolioDashboard() {
                             <BookMarked className="w-4 h-4 mr-2" />
                             Watchlist
                           </TabsTrigger>
+                          <TabsTrigger 
+                            value="bot-trading" 
+                            className="data-[state=active]:bg-transparent data-[state=active]:text-white text-gray-500 px-0 ml-4"
+                            data-testid="tab-bot-trading"
+                          >
+                            <Bot className="w-4 h-4 mr-2" />
+                            Bot Trading
+                          </TabsTrigger>
                         </TabsList>
                         <div className="flex items-center gap-2">
                           {assets.length > 0 && (
@@ -3919,6 +4030,10 @@ export default function PortfolioDashboard() {
                         <WatchlistTab portfolioId={activePortfolioId!} onBuyFromWatchlist={(item) => {
                           setAlertSymbol(item.symbol);
                         }} />
+                      </TabsContent>
+
+                      <TabsContent value="bot-trading" className="mt-0">
+                        <BotTradingTab />
                       </TabsContent>
                     </Tabs>
                   </Card>
