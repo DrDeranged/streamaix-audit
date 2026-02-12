@@ -10720,7 +10720,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       botName: aiAgents.name,
       botAvatar: aiAgents.avatar,
       botStrategy: aiAgents.strategy,
+      botPersonality: aiAgents.personality,
       botRoi: aiAgents.roi,
+      botAccuracyRate: aiAgents.accuracyRate,
+      botTotalPredictions: aiAgents.totalPredictions,
     })
     .from(botStakes)
     .innerJoin(aiAgents, eq(botStakes.agentId, aiAgents.id))
