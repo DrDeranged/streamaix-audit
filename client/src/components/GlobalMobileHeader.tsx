@@ -14,6 +14,7 @@ const routeToSectionMap: Record<string, string> = {
   '/bounties': 'bounties',
   '/bounty': 'bounties',
   '/ai-trading': 'ai-trading',
+  '/bot-trading': 'ai-trading',
   '/discover': 'discover',
   '/streams': 'live-streams',
   '/stream-view': 'live-streams',

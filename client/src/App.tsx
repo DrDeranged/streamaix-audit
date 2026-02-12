@@ -56,6 +56,7 @@ const LearningHub = React.lazy(() => import("@/pages/learning-hub"));
 const LessonViewer = React.lazy(() => import("@/pages/lesson-viewer"));
 const PortfolioDashboard = React.lazy(() => import("@/pages/portfolio-dashboard"));
 const NotificationSettings = React.lazy(() => import("@/pages/notification-settings"));
+const BotTrading = React.lazy(() => import("@/pages/bot-trading"));
 function Router() {
   return (
     <Switch>
@@ -150,6 +151,12 @@ function Router() {
       <Route path="/ai-trading">
         <Suspense fallback={<TradingSkeleton />}>
           <AITrading />
+        </Suspense>
+      </Route>
+
+      <Route path="/bot-trading">
+        <Suspense fallback={<TradingSkeleton />}>
+          <BotTrading />
         </Suspense>
       </Route>
       

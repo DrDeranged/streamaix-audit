@@ -230,6 +230,11 @@ app.use((req, res, next) => {
         console.log('⚠️  Autonomous ecosystem disabled (requires OPENAI_API_KEY)');
       }
 
+      console.log('🤖 Starting Bot Trading Simulator...');
+      const { botTradingSimulator } = await import('./services/botTradingSimulator');
+      await botTradingSimulator.start();
+      console.log('✅ Bot Trading Simulator active - simulating trades for staked bots');
+
       console.log('🌱 Starting background database seeding...');
       autoSeedDatabase().then(() => {
         console.log('✅ Auto-seed completed successfully');

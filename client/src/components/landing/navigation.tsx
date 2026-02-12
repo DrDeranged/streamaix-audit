@@ -196,6 +196,15 @@ export function Navigation() {
                       </div>
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/bot-trading" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-cyan-500/20 transition-all duration-200 rounded-md mx-1">
+                      <Bot className="w-4 h-4 text-cyan-400" />
+                      <div>
+                        <span className="font-medium block">Bot Trading Simulator</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">Stake on AI bots</span>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
@@ -807,6 +816,15 @@ export function Navigation() {
                   >
                     <LineChart className="w-4 h-4 text-amber-400" />
                     AI Trading Signals
+                  </button>
+                </Link>
+                <Link href="/bot-trading" className="block">
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-cyan-500/20 transition-all duration-200 font-medium text-sm"
+                  >
+                    <Bot className="w-4 h-4 text-cyan-400" />
+                    Bot Trading Simulator
                   </button>
                 </Link>
 
