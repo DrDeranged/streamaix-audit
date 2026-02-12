@@ -45,8 +45,14 @@ const ALL_ASSETS = [...CRYPTO_ASSETS, ...STOCK_ASSETS];
 const STRATEGY_CONFIG: Record<string, { longBias: number; closeChance: number; positionMultiplier: number }> = {
   momentum: { longBias: 0.75, closeChance: 0.3, positionMultiplier: 1.5 },
   contrarian: { longBias: 0.4, closeChance: 0.4, positionMultiplier: 1.0 },
-  swing: { longBias: 0.55, closeChance: 0.35, positionMultiplier: 1.2 },
-  scalp: { longBias: 0.5, closeChance: 0.6, positionMultiplier: 0.6 },
+  'swing-trader': { longBias: 0.55, closeChance: 0.35, positionMultiplier: 1.2 },
+  scalper: { longBias: 0.5, closeChance: 0.6, positionMultiplier: 0.6 },
+  conservative: { longBias: 0.45, closeChance: 0.25, positionMultiplier: 0.7 },
+  aggressive: { longBias: 0.7, closeChance: 0.5, positionMultiplier: 2.0 },
+  hodler: { longBias: 0.85, closeChance: 0.1, positionMultiplier: 1.5 },
+  'day-trader': { longBias: 0.55, closeChance: 0.55, positionMultiplier: 1.3 },
+  quantitative: { longBias: 0.52, closeChance: 0.35, positionMultiplier: 1.1 },
+  arbitrage: { longBias: 0.5, closeChance: 0.45, positionMultiplier: 0.8 },
 };
 
 const RISK_MULTIPLIER: Record<string, number> = {
@@ -104,6 +110,84 @@ const SCALP_SHORT_REASONS = [
   '{asset} 5-min chart rejection, quick scalp short',
   '{asset} order book imbalance favoring sellers, scalp short',
   '{asset} micro resistance hit, scalp short entry',
+];
+
+const CONSERVATIVE_LONG_REASONS = [
+  '{asset} fundamentals strong with low volatility, conservative long',
+  '{asset} stable uptrend with solid support, value entry',
+  '{asset} risk-adjusted return favorable, measured long position',
+  '{asset} blue-chip holding at discount, conservative accumulation',
+];
+
+const CONSERVATIVE_SHORT_REASONS = [
+  '{asset} showing deteriorating fundamentals, protective short hedge',
+  '{asset} overvalued relative to peers, conservative short position',
+  '{asset} risk management dictates reducing exposure, hedge short',
+];
+
+const AGGRESSIVE_LONG_REASONS = [
+  '{asset} breakout with massive volume, aggressive leveraged long',
+  '{asset} parabolic setup forming, full-size long entry',
+  '{asset} high-conviction bullish catalyst, maximum position long',
+  '{asset} volatility squeeze about to pop upward, aggressive entry',
+];
+
+const AGGRESSIVE_SHORT_REASONS = [
+  '{asset} breakdown confirmed, aggressive short with leverage',
+  '{asset} bearish catalyst imminent, full-size short position',
+  '{asset} distribution pattern complete, maximum conviction short',
+];
+
+const HODLER_LONG_REASONS = [
+  '{asset} long-term thesis intact, adding to core position',
+  '{asset} accumulating on dip for long-term hold',
+  '{asset} fundamental value play, buy and hold strategy',
+  '{asset} dollar-cost averaging into position, patient accumulation',
+  '{asset} generational buying opportunity, building long-term stack',
+];
+
+const HODLER_SHORT_REASONS = [
+  '{asset} trimming position at extreme overbought levels',
+  '{asset} rebalancing portfolio, taking partial profits on rally',
+];
+
+const DAYTRADER_LONG_REASONS = [
+  '{asset} intraday bullish pattern, day trade long',
+  '{asset} opening range breakout confirmed, quick long entry',
+  '{asset} VWAP reclaim with momentum, day trade long',
+  '{asset} pre-market gap up holding, intraday long play',
+];
+
+const DAYTRADER_SHORT_REASONS = [
+  '{asset} intraday breakdown below support, day trade short',
+  '{asset} failed breakout, quick reversal short entry',
+  '{asset} below VWAP with selling pressure, day trade short',
+];
+
+const QUANTITATIVE_LONG_REASONS = [
+  '{asset} statistical model signals long, z-score favorable',
+  '{asset} mean reversion model triggered buy signal',
+  '{asset} multi-factor model consensus: long with 72% confidence',
+  '{asset} regression analysis indicates undervalued, quantitative long',
+];
+
+const QUANTITATIVE_SHORT_REASONS = [
+  '{asset} quantitative model short signal, 2 sigma deviation',
+  '{asset} statistical arbitrage opportunity, paired short',
+  '{asset} factor model indicates overvalued, systematic short',
+];
+
+const ARBITRAGE_LONG_REASONS = [
+  '{asset} price dislocation detected, arbitrage long leg',
+  '{asset} cross-exchange spread favorable, buying the discount',
+  '{asset} basis trade opportunity, long spot position',
+  '{asset} triangular arbitrage setup, entering long leg',
+];
+
+const ARBITRAGE_SHORT_REASONS = [
+  '{asset} premium detected on this venue, arbitrage short leg',
+  '{asset} futures-spot spread wide, selling the premium',
+  '{asset} cross-market inefficiency, short leg of arb pair',
 ];
 
 const CLOSE_REASONS = [
@@ -170,16 +254,16 @@ export class BotTradingSimulator {
     console.log('[Bot Simulator] === Starting trading cycle ===');
 
     try {
-      const botsWithStakes = await this.getBotsWithStakes();
+      const allBots = await this.getAllActiveBots();
 
-      if (botsWithStakes.length === 0) {
-        console.log('[Bot Simulator] No bots with active stakes, skipping cycle');
+      if (allBots.length === 0) {
+        console.log('[Bot Simulator] No active bots found, skipping cycle');
         return;
       }
 
-      console.log(`[Bot Simulator] Processing ${botsWithStakes.length} bots with active stakes`);
+      console.log(`[Bot Simulator] Processing ${allBots.length} active bots`);
 
-      for (const { agent, totalStaked } of botsWithStakes) {
+      for (const { agent, totalStaked } of allBots) {
         try {
           await this.processBot(agent, totalStaked);
         } catch (err) {
@@ -190,7 +274,7 @@ export class BotTradingSimulator {
       await this.updateStakes();
 
       const today = new Date().toISOString().split('T')[0];
-      for (const { agent } of botsWithStakes) {
+      for (const { agent } of allBots) {
         const lastSnapshot = this.lastSnapshotDate.get(agent.id);
         if (lastSnapshot !== today) {
           try {
@@ -209,7 +293,12 @@ export class BotTradingSimulator {
     }
   }
 
-  private async getBotsWithStakes(): Promise<Array<{ agent: any; totalStaked: number }>> {
+  private async getAllActiveBots(): Promise<Array<{ agent: any; totalStaked: number }>> {
+    const agents = await db
+      .select()
+      .from(aiAgents)
+      .where(eq(aiAgents.isActive, true));
+
     const stakesResult = await db
       .select({
         agentId: botStakes.agentId,
@@ -219,27 +308,19 @@ export class BotTradingSimulator {
       .where(eq(botStakes.status, 'active'))
       .groupBy(botStakes.agentId);
 
-    if (stakesResult.length === 0) return [];
-
-    const results: Array<{ agent: any; totalStaked: number }> = [];
-
+    const stakeMap = new Map<string, number>();
     for (const stake of stakesResult) {
-      const [agent] = await db
-        .select()
-        .from(aiAgents)
-        .where(eq(aiAgents.id, stake.agentId))
-        .limit(1);
-
-      if (agent && agent.isActive) {
-        results.push({ agent, totalStaked: Number(stake.totalStaked) });
-      }
+      stakeMap.set(stake.agentId, Number(stake.totalStaked));
     }
 
-    return results;
+    return agents.map(agent => ({
+      agent,
+      totalStaked: stakeMap.get(agent.id) || 0,
+    }));
   }
 
   private async processBot(agent: any, totalStaked: number) {
-    console.log(`[Bot Simulator] Processing bot: ${agent.name} (strategy: ${agent.strategy}, risk: ${agent.riskTolerance})`);
+    console.log(`[Bot Simulator] Processing bot: ${agent.name} (personality: ${agent.personality}, risk: ${agent.riskTolerance})`);
 
     const openTrades = await db
       .select()
@@ -249,11 +330,11 @@ export class BotTradingSimulator {
         eq(botSimTrades.status, 'open')
       ));
 
-    const strategyConfig = STRATEGY_CONFIG[agent.strategy] || STRATEGY_CONFIG.swing;
+    const strategyConfig = STRATEGY_CONFIG[agent.personality] || STRATEGY_CONFIG['swing-trader'];
     const closeChance = strategyConfig.closeChance;
 
     for (const trade of openTrades) {
-      if (Math.random() < (agent.strategy === 'scalp' ? 0.6 : closeChance)) {
+      if (Math.random() < (agent.personality === 'scalper' ? 0.6 : closeChance)) {
         try {
           await this.closeTrade(trade);
           await delay(DELAY_BETWEEN_API_CALLS_MS);
@@ -287,7 +368,7 @@ export class BotTradingSimulator {
       return;
     }
 
-    const strategyConfig = STRATEGY_CONFIG[agent.strategy] || STRATEGY_CONFIG.swing;
+    const strategyConfig = STRATEGY_CONFIG[agent.personality] || STRATEGY_CONFIG['swing-trader'];
     const riskMult = RISK_MULTIPLIER[agent.riskTolerance] || 1.0;
 
     const direction = Math.random() < strategyConfig.longBias ? 'long' : 'short';
@@ -300,7 +381,7 @@ export class BotTradingSimulator {
     }
 
     const quantity = Math.max(0.0001, baseQuantity);
-    const reasoning = this.generateReasoning(asset.name, direction, agent.strategy);
+    const reasoning = this.generateReasoning(asset.name, direction, agent.personality);
 
     await db.insert(botSimTrades).values({
       agentId: agent.id,
@@ -524,21 +605,39 @@ export class BotTradingSimulator {
     }
   }
 
-  private generateReasoning(assetName: string, direction: string, strategy: string): string {
+  private generateReasoning(assetName: string, direction: string, personality: string): string {
     let reasons: string[];
 
-    switch (strategy) {
+    switch (personality) {
       case 'momentum':
         reasons = direction === 'long' ? MOMENTUM_LONG_REASONS : MOMENTUM_SHORT_REASONS;
         break;
       case 'contrarian':
         reasons = direction === 'long' ? CONTRARIAN_LONG_REASONS : CONTRARIAN_SHORT_REASONS;
         break;
-      case 'swing':
+      case 'swing-trader':
         reasons = direction === 'long' ? SWING_LONG_REASONS : SWING_SHORT_REASONS;
         break;
-      case 'scalp':
+      case 'scalper':
         reasons = direction === 'long' ? SCALP_LONG_REASONS : SCALP_SHORT_REASONS;
+        break;
+      case 'conservative':
+        reasons = direction === 'long' ? CONSERVATIVE_LONG_REASONS : CONSERVATIVE_SHORT_REASONS;
+        break;
+      case 'aggressive':
+        reasons = direction === 'long' ? AGGRESSIVE_LONG_REASONS : AGGRESSIVE_SHORT_REASONS;
+        break;
+      case 'hodler':
+        reasons = direction === 'long' ? HODLER_LONG_REASONS : HODLER_SHORT_REASONS;
+        break;
+      case 'day-trader':
+        reasons = direction === 'long' ? DAYTRADER_LONG_REASONS : DAYTRADER_SHORT_REASONS;
+        break;
+      case 'quantitative':
+        reasons = direction === 'long' ? QUANTITATIVE_LONG_REASONS : QUANTITATIVE_SHORT_REASONS;
+        break;
+      case 'arbitrage':
+        reasons = direction === 'long' ? ARBITRAGE_LONG_REASONS : ARBITRAGE_SHORT_REASONS;
         break;
       default:
         reasons = direction === 'long' ? SWING_LONG_REASONS : SWING_SHORT_REASONS;
