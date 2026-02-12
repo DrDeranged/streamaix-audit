@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/hooks/useAuth';
-import { apiRequest, queryClient } from '@/lib/queryClient';
+import { apiRequest, queryClient, getQueryFn } from '@/lib/queryClient';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
@@ -171,12 +171,14 @@ export default function LessonViewer() {
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
   const [startTime] = useState(Date.now());
 
-  const { data: moduleData, isLoading: moduleLoading } = useQuery<{
+  const { data: moduleData, isLoading: moduleLoading, error: moduleError } = useQuery<{
+    success: boolean;
     module: LearningModule;
     lessons: Lesson[];
   }>({
     queryKey: ['/api/learning/modules', moduleId],
     enabled: !!moduleId,
+    retry: 2,
   });
 
   const module = moduleData?.module;
@@ -185,22 +187,32 @@ export default function LessonViewer() {
   const currentLessonId = currentLesson?.id || lessonId;
 
   const { data: lessonData } = useQuery<{
+    success: boolean;
     lesson: Lesson;
     quizzes: Quiz[];
   }>({
     queryKey: ['/api/learning/lessons', currentLessonId],
     enabled: !!currentLessonId,
+    retry: 1,
   });
 
   const { data: progressData } = useQuery({
     queryKey: ['/api/learning/progress'],
     enabled: !!user,
+    retry: false,
+    queryFn: getQueryFn({ on401: "returnNull" }),
   });
+
+  const [hasStartedModule, setHasStartedModule] = useState(false);
 
   const startModuleMutation = useMutation({
     mutationFn: () => apiRequest(`/api/learning/modules/${moduleId}/start`, { method: 'POST' }),
     onSuccess: () => {
+      setHasStartedModule(true);
       queryClient.invalidateQueries({ queryKey: ['/api/learning/progress'] });
+    },
+    onError: () => {
+      setHasStartedModule(true);
     },
   });
 
@@ -226,10 +238,10 @@ export default function LessonViewer() {
   const quizzes = lessonData?.quizzes || [];
 
   useEffect(() => {
-    if (user && moduleId && !moduleLoading) {
+    if (user && moduleId && !moduleLoading && !hasStartedModule) {
       startModuleMutation.mutate();
     }
-  }, [user, moduleId, moduleLoading]);
+  }, [user, moduleId, moduleLoading, hasStartedModule]);
 
   useEffect(() => {
     if (lessonId && lessons.length > 0) {
@@ -265,11 +277,11 @@ export default function LessonViewer() {
     );
   }
 
-  if (!module) {
+  if (!module && !moduleLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 pt-20 flex flex-col items-center justify-center gap-4">
-        <p className="text-gray-400">Course not found</p>
-        <Link href="/#learn">
+        <p className="text-gray-400">{moduleError ? 'Failed to load course. Please try again.' : 'Course not found'}</p>
+        <Link href="/learn">
           <Button variant="outline">Back to Learning Hub</Button>
         </Link>
       </div>
@@ -292,7 +304,7 @@ export default function LessonViewer() {
           <div className="flex items-center justify-between mb-3">
             <div>
               <Badge variant="outline" className="mb-2 border-purple-500/30 text-purple-400">
-                {module.title}
+                {module?.title || 'Course'}
               </Badge>
               <h1 className="text-xl font-bold text-white">{currentLesson?.title || 'Loading...'}</h1>
             </div>
