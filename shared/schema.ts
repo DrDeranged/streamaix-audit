@@ -7426,3 +7426,71 @@ export type PortfolioGoal = typeof portfolioGoals.$inferSelect;
 
 export type InsertAssetPriceHistory = z.infer<typeof insertAssetPriceHistorySchema>;
 export type AssetPriceHistory = typeof assetPriceHistory.$inferSelect;
+
+// =============================================================================
+// BOT TRADING SIMULATOR
+// =============================================================================
+
+export const botStakes = pgTable("bot_stakes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  agentId: varchar("agent_id").references(() => aiAgents.id).notNull(),
+  amount: integer("amount").notNull(),
+  currentValue: integer("current_value").notNull(),
+  totalPnl: integer("total_pnl").default(0),
+  totalPnlPercent: real("total_pnl_percent").default(0),
+  status: text("status").notNull().default("active"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const botSimTrades = pgTable("bot_sim_trades", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").references(() => aiAgents.id).notNull(),
+  asset: text("asset").notNull(),
+  assetType: text("asset_type").notNull(),
+  direction: text("direction").notNull(),
+  entryPrice: real("entry_price").notNull(),
+  exitPrice: real("exit_price"),
+  quantity: real("quantity").notNull(),
+  pnl: real("pnl").default(0),
+  pnlPercent: real("pnl_percent").default(0),
+  status: text("status").notNull().default("open"),
+  reasoning: text("reasoning"),
+  closedAt: timestamp("closed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const botPerformanceSnapshots = pgTable("bot_performance_snapshots", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").references(() => aiAgents.id).notNull(),
+  totalValue: real("total_value").notNull(),
+  dailyPnl: real("daily_pnl").default(0),
+  dailyPnlPercent: real("daily_pnl_percent").default(0),
+  cumulativeRoi: real("cumulative_roi").default(0),
+  totalTrades: integer("total_trades").default(0),
+  winRate: real("win_rate").default(0),
+  snapshotDate: timestamp("snapshot_date").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertBotStakeSchema = createInsertSchema(botStakes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertBotSimTradeSchema = createInsertSchema(botSimTrades).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertBotPerformanceSnapshotSchema = createInsertSchema(botPerformanceSnapshots).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertBotStake = z.infer<typeof insertBotStakeSchema>;
+export type BotStake = typeof botStakes.$inferSelect;
+export type InsertBotSimTrade = z.infer<typeof insertBotSimTradeSchema>;
+export type BotSimTrade = typeof botSimTrades.$inferSelect;
+export type InsertBotPerformanceSnapshot = z.infer<typeof insertBotPerformanceSnapshotSchema>;
+export type BotPerformanceSnapshot = typeof botPerformanceSnapshots.$inferSelect;
