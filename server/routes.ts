@@ -84,7 +84,7 @@ import {
   streamRecordings, streamAchievements, userStreamAchievements, streamChatCommands,
   streamChatCommandLogs, streamViewerLeaderboard, knowledgeAvatars, bounties, summaries,
   avatarTrades as avatarTradesTable, avatarPositions, streamConversationMessages, pointsTransactions, dailyLoginStreak,
-  scheduledDebates
+  scheduledDebates, botStakes, botSimTrades, botPerformanceSnapshots
 } from "../shared/schema";
 import { eq, and, desc, gte, lte, sql, asc, isNotNull, isNull } from "drizzle-orm";
 
@@ -10222,6 +10222,266 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('❌ Failed to get cross-market analysis for discover page:', error);
       res.status(500).json({ error: 'Failed to get cross-market analysis' });
     }
+  }));
+
+  // =============================================================================
+  // BOT TRADING SIMULATOR ROUTES
+  // =============================================================================
+
+  // GET /api/bot-trading/bots - List all active AI agents as trading bots
+  app.get('/api/bot-trading/bots', asyncHandler(async (req: Request, res: Response) => {
+    const strategy = req.query.strategy as string | undefined;
+    const sort = (req.query.sort as string) || 'roi';
+    const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
+    const offset = parseInt(req.query.offset as string) || 0;
+
+    let conditions = [eq(aiAgents.isActive, true)];
+    if (strategy) {
+      conditions.push(eq(aiAgents.strategy, strategy));
+    }
+
+    const bots = await db.select({
+      id: aiAgents.id,
+      name: aiAgents.name,
+      personality: aiAgents.personality,
+      description: aiAgents.description,
+      avatar: aiAgents.avatar,
+      strategy: aiAgents.strategy,
+      riskTolerance: aiAgents.riskTolerance,
+      confidenceThreshold: aiAgents.confidenceThreshold,
+      totalPredictions: aiAgents.totalPredictions,
+      correctPredictions: aiAgents.correctPredictions,
+      accuracyRate: aiAgents.accuracyRate,
+      totalVolume: aiAgents.totalVolume,
+      totalProfit: aiAgents.totalProfit,
+      totalLoss: aiAgents.totalLoss,
+      netProfit: aiAgents.netProfit,
+      roi: aiAgents.roi,
+      rank: aiAgents.rank,
+      currentStreak: aiAgents.currentStreak,
+      longestStreak: aiAgents.longestStreak,
+      isActive: aiAgents.isActive,
+      totalStaked: sql<number>`COALESCE((SELECT SUM(${botStakes.amount}) FROM ${botStakes} WHERE ${botStakes.agentId} = ${aiAgents.id} AND ${botStakes.status} = 'active'), 0)`,
+      backerCount: sql<number>`COALESCE((SELECT COUNT(*) FROM ${botStakes} WHERE ${botStakes.agentId} = ${aiAgents.id} AND ${botStakes.status} = 'active'), 0)`,
+      recentTradeCount: sql<number>`COALESCE((SELECT COUNT(*) FROM ${botSimTrades} WHERE ${botSimTrades.agentId} = ${aiAgents.id}), 0)`,
+    })
+    .from(aiAgents)
+    .where(and(...conditions))
+    .orderBy(
+      sort === 'backers' ? desc(sql`COALESCE((SELECT COUNT(*) FROM ${botStakes} WHERE ${botStakes.agentId} = ${aiAgents.id} AND ${botStakes.status} = 'active'), 0)`) :
+      sort === 'winRate' ? desc(aiAgents.accuracyRate) :
+      sort === 'volume' ? desc(aiAgents.totalVolume) :
+      desc(aiAgents.roi)
+    )
+    .limit(limit)
+    .offset(offset);
+
+    res.json(bots);
+  }));
+
+  // GET /api/bot-trading/bots/:id - Get bot detail with trade history
+  app.get('/api/bot-trading/bots/:id', asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const userId = (req as any).user?.id || (req as any).session?.userId;
+
+    const [bot] = await db.select().from(aiAgents).where(eq(aiAgents.id, id)).limit(1);
+    if (!bot) {
+      return res.status(404).json({ error: 'Bot not found' });
+    }
+
+    const trades = await db.select()
+      .from(botSimTrades)
+      .where(eq(botSimTrades.agentId, id))
+      .orderBy(desc(botSimTrades.createdAt))
+      .limit(50);
+
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const snapshots = await db.select()
+      .from(botPerformanceSnapshots)
+      .where(and(
+        eq(botPerformanceSnapshots.agentId, id),
+        gte(botPerformanceSnapshots.snapshotDate, thirtyDaysAgo)
+      ))
+      .orderBy(asc(botPerformanceSnapshots.snapshotDate));
+
+    const [stakeStats] = await db.select({
+      totalStaked: sql<number>`COALESCE(SUM(${botStakes.amount}), 0)`,
+      backerCount: sql<number>`COUNT(*)`,
+    })
+    .from(botStakes)
+    .where(and(eq(botStakes.agentId, id), eq(botStakes.status, 'active')));
+
+    let userStake = null;
+    if (userId) {
+      const stakes = await db.select()
+        .from(botStakes)
+        .where(and(
+          eq(botStakes.agentId, id),
+          eq(botStakes.userId, userId),
+          eq(botStakes.status, 'active')
+        ));
+      userStake = stakes.length > 0 ? stakes[0] : null;
+    }
+
+    res.json({
+      bot,
+      trades,
+      snapshots,
+      stakeStats: stakeStats || { totalStaked: 0, backerCount: 0 },
+      userStake,
+    });
+  }));
+
+  // POST /api/bot-trading/stake - Stake STREAM points on a bot
+  app.post('/api/bot-trading/stake', asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as any).user?.id || (req as any).session?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const { agentId, amount } = req.body;
+    if (!agentId || !amount || amount <= 0) {
+      return res.status(400).json({ error: 'Valid agentId and positive amount required' });
+    }
+
+    const [agent] = await db.select().from(aiAgents).where(eq(aiAgents.id, agentId)).limit(1);
+    if (!agent) {
+      return res.status(404).json({ error: 'Bot not found' });
+    }
+
+    const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if ((user.streamPoints || 0) < amount) {
+      return res.status(400).json({ error: 'Insufficient STREAM points' });
+    }
+
+    await db.update(users)
+      .set({ streamPoints: sql`${users.streamPoints} - ${amount}` })
+      .where(eq(users.id, userId));
+
+    const [stake] = await db.insert(botStakes)
+      .values({
+        userId,
+        agentId,
+        amount,
+        currentValue: amount,
+        status: 'active',
+      })
+      .returning();
+
+    res.json(stake);
+  }));
+
+  // POST /api/bot-trading/withdraw - Withdraw stake from a bot
+  app.post('/api/bot-trading/withdraw', asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as any).user?.id || (req as any).session?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const { stakeId } = req.body;
+    if (!stakeId) {
+      return res.status(400).json({ error: 'stakeId is required' });
+    }
+
+    const [stake] = await db.select()
+      .from(botStakes)
+      .where(and(eq(botStakes.id, stakeId), eq(botStakes.userId, userId)))
+      .limit(1);
+
+    if (!stake) {
+      return res.status(404).json({ error: 'Stake not found' });
+    }
+
+    if (stake.status !== 'active') {
+      return res.status(400).json({ error: 'Stake is not active' });
+    }
+
+    const returnAmount = stake.currentValue;
+
+    await db.update(users)
+      .set({ streamPoints: sql`${users.streamPoints} + ${returnAmount}` })
+      .where(eq(users.id, userId));
+
+    await db.update(botStakes)
+      .set({ status: 'withdrawn', updatedAt: new Date() })
+      .where(eq(botStakes.id, stakeId));
+
+    const [updatedUser] = await db.select({ streamPoints: users.streamPoints })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    res.json({
+      success: true,
+      returnedAmount: returnAmount,
+      newBalance: updatedUser?.streamPoints || 0,
+    });
+  }));
+
+  // GET /api/bot-trading/my-stakes - Get user's active bot stakes
+  app.get('/api/bot-trading/my-stakes', asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as any).user?.id || (req as any).session?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const stakes = await db.select({
+      id: botStakes.id,
+      agentId: botStakes.agentId,
+      amount: botStakes.amount,
+      currentValue: botStakes.currentValue,
+      totalPnl: botStakes.totalPnl,
+      totalPnlPercent: botStakes.totalPnlPercent,
+      status: botStakes.status,
+      createdAt: botStakes.createdAt,
+      botName: aiAgents.name,
+      botAvatar: aiAgents.avatar,
+      botStrategy: aiAgents.strategy,
+      botRoi: aiAgents.roi,
+    })
+    .from(botStakes)
+    .innerJoin(aiAgents, eq(botStakes.agentId, aiAgents.id))
+    .where(and(eq(botStakes.userId, userId), eq(botStakes.status, 'active')));
+
+    res.json(stakes);
+  }));
+
+  // GET /api/bot-trading/stats - Platform-wide stats
+  app.get('/api/bot-trading/stats', asyncHandler(async (req: Request, res: Response) => {
+    const [stakeStats] = await db.select({
+      totalStaked: sql<number>`COALESCE(SUM(${botStakes.amount}), 0)`,
+      activeTraders: sql<number>`COUNT(DISTINCT ${botStakes.userId})`,
+    })
+    .from(botStakes)
+    .where(eq(botStakes.status, 'active'));
+
+    const [topBot] = await db.select({
+      id: aiAgents.id,
+      name: aiAgents.name,
+      avatar: aiAgents.avatar,
+      roi: aiAgents.roi,
+    })
+    .from(aiAgents)
+    .where(eq(aiAgents.isActive, true))
+    .orderBy(desc(aiAgents.roi))
+    .limit(1);
+
+    const [tradeCount] = await db.select({
+      total: sql<number>`COUNT(*)`,
+    })
+    .from(botSimTrades);
+
+    res.json({
+      totalStaked: stakeStats?.totalStaked || 0,
+      activeTraders: stakeStats?.activeTraders || 0,
+      topBot: topBot || null,
+      totalTrades: tradeCount?.total || 0,
+    });
   }));
 
   const httpServer = createServer(app);
