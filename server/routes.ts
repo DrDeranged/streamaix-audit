@@ -10502,74 +10502,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // BOT TRADING SIMULATOR ROUTES
   // =============================================================================
 
-  // GET /api/bot-trading/bots - List all active AI agents as trading bots
+  // GET /api/bot-trading/bots - List all active Knowledge Avatars as trading bots
   app.get('/api/bot-trading/bots', asyncHandler(async (req: Request, res: Response) => {
+    const { getAvatarPersona } = await import('../services/avatarTradingPersonas');
     const strategy = req.query.strategy as string | undefined;
     const sort = (req.query.sort as string) || 'roi';
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
     const offset = parseInt(req.query.offset as string) || 0;
 
-    let conditions = [eq(aiAgents.isActive, true)];
+    let conditions = [eq(knowledgeAvatars.isActive, true)];
     if (strategy) {
-      conditions.push(eq(aiAgents.personality, strategy));
+      conditions.push(eq(knowledgeAvatars.tradingStyle, strategy));
     }
 
     const bots = await db.select({
-      id: aiAgents.id,
-      name: aiAgents.name,
-      personality: aiAgents.personality,
-      description: aiAgents.description,
-      avatar: aiAgents.avatar,
-      strategy: aiAgents.strategy,
-      riskTolerance: aiAgents.riskTolerance,
-      confidenceThreshold: aiAgents.confidenceThreshold,
-      totalPredictions: aiAgents.totalPredictions,
-      correctPredictions: aiAgents.correctPredictions,
-      accuracyRate: aiAgents.accuracyRate,
-      totalVolume: aiAgents.totalVolume,
-      totalProfit: aiAgents.totalProfit,
-      totalLoss: aiAgents.totalLoss,
-      netProfit: aiAgents.netProfit,
-      roi: aiAgents.roi,
-      rank: aiAgents.rank,
-      currentStreak: aiAgents.currentStreak,
-      longestStreak: aiAgents.longestStreak,
-      isActive: aiAgents.isActive,
-      totalStaked: sql<number>`COALESCE((SELECT SUM(${botStakes.amount}) FROM ${botStakes} WHERE ${botStakes.agentId} = ${aiAgents.id} AND ${botStakes.status} = 'active'), 0)`,
-      backerCount: sql<number>`COALESCE((SELECT COUNT(*) FROM ${botStakes} WHERE ${botStakes.agentId} = ${aiAgents.id} AND ${botStakes.status} = 'active'), 0)`,
-      recentTradeCount: sql<number>`COALESCE(${aiAgents.totalPredictions}, 0)`,
+      id: knowledgeAvatars.id,
+      name: knowledgeAvatars.name,
+      handle: knowledgeAvatars.handle,
+      description: knowledgeAvatars.bio,
+      imageUrl: knowledgeAvatars.imageUrl,
+      tradingStyle: knowledgeAvatars.tradingStyle,
+      riskTolerance: knowledgeAvatars.riskTolerance,
+      streamBalance: knowledgeAvatars.streamBalance,
+      totalTrades: knowledgeAvatars.totalTrades,
+      winRate: knowledgeAvatars.winRate,
+      avgTradeRoi: knowledgeAvatars.avgTradeRoi,
+      category: knowledgeAvatars.category,
+      influenceScore: knowledgeAvatars.influenceScore,
+      totalStaked: sql<number>`COALESCE((SELECT SUM(${botStakes.amount}) FROM ${botStakes} WHERE ${botStakes.avatarId} = ${knowledgeAvatars.id} AND ${botStakes.status} = 'active'), 0)`,
+      backerCount: sql<number>`COALESCE((SELECT COUNT(*) FROM ${botStakes} WHERE ${botStakes.avatarId} = ${knowledgeAvatars.id} AND ${botStakes.status} = 'active'), 0)`,
+      recentTradeCount: sql<number>`COALESCE((SELECT COUNT(*) FROM ${botSimTrades} WHERE ${botSimTrades.avatarId} = ${knowledgeAvatars.id}), 0)`,
     })
-    .from(aiAgents)
+    .from(knowledgeAvatars)
     .where(and(...conditions))
     .orderBy(
-      sort === 'backers' ? desc(sql`COALESCE((SELECT COUNT(*) FROM ${botStakes} WHERE ${botStakes.agentId} = ${aiAgents.id} AND ${botStakes.status} = 'active'), 0)`) :
-      sort === 'winRate' ? desc(aiAgents.accuracyRate) :
-      sort === 'volume' ? desc(aiAgents.totalVolume) :
-      desc(aiAgents.roi)
+      sort === 'backers' ? desc(sql`COALESCE((SELECT COUNT(*) FROM ${botStakes} WHERE ${botStakes.avatarId} = ${knowledgeAvatars.id} AND ${botStakes.status} = 'active'), 0)`) :
+      sort === 'winRate' ? desc(knowledgeAvatars.winRate) :
+      sort === 'volume' ? desc(knowledgeAvatars.totalTrades) :
+      desc(knowledgeAvatars.avgTradeRoi)
     )
     .limit(limit)
     .offset(offset);
 
+    const botsWithPersona = bots.map(bot => {
+      const persona = getAvatarPersona(bot.handle || '');
+      return {
+        ...bot,
+        emoji: persona?.emoji || '🤖',
+        personaCategory: persona?.category || bot.category,
+        personaDescription: persona?.description || bot.description,
+      };
+    });
+
     const [countResult] = await db.select({ count: sql<number>`COUNT(*)::int` })
-      .from(aiAgents)
+      .from(knowledgeAvatars)
       .where(and(...conditions));
 
-    res.json({ bots, total: countResult?.count || 0 });
+    res.json({ bots: botsWithPersona, total: countResult?.count || 0 });
   }));
 
   // GET /api/bot-trading/bots/:id - Get bot detail with trade history
   app.get('/api/bot-trading/bots/:id', asyncHandler(async (req: Request, res: Response) => {
+    const { getAvatarPersona } = await import('../services/avatarTradingPersonas');
     const { id } = req.params;
     const userId = (req as any).user?.id || (req as any).session?.userId;
 
-    const [bot] = await db.select().from(aiAgents).where(eq(aiAgents.id, id)).limit(1);
+    const [bot] = await db.select().from(knowledgeAvatars).where(eq(knowledgeAvatars.id, id)).limit(1);
     if (!bot) {
       return res.status(404).json({ error: 'Bot not found' });
     }
 
     const trades = await db.select()
       .from(botSimTrades)
-      .where(eq(botSimTrades.agentId, id))
+      .where(eq(botSimTrades.avatarId, id))
       .orderBy(desc(botSimTrades.createdAt))
       .limit(50);
 
@@ -10578,7 +10583,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const snapshots = await db.select()
       .from(botPerformanceSnapshots)
       .where(and(
-        eq(botPerformanceSnapshots.agentId, id),
+        eq(botPerformanceSnapshots.avatarId, id),
         gte(botPerformanceSnapshots.snapshotDate, thirtyDaysAgo)
       ))
       .orderBy(asc(botPerformanceSnapshots.snapshotDate));
@@ -10588,22 +10593,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       backerCount: sql<number>`COUNT(*)`,
     })
     .from(botStakes)
-    .where(and(eq(botStakes.agentId, id), eq(botStakes.status, 'active')));
+    .where(and(eq(botStakes.avatarId, id), eq(botStakes.status, 'active')));
 
     let userStake = null;
     if (userId) {
       const stakes = await db.select()
         .from(botStakes)
         .where(and(
-          eq(botStakes.agentId, id),
+          eq(botStakes.avatarId, id),
           eq(botStakes.userId, userId),
           eq(botStakes.status, 'active')
         ));
       userStake = stakes.length > 0 ? stakes[0] : null;
     }
 
+    const persona = getAvatarPersona(bot.handle || '');
+    const botWithPersona = {
+      ...bot,
+      emoji: persona?.emoji || '🤖',
+      personaCategory: persona?.category || bot.category,
+      personaDescription: persona?.description || bot.bio,
+    };
+
     res.json({
-      bot,
+      bot: botWithPersona,
       trades,
       snapshots,
       stakeStats: stakeStats || { totalStaked: 0, backerCount: 0 },
@@ -10618,13 +10631,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const { agentId, amount } = req.body;
-    if (!agentId || !amount || amount <= 0) {
-      return res.status(400).json({ error: 'Valid agentId and positive amount required' });
+    const { avatarId, amount } = req.body;
+    if (!avatarId || !amount || amount <= 0) {
+      return res.status(400).json({ error: 'Valid avatarId and positive amount required' });
     }
 
-    const [agent] = await db.select().from(aiAgents).where(eq(aiAgents.id, agentId)).limit(1);
-    if (!agent) {
+    const [avatar] = await db.select().from(knowledgeAvatars).where(eq(knowledgeAvatars.id, avatarId)).limit(1);
+    if (!avatar) {
       return res.status(404).json({ error: 'Bot not found' });
     }
 
@@ -10644,7 +10657,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const [stake] = await db.insert(botStakes)
       .values({
         userId,
-        agentId,
+        avatarId,
         amount,
         currentValue: amount,
         status: 'active',
@@ -10710,23 +10723,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     const stakes = await db.select({
       id: botStakes.id,
-      agentId: botStakes.agentId,
+      avatarId: botStakes.avatarId,
       amount: botStakes.amount,
       currentValue: botStakes.currentValue,
       totalPnl: botStakes.totalPnl,
       totalPnlPercent: botStakes.totalPnlPercent,
       status: botStakes.status,
       createdAt: botStakes.createdAt,
-      botName: aiAgents.name,
-      botAvatar: aiAgents.avatar,
-      botStrategy: aiAgents.strategy,
-      botPersonality: aiAgents.personality,
-      botRoi: aiAgents.roi,
-      botAccuracyRate: aiAgents.accuracyRate,
-      botTotalPredictions: aiAgents.totalPredictions,
+      botName: knowledgeAvatars.name,
+      botHandle: knowledgeAvatars.handle,
+      botImageUrl: knowledgeAvatars.imageUrl,
+      botCategory: knowledgeAvatars.category,
+      botTradingStyle: knowledgeAvatars.tradingStyle,
+      botRiskTolerance: knowledgeAvatars.riskTolerance,
     })
     .from(botStakes)
-    .innerJoin(aiAgents, eq(botStakes.agentId, aiAgents.id))
+    .innerJoin(knowledgeAvatars, eq(botStakes.avatarId, knowledgeAvatars.id))
     .where(and(eq(botStakes.userId, userId), eq(botStakes.status, 'active')));
 
     res.json(stakes);
@@ -10742,14 +10754,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     .where(eq(botStakes.status, 'active'));
 
     const [topBot] = await db.select({
-      id: aiAgents.id,
-      name: aiAgents.name,
-      avatar: aiAgents.avatar,
-      roi: aiAgents.roi,
+      id: knowledgeAvatars.id,
+      name: knowledgeAvatars.name,
+      handle: knowledgeAvatars.handle,
+      imageUrl: knowledgeAvatars.imageUrl,
+      avgTradeRoi: knowledgeAvatars.avgTradeRoi,
     })
-    .from(aiAgents)
-    .where(eq(aiAgents.isActive, true))
-    .orderBy(desc(aiAgents.roi))
+    .from(knowledgeAvatars)
+    .where(eq(knowledgeAvatars.isActive, true))
+    .orderBy(desc(knowledgeAvatars.avgTradeRoi))
     .limit(1);
 
     const [tradeCount] = await db.select({

@@ -1,10 +1,7 @@
-// NOTE: To start the bot trading simulator, import and call botTradingSimulator.start()
-// from your server initialization code (e.g., server/index.ts or wherever services are started).
-// Example: import { botTradingSimulator } from './services/botTradingSimulator'; botTradingSimulator.start();
-
 import { db } from '../db';
-import { aiAgents, botStakes, botSimTrades, botPerformanceSnapshots } from '@shared/schema';
-import { eq, desc, sql, and, count, sum } from 'drizzle-orm';
+import { knowledgeAvatars, botStakes, botSimTrades, botPerformanceSnapshots } from '@shared/schema';
+import { eq, desc, sql, and } from 'drizzle-orm';
+import { getAvatarPersona, getAllAvatarHandles, type AvatarTradingPersona } from './avatarTradingPersonas';
 import axios from 'axios';
 
 const CRYPTO_ASSETS = [
@@ -16,6 +13,17 @@ const CRYPTO_ASSETS = [
   { symbol: 'chainlink', name: 'LINK', type: 'crypto' },
   { symbol: 'polkadot', name: 'DOT', type: 'crypto' },
   { symbol: 'dogecoin', name: 'DOGE', type: 'crypto' },
+  { symbol: 'ripple', name: 'XRP', type: 'crypto' },
+  { symbol: 'uniswap', name: 'UNI', type: 'crypto' },
+  { symbol: 'aave', name: 'AAVE', type: 'crypto' },
+  { symbol: 'tron', name: 'TRX', type: 'crypto' },
+  { symbol: 'matic-network', name: 'MATIC', type: 'crypto' },
+  { symbol: 'fantom', name: 'FTM', type: 'crypto' },
+  { symbol: 'yearn-finance', name: 'YFI', type: 'crypto' },
+  { symbol: 'compound-governance-token', name: 'COMP', type: 'crypto' },
+  { symbol: 'synthetix-network-token', name: 'SNX', type: 'crypto' },
+  { symbol: 'maker', name: 'MKR', type: 'crypto' },
+  { symbol: 'curve-dao-token', name: 'CRV', type: 'crypto' },
 ];
 
 const STOCK_ASSETS = [
@@ -40,163 +48,49 @@ const STOCK_BASE_PRICES: Record<string, number> = {
   'AMD': 165,
 };
 
-const ALL_ASSETS = [...CRYPTO_ASSETS, ...STOCK_ASSETS];
-
-const STRATEGY_CONFIG: Record<string, { longBias: number; closeChance: number; positionMultiplier: number }> = {
-  momentum: { longBias: 0.75, closeChance: 0.3, positionMultiplier: 1.5 },
-  contrarian: { longBias: 0.4, closeChance: 0.4, positionMultiplier: 1.0 },
-  'swing-trader': { longBias: 0.55, closeChance: 0.35, positionMultiplier: 1.2 },
-  scalper: { longBias: 0.5, closeChance: 0.6, positionMultiplier: 0.6 },
-  conservative: { longBias: 0.45, closeChance: 0.25, positionMultiplier: 0.7 },
-  aggressive: { longBias: 0.7, closeChance: 0.5, positionMultiplier: 2.0 },
-  hodler: { longBias: 0.85, closeChance: 0.1, positionMultiplier: 1.5 },
-  'day-trader': { longBias: 0.55, closeChance: 0.55, positionMultiplier: 1.3 },
-  quantitative: { longBias: 0.52, closeChance: 0.35, positionMultiplier: 1.1 },
-  arbitrage: { longBias: 0.5, closeChance: 0.45, positionMultiplier: 0.8 },
+const CRYPTO_PRICE_RANGES: Record<string, [number, number]> = {
+  'BTC': [90000, 105000],
+  'ETH': [3000, 4000],
+  'SOL': [170, 250],
+  'ADA': [0.4, 0.8],
+  'AVAX': [25, 50],
+  'LINK': [12, 25],
+  'DOT': [5, 12],
+  'DOGE': [0.08, 0.2],
+  'XRP': [0.5, 1.2],
+  'UNI': [6, 15],
+  'AAVE': [80, 180],
+  'TRX': [0.08, 0.18],
+  'MATIC': [0.5, 1.5],
+  'FTM': [0.3, 0.9],
+  'YFI': [6000, 12000],
+  'COMP': [40, 90],
+  'SNX': [2, 6],
+  'MKR': [1200, 2500],
+  'CRV': [0.4, 1.2],
 };
 
-const RISK_MULTIPLIER: Record<string, number> = {
-  low: 0.5,
-  medium: 1.0,
-  high: 2.0,
+const COINGECKO_ID_MAP: Record<string, string> = {
+  'BTC': 'bitcoin',
+  'ETH': 'ethereum',
+  'SOL': 'solana',
+  'ADA': 'cardano',
+  'AVAX': 'avalanche-2',
+  'LINK': 'chainlink',
+  'DOT': 'polkadot',
+  'DOGE': 'dogecoin',
+  'XRP': 'ripple',
+  'UNI': 'uniswap',
+  'AAVE': 'aave',
+  'TRX': 'tron',
+  'MATIC': 'matic-network',
+  'FTM': 'fantom',
+  'YFI': 'yearn-finance',
+  'COMP': 'compound-governance-token',
+  'SNX': 'synthetix-network-token',
+  'MKR': 'maker',
+  'CRV': 'curve-dao-token',
 };
-
-const MOMENTUM_LONG_REASONS = [
-  '{asset} showing bullish momentum above 50-day MA, entering long',
-  '{asset} breaking resistance with strong volume, momentum long',
-  '{asset} golden cross confirmed, strong uptrend signal',
-  '{asset} institutional accumulation detected, riding momentum',
-  '{asset} RSI trending up from oversold, momentum entry',
-];
-
-const MOMENTUM_SHORT_REASONS = [
-  '{asset} bearish divergence on MACD, entering short',
-  '{asset} death cross forming, downtrend momentum short',
-  '{asset} breaking key support with volume, momentum short',
-];
-
-const CONTRARIAN_LONG_REASONS = [
-  '{asset} oversold on RSI, contrarian long entry',
-  '{asset} at major support with extreme fear, buying the dip',
-  '{asset} capitulation volume detected, contrarian buy',
-  '{asset} sentiment at extreme low, mean reversion play',
-];
-
-const CONTRARIAN_SHORT_REASONS = [
-  '{asset} overbought on RSI, taking contrarian short',
-  '{asset} at extreme greed levels, fading the rally',
-  '{asset} parabolic move unsustainable, contrarian short',
-];
-
-const SWING_LONG_REASONS = [
-  '{asset} bouncing off trendline support, swing long',
-  '{asset} forming higher low pattern, swing entry',
-  '{asset} consolidation breakout setup, entering long swing',
-];
-
-const SWING_SHORT_REASONS = [
-  '{asset} rejected at resistance zone, swing short entry',
-  '{asset} lower high formation confirmed, swing short',
-  '{asset} bearish engulfing at key level, short swing',
-];
-
-const SCALP_LONG_REASONS = [
-  '{asset} 5-min chart bullish setup, quick scalp long',
-  '{asset} bid-ask spread tightening, scalp entry long',
-  '{asset} microstructure bullish, short-term scalp',
-];
-
-const SCALP_SHORT_REASONS = [
-  '{asset} 5-min chart rejection, quick scalp short',
-  '{asset} order book imbalance favoring sellers, scalp short',
-  '{asset} micro resistance hit, scalp short entry',
-];
-
-const CONSERVATIVE_LONG_REASONS = [
-  '{asset} fundamentals strong with low volatility, conservative long',
-  '{asset} stable uptrend with solid support, value entry',
-  '{asset} risk-adjusted return favorable, measured long position',
-  '{asset} blue-chip holding at discount, conservative accumulation',
-];
-
-const CONSERVATIVE_SHORT_REASONS = [
-  '{asset} showing deteriorating fundamentals, protective short hedge',
-  '{asset} overvalued relative to peers, conservative short position',
-  '{asset} risk management dictates reducing exposure, hedge short',
-];
-
-const AGGRESSIVE_LONG_REASONS = [
-  '{asset} breakout with massive volume, aggressive leveraged long',
-  '{asset} parabolic setup forming, full-size long entry',
-  '{asset} high-conviction bullish catalyst, maximum position long',
-  '{asset} volatility squeeze about to pop upward, aggressive entry',
-];
-
-const AGGRESSIVE_SHORT_REASONS = [
-  '{asset} breakdown confirmed, aggressive short with leverage',
-  '{asset} bearish catalyst imminent, full-size short position',
-  '{asset} distribution pattern complete, maximum conviction short',
-];
-
-const HODLER_LONG_REASONS = [
-  '{asset} long-term thesis intact, adding to core position',
-  '{asset} accumulating on dip for long-term hold',
-  '{asset} fundamental value play, buy and hold strategy',
-  '{asset} dollar-cost averaging into position, patient accumulation',
-  '{asset} generational buying opportunity, building long-term stack',
-];
-
-const HODLER_SHORT_REASONS = [
-  '{asset} trimming position at extreme overbought levels',
-  '{asset} rebalancing portfolio, taking partial profits on rally',
-];
-
-const DAYTRADER_LONG_REASONS = [
-  '{asset} intraday bullish pattern, day trade long',
-  '{asset} opening range breakout confirmed, quick long entry',
-  '{asset} VWAP reclaim with momentum, day trade long',
-  '{asset} pre-market gap up holding, intraday long play',
-];
-
-const DAYTRADER_SHORT_REASONS = [
-  '{asset} intraday breakdown below support, day trade short',
-  '{asset} failed breakout, quick reversal short entry',
-  '{asset} below VWAP with selling pressure, day trade short',
-];
-
-const QUANTITATIVE_LONG_REASONS = [
-  '{asset} statistical model signals long, z-score favorable',
-  '{asset} mean reversion model triggered buy signal',
-  '{asset} multi-factor model consensus: long with 72% confidence',
-  '{asset} regression analysis indicates undervalued, quantitative long',
-];
-
-const QUANTITATIVE_SHORT_REASONS = [
-  '{asset} quantitative model short signal, 2 sigma deviation',
-  '{asset} statistical arbitrage opportunity, paired short',
-  '{asset} factor model indicates overvalued, systematic short',
-];
-
-const ARBITRAGE_LONG_REASONS = [
-  '{asset} price dislocation detected, arbitrage long leg',
-  '{asset} cross-exchange spread favorable, buying the discount',
-  '{asset} basis trade opportunity, long spot position',
-  '{asset} triangular arbitrage setup, entering long leg',
-];
-
-const ARBITRAGE_SHORT_REASONS = [
-  '{asset} premium detected on this venue, arbitrage short leg',
-  '{asset} futures-spot spread wide, selling the premium',
-  '{asset} cross-market inefficiency, short leg of arb pair',
-];
-
-const CLOSE_REASONS = [
-  'Target reached, taking profit on {asset}',
-  'Stop loss triggered on {asset}, managing risk',
-  'Trailing stop hit on {asset}, locking gains',
-  'Time-based exit on {asset}, rebalancing portfolio',
-  'Volatility spike on {asset}, reducing exposure',
-];
 
 const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
 const DELAY_BETWEEN_API_CALLS_MS = 2000;
@@ -207,6 +101,22 @@ function delay(ms: number): Promise<void> {
 
 function pickRandom<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function pickWeightedAsset(assets: AvatarTradingPersona['preferredAssets']): AvatarTradingPersona['preferredAssets'][0] {
+  const totalWeight = assets.reduce((sum, a) => sum + a.weight, 0);
+  let roll = Math.random() * totalWeight;
+  for (const asset of assets) {
+    roll -= asset.weight;
+    if (roll <= 0) return asset;
+  }
+  return assets[assets.length - 1];
+}
+
+function getCoingeckoId(symbol: string): string | null {
+  if (COINGECKO_ID_MAP[symbol]) return COINGECKO_ID_MAP[symbol];
+  const found = CRYPTO_ASSETS.find(a => a.name === symbol || a.symbol === symbol);
+  return found ? found.symbol : null;
 }
 
 export class BotTradingSimulator {
@@ -254,34 +164,34 @@ export class BotTradingSimulator {
     console.log('[Bot Simulator] === Starting trading cycle ===');
 
     try {
-      const allBots = await this.getAllActiveBots();
+      const allAvatars = await this.getAllActiveAvatars();
 
-      if (allBots.length === 0) {
-        console.log('[Bot Simulator] No active bots found, skipping cycle');
+      if (allAvatars.length === 0) {
+        console.log('[Bot Simulator] No active avatars found, skipping cycle');
         return;
       }
 
-      console.log(`[Bot Simulator] Processing ${allBots.length} active bots`);
+      console.log(`[Bot Simulator] Processing ${allAvatars.length} active avatars`);
 
-      for (const { agent, totalStaked } of allBots) {
+      for (const { avatar, persona, totalStaked } of allAvatars) {
         try {
-          await this.processBot(agent, totalStaked);
+          await this.processAvatar(avatar, persona, totalStaked);
         } catch (err) {
-          console.error(`[Bot Simulator] Error processing bot ${agent.name}:`, err);
+          console.error(`[Bot Simulator] Error processing avatar ${avatar.name}:`, err);
         }
       }
 
       await this.updateStakes();
 
       const today = new Date().toISOString().split('T')[0];
-      for (const { agent } of allBots) {
-        const lastSnapshot = this.lastSnapshotDate.get(agent.id);
+      for (const { avatar } of allAvatars) {
+        const lastSnapshot = this.lastSnapshotDate.get(avatar.id);
         if (lastSnapshot !== today) {
           try {
-            await this.takePerformanceSnapshot(agent.id);
-            this.lastSnapshotDate.set(agent.id, today);
+            await this.takePerformanceSnapshot(avatar.id);
+            this.lastSnapshotDate.set(avatar.id, today);
           } catch (err) {
-            console.error(`[Bot Simulator] Error taking snapshot for ${agent.name}:`, err);
+            console.error(`[Bot Simulator] Error taking snapshot for ${avatar.name}:`, err);
           }
         }
       }
@@ -293,50 +203,57 @@ export class BotTradingSimulator {
     }
   }
 
-  private async getAllActiveBots(): Promise<Array<{ agent: any; totalStaked: number }>> {
-    const agents = await db
+  private async getAllActiveAvatars(): Promise<Array<{ avatar: any; persona: AvatarTradingPersona; totalStaked: number }>> {
+    const avatars = await db
       .select()
-      .from(aiAgents)
-      .where(eq(aiAgents.isActive, true));
+      .from(knowledgeAvatars)
+      .where(eq(knowledgeAvatars.isActive, true));
 
     const stakesResult = await db
       .select({
-        agentId: botStakes.agentId,
+        avatarId: botStakes.avatarId,
         totalStaked: sql<number>`COALESCE(SUM(${botStakes.amount}), 0)::int`,
       })
       .from(botStakes)
       .where(eq(botStakes.status, 'active'))
-      .groupBy(botStakes.agentId);
+      .groupBy(botStakes.avatarId);
 
     const stakeMap = new Map<string, number>();
     for (const stake of stakesResult) {
-      stakeMap.set(stake.agentId, Number(stake.totalStaked));
+      if (stake.avatarId) stakeMap.set(stake.avatarId, Number(stake.totalStaked));
     }
 
-    return agents.map(agent => ({
-      agent,
-      totalStaked: stakeMap.get(agent.id) || 0,
-    }));
+    const results: Array<{ avatar: any; persona: AvatarTradingPersona; totalStaked: number }> = [];
+
+    for (const avatar of avatars) {
+      const persona = getAvatarPersona(avatar.handle);
+      if (!persona) continue;
+
+      results.push({
+        avatar,
+        persona,
+        totalStaked: stakeMap.get(avatar.id) || 0,
+      });
+    }
+
+    return results;
   }
 
-  private async processBot(agent: any, totalStaked: number) {
-    console.log(`[Bot Simulator] Processing bot: ${agent.name} (personality: ${agent.personality}, risk: ${agent.riskTolerance})`);
+  private async processAvatar(avatar: any, persona: AvatarTradingPersona, totalStaked: number) {
+    console.log(`[Bot Simulator] Processing avatar: ${avatar.name} (style: ${persona.tradingStyle}, risk: ${persona.riskTolerance})`);
 
     const openTrades = await db
       .select()
       .from(botSimTrades)
       .where(and(
-        eq(botSimTrades.agentId, agent.id),
+        eq(botSimTrades.avatarId, avatar.id),
         eq(botSimTrades.status, 'open')
       ));
 
-    const strategyConfig = STRATEGY_CONFIG[agent.personality] || STRATEGY_CONFIG['swing-trader'];
-    const closeChance = strategyConfig.closeChance;
-
     for (const trade of openTrades) {
-      if (Math.random() < (agent.personality === 'scalper' ? 0.6 : closeChance)) {
+      if (Math.random() < persona.closeChance) {
         try {
-          await this.closeTrade(trade);
+          await this.closeTrade(trade, persona);
           await delay(DELAY_BETWEEN_API_CALLS_MS);
         } catch (err) {
           console.error(`[Bot Simulator] Error closing trade ${trade.id}:`, err);
@@ -344,21 +261,22 @@ export class BotTradingSimulator {
       }
     }
 
-    if (Math.random() < 0.6) {
-      const asset = pickRandom(ALL_ASSETS);
+    if (Math.random() < persona.tradeFrequency) {
+      const selectedAsset = pickWeightedAsset(persona.preferredAssets);
       try {
-        await this.openTrade(agent, asset);
+        await this.openTrade(avatar, persona, selectedAsset);
       } catch (err) {
-        console.error(`[Bot Simulator] Error opening trade for ${agent.name}:`, err);
+        console.error(`[Bot Simulator] Error opening trade for ${avatar.name}:`, err);
       }
     }
   }
 
-  private async openTrade(agent: any, asset: { symbol: string; name: string; type: string }) {
+  private async openTrade(avatar: any, persona: AvatarTradingPersona, asset: { symbol: string; name: string; type: 'crypto' | 'stock'; weight: number }) {
     let price: number | null = null;
 
     if (asset.type === 'crypto') {
-      price = await this.fetchCryptoPrice(asset.symbol);
+      const coingeckoId = getCoingeckoId(asset.symbol) || asset.symbol;
+      price = await this.fetchCryptoPrice(coingeckoId);
     } else {
       price = await this.simulateStockPrice(asset.symbol);
     }
@@ -368,23 +286,22 @@ export class BotTradingSimulator {
       return;
     }
 
-    const strategyConfig = STRATEGY_CONFIG[agent.personality] || STRATEGY_CONFIG['swing-trader'];
-    const riskMult = RISK_MULTIPLIER[agent.riskTolerance] || 1.0;
-
-    const direction = Math.random() < strategyConfig.longBias ? 'long' : 'short';
+    const riskMult = persona.riskTolerance === 'high' ? 2.0 : persona.riskTolerance === 'medium' ? 1.0 : 0.5;
+    const direction = Math.random() < persona.longBias ? 'long' : 'short';
 
     let baseQuantity: number;
     if (asset.type === 'crypto') {
-      baseQuantity = (1000 / price) * strategyConfig.positionMultiplier * riskMult;
+      baseQuantity = (1000 / price) * persona.positionMultiplier * riskMult;
     } else {
-      baseQuantity = Math.max(1, Math.round(10 * strategyConfig.positionMultiplier * riskMult));
+      baseQuantity = Math.max(1, Math.round(10 * persona.positionMultiplier * riskMult));
     }
 
     const quantity = Math.max(0.0001, baseQuantity);
-    const reasoning = this.generateReasoning(asset.name, direction, agent.personality);
+    const reasons = direction === 'long' ? persona.longReasons : persona.shortReasons;
+    const reasoning = pickRandom(reasons).replace('{asset}', asset.name);
 
     await db.insert(botSimTrades).values({
-      agentId: agent.id,
+      avatarId: avatar.id,
       asset: asset.name,
       assetType: asset.type,
       direction,
@@ -394,19 +311,19 @@ export class BotTradingSimulator {
       reasoning,
     });
 
-    console.log(`[Bot Simulator] ${agent.name} opened ${direction} ${asset.name} @ $${price.toFixed(2)} qty: ${quantity.toFixed(4)}`);
+    console.log(`[Bot Simulator] ${avatar.name} opened ${direction} ${asset.name} @ $${price.toFixed(2)} qty: ${quantity.toFixed(4)}`);
   }
 
-  private async closeTrade(trade: any) {
+  private async closeTrade(trade: any, persona: AvatarTradingPersona) {
     let currentPrice: number | null = null;
 
     if (trade.assetType === 'crypto') {
-      const cryptoAsset = CRYPTO_ASSETS.find(a => a.name === trade.asset);
-      if (cryptoAsset) {
-        currentPrice = await this.fetchCryptoPrice(cryptoAsset.symbol);
+      const coingeckoId = getCoingeckoId(trade.asset);
+      if (coingeckoId) {
+        currentPrice = await this.fetchCryptoPrice(coingeckoId);
       }
     } else {
-      const stockAsset = STOCK_ASSETS.find(a => a.name === trade.asset);
+      const stockAsset = STOCK_ASSETS.find(a => a.name === trade.asset || a.symbol === trade.asset);
       if (stockAsset) {
         currentPrice = await this.simulateStockPrice(stockAsset.symbol);
       }
@@ -425,8 +342,7 @@ export class BotTradingSimulator {
     }
 
     const pnlPercent = ((pnl / (trade.entryPrice * trade.quantity)) * 100);
-
-    const closeReason = pickRandom(CLOSE_REASONS).replace('{asset}', trade.asset);
+    const closeReason = pickRandom(persona.closeReasons).replace('{asset}', trade.asset);
 
     await db
       .update(botSimTrades)
@@ -479,32 +395,32 @@ export class BotTradingSimulator {
 
   private async updateStakes() {
     try {
-      const agentPnls = await db
+      const avatarPnls = await db
         .select({
-          agentId: botSimTrades.agentId,
+          avatarId: botSimTrades.avatarId,
           totalPnl: sql<number>`COALESCE(SUM(${botSimTrades.pnl}), 0)`,
         })
         .from(botSimTrades)
         .where(eq(botSimTrades.status, 'closed'))
-        .groupBy(botSimTrades.agentId);
+        .groupBy(botSimTrades.avatarId);
 
       const pnlMap = new Map<string, number>();
-      for (const row of agentPnls) {
-        pnlMap.set(row.agentId, Number(row.totalPnl));
+      for (const row of avatarPnls) {
+        if (row.avatarId) pnlMap.set(row.avatarId, Number(row.totalPnl));
       }
 
-      const agentTotals = await db
+      const avatarTotals = await db
         .select({
-          agentId: botStakes.agentId,
+          avatarId: botStakes.avatarId,
           totalStaked: sql<number>`COALESCE(SUM(${botStakes.amount}), 0)`,
         })
         .from(botStakes)
         .where(eq(botStakes.status, 'active'))
-        .groupBy(botStakes.agentId);
+        .groupBy(botStakes.avatarId);
 
       const totalStakedMap = new Map<string, number>();
-      for (const row of agentTotals) {
-        totalStakedMap.set(row.agentId, Number(row.totalStaked));
+      for (const row of avatarTotals) {
+        if (row.avatarId) totalStakedMap.set(row.avatarId, Number(row.totalStaked));
       }
 
       const activeStakes = await db
@@ -513,8 +429,11 @@ export class BotTradingSimulator {
         .where(eq(botStakes.status, 'active'));
 
       for (const stake of activeStakes) {
-        const totalBotPnl = pnlMap.get(stake.agentId) || 0;
-        const totalStakedOnBot = totalStakedMap.get(stake.agentId) || stake.amount;
+        const key = stake.avatarId || stake.agentId;
+        if (!key) continue;
+
+        const totalBotPnl = pnlMap.get(key) || 0;
+        const totalStakedOnBot = totalStakedMap.get(key) || stake.amount;
 
         if (totalStakedOnBot === 0) continue;
 
@@ -539,7 +458,7 @@ export class BotTradingSimulator {
     }
   }
 
-  private async takePerformanceSnapshot(agentId: string) {
+  private async takePerformanceSnapshot(avatarId: string) {
     try {
       const closedTrades = await db
         .select({
@@ -549,7 +468,7 @@ export class BotTradingSimulator {
         })
         .from(botSimTrades)
         .where(and(
-          eq(botSimTrades.agentId, agentId),
+          eq(botSimTrades.avatarId, avatarId),
           eq(botSimTrades.status, 'closed')
         ));
 
@@ -565,7 +484,7 @@ export class BotTradingSimulator {
         })
         .from(botStakes)
         .where(and(
-          eq(botStakes.agentId, agentId),
+          eq(botStakes.avatarId, avatarId),
           eq(botStakes.status, 'active')
         ));
 
@@ -573,14 +492,10 @@ export class BotTradingSimulator {
       const totalValue = stakedAmount + totalPnl;
       const cumulativeRoi = stakedAmount > 0 ? (totalPnl / stakedAmount) * 100 : 0;
 
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split('T')[0];
-
       const prevSnapshots = await db
         .select()
         .from(botPerformanceSnapshots)
-        .where(eq(botPerformanceSnapshots.agentId, agentId))
+        .where(eq(botPerformanceSnapshots.avatarId, avatarId))
         .orderBy(desc(botPerformanceSnapshots.snapshotDate))
         .limit(1);
 
@@ -589,7 +504,7 @@ export class BotTradingSimulator {
       const dailyPnlPercent = prevValue > 0 ? (dailyPnl / prevValue) * 100 : 0;
 
       await db.insert(botPerformanceSnapshots).values({
-        agentId,
+        avatarId,
         totalValue,
         dailyPnl,
         dailyPnlPercent: Math.round(dailyPnlPercent * 100) / 100,
@@ -599,52 +514,136 @@ export class BotTradingSimulator {
         snapshotDate: new Date(),
       });
 
-      console.log(`[Bot Simulator] Snapshot for agent ${agentId}: value=$${totalValue.toFixed(2)}, ROI=${cumulativeRoi.toFixed(2)}%`);
+      console.log(`[Bot Simulator] Snapshot for avatar ${avatarId}: value=$${totalValue.toFixed(2)}, ROI=${cumulativeRoi.toFixed(2)}%`);
     } catch (err) {
-      console.error(`[Bot Simulator] Error taking snapshot for ${agentId}:`, err);
+      console.error(`[Bot Simulator] Error taking snapshot for ${avatarId}:`, err);
     }
-  }
-
-  private generateReasoning(assetName: string, direction: string, personality: string): string {
-    let reasons: string[];
-
-    switch (personality) {
-      case 'momentum':
-        reasons = direction === 'long' ? MOMENTUM_LONG_REASONS : MOMENTUM_SHORT_REASONS;
-        break;
-      case 'contrarian':
-        reasons = direction === 'long' ? CONTRARIAN_LONG_REASONS : CONTRARIAN_SHORT_REASONS;
-        break;
-      case 'swing-trader':
-        reasons = direction === 'long' ? SWING_LONG_REASONS : SWING_SHORT_REASONS;
-        break;
-      case 'scalper':
-        reasons = direction === 'long' ? SCALP_LONG_REASONS : SCALP_SHORT_REASONS;
-        break;
-      case 'conservative':
-        reasons = direction === 'long' ? CONSERVATIVE_LONG_REASONS : CONSERVATIVE_SHORT_REASONS;
-        break;
-      case 'aggressive':
-        reasons = direction === 'long' ? AGGRESSIVE_LONG_REASONS : AGGRESSIVE_SHORT_REASONS;
-        break;
-      case 'hodler':
-        reasons = direction === 'long' ? HODLER_LONG_REASONS : HODLER_SHORT_REASONS;
-        break;
-      case 'day-trader':
-        reasons = direction === 'long' ? DAYTRADER_LONG_REASONS : DAYTRADER_SHORT_REASONS;
-        break;
-      case 'quantitative':
-        reasons = direction === 'long' ? QUANTITATIVE_LONG_REASONS : QUANTITATIVE_SHORT_REASONS;
-        break;
-      case 'arbitrage':
-        reasons = direction === 'long' ? ARBITRAGE_LONG_REASONS : ARBITRAGE_SHORT_REASONS;
-        break;
-      default:
-        reasons = direction === 'long' ? SWING_LONG_REASONS : SWING_SHORT_REASONS;
-    }
-
-    return pickRandom(reasons).replace('{asset}', assetName);
   }
 }
 
 export const botTradingSimulator = new BotTradingSimulator();
+
+function generateSimulatedCryptoPrice(assetName: string): number {
+  const range = CRYPTO_PRICE_RANGES[assetName];
+  if (range) {
+    return range[0] + Math.random() * (range[1] - range[0]);
+  }
+  return 1 + Math.random() * 100;
+}
+
+function generateSimulatedStockPrice(symbol: string): number {
+  const basePrice = STOCK_BASE_PRICES[symbol];
+  if (basePrice) {
+    const variation = (Math.random() - 0.48) * 0.1;
+    return basePrice * (1 + variation);
+  }
+  return 100 + Math.random() * 200;
+}
+
+export async function seedBotHistoricalTrades() {
+  console.log('[Bot Simulator] Seeding historical trades...');
+
+  const avatars = await db
+    .select()
+    .from(knowledgeAvatars)
+    .where(eq(knowledgeAvatars.isActive, true));
+
+  if (avatars.length === 0) {
+    console.log('[Bot Simulator] No active avatars found for seeding');
+    return;
+  }
+
+  const now = Date.now();
+  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+
+  for (const avatar of avatars) {
+    const persona = getAvatarPersona(avatar.handle);
+    if (!persona) {
+      console.log(`[Bot Simulator] No persona found for ${avatar.handle}, skipping`);
+      continue;
+    }
+
+    const baseTradeCount = 30 + Math.round(60 * persona.tradeFrequency);
+    const tradeCount = baseTradeCount + Math.floor(Math.random() * 10) - 5;
+    const positiveBias = 0.5 + persona.tradeFrequency * 0.1;
+
+    console.log(`[Bot Simulator] Seeding ${tradeCount} trades for ${avatar.name}`);
+
+    const trades: any[] = [];
+
+    for (let i = 0; i < tradeCount; i++) {
+      const selectedAsset = pickWeightedAsset(persona.preferredAssets);
+      const tradeTime = new Date(now - Math.random() * thirtyDaysMs);
+      const closeTime = new Date(tradeTime.getTime() + Math.random() * 48 * 60 * 60 * 1000 + 30 * 60 * 1000);
+
+      let entryPrice: number;
+      let exitPrice: number;
+      let assetType = selectedAsset.type;
+
+      if (selectedAsset.type === 'crypto') {
+        entryPrice = generateSimulatedCryptoPrice(selectedAsset.name);
+      } else {
+        entryPrice = generateSimulatedStockPrice(selectedAsset.symbol);
+      }
+
+      const direction = Math.random() < persona.longBias ? 'long' : 'short';
+
+      const isWin = Math.random() < positiveBias;
+      const pnlMagnitude = Math.random() * 0.08 + 0.005;
+      const priceChange = isWin
+        ? entryPrice * pnlMagnitude
+        : entryPrice * -pnlMagnitude;
+
+      if (direction === 'long') {
+        exitPrice = entryPrice + priceChange;
+      } else {
+        exitPrice = entryPrice - priceChange;
+      }
+
+      exitPrice = Math.max(exitPrice, entryPrice * 0.8);
+
+      const riskMult = persona.riskTolerance === 'high' ? 2.0 : persona.riskTolerance === 'medium' ? 1.0 : 0.5;
+      let quantity: number;
+      if (selectedAsset.type === 'crypto') {
+        quantity = Math.max(0.0001, (1000 / entryPrice) * persona.positionMultiplier * riskMult);
+      } else {
+        quantity = Math.max(1, Math.round(10 * persona.positionMultiplier * riskMult));
+      }
+
+      let pnl: number;
+      if (direction === 'long') {
+        pnl = (exitPrice - entryPrice) * quantity;
+      } else {
+        pnl = (entryPrice - exitPrice) * quantity;
+      }
+      const pnlPercent = (pnl / (entryPrice * quantity)) * 100;
+
+      const reasons = direction === 'long' ? persona.longReasons : persona.shortReasons;
+      const closeReasons = persona.closeReasons;
+      const reasoning = `${pickRandom(reasons).replace('{asset}', selectedAsset.name)} | Close: ${pickRandom(closeReasons).replace('{asset}', selectedAsset.name)}`;
+
+      trades.push({
+        avatarId: avatar.id,
+        asset: selectedAsset.name,
+        assetType,
+        direction,
+        entryPrice: Math.round(entryPrice * 100) / 100,
+        exitPrice: Math.round(exitPrice * 100) / 100,
+        quantity: Math.round(quantity * 10000) / 10000,
+        pnl: Math.round(pnl * 100) / 100,
+        pnlPercent: Math.round(pnlPercent * 100) / 100,
+        status: 'closed',
+        reasoning,
+        closedAt: closeTime,
+        createdAt: tradeTime,
+      });
+    }
+
+    for (let batch = 0; batch < trades.length; batch += 50) {
+      const chunk = trades.slice(batch, batch + 50);
+      await db.insert(botSimTrades).values(chunk);
+    }
+  }
+
+  console.log(`[Bot Simulator] Seeded historical trades for ${avatars.length} avatars`);
+}
