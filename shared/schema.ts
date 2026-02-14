@@ -7434,7 +7434,8 @@ export type AssetPriceHistory = typeof assetPriceHistory.$inferSelect;
 export const botStakes = pgTable("bot_stakes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").references(() => users.id).notNull(),
-  agentId: varchar("agent_id").references(() => aiAgents.id).notNull(),
+  agentId: varchar("agent_id").references(() => aiAgents.id),
+  avatarId: varchar("avatar_id").references(() => knowledgeAvatars.id),
   amount: integer("amount").notNull(),
   currentValue: integer("current_value").notNull(),
   totalPnl: integer("total_pnl").default(0),
@@ -7446,7 +7447,8 @@ export const botStakes = pgTable("bot_stakes", {
 
 export const botSimTrades = pgTable("bot_sim_trades", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  agentId: varchar("agent_id").references(() => aiAgents.id).notNull(),
+  agentId: varchar("agent_id").references(() => aiAgents.id),
+  avatarId: varchar("avatar_id").references(() => knowledgeAvatars.id),
   asset: text("asset").notNull(),
   assetType: text("asset_type").notNull(),
   direction: text("direction").notNull(),
@@ -7463,7 +7465,8 @@ export const botSimTrades = pgTable("bot_sim_trades", {
 
 export const botPerformanceSnapshots = pgTable("bot_performance_snapshots", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  agentId: varchar("agent_id").references(() => aiAgents.id).notNull(),
+  agentId: varchar("agent_id").references(() => aiAgents.id),
+  avatarId: varchar("avatar_id").references(() => knowledgeAvatars.id),
   totalValue: real("total_value").notNull(),
   dailyPnl: real("daily_pnl").default(0),
   dailyPnlPercent: real("daily_pnl_percent").default(0),
