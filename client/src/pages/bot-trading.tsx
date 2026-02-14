@@ -16,24 +16,54 @@ import {
   Cpu, TrendingUp, TrendingDown, Users, Coins, Activity, Target, Flame,
   BarChart3, ArrowUpRight, ArrowDownRight, Wallet, Eye, LogIn, Zap,
   Shield, Crosshair, Clock, Trophy, ChevronRight, ChevronLeft, Sparkles, BarChart2,
-  Bot, AlertTriangle, DollarSign,
+  Bot, AlertTriangle, DollarSign, Briefcase, Layers, Network, Server, Brain, User,
 } from 'lucide-react';
 
-const personalityConfig: Record<string, { label: string; color: string; icon: any; gradient: string }> = {
-  momentum: { label: 'Momentum', color: 'text-cyan-400 bg-cyan-500/15 border-cyan-500/30', icon: Zap, gradient: 'from-cyan-500/20 to-blue-500/20' },
-  contrarian: { label: 'Contrarian', color: 'text-purple-400 bg-purple-500/15 border-purple-500/30', icon: Target, gradient: 'from-purple-500/20 to-pink-500/20' },
-  'swing-trader': { label: 'Swing Trader', color: 'text-amber-400 bg-amber-500/15 border-amber-500/30', icon: Activity, gradient: 'from-amber-500/20 to-orange-500/20' },
-  scalper: { label: 'Scalper', color: 'text-emerald-400 bg-emerald-500/15 border-emerald-500/30', icon: Crosshair, gradient: 'from-emerald-500/20 to-teal-500/20' },
-  conservative: { label: 'Conservative', color: 'text-blue-400 bg-blue-500/15 border-blue-500/30', icon: Shield, gradient: 'from-blue-500/20 to-indigo-500/20' },
-  aggressive: { label: 'Aggressive', color: 'text-red-400 bg-red-500/15 border-red-500/30', icon: Flame, gradient: 'from-red-500/20 to-orange-500/20' },
-  hodler: { label: 'HODLer', color: 'text-yellow-400 bg-yellow-500/15 border-yellow-500/30', icon: DollarSign, gradient: 'from-yellow-500/20 to-amber-500/20' },
-  'day-trader': { label: 'Day Trader', color: 'text-pink-400 bg-pink-500/15 border-pink-500/30', icon: Clock, gradient: 'from-pink-500/20 to-rose-500/20' },
-  quantitative: { label: 'Quant', color: 'text-indigo-400 bg-indigo-500/15 border-indigo-500/30', icon: BarChart2, gradient: 'from-indigo-500/20 to-violet-500/20' },
-  arbitrage: { label: 'Arbitrage', color: 'text-teal-400 bg-teal-500/15 border-teal-500/30', icon: Sparkles, gradient: 'from-teal-500/20 to-cyan-500/20' },
+const categoryConfig: Record<string, { label: string; color: string; icon: any; gradient: string }> = {
+  VC: { label: 'VC', color: 'text-purple-400 bg-purple-500/15 border-purple-500/30', icon: Briefcase, gradient: 'from-purple-500/20 to-pink-500/20' },
+  DeFi: { label: 'DeFi', color: 'text-cyan-400 bg-cyan-500/15 border-cyan-500/30', icon: Layers, gradient: 'from-cyan-500/20 to-blue-500/20' },
+  'L1/L2': { label: 'L1/L2', color: 'text-blue-400 bg-blue-500/15 border-blue-500/30', icon: Network, gradient: 'from-blue-500/20 to-indigo-500/20' },
+  Trading: { label: 'Trading', color: 'text-amber-400 bg-amber-500/15 border-amber-500/30', icon: TrendingUp, gradient: 'from-amber-500/20 to-orange-500/20' },
+  Bitcoin: { label: 'Bitcoin', color: 'text-orange-400 bg-orange-500/15 border-orange-500/30', icon: Coins, gradient: 'from-orange-500/20 to-yellow-500/20' },
+  'AI/Tech': { label: 'AI/Tech', color: 'text-emerald-400 bg-emerald-500/15 border-emerald-500/30', icon: Sparkles, gradient: 'from-emerald-500/20 to-teal-500/20' },
+  Infrastructure: { label: 'Infra', color: 'text-slate-400 bg-slate-500/15 border-slate-500/30', icon: Server, gradient: 'from-slate-500/20 to-gray-500/20' },
 };
 
-function getPersonality(p: string) {
-  return personalityConfig[p] || personalityConfig.momentum;
+const tradingStyleConfig: Record<string, { label: string; color: string }> = {
+  aggressive: { label: 'Aggressive', color: 'text-red-400 bg-red-500/15 border-red-500/30' },
+  moderate: { label: 'Moderate', color: 'text-amber-400 bg-amber-500/15 border-amber-500/30' },
+  conservative: { label: 'Conservative', color: 'text-blue-400 bg-blue-500/15 border-blue-500/30' },
+};
+
+function getCategory(c: string) {
+  return categoryConfig[c] || categoryConfig.Trading;
+}
+
+function getTradingStyle(s: string) {
+  return tradingStyleConfig[s] || tradingStyleConfig.moderate;
+}
+
+function AvatarImage({ src, fallbackEmoji, size = 'md', className = '' }: { src?: string; fallbackEmoji?: string; size?: 'sm' | 'md' | 'lg'; className?: string }) {
+  const sizeClasses = { sm: 'w-11 h-11', md: 'w-12 h-12', lg: 'w-16 h-16' };
+  const textSizes = { sm: 'text-xl', md: 'text-2xl', lg: 'text-3xl' };
+  const [imgError, setImgError] = useState(false);
+
+  if (!src || imgError) {
+    return (
+      <div className={`${sizeClasses[size]} rounded-full bg-slate-800/80 border border-slate-700/50 flex items-center justify-center ${textSizes[size]} ${className}`}>
+        {fallbackEmoji || <User className="w-1/2 h-1/2 text-slate-500" />}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt="avatar"
+      className={`${sizeClasses[size]} rounded-full object-cover border-2 border-slate-700/50 ${className}`}
+      onError={() => setImgError(true)}
+    />
+  );
 }
 
 function MiniSparkline({ values, positive }: { values: number[]; positive: boolean }) {
@@ -114,14 +144,15 @@ function PerformanceChart({ snapshots }: { snapshots: any[] }) {
 }
 
 function BotCard({ bot, onSelect, rank }: { bot: any; onSelect: () => void; rank: number }) {
-  const roi = bot.roi ?? 0;
+  const roi = bot.avgTradeRoi ?? 0;
   const isPositive = roi >= 0;
-  const config = getPersonality(bot.personality);
+  const config = getCategory(bot.category);
   const Icon = config.icon;
-  const winRate = bot.accuracyRate ?? 0;
+  const style = getTradingStyle(bot.tradingStyle);
+  const winRate = bot.winRate ?? 0;
   const totalStaked = Number(bot.totalStaked ?? 0);
   const backers = Number(bot.backerCount ?? 0);
-  const trades = Number(bot.recentTradeCount ?? bot.totalPredictions ?? 0);
+  const trades = Number(bot.recentTradeCount ?? bot.totalTrades ?? 0);
 
   return (
     <motion.div
@@ -140,9 +171,7 @@ function BotCard({ bot, onSelect, rank }: { bot: any; onSelect: () => void; rank
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-12 h-12 rounded-xl bg-slate-800/80 border border-slate-700/50 flex items-center justify-center text-2xl">
-                  {bot.avatar || '🤖'}
-                </div>
+                <AvatarImage src={bot.imageUrl} fallbackEmoji={bot.personaEmoji} />
                 {rank <= 3 && (
                   <div className={`absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold ${
                     rank === 1 ? 'bg-amber-500 text-black' : rank === 2 ? 'bg-slate-300 text-black' : 'bg-amber-700 text-white'
@@ -153,10 +182,16 @@ function BotCard({ bot, onSelect, rank }: { bot: any; onSelect: () => void; rank
               </div>
               <div>
                 <h3 className="text-white font-semibold text-sm">{bot.name}</h3>
-                <Badge variant="outline" className={`text-[10px] mt-0.5 ${config.color}`}>
-                  <Icon className="w-2.5 h-2.5 mr-1" />
-                  {config.label}
-                </Badge>
+                {bot.handle && <p className="text-[11px] text-slate-500">@{bot.handle}</p>}
+                <div className="flex items-center gap-1.5 mt-1">
+                  <Badge variant="outline" className={`text-[10px] ${config.color}`}>
+                    <Icon className="w-2.5 h-2.5 mr-1" />
+                    {config.label}
+                  </Badge>
+                  <Badge variant="outline" className={`text-[10px] ${style.color}`}>
+                    {style.label}
+                  </Badge>
+                </div>
               </div>
             </div>
             <div className="text-right">
@@ -224,7 +259,7 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
   });
 
   const stakeMutation = useMutation({
-    mutationFn: async (data: { agentId: string; amount: number }) =>
+    mutationFn: async (data: { avatarId: string; amount: number }) =>
       apiRequest('/api/bot-trading/stake', { method: 'POST', body: JSON.stringify(data) }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/bot-trading/my-stakes'] });
@@ -232,7 +267,7 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
       queryClient.invalidateQueries({ queryKey: ['/api/bot-trading/stats'] });
       queryClient.invalidateQueries({ queryKey: ['auth'] });
       setStakeAmount('');
-      toast({ title: 'Stake Placed!', description: 'Your STREAM points have been staked on this bot.' });
+      toast({ title: 'Stake Placed!', description: 'Your STREAM points have been staked on this avatar.' });
     },
     onError: (err: any) => {
       toast({ title: 'Stake Failed', description: err.message, variant: 'destructive' });
@@ -274,13 +309,14 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
       toast({ title: 'Insufficient balance', description: 'You don\'t have enough STREAM points.', variant: 'destructive' });
       return;
     }
-    stakeMutation.mutate({ agentId: botId!, amount });
+    stakeMutation.mutate({ avatarId: botId!, amount });
   };
 
   if (!botId) return null;
 
-  const config = bot ? getPersonality(bot.personality) : getPersonality('momentum');
-  const BotIcon = config.icon;
+  const config = bot ? getCategory(bot.category) : getCategory('Trading');
+  const CatIcon = config.icon;
+  const style = bot ? getTradingStyle(bot.tradingStyle) : getTradingStyle('moderate');
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -289,7 +325,7 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
           <div className="flex items-center justify-center py-20">
             <div className="relative">
               <div className="w-12 h-12 border-2 border-cyan-500/30 rounded-full animate-spin border-t-cyan-500" />
-              <Bot className="w-5 h-5 text-cyan-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+              <Sparkles className="w-5 h-5 text-cyan-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
             </div>
           </div>
         ) : bot ? (
@@ -299,15 +335,17 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
               <div className="relative z-10">
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-4 text-white">
-                    <div className="w-16 h-16 rounded-2xl bg-slate-800/80 border border-slate-600/50 flex items-center justify-center text-3xl shadow-lg">
-                      {bot.avatar || '🤖'}
-                    </div>
+                    <AvatarImage src={bot.imageUrl} fallbackEmoji={bot.personaEmoji} size="lg" className="shadow-lg" />
                     <div>
                       <h2 className="text-xl font-bold">{bot.name}</h2>
+                      {bot.handle && <p className="text-sm text-slate-400 font-normal">@{bot.handle}</p>}
                       <div className="flex items-center gap-2 mt-1.5">
                         <Badge variant="outline" className={`text-[10px] ${config.color}`}>
-                          <BotIcon className="w-2.5 h-2.5 mr-1" />
+                          <CatIcon className="w-2.5 h-2.5 mr-1" />
                           {config.label}
+                        </Badge>
+                        <Badge variant="outline" className={`text-[10px] ${style.color}`}>
+                          {style.label}
                         </Badge>
                         <Badge variant="outline" className="text-[10px] text-slate-400 border-slate-600">
                           Risk: {bot.riskTolerance}
@@ -326,10 +364,10 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
             <div className="p-6 space-y-5">
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                 {[
-                  { label: 'ROI', value: `${(bot.roi ?? 0).toFixed(1)}%`, color: (bot.roi ?? 0) >= 0 ? 'text-emerald-400' : 'text-red-400' },
-                  { label: 'Win Rate', value: `${(bot.accuracyRate ?? 0).toFixed(0)}%`, color: 'text-cyan-400' },
-                  { label: 'Trades', value: bot.totalPredictions ?? 0, color: 'text-white' },
-                  { label: 'Streak', value: `🔥 ${bot.currentStreak ?? 0}`, color: 'text-amber-400' },
+                  { label: 'ROI', value: `${(bot.avgTradeRoi ?? 0).toFixed(1)}%`, color: (bot.avgTradeRoi ?? 0) >= 0 ? 'text-emerald-400' : 'text-red-400' },
+                  { label: 'Win Rate', value: `${(bot.winRate ?? 0).toFixed(0)}%`, color: 'text-cyan-400' },
+                  { label: 'Trades', value: bot.totalTrades ?? 0, color: 'text-white' },
+                  { label: 'Influence', value: bot.influenceScore ?? 0, color: 'text-amber-400' },
                   { label: 'Backers', value: stakeStats?.backerCount ?? bot.backerCount ?? 0, color: 'text-purple-400' },
                   { label: 'Staked', value: `${(Number(stakeStats?.totalStaked ?? bot.totalStaked ?? 0) / 1000).toFixed(0)}k`, color: 'text-cyan-400' },
                 ].map((stat, i) => (
@@ -459,7 +497,7 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
                     </div>
                     <div className="flex items-start gap-2 text-[11px] text-slate-500">
                       <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" />
-                      <span>Stakes are simulated. Bot performance is based on real market data but trades are paper-traded.</span>
+                      <span>Stakes are simulated. Avatar performance is based on real market data but trades are paper-traded.</span>
                     </div>
                   </div>
                 )}
@@ -467,7 +505,7 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
             </div>
           </>
         ) : (
-          <div className="text-center py-10 text-slate-500">Bot not found</div>
+          <div className="text-center py-10 text-slate-500">Avatar not found</div>
         )}
       </DialogContent>
     </Dialog>
@@ -478,7 +516,7 @@ function SkeletonCard() {
   return (
     <div className="bg-slate-900/60 border border-slate-700/40 rounded-2xl p-5 animate-pulse">
       <div className="flex items-start gap-3 mb-4">
-        <div className="w-12 h-12 rounded-xl bg-slate-800" />
+        <div className="w-12 h-12 rounded-full bg-slate-800" />
         <div className="flex-1">
           <div className="w-24 h-4 bg-slate-800 rounded mb-2" />
           <div className="w-16 h-4 bg-slate-800 rounded" />
@@ -493,11 +531,13 @@ function SkeletonCard() {
   );
 }
 
+const categories = ['all', 'VC', 'DeFi', 'L1/L2', 'Trading', 'Bitcoin', 'AI/Tech', 'Infrastructure'] as const;
+
 export default function BotTradingPage() {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('all');
-  const [strategy, setStrategy] = useState('all');
+  const [category, setCategory] = useState('all');
   const [sort, setSort] = useState('roi');
   const [selectedBotId, setSelectedBotId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -508,13 +548,13 @@ export default function BotTradingPage() {
 
   const botsQueryKey = useMemo(() => {
     const params = new URLSearchParams();
-    if (strategy !== 'all') params.set('strategy', strategy);
+    if (category !== 'all') params.set('category', category);
     params.set('sort', sort);
     params.set('limit', String(BOTS_PER_PAGE));
     params.set('offset', String((page - 1) * BOTS_PER_PAGE));
     const qs = params.toString();
     return [`/api/bot-trading/bots?${qs}`];
-  }, [strategy, sort, page]);
+  }, [category, sort, page]);
 
   const { data: botsData, isLoading: botsLoading } = useQuery({ queryKey: botsQueryKey });
   const botsResponse = botsData as any;
@@ -578,14 +618,14 @@ export default function BotTradingPage() {
               animate={{ boxShadow: ['0 0 20px rgba(6,182,212,0.1)', '0 0 40px rgba(6,182,212,0.2)', '0 0 20px rgba(6,182,212,0.1)'] }}
               transition={{ duration: 3, repeat: Infinity }}
             >
-              <Bot className="w-7 h-7 text-cyan-400" />
+              <Sparkles className="w-7 h-7 text-cyan-400" />
             </motion.div>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent mb-2">
-            Bot Trading Simulator
+            Avatar Trading Simulator
           </h1>
           <p className="text-slate-400 text-sm max-w-md mx-auto">
-            Stake STREAM points on AI trading bots and watch them trade real markets with simulated capital
+            Stake STREAM points on legendary investors & traders and watch them trade real markets with simulated capital
           </p>
         </motion.div>
 
@@ -598,7 +638,7 @@ export default function BotTradingPage() {
           {[
             { icon: Coins, label: 'Total Staked', value: stats?.totalStaked ? `${(Number(stats.totalStaked) / 1000).toFixed(0)}k` : '0', sub: 'STREAM', color: 'cyan', glow: 'shadow-cyan-500/10' },
             { icon: Users, label: 'Active Traders', value: stats?.activeTraders ?? '0', sub: 'staking now', color: 'purple', glow: 'shadow-purple-500/10' },
-            { icon: Trophy, label: 'Top Bot', value: stats?.topBot?.name ?? '—', sub: stats?.topBot ? `${(stats.topBot.roi ?? 0).toFixed(1)}% ROI` : '', color: 'emerald', glow: 'shadow-emerald-500/10' },
+            { icon: Trophy, label: 'Top Avatar', value: stats?.topBot?.name ?? '—', sub: stats?.topBot ? `${(stats.topBot.avgTradeRoi ?? 0).toFixed(1)}% ROI` : '', color: 'emerald', glow: 'shadow-emerald-500/10', imageUrl: stats?.topBot?.imageUrl },
             { icon: Activity, label: 'Total Trades', value: stats?.totalTrades ?? '0', sub: 'executed', color: 'amber', glow: 'shadow-amber-500/10' },
           ].map((item, i) => (
             <motion.div
@@ -626,45 +666,47 @@ export default function BotTradingPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <TabsList className="bg-slate-900/60 border border-slate-700/40 p-1">
               <TabsTrigger value="all" className="data-[state=active]:bg-cyan-600/20 data-[state=active]:text-cyan-400 data-[state=active]:shadow-sm px-5">
-                <Bot className="w-4 h-4 mr-1.5" /> All Bots
+                <Sparkles className="w-4 h-4 mr-1.5" /> All Avatars
                 <Badge variant="outline" className="ml-2 text-[10px] border-slate-600 text-slate-400">{totalBots}</Badge>
               </TabsTrigger>
               <TabsTrigger value="my" className="data-[state=active]:bg-purple-600/20 data-[state=active]:text-purple-400 data-[state=active]:shadow-sm px-5">
-                <Wallet className="w-4 h-4 mr-1.5" /> My Bots
+                <Wallet className="w-4 h-4 mr-1.5" /> My Stakes
                 {stakes.length > 0 && <Badge variant="outline" className="ml-2 text-[10px] border-purple-500/30 text-purple-400">{stakes.length}</Badge>}
               </TabsTrigger>
             </TabsList>
 
             {activeTab === 'all' && (
               <div className="flex flex-wrap gap-2">
-                <Select value={strategy} onValueChange={(v) => { setStrategy(v); setPage(1); }}>
+                <Select value={category} onValueChange={(v) => { setCategory(v); setPage(1); }}>
                   <SelectTrigger className="w-[150px] bg-slate-900/60 border-slate-700/50 text-white text-sm h-9">
-                    <SelectValue placeholder="Strategy" />
+                    <SelectValue placeholder="Category" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-900 border-slate-700">
-                    <SelectItem value="all">All Strategies</SelectItem>
-                    <SelectItem value="momentum">Momentum</SelectItem>
-                    <SelectItem value="contrarian">Contrarian</SelectItem>
-                    <SelectItem value="swing-trader">Swing Trader</SelectItem>
-                    <SelectItem value="scalper">Scalper</SelectItem>
-                    <SelectItem value="conservative">Conservative</SelectItem>
-                    <SelectItem value="aggressive">Aggressive</SelectItem>
-                    <SelectItem value="hodler">HODLer</SelectItem>
-                    <SelectItem value="day-trader">Day Trader</SelectItem>
-                    <SelectItem value="quantitative">Quant</SelectItem>
-                    <SelectItem value="arbitrage">Arbitrage</SelectItem>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {categories.filter(c => c !== 'all').map(c => {
+                      const cfg = getCategory(c);
+                      const CIcon = cfg.icon;
+                      return (
+                        <SelectItem key={c} value={c}>
+                          <span className="flex items-center gap-2">
+                            <CIcon className="w-3.5 h-3.5" />
+                            {cfg.label}
+                          </span>
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
 
                 <Select value={sort} onValueChange={(v) => { setSort(v); setPage(1); }}>
-                  <SelectTrigger className="w-[130px] bg-slate-900/60 border-slate-700/50 text-white text-sm h-9">
+                  <SelectTrigger className="w-[140px] bg-slate-900/60 border-slate-700/50 text-white text-sm h-9">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-900 border-slate-700">
                     <SelectItem value="roi">ROI</SelectItem>
-                    <SelectItem value="backers">Backers</SelectItem>
                     <SelectItem value="winRate">Win Rate</SelectItem>
-                    <SelectItem value="volume">Volume</SelectItem>
+                    <SelectItem value="backers">Backers</SelectItem>
+                    <SelectItem value="totalStaked">Total Staked</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -678,8 +720,8 @@ export default function BotTradingPage() {
               </div>
             ) : bots.length === 0 ? (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 bg-slate-900/40 backdrop-blur-xl border border-slate-700/40 rounded-2xl">
-                <Bot className="w-14 h-14 text-slate-600 mx-auto mb-4" />
-                <p className="text-slate-400 text-lg font-medium mb-1">No bots found</p>
+                <Sparkles className="w-14 h-14 text-slate-600 mx-auto mb-4" />
+                <p className="text-slate-400 text-lg font-medium mb-1">No avatars found</p>
                 <p className="text-slate-500 text-sm">Try adjusting your filters</p>
               </motion.div>
             ) : (
@@ -744,7 +786,7 @@ export default function BotTradingPage() {
                   <LogIn className="w-8 h-8 text-purple-400" />
                 </div>
                 <p className="text-slate-300 text-lg font-medium mb-1">Sign in to view your stakes</p>
-                <p className="text-slate-500 text-sm">Track your bot investments and P&L</p>
+                <p className="text-slate-500 text-sm">Track your avatar investments and P&L</p>
               </motion.div>
             ) : (
               <>
@@ -776,16 +818,16 @@ export default function BotTradingPage() {
                 ) : stakes.length === 0 ? (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16 bg-slate-900/40 backdrop-blur-xl border border-slate-700/40 rounded-2xl">
                     <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mx-auto mb-4">
-                      <Bot className="w-8 h-8 text-cyan-400" />
+                      <Sparkles className="w-8 h-8 text-cyan-400" />
                     </div>
                     <p className="text-slate-300 font-medium mb-1">No active stakes yet</p>
-                    <p className="text-slate-500 text-sm mb-5">Browse bots and stake STREAM points to get started</p>
+                    <p className="text-slate-500 text-sm mb-5">Browse avatars and stake STREAM points to get started</p>
                     <Button
                       className="bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white shadow-lg shadow-cyan-500/20"
                       onClick={() => setActiveTab('all')}
                     >
-                      <Bot className="w-4 h-4 mr-2" />
-                      Browse Bots
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Browse Avatars
                     </Button>
                   </motion.div>
                 ) : (
@@ -795,7 +837,8 @@ export default function BotTradingPage() {
                         const pnl = stake.totalPnl ?? (Number(stake.currentValue ?? 0) - Number(stake.amount ?? 0));
                         const pnlPct = stake.totalPnlPercent ?? (Number(stake.amount) > 0 ? (pnl / Number(stake.amount)) * 100 : 0);
                         const isPositive = pnl >= 0;
-                        const config = getPersonality(stake.botPersonality || stake.botStrategy || 'momentum');
+                        const stakeCategory = getCategory(stake.botCategory || 'Trading');
+                        const stakeStyle = getTradingStyle(stake.botTradingStyle || 'moderate');
 
                         return (
                           <motion.div
@@ -808,22 +851,23 @@ export default function BotTradingPage() {
                             <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/40 rounded-xl p-4 hover:border-cyan-500/30 transition-all">
                               <div className="flex items-center gap-4">
                                 <div
-                                  className="w-11 h-11 rounded-xl bg-slate-800/80 border border-slate-700/50 flex items-center justify-center text-xl cursor-pointer hover:border-cyan-500/50 transition-colors shrink-0"
-                                  onClick={() => setSelectedBotId(stake.agentId)}
+                                  className="cursor-pointer hover:opacity-80 transition-opacity shrink-0"
+                                  onClick={() => setSelectedBotId(stake.avatarId)}
                                 >
-                                  {stake.botAvatar || '🤖'}
+                                  <AvatarImage src={stake.botImageUrl} size="sm" />
                                 </div>
 
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2">
                                     <h4
                                       className="text-white font-medium text-sm truncate cursor-pointer hover:text-cyan-400 transition-colors"
-                                      onClick={() => setSelectedBotId(stake.agentId)}
+                                      onClick={() => setSelectedBotId(stake.avatarId)}
                                     >
                                       {stake.botName}
                                     </h4>
-                                    <Badge variant="outline" className={`text-[9px] ${config.color}`}>
-                                      {config.label}
+                                    {stake.botHandle && <span className="text-[10px] text-slate-500">@{stake.botHandle}</span>}
+                                    <Badge variant="outline" className={`text-[9px] ${stakeCategory.color}`}>
+                                      {stakeCategory.label}
                                     </Badge>
                                   </div>
                                   <div className="flex items-center gap-4 mt-1 text-xs">
