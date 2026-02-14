@@ -1,6 +1,9 @@
 import { db } from './db';
 import { knowledgeAvatars, users, aiAgents, predictionMarkets, predictionLeagues, learningModules, learningLessons, liveStreams, streamRecordings } from '@shared/schema';
 import { eq } from 'drizzle-orm';
+import { seedExpandedLearningContent } from './seed-learning-content';
+import { seedPredictionAndMacroLessons } from './seed-learning-content-part2';
+import { seedLearningQuizzes } from './seed-learning-quizzes';
 
 const avatarSeedData = [
   {
@@ -1592,6 +1595,24 @@ export async function autoSeedDatabase() {
       console.log(`🎉 Added ${moduleCount} new learning modules (${existingModules.length + moduleCount}/${targetModuleCount} total)`);
     } else {
       console.log(`✅ Learning modules complete (${existingModules.length}/${targetModuleCount})`);
+    }
+
+    // ===== STAGE 6B: SEED LEARNING LESSONS & QUIZZES =====
+    const existingLessons = await db.select({ id: learningLessons.id }).from(learningLessons);
+    const targetLessonCount = 29;
+    
+    if (existingLessons.length < targetLessonCount) {
+      console.log(`\n📖 Stage 6B: Seeding Learning Lessons (${existingLessons.length}/${targetLessonCount})...`);
+      try {
+        await seedExpandedLearningContent();
+        await seedPredictionAndMacroLessons();
+        await seedLearningQuizzes();
+        console.log(`🎉 Learning lessons and quizzes seeded successfully`);
+      } catch (error: any) {
+        console.error(`  ✗ Failed to seed lessons:`, error.message);
+      }
+    } else {
+      console.log(`✅ Learning lessons complete (${existingLessons.length}/${targetLessonCount})`);
     }
 
     // ===== BACKFILL STREAM RECORDINGS (IDEMPOTENT) =====
