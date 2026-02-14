@@ -164,53 +164,84 @@ function QuizCard({
 }
 
 export default function LessonViewer() {
-  const { moduleId, lessonId } = useParams<{ moduleId: string; lessonId?: string }>();
+  const params = useParams();
+  const moduleId = params.moduleId || params['0'];
+  const lessonId = params.lessonId || params['1'];
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
   const [startTime] = useState(Date.now());
+  
+  const [courseModule, setCourseModule] = useState<LearningModule | null>(null);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [moduleLoading, setModuleLoading] = useState(true);
+  const [moduleError, setModuleError] = useState<string | null>(null);
+  const [currentLessonData, setCurrentLessonData] = useState<{ lesson: Lesson; quizzes: Quiz[] } | null>(null);
 
-  const { data: moduleData, isLoading: moduleLoading, error: moduleError } = useQuery({
-    queryKey: ['learning-module-detail', moduleId],
-    queryFn: async () => {
-      const res = await fetch(`/api/learning/modules/${moduleId}`, {
-        credentials: 'include',
-        headers: {
-          ...(localStorage.getItem('auth_token') ? { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` } : {}),
-        },
+  useEffect(() => {
+    if (!moduleId) return;
+    let cancelled = false;
+    setModuleLoading(true);
+    setModuleError(null);
+    
+    const authToken = localStorage.getItem('auth_token');
+    fetch(`/api/learning/modules/${moduleId}`, {
+      credentials: 'include',
+      headers: {
+        ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}),
+      },
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        if (cancelled) return;
+        console.log('[LessonViewer] Module loaded:', data?.module?.title, 'Lessons:', data?.lessons?.length);
+        setCourseModule(data.module || null);
+        setLessons(Array.isArray(data.lessons) ? data.lessons : []);
+        setModuleLoading(false);
+      })
+      .catch(err => {
+        if (cancelled) return;
+        console.error('[LessonViewer] Failed to load module:', err);
+        setModuleError(err.message);
+        setModuleLoading(false);
       });
-      if (!res.ok) throw new Error('Failed to load course');
-      const data = await res.json();
-      return data as { success: boolean; module: LearningModule; lessons: Lesson[] };
-    },
-    enabled: !!moduleId,
-    retry: 2,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const courseModule = moduleData?.module;
-  const lessons = moduleData?.lessons || [];
+    
+    return () => { cancelled = true; };
+  }, [moduleId]);
+  
   const currentLesson = lessons[currentLessonIndex];
   const currentLessonId = currentLesson?.id || lessonId;
 
-  const { data: lessonData } = useQuery({
-    queryKey: ['learning-lesson-detail', currentLessonId],
-    queryFn: async () => {
-      const res = await fetch(`/api/learning/lessons/${currentLessonId}`, {
-        credentials: 'include',
-        headers: {
-          ...(localStorage.getItem('auth_token') ? { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` } : {}),
-        },
+  useEffect(() => {
+    if (!currentLessonId) return;
+    let cancelled = false;
+    const authToken = localStorage.getItem('auth_token');
+    
+    fetch(`/api/learning/lessons/${currentLessonId}`, {
+      credentials: 'include',
+      headers: {
+        ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}),
+      },
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        if (cancelled) return;
+        setCurrentLessonData({ lesson: data.lesson, quizzes: data.quizzes || [] });
+      })
+      .catch(err => {
+        if (cancelled) return;
+        console.error('[LessonViewer] Failed to load lesson:', err);
       });
-      if (!res.ok) throw new Error('Failed to load lesson');
-      const data = await res.json();
-      return data as { success: boolean; lesson: Lesson; quizzes: Quiz[] };
-    },
-    enabled: !!currentLessonId,
-    retry: 1,
-    staleTime: 5 * 60 * 1000,
-  });
+    
+    return () => { cancelled = true; };
+  }, [currentLessonId]);
 
   const { data: progressData } = useQuery({
     queryKey: ['/api/learning/progress'],
@@ -251,7 +282,7 @@ export default function LessonViewer() {
     },
   });
 
-  const quizzes = lessonData?.quizzes || [];
+  const quizzes = currentLessonData?.quizzes || [];
 
   useEffect(() => {
     if (user && moduleId && !moduleLoading && !hasStartedModule) {
