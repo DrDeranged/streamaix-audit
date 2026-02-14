@@ -38,6 +38,7 @@ import { trendingService } from "./services/trendingService";
 import { autonomousTradingEngine } from "./services/autonomousTradingEngine";
 import { pointsService } from "./services/pointsService";
 import * as avatarChatService from "./services/avatarChatService";
+import { getAvatarPersona } from "./services/avatarTradingPersonas";
 import passport from "passport";
 import axios from "axios";
 
@@ -86,7 +87,7 @@ import {
   avatarTrades as avatarTradesTable, avatarPositions, streamConversationMessages, pointsTransactions, dailyLoginStreak,
   scheduledDebates, botStakes, botSimTrades, botPerformanceSnapshots
 } from "../shared/schema";
-import { eq, and, desc, gte, lte, sql, asc, isNotNull, isNull } from "drizzle-orm";
+import { eq, and, desc, gte, lte, sql, asc, isNotNull, isNull, inArray } from "drizzle-orm";
 
 // Helper function to handle validation errors
 const validateRequest = <T>(schema: any, data: any): { success: boolean; data?: T; error?: string } => {
@@ -125,278 +126,13 @@ const requireAdmin = (req: AuthRequest, res: Response, next: Function) => {
   next();
 };
 
-const SEED_CRYPTO_ASSETS = [
-  { name: 'BTC', type: 'crypto', price: 97000 },
-  { name: 'ETH', type: 'crypto', price: 2700 },
-  { name: 'SOL', type: 'crypto', price: 200 },
-  { name: 'ADA', type: 'crypto', price: 0.75 },
-  { name: 'AVAX', type: 'crypto', price: 25 },
-  { name: 'LINK', type: 'crypto', price: 17 },
-  { name: 'DOT', type: 'crypto', price: 5.5 },
-  { name: 'DOGE', type: 'crypto', price: 0.25 },
-];
 
-const SEED_STOCK_ASSETS = [
-  { name: 'NVIDIA', type: 'stock', price: 875 },
-  { name: 'Apple', type: 'stock', price: 230 },
-  { name: 'Tesla', type: 'stock', price: 250 },
-  { name: 'Microsoft', type: 'stock', price: 420 },
-  { name: 'Alphabet', type: 'stock', price: 175 },
-  { name: 'Amazon', type: 'stock', price: 200 },
-  { name: 'Meta', type: 'stock', price: 550 },
-  { name: 'AMD', type: 'stock', price: 165 },
-];
 
-const SEED_ALL_ASSETS = [...SEED_CRYPTO_ASSETS, ...SEED_STOCK_ASSETS];
 
-const SEED_STRATEGY_CONFIG: Record<string, { longBias: number; closeChance: number; positionMultiplier: number }> = {
-  momentum: { longBias: 0.75, closeChance: 0.3, positionMultiplier: 1.5 },
-  contrarian: { longBias: 0.4, closeChance: 0.4, positionMultiplier: 1.0 },
-  'swing-trader': { longBias: 0.55, closeChance: 0.35, positionMultiplier: 1.2 },
-  scalper: { longBias: 0.5, closeChance: 0.6, positionMultiplier: 0.6 },
-  conservative: { longBias: 0.45, closeChance: 0.25, positionMultiplier: 0.7 },
-  aggressive: { longBias: 0.7, closeChance: 0.5, positionMultiplier: 2.0 },
-  hodler: { longBias: 0.85, closeChance: 0.1, positionMultiplier: 1.5 },
-  'day-trader': { longBias: 0.55, closeChance: 0.55, positionMultiplier: 1.3 },
-  quantitative: { longBias: 0.52, closeChance: 0.35, positionMultiplier: 1.1 },
-  arbitrage: { longBias: 0.5, closeChance: 0.45, positionMultiplier: 0.8 },
-};
-
-const SEED_TRADE_COUNTS: Record<string, { min: number; max: number }> = {
-  momentum: { min: 20, max: 30 },
-  contrarian: { min: 15, max: 25 },
-  'swing-trader': { min: 18, max: 28 },
-  scalper: { min: 30, max: 40 },
-  conservative: { min: 15, max: 20 },
-  aggressive: { min: 25, max: 35 },
-  hodler: { min: 15, max: 20 },
-  'day-trader': { min: 30, max: 40 },
-  quantitative: { min: 20, max: 30 },
-  arbitrage: { min: 22, max: 32 },
-};
-
-const SEED_PNL_VARIANCE: Record<string, number> = {
-  momentum: 0.05,
-  contrarian: 0.04,
-  'swing-trader': 0.04,
-  scalper: 0.015,
-  conservative: 0.02,
-  aggressive: 0.08,
-  hodler: 0.03,
-  'day-trader': 0.03,
-  quantitative: 0.025,
-  arbitrage: 0.012,
-};
-
-const SEED_REASONING: Record<string, { long: string[]; short: string[] }> = {
-  momentum: {
-    long: ['{a} bullish momentum above 50-day MA, long entry', '{a} golden cross confirmed, riding uptrend', '{a} breakout with strong volume, momentum long'],
-    short: ['{a} bearish divergence on MACD, short entry', '{a} death cross forming, momentum short', '{a} breaking support with volume, short'],
-  },
-  contrarian: {
-    long: ['{a} oversold on RSI, contrarian buy', '{a} extreme fear sentiment, buying the dip', '{a} capitulation volume, contrarian long'],
-    short: ['{a} overbought RSI, contrarian short', '{a} extreme greed, fading the rally', '{a} parabolic move unsustainable, short'],
-  },
-  'swing-trader': {
-    long: ['{a} bouncing off trendline support, swing long', '{a} higher low pattern forming, swing entry', '{a} consolidation breakout, swing long'],
-    short: ['{a} rejected at resistance, swing short', '{a} lower high confirmed, swing short', '{a} bearish engulfing at key level, short'],
-  },
-  scalper: {
-    long: ['{a} 5-min bullish setup, quick scalp long', '{a} spread tightening, scalp long entry', '{a} micro bullish structure, scalp long'],
-    short: ['{a} 5-min rejection, quick scalp short', '{a} order book sellers heavy, scalp short', '{a} micro resistance hit, scalp short'],
-  },
-  conservative: {
-    long: ['{a} strong fundamentals, low vol, conservative long', '{a} stable uptrend with solid support, value entry', '{a} risk-adjusted favorable, measured long'],
-    short: ['{a} deteriorating fundamentals, protective hedge short', '{a} overvalued vs peers, conservative short', '{a} risk mgmt reducing exposure, hedge short'],
-  },
-  aggressive: {
-    long: ['{a} massive volume breakout, aggressive leveraged long', '{a} parabolic setup, full-size long', '{a} high-conviction bullish catalyst, max long'],
-    short: ['{a} breakdown confirmed, aggressive short w/ leverage', '{a} bearish catalyst imminent, full short', '{a} distribution complete, max conviction short'],
-  },
-  hodler: {
-    long: ['{a} long-term thesis intact, adding to core position', '{a} accumulating on dip for hold', '{a} DCA into position, patient accumulation'],
-    short: ['{a} trimming at extreme overbought levels', '{a} rebalancing, partial profit on rally'],
-  },
-  'day-trader': {
-    long: ['{a} intraday bullish pattern, day trade long', '{a} opening range breakout, quick long', '{a} VWAP reclaim with momentum, day long'],
-    short: ['{a} intraday breakdown, day trade short', '{a} failed breakout reversal, day short', '{a} below VWAP selling pressure, day short'],
-  },
-  quantitative: {
-    long: ['{a} stat model signals long, z-score favorable', '{a} mean reversion model buy signal', '{a} multi-factor consensus: long 72% confidence'],
-    short: ['{a} quant model short signal, 2 sigma deviation', '{a} stat arb opportunity, paired short', '{a} factor model overvalued, systematic short'],
-  },
-  arbitrage: {
-    long: ['{a} price dislocation detected, arb long leg', '{a} cross-exchange spread favorable, buying discount', '{a} basis trade opportunity, long spot'],
-    short: ['{a} premium detected, arb short leg', '{a} futures-spot spread wide, selling premium', '{a} cross-market inefficiency, short leg'],
-  },
-};
-
-function seedPickRandom<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
 
 async function seedBotHistoricalTrades() {
-  console.log('[Seed] Starting historical trade seeding for all bots...');
-
-  const agents = await db.select().from(aiAgents).where(eq(aiAgents.isActive, true));
-  console.log(`[Seed] Found ${agents.length} active bots`);
-
-  const now = Date.now();
-  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
-
-  for (const agent of agents) {
-    const personality = agent.personality;
-    const config = SEED_STRATEGY_CONFIG[personality] || SEED_STRATEGY_CONFIG['swing-trader'];
-    const tradeCounts = SEED_TRADE_COUNTS[personality] || { min: 20, max: 30 };
-    const pnlVariance = SEED_PNL_VARIANCE[personality] || 0.04;
-    const reasoning = SEED_REASONING[personality] || SEED_REASONING['swing-trader'];
-
-    const numClosed = tradeCounts.min + Math.floor(Math.random() * (tradeCounts.max - tradeCounts.min + 1));
-    const numOpen = 1 + Math.floor(Math.random() * 3);
-
-    const trades: any[] = [];
-
-    for (let i = 0; i < numClosed; i++) {
-      const asset = seedPickRandom(SEED_ALL_ASSETS);
-      const direction = Math.random() < config.longBias ? 'long' : 'short';
-      const entryPrice = asset.price * (1 + (Math.random() - 0.5) * 0.04);
-      const pnlPct = (Math.random() - 0.42) * pnlVariance * 2;
-      let exitPrice: number;
-      if (direction === 'long') {
-        exitPrice = entryPrice * (1 + pnlPct);
-      } else {
-        exitPrice = entryPrice * (1 - pnlPct);
-      }
-
-      let quantity: number;
-      if (asset.type === 'crypto') {
-        quantity = Math.max(0.001, (1000 / entryPrice) * config.positionMultiplier);
-      } else {
-        quantity = Math.max(1, Math.round(10 * config.positionMultiplier));
-      }
-
-      let pnl: number;
-      if (direction === 'long') {
-        pnl = (exitPrice - entryPrice) * quantity;
-      } else {
-        pnl = (entryPrice - exitPrice) * quantity;
-      }
-      const pnlPercent = (pnl / (entryPrice * quantity)) * 100;
-
-      const tradeAge = Math.random() * thirtyDaysMs;
-      const createdAt = new Date(now - tradeAge - Math.random() * 3600000 * 24);
-      const closedAt = new Date(createdAt.getTime() + Math.random() * 3600000 * 48 + 3600000);
-
-      const reasonArr = direction === 'long' ? reasoning.long : reasoning.short;
-      const reasonText = seedPickRandom(reasonArr).replace('{a}', asset.name);
-
-      trades.push({
-        agentId: agent.id,
-        asset: asset.name,
-        assetType: asset.type,
-        direction,
-        entryPrice: Math.round(entryPrice * 100) / 100,
-        exitPrice: Math.round(exitPrice * 100) / 100,
-        quantity: Math.round(quantity * 10000) / 10000,
-        pnl: Math.round(pnl * 100) / 100,
-        pnlPercent: Math.round(pnlPercent * 100) / 100,
-        status: 'closed',
-        reasoning: reasonText,
-        closedAt,
-        createdAt,
-      });
-    }
-
-    for (let i = 0; i < numOpen; i++) {
-      const asset = seedPickRandom(SEED_ALL_ASSETS);
-      const direction = Math.random() < config.longBias ? 'long' : 'short';
-      const entryPrice = asset.price * (1 + (Math.random() - 0.5) * 0.02);
-
-      let quantity: number;
-      if (asset.type === 'crypto') {
-        quantity = Math.max(0.001, (1000 / entryPrice) * config.positionMultiplier);
-      } else {
-        quantity = Math.max(1, Math.round(10 * config.positionMultiplier));
-      }
-
-      const reasonArr = direction === 'long' ? reasoning.long : reasoning.short;
-      const reasonText = seedPickRandom(reasonArr).replace('{a}', asset.name);
-
-      trades.push({
-        agentId: agent.id,
-        asset: asset.name,
-        assetType: asset.type,
-        direction,
-        entryPrice: Math.round(entryPrice * 100) / 100,
-        quantity: Math.round(quantity * 10000) / 10000,
-        status: 'open',
-        reasoning: reasonText,
-        createdAt: new Date(now - Math.random() * 3600000 * 24),
-      });
-    }
-
-    for (let i = 0; i < trades.length; i += 50) {
-      const batch = trades.slice(i, i + 50);
-      await db.insert(botSimTrades).values(batch);
-    }
-
-    const closedTrades = trades.filter(t => t.status === 'closed');
-    const totalTrades = trades.length;
-    const winningTrades = closedTrades.filter(t => t.pnl > 0);
-    const losingTrades = closedTrades.filter(t => t.pnl <= 0);
-    const winRate = closedTrades.length > 0 ? (winningTrades.length / closedTrades.length) * 100 : 0;
-    const totalProfit = winningTrades.reduce((s, t) => s + t.pnl, 0);
-    const totalLoss = losingTrades.reduce((s, t) => s + Math.abs(t.pnl), 0);
-    const netProfit = totalProfit - totalLoss;
-
-    const roiBiases: Record<string, number> = {
-      momentum: 15, contrarian: 8, 'swing-trader': 12, scalper: 5,
-      conservative: 6, aggressive: 20, hodler: 18, 'day-trader': 10,
-      quantitative: 14, arbitrage: 4,
-    };
-    const baseBias = roiBiases[personality] || 10;
-    const rawRoi = baseBias + (Math.random() - 0.3) * 25;
-    const roi = Math.max(-15, Math.min(45, Math.round(rawRoi * 100) / 100));
-
-    const sortedClosed = closedTrades.sort((a, b) => new Date(b.closedAt!).getTime() - new Date(a.closedAt!).getTime());
-    let currentStreak = 0;
-    if (sortedClosed.length > 0) {
-      const firstWin = sortedClosed[0].pnl > 0;
-      for (const t of sortedClosed) {
-        if ((t.pnl > 0) === firstWin) {
-          currentStreak++;
-        } else {
-          break;
-        }
-      }
-      if (!firstWin) currentStreak = -currentStreak;
-    }
-
-    await db.update(aiAgents).set({
-      totalPredictions: totalTrades,
-      correctPredictions: winningTrades.length,
-      accuracyRate: Math.round(winRate * 100) / 100,
-      totalProfit: Math.round(totalProfit),
-      totalLoss: Math.round(totalLoss),
-      netProfit: Math.round(netProfit),
-      roi,
-      currentStreak,
-      updatedAt: new Date(),
-    }).where(eq(aiAgents.id, agent.id));
-
-    console.log(`[Seed] ${agent.name}: ${numClosed} closed + ${numOpen} open trades, ROI: ${roi}%`);
-  }
-
-  const agentsByRoi = await db.select({ id: aiAgents.id, roi: aiAgents.roi })
-    .from(aiAgents)
-    .where(eq(aiAgents.isActive, true))
-    .orderBy(desc(aiAgents.roi));
-
-  for (let i = 0; i < agentsByRoi.length; i++) {
-    await db.update(aiAgents).set({ rank: i + 1 }).where(eq(aiAgents.id, agentsByRoi[i].id));
-  }
-
-  console.log(`[Seed] Historical trade seeding complete for ${agents.length} bots`);
+  const { seedBotHistoricalTrades: seedAvatarTrades } = await import('./services/botTradingSimulator');
+  await seedAvatarTrades();
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -10504,16 +10240,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // GET /api/bot-trading/bots - List all active Knowledge Avatars as trading bots
   app.get('/api/bot-trading/bots', asyncHandler(async (req: Request, res: Response) => {
-    const { getAvatarPersona } = await import('../services/avatarTradingPersonas');
-    const strategy = req.query.strategy as string | undefined;
+    const { getAllAvatarHandles } = await import('./services/avatarTradingPersonas');
+    const avatarHandles = getAllAvatarHandles();
+    const category = req.query.category as string | undefined;
     const sort = (req.query.sort as string) || 'roi';
-    const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
+    const limitParam = Math.min(parseInt(req.query.limit as string) || 50, 100);
     const offset = parseInt(req.query.offset as string) || 0;
 
-    let conditions = [eq(knowledgeAvatars.isActive, true)];
-    if (strategy) {
-      conditions.push(eq(knowledgeAvatars.tradingStyle, strategy));
-    }
+    let conditions: any[] = [eq(knowledgeAvatars.isActive, true)];
 
     const bots = await db.select({
       id: knowledgeAvatars.id,
@@ -10529,41 +10263,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
       avgTradeRoi: knowledgeAvatars.avgTradeRoi,
       category: knowledgeAvatars.category,
       influenceScore: knowledgeAvatars.influenceScore,
-      totalStaked: sql<number>`COALESCE((SELECT SUM(${botStakes.amount}) FROM ${botStakes} WHERE ${botStakes.avatarId} = ${knowledgeAvatars.id} AND ${botStakes.status} = 'active'), 0)`,
-      backerCount: sql<number>`COALESCE((SELECT COUNT(*) FROM ${botStakes} WHERE ${botStakes.avatarId} = ${knowledgeAvatars.id} AND ${botStakes.status} = 'active'), 0)`,
-      recentTradeCount: sql<number>`COALESCE((SELECT COUNT(*) FROM ${botSimTrades} WHERE ${botSimTrades.avatarId} = ${knowledgeAvatars.id}), 0)`,
     })
     .from(knowledgeAvatars)
     .where(and(...conditions))
     .orderBy(
-      sort === 'backers' ? desc(sql`COALESCE((SELECT COUNT(*) FROM ${botStakes} WHERE ${botStakes.avatarId} = ${knowledgeAvatars.id} AND ${botStakes.status} = 'active'), 0)`) :
       sort === 'winRate' ? desc(knowledgeAvatars.winRate) :
       sort === 'volume' ? desc(knowledgeAvatars.totalTrades) :
       desc(knowledgeAvatars.avgTradeRoi)
     )
-    .limit(limit)
-    .offset(offset);
+    .limit(100);
 
-    const botsWithPersona = bots.map(bot => {
-      const persona = getAvatarPersona(bot.handle || '');
-      return {
-        ...bot,
-        emoji: persona?.emoji || '🤖',
-        personaCategory: persona?.category || bot.category,
-        personaDescription: persona?.description || bot.description,
-      };
-    });
+    const tradeCountsByAvatar = await db
+      .select({
+        avatarId: botSimTrades.avatarId,
+        count: sql<number>`COUNT(*)::int`,
+      })
+      .from(botSimTrades)
+      .where(isNotNull(botSimTrades.avatarId))
+      .groupBy(botSimTrades.avatarId);
+    const tradeCountMap = new Map(tradeCountsByAvatar.map(r => [r.avatarId, r.count]));
 
-    const [countResult] = await db.select({ count: sql<number>`COUNT(*)::int` })
-      .from(knowledgeAvatars)
-      .where(and(...conditions));
+    const stakesByAvatar = await db
+      .select({
+        avatarId: botStakes.avatarId,
+        totalStaked: sql<number>`COALESCE(SUM(${botStakes.amount}), 0)::int`,
+        backerCount: sql<number>`COUNT(*)::int`,
+      })
+      .from(botStakes)
+      .where(and(eq(botStakes.status, 'active'), isNotNull(botStakes.avatarId)))
+      .groupBy(botStakes.avatarId);
+    const stakeMap = new Map(stakesByAvatar.map(r => [r.avatarId, r]));
 
-    res.json({ bots: botsWithPersona, total: countResult?.count || 0 });
+    const avatarHandleSet = new Set(avatarHandles);
+    let botsWithPersona = bots
+      .filter(bot => avatarHandleSet.has(bot.handle || ''))
+      .map(bot => {
+        const persona = getAvatarPersona(bot.handle || '');
+        const stakes = stakeMap.get(bot.id);
+        return {
+          ...bot,
+          totalStaked: stakes?.totalStaked || 0,
+          backerCount: stakes?.backerCount || 0,
+          recentTradeCount: tradeCountMap.get(bot.id) || 0,
+          emoji: persona?.emoji || '🤖',
+          personaCategory: persona?.category || bot.category,
+          personaDescription: persona?.description || bot.description,
+          tradingStyle: persona?.tradingStyle || bot.tradingStyle,
+          riskTolerance: persona?.riskTolerance || bot.riskTolerance,
+        };
+      });
+
+    if (category) {
+      botsWithPersona = botsWithPersona.filter(b => b.personaCategory === category);
+    }
+
+    const total = botsWithPersona.length;
+    const paged = botsWithPersona.slice(offset, offset + limitParam);
+    res.json({ bots: paged, total });
   }));
 
   // GET /api/bot-trading/bots/:id - Get bot detail with trade history
   app.get('/api/bot-trading/bots/:id', asyncHandler(async (req: Request, res: Response) => {
-    const { getAvatarPersona } = await import('../services/avatarTradingPersonas');
     const { id } = req.params;
     const userId = (req as any).user?.id || (req as any).session?.userId;
 
