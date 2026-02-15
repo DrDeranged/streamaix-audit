@@ -1,9 +1,10 @@
 import { db } from './db';
-import { knowledgeAvatars, users, aiAgents, predictionMarkets, predictionLeagues, learningModules, learningLessons, liveStreams, streamRecordings } from '@shared/schema';
-import { eq } from 'drizzle-orm';
+import { knowledgeAvatars, users, aiAgents, predictionMarkets, predictionLeagues, learningModules, learningLessons, liveStreams, streamRecordings, botSimTrades } from '@shared/schema';
+import { eq, and, isNotNull } from 'drizzle-orm';
 import { seedExpandedLearningContent } from './seed-learning-content';
 import { seedPredictionAndMacroLessons } from './seed-learning-content-part2';
 import { seedLearningQuizzes } from './seed-learning-quizzes';
+import { seedBotHistoricalTrades, updateAvatarTradingStats, seedAgentStakesOnAvatars } from './services/botTradingSimulator';
 
 const avatarSeedData = [
   {
@@ -1694,6 +1695,34 @@ export async function autoSeedDatabase() {
       // Don't throw - continue with server startup
     }
     
+    // ===== SEED BOT HISTORICAL TRADES & AVATAR STATS =====
+    try {
+      const existingAvatarTrades = await db
+        .select({ avatarId: botSimTrades.avatarId })
+        .from(botSimTrades)
+        .where(and(
+          eq(botSimTrades.status, 'closed'),
+          isNotNull(botSimTrades.avatarId)
+        ))
+        .limit(1);
+
+      if (existingAvatarTrades.length === 0) {
+        console.log('🤖 Seeding bot historical trades...');
+        await seedBotHistoricalTrades();
+      } else {
+        console.log('✅ Bot historical trades already exist, skipping seed');
+      }
+
+      console.log('📊 Updating avatar trading stats...');
+      await updateAvatarTradingStats();
+
+      console.log('💰 Seeding agent stakes on avatars...');
+      await seedAgentStakesOnAvatars();
+
+    } catch (error: any) {
+      console.error('⚠️ Bot trading seed failed:', error.message);
+    }
+
   } catch (error) {
     console.error('❌ Auto-seed failed:', error);
     // Don't throw - allow server to start even if seeding fails

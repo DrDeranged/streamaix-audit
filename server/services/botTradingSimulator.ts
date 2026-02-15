@@ -1,6 +1,6 @@
 import { db } from '../db';
-import { knowledgeAvatars, botStakes, botSimTrades, botPerformanceSnapshots } from '@shared/schema';
-import { eq, desc, sql, and } from 'drizzle-orm';
+import { knowledgeAvatars, botStakes, botSimTrades, botPerformanceSnapshots, users } from '@shared/schema';
+import { eq, desc, sql, and, isNotNull } from 'drizzle-orm';
 import { getAvatarPersona, getAllAvatarHandles, type AvatarTradingPersona } from './avatarTradingPersonas';
 import axios from 'axios';
 
@@ -646,4 +646,163 @@ export async function seedBotHistoricalTrades() {
   }
 
   console.log(`[Bot Simulator] Seeded historical trades for ${avatars.length} avatars`);
+}
+
+export async function updateAvatarTradingStats() {
+  try {
+    console.log('[Bot Simulator] Updating avatar trading stats from closed trades...');
+
+    const statsResult = await db
+      .select({
+        avatarId: botSimTrades.avatarId,
+        totalTrades: sql<number>`COUNT(*)::int`,
+        wins: sql<number>`COUNT(*) FILTER (WHERE ${botSimTrades.pnl} > 0)::int`,
+        avgPnlPercent: sql<number>`COALESCE(AVG(${botSimTrades.pnlPercent}), 0)`,
+      })
+      .from(botSimTrades)
+      .where(and(
+        eq(botSimTrades.status, 'closed'),
+        isNotNull(botSimTrades.avatarId)
+      ))
+      .groupBy(botSimTrades.avatarId);
+
+    if (statsResult.length === 0) {
+      console.log('[Bot Simulator] No closed trades found, skipping stats update');
+      return;
+    }
+
+    let updatedCount = 0;
+    for (const row of statsResult) {
+      if (!row.avatarId) continue;
+
+      const totalTrades = Number(row.totalTrades);
+      const wins = Number(row.wins);
+      const winRate = totalTrades > 0 ? Math.round((wins / totalTrades) * 10000) / 100 : 0;
+      const avgTradeRoi = Math.round(Number(row.avgPnlPercent) * 100) / 100;
+
+      await db
+        .update(knowledgeAvatars)
+        .set({
+          totalTrades,
+          winRate,
+          avgTradeRoi,
+          updatedAt: new Date(),
+        })
+        .where(eq(knowledgeAvatars.id, row.avatarId));
+
+      updatedCount++;
+    }
+
+    console.log(`[Bot Simulator] Updated trading stats for ${updatedCount} avatars`);
+  } catch (err) {
+    console.error('[Bot Simulator] Error updating avatar trading stats:', err);
+  }
+}
+
+const POPULAR_AVATAR_HANDLES = ['pmarca', 'CryptoHayes', 'VitalikButerin', 'saylor', 'cz_binance', 'elonmusk', 'sama'];
+
+export async function seedAgentStakesOnAvatars() {
+  try {
+    console.log('[Bot Simulator] Seeding agent stakes on avatars...');
+
+    const aiAgentUsers = await db
+      .select()
+      .from(users)
+      .where(eq(users.isAiAgent, true));
+
+    if (aiAgentUsers.length === 0) {
+      console.log('[Bot Simulator] No AI agent users found, skipping stakes seeding');
+      return;
+    }
+
+    const tradingHandles = getAllAvatarHandles();
+    const tradingAvatars = await db
+      .select()
+      .from(knowledgeAvatars)
+      .where(eq(knowledgeAvatars.isActive, true));
+
+    const eligibleAvatars = tradingAvatars.filter(a => tradingHandles.includes(a.handle));
+
+    if (eligibleAvatars.length === 0) {
+      console.log('[Bot Simulator] No trading avatars found, skipping stakes seeding');
+      return;
+    }
+
+    const existingStakes = await db
+      .select({
+        userId: botStakes.userId,
+        avatarId: botStakes.avatarId,
+      })
+      .from(botStakes)
+      .where(eq(botStakes.status, 'active'));
+
+    const existingStakeKeys = new Set(
+      existingStakes.map(s => `${s.userId}-${s.avatarId}`)
+    );
+
+    const popularAvatars = eligibleAvatars.filter(a => POPULAR_AVATAR_HANDLES.includes(a.handle));
+    const regularAvatars = eligibleAvatars.filter(a => !POPULAR_AVATAR_HANDLES.includes(a.handle));
+
+    let totalStakesCreated = 0;
+
+    for (const agent of aiAgentUsers) {
+      const agentPoints = agent.streamPoints || 0;
+      if (agentPoints < 100) continue;
+
+      const numStakes = 2 + Math.floor(Math.random() * 4);
+      const maxBudget = Math.floor(agentPoints * (0.05 + Math.random() * 0.15));
+
+      const selectedAvatars: typeof eligibleAvatars = [];
+      const usedIds = new Set<string>();
+
+      for (let i = 0; i < numStakes && selectedAvatars.length < numStakes; i++) {
+        let pool: typeof eligibleAvatars;
+        if (i < 2 && popularAvatars.length > 0 && Math.random() < 0.6) {
+          pool = popularAvatars;
+        } else {
+          pool = eligibleAvatars;
+        }
+
+        const available = pool.filter(a => !usedIds.has(a.id));
+        if (available.length === 0) continue;
+
+        const chosen = available[Math.floor(Math.random() * available.length)];
+        usedIds.add(chosen.id);
+        selectedAvatars.push(chosen);
+      }
+
+      let remainingBudget = maxBudget;
+
+      for (const avatar of selectedAvatars) {
+        const stakeKey = `${agent.id}-${avatar.id}`;
+        if (existingStakeKeys.has(stakeKey)) continue;
+
+        const isPopular = POPULAR_AVATAR_HANDLES.includes(avatar.handle);
+        const minStake = 100;
+        const maxStake = Math.min(5000, remainingBudget, isPopular ? 5000 : 3000);
+
+        if (maxStake < minStake) continue;
+
+        const amount = Math.floor(minStake + Math.random() * (maxStake - minStake));
+        remainingBudget -= amount;
+
+        await db.insert(botStakes).values({
+          userId: agent.id,
+          avatarId: avatar.id,
+          amount,
+          currentValue: amount,
+          totalPnl: 0,
+          totalPnlPercent: 0,
+          status: 'active',
+        });
+
+        existingStakeKeys.add(stakeKey);
+        totalStakesCreated++;
+      }
+    }
+
+    console.log(`[Bot Simulator] Created ${totalStakesCreated} agent stakes across ${aiAgentUsers.length} AI agents`);
+  } catch (err) {
+    console.error('[Bot Simulator] Error seeding agent stakes:', err);
+  }
 }
