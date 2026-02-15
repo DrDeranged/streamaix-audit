@@ -10317,6 +10317,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       botsWithPersona = botsWithPersona.filter(b => b.personaCategory === category);
     }
 
+    if (sort === 'backers') {
+      botsWithPersona.sort((a, b) => (b.backerCount || 0) - (a.backerCount || 0));
+    } else if (sort === 'totalStaked') {
+      botsWithPersona.sort((a, b) => (b.totalStaked || 0) - (a.totalStaked || 0));
+    } else if (sort === 'winRate') {
+      botsWithPersona.sort((a, b) => (b.winRate ?? 0) - (a.winRate ?? 0));
+    } else {
+      botsWithPersona.sort((a, b) => (b.avgTradeRoi ?? 0) - (a.avgTradeRoi ?? 0));
+    }
+
     const total = botsWithPersona.length;
     const paged = botsWithPersona.slice(offset, offset + limitParam);
     res.json({ bots: paged, total });
@@ -10368,11 +10378,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     const persona = getAvatarPersona(bot.handle || '');
+
+    const openPositions = await db.select()
+      .from(botSimTrades)
+      .where(and(eq(botSimTrades.avatarId, id), eq(botSimTrades.status, 'open')))
+      .orderBy(desc(botSimTrades.createdAt));
+
+    const portfolioMap = new Map<string, { asset: string; direction: string; quantity: number; entryPrice: number; currentValue: number; count: number }>();
+    for (const pos of openPositions) {
+      const key = `${pos.asset}-${pos.direction}`;
+      const existing = portfolioMap.get(key);
+      const qty = Number(pos.quantity ?? 0);
+      const ep = Number(pos.entryPrice ?? 0);
+      const cv = Number(pos.exitPrice ?? pos.entryPrice ?? 0) * qty;
+      if (existing) {
+        existing.quantity += qty;
+        existing.entryPrice = (existing.entryPrice * existing.count + ep) / (existing.count + 1);
+        existing.currentValue += cv;
+        existing.count += 1;
+      } else {
+        portfolioMap.set(key, { asset: pos.asset || '', direction: pos.direction || 'long', quantity: qty, entryPrice: ep, currentValue: cv, count: 1 });
+      }
+    }
+    const portfolio = Array.from(portfolioMap.values());
+
+    const recentReasoningsResult = await db.select({
+      reasoning: botSimTrades.reasoning,
+      asset: botSimTrades.asset,
+      direction: botSimTrades.direction,
+      createdAt: botSimTrades.createdAt,
+    })
+    .from(botSimTrades)
+    .where(and(eq(botSimTrades.avatarId, id), isNotNull(botSimTrades.reasoning)))
+    .orderBy(desc(botSimTrades.createdAt))
+    .limit(5);
+
     const botWithPersona = {
       ...bot,
       emoji: persona?.emoji || '🤖',
       personaCategory: persona?.category || bot.category,
       personaDescription: persona?.description || bot.bio,
+      tradingStyle: persona?.tradingStyle || bot.tradingStyle,
+      riskTolerance: persona?.riskTolerance || bot.riskTolerance,
+      preferredAssets: persona?.preferredAssets || [],
+      personaPhilosophy: persona?.description || '',
     };
 
     res.json({
@@ -10381,6 +10430,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       snapshots,
       stakeStats: stakeStats || { totalStaked: 0, backerCount: 0 },
       userStake,
+      openPositions,
+      portfolio,
+      recentReasonings: recentReasoningsResult,
     });
   }));
 
@@ -10536,6 +10588,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
       topBot: topBot || null,
       totalTrades: tradeCount?.total || 0,
     });
+  }));
+
+  // GET /api/bot-trading/recent-trades - Recent trades across all avatars
+  app.get('/api/bot-trading/recent-trades', asyncHandler(async (req: Request, res: Response) => {
+    const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
+
+    const recentTrades = await db.select({
+      id: botSimTrades.id,
+      asset: botSimTrades.asset,
+      direction: botSimTrades.direction,
+      entryPrice: botSimTrades.entryPrice,
+      exitPrice: botSimTrades.exitPrice,
+      pnl: botSimTrades.pnl,
+      pnlPercent: botSimTrades.pnlPercent,
+      status: botSimTrades.status,
+      reasoning: botSimTrades.reasoning,
+      createdAt: botSimTrades.createdAt,
+      closedAt: botSimTrades.closedAt,
+      avatarId: botSimTrades.avatarId,
+      avatarName: knowledgeAvatars.name,
+      avatarHandle: knowledgeAvatars.handle,
+      avatarImageUrl: knowledgeAvatars.imageUrl,
+    })
+    .from(botSimTrades)
+    .innerJoin(knowledgeAvatars, eq(botSimTrades.avatarId, knowledgeAvatars.id))
+    .orderBy(desc(botSimTrades.createdAt))
+    .limit(limit);
+
+    res.json(recentTrades);
+  }));
+
+  // GET /api/bot-trading/leaderboard - Avatar leaderboard by performance
+  app.get('/api/bot-trading/leaderboard', asyncHandler(async (req: Request, res: Response) => {
+    const period = (req.query.period as string) || 'all';
+
+    const conditions: any[] = [eq(botSimTrades.status, 'closed'), isNotNull(botSimTrades.avatarId)];
+
+    if (period === 'weekly') {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      conditions.push(gte(botSimTrades.closedAt, sevenDaysAgo));
+    } else if (period === 'monthly') {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      conditions.push(gte(botSimTrades.closedAt, thirtyDaysAgo));
+    }
+
+    const leaderboardData = await db.select({
+      avatarId: botSimTrades.avatarId,
+      totalTrades: sql<number>`COUNT(*)::int`,
+      wins: sql<number>`COUNT(*) FILTER (WHERE ${botSimTrades.pnl} > 0)::int`,
+      avgRoi: sql<number>`COALESCE(AVG(${botSimTrades.pnlPercent}), 0)`,
+      totalPnl: sql<number>`COALESCE(SUM(${botSimTrades.pnl}), 0)`,
+      avatarName: knowledgeAvatars.name,
+      avatarHandle: knowledgeAvatars.handle,
+      avatarImageUrl: knowledgeAvatars.imageUrl,
+      avatarCategory: knowledgeAvatars.category,
+    })
+    .from(botSimTrades)
+    .innerJoin(knowledgeAvatars, eq(botSimTrades.avatarId, knowledgeAvatars.id))
+    .where(and(...conditions))
+    .groupBy(botSimTrades.avatarId, knowledgeAvatars.name, knowledgeAvatars.handle, knowledgeAvatars.imageUrl, knowledgeAvatars.category)
+    .orderBy(sql`COALESCE(SUM(${botSimTrades.pnl}), 0) DESC`)
+    .limit(50);
+
+    const leaderboard = leaderboardData.map((row, index) => {
+      const totalTrades = Number(row.totalTrades);
+      const wins = Number(row.wins);
+      const winRate = totalTrades > 0 ? (wins / totalTrades) * 100 : 0;
+      const persona = getAvatarPersona(row.avatarHandle || '');
+      return {
+        rank: index + 1,
+        avatarId: row.avatarId,
+        name: row.avatarName,
+        handle: row.avatarHandle,
+        imageUrl: row.avatarImageUrl,
+        totalTrades,
+        winRate: Math.round(winRate * 100) / 100,
+        avgRoi: Math.round(Number(row.avgRoi) * 100) / 100,
+        totalPnl: Math.round(Number(row.totalPnl) * 100) / 100,
+        category: persona?.category || row.avatarCategory || 'Trading',
+        emoji: persona?.emoji || '🤖',
+      };
+    });
+
+    res.json(leaderboard);
   }));
 
   app.post('/api/bot-trading/seed-historical', asyncHandler(async (req: Request, res: Response) => {

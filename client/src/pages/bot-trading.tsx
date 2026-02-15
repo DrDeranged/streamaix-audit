@@ -17,6 +17,7 @@ import {
   BarChart3, ArrowUpRight, ArrowDownRight, Wallet, Eye, LogIn, Zap,
   Shield, Crosshair, Clock, Trophy, ChevronRight, ChevronLeft, Sparkles, BarChart2,
   Bot, AlertTriangle, DollarSign, Briefcase, Layers, Network, Server, Brain, User,
+  Crown, MessageSquareQuote, Package,
 } from 'lucide-react';
 
 const categoryConfig: Record<string, { label: string; color: string; icon: any; gradient: string }> = {
@@ -294,6 +295,10 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
   const snapshots = botData?.performanceSnapshots || botData?.snapshots || [];
   const stakeStats = botData?.stakeStats;
   const userStake = botData?.userStake;
+  const openPositions = botData?.openPositions || [];
+  const portfolio = botData?.portfolio || [];
+  const recentReasonings = botData?.recentReasonings || [];
+  const preferredAssets = bot?.preferredAssets || [];
 
   const handleStake = () => {
     if (!isAuthenticated) {
@@ -437,6 +442,119 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
                 </div>
               )}
 
+              {bot.personaPhilosophy && (
+                <div>
+                  <h3 className="text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
+                    <Brain className="w-4 h-4 text-purple-400" /> Trading Philosophy
+                  </h3>
+                  <div className="bg-slate-800/30 rounded-xl border border-purple-500/20 p-4">
+                    <p className="text-xs text-slate-300/80 leading-relaxed italic">{bot.personaPhilosophy}</p>
+                  </div>
+                </div>
+              )}
+
+              {preferredAssets.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
+                    <Target className="w-4 h-4 text-amber-400" /> Preferred Assets
+                  </h3>
+                  <div className="flex flex-wrap gap-1.5">
+                    {preferredAssets.map((a: any, i: number) => (
+                      <Badge key={i} variant="outline" className="text-[10px] text-amber-400 border-amber-500/30 bg-amber-500/5">
+                        {a.name || a.symbol} ({a.type})
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {openPositions.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
+                    <Package className="w-4 h-4 text-cyan-400" /> Open Positions
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {openPositions.slice(0, 6).map((pos: any, i: number) => {
+                      const isLong = pos.direction === 'long';
+                      return (
+                        <div key={i} className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/30">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs text-white font-semibold">{pos.asset}</span>
+                            <Badge variant="outline" className={`text-[9px] ${isLong ? 'text-emerald-400 border-emerald-500/30' : 'text-red-400 border-red-500/30'}`}>
+                              {isLong ? '↑ Long' : '↓ Short'}
+                            </Badge>
+                          </div>
+                          <div className="text-[10px] text-slate-500">
+                            Entry: <span className="text-slate-300">${Number(pos.entryPrice ?? 0).toFixed(2)}</span>
+                          </div>
+                          <div className="text-[10px] text-slate-500">
+                            Qty: <span className="text-slate-300">{Number(pos.quantity ?? 0).toFixed(4)}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {portfolio.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
+                    <BarChart2 className="w-4 h-4 text-cyan-400" /> Portfolio Breakdown
+                  </h3>
+                  <div className="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3 space-y-2">
+                    {(() => {
+                      const maxValue = Math.max(...portfolio.map((p: any) => Math.abs(p.currentValue || p.quantity * p.entryPrice)));
+                      const colors = ['bg-cyan-500', 'bg-purple-500', 'bg-emerald-500', 'bg-amber-500', 'bg-pink-500', 'bg-blue-500'];
+                      return portfolio.map((p: any, i: number) => {
+                        const value = Math.abs(p.currentValue || p.quantity * p.entryPrice);
+                        const pct = maxValue > 0 ? (value / maxValue) * 100 : 0;
+                        return (
+                          <div key={i} className="flex items-center gap-3">
+                            <span className="text-xs text-white font-medium w-16 truncate">{p.asset}</span>
+                            <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
+                              <div
+                                className={`h-full rounded-full ${colors[i % colors.length]}`}
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                            <span className="text-[10px] text-slate-400 w-20 text-right">${value.toFixed(0)}</span>
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                </div>
+              )}
+
+              {recentReasonings.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
+                    <MessageSquareQuote className="w-4 h-4 text-purple-400" /> Trading Insights
+                  </h3>
+                  <div className="space-y-2">
+                    {recentReasonings.map((r: any, i: number) => (
+                      <div key={i} className="bg-slate-800/40 rounded-xl p-3 border border-slate-700/30 relative">
+                        <div className="flex items-start gap-2">
+                          <span className="text-lg shrink-0">{bot.emoji}</span>
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <Badge variant="outline" className="text-[9px] text-cyan-400 border-cyan-500/30">{r.asset}</Badge>
+                              <Badge variant="outline" className={`text-[9px] ${r.direction === 'long' ? 'text-emerald-400 border-emerald-500/30' : 'text-red-400 border-red-500/30'}`}>
+                                {r.direction === 'long' ? '↑ Long' : '↓ Short'}
+                              </Badge>
+                            </div>
+                            <p className="text-[11px] text-slate-300/80 leading-relaxed italic">
+                              &ldquo;{(r.reasoning || '').split(' | ')[0]}&rdquo;
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="bg-gradient-to-br from-slate-800/50 to-slate-800/30 rounded-xl border border-cyan-500/20 p-5">
                 <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
                   <Coins className="w-4 h-4 text-cyan-400" /> Stake STREAM Points
@@ -527,6 +645,201 @@ function SkeletonCard() {
       <div className="grid grid-cols-3 gap-2">
         {[...Array(3)].map((_, i) => <div key={i} className="h-12 bg-slate-800/40 rounded-lg" />)}
       </div>
+    </div>
+  );
+}
+
+function LiveTradeFeed() {
+  const { data: tradesData } = useQuery({ queryKey: ['/api/bot-trading/recent-trades'] });
+  const trades = Array.isArray(tradesData) ? tradesData : [];
+
+  if (trades.length === 0) return null;
+
+  const doubled = [...trades, ...trades];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.2 }}
+      className="mb-8"
+    >
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+        <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wider">Live Trade Feed</h3>
+      </div>
+      <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/40 rounded-2xl p-3 overflow-hidden">
+        <div className="relative overflow-hidden">
+          <motion.div
+            className="flex gap-3"
+            animate={{ x: ['0%', '-50%'] }}
+            transition={{ duration: trades.length * 4, repeat: Infinity, ease: 'linear' }}
+          >
+            {doubled.map((trade: any, i: number) => {
+              const pnl = Number(trade.pnl ?? 0);
+              const isPositive = pnl >= 0;
+              const isLong = trade.direction === 'long';
+              const reasoning = trade.reasoning ? (trade.reasoning.length > 60 ? trade.reasoning.slice(0, 60) + '...' : trade.reasoning) : '';
+
+              return (
+                <div
+                  key={`${trade.id}-${i}`}
+                  className="flex-shrink-0 bg-slate-800/50 border border-slate-700/30 rounded-xl p-3 min-w-[260px] max-w-[280px] hover:border-cyan-500/30 transition-colors"
+                >
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <AvatarImage src={trade.avatarImageUrl} size="sm" className="!w-7 !h-7" />
+                    <span className="text-xs text-white font-medium truncate">{trade.avatarName}</span>
+                    <Badge variant="outline" className={`text-[9px] ml-auto ${isLong ? 'text-emerald-400 border-emerald-500/30' : 'text-red-400 border-red-500/30'}`}>
+                      {isLong ? '↑ Long' : '↓ Short'}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-cyan-400 font-semibold">{trade.asset}</span>
+                    {trade.status === 'closed' && (
+                      <span className={`text-xs font-bold ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {isPositive ? '+' : ''}{pnl.toFixed(2)}
+                      </span>
+                    )}
+                    {trade.status === 'open' && (
+                      <Badge variant="outline" className="text-[9px] text-amber-400 border-amber-500/30">Open</Badge>
+                    )}
+                  </div>
+                  {reasoning && (
+                    <p className="text-[10px] text-slate-500 mt-1.5 leading-tight italic truncate">&ldquo;{reasoning}&rdquo;</p>
+                  )}
+                </div>
+              );
+            })}
+          </motion.div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function LeaderboardContent() {
+  const [period, setPeriod] = useState<string>('all');
+  const { data: leaderboardData, isLoading } = useQuery({
+    queryKey: [`/api/bot-trading/leaderboard?period=${period}`],
+  });
+  const leaderboard = Array.isArray(leaderboardData) ? leaderboardData : [];
+
+  const crownColors = ['text-amber-400', 'text-slate-300', 'text-amber-700'];
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-6">
+        {[
+          { value: 'weekly', label: 'Weekly' },
+          { value: 'monthly', label: 'Monthly' },
+          { value: 'all', label: 'All Time' },
+        ].map((p) => (
+          <Button
+            key={p.value}
+            variant="outline"
+            size="sm"
+            className={`text-xs h-8 ${
+              period === p.value
+                ? 'bg-cyan-600/20 border-cyan-500/50 text-cyan-400'
+                : 'border-slate-700/50 text-slate-400 hover:text-white hover:border-cyan-500/50'
+            }`}
+            onClick={() => setPeriod(p.value)}
+          >
+            {p.label}
+          </Button>
+        ))}
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-3">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="bg-slate-900/40 border border-slate-700/40 rounded-xl h-16 animate-pulse" />
+          ))}
+        </div>
+      ) : leaderboard.length === 0 ? (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 bg-slate-900/40 backdrop-blur-xl border border-slate-700/40 rounded-2xl">
+          <Trophy className="w-14 h-14 text-slate-600 mx-auto mb-4" />
+          <p className="text-slate-400 text-lg font-medium mb-1">No leaderboard data yet</p>
+          <p className="text-slate-500 text-sm">Trades need to be executed first</p>
+        </motion.div>
+      ) : (
+        <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/40 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-slate-700/50 text-slate-500">
+                  <th className="text-left p-3 w-12">#</th>
+                  <th className="text-left p-3">Avatar</th>
+                  <th className="text-left p-3">Category</th>
+                  <th className="text-center p-3">Trades</th>
+                  <th className="text-left p-3 min-w-[120px]">Win Rate</th>
+                  <th className="text-right p-3">ROI</th>
+                  <th className="text-right p-3">Total P&L</th>
+                </tr>
+              </thead>
+              <tbody>
+                <AnimatePresence>
+                  {leaderboard.map((entry: any, i: number) => {
+                    const isPositivePnl = entry.totalPnl >= 0;
+                    const isPositiveRoi = entry.avgRoi >= 0;
+                    const catConfig = getCategory(entry.category);
+
+                    return (
+                      <motion.tr
+                        key={entry.avatarId}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.03 }}
+                        className="border-b border-slate-700/20 hover:bg-slate-800/50 transition-colors"
+                      >
+                        <td className="p-3">
+                          {entry.rank <= 3 ? (
+                            <Crown className={`w-5 h-5 ${crownColors[entry.rank - 1]}`} />
+                          ) : (
+                            <span className="text-slate-500 font-medium pl-0.5">{entry.rank}</span>
+                          )}
+                        </td>
+                        <td className="p-3">
+                          <div className="flex items-center gap-2.5">
+                            <AvatarImage src={entry.imageUrl} size="sm" className="!w-8 !h-8" />
+                            <div>
+                              <p className="text-white font-medium text-sm">{entry.name}</p>
+                              <p className="text-[10px] text-slate-500">@{entry.handle}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <Badge variant="outline" className={`text-[10px] ${catConfig.color}`}>
+                            {catConfig.label}
+                          </Badge>
+                        </td>
+                        <td className="p-3 text-center text-slate-300">{entry.totalTrades}</td>
+                        <td className="p-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                              <div
+                                className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-cyan-400"
+                                style={{ width: `${Math.min(entry.winRate, 100)}%` }}
+                              />
+                            </div>
+                            <span className="text-cyan-400 font-medium">{entry.winRate.toFixed(0)}%</span>
+                          </div>
+                        </td>
+                        <td className={`p-3 text-right font-bold ${isPositiveRoi ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {isPositiveRoi ? '+' : ''}{entry.avgRoi.toFixed(1)}%
+                        </td>
+                        <td className={`p-3 text-right font-bold ${isPositivePnl ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {isPositivePnl ? '+' : ''}${entry.totalPnl.toFixed(0)}
+                        </td>
+                      </motion.tr>
+                    );
+                  })}
+                </AnimatePresence>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -662,6 +975,8 @@ export default function BotTradingPage() {
           ))}
         </motion.div>
 
+        <LiveTradeFeed />
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <TabsList className="bg-slate-900/60 border border-slate-700/40 p-1">
@@ -672,6 +987,9 @@ export default function BotTradingPage() {
               <TabsTrigger value="my" className="data-[state=active]:bg-purple-600/20 data-[state=active]:text-purple-400 data-[state=active]:shadow-sm px-5">
                 <Wallet className="w-4 h-4 mr-1.5" /> My Stakes
                 {stakes.length > 0 && <Badge variant="outline" className="ml-2 text-[10px] border-purple-500/30 text-purple-400">{stakes.length}</Badge>}
+              </TabsTrigger>
+              <TabsTrigger value="leaderboard" className="data-[state=active]:bg-amber-600/20 data-[state=active]:text-amber-400 data-[state=active]:shadow-sm px-5">
+                <Trophy className="w-4 h-4 mr-1.5" /> Leaderboard
               </TabsTrigger>
             </TabsList>
 
@@ -905,6 +1223,10 @@ export default function BotTradingPage() {
                 )}
               </>
             )}
+          </TabsContent>
+
+          <TabsContent value="leaderboard">
+            <LeaderboardContent />
           </TabsContent>
         </Tabs>
       </div>
