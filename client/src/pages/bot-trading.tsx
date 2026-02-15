@@ -12,12 +12,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { Link } from 'wouter';
 import {
   Cpu, TrendingUp, TrendingDown, Users, Coins, Activity, Target, Flame,
   BarChart3, ArrowUpRight, ArrowDownRight, Wallet, Eye, LogIn, Zap,
   Shield, Crosshair, Clock, Trophy, ChevronRight, ChevronLeft, Sparkles, BarChart2,
   Bot, AlertTriangle, DollarSign, Briefcase, Layers, Network, Server, Brain, User,
-  Crown, MessageSquareQuote, Package,
+  Crown, MessageSquareQuote, Package, Home,
 } from 'lucide-react';
 
 const categoryConfig: Record<string, { label: string; color: string; icon: any; gradient: string }> = {
@@ -924,6 +925,23 @@ export default function BotTradingPage() {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-6 md:py-10">
+        <Link href="/">
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="inline-block mb-4"
+          >
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-slate-900/60 backdrop-blur-xl border-slate-700/50 hover:border-cyan-500/50 hover:bg-cyan-500/5 text-slate-400 hover:text-cyan-400 transition-all duration-300 rounded-xl"
+            >
+              <Home className="w-4 h-4 mr-2" />
+              Back to Home
+            </Button>
+          </motion.div>
+        </Link>
+
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <motion.div
