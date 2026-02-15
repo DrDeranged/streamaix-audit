@@ -115,6 +115,24 @@ const steps: OnboardingStep[] = [
     }
   },
   {
+    title: "Bot Trading Simulator",
+    subtitle: "Stake on AI Avatar Traders",
+    description: "Back legendary investors like Marc Andreessen, Cathie Wood, and Arthur Hayes as they trade real markets with AI-driven strategies. Stake STREAM points and earn returns based on their performance.",
+    icon: Bot,
+    gradient: "from-cyan-500 via-teal-500 to-emerald-500",
+    glowColor: "rgba(6, 182, 212, 0.5)",
+    instructions: [
+      "Stake STREAM points on your favorite avatars",
+      "Watch real-time trades with live market prices",
+      "Compete on the leaderboard for top returns"
+    ],
+    action: {
+      label: "Open Bot Trading",
+      path: "/bot-trading"
+    },
+    tip: "Each avatar has a unique trading style — diversify your stakes for best results"
+  },
+  {
     title: "AI Content Processor",
     subtitle: "Video → Summary → Market",
     description: "Paste any YouTube URL. AI extracts insights and creates tradeable prediction markets automatically.",

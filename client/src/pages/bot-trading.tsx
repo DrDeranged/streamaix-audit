@@ -326,7 +326,7 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="bg-slate-900/95 backdrop-blur-2xl border-slate-700/50 max-w-2xl max-h-[90vh] overflow-y-auto p-0">
+      <DialogContent className="bg-slate-900/95 backdrop-blur-2xl border-slate-700/50 max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto p-0">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <div className="relative">
@@ -685,7 +685,7 @@ function LiveTradeFeed() {
               return (
                 <div
                   key={`${trade.id}-${i}`}
-                  className="flex-shrink-0 bg-slate-800/50 border border-slate-700/30 rounded-xl p-3 min-w-[260px] max-w-[280px] hover:border-cyan-500/30 transition-colors"
+                  className="flex-shrink-0 bg-slate-800/50 border border-slate-700/30 rounded-xl p-3 min-w-[220px] sm:min-w-[260px] max-w-[280px] hover:border-cyan-500/30 transition-colors"
                 >
                   <div className="flex items-center gap-2 mb-1.5">
                     <AvatarImage src={trade.avatarImageUrl} size="sm" className="!w-7 !h-7" />
@@ -766,7 +766,7 @@ function LeaderboardContent() {
       ) : (
         <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/40 rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-xs">
+            <table className="w-full text-xs min-w-[600px]">
               <thead>
                 <tr className="border-b border-slate-700/50 text-slate-500">
                   <th className="text-left p-3 w-12">#</th>
@@ -967,26 +967,26 @@ export default function BotTradingPage() {
           className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8"
         >
           {[
-            { icon: Coins, label: 'Total Staked', value: stats?.totalStaked ? `${(Number(stats.totalStaked) / 1000).toFixed(0)}k` : '0', sub: 'STREAM', color: 'cyan', glow: 'shadow-cyan-500/10' },
-            { icon: Users, label: 'Active Traders', value: stats?.activeTraders ?? '0', sub: 'staking now', color: 'purple', glow: 'shadow-purple-500/10' },
-            { icon: Trophy, label: 'Top Avatar', value: stats?.topBot?.name ?? '—', sub: stats?.topBot ? `${(stats.topBot.avgTradeRoi ?? 0).toFixed(1)}% ROI` : '', color: 'emerald', glow: 'shadow-emerald-500/10', imageUrl: stats?.topBot?.imageUrl },
-            { icon: Activity, label: 'Total Trades', value: stats?.totalTrades ?? '0', sub: 'executed', color: 'amber', glow: 'shadow-amber-500/10' },
+            { icon: Coins, label: 'Total Staked', value: stats?.totalStaked ? `${(Number(stats.totalStaked) / 1000).toFixed(0)}k` : '0', sub: 'STREAM', iconBg: 'bg-cyan-500/10', iconBorder: 'border-cyan-500/20', iconColor: 'text-cyan-400', subColor: 'text-cyan-400/70', hoverBorder: 'hover:border-cyan-500/40', glow: 'shadow-cyan-500/10' },
+            { icon: Users, label: 'Active Traders', value: stats?.activeTraders ?? '0', sub: 'staking now', iconBg: 'bg-purple-500/10', iconBorder: 'border-purple-500/20', iconColor: 'text-purple-400', subColor: 'text-purple-400/70', hoverBorder: 'hover:border-purple-500/40', glow: 'shadow-purple-500/10' },
+            { icon: Trophy, label: 'Top Avatar', value: stats?.topBot?.name ?? '—', sub: stats?.topBot ? `${(stats.topBot.avgTradeRoi ?? 0).toFixed(1)}% ROI` : '', iconBg: 'bg-emerald-500/10', iconBorder: 'border-emerald-500/20', iconColor: 'text-emerald-400', subColor: 'text-emerald-400/70', hoverBorder: 'hover:border-emerald-500/40', glow: 'shadow-emerald-500/10', imageUrl: stats?.topBot?.imageUrl },
+            { icon: Activity, label: 'Total Trades', value: stats?.totalTrades ?? '0', sub: 'executed', iconBg: 'bg-amber-500/10', iconBorder: 'border-amber-500/20', iconColor: 'text-amber-400', subColor: 'text-amber-400/70', hoverBorder: 'hover:border-amber-500/40', glow: 'shadow-amber-500/10' },
           ].map((item, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 + i * 0.05 }}
-              className={`bg-slate-900/60 backdrop-blur-xl border border-slate-700/40 rounded-2xl p-4 hover:border-${item.color}-500/40 transition-all shadow-lg ${item.glow}`}
+              className={`bg-slate-900/60 backdrop-blur-xl border border-slate-700/40 rounded-2xl p-4 ${item.hoverBorder} transition-all shadow-lg ${item.glow}`}
             >
               <div className="flex items-start gap-3">
-                <div className={`w-10 h-10 rounded-xl bg-${item.color}-500/10 border border-${item.color}-500/20 flex items-center justify-center shrink-0`}>
-                  <item.icon className={`w-5 h-5 text-${item.color}-400`} />
+                <div className={`w-10 h-10 rounded-xl ${item.iconBg} border ${item.iconBorder} flex items-center justify-center shrink-0`}>
+                  <item.icon className={`w-5 h-5 ${item.iconColor}`} />
                 </div>
                 <div className="min-w-0">
                   <p className="text-[10px] text-slate-500 uppercase tracking-wider">{item.label}</p>
-                  <p className="text-lg font-bold text-white truncate">{item.value}</p>
-                  {item.sub && <p className={`text-[10px] text-${item.color}-400/70`}>{item.sub}</p>}
+                  <p className="text-base sm:text-lg font-bold text-white truncate">{item.value}</p>
+                  {item.sub && <p className={`text-[10px] ${item.subColor}`}>{item.sub}</p>}
                 </div>
               </div>
             </motion.div>
@@ -997,24 +997,24 @@ export default function BotTradingPage() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <TabsList className="bg-slate-900/60 border border-slate-700/40 p-1">
-              <TabsTrigger value="all" className="data-[state=active]:bg-cyan-600/20 data-[state=active]:text-cyan-400 data-[state=active]:shadow-sm px-5">
-                <Sparkles className="w-4 h-4 mr-1.5" /> All Avatars
-                <Badge variant="outline" className="ml-2 text-[10px] border-slate-600 text-slate-400">{totalBots}</Badge>
+            <TabsList className="bg-slate-900/60 border border-slate-700/40 p-1 w-full sm:w-auto overflow-x-auto">
+              <TabsTrigger value="all" className="data-[state=active]:bg-cyan-600/20 data-[state=active]:text-cyan-400 data-[state=active]:shadow-sm px-3 sm:px-5">
+                <Sparkles className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">All Avatars</span><span className="sm:hidden">All</span>
+                <Badge variant="outline" className="ml-1.5 sm:ml-2 text-[10px] border-slate-600 text-slate-400">{totalBots}</Badge>
               </TabsTrigger>
-              <TabsTrigger value="my" className="data-[state=active]:bg-purple-600/20 data-[state=active]:text-purple-400 data-[state=active]:shadow-sm px-5">
-                <Wallet className="w-4 h-4 mr-1.5" /> My Stakes
-                {stakes.length > 0 && <Badge variant="outline" className="ml-2 text-[10px] border-purple-500/30 text-purple-400">{stakes.length}</Badge>}
+              <TabsTrigger value="my" className="data-[state=active]:bg-purple-600/20 data-[state=active]:text-purple-400 data-[state=active]:shadow-sm px-3 sm:px-5">
+                <Wallet className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">My Stakes</span><span className="sm:hidden">Stakes</span>
+                {stakes.length > 0 && <Badge variant="outline" className="ml-1.5 sm:ml-2 text-[10px] border-purple-500/30 text-purple-400">{stakes.length}</Badge>}
               </TabsTrigger>
-              <TabsTrigger value="leaderboard" className="data-[state=active]:bg-amber-600/20 data-[state=active]:text-amber-400 data-[state=active]:shadow-sm px-5">
-                <Trophy className="w-4 h-4 mr-1.5" /> Leaderboard
+              <TabsTrigger value="leaderboard" className="data-[state=active]:bg-amber-600/20 data-[state=active]:text-amber-400 data-[state=active]:shadow-sm px-3 sm:px-5">
+                <Trophy className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">Leaderboard</span><span className="sm:hidden">Board</span>
               </TabsTrigger>
             </TabsList>
 
             {activeTab === 'all' && (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 <Select value={category} onValueChange={(v) => { setCategory(v); setPage(1); }}>
-                  <SelectTrigger className="w-[150px] bg-slate-900/60 border-slate-700/50 text-white text-sm h-9">
+                  <SelectTrigger className="w-full sm:w-[150px] bg-slate-900/60 border-slate-700/50 text-white text-sm h-9">
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-900 border-slate-700">
@@ -1035,7 +1035,7 @@ export default function BotTradingPage() {
                 </Select>
 
                 <Select value={sort} onValueChange={(v) => { setSort(v); setPage(1); }}>
-                  <SelectTrigger className="w-[140px] bg-slate-900/60 border-slate-700/50 text-white text-sm h-9">
+                  <SelectTrigger className="w-full sm:w-[140px] bg-slate-900/60 border-slate-700/50 text-white text-sm h-9">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-900 border-slate-700">
