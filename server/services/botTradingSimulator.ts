@@ -37,38 +37,41 @@ const STOCK_ASSETS = [
   { symbol: 'AMD', name: 'AMD', type: 'stock' },
 ];
 
-const STOCK_BASE_PRICES: Record<string, number> = {
-  'NVDA': 875,
-  'AAPL': 230,
-  'TSLA': 250,
-  'MSFT': 420,
-  'GOOGL': 175,
-  'AMZN': 200,
-  'META': 550,
-  'AMD': 165,
+const STOCK_FALLBACK_PRICES: Record<string, number> = {
+  'NVDA': 185,
+  'AAPL': 278,
+  'TSLA': 411,
+  'MSFT': 445,
+  'GOOGL': 195,
+  'AMZN': 235,
+  'META': 620,
+  'AMD': 120,
 };
 
-const CRYPTO_PRICE_RANGES: Record<string, [number, number]> = {
-  'BTC': [90000, 105000],
-  'ETH': [3000, 4000],
-  'SOL': [170, 250],
-  'ADA': [0.4, 0.8],
-  'AVAX': [25, 50],
-  'LINK': [12, 25],
-  'DOT': [5, 12],
-  'DOGE': [0.08, 0.2],
-  'XRP': [0.5, 1.2],
-  'UNI': [6, 15],
-  'AAVE': [80, 180],
-  'TRX': [0.08, 0.18],
-  'MATIC': [0.5, 1.5],
-  'FTM': [0.3, 0.9],
-  'YFI': [6000, 12000],
-  'COMP': [40, 90],
-  'SNX': [2, 6],
-  'MKR': [1200, 2500],
-  'CRV': [0.4, 1.2],
+const CRYPTO_FALLBACK_PRICES: Record<string, number> = {
+  'BTC': 92000,
+  'ETH': 2500,
+  'SOL': 140,
+  'ADA': 0.75,
+  'AVAX': 35,
+  'LINK': 18,
+  'DOT': 7,
+  'DOGE': 0.15,
+  'XRP': 2.5,
+  'UNI': 10,
+  'AAVE': 250,
+  'TRX': 0.24,
+  'MATIC': 0.35,
+  'FTM': 0.6,
+  'YFI': 8500,
+  'COMP': 55,
+  'SNX': 1.5,
+  'MKR': 1600,
+  'CRV': 0.55,
 };
+
+const priceCache: Map<string, { price: number; timestamp: number }> = new Map();
+const PRICE_CACHE_TTL_MS = 10 * 60 * 1000;
 
 const COINGECKO_ID_MAP: Record<string, string> = {
   'BTC': 'bitcoin',
@@ -278,7 +281,7 @@ export class BotTradingSimulator {
       const coingeckoId = getCoingeckoId(asset.symbol) || asset.symbol;
       price = await this.fetchCryptoPrice(coingeckoId);
     } else {
-      price = await this.simulateStockPrice(asset.symbol);
+      price = await this.fetchStockPrice(asset.symbol);
     }
 
     if (!price || price <= 0) {
@@ -325,7 +328,7 @@ export class BotTradingSimulator {
     } else {
       const stockAsset = STOCK_ASSETS.find(a => a.name === trade.asset || a.symbol === trade.asset);
       if (stockAsset) {
-        currentPrice = await this.simulateStockPrice(stockAsset.symbol);
+        currentPrice = await this.fetchStockPrice(stockAsset.symbol);
       }
     }
 
@@ -359,7 +362,28 @@ export class BotTradingSimulator {
     console.log(`[Bot Simulator] Closed ${trade.direction} ${trade.asset}: P&L $${pnl.toFixed(2)} (${pnlPercent.toFixed(2)}%)`);
   }
 
+  private getCachedPrice(key: string): number | null {
+    const cached = priceCache.get(key);
+    if (cached && (Date.now() - cached.timestamp) < PRICE_CACHE_TTL_MS) {
+      return cached.price;
+    }
+    return null;
+  }
+
+  private setCachedPrice(key: string, price: number): void {
+    priceCache.set(key, { price, timestamp: Date.now() });
+  }
+
   private async fetchCryptoPrice(coingeckoId: string): Promise<number | null> {
+    const symbolEntry = Object.entries(COINGECKO_ID_MAP).find(([_, id]) => id === coingeckoId);
+    const symbol = symbolEntry ? symbolEntry[0] : coingeckoId.toUpperCase();
+    const cacheKey = `crypto_${coingeckoId}`;
+
+    const cached = this.getCachedPrice(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
     try {
       const apiKey = process.env.COINGECKO_PRO_API_KEY;
       const headers: Record<string, string> = {};
@@ -377,20 +401,57 @@ export class BotTradingSimulator {
       });
 
       const price = response.data?.[coingeckoId]?.usd;
-      return price || null;
+      if (price && price > 0) {
+        this.setCachedPrice(cacheKey, price);
+        console.log(`[Bot Simulator] CoinGecko price for ${symbol}: $${price}`);
+        return price;
+      }
     } catch (err: any) {
       console.error(`[Bot Simulator] CoinGecko price fetch failed for ${coingeckoId}:`, err.message);
-      return null;
     }
+
+    const fallback = CRYPTO_FALLBACK_PRICES[symbol];
+    if (fallback) {
+      console.log(`[Bot Simulator] Using fallback price for ${symbol}: $${fallback}`);
+      return fallback;
+    }
+    return null;
   }
 
-  private async simulateStockPrice(symbol: string): Promise<number | null> {
-    const basePrice = STOCK_BASE_PRICES[symbol];
-    if (!basePrice) return null;
+  private async fetchStockPrice(symbol: string): Promise<number | null> {
+    const cacheKey = `stock_${symbol}`;
 
-    const randomWalk = (Math.random() - 0.48) * 0.06;
-    const price = basePrice * (1 + randomWalk);
-    return Math.round(price * 100) / 100;
+    const cached = this.getCachedPrice(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const finnhubKey = process.env.FINNHUB_API_KEY;
+    if (finnhubKey) {
+      try {
+        const response = await axios.get('https://finnhub.io/api/v1/quote', {
+          params: { symbol: symbol.toUpperCase(), token: finnhubKey },
+          timeout: 8000,
+        });
+
+        const quote = response.data;
+        if (quote && quote.c > 0) {
+          const price = parseFloat(quote.c.toFixed(2));
+          this.setCachedPrice(cacheKey, price);
+          console.log(`[Bot Simulator] Finnhub price for ${symbol}: $${price}`);
+          return price;
+        }
+      } catch (err: any) {
+        console.error(`[Bot Simulator] Finnhub price fetch failed for ${symbol}:`, err.message);
+      }
+    }
+
+    const fallback = STOCK_FALLBACK_PRICES[symbol];
+    if (fallback) {
+      console.log(`[Bot Simulator] Using fallback price for ${symbol}: $${fallback}`);
+      return fallback;
+    }
+    return null;
   }
 
   private async updateStakes() {
@@ -524,15 +585,16 @@ export class BotTradingSimulator {
 export const botTradingSimulator = new BotTradingSimulator();
 
 function generateSimulatedCryptoPrice(assetName: string): number {
-  const range = CRYPTO_PRICE_RANGES[assetName];
-  if (range) {
-    return range[0] + Math.random() * (range[1] - range[0]);
+  const basePrice = CRYPTO_FALLBACK_PRICES[assetName];
+  if (basePrice) {
+    const variation = (Math.random() - 0.5) * 0.06;
+    return basePrice * (1 + variation);
   }
   return 1 + Math.random() * 100;
 }
 
 function generateSimulatedStockPrice(symbol: string): number {
-  const basePrice = STOCK_BASE_PRICES[symbol];
+  const basePrice = STOCK_FALLBACK_PRICES[symbol];
   if (basePrice) {
     const variation = (Math.random() - 0.48) * 0.1;
     return basePrice * (1 + variation);
