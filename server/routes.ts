@@ -10437,8 +10437,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // POST /api/bot-trading/stake - Stake STREAM points on a bot
-  app.post('/api/bot-trading/stake', asyncHandler(async (req: Request, res: Response) => {
-    const userId = (req as any).user?.id || (req as any).session?.userId;
+  app.post('/api/bot-trading/stake', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({ error: 'Authentication required' });
     }
@@ -10480,8 +10480,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // POST /api/bot-trading/withdraw - Withdraw stake from a bot
-  app.post('/api/bot-trading/withdraw', asyncHandler(async (req: Request, res: Response) => {
-    const userId = (req as any).user?.id || (req as any).session?.userId;
+  app.post('/api/bot-trading/withdraw', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({ error: 'Authentication required' });
     }
@@ -10527,8 +10527,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // GET /api/bot-trading/my-stakes - Get user's active bot stakes
-  app.get('/api/bot-trading/my-stakes', asyncHandler(async (req: Request, res: Response) => {
-    const userId = (req as any).user?.id || (req as any).session?.userId;
+  app.get('/api/bot-trading/my-stakes', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({ error: 'Authentication required' });
     }
