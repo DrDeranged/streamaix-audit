@@ -11,6 +11,8 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { formatDistanceToNow, format, differenceInDays, differenceInHours } from 'date-fns';
+import { useAuth } from '@/hooks/useAuth';
+import { formatPoints } from '@/hooks/usePoints';
 
 interface League {
   id: string;
@@ -91,6 +93,7 @@ function getTimeUntilStart(startDate: string) {
 
 function LeagueCard({ league, onJoin, isJoining }: { league: League; onJoin: (id: string) => void; isJoining: boolean }) {
   const [, setLocation] = useLocation();
+  const { user, isAuthenticated } = useAuth();
   const isActive = league.status === 'active';
   const isUpcoming = league.status === 'upcoming';
   const fillPercent = league.maxParticipants 
@@ -166,14 +169,21 @@ function LeagueCard({ league, onJoin, isJoining }: { league: League; onJoin: (id
 
           <div className="flex gap-2">
             {(isActive || isUpcoming) && (
-              <Button 
-                className="flex-1 bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white"
-                onClick={(e) => { e.stopPropagation(); onJoin(league.id); }}
-                disabled={isJoining}
-                data-testid={`join-league-${league.id}`}
-              >
-                {isJoining ? 'Joining...' : league.entryFee > 0 ? `Join (${league.entryFee} STREAM)` : 'Join Free'}
-              </Button>
+              <div className="flex-1">
+                {isAuthenticated && user && league.entryFee > 0 && (
+                  <p className="text-xs text-slate-400 mb-1.5">
+                    Your balance: <span className="text-cyan-400 font-medium">{formatPoints(Number(user.streamPoints || 0))} STREAM</span>
+                  </p>
+                )}
+                <Button 
+                  className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white"
+                  onClick={(e) => { e.stopPropagation(); onJoin(league.id); }}
+                  disabled={isJoining}
+                  data-testid={`join-league-${league.id}`}
+                >
+                  {isJoining ? 'Joining...' : league.entryFee > 0 ? `Join (${league.entryFee} STREAM)` : 'Join Free'}
+                </Button>
+              </div>
             )}
             <Button 
               variant="outline" 

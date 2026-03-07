@@ -192,7 +192,7 @@ export default function BountyBoard() {
                 Bounty Board
               </h1>
               <p className="text-gray-400">
-                Earn $STREAM by creating summaries from videos and podcasts
+                Earn STREAM by creating summaries from videos and podcasts
               </p>
             </div>
 
@@ -266,7 +266,7 @@ export default function BountyBoard() {
               <div>
                 <p className="text-sm text-gray-400">Total Rewards</p>
                 <p className="text-2xl font-bold text-white" data-testid="stat-total-rewards">
-                  {stats?.totalRewards ? `${stats.totalRewards.toLocaleString()} $STREAM` : '0 $STREAM'}
+                  {stats?.totalRewards ? `${stats.totalRewards.toLocaleString()} STREAM` : '0 STREAM'}
                 </p>
               </div>
             </div>

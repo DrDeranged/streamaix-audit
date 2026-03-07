@@ -375,7 +375,7 @@ export default function BountyDetail() {
       });
       toast({
         title: 'Tip added!',
-        description: `${tipAmount} $STREAM added to the bounty pool`,
+        description: `${tipAmount} STREAM added to the bounty pool`,
       });
       setTipAmount('');
     } catch (error) {
@@ -836,7 +836,7 @@ export default function BountyDetail() {
                     <Trophy className="w-6 h-6 text-purple-400" />
                     <div>
                       <p className="text-sm text-gray-400">Base Reward</p>
-                      <p className="text-2xl font-bold text-white">{bounty.reward} $STREAM</p>
+                      <p className="text-2xl font-bold text-white">{Number(bounty.reward || 0).toLocaleString()} STREAM</p>
                     </div>
                   </div>
                 </div>
@@ -847,7 +847,7 @@ export default function BountyDetail() {
                       <DollarSign className="w-6 h-6 text-fuchsia-400" />
                       <div>
                         <p className="text-sm text-gray-400">Tip Pool</p>
-                        <p className="text-xl font-bold text-white">{bounty.tipPool ?? 0} $STREAM</p>
+                        <p className="text-xl font-bold text-white">{Number(bounty.tipPool || 0).toLocaleString()} STREAM</p>
                       </div>
                     </div>
                   </div>
@@ -857,7 +857,7 @@ export default function BountyDetail() {
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-gray-400">Total Reward:</span>
                     <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400">
-                      {(bounty.reward || 0) + (bounty.tipPool || 0)} $STREAM
+                      {((bounty.reward || 0) + (bounty.tipPool || 0)).toLocaleString()} STREAM
                     </span>
                   </div>
                 </div>

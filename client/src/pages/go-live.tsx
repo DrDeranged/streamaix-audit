@@ -579,6 +579,11 @@ export default function GoLivePage() {
                         min="1"
                         data-testid="input-ticket-price"
                       />
+                      {isAuthenticated && user && (
+                        <p className="text-xs text-slate-400 mt-1.5">
+                          Your balance: <span className="text-cyan-400 font-medium">{Number(user.streamPoints || 0).toLocaleString()} STREAM</span>
+                        </p>
+                      )}
                     </motion.div>
                   )}
                 </motion.div>

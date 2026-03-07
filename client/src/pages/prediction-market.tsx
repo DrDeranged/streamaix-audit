@@ -1016,7 +1016,7 @@ export default function PredictionMarket() {
                                 {userPosition.yesShares.toFixed(2)}
                               </div>
                               <div className="text-xs text-slate-400 mt-1">
-                                Value: {userPosition.currentYesValue?.toFixed(2) || '0'} STREAM
+                                Value: {Math.round(userPosition.currentYesValue || 0).toLocaleString()} STREAM
                               </div>
                             </div>
                           )}
@@ -1030,7 +1030,7 @@ export default function PredictionMarket() {
                                 {userPosition.noShares.toFixed(2)}
                               </div>
                               <div className="text-xs text-slate-400 mt-1">
-                                Value: {userPosition.currentNoValue?.toFixed(2) || '0'} STREAM
+                                Value: {Math.round(userPosition.currentNoValue || 0).toLocaleString()} STREAM
                               </div>
                             </div>
                           )}
@@ -1040,16 +1040,16 @@ export default function PredictionMarket() {
                         <div className="p-4 bg-purple-900/30 rounded-lg border border-purple-500/20">
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-slate-400">Total Value</span>
-                            <span className="text-white font-bold">{userPosition.totalValue?.toFixed(2) || '0'} STREAM</span>
+                            <span className="text-white font-bold">{Math.round(userPosition.totalValue || 0).toLocaleString()} STREAM</span>
                           </div>
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-slate-400">Cost Basis</span>
-                            <span className="text-white">{userPosition.totalCost?.toFixed(2) || '0'} STREAM</span>
+                            <span className="text-white">{Math.round(userPosition.totalCost || 0).toLocaleString()} STREAM</span>
                           </div>
                           <div className="flex justify-between items-center pt-2 border-t border-purple-500/20">
                             <span className="text-slate-400">Unrealized P&L</span>
                             <span className={`font-bold ${(userPosition.unrealizedPnL || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                              {(userPosition.unrealizedPnL || 0) >= 0 ? '+' : ''}{userPosition.unrealizedPnL?.toFixed(2) || '0'} STREAM
+                              {(userPosition.unrealizedPnL || 0) >= 0 ? '+' : ''}{Math.round(userPosition.unrealizedPnL || 0).toLocaleString()} STREAM
                               <span className="text-xs ml-1">
                                 ({(userPosition.percentChange || 0) >= 0 ? '+' : ''}{userPosition.percentChange?.toFixed(1) || '0'}%)
                               </span>

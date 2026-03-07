@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { formatTokenAmount } from '@/lib/contracts';
+import { formatPoints } from '@/hooks/usePoints';
 
 interface BountyHunter {
   id: number;
@@ -148,7 +148,7 @@ export default function Leaderboard() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">Earnings:</span>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400">{formatTokenAmount(hunters[1]?.totalEarnings || '0')} $STREAM</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400">{formatPoints(Number(hunters[1]?.totalEarnings || 0))} STREAM</span>
                       </div>
                     </div>
                   </div>
@@ -185,7 +185,7 @@ export default function Leaderboard() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-300">Earnings:</span>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 font-bold">{formatTokenAmount(hunters[0]?.totalEarnings || '0')} $STREAM</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 font-bold">{formatPoints(Number(hunters[0]?.totalEarnings || 0))} STREAM</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-300">Quality:</span>
@@ -226,7 +226,7 @@ export default function Leaderboard() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">Earnings:</span>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">{formatTokenAmount(hunters[2]?.totalEarnings || '0')} $STREAM</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">{formatPoints(Number(hunters[2]?.totalEarnings || 0))} STREAM</span>
                       </div>
                     </div>
                   </div>
@@ -330,7 +330,7 @@ export default function Leaderboard() {
                           </div>
                           <div className="text-center">
                             <p className="text-gray-400 text-xs mb-1">Earnings</p>
-                            <p className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400">{formatTokenAmount(hunter.totalEarnings)} $STREAM</p>
+                            <p className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400">{formatPoints(Number(hunter.totalEarnings || 0))} STREAM</p>
                           </div>
                           <div className="text-center">
                             <p className="text-gray-400 text-xs mb-1">Completed</p>

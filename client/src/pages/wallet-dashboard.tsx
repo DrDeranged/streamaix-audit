@@ -478,7 +478,7 @@ export default function WalletDashboard() {
                             </div>
                             <div className="text-right">
                               <p className={`font-bold ${getTransactionColor(tx.type, tx.amount)}`}>
-                                {tx.amount > 0 ? '+' : ''}{tx.amount.toFixed(2)} STREAM
+                                {tx.amount > 0 ? '+' : ''}{Math.round(Math.abs(tx.amount)).toLocaleString()} STREAM
                               </p>
                               <Badge className={`text-xs ${
                                 tx.status === 'completed' ? 'bg-green-500/20 text-green-400' :
@@ -513,7 +513,7 @@ export default function WalletDashboard() {
                               <div className="flex justify-between text-sm">
                                 <span className="text-slate-400">Distributed</span>
                                 <span className="text-green-400 font-medium">
-                                  {distribution.distributedAmount.toFixed(2)} / {distribution.totalRewards.toFixed(2)} STREAM
+                                  {Math.round(distribution.distributedAmount).toLocaleString()} / {Math.round(distribution.totalRewards).toLocaleString()} STREAM
                                 </span>
                               </div>
                               <Progress 
@@ -572,7 +572,7 @@ export default function WalletDashboard() {
                             </div>
                             <div className="text-right">
                               <p className={`text-lg font-bold ${getTransactionColor(tx.type, tx.amount)}`}>
-                                {tx.amount > 0 ? '+' : ''}{tx.amount.toFixed(2)} STREAM
+                                {tx.amount > 0 ? '+' : ''}{Math.round(Math.abs(tx.amount)).toLocaleString()} STREAM
                               </p>
                               <p className="text-slate-400 text-sm">
                                 ${(tx.amount * 3.0).toFixed(2)} USD
@@ -600,7 +600,7 @@ export default function WalletDashboard() {
                   <div className="flex justify-between items-center">
                     <h3 className="text-gray-900 dark:text-white text-lg font-semibold">Reward Distributions</h3>
                     <Badge className="bg-yellow-500/20 text-yellow-400">
-                      Total Distributed: {rewardDistributions.reduce((sum, r) => sum + r.distributedAmount, 0).toFixed(2)} STREAM
+                      Total Distributed: {Math.round(rewardDistributions.reduce((sum, r) => sum + r.distributedAmount, 0)).toLocaleString()} STREAM
                     </Badge>
                   </div>
                   
@@ -628,10 +628,10 @@ export default function WalletDashboard() {
                             </div>
                             <div className="text-right">
                               <p className="text-lg font-bold text-green-400">
-                                {distribution.distributedAmount.toFixed(2)} STREAM
+                                {Math.round(distribution.distributedAmount).toLocaleString()} STREAM
                               </p>
                               <p className="text-slate-400 text-sm">
-                                of {distribution.totalRewards.toFixed(2)} total
+                                of {Math.round(distribution.totalRewards).toLocaleString()} total
                               </p>
                             </div>
                           </div>

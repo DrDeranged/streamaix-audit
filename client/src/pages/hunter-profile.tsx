@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { apiRequest, queryClient } from '@/lib/queryClient';
-import { formatTokenAmount } from '@/lib/contracts';
+import { formatPoints } from '@/hooks/usePoints';
 import { useToast } from '@/hooks/use-toast';
 
 interface BountyHunter {
@@ -162,7 +162,7 @@ export default function HunterProfile() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
                     <p className="text-gray-400 text-sm">Total Earnings</p>
-                    <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400">{formatTokenAmount(hunter.totalEarnings)} $STREAM</p>
+                    <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400">{formatPoints(Number(hunter.totalEarnings || 0))} STREAM</p>
                   </div>
                   <div>
                     <p className="text-gray-400 text-sm">Completed</p>
@@ -269,7 +269,7 @@ export default function HunterProfile() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400">{formatTokenAmount(bounty.reward)} {bounty.tokenType}</p>
+                        <p className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400">{formatPoints(Number(bounty.reward || 0))} {bounty.tokenType}</p>
                         <p className="text-xs text-gray-400">{new Date(bounty.completedAt).toLocaleDateString()}</p>
                       </div>
                     </div>
