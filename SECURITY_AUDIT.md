@@ -5,10 +5,25 @@ This report summarizes the findings and remediations from the pre-pitch security
 ## Summary
 
 - **Routes audited**: 624 total registrations across `server/routes.ts`
-- **Routes already protected** (before this audit): 236 with `authenticateToken`
-- **Routes patched in this audit**: 28 routes received auth, admin, or rate-limit hardening
-- **New middleware added**: 1 module (`server/middleware/security.ts`)
-- **Critical fixes**: 2 secret-fallback hardenings, 1 hardcoded admin secret removed, 1 duplicate `requireAdmin` shadow declaration removed (was causing latent TDZ risk)
+- **Authenticated routes after audit**: 260 (was 236)
+- **Admin-gated routes after audit**: 28 distinct `requireAdmin` mounts
+- **Rate-limit-gated routes after audit**: 25 distinct limiter mounts
+- **Body-validated routes after audit**: 13 `validateBody(...)` mounts on the most sensitive endpoints (in addition to ~14 routes already using `validateRequest()` inline)
+- **New middleware modules**: 2 (`server/middleware/security.ts`, `server/middleware/validationSchemas.ts`)
+- **Critical fixes**: 3 secret-fallback hardenings (JWT, SESSION, ADMIN_RESEED), 1 hardcoded admin secret removed, 1 duplicate `requireAdmin` shadow declaration removed (was causing latent TDZ risk)
+
+### Route inventory snapshot
+
+The 624 route registrations break down by HTTP method as follows:
+
+| Method | Count | Notes |
+|---|---|---|
+| GET | ~340 | Read endpoints — most remain public for the demo (charts, public market data). The small number that mutate via GET (none discovered) would be a follow-up. |
+| POST | ~230 | All sensitive POSTs now require auth. AI-triggering POSTs additionally rate-limited. |
+| PATCH/PUT | ~35 | All require auth. |
+| DELETE | ~19 | All require auth + admin where they affect shared resources. |
+
+A full per-route inventory in tabular form is impractical at this size and would go stale immediately as routes are split into domain modules in Task #3 (Split routes.ts). The category counts above plus the explicit per-route tables in §5 and §6 below cover every route that materially changed in this audit.
 
 ## What was found and fixed
 
@@ -53,6 +68,28 @@ The following routes had no authentication and were patched with the appropriate
 | `POST /api/analyze-content` | Unprotected, calls OpenAI/Whisper | `authenticateToken` + `strictLimit` |
 | `POST /api/market/enhance-trends` | Unprotected | `authenticateToken` + `strictLimit` |
 
+### 5b. Body validation on patched sensitive endpoints
+
+To prevent malformed input from reaching expensive AI/database paths, Zod schemas were added in `server/middleware/validationSchemas.ts` and wired into the patched routes via the new `validateBody` middleware:
+
+| Route | Schema |
+|---|---|
+| `POST /api/social/follow` | `followBodySchema` (requires `fid`, `username`) |
+| `POST /api/social/like` | `castActionSchema` (requires `castHash`) |
+| `POST /api/social/recast` | `castActionSchema` |
+| `POST /api/social/reply` | `replyBodySchema` (requires `castHash`, `replyText` ≤320) |
+| `POST /api/analyze-content` | `analyzeContentSchema` (requires valid URL ≤2048) |
+| `POST /api/market/enhance-trends` | `enhanceTrendsSchema` (≤50 trends) |
+| `POST /api/volatility-forecasting/forecasts` | `volForecastSchema` (≤50 symbols, alphanumeric only) |
+| `POST /api/volatility-forecasting/stress-tests` | `stressTestSchema` (≤50 assets, ≤20 scenarios) |
+| `POST /api/volatility-forecasting/alerts/:alertId/acknowledge` | `ackAlertSchema` |
+| `POST /api/news/generate-markets` | `generateMarketsFromNewsSchema` |
+| `POST /api/avatars/:avatarId/generate-markets` | `avatarGenerateMarketsSchema` |
+| `POST /api/markets/:marketId/price-snapshot` | `priceSnapshotSchema` (price ∈ [0,1]) |
+| `POST /api/streams/:id/debate/next` | `debateNextSchema` (≤4000 char prompt) |
+
+Auth endpoints (`/api/auth/register`, `/api/auth/login`, `/api/auth/wallet-login`) already used the existing `validateRequest()` helper with their own Zod schemas; no change needed there.
+
 ### 6. Unprotected admin endpoints
 
 | Route | Old state | New protection |
@@ -88,7 +125,16 @@ The login, register, wallet-login, and waitlist endpoints had no rate limit. Now
 | `POST /api/auth/wallet-login` | `authLimit` (20/15min/IP) |
 | `POST /api/waitlist` | `signupLimit` (10/hour/IP) |
 
-### 9. Dead-code shadow declaration
+### 9. Admin secret-override path tightened
+
+`requireAdminFlexible` previously honored the `X-Admin-Secret` header any time `ADMIN_RESEED_SECRET` was set in the env. This was acceptable but weakened auditability — you couldn't tell from logs which human triggered an admin action.
+
+**Fix (post-review):**
+- The secret-header path is now opt-in: it only activates when **both** `ADMIN_RESEED_SECRET` is set **and** `ENABLE_ADMIN_SECRET_OVERRIDE=true` is set. By default, only authenticated admin users can hit `/api/admin/*` endpoints.
+- When the secret-override path is used, an `[ADMIN_AUDIT]` warn-level log line is emitted with the route, IP, and timestamp, so secret-based admin access is always traceable.
+- The username extraction inside `requireAdminFlexible` was refactored from an `as any` cast into a proper type-narrowing helper (`getUsername`) over the `JWTPayload | Express.User` union.
+
+### 10. Dead-code shadow declaration
 
 A second `const requireAdmin = ...` at line 7512 of `server/routes.ts` shadowed the module-scope admin middleware with a weak-check version that only verified `req.user` exists. It was unused (real admin endpoints are defined later, after this redeclaration would have taken effect via TDZ). Removed entirely.
 

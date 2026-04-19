@@ -1,10 +1,16 @@
 import type { Request, Response, NextFunction } from 'express';
-import type { AuthRequest } from '../auth';
+import type { AuthRequest, JWTPayload } from '../auth';
 
 const ADMIN_USERNAMES = (process.env.ADMIN_USERNAMES || 'admin')
   .split(',')
   .map((u) => u.trim())
   .filter(Boolean);
+
+function getUsername(user: AuthRequest['user']): string | undefined {
+  if (!user) return undefined;
+  const u = user as JWTPayload;
+  return typeof u.username === 'string' ? u.username : undefined;
+}
 
 interface RateLimitOptions {
   windowMs: number;
@@ -85,19 +91,24 @@ export function requireAdminFlexible(
   res: Response,
   next: NextFunction,
 ) {
-  const adminSecret = req.headers['x-admin-secret'];
-  const expectedSecret = process.env.ADMIN_RESEED_SECRET;
-
-  if (
-    expectedSecret &&
-    typeof adminSecret === 'string' &&
-    adminSecret === expectedSecret
-  ) {
+  const username = getUsername(req.user);
+  if (username && ADMIN_USERNAMES.includes(username)) {
     return next();
   }
 
-  if (req.user && ADMIN_USERNAMES.includes((req.user as any).username)) {
-    return next();
+  const expectedSecret = process.env.ADMIN_RESEED_SECRET;
+  const allowSecretPath =
+    !!expectedSecret && process.env.ENABLE_ADMIN_SECRET_OVERRIDE === 'true';
+
+  if (allowSecretPath) {
+    const headerSecret = req.headers['x-admin-secret'];
+    if (typeof headerSecret === 'string' && headerSecret === expectedSecret) {
+      const ip = (req.ip || req.socket.remoteAddress || 'unknown').toString();
+      console.warn(
+        `[ADMIN_AUDIT] secret-override admin access — route=${req.method} ${req.path} ip=${ip} ts=${new Date().toISOString()}`,
+      );
+      return next();
+    }
   }
 
   return res.status(403).json({ error: 'Admin access required' });
@@ -110,14 +121,21 @@ export function disableInProd(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-export function validateBody(schema: { parse: (data: unknown) => unknown }) {
+interface ZodLike<T = unknown> {
+  parse: (data: unknown) => T;
+}
+
+export function validateBody<T>(schema: ZodLike<T>) {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
       req.body = schema.parse(req.body);
       next();
-    } catch (err: any) {
-      const message = err?.errors?.[0]?.message || 'Invalid request body';
-      return res.status(400).json({ error: 'Validation failed', message });
+    } catch (err) {
+      const e = err as { errors?: Array<{ message?: string; path?: Array<string | number> }> };
+      const first = e?.errors?.[0];
+      const field = first?.path?.join('.') || 'body';
+      const message = first?.message || 'Invalid request body';
+      return res.status(400).json({ error: 'Validation failed', field, message });
     }
   };
 }

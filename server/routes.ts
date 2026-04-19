@@ -10,7 +10,22 @@ import {
   authLimit,
   requireAdminFlexible,
   disableInProd,
+  validateBody,
 } from "./middleware/security";
+import {
+  followBodySchema,
+  castActionSchema,
+  replyBodySchema,
+  analyzeContentSchema,
+  enhanceTrendsSchema,
+  volForecastSchema,
+  stressTestSchema,
+  ackAlertSchema,
+  generateMarketsFromNewsSchema,
+  avatarGenerateMarketsSchema,
+  priceSnapshotSchema,
+  debateNextSchema,
+} from "./middleware/validationSchemas";
 import { cacheService } from "./services/cacheService";
 import { StreamProcessor } from "./services/streamProcessor";
 import { StreamProcessorV2 } from "./services/streamProcessorV2";
@@ -4509,7 +4524,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Generate prediction markets from news articles
-  app.post('/api/news/generate-markets', authenticateToken, requireAdmin, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/news/generate-markets', authenticateToken, requireAdmin, strictLimit, validateBody(generateMarketsFromNewsSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
       const { socialMarketGenerator } = await import('./services/socialMarketGenerator');
       const { articles, maxMarkets = 3 } = req.body;
@@ -4566,7 +4581,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Generate prediction markets for an avatar
-  app.post('/api/avatars/:avatarId/generate-markets', authenticateToken, requireAdmin, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/avatars/:avatarId/generate-markets', authenticateToken, requireAdmin, strictLimit, validateBody(avatarGenerateMarketsSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
       const { avatarMarketGenerator } = await import('./services/avatarMarketGenerator');
       const result = await avatarMarketGenerator.createMarketsForAvatar(req.params.avatarId);
@@ -7151,13 +7166,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =============================================================================
 
   // Follow user (Demo - works without authentication)
-  app.post('/api/social/follow', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/social/follow', authenticateToken, mediumLimit, validateBody(followBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { fid, username } = req.body;
-    
-    if (!fid || !username) {
-      return res.status(400).json({ error: 'FID and username are required' });
-    }
-    
     try {
       // For now, simulate successful follow - in real implementation would use Farcaster API
       console.log(`Demo user following ${username} (FID: ${fid})`);
@@ -7177,13 +7187,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Like cast (Demo - works without authentication)
-  app.post('/api/social/like', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/social/like', authenticateToken, mediumLimit, validateBody(castActionSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { castHash } = req.body;
-    
-    if (!castHash) {
-      return res.status(400).json({ error: 'Cast hash is required' });
-    }
-    
     try {
       // For now, simulate successful like - in real implementation would use Farcaster API
       console.log(`Demo user liking cast ${castHash}`);
@@ -7203,13 +7208,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Recast (Demo - works without authentication)
-  app.post('/api/social/recast', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/social/recast', authenticateToken, mediumLimit, validateBody(castActionSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { castHash } = req.body;
-    
-    if (!castHash) {
-      return res.status(400).json({ error: 'Cast hash is required' });
-    }
-    
     try {
       console.log(`Demo user recasting ${castHash}`);
       
@@ -7228,17 +7228,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Reply to cast (Demo - works without authentication)
-  app.post('/api/social/reply', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/social/reply', authenticateToken, mediumLimit, validateBody(replyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { castHash, replyText } = req.body;
-    
-    if (!castHash || !replyText) {
-      return res.status(400).json({ error: 'Cast hash and reply text are required' });
-    }
-    
-    if (replyText.length > 320) {
-      return res.status(400).json({ error: 'Reply text too long (max 320 characters)' });
-    }
-    
     try {
       console.log(`Demo user replying to cast ${castHash}: ${replyText.substring(0, 50)}...`);
       
@@ -7992,17 +7983,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Test real processing endpoint
   console.log('📍 Registering analyze-content endpoint: POST /api/analyze-content');
-  app.post('/api/analyze-content', authenticateToken, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/analyze-content', authenticateToken, strictLimit, validateBody(analyzeContentSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     console.log(`\n🔵 ========== ROUTE: POST /api/analyze-content ==========`);
-    
     const { url } = req.body;
-    console.log(`📥 Request body:`, JSON.stringify(req.body, null, 2));
-    
-    if (!url) {
-      console.error(`❌ Missing URL in request body`);
-      return res.status(400).json({ error: 'URL is required for processing' });
-    }
-
     try {
       console.log(`✅ URL received: ${url}`);
       console.log(`🔐 Environment check: OPENAI_API_KEY = ${process.env.OPENAI_API_KEY ? 'SET ✓' : 'MISSING ✗'}`);
@@ -8244,7 +8227,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Enhance financial trends with live market data
-  app.post('/api/market/enhance-trends', authenticateToken, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/market/enhance-trends', authenticateToken, strictLimit, validateBody(enhanceTrendsSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { trends } = req.body;
     if (!trends || !Array.isArray(trends)) {
       return res.status(400).json({ error: 'Trends array is required' });
@@ -9635,14 +9618,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Get multiple volatility forecasts
-  app.post('/api/volatility-forecasting/forecasts', authenticateToken, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/volatility-forecasting/forecasts', authenticateToken, strictLimit, validateBody(volForecastSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
       const { symbols, horizons = ['1d', '7d', '30d'] } = req.body;
-      
-      if (!symbols || !Array.isArray(symbols)) {
-        return res.status(400).json({ error: 'Symbols array is required' });
-      }
-      
       console.log(`📊 Getting volatility forecasts for ${symbols.length} assets...`);
       const { volatilityForecastingService } = await import('./services/volatilityForecastingService');
       
@@ -9726,14 +9704,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Run stress tests
-  app.post('/api/volatility-forecasting/stress-tests', authenticateToken, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/volatility-forecasting/stress-tests', authenticateToken, strictLimit, validateBody(stressTestSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
       const { assets, scenarioIds } = req.body;
-      
-      if (!assets || !Array.isArray(assets)) {
-        return res.status(400).json({ error: 'Assets array is required' });
-      }
-      
       console.log(`🧪 Running stress tests for ${assets.length} assets...`);
       const { volatilityForecastingService } = await import('./services/volatilityForecastingService');
       
@@ -9794,7 +9767,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Acknowledge volatility alert
-  app.post('/api/volatility-forecasting/alerts/:alertId/acknowledge', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/volatility-forecasting/alerts/:alertId/acknowledge', authenticateToken, mediumLimit, validateBody(ackAlertSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
       const { alertId } = req.params;
       const { acknowledgedBy } = req.body;
@@ -12334,7 +12307,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Record price snapshot (called by trade execution)
-  app.post("/api/markets/:marketId/price-snapshot", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/markets/:marketId/price-snapshot", authenticateToken, requireAdmin, validateBody(priceSnapshotSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { marketId } = req.params;
 
     const market = await db
@@ -16788,7 +16761,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Get next debate response
-  app.post("/api/streams/:id/debate/next", authenticateToken, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/debate/next", authenticateToken, strictLimit, validateBody(debateNextSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { previousStatement } = req.body;
     const response = await avatarStreamEnhancements.generateDebateResponse(req.params.id, previousStatement);
     res.json({ success: !!response, response });

@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import { randomBytes } from 'crypto';
 import jwt from 'jsonwebtoken';
 import passport from 'passport';
 import { Strategy as TwitterStrategy } from 'passport-twitter';
@@ -39,8 +40,16 @@ if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
   );
 }
 
+if (!process.env.JWT_SECRET) {
+  console.warn(
+    '[auth] JWT_SECRET not set — using ephemeral random dev secret. ' +
+    'Tokens will not survive a server restart. Set JWT_SECRET in .env to persist sessions.',
+  );
+}
+
 export class AuthService {
-  private static JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key-for-development-only';
+  private static JWT_SECRET =
+    process.env.JWT_SECRET || randomBytes(64).toString('hex');
   
   /**
    * Hash password using bcrypt
