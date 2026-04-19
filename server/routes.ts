@@ -176,6 +176,7 @@ import { registerLiveStreamingPortfolioRoutes } from "./routes/live-streaming-po
 import { registerRecommendationsRoutes } from "./routes/recommendations";
 import { registerSmartInsightsRoutes } from "./routes/smart-insights";
 import { registerVoiceAssistantRoutes } from "./routes/voice-assistant";
+import { registerAvatarFeedRoutes } from "./routes/avatar-feed";
 // PHASE2-SPLIT END
 import { Request, Response } from "express";
 import cors from "cors";
@@ -469,6 +470,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await registerSmartInsightsRoutes(app);
   // ▶ Voice Assistant (whisper -> gpt-4o-mini -> tts pipeline)
   await registerVoiceAssistantRoutes(app);
+  // ▶ Avatar Commentary Feed (Twitter-style live feed of avatar trades)
+  registerAvatarFeedRoutes(app);
   
   // ▶ Waitlist routes extracted to server/routes/waitlist.ts
   await registerWaitlistRoutes(app);
@@ -650,6 +653,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       timestamp: new Date().toISOString()
     }));
   });
+
+  // =============================================================================
+  // AVATAR FEED WEBSOCKET SERVER (Twitter-style live commentary)
+  // =============================================================================
+
+  const avatarFeedWss = new WebSocketServer({ noServer: true });
+  const avatarFeedClients = new Set<WebSocket>();
+  avatarFeedWss.on('connection', (ws: WebSocket) => {
+    avatarFeedClients.add(ws);
+    ws.send(JSON.stringify({ type: 'connected', timestamp: Date.now() }));
+    ws.on('close', () => avatarFeedClients.delete(ws));
+    ws.on('error', () => avatarFeedClients.delete(ws));
+  });
+  const { setAvatarFeedBroadcaster, backfillFromRecentTrades } =
+    await import('./services/avatarCommentaryService');
+  setAvatarFeedBroadcaster((event) => {
+    const msg = JSON.stringify(event);
+    avatarFeedClients.forEach((c) => {
+      if (c.readyState === WebSocket.OPEN) {
+        try { c.send(msg); } catch {}
+      }
+    });
+  });
+  // Seed the feed once at startup if it's empty so investors landing on the
+  // page see history immediately (deterministic, no LLM cost).
+  backfillFromRecentTrades().catch(() => {});
 
   // =============================================================================
   // PORTFOLIO PRICES WEBSOCKET SERVER (Real-time price updates)
@@ -857,6 +886,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🔌 [WS Upgrade] Routing to prices WebSocket server (/ws/prices)`);
       pricesWss.handleUpgrade(request, socket, head, (ws) => {
         pricesWss.emit('connection', ws, request);
+      });
+    } else if (pathname === '/ws/avatar-feed') {
+      console.log(`🔌 [WS Upgrade] Routing to avatar feed WebSocket server (/ws/avatar-feed)`);
+      avatarFeedWss.handleUpgrade(request, socket, head, (ws) => {
+        avatarFeedWss.emit('connection', ws, request);
       });
     } else if (pathname === '/ws/admin') {
       console.log(`🔌 [WS Upgrade] Routing to admin WebSocket server (/ws/admin)`);

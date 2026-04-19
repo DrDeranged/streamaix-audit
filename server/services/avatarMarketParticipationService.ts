@@ -357,6 +357,20 @@ class AvatarMarketParticipationService {
       console.log(`[Avatar Trade] ${decision.avatarName} bought ${shares} ${decision.decision} shares for ${decision.positionSize} STREAM`);
       console.log(`[Avatar Trade] Reasoning: ${decision.reasoning}`);
 
+      // Surface trade to the live avatar commentary feed (fail-soft).
+      try {
+        const { recordTradeAsPost } = await import('./avatarCommentaryService');
+        recordTradeAsPost({
+          avatarId: decision.avatarId,
+          avatarName: decision.avatarName,
+          marketId: decision.marketId,
+          outcome: decision.decision as 'YES' | 'NO',
+          shares,
+          positionSize: decision.positionSize,
+          reasoning: decision.reasoning,
+        }).catch(() => {});
+      } catch {}
+
       return { success: true, message: `${decision.avatarName} bought ${shares} ${decision.decision} shares` };
     } catch (error) {
       console.error(`[Avatar Trade Error]`, error);

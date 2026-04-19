@@ -4765,6 +4765,35 @@ export type InsertAvatarTrade = typeof avatarTrades.$inferInsert;
 export type AvatarPosition = typeof avatarPositions.$inferSelect;
 export type InsertAvatarPosition = typeof avatarPositions.$inferInsert;
 
+export const avatarPosts = pgTable("avatar_posts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  avatarId: varchar("avatar_id").references(() => knowledgeAvatars.id).notNull(),
+  marketId: varchar("market_id").references(() => predictionMarkets.id),
+  tradeId: varchar("trade_id").references(() => avatarTrades.id),
+  action: text("action").notNull(),
+  outcome: text("outcome"),
+  asset: text("asset"),
+  body: text("body").notNull(),
+  metadata: jsonb("metadata"),
+  likeCount: integer("like_count").notNull().default(0),
+  replyCount: integer("reply_count").notNull().default(0),
+  parentPostId: varchar("parent_post_id"),
+  authorUserId: varchar("author_user_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const avatarPostReactions = pgTable("avatar_post_reactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  postId: varchar("post_id").references(() => avatarPosts.id, { onDelete: "cascade" }).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  reactionType: text("reaction_type").notNull().default("like"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type AvatarPost = typeof avatarPosts.$inferSelect;
+export type InsertAvatarPost = typeof avatarPosts.$inferInsert;
+export type AvatarPostReaction = typeof avatarPostReactions.$inferSelect;
+
 // =============================================================================
 // AI AGENT TRADING SYSTEM
 // =============================================================================

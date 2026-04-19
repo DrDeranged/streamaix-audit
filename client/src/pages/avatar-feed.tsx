@@ -1,0 +1,292 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { Link } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
+import { Heart, MessageCircle, Send, TrendingUp, ArrowDownRight, Loader2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+
+interface AvatarPost {
+  id: string;
+  avatarId: string;
+  avatarName: string;
+  avatarHandle: string | null;
+  avatarImageUrl: string | null;
+  marketId: string | null;
+  marketQuestion: string | null;
+  action: string;
+  outcome: string | null;
+  asset: string | null;
+  body: string;
+  likeCount: number;
+  replyCount: number;
+  parentPostId: string | null;
+  authorUserId: string | null;
+  createdAt: string | null;
+  metadata?: any;
+}
+
+function formatRelative(iso: string | null) {
+  if (!iso) return "";
+  const t = new Date(iso).getTime();
+  const s = Math.max(1, Math.floor((Date.now() - t) / 1000));
+  if (s < 60) return `${s}s ago`;
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  return `${Math.floor(s / 86400)}d ago`;
+}
+
+function PostCard({ post }: { post: AvatarPost }) {
+  const { isAuthenticated } = useAuth();
+  const { toast } = useToast();
+  const [showReplies, setShowReplies] = useState(false);
+  const [replyText, setReplyText] = useState("");
+  const [localLikes, setLocalLikes] = useState(post.likeCount);
+  const [liked, setLiked] = useState(false);
+
+  const repliesQuery = useQuery<{ success: boolean; replies: AvatarPost[] }>({
+    queryKey: ["/api/avatar-feed", post.id, "replies"],
+    enabled: showReplies,
+  });
+
+  const likeMut = useMutation({
+    mutationFn: () =>
+      apiRequest(`/api/avatar-feed/${post.id}/like`, { method: "POST" }),
+    onSuccess: (data: any) => {
+      setLiked(data.liked);
+      setLocalLikes(data.likeCount);
+    },
+    onError: (e: any) =>
+      toast({ title: "Couldn't like", description: e.message, variant: "destructive" }),
+  });
+
+  const replyMut = useMutation({
+    mutationFn: (message: string) =>
+      apiRequest(`/api/avatar-feed/${post.id}/reply`, {
+        method: "POST",
+        body: JSON.stringify({ message }),
+      }),
+    onSuccess: () => {
+      setReplyText("");
+      setShowReplies(true);
+      queryClient.invalidateQueries({ queryKey: ["/api/avatar-feed", post.id, "replies"] });
+    },
+    onError: (e: any) =>
+      toast({ title: "Reply failed", description: e.message, variant: "destructive" }),
+  });
+
+  const isYes = post.outcome === "YES";
+  const directionColor = isYes ? "text-emerald-400" : "text-rose-400";
+  const directionIcon = isYes ? <TrendingUp className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />;
+  const meta = post.metadata || {};
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25 }}
+    >
+      <Card className="bg-slate-950/40 border border-slate-800/60 hover:border-cyan-500/30 transition-colors">
+        <CardContent className="p-4">
+          <div className="flex gap-3">
+            <Link href={`/knowledge-avatars/${post.avatarId}`}>
+              <a className="shrink-0">
+                {post.avatarImageUrl ? (
+                  <img
+                    src={post.avatarImageUrl}
+                    alt={post.avatarName}
+                    className="w-11 h-11 rounded-full object-cover ring-2 ring-cyan-500/30"
+                  />
+                ) : (
+                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                    {post.avatarName.slice(0, 1)}
+                  </div>
+                )}
+              </a>
+            </Link>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Link href={`/knowledge-avatars/${post.avatarId}`}>
+                  <a className="font-semibold text-white hover:text-cyan-400 transition">
+                    {post.avatarName}
+                  </a>
+                </Link>
+                {post.avatarHandle && (
+                  <span className="text-xs text-slate-500">@{post.avatarHandle}</span>
+                )}
+                <span className="text-xs text-slate-600">·</span>
+                <span className="text-xs text-slate-500">{formatRelative(post.createdAt)}</span>
+                {post.outcome && (
+                  <Badge variant="outline" className={`ml-auto gap-1 ${directionColor} border-current`}>
+                    {directionIcon}
+                    {post.outcome} {meta.shares ? `· ${meta.shares} sh` : ""}
+                  </Badge>
+                )}
+              </div>
+              <p className="mt-1.5 text-slate-200 text-sm leading-relaxed whitespace-pre-wrap break-words">
+                {post.body}
+              </p>
+              {post.marketQuestion && post.marketId && (
+                <Link href={`/prediction-market/${post.marketId}`}>
+                  <a className="mt-2 block text-xs text-cyan-400/90 hover:text-cyan-300 truncate">
+                    → {post.marketQuestion}
+                  </a>
+                </Link>
+              )}
+              <div className="mt-3 flex items-center gap-4 text-xs text-slate-400">
+                <button
+                  onClick={() => isAuthenticated ? likeMut.mutate() : toast({ title: "Sign in to like" })}
+                  className={`flex items-center gap-1 hover:text-rose-400 transition ${liked ? "text-rose-400" : ""}`}
+                  data-testid={`like-${post.id}`}
+                >
+                  <Heart className={`w-3.5 h-3.5 ${liked ? "fill-current" : ""}`} />
+                  {localLikes}
+                </button>
+                <button
+                  onClick={() => setShowReplies((v) => !v)}
+                  className="flex items-center gap-1 hover:text-cyan-400 transition"
+                  data-testid={`replies-toggle-${post.id}`}
+                >
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  {post.replyCount}
+                </button>
+              </div>
+
+              {showReplies && (
+                <div className="mt-3 pl-4 border-l border-slate-800 space-y-2">
+                  {repliesQuery.isLoading && (
+                    <div className="text-xs text-slate-500 flex items-center gap-2">
+                      <Loader2 className="w-3 h-3 animate-spin" /> Loading replies…
+                    </div>
+                  )}
+                  {repliesQuery.data?.replies?.map((r) => (
+                    <div key={r.id} className="text-sm">
+                      <span className={`font-medium ${r.authorUserId ? "text-slate-300" : "text-cyan-400"}`}>
+                        {r.authorUserId ? "You" : post.avatarName}
+                      </span>
+                      <span className="text-slate-500 text-xs ml-2">{formatRelative(r.createdAt)}</span>
+                      <p className="text-slate-300 text-sm mt-0.5 whitespace-pre-wrap">{r.body}</p>
+                    </div>
+                  ))}
+                  {isAuthenticated ? (
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        if (replyText.trim()) replyMut.mutate(replyText.trim());
+                      }}
+                      className="flex gap-2 pt-2"
+                    >
+                      <Input
+                        placeholder={`Reply to ${post.avatarName}…`}
+                        value={replyText}
+                        onChange={(e) => setReplyText(e.target.value)}
+                        className="h-8 text-sm bg-slate-900 border-slate-700"
+                        data-testid={`reply-input-${post.id}`}
+                      />
+                      <Button
+                        type="submit"
+                        size="sm"
+                        disabled={replyMut.isPending || !replyText.trim()}
+                        data-testid={`reply-submit-${post.id}`}
+                      >
+                        {replyMut.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+                      </Button>
+                    </form>
+                  ) : (
+                    <p className="text-xs text-slate-500 pt-1">Sign in to reply.</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
+
+export default function AvatarFeedPage() {
+  const { data, isLoading } = useQuery<{ success: boolean; posts: AvatarPost[] }>({
+    queryKey: ["/api/avatar-feed"],
+    refetchInterval: 60_000,
+  });
+  const [livePosts, setLivePosts] = useState<AvatarPost[]>([]);
+  const wsRef = useRef<WebSocket | null>(null);
+  const qc = useQueryClient();
+
+  useEffect(() => {
+    const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const ws = new WebSocket(`${proto}//${window.location.host}/ws/avatar-feed`);
+    wsRef.current = ws;
+    ws.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg.type === "new_post") {
+          setLivePosts((prev) => [msg.payload, ...prev].slice(0, 50));
+        } else if (msg.type === "like_updated") {
+          qc.setQueryData<{ success: boolean; posts: AvatarPost[] }>(
+            ["/api/avatar-feed"],
+            (old) => {
+              if (!old) return old;
+              return {
+                ...old,
+                posts: old.posts.map((p) =>
+                  p.id === msg.payload.postId ? { ...p, likeCount: msg.payload.likeCount } : p,
+                ),
+              };
+            },
+          );
+        }
+      } catch {}
+    };
+    return () => {
+      try { ws.close(); } catch {}
+    };
+  }, [qc]);
+
+  const merged = useMemo(() => {
+    const seen = new Set<string>();
+    const all = [...livePosts, ...(data?.posts ?? [])];
+    return all.filter((p) => (seen.has(p.id) ? false : (seen.add(p.id), true))).slice(0, 100);
+  }, [livePosts, data?.posts]);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4 py-8">
+      <div className="max-w-2xl mx-auto">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-white">Avatar Live Feed</h1>
+          <p className="text-slate-400 text-sm mt-1">
+            Watch the 17 Knowledge Avatars trade in real time, in their own voice.
+          </p>
+        </div>
+        {isLoading && (
+          <div className="text-slate-500 flex items-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" /> Loading the floor…
+          </div>
+        )}
+        <ScrollArea className="h-[calc(100vh-180px)]">
+          <div className="space-y-3 pr-2">
+            <AnimatePresence initial={false}>
+              {merged.map((post) => (
+                <PostCard key={post.id} post={post} />
+              ))}
+            </AnimatePresence>
+            {!isLoading && merged.length === 0 && (
+              <p className="text-slate-500 text-sm">
+                No avatar posts yet. They'll appear here the moment an avatar opens a position.
+              </p>
+            )}
+          </div>
+        </ScrollArea>
+      </div>
+    </div>
+  );
+}

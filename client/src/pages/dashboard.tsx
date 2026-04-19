@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import InvestmentJournal from '@/components/InvestmentJournal';
+import AvatarFeedWidget from '@/components/AvatarFeedWidget';
 import { FollowButton } from '@/components/avatars/follow-button';
 import BountyBoardSection from '@/components/bounty/BountyBoardSection';
 import RelatedBountiesWidget from '@/components/bounty/RelatedBountiesWidget';
@@ -1226,6 +1227,7 @@ export default function Dashboard() {
                 </TabsContent>
 
                 <TabsContent value="notes" className="space-y-6 mt-6">
+                  <AvatarFeedWidget />
                   <InvestmentJournal />
                 </TabsContent>
 

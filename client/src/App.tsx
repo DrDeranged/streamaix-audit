@@ -58,6 +58,7 @@ const LessonViewer = React.lazy(() => import("@/pages/lesson-viewer"));
 const PortfolioDashboard = React.lazy(() => import("@/pages/portfolio-dashboard"));
 const NotificationSettings = React.lazy(() => import("@/pages/notification-settings"));
 const BotTrading = React.lazy(() => import("@/pages/bot-trading"));
+const AvatarFeed = React.lazy(() => import("@/pages/avatar-feed"));
 function Router() {
   return (
     <Switch>
@@ -125,6 +126,12 @@ function Router() {
         </Suspense>
       </Route>
       
+      <Route path="/avatar-feed">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <AvatarFeed />
+        </Suspense>
+      </Route>
+
       <Route path="/knowledge-avatars/:id">
         <Suspense fallback={<DashboardSkeleton />}>
           <KnowledgeAvatarProfile />
