@@ -175,6 +175,7 @@ import { registerLiveStreamingGamificationRoutes } from "./routes/live-streaming
 import { registerLiveStreamingPortfolioRoutes } from "./routes/live-streaming-portfolio";
 import { registerRecommendationsRoutes } from "./routes/recommendations";
 import { registerSmartInsightsRoutes } from "./routes/smart-insights";
+import { registerVoiceAssistantRoutes } from "./routes/voice-assistant";
 // PHASE2-SPLIT END
 import { Request, Response } from "express";
 import cors from "cors";
@@ -466,6 +467,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await registerRecommendationsRoutes(app);
   // ▶ Smart Insights (reasoning-chain dashboard backend)
   await registerSmartInsightsRoutes(app);
+  // ▶ Voice Assistant (whisper -> gpt-4o-mini -> tts pipeline)
+  await registerVoiceAssistantRoutes(app);
   
   // ▶ Waitlist routes extracted to server/routes/waitlist.ts
   await registerWaitlistRoutes(app);

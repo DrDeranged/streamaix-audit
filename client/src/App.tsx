@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { DashboardSkeleton, TradingSkeleton } from "@/components/LazyWrapper";
+import { VoiceAssistant } from "@/components/VoiceAssistant";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import { OnboardingTour } from "@/components/OnboardingTour";
 import { PWAInstallPrompt, PWAUpdatePrompt } from "@/components/pwa/PWAInstallPrompt";
@@ -352,6 +353,7 @@ function App() {
               <GlobalMobileHeader />
               <Router />
               <ChatWidget />
+              <VoiceAssistant />
               <OnboardingTour />
               <PWAInstallPrompt />
               <PWAUpdatePrompt />

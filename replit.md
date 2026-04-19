@@ -20,6 +20,14 @@ The system employs a cost-effective strategy for AI services, primarily using GP
 
 **April 2026 cost forensics (Task #4)**: A full inventory of every `openai.chat.completions.create` and `openai.audio` call was produced. The trading-signal generator (`aiTradingSignalsService.ts`) and two orphaned legacy content processors (`realContentProcessor.ts`, `cleanContentProcessor.ts`) were downgraded from gpt-4o to gpt-4o-mini. The new Smart Insights engine is the only new gpt-4o caller and is aggressively cached (15-minute TTL via `cacheService`, admin-only force-refresh). Estimated monthly OpenAI cost is now **~$8-10/month** (down from $15-25). Full inventory + per-call justifications: `docs/OPENAI_MODEL_INVENTORY.md`.
 
+### Voice-Driven AI Assistant (April 2026)
+A floating mic button in the bottom-right of every authenticated page lets users speak to the platform:
+- Frontend: `client/src/components/VoiceAssistant.tsx` mounts globally in `App.tsx`. Uses MediaRecorder (webm/opus or mp4 fallback). Press once to start, press again (or wait 12s) to stop. A panel shows transcript, assistant text reply, and intent. TTS audio auto-plays.
+- Backend: `server/services/voiceAssistantService.ts` runs whisper-1 (transcription) → gpt-4o-mini (JSON-structured response with strict Zod parsing including spokenResponse, displayResponse, and intent) → tts-1 (nova voice, mp3). Live CoinGecko/Finnhub crypto snapshot is injected into the system prompt so price questions return real numbers.
+- Route: `POST /api/assistant/voice` (auth + `mediumLimit` rate limit + Zod `voiceAssistantSchema` body, 4MB JSON body limit). Accepts `{audioBase64, mimeType, currentPath}`; returns `{transcript, spokenResponse, displayResponse, intent, audioBase64, audioMimeType}`.
+- Intents: `navigate` (auto-routes to `/dashboard`, `/markets`, `/insights`, `/bounties`, `/discover`, `/avatars`, `/portfolio`, `/streams`, `/leaderboard`), `lookup_market`, `check_balance`, `summarize_bounty`, `none`.
+- Cost-safe: `PAUSE_OPENAI_API=true` short-circuits with a deterministic "paused" reply (no API calls).
+
 ### Smart Insights Reasoning Engine (April 2026)
 The `/insights` dashboard now renders real reasoning chains instead of hardcoded mock cards:
 - Backend: `server/services/smartInsightsEngine.ts` produces 5-7 insights per cycle spanning regime shifts, divergences, contrarian setups, cross-asset narratives, "if X then Y" conditionals, opportunities, and risks. Uses gpt-4o with strict JSON output and 15-minute caching.

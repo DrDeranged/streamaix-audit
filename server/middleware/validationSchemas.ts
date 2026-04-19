@@ -87,6 +87,12 @@ export const generateReplayAudioSchema = z.object({
 // Empty-body endpoints — accept any object, but reject string/array/null bodies
 export const emptyBodySchema = z.object({}).passthrough();
 
+export const voiceAssistantSchema = z.object({
+  audioBase64: z.string().min(100).max(2_500_000),
+  mimeType: z.string().min(3).max(100).default('audio/webm'),
+  currentPath: z.string().max(500).optional(),
+});
+
 // Forms / mutations
 export const streamWatchSchema = z.object({
   streamId: nonEmpty('streamId').max(100),
