@@ -5,8 +5,6 @@
 import type { Express, Response } from "express";
 import { storage, DatabaseStorage } from "../storage";
 import { optionalAuth, type AuthRequest } from "../auth";
-import { validateBody } from "../middleware/security";
-import { emptyBodySchema } from "../middleware/validationSchemas";
 import { asyncHandler } from "./_shared";
 
 export async function registerRecommendationsRoutes(app: Express): Promise<void> {
@@ -66,7 +64,7 @@ export async function registerRecommendationsRoutes(app: Express): Promise<void>
     });
   }));
 
-  app.post("/api/recommendations/track-click", optionalAuth, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/recommendations/track-click", optionalAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({ error: "Authentication required" });
