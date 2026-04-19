@@ -700,7 +700,7 @@ export default function Dashboard() {
                 </TabsList>
 
                 <TabsContent value="overview" className="space-y-6 mt-6">
-                  <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+                  <Card className="surface-2">
                     <CardHeader>
                       <CardTitle className="text-white">Recent Activity</CardTitle>
                     </CardHeader>
@@ -768,7 +768,7 @@ export default function Dashboard() {
                             key={followData.avatarId}
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="bg-white/10 border-white/20 backdrop-blur-lg rounded-lg border p-4 touch-manipulation"
+                            className="surface-2 rounded-lg p-4 touch-manipulation"
                             data-testid={`followed-avatar-${followData.avatar.handle}`}
                           >
                             <div className="flex items-start gap-4">
@@ -824,7 +824,7 @@ export default function Dashboard() {
                                       <Button 
                                         variant="outline" 
                                         size="sm"
-                                        className="text-white bg-white/10 border-white/30 hover:bg-white/20 px-3 py-1.5 text-xs"
+                                        className="text-foreground surface-1 surface-interactive border-border/60 px-3 py-1.5 text-xs"
                                         data-testid={`button-view-avatar-${followData.avatar.handle}`}
                                       >
                                         View Profile
@@ -1003,7 +1003,7 @@ export default function Dashboard() {
                               key={summary.id}
                               initial={{ opacity: 0, scale: 0.95 }}
                               animate={{ opacity: 1, scale: 1 }}
-                              className="bg-white/10 border-white/20 backdrop-blur-lg rounded-lg border p-4 touch-manipulation"
+                              className="surface-2 rounded-lg p-4 touch-manipulation"
                               data-testid={`summary-${summary.id}`}
                             >
                               <div className="space-y-3">
@@ -1029,7 +1029,7 @@ export default function Dashboard() {
                                   <Button 
                                     variant="outline" 
                                     size="sm" 
-                                    className="flex-1 text-white bg-white/10 border-white/30 hover:bg-white/20 backdrop-blur-md transition-all duration-200 font-medium touch-manipulation py-2.5"
+                                    className="flex-1 text-foreground surface-1 surface-interactive border-border/60 transition-all duration-200 font-medium touch-manipulation py-2.5"
                                     data-testid="button-view-full"
                                     onClick={() => setLocation(`/summary/${summary.id}`)}
                                   >
@@ -1047,7 +1047,7 @@ export default function Dashboard() {
                                         <Trash2 className="h-4 w-4" />
                                       </Button>
                                     </AlertDialogTrigger>
-                                    <AlertDialogContent className="bg-gray-900/95 border-gray-700/50 backdrop-blur-md">
+                                    <AlertDialogContent className="surface-2">
                                       <AlertDialogHeader>
                                         <AlertDialogTitle className="text-white">Delete Summary</AlertDialogTitle>
                                         <AlertDialogDescription className="text-gray-300">
@@ -1104,7 +1104,7 @@ export default function Dashboard() {
                               key={summary.id}
                               initial={{ opacity: 0, scale: 0.95 }}
                               animate={{ opacity: 1, scale: 1 }}
-                              className="bg-white/10 border-white/20 backdrop-blur-lg rounded-lg border p-4"
+                              className="surface-2 rounded-lg p-4"
                               data-testid={`summary-${summary.id}`}
                             >
                               <div className="space-y-3">
@@ -1129,7 +1129,7 @@ export default function Dashboard() {
                                 <Button 
                                   variant="outline" 
                                   size="sm" 
-                                  className="w-full text-white bg-white/10 border-white/30 hover:bg-white/20 backdrop-blur-md transition-all duration-200 font-medium touch-manipulation py-2.5"
+                                  className="w-full text-foreground surface-1 surface-interactive border-border/60 transition-all duration-200 font-medium touch-manipulation py-2.5"
                                   data-testid="button-view-full"
                                   onClick={() => setLocation(`/summary/${summary.id}`)}
                                 >
@@ -1172,7 +1172,7 @@ export default function Dashboard() {
                                         <Trash2 className="h-4 w-4" />
                                       </button>
                                     </AlertDialogTrigger>
-                                    <AlertDialogContent className="bg-gray-900/95 border-gray-700/50 backdrop-blur-md">
+                                    <AlertDialogContent className="surface-2">
                                       <AlertDialogHeader>
                                         <AlertDialogTitle className="text-white">Delete Summary</AlertDialogTitle>
                                         <AlertDialogDescription className="text-gray-300">
@@ -1236,7 +1236,7 @@ export default function Dashboard() {
                 </TabsContent>
 
                 <TabsContent value="wallet" className="space-y-6 mt-6">
-                  <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+                  <Card className="surface-2">
                     <CardHeader>
                       <CardTitle className="text-white flex items-center gap-2">
                         <Wallet className="h-5 w-5" />
@@ -1266,7 +1266,7 @@ export default function Dashboard() {
                         </Button>
                         <Button 
                           variant="outline" 
-                          className="text-white bg-white/10 border-white/30 hover:bg-white/20 backdrop-blur-md transition-all duration-200 font-medium"
+                          className="text-foreground surface-1 surface-interactive border-border/60 transition-all duration-200 font-medium"
                           data-testid="button-withdraw"
                           onClick={() => {
                             toast({ 
@@ -1373,7 +1373,7 @@ export default function Dashboard() {
                         Add Note
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="bg-gray-900 border-gray-700 text-white">
+                    <DialogContent className="surface-2">
                       <DialogHeader>
                         <DialogTitle>Create New Note</DialogTitle>
                       </DialogHeader>
@@ -1432,7 +1432,7 @@ export default function Dashboard() {
                         Share Profile
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="bg-gray-900 border-gray-700 text-white">
+                    <DialogContent className="surface-2">
                       <DialogHeader>
                         <DialogTitle>Share Your Profile</DialogTitle>
                       </DialogHeader>

@@ -144,7 +144,7 @@ export default function InsightsDashboard() {
             type="button"
             onClick={() => refetch()}
             disabled={isRefetching}
-            className="px-4 py-2 rounded-lg border border-purple-500/40 bg-purple-900/20 text-purple-200 hover:bg-purple-900/40 transition flex items-center gap-2 text-sm disabled:opacity-50"
+            className="px-4 py-2 rounded-lg surface-1 surface-interactive border border-purple-500/40 text-purple-200 hover:border-neon-purple/60 transition flex items-center gap-2 text-sm disabled:opacity-50"
             data-testid="button-refresh-insights"
           >
             <RefreshCw className={`h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`} />
@@ -153,7 +153,7 @@ export default function InsightsDashboard() {
         </div>
 
         {data?.marketRegime && (
-          <Card className="bg-gradient-to-br from-fuchsia-900/20 to-purple-900/10 border-fuchsia-500/30" data-testid="card-market-regime">
+          <Card className="surface-2 border-fuchsia-500/30" data-testid="card-market-regime">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Layers className="h-5 w-5 text-fuchsia-400" />
@@ -179,7 +179,7 @@ export default function InsightsDashboard() {
             { label: 'Opportunities', value: opportunities, Icon: Lightbulb, tint: 'from-cyan-400 to-purple-400' },
             { label: 'Risk Alerts', value: riskAlerts, Icon: AlertCircle, tint: 'from-purple-400 via-fuchsia-400 to-cyan-400' },
           ].map(stat => (
-            <Card key={stat.label} className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
+            <Card key={stat.label} className="surface-2 border-purple-500/30">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
                   <stat.Icon className="h-4 w-4" />
@@ -196,7 +196,7 @@ export default function InsightsDashboard() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="bg-purple-900/20 border border-purple-500/30 flex-wrap h-auto">
+          <TabsList className="surface-1 border border-purple-500/30 flex-wrap h-auto">
             {TAB_FILTERS.map(t => (
               <TabsTrigger
                 key={t.value}
@@ -213,7 +213,7 @@ export default function InsightsDashboard() {
             {isLoading && (
               <>
                 {[0, 1, 2].map(i => (
-                  <Card key={i} className="bg-purple-900/10 border-purple-500/20">
+                  <Card key={i} className="surface-1 border-purple-500/20">
                     <CardHeader>
                       <Skeleton className="h-6 w-2/3" />
                       <Skeleton className="h-4 w-1/3 mt-2" />
@@ -237,7 +237,7 @@ export default function InsightsDashboard() {
             )}
 
             {!isLoading && !isError && filteredInsights.length === 0 && (
-              <Card className="bg-purple-900/10 border-purple-500/30">
+              <Card className="surface-1 border-purple-500/30">
                 <CardContent className="pt-6 text-gray-400">
                   No insights match this filter right now. Try a different category.
                 </CardContent>
@@ -250,7 +250,7 @@ export default function InsightsDashboard() {
               return (
                 <Card
                   key={insight.id}
-                  className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 hover:border-fuchsia-500/50 transition-all"
+                  className="surface-2 border-purple-500/30 hover:border-fuchsia-500/50 transition-all"
                   data-testid={`insight-${insight.id}`}
                 >
                   <CardHeader>
