@@ -1,7 +1,7 @@
 // ============================================================================
-// PortfolioCorrelations routes — extracted from server/routes.ts by
-// scripts/split-routes.ts. No behavior changes; this is a pure file
-// reorganization to break the 20k-line monolith into per-domain modules.
+// TechAiStocks routes — extracted from server/routes.ts by
+// scripts/split-routes-phase2.ts. No behavior changes; pure file
+// reorganization to break the monolith into per-domain modules.
 // ============================================================================
 import type { Express, Request, Response, NextFunction } from "express";
 import { storage, DatabaseStorage } from "../storage";
@@ -9,6 +9,7 @@ import { AuthService, authenticateToken, optionalAuth, type AuthRequest } from "
 import {
   strictLimit,
   mediumLimit,
+  looseLimit,
   signupLimit,
   authLimit,
   requireAdminFlexible,
@@ -49,10 +50,33 @@ import {
   channelPointsRedeemSchema,
 } from "../middleware/validationSchemas";
 import { cacheService } from "../services/cacheService";
+import { StreamProcessor } from "../services/streamProcessor";
+import { StreamProcessorV2 } from "../services/streamProcessorV2";
+import RebuiltContentProcessor from "../services/rebuiltContentProcessor";
 import { AIService } from "../services/aiService";
 import { Web3Service } from "../services/web3Service";
+import { MarketDataService } from "../services/marketDataService";
 import { youtubeService } from "../services/youtubeService";
+import { PredictiveAnalyticsService } from "../services/predictiveAnalyticsService";
+import { onChainAnalyticsService } from "../services/onChainAnalyticsService";
+import { duneAnalyticsService } from "../services/duneAnalyticsService";
+import { federalReserveService } from "../services/federalReserveService";
+import { CorrelationAnalysisService } from "../services/correlationAnalysisService";
+import { chartingService } from "../services/chartingService";
+import { derivativesAnalyticsService } from "../services/derivativesAnalyticsService";
+import { institutionalFlowService } from "../services/institutionalFlowService";
+import { RiskAssessmentService } from "../services/riskAssessmentService";
+import { CrossMarketSignalService } from "../services/crossMarketSignalService";
+import { VolatilityForecastingService } from "../services/volatilityForecastingService";
+import { marketEventModelingService } from "../services/marketEventModelingService";
+import { patternRecognitionService } from "../services/patternRecognitionService";
+import { RecommendationEngine } from "../recommendation-engine";
+import { cryptoIntelligenceService } from "../services/cryptoIntelligenceService";
+import { macroDataService } from "../services/macroDataService";
+import { advancedMarketIntelService } from "../services/advancedMarketIntelService";
+import { aiTradingSignalsService } from "../services/aiTradingSignalsService";
 import { trendingService } from "../services/trendingService";
+import { autonomousTradingEngine } from "../services/autonomousTradingEngine";
 import { pointsService } from "../services/pointsService";
 import { bountyHunterService } from "../services/bountyHunterService";
 import { qualityScorerService } from "../services/qualityScorerService";
@@ -68,7 +92,7 @@ import {
   avatarTrades as avatarTradesTable, avatarPositions, streamConversationMessages, pointsTransactions, dailyLoginStreak,
   scheduledDebates, botStakes, botSimTrades, botPerformanceSnapshots
 } from "../../shared/schema";
-import { eq, and, desc, gte, lte, sql, asc, isNotNull, isNull, inArray } from "drizzle-orm";
+import { eq, and, desc, gte, lte, sql, asc, isNotNull, isNull, inArray, count } from "drizzle-orm";
 import * as validators from "../validators";
 import {
   loginSchema,
@@ -99,63 +123,21 @@ import passport from "passport";
 import axios from "axios";
 import { ADMIN_USERNAMES, isAdmin, requireAdmin, validateRequest, asyncHandler } from "./_shared";
 
-export async function registerPortfolioCorrelationsRoutes(app: Express): Promise<void> {
-  // =============================================================================
-  // PORTFOLIO CORRELATIONS API
-  // =============================================================================
+export async function registerTechAiStocksRoutes(app: Express): Promise<void> {
+  // ============================================================
+  // TECH/AI STOCK MARKET ENDPOINTS
+  // ============================================================
 
-  // Get asset correlations for a portfolio
-  app.get("/api/portfolios/:id/correlations", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
-    const userId = req.user?.id;
-    const { id } = req.params;
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
+  const { stockMarketService } = await import('../services/stockMarketService');
+
+  app.get('/api/stocks/tech-ai-movers', asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const data = await stockMarketService.getTechAiMovers();
+      res.json({ success: true, ...data, timestamp: new Date().toISOString() });
+    } catch (error: any) {
+      console.error('Failed to fetch tech/AI stock movers:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch stock movers' });
     }
-    
-    const { portfolioAssets } = await import("../../shared/schema");
-    const assets = await db.select().from(portfolioAssets).where(eq(portfolioAssets.portfolioId, id));
-    
-    const correlations: Record<string, Record<string, number>> = {};
-    
-    const assetTypeCorrelations: Record<string, Record<string, number>> = {
-      'crypto-crypto': 0.75,
-      'crypto-stock': 0.30,
-      'crypto-etf': 0.35,
-      'crypto-bond': 0.10,
-      'crypto-cash': 0.00,
-      'crypto-stablecoin': 0.05,
-      'stock-stock': 0.65,
-      'stock-etf': 0.80,
-      'stock-bond': 0.25,
-      'stock-cash': 0.00,
-      'etf-etf': 0.70,
-      'etf-bond': 0.30,
-      'bond-bond': 0.60,
-      'bond-cash': 0.15,
-    };
-    
-    for (const assetA of assets) {
-      correlations[assetA.symbol] = {};
-      for (const assetB of assets) {
-        if (assetA.symbol === assetB.symbol) {
-          correlations[assetA.symbol][assetB.symbol] = 1.0;
-        } else {
-          const typeA = (assetA.assetType || 'other').toLowerCase();
-          const typeB = (assetB.assetType || 'other').toLowerCase();
-          const key1 = `${typeA}-${typeB}`;
-          const key2 = `${typeB}-${typeA}`;
-          
-          let baseCorrelation = assetTypeCorrelations[key1] || assetTypeCorrelations[key2] || 0.40;
-          
-          const variance = (Math.random() - 0.5) * 0.2;
-          const finalCorrelation = Math.max(-1, Math.min(1, baseCorrelation + variance));
-          
-          correlations[assetA.symbol][assetB.symbol] = parseFloat(finalCorrelation.toFixed(2));
-        }
-      }
-    }
-    
-    res.json({ success: true, correlations });
   }));
 
 }

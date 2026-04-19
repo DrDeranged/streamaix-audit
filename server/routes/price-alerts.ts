@@ -111,7 +111,7 @@ export async function registerPriceAlertsRoutes(app: Express): Promise<void> {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     
-    const { priceAlerts } = await import("../shared/schema");
+    const { priceAlerts } = await import("../../shared/schema");
     const alerts = await db.select().from(priceAlerts)
       .where(eq(priceAlerts.userId, userId))
       .orderBy(desc(priceAlerts.createdAt));
@@ -132,7 +132,7 @@ export async function registerPriceAlertsRoutes(app: Express): Promise<void> {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     
-    const { priceAlerts } = await import("../shared/schema");
+    const { priceAlerts } = await import("../../shared/schema");
     const [newAlert] = await db.insert(priceAlerts).values({
       userId,
       portfolioId: portfolioId || null,
@@ -156,7 +156,7 @@ export async function registerPriceAlertsRoutes(app: Express): Promise<void> {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     
-    const { priceAlerts } = await import("../shared/schema");
+    const { priceAlerts } = await import("../../shared/schema");
     await db.delete(priceAlerts).where(and(eq(priceAlerts.id, id), eq(priceAlerts.userId, userId)));
     
     res.json({ success: true });

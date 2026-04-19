@@ -21,10 +21,26 @@
  *      `npx tsx scripts/audit-routes.ts --strict`  (fails on warnings)
  */
 
-import { readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync } from 'fs';
 import { resolve, dirname } from 'path';
 
 const ROUTES_FILE = resolve(process.cwd(), 'server/routes.ts');
+const ROUTES_DIR = resolve(process.cwd(), 'server/routes');
+
+function collectRouteFiles(): string[] {
+  const files: string[] = [ROUTES_FILE];
+  try {
+    for (const entry of readdirSync(ROUTES_DIR)) {
+      if (!entry.endsWith('.ts')) continue;
+      if (entry === '_shared.ts') continue;
+      const p = resolve(ROUTES_DIR, entry);
+      if (statSync(p).isFile()) files.push(p);
+    }
+  } catch {
+    // routes dir may not exist yet — that's fine
+  }
+  return files;
+}
 const OUTPUT_FILE = resolve(process.cwd(), 'docs/SECURITY_ROUTE_INVENTORY.md');
 
 const PUBLIC_ALLOWLIST = new Set<string>([
@@ -120,6 +136,7 @@ interface Route {
   method: string;
   path: string;
   line: number;
+  file: string;
   middlewareSrc: string;
   hasAuth: boolean;
   hasOptionalAuth: boolean;
@@ -134,12 +151,15 @@ interface Route {
   isHighRisk: boolean;
 }
 
-const src = readFileSync(ROUTES_FILE, 'utf8');
-const lines = src.split('\n');
-
 const routes: Route[] = [];
 
 const routeRe = /app\.(get|post|put|patch|delete)\s*\(\s*["'`]([^"'`]+)["'`]\s*,?/i;
+
+const routeFiles = collectRouteFiles();
+for (const file of routeFiles) {
+const src = readFileSync(file, 'utf8');
+const lines = src.split('\n');
+const relFile = file.replace(process.cwd() + '/', '');
 
 for (let i = 0; i < lines.length; i++) {
   const m = lines[i].match(routeRe);
@@ -154,6 +174,7 @@ for (let i = 0; i < lines.length; i++) {
     method,
     path,
     line: i + 1,
+    file: relFile,
     middlewareSrc,
     hasAuth: /\bauthenticateToken\b/.test(middlewareSrc),
     hasOptionalAuth: /\boptionalAuth\b/.test(middlewareSrc),
@@ -174,6 +195,7 @@ for (let i = 0; i < lines.length; i++) {
     isAiHeavy: AI_HEAVY_PATTERNS.some((re) => re.test(path.replace(/:\w+/g, '_'))),
     isHighRisk: HIGH_RISK_PATTERNS.some((re) => re.test(path.replace(/:\w+/g, '_'))),
   });
+}
 }
 
 interface Issue {
@@ -399,13 +421,13 @@ if (issueWarns.length) {
 
 md.push('## Full route inventory');
 md.push('');
-md.push('| # | Method | Path | Line | Category | Protection layers |');
-md.push('|---|---|---|---|---|---|');
+md.push('| # | Method | Path | File | Line | Category | Protection layers |');
+md.push('|---|---|---|---|---|---|---|');
 routes
   .sort((a, b) => (a.path + a.method).localeCompare(b.path + b.method))
   .forEach((r, idx) => {
     md.push(
-      `| ${idx + 1} | ${r.method} | \`${r.path}\` | ${r.line} | ${categorize(r)} | ${decision(r)} |`,
+      `| ${idx + 1} | ${r.method} | \`${r.path}\` | \`${r.file}\` | ${r.line} | ${categorize(r)} | ${decision(r)} |`,
     );
   });
 

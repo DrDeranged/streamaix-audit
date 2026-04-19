@@ -111,7 +111,7 @@ export async function registerPortfolioGoalsRoutes(app: Express): Promise<void> 
       return res.status(401).json({ error: 'Unauthorized' });
     }
     
-    const { portfolioGoals } = await import("../shared/schema");
+    const { portfolioGoals } = await import("../../shared/schema");
     const goals = await db.select().from(portfolioGoals).where(eq(portfolioGoals.userId, userId)).orderBy(desc(portfolioGoals.createdAt));
     
     res.json({ success: true, goals });
@@ -130,7 +130,7 @@ export async function registerPortfolioGoalsRoutes(app: Express): Promise<void> 
       return res.status(400).json({ error: 'Name, target amount, and goal type are required' });
     }
     
-    const { portfolioGoals } = await import("../shared/schema");
+    const { portfolioGoals } = await import("../../shared/schema");
     const [newGoal] = await db.insert(portfolioGoals).values({
       userId,
       portfolioId: portfolioId || null,
@@ -156,7 +156,7 @@ export async function registerPortfolioGoalsRoutes(app: Express): Promise<void> 
       return res.status(401).json({ error: 'Unauthorized' });
     }
     
-    const { portfolioGoals } = await import("../shared/schema");
+    const { portfolioGoals } = await import("../../shared/schema");
     await db.delete(portfolioGoals).where(and(eq(portfolioGoals.id, id), eq(portfolioGoals.userId, userId)));
     
     res.json({ success: true });

@@ -310,7 +310,7 @@ export async function registerWaitlistRoutes(app: Express): Promise<void> {
 
   // Get detailed user breakdown (real humans vs AI agents)
   app.get("/api/admin/user-breakdown", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { users } = await import('../shared/schema');
+    const { users } = await import('../../shared/schema');
     const { sql, count, and, eq, gte, isNull, or, like } = await import('drizzle-orm');
     
     const now = new Date();
@@ -417,7 +417,7 @@ export async function registerWaitlistRoutes(app: Express): Promise<void> {
 
   // Get autonomous systems status and monitoring data
   app.get("/api/admin/systems/status", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { autonomousSystemLogs } = await import("../shared/schema");
+    const { autonomousSystemLogs } = await import("../../shared/schema");
     const { sql, desc, count } = await import("drizzle-orm");
     
     // Define all 10 autonomous systems
