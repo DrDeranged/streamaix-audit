@@ -64,7 +64,7 @@ const MarketCard = memo(({ market }: { market: PredictionMarket }) => {
   return (
     <Link href={`/markets/${market.id}`}>
       <div className="transform transition-all duration-200 hover:scale-[1.03] hover:-translate-y-1.5">
-        <Card className="bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-slate-700/50 overflow-hidden backdrop-blur-sm hover:border-purple-500/50 hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300 h-full cursor-pointer">
+        <Card className="surface-2 surface-interactive overflow-hidden hover:border-neon-purple/60 h-full cursor-pointer">
           {market.imageUrl && (
             <div className="h-32 overflow-hidden relative">
               <img 
@@ -308,7 +308,7 @@ export default function Markets() {
         {stats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
             <div className="transform transition-transform duration-200 hover:scale-[1.02]">
-              <Card className="gradient-border-warm bg-gradient-to-br from-purple-900/30 to-purple-800/20 stat-glow overflow-hidden">
+              <Card className="surface-2 border-purple-500/30 overflow-hidden">
                 <CardContent className="p-4 relative">
                   <div className="text-xs font-semibold text-purple-300/90 mb-1">Active Markets</div>
                   <AnimatedCounter 
@@ -322,7 +322,7 @@ export default function Markets() {
             </div>
             
             <div className="transform transition-transform duration-200 hover:scale-[1.02]">
-              <Card className="gradient-border-warm bg-gradient-to-br from-cyan-900/30 to-cyan-800/20 stat-glow overflow-hidden">
+              <Card className="surface-2 border-cyan-500/30 overflow-hidden">
                 <CardContent className="p-4 relative">
                   <div className="text-xs font-semibold text-cyan-300/90 mb-1">Total Volume</div>
                   <AnimatedCounter 
@@ -339,7 +339,7 @@ export default function Markets() {
             </div>
             
             <div className="transform transition-transform duration-200 hover:scale-[1.02]">
-              <Card className="gradient-border-warm bg-gradient-to-br from-green-900/30 to-green-800/20 stat-glow overflow-hidden">
+              <Card className="surface-2 border-emerald-500/30 overflow-hidden">
                 <CardContent className="p-4 relative">
                   <div className="text-xs font-semibold text-green-300/90 mb-1">Total Trades</div>
                   <AnimatedCounter 
@@ -355,7 +355,7 @@ export default function Markets() {
             </div>
             
             <div className="transform transition-transform duration-200 hover:scale-[1.02]">
-              <Card className="gradient-border-warm bg-gradient-to-br from-orange-900/30 to-orange-800/20 stat-glow overflow-hidden">
+              <Card className="surface-2 border-amber-500/30 overflow-hidden">
                 <CardContent className="p-4 relative">
                   <div className="text-xs font-semibold text-orange-300/90 mb-1">All Markets</div>
                   <AnimatedCounter 
@@ -504,7 +504,7 @@ export default function Markets() {
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <Card key={i} className="bg-slate-900/50 border-slate-700/50">
+                  <Card key={i} className="surface-1 border-border/50">
                     <CardContent className="p-4 space-y-3">
                       <Skeleton className="h-4 w-24 bg-slate-700" />
                       <Skeleton className="h-12 w-full bg-slate-700" />
@@ -544,7 +544,7 @@ export default function Markets() {
                 )}
               </div>
             ) : (
-              <Card className="bg-slate-900/50 border-slate-700/50">
+              <Card className="surface-1 border-border/50">
                 <CardContent className="p-12 text-center">
                   <TrendingUp className="w-16 h-16 mx-auto mb-4 text-slate-600" />
                   <h3 className="text-xl font-semibold text-white mb-2">No Markets Found</h3>

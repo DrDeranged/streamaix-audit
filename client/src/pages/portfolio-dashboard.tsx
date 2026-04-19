@@ -161,8 +161,8 @@ function CollapsibleSection({
   
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <Card className="bg-slate-900/80 border-slate-700/50 overflow-hidden">
-        <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-slate-800/30 transition-colors">
+      <Card className="surface-2 overflow-hidden">
+        <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-accent/40 transition-colors">
           <div className="flex items-center gap-2">
             <Icon className={cn("w-5 h-5", iconColor)} />
             <h2 className="text-lg font-semibold text-white">{title}</h2>
@@ -501,7 +501,7 @@ function WatchlistItemRow({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg border border-slate-700/30 hover:border-slate-600/50 hover:bg-slate-800/50 transition-all group"
+      className="flex items-center justify-between p-3 surface-1 surface-interactive rounded-lg group"
       data-testid={`watchlist-item-${item.symbol}`}
     >
       <div className="flex items-center gap-3">
@@ -756,15 +756,15 @@ function BotTradingTab() {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+        <div className="surface-1 rounded-lg p-3">
           <p className="text-[11px] text-gray-400 mb-1">Total Staked</p>
           <p className="text-base font-bold text-white numeric">{totalStaked.toLocaleString()} <span className="text-xs text-gray-400">STREAM</span></p>
         </div>
-        <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+        <div className="surface-1 rounded-lg p-3">
           <p className="text-[11px] text-gray-400 mb-1">Active Bots</p>
           <p className="text-base font-bold text-cyan-400">{stakes.filter((s: any) => s.status === 'active').length}</p>
         </div>
-        <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+        <div className="surface-1 rounded-lg p-3">
           <p className="text-[11px] text-gray-400 mb-1">Est. P&L</p>
           <p className={`text-base font-bold ${totalPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
             {totalPnL >= 0 ? '+' : ''}{totalPnL.toFixed(0)}
@@ -794,7 +794,7 @@ function BotTradingTab() {
             return (
               <div
                 key={stake.id}
-                className="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg border border-slate-700/30 hover:border-cyan-500/30 transition-colors cursor-pointer"
+                className="flex items-center justify-between p-3 surface-1 surface-interactive rounded-lg hover:border-neon-cyan/50 cursor-pointer"
                 onClick={() => navigate('/bot-trading')}
               >
                 <div className="flex items-center gap-3">
@@ -1254,7 +1254,7 @@ function TransactionHistoryDialog({ portfolioId, open, onOpenChange }: { portfol
           {isLoading ? (
             <div className="space-y-2">
               {[1, 2, 3, 4, 5].map(i => (
-                <div key={i} className="p-3 bg-slate-800/50 rounded-lg animate-pulse">
+                <div key={i} className="p-3 surface-1 rounded-lg animate-pulse">
                   <div className="h-4 bg-slate-700 rounded w-3/4 mb-2"></div>
                   <div className="h-3 bg-slate-700 rounded w-1/2"></div>
                 </div>
@@ -1271,7 +1271,7 @@ function TransactionHistoryDialog({ portfolioId, open, onOpenChange }: { portfol
               {paginatedTransactions.map((tx) => (
                 <div
                   key={tx.id}
-                  className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:bg-slate-800/80 transition-colors"
+                  className="p-3 surface-1 surface-interactive rounded-lg"
                   data-testid={`transaction-${tx.id}`}
                 >
                   <div className="flex items-center justify-between mb-2">
@@ -1428,7 +1428,7 @@ function DividendCalendar({ assets }: { assets: PortfolioAsset[] }) {
             return (
               <div 
                 key={div.symbol} 
-                className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:border-purple-500/30 transition-colors"
+                className="p-3 surface-1 surface-interactive rounded-lg hover:border-neon-purple/50"
                 data-testid={`dividend-${div.symbol}`}
               >
                 <div className="flex items-center justify-between mb-1">
@@ -1550,7 +1550,7 @@ function PerformanceSummary({ portfolio, assets, portfolioId }: { portfolio: Por
         {periodReturns.map((period) => (
           <div 
             key={period.label}
-            className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 text-center"
+            className="p-3 surface-1 rounded-lg text-center"
           >
             <span className="text-[10px] text-gray-500 block mb-1">{period.label}</span>
             <span className={cn("text-sm font-bold", period.value >= 0 ? 'text-green-400' : 'text-red-400')}>
@@ -1599,7 +1599,7 @@ function PerformanceSummary({ portfolio, assets, portfolioId }: { portfolio: Por
         </div>
       </div>
       
-      <div className="p-3 bg-slate-800/30 rounded-lg border border-slate-700/30">
+      <div className="p-3 surface-1 rounded-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <DollarSign className="w-4 h-4 text-purple-400" />
@@ -1690,7 +1690,7 @@ function GoalTracker({ currentValue }: { currentValue: number }) {
     return (
       <div className="space-y-3">
         {[1, 2].map(i => (
-          <div key={i} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 animate-pulse">
+          <div key={i} className="p-3 surface-1 rounded-lg animate-pulse">
             <div className="h-4 bg-slate-700 rounded w-3/4 mb-2"></div>
             <div className="h-2 bg-slate-700 rounded w-full"></div>
           </div>
@@ -1711,7 +1711,7 @@ function GoalTracker({ currentValue }: { currentValue: number }) {
           const progress = Math.min(100, (currentValue / goal.targetAmount) * 100);
           const daysLeft = goal.deadline ? Math.max(0, Math.floor((new Date(goal.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : null;
           return (
-            <div key={goal.id} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 group">
+            <div key={goal.id} className="p-3 surface-1 rounded-lg group">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-white">{goal.name}</span>
                 <div className="flex items-center gap-2">
@@ -1931,11 +1931,11 @@ function IncomeTracker({ assets }: { assets: PortfolioAsset[] }) {
         <p className="text-[11px] sm:text-[10px] text-gray-500 mt-1">${(totalPassiveIncome / 12).toFixed(0)}/month</p>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <div className="p-2 bg-slate-800/50 rounded-lg">
+        <div className="p-2 surface-1 rounded-lg">
           <span className="text-[11px] sm:text-[10px] text-gray-400">Dividends</span>
           <p className="text-sm font-medium text-white">${estimatedAnnualDividends.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
         </div>
-        <div className="p-2 bg-slate-800/50 rounded-lg">
+        <div className="p-2 surface-1 rounded-lg">
           <span className="text-[11px] sm:text-[10px] text-gray-400">Staking Rewards</span>
           <p className="text-sm font-medium text-white">${estimatedStakingRewards.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
         </div>
@@ -1972,7 +1972,7 @@ const NewsAggregator = memo(function NewsAggregator({ assets }: { assets: Portfo
     return (
       <div className="space-y-2">
         {[1, 2, 3].map(i => (
-          <div key={i} className="p-2.5 bg-slate-800/50 rounded-lg animate-pulse">
+          <div key={i} className="p-2.5 surface-1 rounded-lg animate-pulse">
             <div className="h-4 bg-slate-700 rounded w-3/4 mb-2"></div>
             <div className="h-3 bg-slate-700 rounded w-1/2"></div>
           </div>
@@ -1995,7 +1995,7 @@ const NewsAggregator = memo(function NewsAggregator({ assets }: { assets: Portfo
       {newsItems.slice(0, 4).map((item, i) => (
         <div 
           key={i} 
-          className="p-2.5 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer group"
+          className="p-2.5 surface-1 rounded-lg hover:bg-accent/40 transition-colors cursor-pointer group"
           onClick={() => item.url && window.open(item.url, '_blank')}
         >
           <div className="flex items-start gap-2">
@@ -2176,7 +2176,7 @@ function ConnectedAccountsSection() {
           return (
             <div
               key={account.id}
-              className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-slate-700/50"
+              className="flex items-center justify-between p-3 surface-1 rounded-lg"
               data-testid={`connected-account-${account.id}`}
             >
               <div className="flex items-center gap-3">
@@ -2278,7 +2278,7 @@ function AIAdvisorChat({ portfolioId, totalValue, assets, allocation }: {
   return (
     <Card className="bg-gradient-to-r from-slate-900 via-purple-900/10 to-slate-900 border-purple-500/30" data-testid="ai-advisor-chat">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-slate-800/30 transition-colors">
+        <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-accent/40 transition-colors">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-cyan-500">
               <MessageCircle className="w-4 h-4 text-white" />
@@ -2426,7 +2426,7 @@ function AssetNewsSection({ symbol, isExpanded, onToggle }: { symbol: string; is
   return (
     <Collapsible open={isExpanded} onOpenChange={onToggle}>
       <CollapsibleTrigger 
-        className="w-full p-2 bg-slate-800/50 rounded-lg flex items-center justify-between hover:bg-slate-800 transition-colors"
+        className="w-full p-2 surface-1 rounded-lg flex items-center justify-between hover:bg-accent/40 transition-colors"
         data-testid={`news-toggle-${symbol}`}
       >
         <div className="flex items-center gap-2">
@@ -2834,7 +2834,7 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
                   className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" 
                 />
               </div>
-              <div className="p-3 bg-slate-800/30 rounded-lg border border-slate-700/50">
+              <div className="p-3 surface-1 rounded-lg">
                 <Label className="text-gray-300 text-sm font-medium flex items-center gap-2 mb-3">
                   <TrendingUp className="w-4 h-4 text-green-400" />
                   Automatic Growth Settings
@@ -2950,7 +2950,7 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
 
           {selectedAsset && mode === 'search' && (
             <div className="mt-4 space-y-4">
-              <div className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+              <div className="flex items-center gap-3 p-3 surface-1 rounded-lg">
                 {selectedAsset.thumb ? (
                   <img src={selectedAsset.thumb} alt={selectedAsset.symbol} className="w-10 h-10 rounded-lg" />
                 ) : (
@@ -3009,7 +3009,7 @@ const AssetRow = memo(function AssetRow({ asset, portfolioId, showValues = true,
   return (
     <div
       className={cn(
-        "flex items-center justify-between p-3 bg-slate-800/30 rounded-lg border hover:border-slate-600/50 hover:bg-slate-800/50 transition-colors cursor-pointer group relative",
+        "flex items-center justify-between p-3 surface-1 rounded-lg border hover:border-slate-600/50 hover:bg-slate-800/50 transition-colors cursor-pointer group relative",
         isRecentlyUpdated ? 'border-green-500/40' : 'border-slate-700/30'
       )}
     >
@@ -3179,7 +3179,7 @@ function EditAssetDialog({ asset, portfolioId, onSuccess }: { asset: PortfolioAs
         </DialogHeader>
         
         <div className="space-y-4 pt-2">
-          <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+          <div className="flex items-center justify-between p-3 surface-1 rounded-lg">
             <div>
               <p className="font-medium text-white">{asset.symbol}</p>
               <p className="text-sm text-gray-400">{asset.name}</p>
@@ -3224,7 +3224,7 @@ function EditAssetDialog({ asset, portfolioId, onSuccess }: { asset: PortfolioAs
             />
           </div>
 
-          <div className="p-3 bg-slate-800/30 rounded-lg border border-slate-700/50">
+          <div className="p-3 surface-1 rounded-lg">
             <div className="flex justify-between text-sm">
               <span className="text-gray-400">Est. Value</span>
               <span className="text-white font-medium">
@@ -4001,7 +4001,7 @@ export default function PortfolioDashboard() {
                                   { icon: TrendingUp, label: 'Stocks', color: 'text-blue-400' },
                                   { icon: Landmark, label: 'Retirement', color: 'text-purple-400' }
                                 ].map((item) => (
-                                  <div key={item.label} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                                  <div key={item.label} className="p-3 surface-1 rounded-lg">
                                     <item.icon className={cn("w-5 h-5 mx-auto mb-1", item.color)} />
                                     <span className="text-[11px] sm:text-[10px] text-gray-400">{item.label}</span>
                                   </div>
@@ -4058,7 +4058,7 @@ export default function PortfolioDashboard() {
                       </h2>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                      <div className="p-3 surface-1 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                           <Activity className="w-4 h-4 text-blue-400" />
                           <span className="text-xs text-gray-400">Volatility</span>
@@ -4067,7 +4067,7 @@ export default function PortfolioDashboard() {
                           {assets.length > 0 ? 'Medium' : '--'}
                         </p>
                       </div>
-                      <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                      <div className="p-3 surface-1 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                           <Crosshair className="w-4 h-4 text-amber-400" />
                           <span className="text-xs text-gray-400">Concentration</span>
@@ -4076,7 +4076,7 @@ export default function PortfolioDashboard() {
                           {assets.length > 0 ? `${assets.length > 1 ? Math.round(100 / assets.length) : 100}%` : '--'}
                         </p>
                       </div>
-                      <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                      <div className="p-3 surface-1 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                           <Shield className="w-4 h-4 text-green-400" />
                           <span className="text-xs text-gray-400">Diversification</span>
@@ -4100,7 +4100,7 @@ export default function PortfolioDashboard() {
                       {tradeSignals.length > 0 ? (
                         <div className="space-y-3">
                           {tradeSignals.slice(0, 3).map((signal, index) => (
-                            <div key={index} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                            <div key={index} className="p-3 surface-1 rounded-lg">
                               <div className="flex items-center justify-between mb-1">
                                 <div className="flex items-center gap-2">
                                   <span className={cn("text-xs font-bold px-2 py-0.5 rounded",
@@ -4249,14 +4249,14 @@ export default function PortfolioDashboard() {
                       <HealthScoreRing score={analysis?.healthScore || portfolio?.healthScore || 0} />
                     </div>
                     <div className="space-y-3">
-                      <div className="p-3 bg-slate-800/50 rounded-lg">
+                      <div className="p-3 surface-1 rounded-lg">
                         <div className="flex justify-between text-sm mb-2">
                           <span className="text-gray-400">Diversification</span>
                           <span className="text-white font-medium">{analysis?.diversificationScore || portfolio?.diversificationScore || 0}%</span>
                         </div>
                         <Progress value={analysis?.diversificationScore || portfolio?.diversificationScore || 0} className="h-1.5" />
                       </div>
-                      <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                      <div className="flex items-center justify-between p-3 surface-1 rounded-lg">
                         <span className="text-sm text-gray-400">Risk Profile</span>
                         <Badge className={cn("text-xs", riskLevelColors[analysis?.riskLevel || portfolio?.riskLevel || ''] || 'text-gray-400 bg-gray-500/20')}>
                           {(analysis?.riskLevel || portfolio?.riskLevel || 'Unknown').replace('_', ' ')}
@@ -4341,7 +4341,7 @@ export default function PortfolioDashboard() {
                         return (
                           <>
                             {impactByType.slice(0, 3).map((t) => (
-                              <div key={t.type} className="flex justify-between items-center p-2 bg-slate-800/50 rounded-lg">
+                              <div key={t.type} className="flex justify-between items-center p-2 surface-1 rounded-lg">
                                 <span className="text-xs text-gray-400 capitalize">If {t.type} drops {t.dropPercent}%</span>
                                 <span className="text-xs font-medium text-red-400">
                                   {showValues ? `-$${Math.round(t.impact).toLocaleString()}` : '••••'}
@@ -4669,7 +4669,7 @@ export default function PortfolioDashboard() {
                     <div className="space-y-3">
                       <button 
                         onClick={() => setShowTaxDialog(true)}
-                        className="w-full p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:border-amber-500/30 transition-colors text-left group"
+                        className="w-full p-3 surface-1 surface-interactive rounded-lg hover:border-neon-amber/50 text-left group"
                         data-testid="button-tax-harvest"
                       >
                         <div className="flex items-center gap-2 mb-1">
@@ -4682,7 +4682,7 @@ export default function PortfolioDashboard() {
                       </button>
                       <button 
                         onClick={() => setShowRebalanceDialog(true)}
-                        className="w-full p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:border-cyan-500/30 transition-colors text-left group"
+                        className="w-full p-3 surface-1 surface-interactive rounded-lg hover:border-neon-cyan/50 text-left group"
                         data-testid="button-auto-rebalance"
                       >
                         <div className="flex items-center gap-2 mb-1">
@@ -4693,7 +4693,7 @@ export default function PortfolioDashboard() {
                       </button>
                       <button 
                         onClick={() => setShowGoalsDialog(true)}
-                        className="w-full p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:border-purple-500/30 transition-colors text-left group"
+                        className="w-full p-3 surface-1 surface-interactive rounded-lg hover:border-neon-purple/50 text-left group"
                         data-testid="button-set-goals"
                       >
                         <div className="flex items-center gap-2 mb-1">
@@ -4726,7 +4726,7 @@ export default function PortfolioDashboard() {
                       <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">vs. S&P 500</Badge>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                      <div className="p-3 surface-1 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                           <TrendingUp className="w-4 h-4 text-green-400" />
                           <span className="text-xs text-gray-400">Sharpe Ratio</span>
@@ -4738,7 +4738,7 @@ export default function PortfolioDashboard() {
                           {(analytics?.sharpeRatio || 0) >= 1 ? 'Above average' : (analytics?.sharpeRatio || 0) >= 0.5 ? 'Average' : 'Below average'}
                         </p>
                       </div>
-                      <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                      <div className="p-3 surface-1 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                           <TrendingDown className="w-4 h-4 text-red-400" />
                           <span className="text-xs text-gray-400">Max Drawdown</span>
@@ -4750,7 +4750,7 @@ export default function PortfolioDashboard() {
                           {Math.abs(analytics?.maxDrawdown || 0) > 25 ? 'High risk' : Math.abs(analytics?.maxDrawdown || 0) > 15 ? 'Moderate risk' : 'Low risk'}
                         </p>
                       </div>
-                      <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                      <div className="p-3 surface-1 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                           <Activity className="w-4 h-4 text-purple-400" />
                           <span className="text-xs text-gray-400">Beta</span>
@@ -4762,7 +4762,7 @@ export default function PortfolioDashboard() {
                           {(analytics?.beta || 1) > 1.2 ? 'Higher volatility' : (analytics?.beta || 1) > 0.8 ? 'Market-neutral' : 'Lower volatility'}
                         </p>
                       </div>
-                      <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                      <div className="p-3 surface-1 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                           <Crosshair className="w-4 h-4 text-cyan-400" />
                           <span className="text-xs text-gray-400">Alpha</span>
@@ -4807,13 +4807,13 @@ export default function PortfolioDashboard() {
                       <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">2024 Tax Year</Badge>
                     </div>
                     <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                      <div className="p-3 surface-1 rounded-lg">
                         <span className="text-xs text-gray-400">Unrealized Gains</span>
                         <p className={cn("text-xl font-bold", (portfolio?.totalPnl || 0) >= 0 ? 'text-green-400' : 'text-red-400')}>
                           {showValues ? `${(portfolio?.totalPnl || 0) >= 0 ? '+' : ''}$${Math.abs(portfolio?.totalPnl || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}` : '••••'}
                         </p>
                       </div>
-                      <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                      <div className="p-3 surface-1 rounded-lg">
                         <span className="text-xs text-gray-400">Est. Tax Liability</span>
                         <p className="text-xl font-bold text-amber-400">
                           {showValues ? `$${Math.round(taxAnalytics?.totalEstTax || (portfolio?.totalPnl || 0) * 0.20).toLocaleString()}` : '••••'}
@@ -4824,7 +4824,7 @@ export default function PortfolioDashboard() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between p-2 bg-slate-800/30 rounded-lg">
+                      <div className="flex items-center justify-between p-2 surface-1 rounded-lg">
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 rounded-full bg-green-400" />
                           <span className="text-xs text-gray-400">Long-term holdings (1yr+)</span>
@@ -4833,7 +4833,7 @@ export default function PortfolioDashboard() {
                           {taxAnalytics ? `${taxAnalytics.longTermAssetCount} assets` : assets.length > 0 ? '--' : '--'}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between p-2 bg-slate-800/30 rounded-lg">
+                      <div className="flex items-center justify-between p-2 surface-1 rounded-lg">
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 rounded-full bg-amber-400" />
                           <span className="text-xs text-gray-400">Short-term holdings</span>
@@ -4926,7 +4926,7 @@ export default function PortfolioDashboard() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
-            <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700/50">
+            <div className="p-4 surface-1 rounded-lg">
               <h4 className="text-sm font-medium text-white mb-3">Create New Alert</h4>
               <div className="space-y-3">
                 <div>
@@ -4998,7 +4998,7 @@ export default function PortfolioDashboard() {
                 </h4>
                 <div className="space-y-2 max-h-[200px] overflow-y-auto">
                   {priceAlerts.filter(a => a.isActive).map((alert) => (
-                    <div key={alert.id} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                    <div key={alert.id} className="flex items-center justify-between p-3 surface-1 rounded-lg">
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-white text-sm">{alert.symbol}</span>
@@ -5053,7 +5053,7 @@ export default function PortfolioDashboard() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
-            <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700/50">
+            <div className="p-4 surface-1 rounded-lg">
               <h4 className="text-sm font-medium text-white mb-3">Set Target Allocations by Asset Type</h4>
               <div className="space-y-2">
                 {Array.from(new Set(assets.map(a => a.assetType))).map(type => {
@@ -5199,7 +5199,7 @@ export default function PortfolioDashboard() {
           <div className="space-y-5 pt-4">
             {/* Summary Cards */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 bg-slate-800/50 rounded-lg border border-green-500/20">
+              <div className="p-3 surface-1 rounded-lg border border-green-500/20">
                 <div className="flex items-center gap-2 mb-1">
                   <div className="w-2 h-2 rounded-full bg-green-400" />
                   <span className="text-xs text-gray-400">Long-term (15% rate)</span>
@@ -5209,7 +5209,7 @@ export default function PortfolioDashboard() {
                   {taxAnalytics?.longTermGains ? `+$${taxAnalytics.longTermGains.toLocaleString(undefined, { maximumFractionDigits: 0 })} gains` : 'No gains'}
                 </p>
               </div>
-              <div className="p-3 bg-slate-800/50 rounded-lg border border-amber-500/20">
+              <div className="p-3 surface-1 rounded-lg border border-amber-500/20">
                 <div className="flex items-center gap-2 mb-1">
                   <div className="w-2 h-2 rounded-full bg-amber-400" />
                   <span className="text-xs text-gray-400">Short-term (32% rate)</span>
@@ -5243,7 +5243,7 @@ export default function PortfolioDashboard() {
               {taxAnalytics?.taxLossHarvestingOpportunities && taxAnalytics.taxLossHarvestingOpportunities.length > 0 ? (
                 <div className="space-y-2">
                   {taxAnalytics.taxLossHarvestingOpportunities.map((op, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-red-500/20">
+                    <div key={i} className="flex items-center justify-between p-3 surface-1 rounded-lg border border-red-500/20">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center">
                           <TrendingDown className="w-4 h-4 text-red-400" />
@@ -5268,7 +5268,7 @@ export default function PortfolioDashboard() {
                   </p>
                 </div>
               ) : (
-                <p className="text-center py-4 text-gray-500 bg-slate-800/30 rounded-lg">
+                <p className="text-center py-4 text-muted-foreground surface-1 rounded-lg">
                   No positions with significant losses to harvest
                 </p>
               )}
@@ -5389,7 +5389,7 @@ export default function PortfolioDashboard() {
                 if (typeValue === 0 && !['crypto', 'stock', 'etf', 'bond'].includes(type)) return null;
                 
                 return (
-                  <div key={type} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                  <div key={type} className="p-3 surface-1 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-white capitalize">{type.replace('_', ' ')}</span>
                       {typeValue > 0 && (
