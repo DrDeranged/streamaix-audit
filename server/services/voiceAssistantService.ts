@@ -34,6 +34,7 @@ export interface VoiceAssistantContext {
   summariesCount?: number;
   bountiesCount?: number;
   walletBalance?: number;
+  recentBountyTitles?: string[];
 }
 
 const KNOWN_PATHS: Array<{ keywords: string[]; path: string; label: string }> = [
@@ -92,8 +93,11 @@ CURRENT CONTEXT
 - User is currently on page: ${ctx.currentPath || 'unknown'}
 - User: ${ctx.username || 'guest'}
 - Summaries created: ${ctx.summariesCount ?? 0}
-- Bounties claimed: ${ctx.bountiesCount ?? 0}
+- Bounties created/claimed: ${ctx.bountiesCount ?? 0}
 - STREAM token balance: ${ctx.walletBalance ?? 0}
+${ctx.recentBountyTitles && ctx.recentBountyTitles.length
+  ? `- Recent bounty titles: ${ctx.recentBountyTitles.slice(0, 3).map((t) => `"${t}"`).join(', ')}`
+  : '- Recent activity: (none)'}
 
 LIVE MARKET SNAPSHOT (24h)
 ${marketLines || '(market data unavailable)'}

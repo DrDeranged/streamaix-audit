@@ -27,6 +27,10 @@ app.use((req, res, next) => {
   next();
 });
 
+// Voice assistant endpoint accepts base64-encoded audio (~50-500KB), so it
+// needs a larger JSON body limit than the rest of the API. Mount this BEFORE
+// the global parser so it short-circuits the default 100KB limit for that path.
+app.use('/api/assistant/voice', express.json({ limit: '4mb' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

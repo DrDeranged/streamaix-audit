@@ -180,8 +180,6 @@ export function VoiceAssistant() {
 
   if (!isAuthenticated) return null;
 
-  const isBusy = status === "processing" || status === "recording" || status === "speaking";
-
   return (
     <>
       {/* Floating mic button */}
@@ -273,8 +271,6 @@ export function VoiceAssistant() {
         </div>
       )}
 
-      {/* Hide visually but keep audio control mounted via ref above */}
-      {isBusy ? null : null}
     </>
   );
 }
