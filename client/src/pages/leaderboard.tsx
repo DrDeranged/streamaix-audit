@@ -144,7 +144,7 @@ export default function Leaderboard() {
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-400">Reputation:</span>
-                        <span className="text-white font-semibold">{hunters[1]?.reputation.toLocaleString()}</span>
+                        <span className="text-white font-semibold numeric">{hunters[1]?.reputation.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">Earnings:</span>
@@ -181,7 +181,7 @@ export default function Leaderboard() {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-gray-300">Reputation:</span>
-                        <span className="text-white font-bold">{hunters[0]?.reputation.toLocaleString()}</span>
+                        <span className="text-white font-bold numeric">{hunters[0]?.reputation.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-300">Earnings:</span>
@@ -222,7 +222,7 @@ export default function Leaderboard() {
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-400">Reputation:</span>
-                        <span className="text-white font-semibold">{hunters[2]?.reputation.toLocaleString()}</span>
+                        <span className="text-white font-semibold numeric">{hunters[2]?.reputation.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">Earnings:</span>
@@ -326,7 +326,7 @@ export default function Leaderboard() {
                         <div className="hidden md:flex items-center gap-6 text-sm">
                           <div className="text-center">
                             <p className="text-gray-400 text-xs mb-1">Reputation</p>
-                            <p className="font-bold text-purple-400">{hunter.reputation.toLocaleString()}</p>
+                            <p className="font-bold text-purple-400 numeric">{hunter.reputation.toLocaleString()}</p>
                           </div>
                           <div className="text-center">
                             <p className="text-gray-400 text-xs mb-1">Earnings</p>

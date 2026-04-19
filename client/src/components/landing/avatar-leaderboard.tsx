@@ -89,7 +89,7 @@ function FlashRow({ row, isLeader }: { row: LeaderboardRow; isLeader: boolean })
         className={`w-full text-left grid grid-cols-12 items-center gap-3 px-4 py-3 rounded-xl border backdrop-blur transition-all hover:scale-[1.005]
           ${isLeader
             ? "bg-gradient-to-r from-amber-500/15 via-amber-400/10 to-transparent border-amber-400/40 shadow-[0_0_30px_-12px_rgba(251,191,36,0.5)]"
-            : "bg-slate-950/40 border-slate-800/60 hover:border-cyan-500/30"
+            : "surface-1 surface-interactive hover:border-neon-cyan/50"
           }`}
       >
         <div className="col-span-1 flex items-center justify-center">
@@ -115,7 +115,7 @@ function FlashRow({ row, isLeader }: { row: LeaderboardRow; isLeader: boolean })
           </div>
         </div>
         <div className="col-span-3 sm:col-span-2 text-right">
-          <div className="text-sm font-mono font-bold text-white tabular-nums">{formatMoney(row.currentValue)}</div>
+          <div className="text-sm font-mono font-bold text-white tabular-nums numeric">{formatMoney(row.currentValue)}</div>
           <div className={`text-[11px] font-mono tabular-nums ${isUp ? "text-emerald-400" : "text-rose-400"}`}>
             {isUp ? "+" : ""}{row.totalPnlPercent.toFixed(2)}%
           </div>
@@ -170,17 +170,17 @@ function AvatarTradesModal({ row, onClose }: { row: LeaderboardRow | null; onClo
               </DialogTitle>
             </DialogHeader>
             <div className="grid grid-cols-3 gap-3 my-3">
-              <div className="bg-slate-900/60 rounded-lg p-3">
+              <div className="surface-1 rounded-lg p-3">
                 <div className="text-[11px] text-slate-500">Current value</div>
                 <div className="text-lg font-bold text-white font-mono tabular-nums">{formatMoney(row.currentValue)}</div>
               </div>
-              <div className="bg-slate-900/60 rounded-lg p-3">
+              <div className="surface-1 rounded-lg p-3">
                 <div className="text-[11px] text-slate-500">Total P&L</div>
                 <div className={`text-lg font-bold font-mono tabular-nums ${row.totalPnl >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
                   {formatPnl(row.totalPnl)}
                 </div>
               </div>
-              <div className="bg-slate-900/60 rounded-lg p-3">
+              <div className="surface-1 rounded-lg p-3">
                 <div className="text-[11px] text-slate-500">Win rate</div>
                 <div className="text-lg font-bold text-white font-mono tabular-nums">{row.winRate.toFixed(0)}%</div>
               </div>

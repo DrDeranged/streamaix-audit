@@ -139,7 +139,7 @@ function PostCard({ post }: { post: AvatarPost }) {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.25 }}
     >
-      <Card className="bg-slate-950/40 border border-slate-800/60 hover:border-cyan-500/30 transition-colors">
+      <Card className="surface-1 surface-interactive hover:border-neon-cyan/50">
         <CardContent className="p-4">
           <div className="flex gap-3">
             <Link href={`/knowledge-avatars/${post.avatarId}`}>

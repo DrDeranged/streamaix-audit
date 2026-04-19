@@ -32,7 +32,7 @@ export default function AvatarFeedWidget() {
   const posts = (data?.posts ?? []).slice(0, 3);
 
   return (
-    <Card className="bg-slate-950/40 border border-cyan-500/20 backdrop-blur-xl">
+    <Card className="surface-1 border-neon-cyan/30">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-white text-base flex items-center gap-2">

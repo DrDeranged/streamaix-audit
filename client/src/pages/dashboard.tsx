@@ -463,7 +463,7 @@ export default function Dashboard() {
                 return (
                   <div
                     key={index}
-                    className="min-w-[240px] max-w-[240px] bg-white/5 rounded-lg p-2.5 border border-white/10 backdrop-blur-sm hover:bg-white/10 cursor-pointer transition-all hover:scale-[1.02]"
+                    className="min-w-[240px] max-w-[240px] surface-1 surface-interactive rounded-lg p-2.5"
                     onClick={() => window.open(article.url, '_blank')}
                     data-testid={`news-article-${index}`}
                   >
@@ -492,7 +492,7 @@ export default function Dashboard() {
                 onClick={() => setLocation('/')}
                 variant="outline"
                 size="sm"
-                className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5 px-3 py-2"
+                className="surface-1 text-white hover:border-neon-cyan/50 px-3 py-2"
                 data-testid="button-back-home"
               >
                 <Home className="h-4 w-4 sm:mr-2" />
@@ -524,7 +524,7 @@ export default function Dashboard() {
           {/* Summaries Card */}
           <div className="relative group">
             <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
-            <Card className="relative bg-slate-950/40 border border-purple-500/20 backdrop-blur-xl hover:border-purple-500/40 transition-all duration-300 touch-manipulation">
+            <Card className="relative surface-1 surface-interactive border-purple-500/30 hover:border-purple-500/60 touch-manipulation">
               <CardContent className="p-5">
                 <div className="text-center">
                   <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center mx-auto mb-3">
@@ -540,7 +540,7 @@ export default function Dashboard() {
           {/* Views Card */}
           <div className="relative group">
             <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
-            <Card className="relative bg-slate-950/40 border border-blue-500/20 backdrop-blur-xl hover:border-blue-500/40 transition-all duration-300 touch-manipulation">
+            <Card className="relative surface-1 surface-interactive border-blue-500/30 hover:border-blue-500/60 touch-manipulation">
               <CardContent className="p-5">
                 <div className="text-center">
                   <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center mx-auto mb-3">
@@ -556,7 +556,7 @@ export default function Dashboard() {
           {/* STREAM Card */}
           <div className="relative group">
             <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
-            <Card className="relative bg-slate-950/40 border border-emerald-500/20 backdrop-blur-xl hover:border-emerald-500/40 transition-all duration-300 touch-manipulation">
+            <Card className="relative surface-1 surface-interactive border-emerald-500/30 hover:border-emerald-500/60 touch-manipulation">
               <CardContent className="p-5">
                 <div className="text-center">
                   <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-emerald-500/20 to-green-500/20 flex items-center justify-center mx-auto mb-3">
@@ -572,7 +572,7 @@ export default function Dashboard() {
           {/* Rank Card */}
           <div className="relative group">
             <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
-            <Card className="relative bg-slate-950/40 border border-amber-500/20 backdrop-blur-xl hover:border-amber-500/40 transition-all duration-300 touch-manipulation">
+            <Card className="relative surface-1 surface-interactive border-amber-500/30 hover:border-amber-500/60 touch-manipulation">
               <CardContent className="p-5">
                 <div className="text-center">
                   <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center mx-auto mb-3">
@@ -596,7 +596,7 @@ export default function Dashboard() {
           {/* Followers Card */}
           <div className="relative group">
             <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
-            <Card className="relative bg-slate-950/40 border border-pink-500/20 backdrop-blur-xl hover:border-pink-500/40 transition-all duration-300 touch-manipulation">
+            <Card className="relative surface-1 surface-interactive border-pink-500/30 hover:border-pink-500/60 touch-manipulation">
               <CardContent className="p-5">
                 <div className="text-center">
                   <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-pink-500/20 to-rose-500/20 flex items-center justify-center mx-auto mb-3">
@@ -612,7 +612,7 @@ export default function Dashboard() {
           {/* Following Card */}
           <div className="relative group">
             <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
-            <Card className="relative bg-slate-950/40 border border-violet-500/20 backdrop-blur-xl hover:border-violet-500/40 transition-all duration-300 touch-manipulation">
+            <Card className="relative surface-1 surface-interactive border-violet-500/30 hover:border-violet-500/60 touch-manipulation">
               <CardContent className="p-5">
                 <div className="text-center">
                   <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center mx-auto mb-3">
@@ -628,7 +628,7 @@ export default function Dashboard() {
           {/* Followed Avatars Card */}
           <div className="relative group">
             <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
-            <Card className="relative bg-slate-950/40 border border-cyan-500/20 backdrop-blur-xl hover:border-cyan-500/40 transition-all duration-300 touch-manipulation">
+            <Card className="relative surface-1 surface-interactive border-cyan-500/30 hover:border-cyan-500/60 touch-manipulation">
               <CardContent className="p-5">
                 <div className="text-center">
                   <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-cyan-500/20 to-teal-500/20 flex items-center justify-center mx-auto mb-3">
@@ -644,7 +644,7 @@ export default function Dashboard() {
           {/* Streak Card */}
           <div className="relative group">
             <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-orange-500 via-yellow-500 to-amber-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
-            <Card className="relative bg-slate-950/40 border border-orange-500/20 backdrop-blur-xl hover:border-orange-500/40 transition-all duration-300 touch-manipulation">
+            <Card className="relative surface-1 surface-interactive border-orange-500/30 hover:border-orange-500/60 touch-manipulation">
               <CardContent className="p-5">
                 <div className="text-center">
                   <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-orange-500/20 to-yellow-500/20 flex items-center justify-center mx-auto mb-3">
@@ -707,7 +707,7 @@ export default function Dashboard() {
                     <CardContent>
                       <div className="space-y-4">
                         {recentSummaries.map((summary: Summary, index: number) => (
-                          <div key={summary.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                          <div key={summary.id} className="flex items-center justify-between p-3 surface-1 rounded-lg">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
                                 <FileText className="h-5 w-5 text-white" />
@@ -846,7 +846,7 @@ export default function Dashboard() {
                         ))}
                       </div>
                     ) : (
-                      <Card className="bg-white/5 border-white/10 backdrop-blur-lg">
+                      <Card className="surface-1">
                         <CardContent className="p-8 text-center">
                           <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                           <h3 className="text-white text-lg font-semibold mb-2">No Avatars Followed Yet</h3>
@@ -1217,7 +1217,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                   ) : (
-                    <Card className="bg-white/5 border-white/10">
+                    <Card className="surface-1">
                       <CardContent className="p-8 text-center">
                         <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                         <p className="text-gray-300">No summaries yet. Create your first AI-powered summary!</p>
@@ -1295,7 +1295,7 @@ export default function Dashboard() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <Card className="bg-slate-950/40 border border-purple-500/20 backdrop-blur-xl">
+              <Card className="surface-1 border-purple-500/30">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-white text-sm flex items-center gap-2">
                     <Zap className="h-4 w-4 text-purple-400" />
@@ -1366,7 +1366,7 @@ export default function Dashboard() {
                     <DialogTrigger asChild>
                       <Button 
                         variant="outline"
-                        className="w-full h-10 bg-white/5 border-white/20 hover:bg-white/10 text-gray-300 hover:text-white transition-all duration-200 font-medium touch-manipulation text-sm"
+                        className="w-full h-10 surface-1 hover:border-neon-cyan/50 text-gray-300 hover:text-white font-medium touch-manipulation text-sm"
                         data-testid="button-add-note"
                       >
                         <BookmarkPlus className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
@@ -1425,7 +1425,7 @@ export default function Dashboard() {
                     <DialogTrigger asChild>
                       <Button 
                         variant="outline"
-                        className="w-full h-10 bg-white/5 border-white/20 hover:bg-white/10 text-gray-300 hover:text-white transition-all duration-200 font-medium touch-manipulation text-sm"
+                        className="w-full h-10 surface-1 hover:border-neon-cyan/50 text-gray-300 hover:text-white font-medium touch-manipulation text-sm"
                         data-testid="button-share-profile"
                       >
                         <Share className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
@@ -1478,7 +1478,7 @@ export default function Dashboard() {
                   {/* Start Tour - Help for new users */}
                   <Button 
                     variant="ghost"
-                    className="w-full h-10 bg-white/5 border border-white/20 hover:bg-white/10 text-gray-300 hover:text-white transition-all duration-200 font-medium touch-manipulation text-sm"
+                    className="w-full h-10 surface-1 hover:border-neon-cyan/50 text-gray-300 hover:text-white font-medium touch-manipulation text-sm"
                     data-testid="button-start-tour"
                     onClick={() => {
                       window.dispatchEvent(new CustomEvent('triggerOnboardingTour'));

@@ -213,7 +213,7 @@ function QuickStatCard({
             )}>{subtext}</p>
           )}
         </div>
-        <div className={cn("p-2 rounded-lg bg-white/5")}>
+        <div className={cn("p-2 rounded-lg surface-1")}>
           <Icon className={cn("w-4 h-4", iconColor)} />
         </div>
       </div>
@@ -758,7 +758,7 @@ function BotTradingTab() {
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
           <p className="text-[11px] text-gray-400 mb-1">Total Staked</p>
-          <p className="text-base font-bold text-white">{totalStaked.toLocaleString()} <span className="text-xs text-gray-400">STREAM</span></p>
+          <p className="text-base font-bold text-white numeric">{totalStaked.toLocaleString()} <span className="text-xs text-gray-400">STREAM</span></p>
         </div>
         <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
           <p className="text-[11px] text-gray-400 mb-1">Active Bots</p>
@@ -801,7 +801,7 @@ function BotTradingTab() {
                   <span className="text-2xl">{stake.botAvatar || '🤖'}</span>
                   <div>
                     <p className="text-sm font-medium text-white">{stake.botName || 'Trading Bot'}</p>
-                    <p className="text-[11px] text-gray-400">{Number(stake.amount).toLocaleString()} STREAM staked</p>
+                    <p className="text-[11px] text-gray-400 numeric">{Number(stake.amount).toLocaleString()} STREAM staked</p>
                   </div>
                 </div>
                 <div className="text-right">
