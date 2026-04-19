@@ -5069,7 +5069,7 @@ export default function PortfolioDashboard() {
                           max="100"
                           value={targetAllocations[type] || 0}
                           onChange={(e) => setTargetAllocations(prev => ({ ...prev, [type]: parseFloat(e.target.value) || 0 }))}
-                          className="w-16 h-8 text-center "" text-sm"
+                          className="w-16 h-8 text-center text-sm"
                           data-testid={`input-target-${type}`}
                         />
                         <span className="text-xs text-gray-400">%</span>
@@ -5343,15 +5343,15 @@ export default function PortfolioDashboard() {
           <div className="space-y-4 pt-4">
             <div>
               <Label className="text-gray-400 text-sm">Target Portfolio Value</Label>
-              <Input placeholder="e.g. $100,000" className="mt-1.5 """ />
+              <Input placeholder="e.g. $100,000" className="mt-1.5" />
             </div>
             <div>
               <Label className="text-gray-400 text-sm">Target Date</Label>
-              <Input type="date" className="mt-1.5 """ />
+              <Input type="date" className="mt-1.5" />
             </div>
             <div>
               <Label className="text-gray-400 text-sm">Monthly Contribution</Label>
-              <Input placeholder="e.g. $500/month" className="mt-1.5 """ />
+              <Input placeholder="e.g. $500/month" className="mt-1.5" />
             </div>
             <Button 
               onClick={() => {
@@ -5415,7 +5415,7 @@ export default function PortfolioDashboard() {
                           max="100"
                           value={dropPercent}
                           onChange={(e) => setCustomScenario(prev => ({ ...prev, [type]: Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) }))}
-                          className="w-12 h-7 text-center "" text-xs p-1"
+                          className="w-12 h-7 text-center text-xs p-1"
                         />
                         <span className="text-xs text-gray-400">%</span>
                       </div>
