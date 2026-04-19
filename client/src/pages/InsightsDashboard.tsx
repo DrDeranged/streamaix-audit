@@ -55,14 +55,14 @@ interface SmartInsightsResponse {
   insights: ReasoningInsight[];
 }
 
-const CATEGORY_META: Record<Category, { label: string; Icon: typeof Brain; tint: string }> = {
-  regime_shift: { label: 'Regime Shift', Icon: Layers, tint: 'fuchsia' },
-  divergence: { label: 'Divergence', Icon: GitBranch, tint: 'cyan' },
-  contrarian: { label: 'Contrarian', Icon: Sparkles, tint: 'purple' },
-  cross_asset: { label: 'Cross-Asset', Icon: Activity, tint: 'cyan' },
-  conditional: { label: 'If → Then', Icon: ArrowRight, tint: 'fuchsia' },
-  opportunity: { label: 'Opportunity', Icon: Lightbulb, tint: 'cyan' },
-  risk: { label: 'Risk', Icon: Shield, tint: 'fuchsia' },
+const CATEGORY_META: Record<Category, { label: string; Icon: typeof Brain; iconClass: string }> = {
+  regime_shift: { label: 'Regime Shift', Icon: Layers, iconClass: 'text-fuchsia-400' },
+  divergence: { label: 'Divergence', Icon: GitBranch, iconClass: 'text-cyan-400' },
+  contrarian: { label: 'Contrarian', Icon: Sparkles, iconClass: 'text-purple-400' },
+  cross_asset: { label: 'Cross-Asset', Icon: Activity, iconClass: 'text-cyan-400' },
+  conditional: { label: 'If → Then', Icon: ArrowRight, iconClass: 'text-fuchsia-400' },
+  opportunity: { label: 'Opportunity', Icon: Lightbulb, iconClass: 'text-cyan-400' },
+  risk: { label: 'Risk', Icon: Shield, iconClass: 'text-fuchsia-400' },
 };
 
 const TAB_FILTERS: Array<{ value: string; label: string; predicate: (i: ReasoningInsight) => boolean }> = [
@@ -256,7 +256,7 @@ export default function InsightsDashboard() {
                   <CardHeader>
                     <div className="flex items-start gap-3">
                       <div className="mt-1">
-                        <Icon className={`h-5 w-5 text-${meta.tint}-400`} />
+                        <Icon className={`h-5 w-5 ${meta.iconClass}`} />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2 flex-wrap">

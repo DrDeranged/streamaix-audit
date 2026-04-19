@@ -31,7 +31,7 @@ setting).
 
 ---
 
-## gpt-4o-mini chat call sites (50)
+## gpt-4o-mini chat call sites (51)
 
 | # | File:line | Purpose | Frequency | ~Tok/call |
 |---|---|---|---|---|
