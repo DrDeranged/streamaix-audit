@@ -453,7 +453,7 @@ export default function BountyDetail() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Header */}
-            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm p-6">
+            <Card className="surface-2 border-purple-500/30 p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <h1 className="text-3xl font-bold text-white mb-3" data-testid="bounty-detail-title">
@@ -497,7 +497,7 @@ export default function BountyDetail() {
 
               {/* Content URL */}
               {bounty.contentUrl && (
-                <div className="mt-4 p-4 bg-slate-800/50 rounded-lg">
+                <div className="mt-4 p-4 surface-1 rounded-lg">
                   <p className="text-sm text-gray-400 mb-2">Content to Summarize:</p>
                   <a
                     href={bounty.contentUrl}
@@ -602,7 +602,7 @@ export default function BountyDetail() {
                       {questions.map((q: any, index: number) => {
                         const answer = analysisAnswers.find(a => a.questionId === q.id)?.answer || '';
                         return (
-                          <div key={q.id || index} className="p-4 bg-slate-800/50 rounded-lg border border-purple-500/20">
+                          <div key={q.id || index} className="p-4 surface-1 rounded-lg border border-purple-500/20">
                             <label className="text-sm font-medium text-gray-300 mb-2 block">
                               Question {index + 1}: {q.question}
                             </label>
@@ -634,7 +634,7 @@ export default function BountyDetail() {
 
                       {/* Prediction List */}
                       {userPredictions.map((prediction, index) => (
-                        <Card key={prediction.id} className="bg-slate-800/50 border-cyan-500/20 p-4" data-testid={`card-prediction-${index}`}>
+                        <Card key={prediction.id} className="surface-1 border-cyan-500/20 p-4" data-testid={`card-prediction-${index}`}>
                           <div className="flex items-start justify-between mb-3">
                             <span className="text-sm font-medium text-cyan-400">Prediction {index + 1}</span>
                             <Button
@@ -761,13 +761,13 @@ export default function BountyDetail() {
 
             {/* Review Interface (for creators) */}
             {canReview && (
-              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm p-6">
+              <Card className="surface-2 border-purple-500/30 p-6">
                 <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                   <Award className="w-5 h-5 text-purple-400" />
                   Review Submission
                 </h2>
                 <div className="space-y-4">
-                  <div className="p-4 bg-slate-800/50 rounded-lg">
+                  <div className="p-4 surface-1 rounded-lg">
                     <p className="text-sm text-gray-400 mb-2">Submission ID:</p>
                     <Link href={`/summaries/${bounty.summaryId}`}>
                       <a className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400 hover:from-purple-300 hover:to-fuchsia-300 flex items-center gap-2">
@@ -802,7 +802,7 @@ export default function BountyDetail() {
 
             {/* Quality Score (for completed) */}
             {bounty.status === 'completed' && qualityData && (
-              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm p-6">
+              <Card className="surface-2 border-purple-500/30 p-6">
                 <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-purple-400" />
                   Quality Analysis
@@ -828,7 +828,7 @@ export default function BountyDetail() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Reward Info */}
-            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm p-6">
+            <Card className="surface-2 border-purple-500/30 p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Reward</h3>
               <div className="space-y-4">
                 <div className="p-4 bg-gradient-to-r from-purple-500/10 to-fuchsia-500/10 rounded-lg border border-purple-500/30">
@@ -891,7 +891,7 @@ export default function BountyDetail() {
             </Card>
 
             {/* Deadline & Details */}
-            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm p-6">
+            <Card className="surface-2 border-purple-500/30 p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Details</h3>
               <div className="space-y-3">
                 {bounty.deadline && (

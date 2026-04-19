@@ -187,7 +187,7 @@ export default function Markets() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
       <Navigation />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
+      <div className="section-container pt-24">
 
         {/* Hero Header - Compact */}
         <div className="relative mb-6 overflow-hidden rounded-xl bg-gradient-to-br from-purple-900/30 via-fuchsia-900/20 to-cyan-900/30 border border-purple-500/20 p-4 animate-fade-in">
