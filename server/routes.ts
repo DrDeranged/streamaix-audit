@@ -726,7 +726,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =============================================================================
 
   // Update user profile
-  app.patch('/api/users/me', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.patch('/api/users/me', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const validation = validateRequest(updateUserSchema, req.body);
     if (!validation.success) {
       return res.status(400).json({ error: validation.error });
@@ -895,7 +895,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Create new summary
-  app.post('/api/summaries', authenticateToken, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/summaries', authenticateToken, strictLimit, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const validation = validateRequest(createSummarySchema, req.body);
     if (!validation.success) {
       return res.status(400).json({ error: validation.error });
@@ -911,7 +911,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Update summary
-  app.patch('/api/summaries/:id', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.patch('/api/summaries/:id', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const existingSummary = await storage.getSummary(req.params.id);
     if (!existingSummary) {
       return res.status(404).json({ error: 'Summary not found' });
@@ -982,7 +982,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =============================================================================
 
   // Generate new referral code for authenticated user
-  app.post('/api/referrals/generate', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/referrals/generate', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user!.id;
 
     try {
@@ -1212,7 +1212,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =============================================================================
 
   // Follow a user (bounty creator)
-  app.post('/api/users/:userId/follow', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/users/:userId/follow', authenticateToken, mediumLimit, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ error: 'Authentication required' });
     }
@@ -1276,7 +1276,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Follow a category
-  app.post('/api/categories/:category/follow', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/categories/:category/follow', authenticateToken, mediumLimit, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ error: 'Authentication required' });
     }
@@ -1652,7 +1652,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Create new bounty
-  app.post('/api/bounties', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/bounties', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const validation = validateRequest(createBountySchema, req.body);
     if (!validation.success) {
       return res.status(400).json({ error: validation.error });
@@ -1689,7 +1689,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Update bounty
-  app.patch('/api/bounties/:id', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.patch('/api/bounties/:id', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const existingBounty = await storage.getBounty(req.params.id);
     if (!existingBounty) {
       return res.status(404).json({ error: 'Bounty not found' });
@@ -1789,7 +1789,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Complete a bounty and trigger payout (Web3)
-  app.post('/api/bounties/:id/complete', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/bounties/:id/complete', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const bounty = await storage.getBounty(req.params.id);
     if (!bounty) {
       return res.status(404).json({ error: 'Bounty not found' });
@@ -1917,7 +1917,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Add tip to bounty (Web3)
-  app.post('/api/bounties/:id/tip', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/bounties/:id/tip', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const bounty = await storage.getBounty(req.params.id);
     if (!bounty) {
       return res.status(404).json({ error: 'Bounty not found' });
@@ -1954,7 +1954,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Verify knowledge question answer (AI-powered)
-  app.post('/api/bounties/:id/verify-answer', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/bounties/:id/verify-answer', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const bounty = await storage.getBounty(req.params.id);
     if (!bounty) {
       return res.status(404).json({ error: 'Bounty not found' });
@@ -2091,7 +2091,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Add a collaborator to a bounty
-  app.post('/api/bounties/:id/collaborators', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/bounties/:id/collaborators', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const bounty = await storage.getBounty(req.params.id);
     if (!bounty) {
       return res.status(404).json({ error: 'Bounty not found' });
@@ -2121,7 +2121,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Update reward share for a collaborator
-  app.patch('/api/bounties/:id/collaborators/:userId/share', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.patch('/api/bounties/:id/collaborators/:userId/share', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const bounty = await storage.getBounty(req.params.id);
     if (!bounty) {
       return res.status(404).json({ error: 'Bounty not found' });
@@ -2167,7 +2167,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Create a new bounty template
-  app.post('/api/bounty-templates', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/bounty-templates', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const templateData = {
       ...req.body,
       createdBy: req.user!.id
@@ -2178,7 +2178,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Update a bounty template
-  app.patch('/api/bounty-templates/:id', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.patch('/api/bounty-templates/:id', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const template = await storage.getBountyTemplate(req.params.id);
     if (!template) {
       return res.status(404).json({ error: 'Template not found' });
@@ -2210,7 +2210,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Use a template to create a bounty (increments usage count)
-  app.post('/api/bounty-templates/:id/use', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/bounty-templates/:id/use', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const template = await storage.getBountyTemplate(req.params.id);
     if (!template) {
       return res.status(404).json({ error: 'Template not found' });
@@ -2348,7 +2348,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Follow avatar
-  app.post('/api/avatars/:id/follow', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/avatars/:id/follow', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     const { notificationsEnabled = true } = req.body;
     
@@ -2523,7 +2523,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Avatar Chat - Chat with AI personas of Knowledge Avatars
-  app.post('/api/avatars/:avatarId/chat', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/avatars/:avatarId/chat', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { avatarId } = req.params;
     const { message } = req.body;
     const userId = req.user?.id;
@@ -2793,7 +2793,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =============================================================================
 
   // Create user interaction (like, bookmark, share)
-  app.post('/api/interactions', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/interactions', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const validation = validateRequest(createInteractionSchema, req.body);
     if (!validation.success) {
       return res.status(400).json({ error: validation.error });
@@ -2833,7 +2833,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =============================================================================
 
   // Bounty social engagement
-  app.post('/api/bounties/:id/like', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/bounties/:id/like', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required' });
     
     try {
@@ -2845,7 +2845,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  app.post('/api/bounties/:id/comment', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/bounties/:id/comment', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required' });
     
     const { content } = req.body;
@@ -2876,7 +2876,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  app.post('/api/bounties/:id/save', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/bounties/:id/save', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required' });
     
     try {
@@ -2912,7 +2912,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Prediction market social engagement
-  app.post('/api/prediction-markets/:id/like', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/prediction-markets/:id/like', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required' });
     
     try {
@@ -2924,7 +2924,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  app.post('/api/prediction-markets/:id/comment', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/prediction-markets/:id/comment', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required' });
     
     const { content } = req.body;
@@ -2955,7 +2955,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  app.post('/api/prediction-markets/:id/save', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/prediction-markets/:id/save', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required' });
     
     try {
@@ -3002,7 +3002,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Start trading engine
-  app.post('/api/trading-engine/start', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/trading-engine/start', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required' });
     
     // Only admins can control the trading engine (in production, add role check here)
@@ -3017,7 +3017,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Stop trading engine
-  app.post('/api/trading-engine/stop', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/trading-engine/stop', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required' });
     
     try {
@@ -3217,7 +3217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Summary social engagement
-  app.post('/api/summaries/:id/like', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/summaries/:id/like', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required' });
     
     try {
@@ -3229,7 +3229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  app.post('/api/summaries/:id/comment', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/summaries/:id/comment', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required' });
     
     const { content } = req.body;
@@ -3261,7 +3261,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  app.post('/api/summaries/:id/save', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/summaries/:id/save', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required' });
     
     try {
@@ -3297,7 +3297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // News article engagement (macro/crypto news)
-  app.post('/api/news/:id/like', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/news/:id/like', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required' });
     
     try {
@@ -3358,7 +3358,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  app.post('/api/news/:id/comment', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/news/:id/comment', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required' });
     
     const { content } = req.body;
@@ -3449,7 +3449,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  app.post('/api/news/:id/save', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/news/:id/save', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required' });
     
     try {
@@ -3516,7 +3516,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Create new knowledge stack
-  app.post('/api/stacks', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/stacks', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const validation = validateRequest(createKnowledgeStackSchema, req.body);
     if (!validation.success) {
       return res.status(400).json({ error: validation.error });
@@ -3532,7 +3532,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Update knowledge stack
-  app.patch('/api/stacks/:id', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.patch('/api/stacks/:id', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const existingStack = await storage.getKnowledgeStack(req.params.id);
     if (!existingStack) {
       return res.status(404).json({ error: 'Knowledge stack not found' });
@@ -3595,7 +3595,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Create new user note
-  app.post('/api/notes', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/notes', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const validation = validateRequest(createUserNoteSchema, {
       ...req.body,
       userId: req.user!.id
@@ -3623,7 +3623,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Update user note
-  app.patch('/api/notes/:id', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.patch('/api/notes/:id', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const existingNote = await storage.getUserNote(req.params.id);
     if (!existingNote) {
       return res.status(404).json({ error: 'Note not found' });
@@ -3676,7 +3676,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Send chat message
-  app.post('/api/chat', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/chat', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { message } = req.body;
     
     if (!message || typeof message !== 'string') {
@@ -3796,7 +3796,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Process content from URL directly
-  app.post('/api/process-content', authenticateToken, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/process-content', authenticateToken, strictLimit, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const validation = validateRequest(processContentSchema, req.body);
     if (!validation.success) {
       return res.status(400).json({ error: validation.error });
@@ -3885,7 +3885,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Share summary to social platforms
-  app.post('/api/summaries/:id/share', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/summaries/:id/share', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const summaryId = req.params.id;
     const { platform, message } = req.body;
 
@@ -4737,7 +4737,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Get user engagement predictions
-  app.post('/api/analytics/engagement-forecast', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/analytics/engagement-forecast', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     const { contentTypes } = req.body;
     
@@ -4961,7 +4961,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Generate trading signals based on event predictions
-  app.post('/api/events/:eventId/signals', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/events/:eventId/signals', authenticateToken, mediumLimit, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { eventId } = req.params;
     const { predictionId, minConfidence = 60, maxSignals = 10 } = req.body;
     
@@ -5277,7 +5277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  app.post('/api/charts/configurations', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/charts/configurations', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { name, symbols, assetTypes, timeframe, indicators, overlays, layout, tags } = req.body;
 
     if (!name || !symbols || !Array.isArray(symbols) || symbols.length === 0) {
@@ -5337,7 +5337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  app.post('/api/charts/watchlists', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/charts/watchlists', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { name, symbols, assetTypes, color, alertsEnabled, alertConditions } = req.body;
 
     if (!name || !symbols || !Array.isArray(symbols) || symbols.length === 0) {
@@ -5407,7 +5407,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  app.put('/api/charts/preferences', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.put('/api/charts/preferences', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
       const preferences = await storage.updateChartUserPreferences?.(req.user!.id, req.body);
       res.json({
@@ -5870,7 +5870,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Acknowledge risk alert
-  app.patch('/api/risk/alerts/:alertId/acknowledge', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.patch('/api/risk/alerts/:alertId/acknowledge', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { alertId } = req.params;
     
     console.log(`✅ API Call: PATCH /api/risk/alerts/${alertId}/acknowledge`);
@@ -6857,7 +6857,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Screen patterns across multiple assets
-  app.post('/api/patterns/screen', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/patterns/screen', authenticateToken, mediumLimit, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const filter = req.body || {};
     
     console.log('🔍 API Call: POST /api/patterns/screen - Pattern screening with filter:', filter);
@@ -6932,7 +6932,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Acknowledge a pattern alert
-  app.post('/api/patterns/alerts/:alertId/acknowledge', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/patterns/alerts/:alertId/acknowledge', authenticateToken, mediumLimit, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const alertId = req.params.alertId;
     
     console.log(`✅ API Call: POST /api/patterns/alerts/${alertId}/acknowledge`);
@@ -7016,7 +7016,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Update pattern recognition service configuration
-  app.post('/api/patterns/config', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/patterns/config', authenticateToken, mediumLimit, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const configUpdates = req.body;
     
     console.log('⚙️ API Call: POST /api/patterns/config - Update configuration:', configUpdates);
@@ -7320,7 +7320,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Create new conversation (or comment)
-  app.post('/api/conversations', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/conversations', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ error: 'Authentication required' });
     }
@@ -7380,7 +7380,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Update conversation
-  app.put('/api/conversations/:id', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.put('/api/conversations/:id', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ error: 'Authentication required' });
     }
@@ -7436,7 +7436,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Like/unlike conversation
-  app.post('/api/conversations/:id/like', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/conversations/:id/like', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ error: 'Authentication required' });
     }
@@ -7458,7 +7458,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Comment on conversation
-  app.post('/api/conversations/:id/comment', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/conversations/:id/comment', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ error: 'Authentication required' });
     }
@@ -7493,7 +7493,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Share conversation
-  app.post('/api/conversations/:id/share', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/conversations/:id/share', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ error: 'Authentication required' });
     }
@@ -7642,7 +7642,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  app.post('/api/trading-watchlist', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/trading-watchlist', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -10038,7 +10038,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Acknowledge an alert
-  app.post('/api/cross-market-signals/alerts/:alertId/acknowledge', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/cross-market-signals/alerts/:alertId/acknowledge', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
       const { alertId } = req.params;
       console.log(`✅ Acknowledging alert: ${alertId}`);
@@ -10078,7 +10078,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Update signal configuration (admin only)
-  app.post('/api/cross-market-signals/config', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/cross-market-signals/config', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
       // In production, you'd want proper admin authentication
       const newConfig = req.body;
@@ -10629,7 +10629,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(leaderboard);
   }));
 
-  app.post('/api/bot-trading/seed-historical', authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/bot-trading/seed-historical', authenticateToken, requireAdmin, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const [existingCount] = await db.select({ count: sql<number>`COUNT(*)::int` }).from(botSimTrades);
     if (Number(existingCount?.count || 0) > 0) {
       return res.json({ success: true, message: 'Trades already exist, skipping seed', count: existingCount.count });
@@ -10711,7 +10711,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
   
   // Create new market
-  app.post("/api/prediction-markets", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/prediction-markets", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { question, description, category, deadline, initialLiquidity, resolutionSource, imageUrl, tags, aiProbability, aiReasoning } = req.body;
     
     if (!question || !deadline || !initialLiquidity) {
@@ -11414,7 +11414,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Trigger AI agents to auto-join leagues (admin action)
-  app.post("/api/prediction-leagues/ai-join", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/prediction-leagues/ai-join", authenticateToken, requireAdmin, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { aiLeagueManager } = await import('./services/aiLeagueManager');
     const result = await aiLeagueManager.runAutoJoinCycle();
     
@@ -11467,7 +11467,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Join a league
-  app.post("/api/prediction-leagues/:leagueId/join", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/prediction-leagues/:leagueId/join", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { leagueId } = req.params;
     const userId = req.user!.id;
     
@@ -11572,7 +11572,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Create a new league (admin only or with STREAM cost)
-  app.post("/api/prediction-leagues", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/prediction-leagues", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { 
       name, 
       description, 
@@ -11634,7 +11634,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Record a trade for league tracking (called internally after market trade)
-  app.post("/api/prediction-leagues/record-trade", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/prediction-leagues/record-trade", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { marketTradeId, streamAmount, outcome, price } = req.body;
     const userId = req.user!.id;
     
@@ -11729,7 +11729,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =============================================================================
   
   // Initialize AI agents
-  app.post("/api/ai-agents/initialize", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/ai-agents/initialize", authenticateToken, requireAdmin, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { aiAgentService } = await import('./services/aiAgentService');
     const agents = await aiAgentService.initializeAgents();
     
@@ -12394,7 +12394,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Initialize base achievements (admin only)
-  app.post("/api/achievements/initialize", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/achievements/initialize", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const baseAchievements = [
       {
         key: 'first_trade',
@@ -12829,7 +12829,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // NEWSLETTER ROUTES (ADMIN ONLY)
   // =============================================================================
 
-  app.post("/api/newsletter/send", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/newsletter/send", authenticateToken, requireAdmin, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { newsletterService } = await import('./services/newsletterService');
     
     console.log('📧 Manual newsletter send initiated by admin:', req.user?.username);
@@ -12844,7 +12844,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }));
 
-  app.post("/api/newsletter/test", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/newsletter/test", authenticateToken, requireAdmin, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { email } = req.body;
     
     if (!email) {
@@ -12869,7 +12869,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  app.post("/api/newsletter/test-welcome", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/newsletter/test-welcome", authenticateToken, requireAdmin, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { email } = req.body;
     
     if (!email) {
@@ -13919,7 +13919,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Create a new proposal (requires auth)
-  app.post("/api/governance/proposals", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/governance/proposals", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -13944,7 +13944,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Cast a vote (requires auth)
-  app.post("/api/governance/proposals/:id/vote", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/governance/proposals/:id/vote", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -14031,7 +14031,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Subscribe to push notifications
-  app.post("/api/push/subscribe", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/push/subscribe", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -14052,7 +14052,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Unsubscribe from push notifications
-  app.post("/api/push/unsubscribe", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/push/unsubscribe", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -14106,7 +14106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Update notification preferences
-  app.patch("/api/push/preferences", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.patch("/api/push/preferences", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -14147,7 +14147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Test push notification (for debugging)
-  app.post("/api/push/test", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/push/test", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -14281,7 +14281,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Enhanced test with detailed error reporting
-  app.post("/api/push/test-detailed", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/push/test-detailed", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -15065,7 +15065,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Create a new stream
-  app.post("/api/streams", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -15136,7 +15136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Generate LiveKit token for stream
-  app.post("/api/streams/:id/token", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/token", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -15192,7 +15192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Start a scheduled stream
-  app.post("/api/streams/:id/start", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/start", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -15250,7 +15250,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // End a stream
-  app.post("/api/streams/:id/end", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/end", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -15331,7 +15331,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Join a stream
-  app.post("/api/streams/:id/join", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/join", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -15386,7 +15386,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Leave a stream
-  app.post("/api/streams/:id/leave", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/leave", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -15409,7 +15409,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Send a tip to streamer
-  app.post("/api/streams/:id/tip", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/tip", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -15515,7 +15515,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Send a message to stream
-  app.post("/api/streams/:id/messages", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/messages", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -15575,7 +15575,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Vote on a stream prediction (for market creation)
-  app.post("/api/streams/predictions/:id/vote", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/predictions/:id/vote", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -15613,7 +15613,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Start AI market commentary for a stream
-  app.post("/api/streams/:id/ai-commentary/start", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/ai-commentary/start", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -15634,7 +15634,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Stop AI market commentary
-  app.post("/api/streams/:id/ai-commentary/stop", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/ai-commentary/stop", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -15664,7 +15664,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Add co-host to stream
-  app.post("/api/streams/:id/co-hosts", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/co-hosts", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -15699,7 +15699,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Toggle screen sharing
-  app.post("/api/streams/:id/screen-share", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/screen-share", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -15747,7 +15747,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Start a controlled live test stream for mobile testing (5 minutes, 3-4 segments)
-  app.post("/api/streams/start-test-stream", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/start-test-stream", authenticateToken, requireAdmin, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { AvatarVoiceService } = await import('./services/avatarVoiceService');
     const { getStreamingService } = await import('./services/streamingService');
     const { avatarName = 'Vitalik Buterin', durationMinutes = 5, maxSegments = 4 } = req.body;
@@ -15898,7 +15898,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Stop a test stream early
-  app.post("/api/streams/stop-test-stream/:id", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/stop-test-stream/:id", authenticateToken, requireAdmin, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     
     await db.update(liveStreams)
@@ -16094,7 +16094,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Create a poll for a stream
-  app.post("/api/streams/:id/polls", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/polls", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -16126,7 +16126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Vote on a poll
-  app.post("/api/streams/polls/:pollId/vote", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/polls/:pollId/vote", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -16170,7 +16170,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // End a poll
-  app.post("/api/streams/polls/:pollId/end", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/polls/:pollId/end", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -16214,7 +16214,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Set stream reminder
-  app.post("/api/streams/:id/remind", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/remind", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -16285,7 +16285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Create a clip
-  app.post("/api/streams/:id/clips", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/clips", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -16383,7 +16383,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Send a reaction
-  app.post("/api/streams/:id/reactions", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/reactions", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -16406,7 +16406,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Pin/unpin a message
-  app.post("/api/streams/messages/:messageId/pin", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/messages/:messageId/pin", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -16456,7 +16456,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Process chat command
-  app.post("/api/streams/:id/commands", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/commands", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -16550,7 +16550,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Create a live poll
-  app.post("/api/streams/:id/polls", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/polls", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -16572,7 +16572,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Vote on a poll
-  app.post("/api/streams/polls/:pollId/vote", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/polls/:pollId/vote", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -16601,7 +16601,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Start a trivia question
-  app.post("/api/streams/:id/trivia", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/trivia", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -16630,7 +16630,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Answer a trivia question
-  app.post("/api/streams/trivia/:triviaId/answer", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/trivia/:triviaId/answer", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -16671,7 +16671,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Create a watch party
-  app.post("/api/streams/:id/watch-party", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/watch-party", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -16691,7 +16691,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Join a watch party
-  app.post("/api/watch-party/:code/join", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/watch-party/:code/join", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -16716,7 +16716,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Leave a watch party
-  app.post("/api/watch-party/:code/leave", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/watch-party/:code/leave", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -16747,7 +16747,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Sync watch party playback
-  app.post("/api/watch-party/:code/sync", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/watch-party/:code/sync", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -16758,7 +16758,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Start debate mode between two avatars
-  app.post("/api/streams/:id/debate/start", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/debate/start", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -16786,7 +16786,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // End debate mode
-  app.post("/api/streams/:id/debate/end", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/debate/end", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     avatarStreamEnhancements.endDebateMode(req.params.id);
     res.json({ success: true });
   }));
@@ -16795,7 +16795,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // STREAM RAIDS - Send viewers to other streams
   // =============================================================================
 
-  app.post("/api/streams/:id/raid", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/raid", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -16937,7 +16937,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // GIFT SUBSCRIPTIONS - Gift subs to community
   // =============================================================================
 
-  app.post("/api/streams/:id/gift-subs", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/gift-subs", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -16972,7 +16972,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // CHAT MODERATION - Host controls for chat
   // =============================================================================
 
-  app.post("/api/streams/:id/moderation", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/moderation", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -16999,7 +16999,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Like a clip
-  app.post("/api/clips/:clipId/like", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/clips/:clipId/like", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -17037,7 +17037,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   DebateManagerService.initialize();
 
   // Schedule a new debate between two avatars
-  app.post("/api/debates/schedule", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/debates/schedule", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -17150,7 +17150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Manually start a scheduled debate (admin/creator only)
-  app.post("/api/debates/:id/start", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/debates/:id/start", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -17164,7 +17164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // End a debate early
-  app.post("/api/debates/:id/end", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/debates/:id/end", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -17174,7 +17174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Vote for which avatar is winning
-  app.post("/api/debates/:id/vote", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/debates/:id/vote", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -17252,7 +17252,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Send a chat message in a debate
-  app.post("/api/debates/:id/chat", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/debates/:id/chat", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -17279,7 +17279,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Tip an avatar during a debate
-  app.post("/api/debates/:id/tip", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/debates/:id/tip", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -17314,7 +17314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Submit a question for avatars
-  app.post("/api/debates/:id/question", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/debates/:id/question", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -17342,7 +17342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Upvote a viewer question
-  app.post("/api/debates/:id/questions/:questionId/upvote", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/debates/:id/questions/:questionId/upvote", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -17352,7 +17352,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Add a reaction to the debate
-  app.post("/api/debates/:id/react", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/debates/:id/react", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -17435,7 +17435,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Update streak (called when user performs activity)
-  app.post("/api/gamification/streaks/:type", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/gamification/streaks/:type", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     const { type } = req.params;
     if (!userId) {
@@ -17469,14 +17469,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Mark notification as read
-  app.post("/api/gamification/notifications/:id/read", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/gamification/notifications/:id/read", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     await gamificationService.markNotificationRead(id);
     res.json({ success: true });
   }));
 
   // Track action for quest progress (used internally and can be called manually)
-  app.post("/api/gamification/track-action", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/gamification/track-action", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     const { actionType, count = 1 } = req.body;
     if (!userId) {
@@ -17534,7 +17534,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Start a module (create progress record)
-  app.post("/api/learning/modules/:id/start", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/learning/modules/:id/start", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     const { id } = req.params;
     if (!userId) {
@@ -17560,7 +17560,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Complete a lesson
-  app.post("/api/learning/lessons/:id/complete", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/learning/lessons/:id/complete", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     const { id } = req.params;
     const { timeSpentSeconds = 0 } = req.body;
@@ -17609,7 +17609,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Submit quiz answer
-  app.post("/api/learning/quizzes/:id/submit", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/learning/quizzes/:id/submit", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     const { id } = req.params;
     const { selectedAnswer } = req.body;
@@ -17709,7 +17709,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Create new portfolio
-  app.post("/api/portfolios", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/portfolios", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -17732,7 +17732,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Update portfolio
-  app.patch("/api/portfolios/:id", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.patch("/api/portfolios/:id", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     const { id } = req.params;
     if (!userId) {
@@ -17769,7 +17769,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Add asset to portfolio
-  app.post("/api/portfolios/:id/assets", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/portfolios/:id/assets", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     const { id } = req.params;
     if (!userId) {
@@ -17876,7 +17876,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Update asset
-  app.patch("/api/portfolios/:portfolioId/assets/:assetId", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.patch("/api/portfolios/:portfolioId/assets/:assetId", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     const { portfolioId, assetId } = req.params;
     if (!userId) {
@@ -17932,7 +17932,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Recalculate asset price and regenerate portfolio snapshots (fixes glitched charts)
-  app.post("/api/portfolios/:portfolioId/assets/:assetId/recalculate", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/portfolios/:portfolioId/assets/:assetId/recalculate", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     const { portfolioId, assetId } = req.params;
     const { manualPrice } = req.body; // Optional: allow user to set a manual price
@@ -18009,7 +18009,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Regenerate portfolio chart (fixes glitched/spiked charts)
-  app.post("/api/portfolios/:id/regenerate-chart", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/portfolios/:id/regenerate-chart", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     const { id } = req.params;
     
@@ -18030,7 +18030,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Add transaction
-  app.post("/api/portfolios/:id/transactions", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/portfolios/:id/transactions", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     const { id } = req.params;
     if (!userId) {
@@ -18114,7 +18114,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Sync portfolio prices
-  app.post("/api/portfolios/:id/sync", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/portfolios/:id/sync", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     const { id } = req.params;
     if (!userId) {
@@ -18646,7 +18646,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Portfolio stress test
-  app.post("/api/portfolios/:id/stress-test", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/portfolios/:id/stress-test", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     const { id } = req.params;
     const { scenario } = req.body;
@@ -18835,7 +18835,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Dismiss insight
-  app.post("/api/portfolios/insights/:insightId/dismiss", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/portfolios/insights/:insightId/dismiss", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     const { insightId } = req.params;
     if (!userId) {
@@ -18848,7 +18848,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Scenario simulator - What-if analysis
-  app.post("/api/portfolios/:id/simulate", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/portfolios/:id/simulate", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     const { id } = req.params;
     const { scenarios } = req.body; // [{ symbol: 'BTC', priceChange: 50 }, ...]
@@ -18912,7 +18912,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Create portfolio goal
-  app.post("/api/portfolio-goals", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/portfolio-goals", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -18972,7 +18972,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Add item to portfolio watchlist
-  app.post("/api/watchlist", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/watchlist", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -19195,7 +19195,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // AI Financial Advisor Chat endpoint
-  app.post("/api/portfolio/advisor-chat", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/portfolio/advisor-chat", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -19331,7 +19331,7 @@ Keep responses under 200 words. Do not provide specific buy/sell recommendations
   }));
 
   // Create new price alert
-  app.post("/api/price-alerts", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/price-alerts", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });

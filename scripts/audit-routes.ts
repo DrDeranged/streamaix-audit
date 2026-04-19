@@ -261,10 +261,15 @@ for (const r of routes) {
     });
   }
 
-  // 6. Other body-consuming mutations get baseline body-shape validation from
-  // the global `requireJsonObjectBody` middleware (registered in server/index.ts).
-  // We surface them as INFO so reviewers can see which routes still rely on the
-  // baseline check rather than a tightly-typed Zod schema, without failing CI.
+  // 6. Every authenticated mutation must declare a per-route Zod body schema
+  // (`validateBody(...)` or inline `validateRequest(...)`). The global
+  // `requireJsonObjectBody` middleware in server/index.ts is a baseline shape
+  // check; the per-route schema is the authoritative validator. Routes that
+  // truly accept any object can use `emptyBodySchema` (passthrough), which
+  // still gives us a per-route checkpoint and a place to tighten later.
+  // Promoted from `warn` to `error` after the codemod
+  // `scripts/inject-default-body-validation.ts` brought the project to 100%
+  // per-route Zod coverage on authenticated mutations.
   if (
     r.isMutation &&
     !r.hasValidateBody &&
@@ -276,10 +281,10 @@ for (const r of routes) {
     r.method !== 'DELETE'
   ) {
     issues.push({
-      severity: 'warn',
-      category: 'global_only_body_validation',
+      severity: 'error',
+      category: 'mutation_without_per_route_zod',
       route: key,
-      detail: `Relies on global requireJsonObjectBody baseline (no per-route Zod schema) at line ${r.line}`,
+      detail: `Authenticated mutation has no per-route Zod schema at line ${r.line}. Add validateBody(<schema>) — use emptyBodySchema for passthrough acceptance, or run \`npx tsx scripts/inject-default-body-validation.ts\` to apply the default.`,
     });
   }
 }

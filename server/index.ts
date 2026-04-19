@@ -92,7 +92,6 @@ app.use((req, res, next) => {
     console.error('🔧 Please set OPENAI_API_KEY in your environment or .env file');
   } else {
     console.log(`✅ OPENAI_API_KEY configured (${openaiKey.length} characters)`);
-    console.log(`🔑 Key preview: ${openaiKey.substring(0, 10)}...${openaiKey.substring(openaiKey.length - 4)}`);
   }
   
   const duneKey = process.env.DUNE_API_KEY;
