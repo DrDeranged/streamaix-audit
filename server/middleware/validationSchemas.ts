@@ -48,8 +48,8 @@ export const ackAlertSchema = z.object({
 });
 
 export const generateMarketsFromNewsSchema = z.object({
-  newsItems: z.array(z.unknown()).min(1).max(50).optional(),
-  limit: z.number().int().positive().max(20).optional(),
+  articles: z.array(z.unknown()).min(1, 'articles array is required').max(50),
+  maxMarkets: z.number().int().positive().max(20).optional(),
 }).passthrough();
 
 export const avatarGenerateMarketsSchema = z.object({
@@ -58,9 +58,30 @@ export const avatarGenerateMarketsSchema = z.object({
 }).passthrough();
 
 export const priceSnapshotSchema = z.object({
-  yesPrice: z.number().min(0).max(1),
-  noPrice: z.number().min(0).max(1),
+  yesPrice: z.number().min(0).max(1).optional(),
+  noPrice: z.number().min(0).max(1).optional(),
   volume: z.number().min(0).optional(),
+}).passthrough();
+
+const avatarName = z.string().min(1).max(200);
+
+export const avatarPredictSchema = z.object({
+  asset: nonEmpty('asset').max(50),
+  marketContext: z.string().max(4000).optional(),
+}).passthrough();
+
+export const testTtsSchema = z.object({
+  avatarName: avatarName.optional(),
+  maxSegments: z.number().int().positive().max(5).optional(),
+}).passthrough();
+
+export const testTtsAudioSchema = z.object({
+  avatarName: avatarName.optional(),
+  streamId: z.string().min(1).max(100).optional(),
+}).passthrough();
+
+export const generateReplayAudioSchema = z.object({
+  count: z.number().int().positive().max(20).optional(),
 }).passthrough();
 
 export const debateNextSchema = z.object({

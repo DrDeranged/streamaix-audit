@@ -25,6 +25,10 @@ import {
   avatarGenerateMarketsSchema,
   priceSnapshotSchema,
   debateNextSchema,
+  avatarPredictSchema,
+  testTtsSchema,
+  testTtsAudioSchema,
+  generateReplayAudioSchema,
 } from "./middleware/validationSchemas";
 import { cacheService } from "./services/cacheService";
 import { StreamProcessor } from "./services/streamProcessor";
@@ -4672,7 +4676,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Trigger avatar trading cycle (admin only)
-  app.post('/api/admin/avatar-trading-cycle', optionalAuth, requireAdminFlexible, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/admin/avatar-trading-cycle', authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
       const { avatarMarketParticipationService } = await import('./services/avatarMarketParticipationService');
       const result = await avatarMarketParticipationService.runTradingCycle();
@@ -7814,7 +7818,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Admin reseed endpoint - requires admin auth or secret key
   console.log('📍 Registering admin reseed endpoint: POST /api/admin/reseed');
-  app.post('/api/admin/reseed', optionalAuth, requireAdminFlexible, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/admin/reseed', authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
     console.log('🔄 Admin reseed endpoint hit!');
     // Import and run auto-seed
     try {
@@ -7849,7 +7853,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   console.log('✅ Admin reseed endpoint registered');
 
   // Admin endpoint to retroactively generate TTS audio for existing stream replays
-  app.post('/api/admin/generate-replay-audio', optionalAuth, requireAdminFlexible, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/admin/generate-replay-audio', authenticateToken, requireAdmin, validateBody(generateReplayAudioSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { count = 2 } = req.body;
     try {
       // Get streams that have recordings but no audio, ordered by most recent
@@ -15692,7 +15696,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Test TTS with minimal cost (short phrases only)
-  app.post("/api/streams/test-tts", authenticateToken, requireAdmin, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/test-tts", authenticateToken, requireAdmin, strictLimit, validateBody(testTtsSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { AvatarVoiceService } = await import('./services/avatarVoiceService');
     const { avatarName = 'Vitalik Buterin', maxSegments = 3 } = req.body;
     
@@ -15710,7 +15714,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Test single TTS phrase with audio response
-  app.post("/api/streams/test-tts-audio", authenticateToken, requireAdmin, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/test-tts-audio", authenticateToken, requireAdmin, strictLimit, validateBody(testTtsAudioSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { AvatarVoiceService } = await import('./services/avatarVoiceService');
     const { avatarName = 'Vitalik Buterin', streamId = 'test' } = req.body;
     
@@ -16998,12 +17002,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Generate market prediction from avatar
-  app.post("/api/avatars/:id/predict", authenticateToken, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/avatars/:id/predict", authenticateToken, strictLimit, validateBody(avatarPredictSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { asset, marketContext } = req.body;
-    if (!asset) {
-      return res.status(400).json({ success: false, error: 'Asset required' });
-    }
-    
     const prediction = await avatarStreamEnhancements.generateMarketPrediction(
       req.params.id,
       asset,

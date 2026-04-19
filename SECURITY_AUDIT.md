@@ -8,7 +8,7 @@ This report summarizes the findings and remediations from the pre-pitch security
 - **Authenticated routes after audit**: 260 (was 236)
 - **Admin-gated routes after audit**: 28 distinct `requireAdmin` mounts
 - **Rate-limit-gated routes after audit**: 25 distinct limiter mounts
-- **Body-validated routes after audit**: 13 `validateBody(...)` mounts on the most sensitive endpoints (in addition to ~14 routes already using `validateRequest()` inline)
+- **Body-validated routes after audit**: 17 `validateBody(...)` mounts on the most sensitive endpoints (in addition to ~14 routes already using `validateRequest()` inline)
 - **New middleware modules**: 2 (`server/middleware/security.ts`, `server/middleware/validationSchemas.ts`)
 - **Critical fixes**: 3 secret-fallback hardenings (JWT, SESSION, ADMIN_RESEED), 1 hardcoded admin secret removed, 1 duplicate `requireAdmin` shadow declaration removed (was causing latent TDZ risk)
 
@@ -87,6 +87,10 @@ To prevent malformed input from reaching expensive AI/database paths, Zod schema
 | `POST /api/avatars/:avatarId/generate-markets` | `avatarGenerateMarketsSchema` |
 | `POST /api/markets/:marketId/price-snapshot` | `priceSnapshotSchema` (price ∈ [0,1]) |
 | `POST /api/streams/:id/debate/next` | `debateNextSchema` (≤4000 char prompt) |
+| `POST /api/avatars/:id/predict` | `avatarPredictSchema` (asset ≤50, optional context ≤4000) |
+| `POST /api/streams/test-tts` | `testTtsSchema` (max 5 segments) |
+| `POST /api/streams/test-tts-audio` | `testTtsAudioSchema` |
+| `POST /api/admin/generate-replay-audio` | `generateReplayAudioSchema` (count 1-20) |
 
 Auth endpoints (`/api/auth/register`, `/api/auth/login`, `/api/auth/wallet-login`) already used the existing `validateRequest()` helper with their own Zod schemas; no change needed there.
 
@@ -94,9 +98,9 @@ Auth endpoints (`/api/auth/register`, `/api/auth/login`, `/api/auth/wallet-login
 
 | Route | Old state | New protection |
 |---|---|---|
-| `POST /api/admin/avatar-trading-cycle` | Hardcoded secret | `requireAdminFlexible` |
-| `POST /api/admin/reseed` | Hardcoded secret fallback | `requireAdminFlexible` |
-| `POST /api/admin/generate-replay-audio` | Hardcoded secret fallback | `requireAdminFlexible` |
+| `POST /api/admin/avatar-trading-cycle` | Hardcoded secret | `authenticateToken` + `requireAdmin` |
+| `POST /api/admin/reseed` | Hardcoded secret fallback | `authenticateToken` + `requireAdmin` |
+| `POST /api/admin/generate-replay-audio` | Hardcoded secret fallback | `authenticateToken` + `requireAdmin` + body validation |
 | `POST /api/news/generate-markets` | Unprotected, creates markets | `authenticateToken` + `requireAdmin` + `strictLimit` |
 | `POST /api/avatars/:avatarId/generate-markets` | Unprotected, creates markets | `authenticateToken` + `requireAdmin` + `strictLimit` |
 | `POST /api/bot-trading/seed-historical` | Unprotected DB seed | `authenticateToken` + `requireAdmin` |
@@ -125,14 +129,16 @@ The login, register, wallet-login, and waitlist endpoints had no rate limit. Now
 | `POST /api/auth/wallet-login` | `authLimit` (20/15min/IP) |
 | `POST /api/waitlist` | `signupLimit` (10/hour/IP) |
 
-### 9. Admin secret-override path tightened
+### 9. Admin endpoints require authenticated admin user (secret-only path removed)
 
-`requireAdminFlexible` previously honored the `X-Admin-Secret` header any time `ADMIN_RESEED_SECRET` was set in the env. This was acceptable but weakened auditability — you couldn't tell from logs which human triggered an admin action.
+`requireAdminFlexible` previously honored the `X-Admin-Secret` header any time `ADMIN_RESEED_SECRET` was set in the env. This weakened auditability — you couldn't tell from logs which human triggered an admin action.
 
 **Fix (post-review):**
-- The secret-header path is now opt-in: it only activates when **both** `ADMIN_RESEED_SECRET` is set **and** `ENABLE_ADMIN_SECRET_OVERRIDE=true` is set. By default, only authenticated admin users can hit `/api/admin/*` endpoints.
-- When the secret-override path is used, an `[ADMIN_AUDIT]` warn-level log line is emitted with the route, IP, and timestamp, so secret-based admin access is always traceable.
+- All three `/api/admin/*` endpoints (`/reseed`, `/generate-replay-audio`, `/avatar-trading-cycle`) now use the strict `authenticateToken + requireAdmin` middleware chain. An authenticated admin user is **required** — there is no secret-only override path on `/api/admin/*` anymore.
+- `requireAdminFlexible` still exists in `server/middleware/security.ts` for future emergency-only use (e.g. first-time bootstrap), gated behind two env vars (`ADMIN_RESEED_SECRET` **and** `ENABLE_ADMIN_SECRET_OVERRIDE=true`) and emitting an `[ADMIN_AUDIT]` warn log on every use, but it is **not wired to any route** by default.
 - The username extraction inside `requireAdminFlexible` was refactored from an `as any` cast into a proper type-narrowing helper (`getUsername`) over the `JWTPayload | Express.User` union.
+
+Verified: `POST /api/admin/reseed` returns `401` for unauthenticated requests and for requests carrying only the legacy `X-Admin-Secret` header.
 
 ### 10. Dead-code shadow declaration
 
