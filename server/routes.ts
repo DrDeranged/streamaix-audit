@@ -169,6 +169,11 @@ import { registerPredictionMarketsRoutes } from "./routes/prediction-markets";
 import { registerPredictionLeaguesRoutes } from "./routes/prediction-leagues";
 import { registerAiAgentTradingRoutes } from "./routes/ai-agent-trading";
 import { registerLiveStreamingRoutes } from "./routes/live-streaming";
+import { registerLiveStreamingEnhancedRoutes } from "./routes/live-streaming-enhanced";
+import { registerLiveStreamingMonetizationRoutes } from "./routes/live-streaming-monetization";
+import { registerLiveStreamingGamificationRoutes } from "./routes/live-streaming-gamification";
+import { registerLiveStreamingPortfolioRoutes } from "./routes/live-streaming-portfolio";
+import { registerRecommendationsRoutes } from "./routes/recommendations";
 // PHASE2-SPLIT END
 import { Request, Response } from "express";
 import cors from "cors";
@@ -456,91 +461,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
   
-  // AI Recommendations API
-  app.get("/api/recommendations/avatars", optionalAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
-    const userId = req.user?.id;
-    if (!userId) {
-      return res.status(401).json({ error: "Authentication required for personalized recommendations" });
-    }
-
-    const { RecommendationService } = await import('./services/recommendationService');
-    const recommendationService = new RecommendationService(storage as DatabaseStorage);
-    
-    const limit = parseInt(req.query.limit as string) || 5;
-    const recommendations = await recommendationService.getPersonalizedAvatarRecommendations(userId, limit);
-
-    res.json({
-      success: true,
-      recommendations,
-      count: recommendations.length
-    });
-  }));
-
-  app.get("/api/recommendations/content", optionalAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
-    const userId = req.user?.id;
-    if (!userId) {
-      return res.status(401).json({ error: "Authentication required for personalized recommendations" });
-    }
-
-    const { RecommendationService } = await import('./services/recommendationService');
-    const recommendationService = new RecommendationService(storage as DatabaseStorage);
-    
-    const limit = parseInt(req.query.limit as string) || 10;
-    const recommendations = await recommendationService.getPersonalizedContentRecommendations(userId, limit);
-
-    res.json({
-      success: true,
-      recommendations,
-      count: recommendations.length
-    });
-  }));
-
-  app.get("/api/recommendations/mixed", optionalAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
-    const userId = req.user?.id;
-    if (!userId) {
-      return res.status(401).json({ error: "Authentication required for personalized recommendations" });
-    }
-
-    const { RecommendationService } = await import('./services/recommendationService');
-    const recommendationService = new RecommendationService(storage as DatabaseStorage);
-    
-    const recommendations = await recommendationService.getMixedRecommendations(userId);
-
-    res.json({
-      success: true,
-      ...recommendations
-    });
-  }));
-
-  app.post("/api/recommendations/track-click", optionalAuth, asyncHandler(async (req: AuthRequest, res: Response) => {
-    const userId = req.user?.id;
-    if (!userId) {
-      return res.status(401).json({ error: "Authentication required" });
-    }
-
-    const { recommendationId, recommendationType } = req.body;
-    
-    if (!recommendationId || !recommendationType) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-
-    const { RecommendationService } = await import('./services/recommendationService');
-    const recommendationService = new RecommendationService(storage as DatabaseStorage);
-    
-    await recommendationService.trackRecommendationClick(userId, recommendationId, recommendationType);
-
-    res.json({
-      success: true,
-      message: "Click tracked successfully"
-    });
-  }));
-
+  // ▶ Recommendations routes extracted to server/routes/recommendations.ts
+  await registerRecommendationsRoutes(app);
+  
   // ▶ Waitlist routes extracted to server/routes/waitlist.ts
   await registerWaitlistRoutes(app);
   // ▶ PushNotifications routes extracted to server/routes/push-notifications.ts
   await registerPushNotificationsRoutes(app);
-  // ▶ LiveStreaming routes extracted to server/routes/live-streaming.ts
+  // ▶ LiveStreaming routes extracted to server/routes/live-streaming*.ts
   await registerLiveStreamingRoutes(app);
+  await registerLiveStreamingEnhancedRoutes(app);
+  await registerLiveStreamingMonetizationRoutes(app);
+  await registerLiveStreamingGamificationRoutes(app);
+  await registerLiveStreamingPortfolioRoutes(app);
 
   // ▶ PortfolioGoals routes extracted to server/routes/portfolio-goals.ts
   await registerPortfolioGoalsRoutes(app);
