@@ -59,6 +59,7 @@ const PortfolioDashboard = React.lazy(() => import("@/pages/portfolio-dashboard"
 const NotificationSettings = React.lazy(() => import("@/pages/notification-settings"));
 const BotTrading = React.lazy(() => import("@/pages/bot-trading"));
 const AvatarFeed = React.lazy(() => import("@/pages/avatar-feed"));
+const StyleGuide = React.lazy(() => import("@/pages/style-guide"));
 function Router() {
   return (
     <Switch>
@@ -343,7 +344,13 @@ function Router() {
       </Route>
       
       <Route path="/auth" component={Auth} />
-      
+
+      <Route path="/style-guide">
+        <Suspense fallback={<DashboardSkeleton />}>
+          <StyleGuide />
+        </Suspense>
+      </Route>
+
       <Route component={NotFound} />
     </Switch>
   );

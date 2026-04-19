@@ -10,7 +10,19 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontFamily: {
+        display: ["Orbitron", "ui-monospace", "monospace"],
+        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+      },
       colors: {
+        neon: {
+          purple: "hsl(258, 84%, 62%)",
+          cyan: "hsl(195, 95%, 55%)",
+          fuchsia: "hsl(320, 88%, 60%)",
+          amber: "hsl(43, 95%, 58%)",
+          emerald: "hsl(160, 80%, 45%)",
+          rose: "hsl(0, 84%, 62%)",
+        },
         background: "var(--background)",
         foreground: "var(--foreground)",
         card: {
