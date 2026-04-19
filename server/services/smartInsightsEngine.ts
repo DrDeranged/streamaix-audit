@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
-import { marketDataService } from './marketDataService';
+import { z } from 'zod';
+import { marketDataService, type CryptoQuote } from './marketDataService';
 import { cacheService } from './cacheService';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -40,9 +41,63 @@ export interface SmartInsightsPayload {
 const CACHE_KEY = 'smart_insights_reasoning_v1';
 const CACHE_TTL_SECONDS = 15 * 60;
 
-function buildFallback(
-  marketSnapshot: Array<{ symbol: string; change24h: number; price: number }>,
-): SmartInsightsPayload {
+interface SnapshotEntry {
+  symbol: string;
+  name: string;
+  price: number;
+  change24h: number;
+  change7d: number | null;
+  volume24h: number;
+  marketCap: number;
+}
+
+const insightCategoryEnum = z.enum([
+  'regime_shift',
+  'divergence',
+  'contrarian',
+  'cross_asset',
+  'conditional',
+  'opportunity',
+  'risk',
+]);
+const sentimentEnum = z.enum(['bullish', 'bearish', 'neutral', 'caution']);
+const impactEnum = z.enum(['high', 'medium', 'low']);
+
+const openAiInsightSchema = z.object({
+  category: insightCategoryEnum.default('opportunity'),
+  headline: z.string().default('Untitled insight'),
+  reasoning: z
+    .union([z.array(z.string()), z.string()])
+    .transform((v) => (Array.isArray(v) ? v : [v]))
+    .default([]),
+  conclusion: z.string().default(''),
+  conditional: z
+    .object({ trigger: z.string(), thenOutcome: z.string() })
+    .optional(),
+  sentiment: sentimentEnum.default('neutral'),
+  confidence: z.coerce.number().min(0).max(100).default(60),
+  impact: impactEnum.default('medium'),
+  assets: z.array(z.string()).default([]),
+});
+
+const openAiPayloadSchema = z.object({
+  marketRegime: z
+    .object({
+      label: z.string().default('Mixed conditions'),
+      description: z
+        .string()
+        .default('No single dominant regime — wait for clearer signals.'),
+      durabilityHours: z.coerce.number().int().min(1).max(168).default(12),
+    })
+    .default({
+      label: 'Mixed conditions',
+      description: 'No single dominant regime — wait for clearer signals.',
+      durabilityHours: 12,
+    }),
+  insights: z.array(openAiInsightSchema).default([]),
+});
+
+function buildFallback(marketSnapshot: SnapshotEntry[]): SmartInsightsPayload {
   const avg =
     marketSnapshot.reduce((s, c) => s + (c.change24h || 0), 0) /
     Math.max(marketSnapshot.length, 1);
@@ -91,10 +146,10 @@ export class SmartInsightsEngine {
     }
 
     const trackedSymbols = ['BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'DOGE', 'ADA', 'AVAX', 'LINK', 'MATIC', 'DOT', 'TON'];
-    const quotes = await marketDataService
+    const quotes: CryptoQuote[] = await marketDataService
       .getCryptoQuotes(trackedSymbols)
-      .catch(() => [] as any[]);
-    const snapshot = (quotes || []).slice(0, 12).map((c: any) => ({
+      .catch((): CryptoQuote[] => []);
+    const snapshot: SnapshotEntry[] = quotes.slice(0, 12).map((c) => ({
       symbol: (c.symbol || '').toString().toUpperCase(),
       name: c.name || c.symbol,
       price: c.price ?? 0,
@@ -182,7 +237,8 @@ Respond with EXACT JSON (no markdown):
       });
 
       const raw = response.choices[0]?.message?.content || '{}';
-      const parsed = JSON.parse(raw);
+      const parsedJson: unknown = JSON.parse(raw);
+      const parsed = openAiPayloadSchema.parse(parsedJson);
       const now = new Date().toISOString();
 
       const payload: SmartInsightsPayload = {
@@ -190,23 +246,21 @@ Respond with EXACT JSON (no markdown):
         modelUsed: 'gpt-4o',
         fromCache: false,
         marketRegime: {
-          label: parsed.marketRegime?.label || 'Mixed conditions',
-          description:
-            parsed.marketRegime?.description ||
-            'No single dominant regime — wait for clearer signals.',
-          durabilityHours: Number(parsed.marketRegime?.durabilityHours) || 12,
+          label: parsed.marketRegime.label,
+          description: parsed.marketRegime.description,
+          durabilityHours: parsed.marketRegime.durabilityHours,
         },
-        insights: (parsed.insights || []).map((i: any, idx: number) => ({
+        insights: parsed.insights.map((i, idx) => ({
           id: `insight-${Date.now()}-${idx}`,
-          category: i.category || 'opportunity',
-          headline: i.headline || 'Untitled insight',
-          reasoning: Array.isArray(i.reasoning) ? i.reasoning : [String(i.reasoning || '')],
-          conclusion: i.conclusion || '',
+          category: i.category,
+          headline: i.headline,
+          reasoning: i.reasoning,
+          conclusion: i.conclusion,
           conditional: i.conditional,
-          sentiment: i.sentiment || 'neutral',
-          confidence: Math.max(0, Math.min(100, Number(i.confidence) || 60)),
-          impact: i.impact || 'medium',
-          assets: Array.isArray(i.assets) ? i.assets : [],
+          sentiment: i.sentiment,
+          confidence: i.confidence,
+          impact: i.impact,
+          assets: i.assets,
           timestamp: now,
         })),
       };

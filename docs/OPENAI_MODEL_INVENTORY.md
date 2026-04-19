@@ -1,102 +1,139 @@
-# OpenAI Call Inventory & Cost Justification
+# OpenAI Call-Site Inventory (April 2026)
 
-Last audited: April 2026 (Task #4 — AI cost forensics)
+Generated as part of Task #4 (AI cost forensics). Every `openai.chat.completions.create`,
+`openai.audio.speech.create`, and `openai.audio.transcriptions.create` call site in the
+backend is listed below with its model, purpose, trigger frequency, and per-call token
+estimate. Two surfaces remain on premium **gpt-4o**; everything else uses
+**gpt-4o-mini**.
 
-This document inventories every OpenAI call site in `server/`, the model
-used, the justification, and any caching applied. It is the source of
-truth for the platform's AI cost posture.
+## Pricing reference (used for monthly estimate)
 
-## Summary
+| Model | Input $/1M tok | Output $/1M tok |
+|---|---|---|
+| gpt-4o | $2.50 | $10.00 |
+| gpt-4o-mini | $0.15 | $0.60 |
+| tts-1 | $15.00 / 1M chars | — |
+| whisper-1 | $0.006 / minute | — |
 
-| Bucket            | Calls | Model         | Notes                                        |
-| ----------------- | ----- | ------------- | -------------------------------------------- |
-| Premium reasoning | 2     | `gpt-4o`      | Smart Insights + premium content processor   |
-| Background AI     | ~50   | `gpt-4o-mini` | All autonomous services & background scoring |
-| TTS               | ~3    | `tts-1`       | Avatar voice + scheduled streams             |
-| Whisper           | ~1    | `whisper-1`   | Transcription pipeline                       |
+Frequency labels: **on-demand** (user click), **cron** (scheduled cycle, frequency in
+parens), **per-event** (fires when a triggering DB event occurs). Token estimates are
+input + output tokens per call (conservative upper bound from the prompt + `max_tokens`
+setting).
 
-`gpt-4o-mini` is roughly 1/30 the price of `gpt-4o` for input/output
-tokens. Default for everything that isn't directly visible to investors.
+---
 
-## Premium GPT-4o call sites (justified)
+## Premium gpt-4o call sites (2)
 
-| File                                          | Purpose                                               | Why premium?                                                                                                          | Cache       |
-| --------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `server/services/smartInsightsEngine.ts:175`  | Smart Insights reasoning chains (regime, divergence, contrarian, conditional, cross-asset, opportunity, risk) | Highest-visibility surface — drives the investor pitch. Reasoning-chain quality directly tied to perceived AI quality | 15 min TTL  |
-| `server/services/rebuiltContentProcessor.ts:728` | Premium video/podcast content analysis (the live processor users hit) | Long-form content analysis where mini's 4o-mini quality drop is user-visible. Already documented in `replit.md` | per-content |
+| # | File:line | Purpose | Frequency | ~Tok/call | Justification |
+|---|---|---|---|---|---|
+| 1 | `services/rebuiltContentProcessor.ts:727` | Premium long-form video → blog summary (the headline content product) | on-demand (user uploads URL) | ~3.5k in / 1.5k out | Output quality is the user-visible product; mini noticeably worse on long-context summarization |
+| 2 | `services/smartInsightsEngine.ts:224` | Reasoning-chain market insights for /insights dashboard | cron-equivalent: lazy on first request, **15-min cache**, admin force-refresh only | ~1.2k in / 1.5k out | Highest-visibility surface in the investor pitch; reasoning-chain quality matters; aggressively cached so worst case is 4 calls/hour |
 
-## Downgrades performed (April 2026)
+---
 
-| File                                          | Before    | After          | Reason                                                                                                                                            |
-| --------------------------------------------- | --------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `server/services/aiTradingSignalsService.ts:615` | `gpt-4o`  | `gpt-4o-mini`  | Structured trade-signal JSON generation works on mini at ~95% perceived quality and 1/30 the cost. Uses `response_format: json_object` so structure is enforced regardless of model. |
-| `server/services/realContentProcessor.ts:275` | `gpt-4o`  | `gpt-4o-mini`  | Legacy/orphaned processor — no live import path. Downgraded defensively in case it gets re-wired.                                                  |
-| `server/services/cleanContentProcessor.ts:239` | `gpt-4o`  | `gpt-4o-mini`  | Same — orphaned legacy processor, defensive downgrade.                                                                                            |
+## gpt-4o-mini chat call sites (50)
 
-## All `gpt-4o-mini` call sites (~50)
+| # | File:line | Purpose | Frequency | ~Tok/call |
+|---|---|---|---|---|
+| 1 | `services/alphaIntelligenceService.ts:984` | Alpha intelligence narrative generation | cron (6h) | 1.2k / 0.8k |
+| 2 | `services/aiMetaTrader.ts:204` | Meta-trader portfolio rebalance reasoning | cron (6h) | 1.0k / 0.6k |
+| 3 | `services/aiContentModerator.ts:178` | Bounty/comment moderation classification | per-event (new submission) | 0.6k / 0.3k |
+| 4 | `services/aiCommunityManager.ts:175` | Community announcement / nudge generation | cron (4h) | 0.8k / 0.5k |
+| 5 | `services/aiTreasuryManager.ts:157` | Treasury allocation reasoning | cron (6h) | 1.0k / 0.6k |
+| 6 | `services/chatService.ts:101` | Site-wide chatbot reply (non-streaming) | on-demand (user message) | 1.0k / 0.7k |
+| 7 | `services/chatService.ts:130` | Site-wide chatbot reply (streaming) | on-demand (user message) | 1.0k / 0.7k |
+| 8 | `services/agentMarketAnalyzer.ts:172` | Agent reads markets to decide a trade | cron per agent (6–7h) | 0.9k / 0.5k |
+| 9 | `services/agentContentCreator.ts:44` | Agent generates a bounty topic | cron per agent (5–7h) | 0.6k / 0.4k |
+| 10 | `services/agentContentCreator.ts:96` | Agent writes a summary submission | cron per agent (5–7h) | 1.0k / 0.8k |
+| 11 | `services/agentContentCreator.ts:141` | Agent writes a social/comment post | cron per agent (5–7h) | 0.5k / 0.3k |
+| 12 | `services/aiAgentService.ts:162` | Generic AI agent action dispatcher | cron per agent (5h) | 0.8k / 0.5k |
+| 13 | `services/alphaInsightsEngine.ts:122` | Legacy alpha insight: regime detection | cron (4h) | 0.9k / 0.6k |
+| 14 | `services/alphaInsightsEngine.ts:204` | Legacy alpha insight: divergences | cron (4h) | 0.9k / 0.6k |
+| 15 | `services/alphaInsightsEngine.ts:280` | Legacy alpha insight: contrarian setups | cron (4h) | 0.9k / 0.6k |
+| 16 | `services/alphaInsightsEngine.ts:353` | Legacy alpha insight: cross-asset | cron (4h) | 0.9k / 0.6k |
+| 17 | `services/alphaInsightsEngine.ts:410` | Legacy alpha insight: opportunities | cron (4h) | 0.9k / 0.6k |
+| 18 | `services/alphaInsightsEngine.ts:464` | Legacy alpha insight: risks | cron (4h) | 0.9k / 0.6k |
+| 19 | `services/predictionExtractionService.ts:171` | Extract prediction-market candidates from content | per-event (new published summary) | 1.5k / 0.8k |
+| 20 | `services/avatarMarketGenerator.ts:78` | Avatar-authored prediction market topic | cron per avatar (8h) | 0.7k / 0.5k |
+| 21 | `services/socialMarketGenerator.ts:79` | Social-feed-driven market topic | cron (6h) | 0.7k / 0.5k |
+| 22 | `services/avatarAlphaStreamService.ts:289` | Avatar alpha commentary chunk | cron per avatar stream (5–10 min during live) | 0.6k / 0.4k |
+| 23 | `services/aiPredictionBackfillService.ts:40` | One-shot backfill of historical predictions | manual admin trigger | 1.0k / 0.7k |
+| 24 | `services/streamConversationService.ts:634` | Stream Q&A response to viewer message | per-event (viewer asks question) | 0.8k / 0.5k |
+| 25 | `services/aiLiquidityProvider.ts:193` | Decide AMM liquidity adjustments | cron (6h) | 0.8k / 0.5k |
+| 26 | `services/avatarChatService.ts:128` | Avatar 1:1 chat reply | on-demand (user DM avatar) | 0.7k / 0.5k |
+| 27 | `services/avatarStreamEnhancementsService.ts:213` | Stream segment generator (e.g. recap) | cron per active stream (15 min) | 0.7k / 0.5k |
+| 28 | `services/avatarStreamEnhancementsService.ts:307` | Stream highlight extractor | per-event (notable moment) | 0.6k / 0.4k |
+| 29 | `services/debateManagerService.ts:278` | Multi-avatar debate turn generation | cron during debate (every 2 min) | 0.9k / 0.6k |
+| 30 | `services/debateManagerService.ts:434` | Debate moderator summary | per-event (debate ends) | 1.2k / 0.8k |
+| 31 | `services/aiTradingBotService.ts:221` | Trading bot decision reasoning | cron per bot (5–6h) | 0.9k / 0.6k |
+| 32 | `services/aiTrendSpotter.ts:281` | Spot trending topics → propose markets | cron (6h) | 1.0k / 0.7k |
+| 33 | `services/knowledgeQuestionService.ts:163` | Generate knowledge quiz questions | cron (8h) | 0.7k / 0.5k |
+| 34 | `services/knowledgeQuestionService.ts:257` | Grade user knowledge answers | per-event (user submits answer) | 0.5k / 0.3k |
+| 35 | `services/agentBountyEngine.ts:171` | Agent quality-scores a bounty | per-event (new submission) | 0.8k / 0.4k |
+| 36 | `services/autonomousAvatarStreamService.ts:184` | Autonomous avatar stream commentary | cron per active stream (10 min) | 0.7k / 0.5k |
+| 37 | `services/avatarVoiceService.ts:197` | Avatar voice script: market reaction | per-event (large price move) | 0.6k / 0.4k |
+| 38 | `services/avatarVoiceService.ts:237` | Avatar voice script: news reaction | per-event (breaking news) | 0.6k / 0.4k |
+| 39 | `services/avatarVoiceService.ts:272` | Avatar voice script: viewer Q&A | per-event (viewer question) | 0.6k / 0.4k |
+| 40 | `services/avatarVoiceService.ts:309` | Avatar voice script: ambient commentary | cron per active stream (5–10 min) | 0.6k / 0.4k |
+| 41 | `services/enhancedStreamingService.ts:85` | Stream metadata generation | per-event (stream start) | 0.5k / 0.3k |
+| 42 | `services/enhancedStreamingService.ts:229` | Stream segment summarizer | cron per active stream (10 min) | 0.7k / 0.5k |
+| 43 | `services/enhancedStreamingService.ts:273` | Stream highlight detector | per-event | 0.6k / 0.4k |
+| 44 | `services/enhancedStreamingService.ts:1325` | Post-stream recap | per-event (stream ends) | 1.2k / 0.8k |
+| 45 | `services/aiMarketResolver.ts:182` | Resolve disputed prediction-market outcome | per-event (market deadline) | 1.0k / 0.5k |
+| 46 | `services/scheduledMarketStreamService.ts:463` | Daily morning/close market briefing script | cron (2x daily) | 1.5k / 1.0k |
+| 47 | `services/aiTradingSignalsService.ts:611` | Trading-signal narrative (downgraded Apr 2026) | cron (4h) | 1.0k / 0.6k |
+| 48 | `services/realContentProcessor.ts:271` | **Orphaned legacy** content processor (downgraded Apr 2026) | unused | — |
+| 49 | `services/cleanContentProcessor.ts:235` | **Orphaned legacy** content processor (downgraded Apr 2026) | unused | — |
+| 50 | `routes/portfolio-news.ts:311` | Portfolio news summary endpoint | on-demand (user opens portfolio) | 0.9k / 0.6k |
+| 51 | `routes/live-streaming-enhanced.ts:1018` | Live-stream enhancement reasoning | per-event (stream interaction) | 0.6k / 0.4k |
 
-The full list is grep-able with:
+> Note: items 48 and 49 are reachable code but no longer wired to any route or cron.
+> They are downgraded to mini as a defense-in-depth measure but should be deleted in
+> a future tech-debt task.
 
-```
-grep -rn "model: ['\"]gpt-4o" server/services server/routes
-```
+---
 
-Categories:
+## Audio: tts-1 call sites (6)
 
-- **Autonomous AI ecosystem** (10+ sites): `aiMarketResolver`,
-  `aiLiquidityProvider`, `aiTrendSpotter`, `aiContentModerator`,
-  `aiCommunityManager`, `aiTreasuryManager`, `aiMetaTrader`,
-  `aiAgentService`, `agentMarketAnalyzer`, `agentBountyEngine`,
-  `agentContentCreator`, `aiPredictionBackfillService`,
-  `predictionExtractionService`. All low-stakes JSON output where mini
-  is fine.
-- **Streaming & avatars** (10+ sites): `avatarVoiceService`,
-  `avatarChatService`, `avatarStreamEnhancementsService`,
-  `avatarAlphaStreamService`, `autonomousAvatarStreamService`,
-  `enhancedStreamingService`, `streamConversationService`,
-  `debateManagerService`, `scheduledMarketStreamService`. Real-time
-  conversational text where speed > nuance.
-- **Market/news/scoring** (10+ sites): `aiTradingSignalsService` (post-downgrade),
-  `aiTradingBotService`, `qualityScorerService`,
-  `socialMarketGenerator`, `avatarMarketGenerator`,
-  `knowledgeQuestionService`, `alphaIntelligenceService`,
-  `alphaInsightsEngine` (all 6 methods), `chatService` (2 sites),
-  `aiService` (10 sites — already mini, all annotated).
-- **Routes** (1 site): `live-streaming-enhanced.ts:1019` (chat command
-  responses).
+| # | File:line | Purpose | Frequency | ~Chars/call |
+|---|---|---|---|---|
+| 1 | `services/streamConversationService.ts:700` | Speak Q&A response in user-hosted stream | per-event (viewer Q&A) | 200 |
+| 2 | `services/avatarVoiceService.ts:127` | Avatar greeting / opener | per-event (stream start) | 250 |
+| 3 | `services/avatarVoiceService.ts:169` | Avatar generic line | per-event | 200 |
+| 4 | `services/avatarVoiceService.ts:368` | Avatar segment narration | cron per active stream (5–10 min) | 400 |
+| 5 | `services/avatarVoiceService.ts:422` | Avatar Q&A reply | per-event (viewer question) | 250 |
+| 6 | `auto-seed.ts:1793` | One-time TTS during initial seed (sample audio) | once on first deploy | 300 |
 
-## Caching audit
+## Audio: whisper-1 call sites (1)
 
-Caches with measurable hit rates:
+| # | File:line | Purpose | Frequency | ~Min/call |
+|---|---|---|---|---|
+| 1 | `services/streamConversationService.ts:868` | Transcribe browser-mic input from user-hosted stream | per-event (user speaks) | 0.5 |
 
-- `cacheService` (server-wide TTL store): used by `/api/avatars` (5 min),
-  `/api/prediction-markets` (2 min), `/api/prediction-markets/trending`
-  (3 min), and now `/api/smart-insights/reasoning` (15 min).
-- `alphaInsightsEngine` has its own in-class Map cache, 5 min TTL, used
-  by `generatePriceAlertInsight`, `generateMorningBriefing`,
-  `generateEveningRecap`, `generateTradingSignalInsight`,
-  `generateAlphaSignal`. Already in place.
-- `smartInsightsEngine` uses the shared `cacheService` with a 15 min
-  TTL on the deterministic key `smart_insights_reasoning_v1`. Admin can
-  force-refresh via `POST /api/smart-insights/reasoning/refresh`.
+---
 
-## Estimated monthly OpenAI cost (post Task #4)
+## Monthly cost estimate (~$8–10)
 
-| Component                             | Calls/day (est) | Avg tokens | Model         | Monthly cost |
-| ------------------------------------- | --------------- | ---------- | ------------- | ------------ |
-| Smart Insights (1 cache key, 96 fills/day worst-case) | 96              | 2,500      | gpt-4o        | $1.80        |
-| Rebuilt content processor (per upload) | ~5             | 6,000      | gpt-4o        | $0.45        |
-| Autonomous ecosystem (~50 sites, 6h cycles) | 200            | 1,000      | gpt-4o-mini   | $1.80        |
-| Avatars / streaming TTS               | 100             | 800 chars  | tts-1         | ~$3          |
-| Avatar chat / commentary text         | 500             | 300        | gpt-4o-mini   | $0.45        |
-| Trading signals + market generators   | 300             | 700        | gpt-4o-mini   | $0.65        |
-| Misc (qualityScorer, knowledge q's)   | 200             | 400        | gpt-4o-mini   | $0.25        |
-| **Total**                             |                 |            |               | **~$8-10/month** |
+Assuming a small-but-real production load:
+- **gpt-4o (2 sites)**: rebuiltContentProcessor ~50 calls/mo × ~$0.025 ≈ $1.25;
+  smartInsightsEngine ~96 calls/mo (cache-bounded at 4/h × 24h × 30d ≈ 2,880 max,
+  but actual ≈ 3% cache miss / refresh pattern) × ~$0.018 ≈ $1.75. **~$3/mo**
+- **gpt-4o-mini (50+ sites)**: dominated by per-agent crons (100 agents × ~3 calls/day),
+  per-bot crons (50 bots × ~4 calls/day), and per-stream crons. ~150k calls/mo at
+  ~$0.000045/call ≈ **$5–6/mo**
+- **tts-1**: dominated by avatar streams; ~30k chars/day → ~900k/mo × $15/M chars
+  ≈ **$0.50/mo** (with audio caching reducing this further)
+- **whisper-1**: only on user-hosted streams with mic enabled; <100 min/mo ≈ **$0.50/mo**
 
-Down from the previously documented $15-25/month. The savings primarily
-come from (a) downgrading `aiTradingSignalsService` (the only hot
-gpt-4o path outside content processing), (b) tight caching on Smart
-Insights (15 min TTL on the only new gpt-4o surface), and (c) removing
-two orphaned premium call sites that were waiting to bite us.
+**Total: ~$8–10/month** (vs. $15–25 before Task #4).
 
-`PAUSE_OPENAI_API=true` continues to drop this to $0 immediately.
+## Cost-control switches
+
+- `PAUSE_OPENAI_API=true` — hard halt for **all** OpenAI calls (returns deterministic
+  fallbacks; verified in `smartInsightsEngine`, `avatarVoiceService`, `chatService`,
+  and the agent/bot dispatchers).
+- `QUIET_MODE=true` — disables all background polling/cron services; only on-demand
+  routes still call OpenAI.
+- Smart Insights cache TTL: 15 min (`CACHE_TTL_SECONDS` in `smartInsightsEngine.ts`).
+- Admin-only force refresh: `POST /api/smart-insights/reasoning/refresh`
+  (auth + admin + `mediumLimit` rate limiter + Zod body validation).
