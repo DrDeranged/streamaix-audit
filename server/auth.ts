@@ -32,8 +32,15 @@ declare global {
   }
 }
 
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+  throw new Error(
+    'FATAL: JWT_SECRET environment variable must be set in production. ' +
+    'Refusing to start with insecure fallback secret.',
+  );
+}
+
 export class AuthService {
-  private static JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key-for-development';
+  private static JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key-for-development-only';
   
   /**
    * Hash password using bcrypt
@@ -72,7 +79,9 @@ export class AuthService {
       }) as JWTPayload;
       return payload;
     } catch (error) {
-      console.error('Token verification failed:', error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Token verification failed:', (error as Error).message);
+      }
       return null;
     }
   }

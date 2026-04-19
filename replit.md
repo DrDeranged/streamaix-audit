@@ -24,6 +24,17 @@ To manage API usage, aggressive caching and schedule optimization have been impl
 ### Quiet Mode & API Pause Feature
 `QUIET_MODE=true` disables all background polling services, only fetching data on-demand, leading to a 95%+ reduction in API calls. `PAUSE_OPENAI_API=true` immediately halts all OpenAI API consumption for emergency cost control, pausing services like Avatar Voice Streaming and Autonomous AI Agents while keeping the platform operational.
 
+### Security Hardening (April 2026)
+A pre-pitch security sweep tightened authentication, admin access, and rate limits across the backend:
+- New `server/middleware/security.ts` exposes tiered rate limiters (`strictLimit`, `mediumLimit`, `looseLimit`, `signupLimit`, `authLimit`), a `requireAdminFlexible` middleware (env-secret OR admin user), a `disableInProd` guard, and a `validateBody` Zod helper
+- `JWT_SECRET` and `SESSION_SECRET` now throw at startup if missing in production (no insecure fallback)
+- Token verification errors no longer logged in production
+- 28 previously unprotected mutation/admin/AI endpoints now require auth + appropriate rate limiting
+- 3 hardcoded admin secret fallbacks (`'streamaix-reseed-2024'`, `'your-session-secret'`) removed
+- Test/debug echo endpoints now return 404 in production
+- Login/register/wallet-login/waitlist endpoints now have brute-force rate limits
+- Full report: `SECURITY_AUDIT.md`
+
 ### Performance Optimizations (December 2025)
 Comprehensive performance optimizations have been applied to reduce lag and improve responsiveness:
 

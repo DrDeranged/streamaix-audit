@@ -3,6 +3,14 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage, DatabaseStorage } from "./storage";
 import { AuthService, authenticateToken, optionalAuth, type AuthRequest } from "./auth";
+import {
+  strictLimit,
+  mediumLimit,
+  signupLimit,
+  authLimit,
+  requireAdminFlexible,
+  disableInProd,
+} from "./middleware/security";
 import { cacheService } from "./services/cacheService";
 import { StreamProcessor } from "./services/streamProcessor";
 import { StreamProcessorV2 } from "./services/streamProcessorV2";
@@ -149,7 +157,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Configure session for passport
   app.use(session({
-    secret: process.env.SESSION_SECRET || 'your-session-secret',
+    secret: process.env.SESSION_SECRET || (() => {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('FATAL: SESSION_SECRET environment variable must be set in production.');
+      }
+      return 'dev-only-session-secret-do-not-use-in-prod';
+    })(),
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false } // Set to true in production with HTTPS
@@ -167,7 +180,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =============================================================================
 
   // Register new user
-  app.post('/api/auth/register', asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/auth/register', authLimit, asyncHandler(async (req: Request, res: Response) => {
     const validation = validateRequest<RegisterRequest>(registerSchema, req.body);
     if (!validation.success) {
       console.log('Registration validation failed:', validation.error);
@@ -298,7 +311,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Login with username/password
-  app.post('/api/auth/login', asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/auth/login', authLimit, asyncHandler(async (req: Request, res: Response) => {
     const validation = validateRequest<LoginRequest>(loginSchema, req.body);
     if (!validation.success) {
       return res.status(400).json({ error: validation.error });
@@ -342,7 +355,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Wallet login (for Web3 authentication)
-  app.post('/api/auth/wallet-login', asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/auth/wallet-login', authLimit, asyncHandler(async (req: Request, res: Response) => {
     const validation = validateRequest<WalletLoginRequest>(walletLoginSchema, req.body);
     if (!validation.success) {
       return res.status(400).json({ error: validation.error });
@@ -4496,7 +4509,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Generate prediction markets from news articles
-  app.post('/api/news/generate-markets', asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/news/generate-markets', authenticateToken, requireAdmin, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
       const { socialMarketGenerator } = await import('./services/socialMarketGenerator');
       const { articles, maxMarkets = 3 } = req.body;
@@ -4553,7 +4566,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Generate prediction markets for an avatar
-  app.post('/api/avatars/:avatarId/generate-markets', asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/avatars/:avatarId/generate-markets', authenticateToken, requireAdmin, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
       const { avatarMarketGenerator } = await import('./services/avatarMarketGenerator');
       const result = await avatarMarketGenerator.createMarketsForAvatar(req.params.avatarId);
@@ -4644,12 +4657,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Trigger avatar trading cycle (admin only)
-  app.post('/api/admin/avatar-trading-cycle', asyncHandler(async (req: Request, res: Response) => {
-    const adminSecret = req.headers['x-admin-secret'];
-    if (adminSecret !== 'streamaix-reseed-2024') {
-      return res.status(403).json({ success: false, error: 'Unauthorized' });
-    }
-
+  app.post('/api/admin/avatar-trading-cycle', optionalAuth, requireAdminFlexible, asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
       const { avatarMarketParticipationService } = await import('./services/avatarMarketParticipationService');
       const result = await avatarMarketParticipationService.runTradingCycle();
@@ -7143,7 +7151,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =============================================================================
 
   // Follow user (Demo - works without authentication)
-  app.post('/api/social/follow', asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/social/follow', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { fid, username } = req.body;
     
     if (!fid || !username) {
@@ -7169,7 +7177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Like cast (Demo - works without authentication)
-  app.post('/api/social/like', asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/social/like', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { castHash } = req.body;
     
     if (!castHash) {
@@ -7195,7 +7203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Recast (Demo - works without authentication)
-  app.post('/api/social/recast', asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/social/recast', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { castHash } = req.body;
     
     if (!castHash) {
@@ -7220,7 +7228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Reply to cast (Demo - works without authentication)
-  app.post('/api/social/reply', asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/social/reply', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { castHash, replyText } = req.body;
     
     if (!castHash || !replyText) {
@@ -7505,17 +7513,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ADMIN ROUTES (Protected)
   // =============================================================================
 
-  // Admin middleware (for future use)
-  const requireAdmin = (req: AuthRequest, res: Response, next: Function) => {
-    // TODO: Implement admin role checking
-    // For now, just check if user exists
-    if (!req.user) {
-      return res.status(403).json({ error: 'Admin access required' });
-    }
-    next();
-  };
-
   // NOTE: Comprehensive /api/admin/stats endpoint is defined below in ADMIN DASHBOARD ENDPOINTS section
+  // Admin middleware (`requireAdmin`) is defined at module scope above and shared across all admin routes.
 
   // Error handling middleware
   app.use((error: any, req: Request, res: Response, next: Function) => {
@@ -7791,7 +7790,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // CRITICAL: Simple POST test - NO asyncHandler, NO dependencies
   console.log('📍 Registering test-post-simple endpoint: POST /api/test-post-simple');
-  app.post('/api/test-post-simple', (req: Request, res: Response) => {
+  app.post('/api/test-post-simple', disableInProd, (req: Request, res: Response) => {
     console.log('✅ SIMPLE POST TEST HIT!');
     res.status(200).json({
       success: true,
@@ -7805,7 +7804,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // CRITICAL: Echo POST test - Returns exactly what it receives
   console.log('📍 Registering test-post-echo endpoint: POST /api/test-post-echo');
-  app.post('/api/test-post-echo', (req: Request, res: Response) => {
+  app.post('/api/test-post-echo', disableInProd, (req: Request, res: Response) => {
     console.log('✅ ECHO POST TEST HIT with body:', req.body);
     res.status(200).json({
       success: true,
@@ -7824,28 +7823,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Admin reseed endpoint - requires admin auth or secret key
   console.log('📍 Registering admin reseed endpoint: POST /api/admin/reseed');
-  app.post('/api/admin/reseed', asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/admin/reseed', optionalAuth, requireAdminFlexible, asyncHandler(async (req: AuthRequest, res: Response) => {
     console.log('🔄 Admin reseed endpoint hit!');
-    
-    // Verify admin access via secret key or admin username
-    const adminSecret = req.headers['x-admin-secret'] as string;
-    const expectedSecret = process.env.ADMIN_RESEED_SECRET || 'streamaix-reseed-2024';
-    
-    // @ts-ignore - req.user may be added by optional auth
-    const user = req.user;
-    const isAdminUser = user && ADMIN_USERNAMES.includes(user.username);
-    const hasValidSecret = adminSecret === expectedSecret;
-    
-    if (!isAdminUser && !hasValidSecret) {
-      console.log('❌ Unauthorized reseed attempt');
-      return res.status(403).json({ 
-        success: false, 
-        error: 'Unauthorized. Provide admin auth or X-Admin-Secret header.' 
-      });
-    }
-    
-    console.log(`✅ Authorized reseed request from: ${isAdminUser ? user.username : 'secret key'}`);
-    
     // Import and run auto-seed
     try {
       const { autoSeedDatabase } = await import('./auto-seed');
@@ -7879,25 +7858,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   console.log('✅ Admin reseed endpoint registered');
 
   // Admin endpoint to retroactively generate TTS audio for existing stream replays
-  app.post('/api/admin/generate-replay-audio', asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/admin/generate-replay-audio', optionalAuth, requireAdminFlexible, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { count = 2 } = req.body;
-    
-    // Verify admin access
-    const adminSecret = req.headers['x-admin-secret'] as string;
-    const expectedSecret = process.env.ADMIN_RESEED_SECRET || 'streamaix-reseed-2024';
-    
-    // @ts-ignore - req.user may be added by optional auth
-    const user = req.user;
-    const isAdminUser = user && ADMIN_USERNAMES.includes(user.username);
-    const hasValidSecret = adminSecret === expectedSecret;
-    
-    if (!isAdminUser && !hasValidSecret) {
-      return res.status(403).json({ 
-        success: false, 
-        error: 'Unauthorized. Provide admin auth or X-Admin-Secret header.' 
-      });
-    }
-
     try {
       // Get streams that have recordings but no audio, ordered by most recent
       const recordingsWithoutAudio = await db.select({
@@ -8030,7 +7992,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Test real processing endpoint
   console.log('📍 Registering analyze-content endpoint: POST /api/analyze-content');
-  app.post('/api/analyze-content', asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/analyze-content', authenticateToken, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     console.log(`\n🔵 ========== ROUTE: POST /api/analyze-content ==========`);
     
     const { url } = req.body;
@@ -8282,7 +8244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Enhance financial trends with live market data
-  app.post('/api/market/enhance-trends', asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/market/enhance-trends', authenticateToken, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { trends } = req.body;
     if (!trends || !Array.isArray(trends)) {
       return res.status(400).json({ error: 'Trends array is required' });
@@ -9673,7 +9635,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Get multiple volatility forecasts
-  app.post('/api/volatility-forecasting/forecasts', asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/volatility-forecasting/forecasts', authenticateToken, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
       const { symbols, horizons = ['1d', '7d', '30d'] } = req.body;
       
@@ -9764,7 +9726,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Run stress tests
-  app.post('/api/volatility-forecasting/stress-tests', asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/volatility-forecasting/stress-tests', authenticateToken, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
       const { assets, scenarioIds } = req.body;
       
@@ -9832,7 +9794,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Acknowledge volatility alert
-  app.post('/api/volatility-forecasting/alerts/:alertId/acknowledge', asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/volatility-forecasting/alerts/:alertId/acknowledge', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
       const { alertId } = req.params;
       const { acknowledgedBy } = req.body;
@@ -10676,7 +10638,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(leaderboard);
   }));
 
-  app.post('/api/bot-trading/seed-historical', asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/bot-trading/seed-historical', authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
     const [existingCount] = await db.select({ count: sql<number>`COUNT(*)::int` }).from(botSimTrades);
     if (Number(existingCount?.count || 0) > 0) {
       return res.json({ success: true, message: 'Trades already exist, skipping seed', count: existingCount.count });
@@ -11461,7 +11423,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Trigger AI agents to auto-join leagues (admin action)
-  app.post("/api/prediction-leagues/ai-join", asyncHandler(async (req: Request, res: Response) => {
+  app.post("/api/prediction-leagues/ai-join", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { aiLeagueManager } = await import('./services/aiLeagueManager');
     const result = await aiLeagueManager.runAutoJoinCycle();
     
@@ -11776,7 +11738,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =============================================================================
   
   // Initialize AI agents
-  app.post("/api/ai-agents/initialize", asyncHandler(async (req: Request, res: Response) => {
+  app.post("/api/ai-agents/initialize", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { aiAgentService } = await import('./services/aiAgentService');
     const agents = await aiAgentService.initializeAgents();
     
@@ -11820,7 +11782,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Generate AI predictions for a market
-  app.post("/api/ai-agents/predict/:marketId", asyncHandler(async (req: Request, res: Response) => {
+  app.post("/api/ai-agents/predict/:marketId", authenticateToken, requireAdmin, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { aiAgentService } = await import('./services/aiAgentService');
     const predictions = await aiAgentService.generatePredictionsForMarket(req.params.marketId);
     
@@ -11843,7 +11805,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Execute AI agent trade
-  app.post("/api/ai-agents/:agentId/trade", asyncHandler(async (req: Request, res: Response) => {
+  app.post("/api/ai-agents/:agentId/trade", authenticateToken, requireAdmin, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { aiAgentService } = await import('./services/aiAgentService');
     const { marketId, predictionId, shares } = req.body;
     
@@ -12372,7 +12334,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Record price snapshot (called by trade execution)
-  app.post("/api/markets/:marketId/price-snapshot", asyncHandler(async (req: Request, res: Response) => {
+  app.post("/api/markets/:marketId/price-snapshot", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { marketId } = req.params;
 
     const market = await db
@@ -12785,7 +12747,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // WAITLIST ROUTES
   // =============================================================================
   
-  app.post("/api/waitlist", asyncHandler(async (req: Request, res: Response) => {
+  app.post("/api/waitlist", signupLimit, asyncHandler(async (req: Request, res: Response) => {
     const { email, name, referralSource } = req.body;
     
     if (!email || typeof email !== 'string') {
@@ -12916,7 +12878,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  app.post("/api/newsletter/test-welcome", asyncHandler(async (req: Request, res: Response) => {
+  app.post("/api/newsletter/test-welcome", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { email } = req.body;
     
     if (!email) {
@@ -15757,7 +15719,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Test TTS with minimal cost (short phrases only)
-  app.post("/api/streams/test-tts", asyncHandler(async (req: Request, res: Response) => {
+  app.post("/api/streams/test-tts", authenticateToken, requireAdmin, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { AvatarVoiceService } = await import('./services/avatarVoiceService');
     const { avatarName = 'Vitalik Buterin', maxSegments = 3 } = req.body;
     
@@ -15775,7 +15737,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Test single TTS phrase with audio response
-  app.post("/api/streams/test-tts-audio", asyncHandler(async (req: Request, res: Response) => {
+  app.post("/api/streams/test-tts-audio", authenticateToken, requireAdmin, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { AvatarVoiceService } = await import('./services/avatarVoiceService');
     const { avatarName = 'Vitalik Buterin', streamId = 'test' } = req.body;
     
@@ -15794,7 +15756,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Start a controlled live test stream for mobile testing (5 minutes, 3-4 segments)
-  app.post("/api/streams/start-test-stream", asyncHandler(async (req: Request, res: Response) => {
+  app.post("/api/streams/start-test-stream", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { AvatarVoiceService } = await import('./services/avatarVoiceService');
     const { getStreamingService } = await import('./services/streamingService');
     const { avatarName = 'Vitalik Buterin', durationMinutes = 5, maxSegments = 4 } = req.body;
@@ -15945,7 +15907,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Stop a test stream early
-  app.post("/api/streams/stop-test-stream/:id", asyncHandler(async (req: Request, res: Response) => {
+  app.post("/api/streams/stop-test-stream/:id", authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     
     await db.update(liveStreams)
@@ -16826,7 +16788,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Get next debate response
-  app.post("/api/streams/:id/debate/next", asyncHandler(async (req: Request, res: Response) => {
+  app.post("/api/streams/:id/debate/next", authenticateToken, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { previousStatement } = req.body;
     const response = await avatarStreamEnhancements.generateDebateResponse(req.params.id, previousStatement);
     res.json({ success: !!response, response });
@@ -17063,7 +17025,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Generate market prediction from avatar
-  app.post("/api/avatars/:id/predict", asyncHandler(async (req: Request, res: Response) => {
+  app.post("/api/avatars/:id/predict", authenticateToken, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { asset, marketContext } = req.body;
     if (!asset) {
       return res.status(400).json({ success: false, error: 'Asset required' });
