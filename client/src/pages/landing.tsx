@@ -20,6 +20,7 @@ const AITradingPage = lazy(() => import("@/pages/ai-trading"));
 const LearningHubSection = lazy(() => import("@/components/landing/learning-hub-section"));
 const PortfolioSection = lazy(() => import("@/components/landing/portfolio-section"));
 const BotTradingPage = lazy(() => import("@/pages/bot-trading"));
+const AvatarLeaderboardLanding = lazy(() => import("@/components/landing/avatar-leaderboard").then(m => ({ default: m.AvatarLeaderboardLanding })));
 
 function SectionLoader() {
   return (
@@ -121,6 +122,7 @@ export default function Landing() {
             <Navigation />
             <HeroSection onNavigateToSection={handleNavigateToSection} />
             <Suspense fallback={<SectionLoader />}>
+              <AvatarLeaderboardLanding />
               <RecentActivity />
               <Footer />
             </Suspense>

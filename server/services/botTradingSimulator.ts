@@ -315,6 +315,11 @@ export class BotTradingSimulator {
     });
 
     console.log(`[Bot Simulator] ${avatar.name} opened ${direction} ${asset.name} @ $${price.toFixed(2)} qty: ${quantity.toFixed(4)}`);
+
+    try {
+      const { notifyTradeEvent } = await import('./avatarLeaderboardService');
+      notifyTradeEvent({ avatarId: avatar.id, action: 'opened', asset: asset.name, direction });
+    } catch {}
   }
 
   private async closeTrade(trade: any, persona: AvatarTradingPersona) {
@@ -360,6 +365,13 @@ export class BotTradingSimulator {
       .where(eq(botSimTrades.id, trade.id));
 
     console.log(`[Bot Simulator] Closed ${trade.direction} ${trade.asset}: P&L $${pnl.toFixed(2)} (${pnlPercent.toFixed(2)}%)`);
+
+    try {
+      const { notifyTradeEvent } = await import('./avatarLeaderboardService');
+      if (trade.avatarId) {
+        notifyTradeEvent({ avatarId: trade.avatarId, action: 'closed', asset: trade.asset, direction: trade.direction, pnl });
+      }
+    } catch {}
   }
 
   private getCachedPrice(key: string): number | null {

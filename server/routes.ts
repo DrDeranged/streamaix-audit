@@ -177,6 +177,7 @@ import { registerRecommendationsRoutes } from "./routes/recommendations";
 import { registerSmartInsightsRoutes } from "./routes/smart-insights";
 import { registerVoiceAssistantRoutes } from "./routes/voice-assistant";
 import { registerAvatarFeedRoutes } from "./routes/avatar-feed";
+import { registerAvatarLeaderboardRoutes } from "./routes/avatar-leaderboard";
 // PHASE2-SPLIT END
 import { Request, Response } from "express";
 import cors from "cors";
@@ -472,6 +473,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await registerVoiceAssistantRoutes(app);
   // ▶ Avatar Commentary Feed (Twitter-style live feed of avatar trades)
   registerAvatarFeedRoutes(app);
+  registerAvatarLeaderboardRoutes(app);
   
   // ▶ Waitlist routes extracted to server/routes/waitlist.ts
   await registerWaitlistRoutes(app);
@@ -679,6 +681,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Seed the feed once at startup if it's empty so investors landing on the
   // page see history immediately (deterministic, no LLM cost).
   backfillFromRecentTrades().catch(() => {});
+
+  // =============================================================================
+  // AVATAR LEADERBOARD WEBSOCKET SERVER (live $10K simulator races)
+  // =============================================================================
+  const leaderboardWss = new WebSocketServer({ noServer: true });
+  const leaderboardClients = new Set<WebSocket>();
+  const { setLeaderboardBroadcaster, computeLeaderboard } =
+    await import('./services/avatarLeaderboardService');
+  leaderboardWss.on('connection', async (ws: WebSocket) => {
+    leaderboardClients.add(ws);
+    try {
+      const rows = await computeLeaderboard();
+      ws.send(JSON.stringify({ type: 'leaderboard_update', payload: rows, timestamp: Date.now() }));
+    } catch {}
+    ws.on('close', () => leaderboardClients.delete(ws));
+    ws.on('error', () => leaderboardClients.delete(ws));
+  });
+  setLeaderboardBroadcaster((event) => {
+    const msg = JSON.stringify(event);
+    leaderboardClients.forEach((c) => {
+      if (c.readyState === WebSocket.OPEN) {
+        try { c.send(msg); } catch {}
+      }
+    });
+  });
 
   // =============================================================================
   // PORTFOLIO PRICES WEBSOCKET SERVER (Real-time price updates)
@@ -891,6 +918,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🔌 [WS Upgrade] Routing to avatar feed WebSocket server (/ws/avatar-feed)`);
       avatarFeedWss.handleUpgrade(request, socket, head, (ws) => {
         avatarFeedWss.emit('connection', ws, request);
+      });
+    } else if (pathname === '/ws/avatar-leaderboard') {
+      console.log(`🔌 [WS Upgrade] Routing to avatar leaderboard WebSocket server (/ws/avatar-leaderboard)`);
+      leaderboardWss.handleUpgrade(request, socket, head, (ws) => {
+        leaderboardWss.emit('connection', ws, request);
       });
     } else if (pathname === '/ws/admin') {
       console.log(`🔌 [WS Upgrade] Routing to admin WebSocket server (/ws/admin)`);
