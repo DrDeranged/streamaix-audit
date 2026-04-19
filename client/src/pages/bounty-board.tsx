@@ -4,6 +4,7 @@ import { Plus, Trophy, DollarSign, CheckCircle, Clock, Filter, TrendingUp, Flame
 import { Link } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/PageHeader';
 import {
   Select,
   SelectContent,
@@ -186,50 +187,49 @@ export default function BountyBoard() {
             </Button>
           </div>
 
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 mb-2">
-                Bounty Board
-              </h1>
-              <p className="text-gray-400">
-                Earn STREAM by creating summaries from videos and podcasts
-              </p>
-            </div>
+          <PageHeader
+            eyebrow="Earn · Open bounties"
+            title="Bounty Board"
+            icon={<Trophy className="h-5 w-5" />}
+            subtitle="Earn STREAM by creating summaries from videos and podcasts."
+            className="mb-4"
+            actions={
+              <Button
+                size="lg"
+                data-testid="button-create-bounty"
+                onClick={() => {
+                  if (!isConnected) {
+                    setWalletModalOpen(true);
+                  } else {
+                    setCreateModalOpen(true);
+                  }
+                }}
+                variant="gradient-glow"
+                className="min-h-[44px]"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Create Bounty
+              </Button>
+            }
+          />
 
-            <Button
-              size="lg"
-              data-testid="button-create-bounty"
-              onClick={() => {
-                if (!isConnected) {
-                  setWalletModalOpen(true);
-                } else {
-                  setCreateModalOpen(true);
-                }
-              }}
-              className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Create Bounty
-            </Button>
+          {/* Wallet Connection Modal */}
+          <Dialog open={walletModalOpen} onOpenChange={setWalletModalOpen}>
+            <DialogContent className="max-w-lg">
+              <WalletConnector>
+                <p className="text-sm">
+                  Connect your wallet to create bounties
+                </p>
+              </WalletConnector>
+            </DialogContent>
+          </Dialog>
 
-            {/* Wallet Connection Modal */}
-            <Dialog open={walletModalOpen} onOpenChange={setWalletModalOpen}>
-              <DialogContent className="max-w-lg">
-                <WalletConnector>
-                  <p className="text-sm">
-                    Connect your wallet to create bounties
-                  </p>
-                </WalletConnector>
-              </DialogContent>
-            </Dialog>
-
-            {/* Create Bounty Modal */}
-            <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <CreateBountyModal onSuccess={() => setCreateModalOpen(false)} />
-              </DialogContent>
-            </Dialog>
-          </div>
+          {/* Create Bounty Modal */}
+          <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <CreateBountyModal onSuccess={() => setCreateModalOpen(false)} />
+            </DialogContent>
+          </Dialog>
 
           {!isConnected && (
             <div className="mb-6">

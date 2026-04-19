@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { PageHeader } from '@/components/PageHeader';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'wouter';
 import {
@@ -475,12 +476,13 @@ export default function GamificationPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950 safe-area-inset">
       <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
-        <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 font-orbitron">
-            Your Progress
-          </h1>
-          <p className="text-sm text-slate-400">Complete quests, earn XP, level up!</p>
-        </div>
+        <PageHeader
+          eyebrow="XP · quests · streaks"
+          title="Your Progress"
+          icon={<Sparkles className="h-5 w-5" />}
+          subtitle="Complete quests, earn XP, level up."
+          className="mb-6"
+        />
         
         {dashboard?.activeEvent && (
           <motion.div

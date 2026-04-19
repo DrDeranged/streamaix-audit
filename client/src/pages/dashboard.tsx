@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -480,38 +481,33 @@ export default function Dashboard() {
 
       
       <div className="relative z-10 max-w-7xl mx-auto p-4 md:p-6">
-        {/* Mobile-Optimized Header */}
+        {/* Page header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-6 pt-2"
         >
-          <div className="flex flex-col space-y-4">
-            <div className="flex items-center justify-between">
+          <PageHeader
+            eyebrow={`Level ${stats.level} · ${balance.streamTokens.toFixed(0)} STREAM`}
+            title={
+              <>
+                Welcome back, {user?.username}! <span className="not-italic">👋</span>
+              </>
+            }
+            subtitle="Manage your AI summaries and track your progress."
+            actions={
               <Button
                 onClick={() => setLocation('/')}
                 variant="outline"
                 size="sm"
-                className="surface-1 text-white hover:border-neon-cyan/50 px-3 py-2"
+                className="surface-1 text-white hover:border-neon-cyan/50 min-h-[44px]"
                 data-testid="button-back-home"
               >
                 <Home className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Back to Home</span>
               </Button>
-              <div className="text-right">
-                <div className="text-xs text-gray-400">Level: {stats.level}</div>
-                <div className="text-sm font-semibold text-green-400">{balance.streamTokens.toFixed(0)} STREAM</div>
-              </div>
-            </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent mb-2">
-                Welcome back, {user?.username}! 👋
-              </h1>
-              <p className="text-gray-300 text-sm sm:text-base">
-                Manage your AI summaries and track your progress
-              </p>
-            </div>
-          </div>
+            }
+          />
         </motion.div>
 
         {/* Glassmorphism Stats Cards */}

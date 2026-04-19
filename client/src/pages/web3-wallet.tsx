@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -80,8 +81,11 @@ export default function Web3WalletPage() {
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Web3 Wallet</h1>
-          <p className="text-gray-400">Connect and manage your decentralized wallet</p>
+          <PageHeader
+            eyebrow="Web3 · self-custody"
+            title="Web3 Wallet"
+            subtitle="Connect and manage your decentralized wallet."
+          />
         </motion.div>
 
         {/* Wallet Connection Section */}

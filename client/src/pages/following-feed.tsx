@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
+import { PageHeader } from '@/components/PageHeader';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Rss, 
@@ -121,19 +122,18 @@ export default function FollowingFeed() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500/20 to-purple-500/20 border border-cyan-500/30">
-              <Rss className="w-6 h-6 text-cyan-400" />
-            </div>
-            <h1 className="text-3xl font-bold text-white">Your Feed</h1>
-            <Badge className="bg-gradient-to-r from-cyan-500 to-purple-500 text-white">
-              <Sparkles className="w-3 h-3 mr-1" />
-              Personalized
-            </Badge>
-          </div>
-          <p className="text-gray-400">
-            Bounties from creators and categories you follow
-          </p>
+          <PageHeader
+            eyebrow="Personalized · live updates"
+            title="Your Feed"
+            icon={<Rss className="h-5 w-5" />}
+            subtitle="Bounties from creators and categories you follow."
+            actions={
+              <Badge className="bg-gradient-to-r from-cyan-500 to-purple-500 text-white">
+                <Sparkles className="w-3 h-3 mr-1" />
+                Personalized
+              </Badge>
+            }
+          />
         </motion.div>
 
         {/* Stats Bar */}

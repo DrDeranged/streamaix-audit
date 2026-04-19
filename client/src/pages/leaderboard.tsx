@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { PageHeader } from '@/components/PageHeader';
 import { useLocation } from 'wouter';
 import { motion } from 'framer-motion';
 import { Trophy, Medal, Star, TrendingUp, Target, Zap, Award, Crown } from 'lucide-react';
@@ -86,17 +87,13 @@ export default function Leaderboard() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 mb-2">
-                Bounty Hunter Leaderboard
-              </h1>
-              <p className="text-gray-400">
-                Top performers earning rewards and building reputation
-              </p>
-            </div>
-
-            <Select value={sortBy} onValueChange={setSortBy}>
+          <PageHeader
+            eyebrow="Reputation · top performers"
+            title="Bounty Hunter Leaderboard"
+            icon={<Trophy className="h-5 w-5" />}
+            subtitle="Top performers earning rewards and building reputation."
+            actions={
+              <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-[200px] bg-slate-900/50 border-purple-500/30" data-testid="select-sort">
                 <SelectValue />
               </SelectTrigger>
@@ -106,7 +103,8 @@ export default function Leaderboard() {
                 <SelectItem value="quality">Quality Score</SelectItem>
               </SelectContent>
             </Select>
-          </div>
+            }
+          />
         </motion.div>
 
         {/* Top 3 Podium */}

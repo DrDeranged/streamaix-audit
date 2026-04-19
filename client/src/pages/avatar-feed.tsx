@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteQuery, useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, MessageCircle, Send, TrendingUp, ArrowDownRight, Loader2 } from "lucide-react";
+import { Heart, MessageCircle, Send, TrendingUp, ArrowDownRight, Loader2, Radio } from "lucide-react";
+import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -374,14 +375,15 @@ export default function AvatarFeedPage() {
   }, [livePosts, feed.data]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4 py-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-white">Avatar Live Feed</h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Watch the 17 Knowledge Avatars trade in real time, in their own voice.
-          </p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      <div className="section-container max-w-2xl">
+        <PageHeader
+          eyebrow="Knowledge Avatars · live"
+          title="Avatar Live Feed"
+          subtitle="Watch the 17 Knowledge Avatars trade in real time, in their own voice."
+          icon={<Radio className="h-5 w-5" />}
+          className="mb-6"
+        />
         {feed.isLoading && (
           <div className="text-slate-500 flex items-center gap-2">
             <Loader2 className="w-4 h-4 animate-spin" /> Loading the floor…

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
+import { PageHeader } from '@/components/PageHeader';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -67,12 +68,13 @@ export default function FarcasterActivity() {
           transition={{ duration: 0.5 }}
           className="text-center mb-8"
         >
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-4">
-            Farcaster Activity Dashboard
-          </h1>
-          <p className="text-xl text-gray-300 mb-8">
-            Explore real Farcaster user activity and engagement metrics
-          </p>
+          <PageHeader
+            align="center"
+            eyebrow="Farcaster · social graph"
+            title="Farcaster Activity Dashboard"
+            subtitle="Explore real Farcaster user activity and engagement metrics."
+            className="mb-8"
+          />
 
           {/* Search */}
           <div className="flex justify-center gap-4 max-w-md mx-auto">

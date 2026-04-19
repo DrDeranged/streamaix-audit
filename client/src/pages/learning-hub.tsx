@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { PageHeader } from '@/components/PageHeader';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'wouter';
 import {
@@ -278,17 +279,12 @@ export default function LearningHub() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center gap-4 mb-2">
-            <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-500 to-fuchsia-500">
-              <GraduationCap className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent">
-                Learning Hub
-              </h1>
-              <p className="text-gray-400">Master Web3, DeFi, AI Trading & Market Intelligence</p>
-            </div>
-          </div>
+          <PageHeader
+            eyebrow="Education · curriculum"
+            title="Learning Hub"
+            icon={<GraduationCap className="h-5 w-5" />}
+            subtitle="Master Web3, DeFi, AI trading & market intelligence."
+          />
         </motion.div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">

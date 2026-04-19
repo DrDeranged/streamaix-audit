@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { PageHeader } from '@/components/PageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -122,35 +123,36 @@ export default function InsightsDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
       <Navigation />
       <div className="section-container section-stack pt-24">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent flex items-center gap-3">
-              <Brain className="h-10 w-10 text-purple-400" />
-              Smart Insights
-            </h1>
-            <p className="text-gray-400 mt-2">
+        <PageHeader
+          eyebrow="AI · Reasoning chain"
+          title="Smart Insights"
+          icon={<Brain className="h-5 w-5" />}
+          subtitle={
+            <>
               Reasoning-chain market intelligence — regime shifts, divergences, contrarian setups, and
               <span className="text-purple-300"> if-then sequences</span>.
-            </p>
-            {data && (
-              <p className="text-xs text-gray-500 mt-1" data-testid="insights-meta">
-                Generated {new Date(data.generatedAt).toLocaleTimeString()} · model{' '}
-                <span className="text-purple-400">{data.modelUsed}</span>
-                {data.fromCache && <span className="ml-2 text-cyan-400">(cached)</span>}
-              </p>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={() => refetch()}
-            disabled={isRefetching}
-            className="px-4 py-2 rounded-lg surface-1 surface-interactive border border-purple-500/40 text-purple-200 hover:border-neon-purple/60 transition flex items-center gap-2 text-sm disabled:opacity-50"
-            data-testid="button-refresh-insights"
-          >
-            <RefreshCw className={`h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
-        </div>
+              {data && (
+                <span className="block mt-1 text-xs text-muted-foreground" data-testid="insights-meta">
+                  Generated {new Date(data.generatedAt).toLocaleTimeString()} · model{' '}
+                  <span className="text-purple-400">{data.modelUsed}</span>
+                  {data.fromCache && <span className="ml-2 text-cyan-400">(cached)</span>}
+                </span>
+              )}
+            </>
+          }
+          actions={
+            <button
+              type="button"
+              onClick={() => refetch()}
+              disabled={isRefetching}
+              className="px-4 py-2 rounded-lg surface-1 surface-interactive border border-purple-500/40 text-purple-200 hover:border-neon-purple/60 transition flex items-center gap-2 text-sm disabled:opacity-50 min-h-[44px]"
+              data-testid="button-refresh-insights"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          }
+        />
 
         {data?.marketRegime && (
           <Card className="surface-2 border-fuchsia-500/30" data-testid="card-market-regime">

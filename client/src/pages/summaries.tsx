@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Navigation } from "@/components/landing/navigation";
+import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -65,25 +66,14 @@ export default function Summaries() {
       <Navigation />
       
       <div className="container mx-auto px-4 pt-24 pb-16">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border border-purple-500/30 mb-6">
-            <Sparkles className="w-4 h-4 text-cyan-400" />
-            <span className="text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
-              AI-Processed Content
-            </span>
-          </div>
-          
-          <h1 className="text-4xl sm:text-5xl font-orbitron font-bold mb-4">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400">
-              Content Summaries
-            </span>
-          </h1>
-          
-          <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-            Browse all AI-processed videos, podcasts, and livestreams transformed into actionable insights
-          </p>
-        </div>
+        <PageHeader
+          align="center"
+          eyebrow="AI-processed content"
+          title="Content Summaries"
+          icon={<Sparkles className="h-5 w-5" />}
+          subtitle="Browse all AI-processed videos, podcasts, and livestreams transformed into actionable insights."
+          className="mb-12"
+        />
 
         {/* Filters */}
         <div className="mb-8 space-y-4">

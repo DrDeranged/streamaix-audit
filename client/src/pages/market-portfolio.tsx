@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
+import { PageHeader } from "@/components/PageHeader";
 import { TrendingUp, TrendingDown, Target, Award, Zap, ArrowUpRight, ArrowDownRight, ArrowLeft, Flame, PieChart } from "lucide-react";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { Link } from "wouter";
@@ -131,18 +132,13 @@ export default function MarketPortfolio() {
               </Button>
             </Link>
 
-            <div className="flex items-center justify-center gap-4">
-              <motion.div
-                animate={{ rotate: [0, 360], scale: [1, 1.1, 1] }}
-                transition={{ duration: 4, repeat: Infinity }}
-              >
-                <PieChart className="w-16 h-16 text-cyan-400 drop-shadow-[0_0_20px_rgba(34,211,238,0.6)]" />
-              </motion.div>
-              <h1 className="text-6xl font-bold bg-gradient-to-r from-cyan-400 via-emerald-400 to-amber-400 bg-clip-text text-transparent drop-shadow-lg">
-                Portfolio
-              </h1>
-            </div>
-            <p className="text-slate-400 text-lg">Track your positions, performance, and trade history</p>
+            <PageHeader
+              align="center"
+              eyebrow="Prediction markets · positions"
+              title="Portfolio"
+              icon={<PieChart className="h-5 w-5" />}
+              subtitle="Track your positions, performance, and trade history."
+            />
           </motion.div>
 
           {/* Stats Grid */}

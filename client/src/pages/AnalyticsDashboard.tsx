@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { PageHeader } from '@/components/PageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Navigation } from '@/components/landing/navigation';
@@ -94,17 +95,12 @@ export default function AnalyticsDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
       <Navigation />
       <div className="max-w-7xl mx-auto space-y-8 px-4 sm:px-6 lg:px-8 pt-24 pb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent flex items-center gap-3">
-              <BarChart3 className="h-10 w-10 text-purple-400" />
-              Analytics Dashboard
-            </h1>
-            <p className="text-gray-400 mt-2">
-              Track platform performance and user engagement metrics
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          eyebrow="Performance · engagement"
+          title="Analytics Dashboard"
+          icon={<BarChart3 className="h-5 w-5" />}
+          subtitle="Track platform performance and user engagement metrics."
+        />
 
         <div className="grid md:grid-cols-4 gap-6">
           <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">

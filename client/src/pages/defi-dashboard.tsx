@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/PageHeader';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -150,21 +151,23 @@ export default function DeFiDashboard() {
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">DeFi Dashboard</h1>
-              <p className="text-gray-400">Manage your DeFi positions and earn yield</p>
-            </div>
-            <Button
-              onClick={handleRefresh}
-              disabled={isLoading}
-              variant="outline"
-              className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10"
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
-          </div>
+          <PageHeader
+            eyebrow="DeFi · yield positions"
+            title="DeFi Dashboard"
+            icon={<PieChart className="h-5 w-5" />}
+            subtitle="Manage your DeFi positions and earn yield."
+            actions={
+              <Button
+                onClick={handleRefresh}
+                disabled={isLoading}
+                variant="outline"
+                className="min-h-[44px] border-white/20 text-gray-900 dark:text-white hover:bg-white/10"
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            }
+          />
         </motion.div>
 
         {!isConnected && (

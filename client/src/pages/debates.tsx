@@ -1,6 +1,7 @@
 import { AvatarDebateHub } from '@/components/streaming/AvatarDebateHub';
 import { Link } from 'wouter';
 import { ArrowLeft, Sparkles } from 'lucide-react';
+import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 
 export default function Debates() {
@@ -16,15 +17,13 @@ export default function Debates() {
           </Link>
         </div>
         
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30">
-            <Sparkles className="w-6 h-6 text-purple-400" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-white">AI Avatar Debates</h1>
-            <p className="text-sm text-slate-400">Watch AI avatars debate hot topics in real-time</p>
-          </div>
-        </div>
+        <PageHeader
+          eyebrow="AI · live debate arena"
+          title="AI Avatar Debates"
+          icon={<Sparkles className="h-5 w-5" />}
+          subtitle="Watch AI avatars debate hot topics in real-time."
+          className="mb-6"
+        />
         
         <AvatarDebateHub />
       </div>

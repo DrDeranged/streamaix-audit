@@ -12,6 +12,8 @@ The project is built on a modern tech stack emphasizing an AI-Native aesthetic a
 ### UI/UX Design
 The frontend, built with React 18, TypeScript, TailwindCSS, shadcn/ui, and Radix UI, features an AI-Native aesthetic characterized by neural network visualizations, advanced glass morphism, iridescent borders, and 3D depth transforms. It supports both light and dark modes with a mobile-first responsive layout, using a consistent color scheme (Amber, Cyan, Emerald) for AI confidence visualization. Animations are powered by Framer Motion and custom CSS keyframes. A comprehensive design system ensures a unified visual experience, incorporating semantic surface elevations, brand-focused elements, and a neon color palette.
 
+A canonical `<PageHeader>` primitive (`client/src/components/PageHeader.tsx`) renders every internal page title with shared eyebrow / gradient title / subtitle / icon / actions / metric-chip slots and built-in mobile-first sizing. Showcased in `/style-guide`.
+
 ### Technical Implementation
 The backend uses Node.js with Express.js and TypeScript, leveraging Vite and esbuild. Content processing utilizes OpenAI Whisper for transcription, GPT-4o for premium analysis, and GPT-4o-mini for cost-effective background services. Audio extraction is handled by yt-dlp and ffmpeg. The system incorporates an idempotent auto-seed system for database consistency and employs a sophisticated cost optimization strategy for AI services, prioritizing GPT-4o-mini for most operations and aggressively caching expensive AI calls. PostgreSQL with Drizzle ORM is used for data management.
 

@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { PageHeader } from "@/components/PageHeader";
+import { Brain, RefreshCw, Plus, Trophy } from "lucide-react";
 
 const swatches = [
   { name: "Neon Purple", token: "neon-purple", value: "hsl(258, 84%, 62%)" },
@@ -36,6 +38,61 @@ export default function StyleGuide() {
             coherent.
           </p>
         </header>
+
+        {/* Page header primitive */}
+        <section className="space-y-3">
+          <div className="text-overline">Page header · canonical primitive</div>
+          <p className="text-sm text-muted-foreground max-w-2xl">
+            Every internal page renders its title through <code>&lt;PageHeader&gt;</code> so
+            spacing, gradient title treatment, and mobile sizing stay consistent.
+            Slots: eyebrow, icon, title, subtitle, actions, optional metric chips.
+          </p>
+
+          <div className="surface-1 rounded-xl p-5">
+            <PageHeader
+              eyebrow="AI · Reasoning chain"
+              title="Smart Insights"
+              icon={<Brain className="h-5 w-5" />}
+              subtitle="Reasoning-chain market intelligence — regime shifts, divergences, contrarian setups, and if-then sequences."
+              actions={
+                <>
+                  <Button variant="outline" size="sm" className="min-h-[44px]">
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Refresh
+                  </Button>
+                  <Button variant="gradient-glow" size="sm" className="min-h-[44px]">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create
+                  </Button>
+                </>
+              }
+            />
+          </div>
+
+          <div className="surface-1 rounded-xl p-5">
+            <PageHeader
+              eyebrow="Earn · open bounties"
+              title="Bounty Board"
+              icon={<Trophy className="h-5 w-5" />}
+              subtitle="Title-only variant with metric chips below — useful for hub pages."
+              metrics={[
+                { label: "Active", value: "128", tone: "purple" },
+                { label: "Pool", value: "$48.2K", tone: "emerald" },
+                { label: "Won this week", value: "23", tone: "cyan" },
+                { label: "Avg payout", value: "$420", tone: "amber" },
+              ]}
+            />
+          </div>
+
+          <div className="surface-1 rounded-xl p-5">
+            <PageHeader
+              align="center"
+              eyebrow="Centered variant"
+              title="Marketing-style header"
+              subtitle="Use sparingly — for landing-style hubs that benefit from a centered title."
+            />
+          </div>
+        </section>
 
         {/* Color palette */}
         <section className="space-y-3">

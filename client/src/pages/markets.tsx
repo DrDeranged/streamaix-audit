@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Plus, TrendingUp, Filter, Search, Sparkles, ExternalLink, Home, ArrowLeft, Wallet, Copy, AlertTriangle, Trophy, Award, PieChart, Bot, Swords } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/PageHeader";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -189,23 +190,15 @@ export default function Markets() {
       <Navigation />
       <div className="section-container pt-24">
 
-        {/* Hero Header - Compact */}
-        <div className="relative mb-6 overflow-hidden rounded-xl bg-gradient-to-br from-purple-900/30 via-fuchsia-900/20 to-cyan-900/30 border border-purple-500/20 p-4 animate-fade-in">
-          {/* Static background effects - removed animations for performance */}
-          <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:30px_30px]" />
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
-          <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
-          
-          <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="flex-1">
-              <h1 className="text-2xl md:text-3xl font-bold mb-2">
-                <span className="text-white">Prediction </span>
-                <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">Markets</span>
-              </h1>
-              <p className="text-sm text-gray-400">Trade the future. Predict outcomes. Earn STREAM.</p>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        {/* Page header */}
+        <PageHeader
+          eyebrow="On-chain · Base"
+          title="Prediction Markets"
+          icon={<Sparkles className="h-5 w-5" />}
+          subtitle="Trade the future. Predict outcomes. Earn STREAM."
+          className="mb-6"
+          actions={
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
             {/* Wallet Button */}
             {!isConnected ? (
               <Button
@@ -301,8 +294,8 @@ export default function Markets() {
               Create Market
             </Button>
             </div>
-          </div>
-        </div>
+          }
+        />
 
         {/* Stats - Enhanced with Animated Counters */}
         {stats && (

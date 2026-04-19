@@ -27,6 +27,7 @@ import {
 } from 'recharts';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/PageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -3587,19 +3588,14 @@ export default function PortfolioDashboard() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500/20 to-cyan-500/20 border border-purple-500/20">
-                <Briefcase className="w-7 h-7 text-purple-400" />
-              </div>
-              <div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-white">
-                  Portfolio Command Center
-                </h1>
-                <p className="text-sm text-gray-500">Unified asset management with AI intelligence</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <PageHeader
+            eyebrow="Unified · multi-asset"
+            title="Portfolio Command Center"
+            icon={<Briefcase className="h-5 w-5" />}
+            subtitle="Unified asset management with AI intelligence."
+            className="mb-6"
+            actions={
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
               {/* Live connection status indicator */}
               {assets.length > 0 && (
                 <TooltipProvider>
@@ -3688,8 +3684,9 @@ export default function PortfolioDashboard() {
               {activePortfolioId && (
                 <AddAssetDialog portfolioId={activePortfolioId} onSuccess={() => refetchPortfolio()} />
               )}
-            </div>
-          </div>
+              </div>
+            }
+          />
           <div className="h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent mt-4" />
 
           {portfolios.length === 0 ? (

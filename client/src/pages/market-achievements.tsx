@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
+import { PageHeader } from "@/components/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Trophy, Award, Target, Zap, TrendingUp, Users, Star, ArrowLeft, Lock, CheckCircle2, Sparkles } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
@@ -163,11 +164,14 @@ export default function MarketAchievements() {
               >
                 <Trophy className="w-16 h-16 text-purple-400 drop-shadow-[0_0_20px_rgba(192,132,252,0.7)]" />
               </motion.div>
-              <h1 className="text-6xl font-bold bg-gradient-to-r from-purple-400 via-amber-400 to-cyan-400 bg-clip-text text-transparent drop-shadow-lg">
-                Achievements
-              </h1>
+              <PageHeader
+                align="center"
+                eyebrow="Trading rewards · badges"
+                title="Achievements"
+                icon={<Trophy className="h-5 w-5" />}
+                subtitle="Unlock rewards and showcase your trading prowess."
+              />
             </div>
-            <p className="text-slate-400 text-lg">Unlock rewards and showcase your trading prowess</p>
 
             {/* Progress Bar */}
             <motion.div

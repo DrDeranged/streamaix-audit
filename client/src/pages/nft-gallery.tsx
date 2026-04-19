@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -159,29 +160,31 @@ export default function NFTGallery() {
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">NFT Gallery</h1>
-              <p className="text-gray-400">Your AI-generated summary NFTs and marketplace</p>
-            </div>
-            <Button
-              onClick={handleMintDemo}
-              disabled={isMinting || !isConnected}
-              className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600"
-            >
-              {isMinting ? (
-                <>
-                  <Zap className="h-4 w-4 mr-2 animate-pulse" />
-                  Minting...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Mint Demo NFT
-                </>
-              )}
-            </Button>
-          </div>
+          <PageHeader
+            eyebrow="On-chain · summary NFTs"
+            title="NFT Gallery"
+            icon={<Sparkles className="h-5 w-5" />}
+            subtitle="Your AI-generated summary NFTs and marketplace."
+            actions={
+              <Button
+                onClick={handleMintDemo}
+                disabled={isMinting || !isConnected}
+                className="min-h-[44px] bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600"
+              >
+                {isMinting ? (
+                  <>
+                    <Zap className="h-4 w-4 mr-2 animate-pulse" />
+                    Minting...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Mint Demo NFT
+                  </>
+                )}
+              </Button>
+            }
+          />
         </motion.div>
 
         {/* Statistics */}

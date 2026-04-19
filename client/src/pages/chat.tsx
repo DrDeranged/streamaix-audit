@@ -5,6 +5,7 @@ import { Send, Sparkles, Loader2, Bot, User, ArrowLeft, Trash2, Download, Copy, 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { PageHeader } from '@/components/PageHeader';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { getAuthToken } from '@/lib/auth';
@@ -127,22 +128,14 @@ export default function ChatPage() {
                 Back
               </Button>
               
-              <div className="flex-1 text-center">
-                <div className="flex items-center justify-center gap-3 mb-2">
-                  <motion.div
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="p-3 bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 rounded-2xl shadow-2xl"
-                  >
-                    <Bot className="h-8 w-8 text-white" />
-                  </motion.div>
-                  <h1 className="text-4xl font-orbitron font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
-                    AI Assistant
-                  </h1>
-                </div>
-                <p className="text-gray-400">
-                  AI-Powered • Ask about platform features, market analysis, or investment insights
-                </p>
+              <div className="flex-1">
+                <PageHeader
+                  align="center"
+                  eyebrow="AI · platform-wide assistant"
+                  title="AI Assistant"
+                  icon={<Bot className="h-5 w-5" />}
+                  subtitle="Ask about platform features, market analysis, or investment insights."
+                />
               </div>
               
               <div className="w-24" />

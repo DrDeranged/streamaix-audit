@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { PageHeader } from '@/components/PageHeader';
 import { useLocation, Link } from 'wouter';
 import { motion } from 'framer-motion';
 import { Trophy, Users, Clock, Coins, Medal, Crown, ArrowRight, ArrowLeft, Plus, TrendingUp, Target, Zap, Calendar, DollarSign, Timer } from 'lucide-react';
@@ -306,25 +307,23 @@ export default function LeaguesPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 mb-2">
-                Prediction Leagues
-              </h1>
-              <p className="text-gray-400">
-                Compete with other traders in weekly competitions for STREAM rewards
-              </p>
-            </div>
-            
-            <Button 
-              className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500"
-              onClick={() => setLocation('/markets')}
-              data-testid="btn-trade-now"
-            >
-              <TrendingUp className="w-4 h-4 mr-2" />
-              Trade Now
-            </Button>
-          </div>
+          <PageHeader
+            eyebrow="Compete · weekly rewards"
+            title="Prediction Leagues"
+            icon={<Trophy className="h-5 w-5" />}
+            subtitle="Compete with other traders in weekly competitions for STREAM rewards."
+            className="mb-4"
+            actions={
+              <Button
+                className="min-h-[44px] bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500"
+                onClick={() => setLocation('/markets')}
+                data-testid="btn-trade-now"
+              >
+                <TrendingUp className="w-4 h-4 mr-2" />
+                Trade Now
+              </Button>
+            }
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <Card className="bg-gradient-to-br from-purple-900/40 to-purple-800/20 border-purple-500/30 p-4">
