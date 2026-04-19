@@ -84,6 +84,71 @@ export const generateReplayAudioSchema = z.object({
   count: z.number().int().positive().max(20).optional(),
 }).passthrough();
 
+// Empty-body endpoints — accept any object, but reject string/array/null bodies
+export const emptyBodySchema = z.object({}).passthrough();
+
+// Forms / mutations
+export const streamWatchSchema = z.object({
+  streamId: nonEmpty('streamId').max(100),
+  minutesWatched: z.number().positive().max(60 * 24),
+}).passthrough();
+
+export const voiceConversationSchema = z.object({
+  streamId: nonEmpty('streamId').max(100),
+}).passthrough();
+
+export const bountyClaimSchema = z.object({
+  claimerWallet: z.string().max(200).optional(),
+  blockchainTxHash: z.string().max(200).optional(),
+}).passthrough();
+
+export const summaryProcessSchema = z.object({
+  forceReprocess: z.boolean().optional(),
+}).passthrough();
+
+export const forceRefreshSchema = z.object({
+  forceRefresh: z.boolean().optional(),
+}).passthrough();
+
+export const botStakeSchema = z.object({
+  avatarId: nonEmpty('avatarId').max(100),
+  amount: z.number().positive().max(1_000_000_000),
+}).passthrough();
+
+export const botWithdrawSchema = z.object({
+  stakeId: nonEmpty('stakeId').max(100),
+}).passthrough();
+
+export const predictionMarketTradeSchema = z.object({
+  amount: z.number().positive().max(1_000_000_000),
+  outcome: z.enum(['yes', 'no', 'YES', 'NO', 'Yes', 'No']),
+  tradeType: z.enum(['buy', 'sell', 'BUY', 'SELL']),
+}).passthrough();
+
+export const aiAgentTradeSchema = z.object({
+  marketId: nonEmpty('marketId').max(100),
+  predictionId: nonEmpty('predictionId').max(100),
+  shares: z.number().positive().max(1_000_000_000),
+}).passthrough();
+
+export const streamPredictionSchema = z.object({
+  predictionText: nonEmpty('predictionText').max(2000),
+  confidence: z.number().min(0).max(100).optional(),
+  timestamp: z.union([z.string(), z.number()]).optional(),
+}).passthrough();
+
+export const convertToMarketSchema = z.object({
+  deadline: z.union([z.string(), z.number()]),
+}).passthrough();
+
+export const transcribeSchema = z.object({
+  audioBase64: nonEmpty('audioBase64').max(5_000_000),
+}).passthrough();
+
+export const channelPointsRedeemSchema = z.object({
+  rewardId: nonEmpty('rewardId').max(100),
+}).passthrough();
+
 export const debateNextSchema = z.object({
   previousStatement: z.string().max(4000).optional(),
   prompt: z.string().max(2000).optional(),

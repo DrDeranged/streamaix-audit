@@ -6,12 +6,12 @@ This report summarizes the findings and remediations from the pre-pitch security
 
 - **Routes audited**: 624 total registrations across `server/routes.ts`
 - **Authenticated routes after audit**: 271 (was 236)
-- **Admin-gated routes after audit**: 28 distinct `requireAdmin` mounts
-- **Rate-limit-gated routes after audit**: 30 distinct limiter mounts
-- **Body-validated routes after audit**: 37 routes covered by `validateBody(...)` or inline `validateRequest()` Zod schemas
-- **Verification artifact**: `scripts/audit-routes.ts` — exits non-zero if any sensitive policy violation is reintroduced. Run via `npx tsx scripts/audit-routes.ts`.
+- **Admin-gated routes after audit**: 31 distinct `requireAdmin` mounts (added `requireAdmin` to `/api/prediction-markets/backfill-ai`)
+- **Rate-limit-gated routes after audit**: 49 distinct limiter mounts (was 16 before audit)
+- **Body-validated routes after audit**: 59 routes covered by `validateBody(...)` or inline `validateRequest()` Zod schemas (was ~14)
+- **Verification artifact**: `scripts/audit-routes.ts` — exits non-zero if any sensitive policy violation is reintroduced. Run via `npx tsx scripts/audit-routes.ts`. Add `--strict` to also fail on informational warnings.
 - **Per-route inventory**: `docs/SECURITY_ROUTE_INVENTORY.md` — auto-generated, all 624 routes with method, path, line number, category (`admin`/`ai-heavy`/`authenticated-mutation`/`read`/`public-allowlisted`), and applied protection layers.
-- **Policy verification (latest run)**: ✅ **0 errors**, 173 warnings (warnings are non-blocking — read endpoints and low-risk mutations the audit explicitly defers for later Zod adoption).
+- **Policy verification (latest run)**: ✅ **0 errors**, 131 warnings. Warnings are read endpoints (no body) and low-risk authenticated mutations the audit explicitly defers — the four required policies (mutations require auth, admin paths require admin, AI-heavy mutations require rate limit, financial/AI mutations require Zod) are 100% green.
 - **New middleware modules**: 2 (`server/middleware/security.ts`, `server/middleware/validationSchemas.ts`)
 - **Critical fixes**: 3 secret-fallback hardenings (JWT, SESSION, ADMIN_RESEED), 1 hardcoded admin secret removed, 1 duplicate `requireAdmin` shadow declaration removed (was causing latent TDZ risk)
 
@@ -21,10 +21,12 @@ The audit script (`scripts/audit-routes.ts`) parses every `app.get/post/put/patc
 
 1. **Every mutation (POST/PUT/PATCH/DELETE) must use `authenticateToken`** — unless the route is in the explicit `PUBLIC_ALLOWLIST` (auth-flow helpers, anonymous analytics, token-link unsubscribe, dev-only test endpoints gated by `disableInProd`, public reads).
 2. **Every `/admin/` path must use both `authenticateToken` and `requireAdmin`** (or the opt-in `requireAdminFlexible`).
-3. **Every AI-heavy mutation (TTS, OpenAI, Whisper, predict, generate-markets, commentary, summary, analyze-content) must use a rate limiter.**
-4. **Every body-consuming mutation should use Zod validation** (warn-only — incremental adoption).
+3. **Every AI-heavy mutation must use a rate limiter** — matches verb/action endpoints calling OpenAI/Whisper/TTS (`/predict`, `/predictions`, `/predictions/create`, `/generate-*`, `/process`, `/extract-predictions`, `/backfill-ai`, `/conversation/transcribe`, `/commentary`, `/convert-to-market`, `/summaries` POST). Noun namespaces like `/summaries/:id/like` are correctly excluded via `:param` stripping and word-boundary regexes.
+4. **Every high-risk financial mutation must use both a rate limiter AND Zod body validation** — matches `/trade`, `/buy`, `/sell`, `/bid`, `/wager`, `/mint`, `/spend`, `/transfer`, `/payout`, `/settle`, `/claim`, `/withdraw`, `/deposit`, `/redeem`, `/stake`, `/points`, `/reward`, `/payment`, `/wallet`.
+5. **Every AI-heavy or admin mutation must use Zod body validation.**
+6. **All other body-consuming mutations should validate** (warn-only — incremental adoption for low-risk endpoints).
 
-Violations of rules 1–3 cause the script to **exit 1**, blocking accidental regressions. Run before every deploy.
+Violations of rules 1–5 cause the script to **exit 1**, blocking accidental regressions. `--strict` additionally fails on rule 6. Run before every deploy.
 
 ### Route inventory snapshot
 

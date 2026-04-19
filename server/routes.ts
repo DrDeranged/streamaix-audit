@@ -29,6 +29,20 @@ import {
   testTtsSchema,
   testTtsAudioSchema,
   generateReplayAudioSchema,
+  emptyBodySchema,
+  streamWatchSchema,
+  voiceConversationSchema,
+  bountyClaimSchema,
+  summaryProcessSchema,
+  forceRefreshSchema,
+  botStakeSchema,
+  botWithdrawSchema,
+  predictionMarketTradeSchema,
+  aiAgentTradeSchema,
+  streamPredictionSchema,
+  convertToMarketSchema,
+  transcribeSchema,
+  channelPointsRedeemSchema,
 } from "./middleware/validationSchemas";
 import { cacheService } from "./services/cacheService";
 import { StreamProcessor } from "./services/streamProcessor";
@@ -585,7 +599,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Process daily login (called when user logs in)
-  app.post('/api/points/daily-login', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/points/daily-login', authenticateToken, mediumLimit, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user!.id;
     const result = await pointsService.processDailyLogin(userId);
     
@@ -598,7 +612,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Award points for stream watching (called periodically by frontend)
-  app.post('/api/points/stream-watch', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/points/stream-watch', authenticateToken, mediumLimit, validateBody(streamWatchSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user!.id;
     const { streamId, minutesWatched } = req.body;
     
@@ -615,7 +629,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Award points for voice conversation
-  app.post('/api/points/voice-conversation', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/points/voice-conversation', authenticateToken, mediumLimit, validateBody(voiceConversationSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user!.id;
     const { streamId } = req.body;
     
@@ -881,7 +895,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Create new summary
-  app.post('/api/summaries', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/summaries', authenticateToken, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     const validation = validateRequest(createSummarySchema, req.body);
     if (!validation.success) {
       return res.status(400).json({ error: validation.error });
@@ -1054,7 +1068,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Claim STREAM reward for referral
-  app.post('/api/referrals/claim/:signupId', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/referrals/claim/:signupId', authenticateToken, mediumLimit, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user!.id;
     const { signupId } = req.params;
 
@@ -1704,7 +1718,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Claim a bounty (Web3)
-  app.post('/api/bounties/:id/claim', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/bounties/:id/claim', authenticateToken, mediumLimit, validateBody(bountyClaimSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const bounty = await storage.getBounty(req.params.id);
     if (!bounty) {
       return res.status(404).json({ error: 'Bounty not found' });
@@ -3716,7 +3730,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =============================================================================
 
   // Start processing a summary
-  app.post('/api/summaries/:id/process', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/summaries/:id/process', authenticateToken, strictLimit, validateBody(summaryProcessSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const summaryId = req.params.id;
     const summary = await storage.getSummary(summaryId);
     
@@ -4676,7 +4690,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Trigger avatar trading cycle (admin only)
-  app.post('/api/admin/avatar-trading-cycle', authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/admin/avatar-trading-cycle', authenticateToken, requireAdmin, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
       const { avatarMarketParticipationService } = await import('./services/avatarMarketParticipationService');
       const result = await avatarMarketParticipationService.runTradingCycle();
@@ -4881,7 +4895,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Generate ML-powered event impact predictions
-  app.post('/api/events/:eventId/predictions', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/events/:eventId/predictions', authenticateToken, mediumLimit, validateBody(forceRefreshSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { eventId } = req.params;
     const { forceRefresh = false } = req.body;
     
@@ -7818,7 +7832,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Admin reseed endpoint - requires admin auth or secret key
   console.log('📍 Registering admin reseed endpoint: POST /api/admin/reseed');
-  app.post('/api/admin/reseed', authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/admin/reseed', authenticateToken, requireAdmin, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     console.log('🔄 Admin reseed endpoint hit!');
     // Import and run auto-seed
     try {
@@ -7853,7 +7867,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   console.log('✅ Admin reseed endpoint registered');
 
   // Admin endpoint to retroactively generate TTS audio for existing stream replays
-  app.post('/api/admin/generate-replay-audio', authenticateToken, requireAdmin, validateBody(generateReplayAudioSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/admin/generate-replay-audio', authenticateToken, requireAdmin, strictLimit, validateBody(generateReplayAudioSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { count = 2 } = req.body;
     try {
       // Get streams that have recordings but no audio, ordered by most recent
@@ -10376,7 +10390,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // POST /api/bot-trading/stake - Stake STREAM points on a bot
-  app.post('/api/bot-trading/stake', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/bot-trading/stake', authenticateToken, mediumLimit, validateBody(botStakeSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({ error: 'Authentication required' });
@@ -10419,7 +10433,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // POST /api/bot-trading/withdraw - Withdraw stake from a bot
-  app.post('/api/bot-trading/withdraw', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/bot-trading/withdraw', authenticateToken, mediumLimit, validateBody(botWithdrawSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({ error: 'Authentication required' });
@@ -10771,7 +10785,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Execute a trade (buy/sell shares) for authenticated users
-  app.post("/api/prediction-markets/:marketId/trade", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/prediction-markets/:marketId/trade", authenticateToken, mediumLimit, validateBody(predictionMarketTradeSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { amount, outcome, tradeType } = req.body;
     const marketId = req.params.marketId;
     const userId = req.user!.id;
@@ -11100,7 +11114,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
   
   // Extract predictions from summary content
-  app.post("/api/summaries/:summaryId/extract-predictions", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/summaries/:summaryId/extract-predictions", authenticateToken, strictLimit, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { extractPredictionsFromSummary } = await import('./services/predictionExtractionService');
     
     const summary = await storage.getSummary(req.params.summaryId);
@@ -11181,7 +11195,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Backfill AI predictions for markets
-  app.post("/api/prediction-markets/backfill-ai", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/prediction-markets/backfill-ai", authenticateToken, requireAdmin, strictLimit, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
       const { aiPredictionBackfillService } = await import('./services/aiPredictionBackfillService');
       
@@ -11759,7 +11773,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Generate AI predictions for a market
-  app.post("/api/ai-agents/predict/:marketId", authenticateToken, requireAdmin, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/ai-agents/predict/:marketId", authenticateToken, requireAdmin, strictLimit, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { aiAgentService } = await import('./services/aiAgentService');
     const predictions = await aiAgentService.generatePredictionsForMarket(req.params.marketId);
     
@@ -11782,7 +11796,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Execute AI agent trade
-  app.post("/api/ai-agents/:agentId/trade", authenticateToken, requireAdmin, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/ai-agents/:agentId/trade", authenticateToken, requireAdmin, strictLimit, validateBody(aiAgentTradeSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { aiAgentService } = await import('./services/aiAgentService');
     const { marketId, predictionId, shares } = req.body;
     
@@ -15538,7 +15552,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Submit a prediction during stream
-  app.post("/api/streams/:id/predictions", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/predictions", authenticateToken, mediumLimit, validateBody(streamPredictionSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -15640,7 +15654,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Generate stream summary (VOD)
-  app.post("/api/streams/:id/generate-summary", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/generate-summary", authenticateToken, strictLimit, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -15896,7 +15910,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Create prediction from stream
-  app.post("/api/streams/:id/predictions/create", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/predictions/create", authenticateToken, mediumLimit, validateBody(streamPredictionSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -15917,7 +15931,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Convert stream prediction to market
-  app.post("/api/streams/predictions/:predictionId/convert-to-market", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/predictions/:predictionId/convert-to-market", authenticateToken, strictLimit, validateBody(convertToMarketSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -15998,7 +16012,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Transcribe audio (for human speech-to-text)
-  app.post("/api/streams/:id/conversation/transcribe", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/conversation/transcribe", authenticateToken, strictLimit, validateBody(transcribeSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -16883,7 +16897,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // CHANNEL POINTS - Earn and redeem viewer rewards
   // =============================================================================
 
-  app.post("/api/streams/:id/channel-points/redeem", authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/channel-points/redeem", authenticateToken, mediumLimit, validateBody(channelPointsRedeemSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }

@@ -70,15 +70,50 @@ const PUBLIC_ALLOWLIST = new Set<string>([
   'POST /api/test-post-echo',
 ]);
 
+// AI-heavy patterns are matched against the path AFTER stripping :params,
+// so they won't false-positive on parameter names like ":summaryId".
+// These match VERB / ACTION endpoints that synchronously call OpenAI / TTS /
+// Whisper, NOT noun namespaces like /summaries/:id/like or /predictions/:id/vote.
 const AI_HEAVY_PATTERNS = [
-  /openai/i,
-  /tts/i,
-  /whisper/i,
-  /generate-?market/i,
-  /predict/i,
-  /analyze-content/i,
-  /commentary/i,
-  /summary/i,
+  /\/openai\b/i,
+  /\/tts\b/i,
+  /\/whisper\b/i,
+  /\/transcrib/i,
+  /\/generate-/i, // generate-markets, generate-summary, generate-audio, generate-replay-audio
+  /\/backfill-?ai\b/i,
+  /\/extract-?predictions?\b/i,
+  /\/predict(?:\/|$)/i, // /predict at end OR /predict/:param prefix segment
+  /\/predictions(?:$|\/create$)/i, // POST /predictions, POST /predictions/create
+  /\/process$/i, // /summaries/_/process (AI re-process)
+  /\/commentary(?:$|\/start$)/i,
+  /\/analyze-?content/i,
+  /\/summaries$/i, // POST /api/summaries triggers AI processing
+  /\/convert-to-market$/i, // creates market via AI from prediction
+  /\/conversation\/transcribe/i,
+];
+
+// High-risk mutation patterns: STREAM-spending, on-chain writes, financial txns
+const HIGH_RISK_PATTERNS = [
+  /\/trade\b/i,
+  /\/buy\b/i,
+  /\/sell\b/i,
+  /\/bid\b/i,
+  /\/wager\b/i,
+  /\/mint\b/i,
+  /\/spend\b/i,
+  /\/transfer\b/i,
+  /\/payout\b/i,
+  /\/settle\b/i,
+  /\/claim\b/i,
+  /\/withdraw\b/i,
+  /\/deposit\b/i,
+  /\/redeem\b/i,
+  /\/commit-?buy\b/i,
+  /\/points\b/i,
+  /\/reward/i,
+  /\/payment/i,
+  /\/wallet/i,
+  /\/stake\b/i,
 ];
 
 interface Route {
@@ -96,6 +131,7 @@ interface Route {
   isMutation: boolean;
   isAdminPath: boolean;
   isAiHeavy: boolean;
+  isHighRisk: boolean;
 }
 
 const src = readFileSync(ROUTES_FILE, 'utf8');
@@ -131,9 +167,12 @@ for (let i = 0; i < lines.length; i++) {
       // validateRequest is called inside the handler, not in the chain — scan a wider window
       lines.slice(i, Math.min(i + 30, lines.length)).join('\n'),
     ),
+    // Strip route params (":foo") so pattern matching only sees real path
+    // segments — prevents false positives like ":summaryId" hitting /summary/.
     isMutation: ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method),
     isAdminPath: /\/admin\//i.test(path),
-    isAiHeavy: AI_HEAVY_PATTERNS.some((re) => re.test(path)),
+    isAiHeavy: AI_HEAVY_PATTERNS.some((re) => re.test(path.replace(/:\w+/g, '_'))),
+    isHighRisk: HIGH_RISK_PATTERNS.some((re) => re.test(path.replace(/:\w+/g, '_'))),
   });
 }
 
@@ -180,22 +219,57 @@ for (const r of routes) {
     }
   }
 
-  // 3. AI-heavy endpoints (mutations) should have a rate limiter
+  // 3. AI-heavy endpoints (mutations) MUST have a rate limiter
   if (r.isMutation && r.isAiHeavy && !r.hasRateLimit) {
     issues.push({
-      severity: 'warn',
+      severity: 'error',
       category: 'ai_endpoint_without_rate_limit',
       route: key,
-      detail: `AI/heavy endpoint missing rate limiter at line ${r.line}`,
+      detail: `AI/heavy mutation missing rate limiter at line ${r.line}`,
     });
   }
 
-  // 4. Body-consuming mutations should validate (warn — incremental adoption)
+  // 4. AI-heavy + high-risk (financial/STREAM-spending) mutations MUST validate body
+  const needsStrictValidation =
+    r.isMutation &&
+    (r.isAiHeavy || r.isHighRisk || r.isAdminPath) &&
+    !isPublic &&
+    r.method !== 'DELETE' &&
+    !r.hasValidateBody &&
+    !r.hasValidateRequest;
+
+  if (needsStrictValidation) {
+    issues.push({
+      severity: 'error',
+      category: r.isAiHeavy
+        ? 'ai_endpoint_without_validation'
+        : r.isHighRisk
+        ? 'high_risk_without_validation'
+        : 'admin_without_validation',
+      route: key,
+      detail: `High-risk mutation missing Zod body validation at line ${r.line}`,
+    });
+  }
+
+  // 5. High-risk mutations should also be rate-limited (error)
+  if (r.isMutation && r.isHighRisk && !r.hasRateLimit && !isPublic) {
+    issues.push({
+      severity: 'error',
+      category: 'high_risk_without_rate_limit',
+      route: key,
+      detail: `High-risk financial mutation missing rate limiter at line ${r.line}`,
+    });
+  }
+
+  // 6. Other body-consuming mutations should validate (warn — incremental adoption)
   if (
     r.isMutation &&
     !r.hasValidateBody &&
     !r.hasValidateRequest &&
     !isPublic &&
+    !r.isAiHeavy &&
+    !r.isHighRisk &&
+    !r.isAdminPath &&
     r.method !== 'DELETE'
   ) {
     issues.push({
