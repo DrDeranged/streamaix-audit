@@ -1198,7 +1198,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =============================================================================
 
   // Follow a user (bounty creator)
-  app.post('/api/users/:userId/follow', asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/users/:userId/follow', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ error: 'Authentication required' });
     }
@@ -1215,7 +1215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Unfollow a user
-  app.delete('/api/users/:userId/follow', asyncHandler(async (req: Request, res: Response) => {
+  app.delete('/api/users/:userId/follow', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ error: 'Authentication required' });
     }
@@ -1262,7 +1262,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Follow a category
-  app.post('/api/categories/:category/follow', asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/categories/:category/follow', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ error: 'Authentication required' });
     }
@@ -1275,7 +1275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Unfollow a category
-  app.delete('/api/categories/:category/follow', asyncHandler(async (req: Request, res: Response) => {
+  app.delete('/api/categories/:category/follow', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ error: 'Authentication required' });
     }
@@ -4881,7 +4881,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Generate ML-powered event impact predictions
-  app.post('/api/events/:eventId/predictions', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/events/:eventId/predictions', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { eventId } = req.params;
     const { forceRefresh = false } = req.body;
     
@@ -4947,7 +4947,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Generate trading signals based on event predictions
-  app.post('/api/events/:eventId/signals', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/events/:eventId/signals', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { eventId } = req.params;
     const { predictionId, minConfidence = 60, maxSignals = 10 } = req.body;
     
@@ -6843,7 +6843,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Screen patterns across multiple assets
-  app.post('/api/patterns/screen', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/patterns/screen', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     const filter = req.body || {};
     
     console.log('🔍 API Call: POST /api/patterns/screen - Pattern screening with filter:', filter);
@@ -6918,7 +6918,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Acknowledge a pattern alert
-  app.post('/api/patterns/alerts/:alertId/acknowledge', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/patterns/alerts/:alertId/acknowledge', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     const alertId = req.params.alertId;
     
     console.log(`✅ API Call: POST /api/patterns/alerts/${alertId}/acknowledge`);
@@ -7002,7 +7002,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Update pattern recognition service configuration
-  app.post('/api/patterns/config', optionalAuth, asyncHandler(async (req: Request, res: Response) => {
+  app.post('/api/patterns/config', authenticateToken, mediumLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     const configUpdates = req.body;
     
     console.log('⚙️ API Call: POST /api/patterns/config - Update configuration:', configUpdates);

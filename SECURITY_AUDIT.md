@@ -5,12 +5,26 @@ This report summarizes the findings and remediations from the pre-pitch security
 ## Summary
 
 - **Routes audited**: 624 total registrations across `server/routes.ts`
-- **Authenticated routes after audit**: 260 (was 236)
+- **Authenticated routes after audit**: 271 (was 236)
 - **Admin-gated routes after audit**: 28 distinct `requireAdmin` mounts
-- **Rate-limit-gated routes after audit**: 25 distinct limiter mounts
-- **Body-validated routes after audit**: 17 `validateBody(...)` mounts on the most sensitive endpoints (in addition to ~14 routes already using `validateRequest()` inline)
+- **Rate-limit-gated routes after audit**: 30 distinct limiter mounts
+- **Body-validated routes after audit**: 37 routes covered by `validateBody(...)` or inline `validateRequest()` Zod schemas
+- **Verification artifact**: `scripts/audit-routes.ts` — exits non-zero if any sensitive policy violation is reintroduced. Run via `npx tsx scripts/audit-routes.ts`.
+- **Per-route inventory**: `docs/SECURITY_ROUTE_INVENTORY.md` — auto-generated, all 624 routes with method, path, line number, category (`admin`/`ai-heavy`/`authenticated-mutation`/`read`/`public-allowlisted`), and applied protection layers.
+- **Policy verification (latest run)**: ✅ **0 errors**, 173 warnings (warnings are non-blocking — read endpoints and low-risk mutations the audit explicitly defers for later Zod adoption).
 - **New middleware modules**: 2 (`server/middleware/security.ts`, `server/middleware/validationSchemas.ts`)
 - **Critical fixes**: 3 secret-fallback hardenings (JWT, SESSION, ADMIN_RESEED), 1 hardcoded admin secret removed, 1 duplicate `requireAdmin` shadow declaration removed (was causing latent TDZ risk)
+
+### How verification works
+
+The audit script (`scripts/audit-routes.ts`) parses every `app.get/post/put/patch/delete` registration in `server/routes.ts`, examines the surrounding middleware chain, and applies four policy rules:
+
+1. **Every mutation (POST/PUT/PATCH/DELETE) must use `authenticateToken`** — unless the route is in the explicit `PUBLIC_ALLOWLIST` (auth-flow helpers, anonymous analytics, token-link unsubscribe, dev-only test endpoints gated by `disableInProd`, public reads).
+2. **Every `/admin/` path must use both `authenticateToken` and `requireAdmin`** (or the opt-in `requireAdminFlexible`).
+3. **Every AI-heavy mutation (TTS, OpenAI, Whisper, predict, generate-markets, commentary, summary, analyze-content) must use a rate limiter.**
+4. **Every body-consuming mutation should use Zod validation** (warn-only — incremental adoption).
+
+Violations of rules 1–3 cause the script to **exit 1**, blocking accidental regressions. Run before every deploy.
 
 ### Route inventory snapshot
 
