@@ -121,6 +121,15 @@ function PostCard({ post }: { post: AvatarPost }) {
   const directionColor = isYes ? "text-emerald-400" : "text-rose-400";
   const directionIcon = isYes ? <TrendingUp className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />;
   const meta = post.metadata;
+  const ACTION_LABELS: Record<string, string> = {
+    opened_position: "Opened position",
+    closed_position: "Closed position",
+    staked: "Staked",
+    insight: "Posted insight",
+    user_reply: "Replied",
+    avatar_reply: "Replied",
+  };
+  const actionLabel = ACTION_LABELS[post.action] ?? post.action.replace(/_/g, " ");
 
   return (
     <motion.div
@@ -160,6 +169,9 @@ function PostCard({ post }: { post: AvatarPost }) {
                 )}
                 <span className="text-xs text-slate-600">·</span>
                 <span className="text-xs text-slate-500">{formatRelative(post.createdAt)}</span>
+                <Badge variant="secondary" className="text-[10px] py-0 px-1.5 bg-slate-800/60 text-slate-300 border-slate-700">
+                  {actionLabel}
+                </Badge>
                 {post.outcome && (
                   <Badge variant="outline" className={`ml-auto gap-1 ${directionColor} border-current`}>
                     {directionIcon}
@@ -277,6 +289,35 @@ export default function AvatarFeedPage() {
         const msg = JSON.parse(e.data) as FeedWsEvent;
         if (msg.type === "new_post") {
           setLivePosts((prev) => [msg.payload, ...prev].slice(0, 50));
+        } else if (msg.type === "new_reply") {
+          const reply = msg.payload;
+          if (reply.parentPostId) {
+            qc.setQueryData<RepliesResponse>(
+              ["/api/avatar-feed", reply.parentPostId, "replies"],
+              (old) => {
+                if (!old) return { success: true, replies: [reply] };
+                if (old.replies.some((r) => r.id === reply.id)) return old;
+                return { ...old, replies: [...old.replies, reply] };
+              },
+            );
+            qc.setQueryData<{ pages: FeedPage[]; pageParams: unknown[] }>(
+              ["/api/avatar-feed"],
+              (old) => {
+                if (!old) return old;
+                return {
+                  ...old,
+                  pages: old.pages.map((page) => ({
+                    ...page,
+                    posts: page.posts.map((p) =>
+                      p.id === reply.parentPostId
+                        ? { ...p, replyCount: p.replyCount + 1 }
+                        : p,
+                    ),
+                  })),
+                };
+              },
+            );
+          }
         } else if (msg.type === "like_updated") {
           qc.setQueryData<{ pages: FeedPage[]; pageParams: unknown[] }>(
             ["/api/avatar-feed"],
@@ -327,7 +368,9 @@ export default function AvatarFeedPage() {
       ...livePosts,
       ...((feed.data?.pages ?? []).flatMap((p) => p.posts)),
     ];
-    return all.filter((p) => (seen.has(p.id) ? false : (seen.add(p.id), true)));
+    return all
+      .filter((p) => (seen.has(p.id) ? false : (seen.add(p.id), true)))
+      .slice(0, 100);
   }, [livePosts, feed.data]);
 
   return (
