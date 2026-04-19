@@ -14,7 +14,49 @@ const openai = process.env.OPENAI_API_KEY
   ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   : null;
 
-type Broadcaster = (event: { type: string; payload: any }) => void;
+export interface FeedPostMetadata {
+  shares?: number;
+  positionSize?: number;
+  marketQuestion?: string;
+  avatarName?: string;
+  avatarHandle?: string | null;
+  avatarImageUrl?: string | null;
+  isUserReply?: boolean;
+  inReplyToUser?: string;
+  backfilled?: boolean;
+}
+
+export interface FeedPostDTO {
+  id: string;
+  avatarId: string;
+  avatarName: string;
+  avatarHandle: string | null;
+  avatarImageUrl: string | null;
+  marketId: string | null;
+  marketQuestion: string | null;
+  action: string;
+  outcome: string | null;
+  asset: string | null;
+  body: string;
+  likeCount: number;
+  replyCount: number;
+  parentPostId: string | null;
+  authorType: "avatar" | "user" | null;
+  createdAt: string | null;
+  metadata: FeedPostMetadata;
+}
+
+export interface FeedPage {
+  posts: FeedPostDTO[];
+  nextCursor: string | null;
+}
+
+export type FeedBroadcastEvent =
+  | { type: "new_post"; payload: FeedPostDTO }
+  | { type: "new_reply"; payload: FeedPostDTO }
+  | { type: "like_updated"; payload: { postId: string; likeCount: number } };
+
+type Broadcaster = (event: FeedBroadcastEvent) => void;
 let broadcaster: Broadcaster = () => {};
 export function setAvatarFeedBroadcaster(fn: Broadcaster) {
   broadcaster = fn;
@@ -71,6 +113,42 @@ async function generateBody(
   return fallbackPost(avatar, market.question, ev);
 }
 
+interface AvatarLite {
+  name: string;
+  handle: string | null;
+  imageUrl: string | null;
+}
+
+function hydratePost(
+  post: AvatarPost,
+  avatar?: AvatarLite,
+  marketQuestion?: string | null,
+): FeedPostDTO {
+  const meta = (post.metadata as FeedPostMetadata | null) ?? {};
+  const authorType: FeedPostDTO["authorType"] = post.authorUserId
+    ? "user"
+    : "avatar";
+  return {
+    id: post.id,
+    avatarId: post.avatarId,
+    avatarName: avatar?.name || meta.avatarName || "Avatar",
+    avatarHandle: avatar?.handle ?? meta.avatarHandle ?? null,
+    avatarImageUrl: avatar?.imageUrl ?? meta.avatarImageUrl ?? null,
+    marketId: post.marketId,
+    marketQuestion: marketQuestion ?? meta.marketQuestion ?? null,
+    action: post.action,
+    outcome: post.outcome,
+    asset: post.asset,
+    body: post.body,
+    likeCount: post.likeCount,
+    replyCount: post.replyCount,
+    parentPostId: post.parentPostId,
+    authorType,
+    createdAt: post.createdAt ? post.createdAt.toISOString() : null,
+    metadata: meta,
+  };
+}
+
 export async function recordTradeAsPost(ev: TradeEvent): Promise<AvatarPost | null> {
   try {
     const [avatar] = await db
@@ -104,13 +182,17 @@ export async function recordTradeAsPost(ev: TradeEvent): Promise<AvatarPost | nu
           avatarName: avatar.name,
           avatarHandle: avatar.handle,
           avatarImageUrl: avatar.imageUrl,
-        },
+        } satisfies FeedPostMetadata,
       })
       .returning();
 
     broadcaster({
       type: "new_post",
-      payload: hydratePost(inserted, avatar, market.question),
+      payload: hydratePost(
+        inserted,
+        { name: avatar.name, handle: avatar.handle, imageUrl: avatar.imageUrl },
+        market.question,
+      ),
     });
     return inserted;
   } catch (err) {
@@ -119,42 +201,30 @@ export async function recordTradeAsPost(ev: TradeEvent): Promise<AvatarPost | nu
   }
 }
 
-function hydratePost(
-  post: AvatarPost,
-  avatar?: { name: string; handle: string | null; imageUrl: string | null },
-  marketQuestion?: string | null,
-) {
-  const meta = (post.metadata as any) || {};
-  return {
-    id: post.id,
-    avatarId: post.avatarId,
-    avatarName: avatar?.name || meta.avatarName || "Avatar",
-    avatarHandle: avatar?.handle || meta.avatarHandle || null,
-    avatarImageUrl: avatar?.imageUrl || meta.avatarImageUrl || null,
-    marketId: post.marketId,
-    marketQuestion: marketQuestion || meta.marketQuestion || null,
-    action: post.action,
-    outcome: post.outcome,
-    asset: post.asset,
-    body: post.body,
-    likeCount: post.likeCount,
-    replyCount: post.replyCount,
-    parentPostId: post.parentPostId,
-    authorUserId: post.authorUserId,
-    createdAt: post.createdAt,
-    metadata: meta,
-  };
+export interface ListFeedOptions {
+  limit?: number;
+  before?: string; // post id cursor
+  avatarId?: string;
 }
 
-export async function listFeed(opts: {
-  limit?: number;
-  before?: string;
-  avatarId?: string;
-}) {
+export async function listFeed(opts: ListFeedOptions): Promise<FeedPage> {
   const limit = Math.min(Math.max(opts.limit ?? 30, 1), 100);
-  const where = [eq(avatarPosts.parentPostId, sql`NULL`)] as any[];
-  // top-level only
-  let q = db
+  // Resolve cursor → createdAt timestamp at the SQL layer for true pagination.
+  let cursorDate: Date | null = null;
+  if (opts.before) {
+    const [row] = await db
+      .select({ createdAt: avatarPosts.createdAt })
+      .from(avatarPosts)
+      .where(eq(avatarPosts.id, opts.before))
+      .limit(1);
+    cursorDate = row?.createdAt ?? null;
+  }
+
+  const conditions = [sql`${avatarPosts.parentPostId} IS NULL`];
+  if (cursorDate) conditions.push(lt(avatarPosts.createdAt, cursorDate));
+  if (opts.avatarId) conditions.push(eq(avatarPosts.avatarId, opts.avatarId));
+
+  const rows = await db
     .select({
       post: avatarPosts,
       avatarName: knowledgeAvatars.name,
@@ -165,27 +235,13 @@ export async function listFeed(opts: {
     .from(avatarPosts)
     .leftJoin(knowledgeAvatars, eq(avatarPosts.avatarId, knowledgeAvatars.id))
     .leftJoin(predictionMarkets, eq(avatarPosts.marketId, predictionMarkets.id))
-    .where(sql`${avatarPosts.parentPostId} IS NULL`)
+    .where(and(...conditions))
     .orderBy(desc(avatarPosts.createdAt))
-    .limit(limit);
+    .limit(limit + 1);
 
-  const rows = await q;
-  let filtered = rows;
-  if (opts.avatarId) {
-    filtered = rows.filter((r) => r.post.avatarId === opts.avatarId);
-  }
-  if (opts.before) {
-    const beforeRow = await db
-      .select({ createdAt: avatarPosts.createdAt })
-      .from(avatarPosts)
-      .where(eq(avatarPosts.id, opts.before))
-      .limit(1);
-    const cutoff = beforeRow[0]?.createdAt;
-    if (cutoff) {
-      filtered = filtered.filter((r) => r.post.createdAt && r.post.createdAt < cutoff);
-    }
-  }
-  return filtered.map((r) =>
+  const hasMore = rows.length > limit;
+  const trimmed = hasMore ? rows.slice(0, limit) : rows;
+  const posts = trimmed.map((r) =>
     hydratePost(
       r.post,
       r.avatarName
@@ -194,9 +250,13 @@ export async function listFeed(opts: {
       r.marketQuestion,
     ),
   );
+  return {
+    posts,
+    nextCursor: hasMore ? trimmed[trimmed.length - 1].post.id : null,
+  };
 }
 
-export async function listReplies(postId: string) {
+export async function listReplies(postId: string): Promise<FeedPostDTO[]> {
   const rows = await db
     .select({
       post: avatarPosts,
@@ -218,7 +278,10 @@ export async function listReplies(postId: string) {
   );
 }
 
-export async function toggleLike(postId: string, userId: string) {
+export async function toggleLike(
+  postId: string,
+  userId: string,
+): Promise<{ liked: boolean; likeCount: number }> {
   const existing = await db
     .select()
     .from(avatarPostReactions)
@@ -241,11 +304,9 @@ export async function toggleLike(postId: string, userId: string) {
       .select({ likeCount: avatarPosts.likeCount })
       .from(avatarPosts)
       .where(eq(avatarPosts.id, postId));
-    broadcaster({
-      type: "like_updated",
-      payload: { postId, likeCount: post?.likeCount ?? 0 },
-    });
-    return { liked: false, likeCount: post?.likeCount ?? 0 };
+    const likeCount = post?.likeCount ?? 0;
+    broadcaster({ type: "like_updated", payload: { postId, likeCount } });
+    return { liked: false, likeCount };
   }
   await db
     .insert(avatarPostReactions)
@@ -258,18 +319,16 @@ export async function toggleLike(postId: string, userId: string) {
     .select({ likeCount: avatarPosts.likeCount })
     .from(avatarPosts)
     .where(eq(avatarPosts.id, postId));
-  broadcaster({
-    type: "like_updated",
-    payload: { postId, likeCount: post?.likeCount ?? 0 },
-  });
-  return { liked: true, likeCount: post?.likeCount ?? 0 };
+  const likeCount = post?.likeCount ?? 0;
+  broadcaster({ type: "like_updated", payload: { postId, likeCount } });
+  return { liked: true, likeCount };
 }
 
 export async function postUserReply(
   postId: string,
   userId: string,
   message: string,
-): Promise<{ userReply: any; avatarReply: any }> {
+): Promise<{ userReply: FeedPostDTO; avatarReply: FeedPostDTO | null }> {
   const [parent] = await db
     .select()
     .from(avatarPosts)
@@ -286,16 +345,17 @@ export async function postUserReply(
       body: message.slice(0, 600),
       parentPostId: postId,
       authorUserId: userId,
-      metadata: { isUserReply: true },
+      metadata: { isUserReply: true } satisfies FeedPostMetadata,
     })
     .returning();
   await db
     .update(avatarPosts)
     .set({ replyCount: sql`${avatarPosts.replyCount} + 1` })
     .where(eq(avatarPosts.id, postId));
-  broadcaster({ type: "new_reply", payload: hydratePost(userReply) });
+  const userReplyDto = hydratePost(userReply);
+  broadcaster({ type: "new_reply", payload: userReplyDto });
 
-  let avatarReply: any = null;
+  let avatarReplyDto: FeedPostDTO | null = null;
   try {
     const { generateAvatarChatResponse } = await import("./avatarChatService");
     const ctx = `In reply to your earlier post: "${parent.body}"\n\nUser asks: ${message}`;
@@ -308,26 +368,21 @@ export async function postUserReply(
         action: "avatar_reply",
         body: r.response.slice(0, 600),
         parentPostId: postId,
-        metadata: { inReplyToUser: userId },
       })
       .returning();
     await db
       .update(avatarPosts)
       .set({ replyCount: sql`${avatarPosts.replyCount} + 1` })
       .where(eq(avatarPosts.id, postId));
-    avatarReply = hydratePost(inserted);
-    broadcaster({ type: "new_reply", payload: avatarReply });
+    avatarReplyDto = hydratePost(inserted);
+    broadcaster({ type: "new_reply", payload: avatarReplyDto });
   } catch (err) {
     console.error("[avatarCommentary] avatar reply generation failed", err);
   }
 
-  return { userReply: hydratePost(userReply), avatarReply };
+  return { userReply: userReplyDto, avatarReply: avatarReplyDto };
 }
 
-/**
- * Backfill posts from recent avatar trades so the feed isn't empty on first
- * load. Runs once at startup, only when the posts table is empty.
- */
 export async function backfillFromRecentTrades(maxPosts = 30): Promise<number> {
   try {
     const [{ count }] = await db
@@ -351,7 +406,6 @@ export async function backfillFromRecentTrades(maxPosts = 30): Promise<number> {
     let inserted = 0;
     for (const row of trades) {
       if (!row.avatar || !row.market) continue;
-      // Use deterministic templated body for backfill (no LLM cost on 30 posts).
       const body = `Opened a ${row.trade.outcome} position on "${row.market.question}" — ${row.trade.shares} shares for ${row.trade.streamAmount} STREAM. ${row.trade.reasoning || ""}`.trim();
       await db.insert(avatarPosts).values({
         avatarId: row.avatar.id,
@@ -370,7 +424,7 @@ export async function backfillFromRecentTrades(maxPosts = 30): Promise<number> {
           avatarHandle: row.avatar.handle,
           avatarImageUrl: row.avatar.imageUrl,
           backfilled: true,
-        },
+        } satisfies FeedPostMetadata,
       });
       inserted++;
     }

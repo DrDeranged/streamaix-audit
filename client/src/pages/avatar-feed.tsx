@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, MessageCircle, Send, TrendingUp, ArrowDownRight, Loader2 } from "lucide-react";
@@ -11,6 +11,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+
+interface FeedPostMetadata {
+  shares?: number;
+  positionSize?: number;
+  marketQuestion?: string;
+  isUserReply?: boolean;
+}
 
 interface AvatarPost {
   id: string;
@@ -27,12 +34,41 @@ interface AvatarPost {
   likeCount: number;
   replyCount: number;
   parentPostId: string | null;
-  authorUserId: string | null;
+  authorType: "avatar" | "user" | null;
   createdAt: string | null;
-  metadata?: any;
+  metadata: FeedPostMetadata;
 }
 
-function formatRelative(iso: string | null) {
+interface FeedPage {
+  success: boolean;
+  posts: AvatarPost[];
+  nextCursor: string | null;
+}
+
+interface RepliesResponse {
+  success: boolean;
+  replies: AvatarPost[];
+}
+
+interface LikeResponse {
+  success: boolean;
+  liked: boolean;
+  likeCount: number;
+}
+
+interface ReplyResponse {
+  success: boolean;
+  userReply: AvatarPost;
+  avatarReply: AvatarPost | null;
+}
+
+type FeedWsEvent =
+  | { type: "new_post"; payload: AvatarPost }
+  | { type: "new_reply"; payload: AvatarPost }
+  | { type: "like_updated"; payload: { postId: string; likeCount: number } }
+  | { type: "connected"; timestamp: number };
+
+function formatRelative(iso: string | null): string {
   if (!iso) return "";
   const t = new Date(iso).getTime();
   const s = Math.max(1, Math.floor((Date.now() - t) / 1000));
@@ -50,23 +86,23 @@ function PostCard({ post }: { post: AvatarPost }) {
   const [localLikes, setLocalLikes] = useState(post.likeCount);
   const [liked, setLiked] = useState(false);
 
-  const repliesQuery = useQuery<{ success: boolean; replies: AvatarPost[] }>({
+  const repliesQuery = useQuery<RepliesResponse>({
     queryKey: ["/api/avatar-feed", post.id, "replies"],
     enabled: showReplies,
   });
 
-  const likeMut = useMutation({
+  const likeMut = useMutation<LikeResponse, Error, void>({
     mutationFn: () =>
       apiRequest(`/api/avatar-feed/${post.id}/like`, { method: "POST" }),
-    onSuccess: (data: any) => {
+    onSuccess: (data) => {
       setLiked(data.liked);
       setLocalLikes(data.likeCount);
     },
-    onError: (e: any) =>
+    onError: (e) =>
       toast({ title: "Couldn't like", description: e.message, variant: "destructive" }),
   });
 
-  const replyMut = useMutation({
+  const replyMut = useMutation<ReplyResponse, Error, string>({
     mutationFn: (message: string) =>
       apiRequest(`/api/avatar-feed/${post.id}/reply`, {
         method: "POST",
@@ -77,14 +113,14 @@ function PostCard({ post }: { post: AvatarPost }) {
       setShowReplies(true);
       queryClient.invalidateQueries({ queryKey: ["/api/avatar-feed", post.id, "replies"] });
     },
-    onError: (e: any) =>
+    onError: (e) =>
       toast({ title: "Reply failed", description: e.message, variant: "destructive" }),
   });
 
   const isYes = post.outcome === "YES";
   const directionColor = isYes ? "text-emerald-400" : "text-rose-400";
   const directionIcon = isYes ? <TrendingUp className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />;
-  const meta = post.metadata || {};
+  const meta = post.metadata;
 
   return (
     <motion.div
@@ -169,8 +205,8 @@ function PostCard({ post }: { post: AvatarPost }) {
                   )}
                   {repliesQuery.data?.replies?.map((r) => (
                     <div key={r.id} className="text-sm">
-                      <span className={`font-medium ${r.authorUserId ? "text-slate-300" : "text-cyan-400"}`}>
-                        {r.authorUserId ? "You" : post.avatarName}
+                      <span className={`font-medium ${r.authorType === "user" ? "text-slate-300" : "text-cyan-400"}`}>
+                        {r.authorType === "user" ? "User" : post.avatarName}
                       </span>
                       <span className="text-slate-500 text-xs ml-2">{formatRelative(r.createdAt)}</span>
                       <p className="text-slate-300 text-sm mt-0.5 whitespace-pre-wrap">{r.body}</p>
@@ -214,49 +250,85 @@ function PostCard({ post }: { post: AvatarPost }) {
 }
 
 export default function AvatarFeedPage() {
-  const { data, isLoading } = useQuery<{ success: boolean; posts: AvatarPost[] }>({
+  const qc = useQueryClient();
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const [livePosts, setLivePosts] = useState<AvatarPost[]>([]);
+
+  const feed = useInfiniteQuery<FeedPage, Error>({
     queryKey: ["/api/avatar-feed"],
+    initialPageParam: null,
+    queryFn: async ({ pageParam }) => {
+      const cursor = pageParam as string | null;
+      const url = cursor
+        ? `/api/avatar-feed?limit=30&before=${encodeURIComponent(cursor)}`
+        : "/api/avatar-feed?limit=30";
+      return apiRequest(url);
+    },
+    getNextPageParam: (last) => last.nextCursor,
     refetchInterval: 60_000,
   });
-  const [livePosts, setLivePosts] = useState<AvatarPost[]>([]);
-  const wsRef = useRef<WebSocket | null>(null);
-  const qc = useQueryClient();
 
+  // WebSocket — prepend new posts and patch like counts.
   useEffect(() => {
     const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
     const ws = new WebSocket(`${proto}//${window.location.host}/ws/avatar-feed`);
-    wsRef.current = ws;
     ws.onmessage = (e) => {
       try {
-        const msg = JSON.parse(e.data);
+        const msg = JSON.parse(e.data) as FeedWsEvent;
         if (msg.type === "new_post") {
           setLivePosts((prev) => [msg.payload, ...prev].slice(0, 50));
         } else if (msg.type === "like_updated") {
-          qc.setQueryData<{ success: boolean; posts: AvatarPost[] }>(
+          qc.setQueryData<{ pages: FeedPage[]; pageParams: unknown[] }>(
             ["/api/avatar-feed"],
             (old) => {
               if (!old) return old;
               return {
                 ...old,
-                posts: old.posts.map((p) =>
-                  p.id === msg.payload.postId ? { ...p, likeCount: msg.payload.likeCount } : p,
-                ),
+                pages: old.pages.map((page) => ({
+                  ...page,
+                  posts: page.posts.map((p) =>
+                    p.id === msg.payload.postId ? { ...p, likeCount: msg.payload.likeCount } : p,
+                  ),
+                })),
               };
             },
           );
         }
-      } catch {}
+      } catch {
+        // ignore malformed frames
+      }
     };
     return () => {
-      try { ws.close(); } catch {}
+      try { ws.close(); } catch {
+        /* noop */
+      }
     };
   }, [qc]);
 
+  // IntersectionObserver-based infinite scroll.
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && feed.hasNextPage && !feed.isFetchingNextPage) {
+          feed.fetchNextPage();
+        }
+      },
+      { rootMargin: "300px" },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [feed.hasNextPage, feed.isFetchingNextPage, feed.fetchNextPage]);
+
   const merged = useMemo(() => {
     const seen = new Set<string>();
-    const all = [...livePosts, ...(data?.posts ?? [])];
-    return all.filter((p) => (seen.has(p.id) ? false : (seen.add(p.id), true))).slice(0, 100);
-  }, [livePosts, data?.posts]);
+    const all: AvatarPost[] = [
+      ...livePosts,
+      ...((feed.data?.pages ?? []).flatMap((p) => p.posts)),
+    ];
+    return all.filter((p) => (seen.has(p.id) ? false : (seen.add(p.id), true)));
+  }, [livePosts, feed.data]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4 py-8">
@@ -267,7 +339,7 @@ export default function AvatarFeedPage() {
             Watch the 17 Knowledge Avatars trade in real time, in their own voice.
           </p>
         </div>
-        {isLoading && (
+        {feed.isLoading && (
           <div className="text-slate-500 flex items-center gap-2">
             <Loader2 className="w-4 h-4 animate-spin" /> Loading the floor…
           </div>
@@ -279,11 +351,19 @@ export default function AvatarFeedPage() {
                 <PostCard key={post.id} post={post} />
               ))}
             </AnimatePresence>
-            {!isLoading && merged.length === 0 && (
+            {!feed.isLoading && merged.length === 0 && (
               <p className="text-slate-500 text-sm">
                 No avatar posts yet. They'll appear here the moment an avatar opens a position.
               </p>
             )}
+            <div ref={sentinelRef} className="h-8 flex items-center justify-center">
+              {feed.isFetchingNextPage && (
+                <Loader2 className="w-4 h-4 animate-spin text-slate-600" />
+              )}
+              {!feed.hasNextPage && merged.length > 0 && (
+                <span className="text-xs text-slate-600">You've reached the end.</span>
+              )}
+            </div>
           </div>
         </ScrollArea>
       </div>

@@ -26,12 +26,12 @@ export function registerAvatarFeedRoutes(app: Express) {
       const limit = Number.parseInt(String(req.query.limit ?? "30"), 10);
       const before = req.query.before ? String(req.query.before) : undefined;
       const avatarId = req.query.avatarId ? String(req.query.avatarId) : undefined;
-      const posts = await listFeed({
+      const page = await listFeed({
         limit: Number.isFinite(limit) ? limit : 30,
         before,
         avatarId,
       });
-      res.json({ success: true, posts });
+      res.json({ success: true, posts: page.posts, nextCursor: page.nextCursor });
     }),
   );
 
