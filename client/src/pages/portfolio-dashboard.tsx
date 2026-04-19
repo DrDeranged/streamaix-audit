@@ -200,7 +200,7 @@ function QuickStatCard({
   return (
     <div className={cn(
       "relative overflow-hidden rounded-xl p-4 border transition-all hover:scale-[1.02]",
-      bgGradient || "bg-slate-800/50 border-slate-700/50"
+      bgGradient || "surface-1"
     )}>
       <div className="flex items-start justify-between">
         <div>
@@ -389,7 +389,7 @@ const NetWorthChart = memo(function NetWorthChart({ portfolioId }: { portfolioId
   
   if (chartData.length === 0) {
     return (
-      <div className="h-48 flex items-center justify-center border border-dashed border-slate-700 rounded-lg">
+      <div className="h-48 flex items-center justify-center border border-dashed border-border rounded-lg">
         <div className="text-center">
           <LineChart className="w-8 h-8 mx-auto text-gray-600 mb-2" />
           <p className="text-sm text-gray-400">Not enough data for chart</p>
@@ -1078,7 +1078,7 @@ const BenchmarkComparisonChart = memo(function BenchmarkComparisonChart({ portfo
   
   if (chartData.length < 2 || assets.length === 0) {
     return (
-      <div className="h-64 flex items-center justify-center border border-dashed border-slate-700 rounded-lg">
+      <div className="h-64 flex items-center justify-center border border-dashed border-border rounded-lg">
         <div className="text-center">
           <LineChart className="w-8 h-8 mx-auto text-gray-600 mb-2" />
           <p className="text-sm text-gray-400">Not enough history for benchmark comparison</p>
@@ -1434,7 +1434,7 @@ function DividendCalendar({ assets }: { assets: PortfolioAsset[] }) {
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-white">{div.symbol}</span>
-                    <span className="text-[10px] text-gray-500 bg-slate-700/50 px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
                       {div.yield.toFixed(1)}% yield
                     </span>
                   </div>

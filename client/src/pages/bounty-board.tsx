@@ -403,7 +403,7 @@ export default function BountyBoard() {
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <TabsList className="bg-slate-900/50 border border-purple-500/30 h-auto p-1">
+            <TabsList className="surface-1 border border-purple-500/30 h-auto p-1">
               <TabsTrigger 
                 value="active" 
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-fuchsia-500 data-[state=active]:text-white"
@@ -444,7 +444,7 @@ export default function BountyBoard() {
             {/* Category Filter */}
             <div className="flex items-center gap-3">
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[180px] bg-slate-900/50 border-purple-500/30" data-testid="select-category-filter">
+                <SelectTrigger className="w-[180px] surface-1 border-purple-500/30" data-testid="select-category-filter">
                   <Filter className="w-4 h-4 mr-2" />
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>

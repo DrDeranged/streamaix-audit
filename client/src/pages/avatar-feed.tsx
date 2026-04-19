@@ -169,7 +169,7 @@ function PostCard({ post }: { post: AvatarPost }) {
                 )}
                 <span className="text-xs text-slate-600">·</span>
                 <span className="text-xs text-slate-500">{formatRelative(post.createdAt)}</span>
-                <Badge variant="secondary" className="text-[10px] py-0 px-1.5 bg-slate-800/60 text-slate-300 border-slate-700">
+                <Badge variant="secondary" className="text-[10px] py-0 px-1.5 bg-muted/60 text-muted-foreground border-border">
                   {actionLabel}
                 </Badge>
                 {post.outcome && (
@@ -209,7 +209,7 @@ function PostCard({ post }: { post: AvatarPost }) {
               </div>
 
               {showReplies && (
-                <div className="mt-3 pl-4 border-l border-slate-800 space-y-2">
+                <div className="mt-3 pl-4 border-l border-border space-y-2">
                   {repliesQuery.isLoading && (
                     <div className="text-xs text-slate-500 flex items-center gap-2">
                       <Loader2 className="w-3 h-3 animate-spin" /> Loading replies…
@@ -236,7 +236,7 @@ function PostCard({ post }: { post: AvatarPost }) {
                         placeholder={`Reply to ${post.avatarName}…`}
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
-                        className="h-8 text-sm bg-slate-900 border-slate-700"
+                        className="h-8 text-sm surface-1 border-border"
                         data-testid={`reply-input-${post.id}`}
                       />
                       <Button

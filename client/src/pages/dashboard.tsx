@@ -668,7 +668,7 @@ export default function Dashboard() {
               transition={{ delay: 0.2 }}
             >
               <Tabs defaultValue="summaries" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 bg-slate-950/60 backdrop-blur-xl border border-purple-500/20 rounded-xl p-1 touch-manipulation">
+                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 surface-1 border border-purple-500/20 rounded-xl p-1 touch-manipulation">
                   <TabsTrigger value="summaries" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/30 data-[state=active]:to-fuchsia-500/30 data-[state=active]:border-purple-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/20 rounded-lg px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px] text-gray-400 data-[state=active]:text-white transition-all duration-300 border border-transparent">
                     <FileText className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Summaries</span>
