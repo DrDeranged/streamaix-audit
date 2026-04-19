@@ -233,7 +233,7 @@ Focus on the actual content and provide meaningful, specific insights.
 
     try {
       const response = await this.openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-4o-mini", // COST OPTIMIZATION (Apr 2026): legacy/orphaned processor — no live import path. Downgraded defensively in case it gets re-wired.
         messages: [
           { role: "system", content: "You are an expert content analyst. Provide detailed, accurate analysis based on the video metadata provided." },
           { role: "user", content: prompt }

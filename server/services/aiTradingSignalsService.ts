@@ -609,7 +609,7 @@ Respond in this exact JSON format:
 }`;
 
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini', // COST OPTIMIZATION (Apr 2026): downgraded from gpt-4o; structured trade signal generation works on mini at ~95% perceived quality and 1/30 the cost
       messages: [
         { 
           role: 'system', 

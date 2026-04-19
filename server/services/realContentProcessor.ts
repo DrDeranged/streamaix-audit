@@ -269,7 +269,7 @@ Format as JSON with these fields:
 `;
 
       const response = await this.openai.chat.completions.create({
-        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        model: "gpt-4o-mini", // COST OPTIMIZATION (Apr 2026): legacy/orphaned processor — no live import path. Downgraded defensively in case it gets re-wired.
         messages: [
           { role: "system", content: "You are an expert content analyst. Provide detailed, contextual analysis based on the actual video content provided." },
           { role: "user", content: prompt }
