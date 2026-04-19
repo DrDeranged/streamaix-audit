@@ -255,6 +255,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await registerCollaborationRoutes(app);
   // ▶ BountyTemplates routes extracted to server/routes/bounty-templates.ts
   await registerBountyTemplatesRoutes(app);
+  // Alias: spec-defined path /api/avatars/live-leaderboard. Must be registered
+  // BEFORE registerAvatarRoutes so the /api/avatars/:handle wildcard there
+  // doesn't capture "live-leaderboard" as a handle. Delegates to the same
+  // handler used by /api/avatar-leaderboard/live.
+  app.get('/api/avatars/live-leaderboard', async (_req, res, next) => {
+    try {
+      const { computeLeaderboard } = await import('./services/avatarLeaderboardService');
+      const rows = await computeLeaderboard();
+      res.json({ success: true, leaderboard: rows, generatedAt: new Date().toISOString() });
+    } catch (err) { next(err); }
+  });
   // ▶ Avatar routes extracted to server/routes/avatar.ts
   await registerAvatarRoutes(app);
   // ▶ Interaction routes extracted to server/routes/interaction.ts

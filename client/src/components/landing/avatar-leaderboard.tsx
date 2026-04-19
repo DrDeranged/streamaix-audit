@@ -192,8 +192,40 @@ function AvatarTradesModal({ row, onClose }: { row: LeaderboardRow | null; onClo
               {trades.data?.trades?.length === 0 && (
                 <div className="text-slate-500 text-sm">No trades yet — this bot is waiting for its setup.</div>
               )}
+              {trades.data && trades.data.trades.some((t) => t.status === "open") && (
+                <>
+                  <div className="text-[11px] uppercase tracking-wider text-cyan-300 font-semibold mb-1.5 mt-1">
+                    Current positions ({trades.data.trades.filter((t) => t.status === "open").length})
+                  </div>
+                  <div className="space-y-2 mb-4">
+                    {trades.data.trades.filter((t) => t.status === "open").map((t) => (
+                      <div key={t.id} className="flex items-center justify-between bg-cyan-500/5 border border-cyan-500/20 rounded-lg p-2.5">
+                        <div className="min-w-0">
+                          <div className="text-sm text-white font-medium flex items-center gap-2">
+                            <Badge variant="outline" className={t.direction === "long" ? "border-emerald-500/40 text-emerald-400" : "border-rose-500/40 text-rose-400"}>
+                              {t.direction === "long" ? "LONG" : "SHORT"}
+                            </Badge>
+                            {t.asset}
+                            <span className="text-xs text-slate-500">{t.assetType}</span>
+                          </div>
+                          {t.reasoning && (
+                            <div className="text-xs text-slate-400 truncate mt-0.5 max-w-md">{t.reasoning}</div>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/40">OPEN</Badge>
+                          <div className="text-[10px] text-slate-500 font-mono mt-1">@${t.entryPrice.toFixed(2)} · qty {t.quantity.toFixed(2)}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5">
+                    Trade history
+                  </div>
+                </>
+              )}
               <div className="space-y-2">
-                {trades.data?.trades?.map((t) => {
+                {trades.data?.trades?.filter((t) => t.status !== "open").map((t) => {
                   const closed = t.status === "closed";
                   const win = (t.pnl ?? 0) >= 0;
                   return (
@@ -268,6 +300,13 @@ export function AvatarLeaderboardLanding() {
     };
     return () => { try { ws.close(); } catch { /* noop */ } };
   }, []);
+
+  // Auto-dismiss the trade pulse after 3s so it doesn't linger.
+  useEffect(() => {
+    if (!pulse) return;
+    const t = setTimeout(() => setPulse(null), 3000);
+    return () => clearTimeout(t);
+  }, [pulse]);
 
   // Listen for the modal-open custom event dispatched by row clicks.
   useEffect(() => {
