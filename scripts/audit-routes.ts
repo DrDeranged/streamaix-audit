@@ -261,7 +261,10 @@ for (const r of routes) {
     });
   }
 
-  // 6. Other body-consuming mutations should validate (warn — incremental adoption)
+  // 6. Other body-consuming mutations get baseline body-shape validation from
+  // the global `requireJsonObjectBody` middleware (registered in server/index.ts).
+  // We surface them as INFO so reviewers can see which routes still rely on the
+  // baseline check rather than a tightly-typed Zod schema, without failing CI.
   if (
     r.isMutation &&
     !r.hasValidateBody &&
@@ -274,11 +277,23 @@ for (const r of routes) {
   ) {
     issues.push({
       severity: 'warn',
-      category: 'mutation_without_body_validation',
+      category: 'global_only_body_validation',
       route: key,
-      detail: `No Zod body validation at line ${r.line}`,
+      detail: `Relies on global requireJsonObjectBody baseline (no per-route Zod schema) at line ${r.line}`,
     });
   }
+}
+
+// Confirm global validator is wired before exiting OK
+const indexSrc = readFileSync(resolve(process.cwd(), 'server/index.ts'), 'utf8');
+if (!/app\.use\(\s*requireJsonObjectBody\s*\)/.test(indexSrc)) {
+  issues.push({
+    severity: 'error',
+    category: 'global_body_validator_missing',
+    route: 'server/index.ts',
+    detail:
+      'Global requireJsonObjectBody middleware is not wired in server/index.ts — every mutation would lose its baseline body-shape validation.',
+  });
 }
 
 // Categorize each route for the inventory
@@ -330,7 +345,10 @@ md.push('');
 md.push(`- **Total routes:** ${totals.total}`);
 md.push(`- **Authenticated:** ${totals.authed}`);
 md.push(`- **Rate-limited:** ${totals.rateLimited}`);
-md.push(`- **Body-validated (Zod):** ${totals.validated}`);
+md.push(`- **Body-validated (per-route Zod):** ${totals.validated}`);
+md.push(
+  '- **Global mutation body validation:** every POST/PUT/PATCH body passes through `requireJsonObjectBody` (server/middleware/security.ts) — rejects non-JSON-object bodies and root-level prototype-pollution keys (`__proto__`, `constructor`, `prototype`).',
+);
 md.push('');
 md.push('### By method');
 md.push('');

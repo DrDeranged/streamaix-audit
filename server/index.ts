@@ -30,6 +30,13 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Global mutation-body validator: enforces that every POST/PUT/PATCH body is
+// a plain JSON object (or empty), rejecting bare arrays/primitives and root-
+// level prototype-pollution payloads. Per-route Zod schemas further constrain
+// individual fields. See server/middleware/security.ts for skip rules.
+import { requireJsonObjectBody } from './middleware/security';
+app.use(requireJsonObjectBody);
+
 // Health check endpoint - responds immediately, no dependencies
 app.get('/health', (_req, res) => {
   res.status(200).json({ 

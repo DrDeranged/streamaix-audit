@@ -3796,7 +3796,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Process content from URL directly
-  app.post('/api/process-content', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/process-content', authenticateToken, strictLimit, asyncHandler(async (req: AuthRequest, res: Response) => {
     const validation = validateRequest(processContentSchema, req.body);
     if (!validation.success) {
       return res.status(400).json({ error: validation.error });

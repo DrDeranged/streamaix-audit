@@ -114,6 +114,82 @@ export function requireAdminFlexible(
   return res.status(403).json({ error: 'Admin access required' });
 }
 
+/**
+ * Global mutation-body validator.
+ *
+ * For every POST/PUT/PATCH request, enforces that req.body is a plain JSON
+ * object (not an array, not a primitive, not null). Rejects with 400 otherwise.
+ *
+ * This is a baseline defense applied to every mutating route in the app:
+ *
+ *   - blocks `__proto__` / `constructor` prototype-pollution payloads sent as
+ *     non-object roots
+ *   - blocks bodies posted as bare arrays, strings, or numbers (which can
+ *     trip handlers expecting `{ ... }` and lead to NaN/undefined writes)
+ *   - lets per-route Zod schemas (`validateBody(schema)`) further constrain
+ *     individual fields
+ *
+ * Does NOT run for GET/DELETE/HEAD/OPTIONS, multipart/form-data uploads,
+ * or webhook routes that legitimately accept other content types
+ * (those are skipped via the `skipPaths` list).
+ */
+const GLOBAL_BODY_VALIDATOR_SKIP = [
+  /^\/api\/webhooks?\//, // raw webhook bodies
+  /^\/api\/upload/, // multipart uploads
+];
+
+export function requireJsonObjectBody(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const method = req.method.toUpperCase();
+  if (method !== 'POST' && method !== 'PUT' && method !== 'PATCH') {
+    return next();
+  }
+  if (GLOBAL_BODY_VALIDATOR_SKIP.some((re) => re.test(req.path))) {
+    return next();
+  }
+  const ct = (req.headers['content-type'] || '').toString().toLowerCase();
+  if (ct.includes('multipart/form-data') || ct.startsWith('text/')) {
+    return next();
+  }
+
+  const body = req.body;
+  // Accept "no body" (Content-Length: 0) for empty-payload mutations
+  if (body === undefined || body === null) {
+    req.body = {};
+    return next();
+  }
+
+  if (
+    typeof body !== 'object' ||
+    Array.isArray(body) ||
+    Buffer.isBuffer(body)
+  ) {
+    return res.status(400).json({
+      error: 'Validation failed',
+      field: 'body',
+      message: 'Request body must be a JSON object',
+    });
+  }
+
+  // Block prototype-pollution attempts at the root
+  if (
+    Object.prototype.hasOwnProperty.call(body, '__proto__') ||
+    Object.prototype.hasOwnProperty.call(body, 'constructor') ||
+    Object.prototype.hasOwnProperty.call(body, 'prototype')
+  ) {
+    return res.status(400).json({
+      error: 'Validation failed',
+      field: 'body',
+      message: 'Forbidden property in request body',
+    });
+  }
+
+  next();
+}
+
 export function disableInProd(req: Request, res: Response, next: NextFunction) {
   if (process.env.NODE_ENV === 'production') {
     return res.status(404).json({ error: 'Not found' });
