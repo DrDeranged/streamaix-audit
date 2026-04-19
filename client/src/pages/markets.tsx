@@ -119,7 +119,7 @@ const MarketCard = memo(({ market }: { market: PredictionMarket }) => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-700/50">
+            <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/60">
               <span>{(market.totalVolume / 1000).toFixed(1)}K Vol</span>
               <span>{market.totalTrades} Trades</span>
             </div>
@@ -239,9 +239,9 @@ export default function Markets() {
                     )}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-slate-900 border-slate-700 text-white w-64">
+                <DropdownMenuContent align="end" className="surface-2 text-foreground w-64">
                   <DropdownMenuLabel className="text-slate-400">Wallet</DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-slate-700" />
+                  <DropdownMenuSeparator className="bg-muted" />
                   <div className="px-2 py-3 space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-slate-400">Address:</span>
@@ -269,7 +269,7 @@ export default function Markets() {
                       <span className="text-white">{getNetworkInfo(wallet?.chainId || 1)?.name || 'Unknown'}</span>
                     </div>
                   </div>
-                  <DropdownMenuSeparator className="bg-slate-700" />
+                  <DropdownMenuSeparator className="bg-muted" />
                   {wallet?.chainId !== 8453 && (
                     <DropdownMenuItem
                       onClick={() => switchNetwork(8453)}
@@ -467,16 +467,16 @@ export default function Markets() {
               placeholder="Search markets..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-slate-900/50 border-slate-700 text-white"
+              className="pl-10"
               data-testid="input-search-markets"
             />
           </div>
           <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger className="w-full md:w-48 bg-slate-900/50 border-slate-700 text-white" data-testid="select-category">
+            <SelectTrigger className="w-full md:w-48" data-testid="select-category">
               <Filter className="w-4 h-4 mr-2" />
               <SelectValue placeholder="Category" />
             </SelectTrigger>
-            <SelectContent className="bg-slate-900 border-slate-700">
+            <SelectContent className="surface-2">
               <SelectItem value="all">All Categories</SelectItem>
               <SelectItem value="crypto">Crypto</SelectItem>
               <SelectItem value="defi">DeFi</SelectItem>
@@ -485,11 +485,11 @@ export default function Markets() {
             </SelectContent>
           </Select>
           <Select value={sourceFilter} onValueChange={setSourceFilter}>
-            <SelectTrigger className="w-full md:w-48 bg-slate-900/50 border-slate-700 text-white" data-testid="select-source">
+            <SelectTrigger className="w-full md:w-48" data-testid="select-source">
               <Sparkles className="w-4 h-4 mr-2" />
               <SelectValue placeholder="Source" />
             </SelectTrigger>
-            <SelectContent className="bg-slate-900 border-slate-700">
+            <SelectContent className="surface-2">
               <SelectItem value="all">All Markets</SelectItem>
               <SelectItem value="ai">AI-Generated</SelectItem>
               <SelectItem value="community">Community Created</SelectItem>
@@ -506,13 +506,13 @@ export default function Markets() {
                 {[1, 2, 3, 4, 5, 6].map((i) => (
                   <Card key={i} className="surface-1 border-border/50">
                     <CardContent className="p-4 space-y-3">
-                      <Skeleton className="h-4 w-24 bg-slate-700" />
-                      <Skeleton className="h-12 w-full bg-slate-700" />
+                      <Skeleton className="h-4 w-24 bg-muted" />
+                      <Skeleton className="h-12 w-full bg-muted" />
                       <div className="flex gap-2">
-                        <Skeleton className="h-16 flex-1 bg-slate-700" />
-                        <Skeleton className="h-16 flex-1 bg-slate-700" />
+                        <Skeleton className="h-16 flex-1 bg-muted" />
+                        <Skeleton className="h-16 flex-1 bg-muted" />
                       </div>
-                      <Skeleton className="h-4 w-full bg-slate-700" />
+                      <Skeleton className="h-4 w-full bg-muted" />
                     </CardContent>
                   </Card>
                 ))}

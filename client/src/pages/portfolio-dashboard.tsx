@@ -407,7 +407,7 @@ const NetWorthChart = memo(function NetWorthChart({ portfolioId }: { portfolioId
             <span className="text-xs text-gray-400">Value</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-0.5 bg-slate-500" />
+            <div className="w-3 h-0.5 bg-muted-foreground" />
             <span className="text-xs text-gray-400">Cost Basis</span>
           </div>
         </div>
@@ -636,7 +636,7 @@ function AddToWatchlistDialog({ onSuccess }: { onSuccess: () => void }) {
           Add to Watchlist
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-slate-900 border-slate-700 sm:max-w-md">
+      <DialogContent className="surface-2 sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-white">Add to Watchlist</DialogTitle>
         </DialogHeader>
@@ -647,7 +647,7 @@ function AddToWatchlistDialog({ onSuccess }: { onSuccess: () => void }) {
               placeholder="Search stocks or crypto..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-slate-800/50 border-slate-600 text-white pl-10 h-11"
+              className="pl-10 h-11"
               data-testid="input-watchlist-search"
               autoFocus
             />
@@ -662,10 +662,10 @@ function AddToWatchlistDialog({ onSuccess }: { onSuccess: () => void }) {
           )}
           
           {hasResults && (
-            <div className="border border-slate-700 rounded-lg overflow-hidden max-h-[300px] overflow-y-auto">
+            <div className="border border-border rounded-lg overflow-hidden max-h-[300px] overflow-y-auto">
               {stockResults.length > 0 && (
                 <>
-                  <div className="px-3 py-2 bg-slate-800 text-xs text-gray-400 font-medium flex items-center gap-2 border-b border-slate-700">
+                  <div className="px-3 py-2 bg-muted text-xs text-muted-foreground font-medium flex items-center gap-2 border-b border-border">
                     <Building2 className="w-3 h-3" /> Stocks
                   </div>
                   {stockResults.slice(0, 5).map((result) => (
@@ -673,7 +673,7 @@ function AddToWatchlistDialog({ onSuccess }: { onSuccess: () => void }) {
                       key={result.symbol}
                       onClick={() => handleSelect(result, 'stock')}
                       disabled={addMutation.isPending}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 text-left border-b border-slate-800 last:border-b-0 transition-colors disabled:opacity-50"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-accent/40 text-left border-b border-border last:border-b-0 transition-colors disabled:opacity-50"
                     >
                       <div className="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center">
                         <Building2 className="w-4 h-4 text-blue-400" />
@@ -688,7 +688,7 @@ function AddToWatchlistDialog({ onSuccess }: { onSuccess: () => void }) {
               )}
               {cryptoResults.length > 0 && (
                 <>
-                  <div className="px-3 py-2 bg-slate-800 text-xs text-gray-400 font-medium flex items-center gap-2 border-b border-slate-700">
+                  <div className="px-3 py-2 bg-muted text-xs text-muted-foreground font-medium flex items-center gap-2 border-b border-border">
                     <Bitcoin className="w-3 h-3" /> Crypto
                   </div>
                   {cryptoResults.slice(0, 5).map((result: any) => (
@@ -696,7 +696,7 @@ function AddToWatchlistDialog({ onSuccess }: { onSuccess: () => void }) {
                       key={result.id || result.symbol}
                       onClick={() => handleSelect(result, 'crypto')}
                       disabled={addMutation.isPending}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 text-left border-b border-slate-800 last:border-b-0 transition-colors disabled:opacity-50"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-accent/40 text-left border-b border-border last:border-b-0 transition-colors disabled:opacity-50"
                     >
                       {result.thumb ? (
                         <img src={result.thumb} alt={result.symbol} className="w-9 h-9 rounded-lg" />
@@ -1216,7 +1216,7 @@ function TransactionHistoryDialog({ portfolioId, open, onOpenChange }: { portfol
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-900 border-slate-700 sm:max-w-3xl max-h-[85vh] overflow-hidden flex flex-col">
+      <DialogContent className="surface-2 sm:max-w-3xl max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
             <History className="w-5 h-5 text-purple-400" />
@@ -1226,10 +1226,10 @@ function TransactionHistoryDialog({ portfolioId, open, onOpenChange }: { portfol
         
         <div className="flex flex-wrap gap-3 mb-4">
           <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-32 bg-slate-800/50 border-slate-600 text-white">
+            <SelectTrigger className="w-32">
               <SelectValue placeholder="All Types" />
             </SelectTrigger>
-            <SelectContent className="bg-slate-800 border-slate-700">
+            <SelectContent className="surface-2">
               <SelectItem value="all">All Types</SelectItem>
               <SelectItem value="buy">Buy</SelectItem>
               <SelectItem value="sell">Sell</SelectItem>
@@ -1244,7 +1244,7 @@ function TransactionHistoryDialog({ portfolioId, open, onOpenChange }: { portfol
               placeholder="Filter by symbol..."
               value={filterSymbol}
               onChange={(e) => setFilterSymbol(e.target.value)}
-              className="bg-slate-800/50 border-slate-600 text-white pl-10"
+              className="pl-10"
               data-testid="input-filter-symbol"
             />
           </div>
@@ -1255,8 +1255,8 @@ function TransactionHistoryDialog({ portfolioId, open, onOpenChange }: { portfol
             <div className="space-y-2">
               {[1, 2, 3, 4, 5].map(i => (
                 <div key={i} className="p-3 surface-1 rounded-lg animate-pulse">
-                  <div className="h-4 bg-slate-700 rounded w-3/4 mb-2"></div>
-                  <div className="h-3 bg-slate-700 rounded w-1/2"></div>
+                  <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-muted rounded w-1/2"></div>
                 </div>
               ))}
             </div>
@@ -1318,7 +1318,7 @@ function TransactionHistoryDialog({ portfolioId, open, onOpenChange }: { portfol
         </ScrollArea>
         
         {totalPages > 1 && (
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-700">
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
             <span className="text-xs text-gray-500">
               Showing {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, filteredTransactions.length)} of {filteredTransactions.length}
             </span>
@@ -1328,7 +1328,7 @@ function TransactionHistoryDialog({ portfolioId, open, onOpenChange }: { portfol
                 size="sm"
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="border-slate-600 text-gray-300"
+                className="border-border text-muted-foreground"
                 data-testid="button-prev-page"
               >
                 Previous
@@ -1338,7 +1338,7 @@ function TransactionHistoryDialog({ portfolioId, open, onOpenChange }: { portfol
                 size="sm"
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="border-slate-600 text-gray-300"
+                className="border-border text-muted-foreground"
                 data-testid="button-next-page"
               >
                 Next
@@ -1535,7 +1535,7 @@ function PerformanceSummary({ portfolio, assets, portfolioId }: { portfolio: Por
 
   if (assets.length === 0) {
     return (
-      <div className="h-32 flex items-center justify-center border border-dashed border-slate-700 rounded-lg">
+      <div className="h-32 flex items-center justify-center border border-dashed border-border rounded-lg">
         <div className="text-center">
           <History className="w-6 h-6 text-gray-600 mx-auto mb-2" />
           <p className="text-xs text-gray-500">Add assets to see performance</p>
@@ -1691,8 +1691,8 @@ function GoalTracker({ currentValue }: { currentValue: number }) {
       <div className="space-y-3">
         {[1, 2].map(i => (
           <div key={i} className="p-3 surface-1 rounded-lg animate-pulse">
-            <div className="h-4 bg-slate-700 rounded w-3/4 mb-2"></div>
-            <div className="h-2 bg-slate-700 rounded w-full"></div>
+            <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+            <div className="h-2 bg-muted rounded w-full"></div>
           </div>
         ))}
       </div>
@@ -1745,7 +1745,7 @@ function GoalTracker({ currentValue }: { currentValue: number }) {
             <Plus className="w-3 h-3 mr-1" /> Add Goal
           </Button>
         </DialogTrigger>
-        <DialogContent className="bg-slate-900 border-slate-700 sm:max-w-md">
+        <DialogContent className="surface-2 sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white">Create New Goal</DialogTitle>
           </DialogHeader>
@@ -1756,7 +1756,7 @@ function GoalTracker({ currentValue }: { currentValue: number }) {
                 value={newGoalName}
                 onChange={(e) => setNewGoalName(e.target.value)}
                 placeholder="e.g., Financial Freedom"
-                className="bg-slate-800/50 border-slate-600 text-white mt-1"
+                className="mt-1"
                 data-testid="goal-name-input"
               />
             </div>
@@ -1767,7 +1767,7 @@ function GoalTracker({ currentValue }: { currentValue: number }) {
                 value={newGoalTarget}
                 onChange={(e) => setNewGoalTarget(e.target.value)}
                 placeholder="100000"
-                className="bg-slate-800/50 border-slate-600 text-white mt-1"
+                className="mt-1"
                 data-testid="goal-target-input"
               />
             </div>
@@ -1777,17 +1777,17 @@ function GoalTracker({ currentValue }: { currentValue: number }) {
                 type="date"
                 value={newGoalDeadline}
                 onChange={(e) => setNewGoalDeadline(e.target.value)}
-                className="bg-slate-800/50 border-slate-600 text-white mt-1"
+                className="mt-1"
                 data-testid="goal-deadline-input"
               />
             </div>
             <div>
               <Label className="text-gray-300 text-sm">Goal Type</Label>
               <Select value={newGoalType} onValueChange={setNewGoalType}>
-                <SelectTrigger className="bg-slate-800/50 border-slate-600 text-white mt-1">
+                <SelectTrigger className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
+                <SelectContent className="surface-2">
                   <SelectItem value="net_worth">Net Worth Target</SelectItem>
                   <SelectItem value="savings">Savings Goal</SelectItem>
                   <SelectItem value="investment_return">Investment Return</SelectItem>
@@ -1973,8 +1973,8 @@ const NewsAggregator = memo(function NewsAggregator({ assets }: { assets: Portfo
       <div className="space-y-2">
         {[1, 2, 3].map(i => (
           <div key={i} className="p-2.5 surface-1 rounded-lg animate-pulse">
-            <div className="h-4 bg-slate-700 rounded w-3/4 mb-2"></div>
-            <div className="h-3 bg-slate-700 rounded w-1/2"></div>
+            <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+            <div className="h-3 bg-muted rounded w-1/2"></div>
           </div>
         ))}
       </div>
@@ -2006,7 +2006,7 @@ const NewsAggregator = memo(function NewsAggregator({ assets }: { assets: Portfo
             <div className="flex-1 min-w-0">
               <p className="text-xs text-white leading-snug line-clamp-2 group-hover:text-purple-300 transition-colors">{item.title}</p>
               <div className="flex items-center gap-2 mt-1">
-                <Badge variant="outline" className="text-[11px] sm:text-[9px] px-1.5 py-0.5 text-gray-500 border-slate-600">{item.symbol}</Badge>
+                <Badge variant="outline" className="text-[11px] sm:text-[9px] px-1.5 py-0.5 text-muted-foreground border-border">{item.symbol}</Badge>
                 <span className="text-[11px] sm:text-[10px] text-gray-500">{item.source} • {item.time}</span>
               </div>
             </div>
@@ -2127,7 +2127,7 @@ const SectorBreakdownChart = memo(function SectorBreakdownChart({ assets }: { as
       </div>
       <div className="space-y-1.5 max-h-[180px] overflow-y-auto">
         {sectorData.slice(0, 8).map((item) => (
-          <div key={item.sector} className="flex items-center justify-between py-1 px-2 rounded-md hover:bg-slate-800/50 transition-colors">
+          <div key={item.sector} className="flex items-center justify-between py-1 px-2 rounded-md hover:bg-accent/40 transition-colors">
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
               <span className="text-xs text-gray-300">{item.sector}</span>
@@ -2298,7 +2298,7 @@ function AIAdvisorChat({ portfolioId, totalValue, assets, allocation }: {
         </CollapsibleTrigger>
         <CollapsibleContent>
           <div className="px-4 pb-4">
-            <div className="h-[200px] overflow-y-auto mb-3 space-y-2 border border-slate-700/50 rounded-lg p-3 bg-slate-900/50">
+            <div className="h-[200px] overflow-y-auto mb-3 space-y-2 surface-1 rounded-lg p-3">
               {messages.length === 0 && (
                 <div className="text-center py-6">
                   <Brain className="w-8 h-8 mx-auto text-purple-400 mb-2" />
@@ -2309,7 +2309,7 @@ function AIAdvisorChat({ portfolioId, totalValue, assets, allocation }: {
                         key={i}
                         variant="outline"
                         size="sm"
-                        className="text-[10px] h-6 px-2 border-slate-600 text-gray-400 hover:text-white hover:border-purple-500/50"
+                        className="text-[10px] h-6 px-2 border-border text-muted-foreground hover:text-foreground hover:border-neon-purple/60"
                         onClick={() => sendMessage(q)}
                         data-testid={`suggested-question-${i}`}
                       >
@@ -2326,14 +2326,14 @@ function AIAdvisorChat({ portfolioId, totalValue, assets, allocation }: {
                     "p-2 rounded-lg text-xs",
                     msg.role === 'user' 
                       ? "bg-purple-500/20 text-purple-100 ml-8" 
-                      : "bg-slate-800 text-gray-300 mr-8"
+                      : "bg-muted text-foreground mr-8"
                   )}
                 >
                   {msg.content}
                 </div>
               ))}
               {isLoading && (
-                <div className="bg-slate-800 text-gray-400 p-2 rounded-lg text-xs mr-8 flex items-center gap-2">
+                <div className="bg-muted text-muted-foreground p-2 rounded-lg text-xs mr-8 flex items-center gap-2">
                   <RefreshCw className="w-3 h-3 animate-spin" />
                   Thinking...
                 </div>
@@ -2345,7 +2345,7 @@ function AIAdvisorChat({ portfolioId, totalValue, assets, allocation }: {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
                 placeholder="Ask about your portfolio..."
-                className="bg-slate-800/50 border-slate-600 text-white text-xs h-9"
+                className="text-xs h-9"
                 disabled={isLoading}
                 data-testid="input-advisor-chat"
               />
@@ -2430,7 +2430,7 @@ function AssetNewsSection({ symbol, isExpanded, onToggle }: { symbol: string; is
         data-testid={`news-toggle-${symbol}`}
       >
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 text-gray-400 border-slate-600">{symbol}</Badge>
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 text-muted-foreground border-border">{symbol}</Badge>
           <span className="text-xs text-gray-400">News</span>
         </div>
         <ChevronDown className={cn("w-3 h-3 text-gray-500 transition-transform", isExpanded && "rotate-180")} />
@@ -2449,7 +2449,7 @@ function AssetNewsSection({ symbol, isExpanded, onToggle }: { symbol: string; is
               {newsItems.slice(0, 3).map((item, i) => (
                 <div 
                   key={i}
-                  className="p-2 bg-slate-800/30 rounded hover:bg-slate-800/60 cursor-pointer transition-colors"
+                  className="p-2 surface-1 surface-interactive rounded cursor-pointer"
                   onClick={() => item.url && window.open(item.url, '_blank')}
                 >
                   <p className="text-[11px] text-gray-300 line-clamp-2">{item.title}</p>
@@ -2605,7 +2605,7 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
           Add Asset
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-slate-900 border-slate-700 sm:max-w-xl">
+      <DialogContent className="surface-2 sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="text-white">Add Asset</DialogTitle>
         </DialogHeader>
@@ -2633,7 +2633,7 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
             }
           } 
         }} className="w-full">
-          <TabsList className="w-full bg-transparent border-b border-slate-700 p-0 h-auto rounded-none gap-0">
+          <TabsList className="w-full bg-transparent border-b border-border p-0 h-auto rounded-none gap-0">
             <TabsTrigger value="search" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:text-white text-gray-500 py-3 bg-transparent data-[state=active]:bg-transparent hover:text-gray-300 transition-colors">
               <Search className="w-4 h-4 mr-2" />
               Search
@@ -2661,7 +2661,7 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
                     placeholder="Type to search stocks or crypto..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="bg-slate-800/50 border-slate-600 text-white pl-10 h-11 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20"
+                    className="pl-10 h-11 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20"
                     data-testid="input-asset-search"
                     autoFocus
                   />
@@ -2677,17 +2677,17 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
                 )}
 
                 {hasResults && (
-                  <div className="border border-slate-700 rounded-lg overflow-hidden">
+                  <div className="border border-border rounded-lg overflow-hidden">
                     {stockResults.length > 0 && (
                       <>
-                        <div className="px-3 py-2 bg-slate-800 text-xs text-gray-400 font-medium flex items-center gap-2 border-b border-slate-700">
+                        <div className="px-3 py-2 bg-muted text-xs text-muted-foreground font-medium flex items-center gap-2 border-b border-border">
                           <Building2 className="w-3 h-3" /> Stocks
                         </div>
                         {stockResults.slice(0, 5).map((result) => (
                           <button
                             key={result.symbol}
                             onClick={() => handleSelectAsset({ ...result, type: 'stock' })}
-                            className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 text-left border-b border-slate-800 last:border-b-0 transition-colors"
+                            className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-accent/40 text-left border-b border-border last:border-b-0 transition-colors"
                           >
                             <div className="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center">
                               <Building2 className="w-4 h-4 text-blue-400" />
@@ -2703,14 +2703,14 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
                     )}
                     {cryptoResults.length > 0 && (
                       <>
-                        <div className="px-3 py-2 bg-slate-800 text-xs text-gray-400 font-medium flex items-center gap-2 border-b border-slate-700">
+                        <div className="px-3 py-2 bg-muted text-xs text-muted-foreground font-medium flex items-center gap-2 border-b border-border">
                           <Bitcoin className="w-3 h-3" /> Crypto
                         </div>
                         {cryptoResults.slice(0, 5).map((result: any) => (
                           <button
                             key={result.id || result.symbol}
                             onClick={() => handleSelectAsset({ symbol: result.symbol, name: result.name, type: 'crypto', thumb: result.thumb })}
-                            className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 text-left border-b border-slate-800 last:border-b-0 transition-colors"
+                            className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-accent/40 text-left border-b border-border last:border-b-0 transition-colors"
                           >
                             {result.thumb ? (
                               <img src={result.thumb} alt={result.symbol} className="w-9 h-9 rounded-lg" />
@@ -2746,10 +2746,10 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
               <div>
                 <Label className="text-gray-400 text-sm">Type</Label>
                 <Select value={assetType} onValueChange={(v) => { setAssetType(v); setSymbol(v === 'cash' ? 'USD' : v === 'stablecoin' ? 'USDC' : 'BANK'); setName(v === 'cash' ? 'US Dollar' : v === 'stablecoin' ? 'USD Coin' : 'Bank Account'); }}>
-                  <SelectTrigger className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20">
+                  <SelectTrigger className="h-11 mt-1.5 focus-visible:ring-2 focus-visible:ring-ring">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectContent className="surface-2">
                     <SelectItem value="cash">Cash (USD)</SelectItem>
                     <SelectItem value="stablecoin">Stablecoin (USDC/USDT)</SelectItem>
                     <SelectItem value="other">Bank Account</SelectItem>
@@ -2763,7 +2763,7 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
                   value={quantity}
                   onChange={(e) => { setQuantity(e.target.value); setAvgCost('1'); }}
                   placeholder="10,000"
-                  className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20"
+                  className="h-11 mt-1.5 focus-visible:ring-2 focus-visible:ring-ring"
                 />
               </div>
               <div>
@@ -2772,7 +2772,7 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
                   value={accountName}
                   onChange={(e) => setAccountName(e.target.value)}
                   placeholder="e.g., Chase Checking, Coinbase"
-                  className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20"
+                  className="h-11 mt-1.5 focus-visible:ring-2 focus-visible:ring-ring"
                 />
               </div>
               <Button
@@ -2802,10 +2802,10 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
               <div>
                 <Label className="text-gray-400 text-sm">Account Type</Label>
                 <Select value={assetType} onValueChange={setAssetType}>
-                  <SelectTrigger className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20">
+                  <SelectTrigger className="h-11 mt-1.5 focus-visible:ring-2 focus-visible:ring-ring">
                     <SelectValue placeholder="Select account type" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectContent className="surface-2">
                     <SelectItem value="401k">401(k)</SelectItem>
                     <SelectItem value="ira">Traditional IRA</SelectItem>
                     <SelectItem value="roth_ira">Roth IRA</SelectItem>
@@ -2821,7 +2821,7 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
                   value={accountName} 
                   onChange={(e) => { setAccountName(e.target.value); setName(e.target.value); setSymbol('RET'); }}
                   placeholder="e.g., Fidelity 401k, Vanguard IRA" 
-                  className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" 
+                  className="h-11 mt-1.5 focus-visible:ring-2 focus-visible:ring-ring" 
                 />
               </div>
               <div>
@@ -2831,7 +2831,7 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
                   value={quantity} 
                   onChange={(e) => { setQuantity(e.target.value); setAvgCost('1'); }}
                   placeholder="50,000" 
-                  className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" 
+                  className="h-11 mt-1.5 focus-visible:ring-2 focus-visible:ring-ring" 
                 />
               </div>
               <div className="p-3 surface-1 rounded-lg">
@@ -2847,7 +2847,7 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
                       value={growthRate} 
                       onChange={(e) => setGrowthRate(e.target.value)}
                       placeholder="7" 
-                      className="bg-slate-800/50 border-slate-600 text-white h-10 mt-1 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" 
+                      className="h-10 mt-1 focus-visible:ring-2 focus-visible:ring-ring" 
                     />
                   </div>
                   <div>
@@ -2857,17 +2857,17 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
                       value={contributionAmount} 
                       onChange={(e) => setContributionAmount(e.target.value)}
                       placeholder="500" 
-                      className="bg-slate-800/50 border-slate-600 text-white h-10 mt-1 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" 
+                      className="h-10 mt-1 focus-visible:ring-2 focus-visible:ring-ring" 
                     />
                   </div>
                 </div>
                 <div className="mt-3">
                   <Label className="text-gray-500 text-xs">Contribution Frequency</Label>
                   <Select value={contributionFrequency} onValueChange={setContributionFrequency}>
-                    <SelectTrigger className="bg-slate-800/50 border-slate-600 text-white h-10 mt-1 focus:border-purple-500">
+                    <SelectTrigger className="h-10 mt-1">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectContent className="surface-2">
                       <SelectItem value="weekly">Weekly</SelectItem>
                       <SelectItem value="biweekly">Bi-weekly</SelectItem>
                       <SelectItem value="monthly">Monthly</SelectItem>
@@ -2904,10 +2904,10 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
               <div>
                 <Label className="text-gray-400 text-sm">Asset Type</Label>
                 <Select value={assetType} onValueChange={setAssetType}>
-                  <SelectTrigger className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20">
+                  <SelectTrigger className="h-11 mt-1.5 focus-visible:ring-2 focus-visible:ring-ring">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectContent className="surface-2">
                     <SelectItem value="crypto">Crypto</SelectItem>
                     <SelectItem value="stock">Stock</SelectItem>
                     <SelectItem value="etf">ETF</SelectItem>
@@ -2921,26 +2921,26 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-gray-400 text-sm">Symbol</Label>
-                  <Input value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())} placeholder="BTC" className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" />
+                  <Input value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())} placeholder="BTC" className="h-11 mt-1.5 focus-visible:ring-2 focus-visible:ring-ring" />
                 </div>
                 <div>
                   <Label className="text-gray-400 text-sm">Name</Label>
-                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Bitcoin" className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" />
+                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Bitcoin" className="h-11 mt-1.5 focus-visible:ring-2 focus-visible:ring-ring" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-gray-400 text-sm">Quantity</Label>
-                  <Input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="0.00" className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" />
+                  <Input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="0.00" className="h-11 mt-1.5 focus-visible:ring-2 focus-visible:ring-ring" />
                 </div>
                 <div>
                   <Label className="text-gray-400 text-sm">Avg Cost ($)</Label>
-                  <Input type="number" value={avgCost} onChange={(e) => setAvgCost(e.target.value)} placeholder="0.00" className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" />
+                  <Input type="number" value={avgCost} onChange={(e) => setAvgCost(e.target.value)} placeholder="0.00" className="h-11 mt-1.5 focus-visible:ring-2 focus-visible:ring-ring" />
                 </div>
               </div>
               <div>
                 <Label className="text-gray-400 text-sm">Account (optional)</Label>
-                <Input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="Coinbase, Fidelity..." className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" />
+                <Input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="Coinbase, Fidelity..." className="h-11 mt-1.5 focus-visible:ring-2 focus-visible:ring-ring" />
               </div>
               <Button onClick={handleSubmit} disabled={addAssetMutation.isPending} className="w-full h-11 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white font-medium">
                 {addAssetMutation.isPending ? 'Adding...' : 'Add Asset'}
@@ -2970,16 +2970,16 @@ function AddAssetDialog({ portfolioId, onSuccess }: { portfolioId: string; onSuc
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-gray-400 text-sm">Quantity</Label>
-                  <Input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="0.00" className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" />
+                  <Input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="0.00" className="h-11 mt-1.5 focus-visible:ring-2 focus-visible:ring-ring" />
                 </div>
                 <div>
                   <Label className="text-gray-400 text-sm">Avg Cost ($)</Label>
-                  <Input type="number" value={avgCost} onChange={(e) => setAvgCost(e.target.value)} placeholder="0.00" className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" />
+                  <Input type="number" value={avgCost} onChange={(e) => setAvgCost(e.target.value)} placeholder="0.00" className="h-11 mt-1.5 focus-visible:ring-2 focus-visible:ring-ring" />
                 </div>
               </div>
               <div>
                 <Label className="text-gray-400 text-sm">Account (optional)</Label>
-                <Input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="Coinbase, Fidelity..." className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20" />
+                <Input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="Coinbase, Fidelity..." className="h-11 mt-1.5 focus-visible:ring-2 focus-visible:ring-ring" />
               </div>
               <Button onClick={handleSubmit} disabled={addAssetMutation.isPending} className="w-full h-11 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white font-medium">
                 {addAssetMutation.isPending ? 'Adding...' : 'Add Asset'}
@@ -3009,8 +3009,8 @@ const AssetRow = memo(function AssetRow({ asset, portfolioId, showValues = true,
   return (
     <div
       className={cn(
-        "flex items-center justify-between p-3 surface-1 rounded-lg border hover:border-slate-600/50 hover:bg-slate-800/50 transition-colors cursor-pointer group relative",
-        isRecentlyUpdated ? 'border-green-500/40' : 'border-slate-700/30'
+        "flex items-center justify-between p-3 surface-1 rounded-lg border hover:border-border hover:bg-accent/40 transition-colors cursor-pointer group relative",
+        isRecentlyUpdated ? 'border-green-500/40' : 'border-border/30'
       )}
     >
       {isRecentlyUpdated && (
@@ -3161,14 +3161,14 @@ function EditAssetDialog({ asset, portfolioId, onSuccess }: { asset: PortfolioAs
         <Button 
           variant="ghost" 
           size="sm" 
-          className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 p-0 bg-slate-700/80 hover:bg-slate-600 text-gray-400 hover:text-white"
+          className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 p-0 bg-muted hover:bg-accent text-muted-foreground hover:text-foreground"
           onClick={(e) => { e.stopPropagation(); setOpen(true); }}
           data-testid={`edit-asset-${asset.symbol}`}
         >
           <Edit2 className="w-3.5 h-3.5" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-slate-900 border-slate-700 sm:max-w-md">
+      <DialogContent className="surface-2 sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-3">
             <div className={cn("p-2 rounded-lg bg-gradient-to-br", colorGradient)}>
@@ -3198,7 +3198,7 @@ function EditAssetDialog({ asset, portfolioId, onSuccess }: { asset: PortfolioAs
                 value={quantity} 
                 onChange={(e) => setQuantity(e.target.value)} 
                 placeholder="0.00" 
-                className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500" 
+                className="h-11 mt-1.5" 
               />
             </div>
             <div>
@@ -3208,7 +3208,7 @@ function EditAssetDialog({ asset, portfolioId, onSuccess }: { asset: PortfolioAs
                 value={avgCost} 
                 onChange={(e) => setAvgCost(e.target.value)} 
                 placeholder="0.00" 
-                className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500"
+                className="h-11 mt-1.5"
                 disabled={isCashLike}
               />
             </div>
@@ -3220,7 +3220,7 @@ function EditAssetDialog({ asset, portfolioId, onSuccess }: { asset: PortfolioAs
               value={accountName} 
               onChange={(e) => setAccountName(e.target.value)} 
               placeholder="Coinbase, Fidelity..." 
-              className="bg-slate-800/50 border-slate-600 text-white h-11 mt-1.5 focus:border-purple-500" 
+              className="h-11 mt-1.5" 
             />
           </div>
 
@@ -3569,9 +3569,9 @@ export default function PortfolioDashboard() {
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pt-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="animate-pulse space-y-6">
-            <div className="h-12 bg-slate-800 rounded-lg w-1/3" />
+            <div className="h-12 bg-muted rounded-lg w-1/3" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map(i => <div key={i} className="h-32 bg-slate-800 rounded-xl" />)}
+              {[1, 2, 3, 4].map(i => <div key={i} className="h-32 bg-muted rounded-xl" />)}
             </div>
           </div>
         </div>
@@ -3612,7 +3612,7 @@ export default function PortfolioDashboard() {
                             ? 'bg-green-500/10 text-green-400 border border-green-500/20' 
                             : connectionStatus === 'connecting'
                             ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
-                            : 'bg-slate-500/10 text-slate-400 border border-slate-500/20'
+                            : 'bg-muted text-muted-foreground border border-border'
                         )}
                         data-testid="live-connection-status"
                       >
@@ -3662,7 +3662,7 @@ export default function PortfolioDashboard() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowValues(!showValues)}
-                className="text-gray-400 hover:text-white hover:bg-slate-800 min-w-[44px] min-h-[44px]"
+                className="text-muted-foreground hover:text-foreground hover:bg-accent/40 min-w-[44px] min-h-[44px]"
               >
                 {showValues ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </Button>
@@ -3672,7 +3672,7 @@ export default function PortfolioDashboard() {
                   size="sm"
                   onClick={() => syncMutation.mutate()}
                   disabled={syncMutation.isPending || !activePortfolioId}
-                  className="border-slate-700 text-gray-300 hover:bg-slate-800 hover:text-white min-h-[44px]"
+                  className="border-border text-foreground hover:bg-accent/40 min-h-[44px]"
                   data-testid="sync-portfolio-button"
                 >
                   <RefreshCw className={cn("w-4 h-4 mr-2", syncMutation.isPending && "animate-spin")} />
@@ -3698,7 +3698,7 @@ export default function PortfolioDashboard() {
               animate={{ opacity: 1, y: 0 }}
               className="max-w-2xl mx-auto"
             >
-              <Card className="bg-slate-900/80 border-slate-700/50 p-8">
+              <Card className="surface-2 p-8">
                 <div className="text-center mb-8">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center">
                     <Wallet className="w-8 h-8 text-white" />
@@ -3726,7 +3726,7 @@ export default function PortfolioDashboard() {
                   )}
                 </Button>
 
-                <div className="grid grid-cols-3 gap-4 mt-8 pt-8 border-t border-slate-700/50">
+                <div className="grid grid-cols-3 gap-4 mt-8 pt-8 border-t border-border/60">
                   {[
                     { icon: PieChart, label: 'Track All Assets', desc: 'Crypto, stocks, cash' },
                     { icon: Brain, label: 'AI Health Score', desc: 'Smart analysis' },
@@ -3753,7 +3753,7 @@ export default function PortfolioDashboard() {
                       onClick={() => setSelectedPortfolioId(p.id)}
                       className={p.id === activePortfolioId
                         ? 'bg-purple-500 text-white'
-                        : 'border-slate-600 text-gray-300'
+                        : 'border-border text-muted-foreground'
                       }
                     >
                       {p.name}
@@ -3798,7 +3798,7 @@ export default function PortfolioDashboard() {
                 </Card>
 
                 {/* Cost Basis Card */}
-                <Card className="bg-slate-900/80 border-slate-700/50 p-5 hover:border-cyan-500/30 hover:shadow-lg hover:shadow-cyan-500/5 transition-all">
+                <Card className="surface-2 surface-interactive p-5 hover:border-neon-cyan/50">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="p-2 rounded-lg bg-blue-500/10">
                       <Target className="w-4 h-4 text-blue-400" />
@@ -3812,7 +3812,7 @@ export default function PortfolioDashboard() {
                 </Card>
 
                 {/* Assets Count Card */}
-                <Card className="bg-slate-900/80 border-slate-700/50 p-5 hover:border-green-500/30 hover:shadow-lg hover:shadow-green-500/5 transition-all">
+                <Card className="surface-2 surface-interactive p-5 hover:border-emerald-500/50">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="p-2 rounded-lg bg-cyan-500/10">
                       <Layers className="w-4 h-4 text-cyan-400" />
@@ -3845,7 +3845,7 @@ export default function PortfolioDashboard() {
               </div>
 
               {/* Quick Actions Bar */}
-              <Card className="bg-slate-900/60 border-slate-700/50 p-3 mb-6">
+              <Card className="surface-1 p-3 mb-6">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Button 
@@ -3868,7 +3868,7 @@ export default function PortfolioDashboard() {
                       variant="ghost" 
                       size="sm" 
                       onClick={() => setShowAlertDialog(true)}
-                      className="text-gray-400 hover:text-white hover:bg-slate-800 hidden sm:flex"
+                      className="text-muted-foreground hover:text-foreground hover:bg-accent/40 hidden sm:flex"
                       data-testid="button-set-alert"
                     >
                       <Bell className="w-4 h-4 mr-2" />
@@ -3878,7 +3878,7 @@ export default function PortfolioDashboard() {
                       variant="ghost" 
                       size="sm" 
                       onClick={() => setShowRebalanceDialog(true)}
-                      className="text-gray-400 hover:text-white hover:bg-slate-800 hidden sm:flex"
+                      className="text-muted-foreground hover:text-foreground hover:bg-accent/40 hidden sm:flex"
                       data-testid="button-rebalance"
                     >
                       <Scale className="w-4 h-4 mr-2" />
@@ -3888,7 +3888,7 @@ export default function PortfolioDashboard() {
                       variant="ghost" 
                       size="sm" 
                       onClick={() => setShowTaxDialog(true)}
-                      className="text-gray-400 hover:text-white hover:bg-slate-800 hidden md:flex"
+                      className="text-muted-foreground hover:text-foreground hover:bg-accent/40 hidden md:flex"
                       data-testid="button-tax-loss"
                     >
                       <Percent className="w-4 h-4 mr-2" />
@@ -3898,7 +3898,7 @@ export default function PortfolioDashboard() {
                       variant="ghost" 
                       size="sm" 
                       onClick={() => setShowTransactionHistoryDialog(true)}
-                      className="text-gray-400 hover:text-white hover:bg-slate-800 hidden lg:flex"
+                      className="text-muted-foreground hover:text-foreground hover:bg-accent/40 hidden lg:flex"
                       data-testid="button-transaction-history"
                     >
                       <History className="w-4 h-4 mr-2" />
@@ -3906,7 +3906,7 @@ export default function PortfolioDashboard() {
                     </Button>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-gray-500 border-slate-600 text-xs">
+                    <Badge variant="outline" className="text-muted-foreground border-border text-xs">
                       <Radio className="w-3 h-3 mr-1 text-green-400" />
                       Live
                     </Badge>
@@ -3921,7 +3921,7 @@ export default function PortfolioDashboard() {
 
               {/* Net Worth Historical Chart */}
               {activePortfolioId && assets.length > 0 && (
-                <Card className="bg-slate-900/80 border-slate-700/50 p-6 mb-6">
+                <Card className="surface-2 p-6 mb-6">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                       <LineChart className="w-5 h-5 text-purple-400" />
@@ -3934,7 +3934,7 @@ export default function PortfolioDashboard() {
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-6">
-                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                  <Card className="surface-2 p-6">
                     <Tabs defaultValue="holdings" className="w-full">
                       <div className="flex items-center justify-between mb-4">
                         <TabsList className="bg-transparent border-none p-0 h-auto">
@@ -3945,7 +3945,7 @@ export default function PortfolioDashboard() {
                           >
                             <Briefcase className="w-4 h-4 mr-2" />
                             Holdings
-                            <Badge variant="outline" className="ml-2 text-gray-400 border-slate-600 text-xs">
+                            <Badge variant="outline" className="ml-2 text-muted-foreground border-border text-xs">
                               {assets.length}
                             </Badge>
                           </TabsTrigger>
@@ -4039,7 +4039,7 @@ export default function PortfolioDashboard() {
                   </Card>
 
                   {/* Performance Summary */}
-                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                  <Card className="surface-2 p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                         <LineChart className="w-5 h-5 text-green-400" />
@@ -4050,7 +4050,7 @@ export default function PortfolioDashboard() {
                   </Card>
 
                   {/* Risk & Metrics Panel */}
-                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                  <Card className="surface-2 p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                         <Gauge className="w-5 h-5 text-cyan-400" />
@@ -4089,7 +4089,7 @@ export default function PortfolioDashboard() {
                   </Card>
 
                   {/* AI Trade Signals */}
-                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                  <Card className="surface-2 p-6">
                       <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                           <Zap className="w-5 h-5 text-cyan-400" />
@@ -4138,7 +4138,7 @@ export default function PortfolioDashboard() {
                     </Card>
 
                   {/* Top Movers */}
-                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                  <Card className="surface-2 p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                         <Activity className="w-5 h-5 text-purple-400" />
@@ -4149,31 +4149,31 @@ export default function PortfolioDashboard() {
                   </Card>
 
                   {/* Correlation Matrix */}
-                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                  <Card className="surface-2 p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                         <BarChart2 className="w-5 h-5 text-cyan-400" />
                         Asset Correlations
                       </h2>
-                      <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">30D</Badge>
+                      <Badge variant="outline" className="text-[10px] text-muted-foreground border-border">30D</Badge>
                     </div>
                     <CorrelationMatrix assets={assets} portfolioId={activePortfolioId} />
                   </Card>
 
                   {/* Sector Breakdown */}
-                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                  <Card className="surface-2 p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                         <PieChart className="w-5 h-5 text-indigo-400" />
                         Sector Breakdown
                       </h2>
-                      <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">By Industry</Badge>
+                      <Badge variant="outline" className="text-[10px] text-muted-foreground border-border">By Industry</Badge>
                     </div>
                     <SectorBreakdownChart assets={assets} />
                   </Card>
 
                   {/* AI Insights Feed */}
-                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                  <Card className="surface-2 p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                         <Zap className="w-5 h-5 text-amber-400" />
@@ -4192,7 +4192,7 @@ export default function PortfolioDashboard() {
                               "p-3 rounded-lg border transition-colors cursor-pointer hover:border-purple-500/30",
                               rec.priority === 'high' ? 'bg-red-500/5 border-red-500/20' :
                               rec.priority === 'medium' ? 'bg-amber-500/5 border-amber-500/20' :
-                              'bg-slate-800/30 border-slate-700/50'
+                              'surface-1'
                             )}
                           >
                             <div className="flex items-start gap-3">
@@ -4200,7 +4200,7 @@ export default function PortfolioDashboard() {
                                 "p-1.5 rounded-md mt-0.5",
                                 rec.priority === 'high' ? 'bg-red-500/10' :
                                 rec.priority === 'medium' ? 'bg-amber-500/10' :
-                                'bg-slate-700/50'
+                                'bg-muted'
                               )}>
                                 {rec.priority === 'high' ? (
                                   <Flame className="w-3.5 h-3.5 text-red-400" />
@@ -4213,7 +4213,7 @@ export default function PortfolioDashboard() {
                               <div className="flex-1 min-w-0">
                                 <p className="text-white text-sm leading-snug">{rec.message}</p>
                                 <div className="flex items-center gap-2 mt-2">
-                                  <Badge variant="outline" className="text-[11px] sm:text-[10px] text-gray-500 border-slate-600 px-1.5 py-0">
+                                  <Badge variant="outline" className="text-[11px] sm:text-[10px] text-muted-foreground border-border px-1.5 py-0">
                                     {rec.type}
                                   </Badge>
                                   {rec.action && (
@@ -4240,7 +4240,7 @@ export default function PortfolioDashboard() {
 
                 <div className="space-y-6">
                   {/* AI Health Analysis */}
-                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                  <Card className="surface-2 p-6">
                     <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
                       <Brain className="w-5 h-5 text-purple-400" />
                       Portfolio Health
@@ -4266,19 +4266,19 @@ export default function PortfolioDashboard() {
                   </Card>
 
                   {/* Connected Accounts */}
-                  <Card className="bg-slate-900/80 border-slate-700/50 p-5">
+                  <Card className="surface-2 p-5">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-semibold text-white text-sm flex items-center gap-2">
                         <Wallet className="w-4 h-4 text-purple-400" />
                         Connected Accounts
                       </h3>
-                      <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">Demo</Badge>
+                      <Badge variant="outline" className="text-[10px] text-muted-foreground border-border">Demo</Badge>
                     </div>
                     <ConnectedAccountsSection />
                   </Card>
 
                   {/* Asset Allocation */}
-                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                  <Card className="surface-2 p-6">
                     <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
                       <PieChart className="w-5 h-5 text-cyan-400" />
                       Allocation
@@ -4293,7 +4293,7 @@ export default function PortfolioDashboard() {
                             // Use same colors as the chart for consistency
                             const chartColor = assetTypeChartColors[type] || assetTypeChartColors.other;
                             return (
-                              <div key={type} className="flex items-center justify-between py-1.5 px-2 rounded-md hover:bg-slate-800/50 transition-colors">
+                              <div key={type} className="flex items-center justify-between py-1.5 px-2 rounded-md hover:bg-accent/40 transition-colors">
                                 <div className="flex items-center gap-2">
                                   <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: chartColor }} />
                                   <span className="text-sm text-gray-300 capitalize">{type.replace('_', ' ')}</span>
@@ -4370,14 +4370,14 @@ export default function PortfolioDashboard() {
                   </Card>
 
                   {/* Event Calendar */}
-                  <Card className="bg-slate-900/80 border-slate-700/50 p-5">
+                  <Card className="surface-2 p-5">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-semibold text-white text-sm flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-cyan-400" />
                         Upcoming Events
                       </h3>
                       {portfolioEvents.length > 0 && (
-                        <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">
+                        <Badge variant="outline" className="text-[10px] text-muted-foreground border-border">
                           {portfolioEvents.length} events
                         </Badge>
                       )}
@@ -4431,7 +4431,7 @@ export default function PortfolioDashboard() {
                   </Card>
 
                   {/* Income Tracker */}
-                  <Card className="bg-slate-900/80 border-slate-700/50 p-5">
+                  <Card className="surface-2 p-5">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-semibold text-white text-sm flex items-center gap-2">
                         <Coins className="w-4 h-4 text-green-400" />
@@ -4442,25 +4442,25 @@ export default function PortfolioDashboard() {
                   </Card>
 
                   {/* News Feed */}
-                  <Card className="bg-slate-900/80 border-slate-700/50 p-5">
+                  <Card className="surface-2 p-5">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-semibold text-white text-sm flex items-center gap-2">
                         <FileText className="w-4 h-4 text-blue-400" />
                         Latest News
                       </h3>
-                      <Badge variant="outline" className="text-[11px] sm:text-[9px] text-gray-500 border-slate-600">Live</Badge>
+                      <Badge variant="outline" className="text-[11px] sm:text-[9px] text-muted-foreground border-border">Live</Badge>
                     </div>
                     <NewsAggregator assets={assets} />
                   </Card>
 
                   {/* Per-Asset News Feed */}
-                  <Card className="bg-slate-900/80 border-slate-700/50 p-5">
+                  <Card className="surface-2 p-5">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-semibold text-white text-sm flex items-center gap-2">
                         <Layers className="w-4 h-4 text-cyan-400" />
                         News by Asset
                       </h3>
-                      <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">Per Symbol</Badge>
+                      <Badge variant="outline" className="text-[10px] text-muted-foreground border-border">Per Symbol</Badge>
                     </div>
                     <AssetNewsFeed assets={assets} />
                   </Card>
@@ -4470,10 +4470,10 @@ export default function PortfolioDashboard() {
               {/* Section Divider */}
               <div className="relative py-8">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-700/50" />
+                  <div className="w-full border-t border-border/60" />
                 </div>
                 <div className="relative flex justify-center">
-                  <span className="bg-slate-950 px-4 text-xs text-gray-500 uppercase tracking-wider">Advanced Analytics</span>
+                  <span className="bg-background px-4 text-xs text-muted-foreground uppercase tracking-wider">Advanced Analytics</span>
                 </div>
               </div>
 
@@ -4499,7 +4499,7 @@ export default function PortfolioDashboard() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {/* Top Recommendation - Dynamic based on portfolio state */}
-                    <div className="md:col-span-2 p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                    <div className="md:col-span-2 p-4 surface-1 rounded-xl">
                       <div className="flex items-start gap-3">
                         {(() => {
                           const sortedByAlloc = [...assets].sort((a, b) => (b.allocationPercent || 0) - (a.allocationPercent || 0));
@@ -4717,13 +4717,13 @@ export default function PortfolioDashboard() {
                 {/* Portfolio Analytics + Tax Summary Row */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Portfolio Analytics */}
-                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                  <Card className="surface-2 p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                         <BarChart3 className="w-5 h-5 text-blue-400" />
                         Portfolio Analytics
                       </h2>
-                      <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">vs. S&P 500</Badge>
+                      <Badge variant="outline" className="text-[10px] text-muted-foreground border-border">vs. S&P 500</Badge>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-3 surface-1 rounded-lg">
@@ -4798,13 +4798,13 @@ export default function PortfolioDashboard() {
                   </Card>
 
                   {/* Tax Dashboard */}
-                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                  <Card className="surface-2 p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                         <Receipt className="w-5 h-5 text-amber-400" />
                         Tax Dashboard
                       </h2>
-                      <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">2024 Tax Year</Badge>
+                      <Badge variant="outline" className="text-[10px] text-muted-foreground border-border">2024 Tax Year</Badge>
                     </div>
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div className="p-3 surface-1 rounded-lg">
@@ -4879,7 +4879,7 @@ export default function PortfolioDashboard() {
 
                 {/* Benchmark Comparison Chart */}
                 {activePortfolioId && (
-                  <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                  <Card className="surface-2 p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                         <TrendingUp className="w-5 h-5 text-purple-400" />
@@ -4891,13 +4891,13 @@ export default function PortfolioDashboard() {
                 )}
 
                 {/* Dividend Calendar */}
-                <Card className="bg-slate-900/80 border-slate-700/50 p-6">
+                <Card className="surface-2 p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                       <Calendar className="w-5 h-5 text-green-400" />
                       Dividend Calendar
                     </h2>
-                    <Badge variant="outline" className="text-[10px] text-gray-500 border-slate-600">Upcoming</Badge>
+                    <Badge variant="outline" className="text-[10px] text-muted-foreground border-border">Upcoming</Badge>
                   </div>
                   <DividendCalendar assets={assets} />
                 </Card>
@@ -4918,7 +4918,7 @@ export default function PortfolioDashboard() {
 
       {/* Price Alert Dialog */}
       <Dialog open={showAlertDialog} onOpenChange={setShowAlertDialog}>
-        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-md max-h-[85vh] overflow-y-auto">
+        <DialogContent className="surface-2 max-w-md max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Bell className="w-5 h-5 text-purple-400" />
@@ -4932,12 +4932,12 @@ export default function PortfolioDashboard() {
                 <div>
                   <Label className="text-gray-400 text-xs">Select Asset</Label>
                   <Select value={alertSymbol} onValueChange={setAlertSymbol}>
-                    <SelectTrigger className="mt-1 bg-slate-800 border-slate-600 text-white" data-testid="select-alert-asset">
+                    <SelectTrigger className="mt-1" data-testid="select-alert-asset">
                       <SelectValue placeholder="Choose asset" />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectContent className="surface-2">
                       {assets.map(a => (
-                        <SelectItem key={a.id} value={a.symbol} className="text-white hover:bg-slate-700">
+                        <SelectItem key={a.id} value={a.symbol} className="hover:bg-accent/40">
                           {a.symbol} - {a.name} (${a.currentPrice?.toLocaleString()})
                         </SelectItem>
                       ))}
@@ -4948,10 +4948,10 @@ export default function PortfolioDashboard() {
                   <Label className="text-gray-400 text-xs">Alert When Price</Label>
                   <div className="flex gap-2 mt-1">
                     <Select value={alertType} onValueChange={(v) => setAlertType(v as 'above' | 'below')}>
-                      <SelectTrigger className="bg-slate-800 border-slate-600 text-white w-28" data-testid="select-alert-type">
+                      <SelectTrigger className="w-28" data-testid="select-alert-type">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectContent className="surface-2">
                         <SelectItem value="above" className="text-white">Goes above</SelectItem>
                         <SelectItem value="below" className="text-white">Goes below</SelectItem>
                       </SelectContent>
@@ -4960,7 +4960,7 @@ export default function PortfolioDashboard() {
                       placeholder="Target price" 
                       value={alertTargetPrice}
                       onChange={(e) => setAlertTargetPrice(e.target.value)}
-                      className="bg-slate-800 border-slate-600 text-white" 
+                      className="" 
                       data-testid="input-alert-price"
                     />
                   </div>
@@ -5045,7 +5045,7 @@ export default function PortfolioDashboard() {
           setTargetAllocations(initialTargets);
         }
       }}>
-        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogContent className="surface-2 max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Scale className="w-5 h-5 text-cyan-400" />
@@ -5069,7 +5069,7 @@ export default function PortfolioDashboard() {
                           max="100"
                           value={targetAllocations[type] || 0}
                           onChange={(e) => setTargetAllocations(prev => ({ ...prev, [type]: parseFloat(e.target.value) || 0 }))}
-                          className="w-16 h-8 text-center bg-slate-800 border-slate-600 text-white text-sm"
+                          className="w-16 h-8 text-center "" text-sm"
                           data-testid={`input-target-${type}`}
                         />
                         <span className="text-xs text-gray-400">%</span>
@@ -5077,7 +5077,7 @@ export default function PortfolioDashboard() {
                     </div>
                   );
                 })}
-                <div className="pt-2 border-t border-slate-700/50 flex justify-between text-xs">
+                <div className="pt-2 border-t border-border/60 flex justify-between text-xs">
                   <span className="text-gray-400">Total:</span>
                   <span className={cn("font-medium", Object.values(targetAllocations).reduce((a, b) => a + b, 0) === 100 ? 'text-green-400' : 'text-amber-400')}>
                     {Object.values(targetAllocations).reduce((a, b) => a + b, 0).toFixed(0)}%
@@ -5189,7 +5189,7 @@ export default function PortfolioDashboard() {
 
       {/* Tax Analytics Dialog */}
       <Dialog open={showTaxDialog} onOpenChange={setShowTaxDialog}>
-        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-lg max-h-[80vh] overflow-y-auto">
+        <DialogContent className="surface-2 max-w-lg max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Receipt className="w-5 h-5 text-amber-400" />
@@ -5290,7 +5290,7 @@ export default function PortfolioDashboard() {
 
       {/* Strategy Dialog */}
       <Dialog open={showStrategyDialog} onOpenChange={setShowStrategyDialog}>
-        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-lg">
+        <DialogContent className="surface-2 max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Brain className="w-5 h-5 text-purple-400" />
@@ -5303,7 +5303,7 @@ export default function PortfolioDashboard() {
                 <div key={i} className={cn("p-4 rounded-lg border", 
                   rec.priority === 'high' ? 'bg-red-500/10 border-red-500/30' : 
                   rec.priority === 'medium' ? 'bg-amber-500/10 border-amber-500/30' : 
-                  'bg-slate-800/50 border-slate-700/50'
+                  'surface-1'
                 )}>
                   <div className="flex items-start gap-3">
                     <Lightbulb className={cn("w-4 h-4 mt-0.5",
@@ -5333,7 +5333,7 @@ export default function PortfolioDashboard() {
 
       {/* Goals Dialog */}
       <Dialog open={showGoalsDialog} onOpenChange={setShowGoalsDialog}>
-        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-md">
+        <DialogContent className="surface-2 max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Target className="w-5 h-5 text-purple-400" />
@@ -5343,15 +5343,15 @@ export default function PortfolioDashboard() {
           <div className="space-y-4 pt-4">
             <div>
               <Label className="text-gray-400 text-sm">Target Portfolio Value</Label>
-              <Input placeholder="e.g. $100,000" className="mt-1.5 bg-slate-800 border-slate-600 text-white" />
+              <Input placeholder="e.g. $100,000" className="mt-1.5 """ />
             </div>
             <div>
               <Label className="text-gray-400 text-sm">Target Date</Label>
-              <Input type="date" className="mt-1.5 bg-slate-800 border-slate-600 text-white" />
+              <Input type="date" className="mt-1.5 """ />
             </div>
             <div>
               <Label className="text-gray-400 text-sm">Monthly Contribution</Label>
-              <Input placeholder="e.g. $500/month" className="mt-1.5 bg-slate-800 border-slate-600 text-white" />
+              <Input placeholder="e.g. $500/month" className="mt-1.5 """ />
             </div>
             <Button 
               onClick={() => {
@@ -5368,7 +5368,7 @@ export default function PortfolioDashboard() {
 
       {/* Custom Stress Test Dialog */}
       <Dialog open={showStressTestDialog} onOpenChange={setShowStressTestDialog}>
-        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogContent className="surface-2 max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-red-400" />
@@ -5405,7 +5405,7 @@ export default function PortfolioDashboard() {
                         max="80"
                         value={dropPercent}
                         onChange={(e) => setCustomScenario(prev => ({ ...prev, [type]: parseInt(e.target.value) }))}
-                        className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-red-500"
+                        className="flex-1 h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-red-500"
                         data-testid={`slider-drop-${type}`}
                       />
                       <div className="flex items-center gap-1 w-16">
@@ -5415,7 +5415,7 @@ export default function PortfolioDashboard() {
                           max="100"
                           value={dropPercent}
                           onChange={(e) => setCustomScenario(prev => ({ ...prev, [type]: Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) }))}
-                          className="w-12 h-7 text-center bg-slate-800 border-slate-600 text-white text-xs p-1"
+                          className="w-12 h-7 text-center "" text-xs p-1"
                         />
                         <span className="text-xs text-gray-400">%</span>
                       </div>
@@ -5484,7 +5484,7 @@ export default function PortfolioDashboard() {
                   commodity: 15,
                   other: 15,
                 })}
-                className="flex-1 border-slate-600 text-gray-300 hover:bg-slate-800"
+                className="flex-1 border-border text-muted-foreground hover:bg-accent/40"
                 data-testid="button-reset-scenario"
               >
                 Reset to Default
