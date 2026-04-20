@@ -7,7 +7,8 @@
   --background: hsl(250, 20%, 98%);
   --foreground: hsl(250, 30%, 15%);
   --muted: hsl(250, 15%, 94%);
-  --muted-foreground: hsl(250, 10%, 45%);
+  /* Bumped from 45% → 38% L for stronger contrast on muted surfaces (AA on body). */
+  --muted-foreground: hsl(250, 12%, 38%);
   --popover: hsl(0, 0%, 100%);
   --popover-foreground: hsl(250, 30%, 15%);
   --card: hsl(0, 0%, 100%);
@@ -219,7 +220,8 @@
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: hsl(195, 50%, 78%);
+    /* Light mode: deep cyan that stays legible on white surface (AA on white). */
+    color: hsl(195, 80%, 32%);
   }
   .dark .text-overline { color: hsl(195, 70%, 78%); }
 
@@ -317,14 +319,15 @@
     border-color: hsla(258, 80%, 65%, 0.4);
   }
   
-  /* Light mode specific overrides */
-  :root .glass-card {
+  /* Light mode specific overrides — scoped to :not(.dark) so cascade order
+     no longer matters and the dark override stays the source of truth in dark. */
+  :root:not(.dark) .glass-card {
     background: hsla(250, 40%, 100%, 0.9);
     border: 1px solid hsla(258, 50%, 80%, 0.35);
     box-shadow: 0 4px 24px 0 hsla(258, 40%, 50%, 0.08);
   }
-  
-  :root .glass-card:hover {
+
+  :root:not(.dark) .glass-card:hover {
     box-shadow: 0 8px 32px 0 hsla(258, 50%, 50%, 0.15);
     border-color: hsla(258, 70%, 60%, 0.45);
   }

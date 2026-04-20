@@ -29,7 +29,7 @@ export default function StyleGuide() {
       <div className="section-container section-stack">
         <header className="space-y-3 pt-4">
           <div className="text-overline">StreamAiX · Design system</div>
-          <h1 className="text-display text-3xl md:text-5xl text-white">
+          <h1 className="text-display text-3xl md:text-5xl text-foreground">
             Visual style reference
           </h1>
           <p className="text-muted-foreground max-w-2xl">
@@ -105,7 +105,7 @@ export default function StyleGuide() {
                   style={{ backgroundColor: s.value }}
                   data-testid={`swatch-${s.token}`}
                 />
-                <div className="text-sm font-semibold text-white">{s.name}</div>
+                <div className="text-sm font-semibold text-foreground">{s.name}</div>
                 <div className="text-[11px] text-muted-foreground numeric">
                   {s.value}
                 </div>
@@ -119,18 +119,18 @@ export default function StyleGuide() {
           <div className="text-overline">Typography</div>
           <div className="surface-1 rounded-lg p-6 space-y-4">
             <div className="text-overline">Overline · 11/12 · Inter 600</div>
-            <h1 className="text-display text-5xl text-white">
+            <h1 className="text-display text-5xl text-foreground">
               Display · Orbitron 700
             </h1>
-            <h2 className="text-3xl font-bold text-white">Heading 2 · Inter 700</h2>
-            <h3 className="text-xl font-semibold text-white">Heading 3 · Inter 600</h3>
+            <h2 className="text-3xl font-bold text-foreground">Heading 2 · Inter 700</h2>
+            <h3 className="text-xl font-semibold text-foreground">Heading 3 · Inter 600</h3>
             <p className="text-base text-foreground/90">
               Body · Inter 400 — used for paragraphs and descriptions.
             </p>
             <p className="text-sm text-muted-foreground">
               Caption · Inter 400 — used for metadata and helper text.
             </p>
-            <p className="text-2xl font-semibold text-white numeric">
+            <p className="text-2xl font-semibold text-foreground numeric">
               1,284,330.55 · numeric (tabular)
             </p>
           </div>
@@ -246,7 +246,7 @@ export default function StyleGuide() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Progress</span>
-                  <span className="numeric text-white">{progress}%</span>
+                  <span className="numeric text-foreground">{progress}%</span>
                 </div>
                 <Progress value={progress} />
                 <div className="flex gap-2">
@@ -257,7 +257,7 @@ export default function StyleGuide() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Slider</span>
-                  <span className="numeric text-white">{slider[0]}</span>
+                  <span className="numeric text-foreground">{slider[0]}</span>
                 </div>
                 <Slider value={slider} onValueChange={setSlider} max={100} step={1} />
               </div>
@@ -321,8 +321,8 @@ export default function StyleGuide() {
                   { name: "Sam", value: 19874.6, pnl: 1203.0 },
                 ].map((r) => (
                   <div key={r.name} className="grid grid-cols-3 gap-2">
-                    <div className="text-white">{r.name}</div>
-                    <div className="text-right numeric text-white">
+                    <div className="text-foreground">{r.name}</div>
+                    <div className="text-right numeric text-foreground">
                       ${r.value.toLocaleString()}
                     </div>
                     <div

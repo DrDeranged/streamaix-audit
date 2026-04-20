@@ -29,7 +29,7 @@ export interface PageHeaderProps {
 }
 
 const toneRing: Record<MetricTone, string> = {
-  default: "border-white/10 text-white/90",
+  default: "border-slate-300/60 text-slate-900 dark:border-white/10 dark:text-white/90",
   purple: "border-neon-purple/40 text-neon-purple",
   cyan: "border-neon-cyan/40 text-neon-cyan",
   fuchsia: "border-neon-fuchsia/40 text-neon-fuchsia",
@@ -91,8 +91,10 @@ export function PageHeader({
             )}
             <h1
               className={cn(
-                "text-display min-w-0 break-words text-2xl leading-tight text-white sm:text-3xl lg:text-4xl",
-                "bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent",
+                "text-display min-w-0 break-words text-2xl leading-tight sm:text-3xl lg:text-4xl",
+                "bg-gradient-to-r bg-clip-text text-transparent",
+                "from-slate-900 via-purple-700 to-cyan-700",
+                "dark:from-white dark:via-purple-200 dark:to-cyan-200",
               )}
               data-testid="page-header-title"
             >
@@ -146,7 +148,7 @@ export function PageHeader({
               <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 {m.label}
               </div>
-              <div className="numeric truncate text-base font-semibold text-white sm:text-lg">
+              <div className="numeric truncate text-base font-semibold text-foreground sm:text-lg">
                 {m.value}
               </div>
             </div>
