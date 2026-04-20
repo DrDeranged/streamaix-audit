@@ -39,9 +39,7 @@ export class CleanContentProcessor {
 
   constructor() {
     this.storage = new DatabaseStorage();
-    this.openai = process.env.OPENAI_API_KEY ? new OpenAI({ 
-      apiKey: process.env.OPENAI_API_KEY 
-    }) : null;
+    this.openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key" }) : null;
   }
 
   static getInstance(): CleanContentProcessor {

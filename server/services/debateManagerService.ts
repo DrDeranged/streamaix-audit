@@ -5,7 +5,7 @@ import OpenAI from 'openai';
 import { AvatarVoiceService } from './avatarVoiceService';
 import { WebSocketServer, WebSocket } from 'ws';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key" });
 
 interface DebateExchange {
   speakerId: string;

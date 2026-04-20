@@ -33,23 +33,56 @@ declare global {
   }
 }
 
-if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
-  throw new Error(
-    'FATAL: JWT_SECRET environment variable must be set in production. ' +
-    'Refusing to start with insecure fallback secret.',
-  );
+// JWT secret resolution is deferred to first use rather than evaluated at
+// module-import time. Throwing here would kill the process before
+// server/index.ts gets a chance to bind a port or log anything, which is
+// what was causing silent Cloud Run "Promote" failures.
+//
+// We still surface the misconfiguration LOUDLY at boot (via the warning
+// below) and refuse to issue/verify tokens at request time if the secret
+// is missing in production.
+let _resolvedJwtSecret: string | null = null;
+function getJwtSecret(): string {
+  if (_resolvedJwtSecret) return _resolvedJwtSecret;
+  const fromEnv = process.env.JWT_SECRET;
+  if (fromEnv && fromEnv.length > 0) {
+    _resolvedJwtSecret = fromEnv;
+    return _resolvedJwtSecret;
+  }
+  if (process.env.NODE_ENV === 'production') {
+    // In production, do NOT fall back to an ephemeral random secret —
+    // that would silently sign tokens nobody can verify after a restart.
+    // Throw HERE (at first use) so the request fails fast with a clear
+    // error, instead of crashing the whole process at import.
+    throw new Error(
+      'JWT_SECRET environment variable is not set. The server cannot ' +
+      'issue or verify auth tokens in production without it. Add ' +
+      'JWT_SECRET to your deployment secrets and redeploy.',
+    );
+  }
+  _resolvedJwtSecret = randomBytes(64).toString('hex');
+  return _resolvedJwtSecret;
 }
 
 if (!process.env.JWT_SECRET) {
-  console.warn(
-    '[auth] JWT_SECRET not set — using ephemeral random dev secret. ' +
-    'Tokens will not survive a server restart. Set JWT_SECRET in .env to persist sessions.',
-  );
+  if (process.env.NODE_ENV === 'production') {
+    console.error(
+      '[auth] ❌ JWT_SECRET is NOT set in production. The server will ' +
+      'start, but every authenticated request will fail until you add ' +
+      'JWT_SECRET to your deployment secrets and redeploy.',
+    );
+  } else {
+    console.warn(
+      '[auth] JWT_SECRET not set — using ephemeral random dev secret. ' +
+      'Tokens will not survive a server restart. Set JWT_SECRET in .env to persist sessions.',
+    );
+  }
 }
 
 export class AuthService {
-  private static JWT_SECRET =
-    process.env.JWT_SECRET || randomBytes(64).toString('hex');
+  private static get JWT_SECRET(): string {
+    return getJwtSecret();
+  }
   
   /**
    * Hash password using bcrypt

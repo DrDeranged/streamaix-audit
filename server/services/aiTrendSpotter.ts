@@ -5,7 +5,7 @@ import OpenAI from 'openai';
 import axios from 'axios';
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key",
 });
 
 interface MarketIdea {

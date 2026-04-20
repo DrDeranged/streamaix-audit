@@ -8,7 +8,7 @@ import { pushNotificationService } from './pushNotificationService';
 import OpenAI from 'openai';
 import * as cron from 'node-cron';
 
-const openai = new OpenAI();
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key" });
 
 // In-memory audio storage for scheduled stream replays
 const scheduledStreamAudio = new Map<string, string>(); // streamId -> base64 audio

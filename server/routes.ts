@@ -206,7 +206,7 @@ async function seedBotHistoricalTrades() {
   await seedAvatarTrades();
 }
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(app: Express, existingServer?: Server): Promise<Server> {
   console.log('\n🚀 ========== STARTING ROUTE REGISTRATION ==========');
   console.log('📂 Current working directory:', process.cwd());
   console.log('🌍 NODE_ENV:', process.env.NODE_ENV);
@@ -329,10 +329,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ▶ AiAgentTrading routes extracted to server/routes/ai-agent-trading.ts
   await registerAiAgentTradingRoutes(app);
 
-  // Create the HTTP server now that all REST routes are registered.
-  // Was previously defined at the end of the bot-trading-simulator section;
-  // hoisted here so the websocket setup below can still reference it.
-  const httpServer = createServer(app);
+  // Reuse the HTTP server passed in by server/index.ts (which has already
+  // started listening on the configured port) so websocket upgrades bind
+  // to the same port. Fall back to creating one only if a caller invokes
+  // registerRoutes(app) without a server (e.g. tests).
+  const httpServer = existingServer ?? createServer(app);
 
   // =============================================================================
   // WEBSOCKET SERVER FOR REAL-TIME UPDATES

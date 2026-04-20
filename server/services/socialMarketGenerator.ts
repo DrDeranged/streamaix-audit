@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import crypto from 'crypto';
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key",
 });
 
 interface NewsArticle {

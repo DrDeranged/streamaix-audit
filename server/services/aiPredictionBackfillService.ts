@@ -4,7 +4,7 @@ import { predictionMarkets } from "@shared/schema";
 import { isNull, eq } from "drizzle-orm";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key",
 });
 
 export class AIPredictionBackfillService {

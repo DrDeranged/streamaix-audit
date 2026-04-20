@@ -4,7 +4,7 @@ import { eq, and, desc, sql, lt } from 'drizzle-orm';
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key",
 });
 
 export class AITradingBotService {

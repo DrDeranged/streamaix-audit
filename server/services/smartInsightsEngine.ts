@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { marketDataService, type CryptoQuote } from './marketDataService';
 import { cacheService } from './cacheService';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key" });
 
 export interface ReasoningInsight {
   id: string;

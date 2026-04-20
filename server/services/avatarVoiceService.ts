@@ -3,7 +3,7 @@ import { db } from '../db';
 import { knowledgeAvatars } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 
-const openai = new OpenAI();
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key" });
 
 export type OpenAIVoice = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
 

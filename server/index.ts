@@ -1,5 +1,28 @@
+// IMPORTANT: keep this block at the very top of the file. Anything above
+// this — including `import` statements — runs BEFORE these handlers, so a
+// throw during import resolution would still vanish into empty logs. We
+// can't avoid the import block being hoisted above this in TS source, but
+// we can at least make sure that the moment ANY of our own code runs, we
+// have a flushed boot line, an unhandled-rejection trap, and an uncaught-
+// exception trap so deploy logs always show something.
+const __bootStartedAt = Date.now();
+console.log(
+  `[boot] streamaix server starting at ${new Date().toISOString()} ` +
+  `(pid=${process.pid}, node=${process.version}, env=${process.env.NODE_ENV ?? 'unknown'})`,
+);
+process.on('uncaughtException', (err) => {
+  console.error('[boot] FATAL uncaughtException:', err);
+  // Give the log stream a tick to flush before exiting.
+  setTimeout(() => process.exit(1), 50);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[boot] FATAL unhandledRejection:', reason);
+  setTimeout(() => process.exit(1), 50);
+});
+
 import express, { type Request, Response, NextFunction } from "express";
 import compression from "compression";
+import { createServer } from "http";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { autoSeedDatabase } from "./auto-seed";
@@ -41,21 +64,25 @@ app.use(express.urlencoded({ extended: false }));
 import { requireJsonObjectBody } from './middleware/security';
 app.use(requireJsonObjectBody);
 
-// Health check endpoint - responds immediately, no dependencies
+// Health check endpoints — registered FIRST so they always answer, even
+// while route registration is still in flight. Cloud Run only needs the
+// container to bind a port and answer 200 on a health probe within its
+// first ~60s; everything else can warm up after.
 app.get('/health', (_req, res) => {
-  res.status(200).json({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString(),
+  res.status(200).json({
+    status: routesReady ? 'ok' : 'starting',
+    ready: routesReady,
     uptime: process.uptime(),
+    bootMs: Date.now() - __bootStartedAt,
     memory: process.memoryUsage().heapUsed,
+    timestamp: new Date().toISOString(),
   });
 });
-
-// Root health check for Cloud Run
 app.get('/_health', (_req, res) => {
-  res.status(200).send('OK');
+  res.status(200).send(routesReady ? 'OK' : 'STARTING');
 });
 
+// Request logger
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -94,56 +121,95 @@ app.use((req, res, next) => {
   next();
 });
 
+// Until registerRoutes() resolves, return 503 for any non-health request so
+// callers (and Cloud Run probes targeting other paths) get a clear signal
+// instead of a hang. This middleware short-circuits with `next()` once
+// `routesReady` flips, so the real routes take over without restarting.
+let routesReady = false;
+app.use((req, res, next) => {
+  if (routesReady) return next();
+  // Health endpoints already matched above. Any other request hits this
+  // before the real routes are mounted.
+  res.setHeader('Retry-After', '5');
+  res.status(503).json({
+    status: 'starting',
+    message: 'Server is still warming up. Try again in a few seconds.',
+    bootMs: Date.now() - __bootStartedAt,
+  });
+});
+
+// Bind the port IMMEDIATELY so Cloud Run's health probe sees a live
+// container within the first second. Route registration can then take as
+// long as it needs without breaking the deploy.
+const port = parseInt(process.env.PORT || '5000', 10);
+const httpServer = createServer(app);
+httpServer.listen({ port, host: '0.0.0.0', reusePort: true }, () => {
+  log(`🚀 Server listening on port ${port} (boot ${Date.now() - __bootStartedAt}ms)`);
+  console.log(`✅ Port ${port} bound; route registration starting…`);
+});
+
 (async () => {
-  console.log('\n🔐 ========== ENVIRONMENT VALIDATION ==========');
-  
-  const openaiKey = process.env.OPENAI_API_KEY;
-  if (!openaiKey) {
-    console.error('❌ CRITICAL: OPENAI_API_KEY is NOT configured!');
-    console.error('📍 AI content processing will fail without this key.');
-    console.error('🔧 Please set OPENAI_API_KEY in your environment or .env file');
-  } else {
-    console.log(`✅ OPENAI_API_KEY configured (${openaiKey.length} characters)`);
+  try {
+    console.log('\n🔐 ========== ENVIRONMENT VALIDATION ==========');
+
+    const openaiKey = process.env.OPENAI_API_KEY;
+    if (!openaiKey) {
+      console.error('❌ CRITICAL: OPENAI_API_KEY is NOT configured!');
+      console.error('📍 AI content processing will fail without this key.');
+      console.error('🔧 Please set OPENAI_API_KEY in your environment or .env file');
+    } else {
+      console.log(`✅ OPENAI_API_KEY configured (${openaiKey.length} characters)`);
+    }
+
+    const duneKey = process.env.DUNE_API_KEY;
+    if (duneKey) {
+      console.log(`✅ DUNE_API_KEY configured (${duneKey.length} characters)`);
+    } else {
+      console.log(`⚠️  DUNE_API_KEY not configured (optional, for advanced analytics)`);
+    }
+
+    console.log('========================================\n');
+
+    // registerRoutes attaches the websocket server to httpServer and mounts
+    // every domain route. We pass the already-listening httpServer so the
+    // websocket upgrade handler binds to the same port.
+    await registerRoutes(app, httpServer);
+
+    if (app.get("env") === "development") {
+      await setupVite(app, httpServer);
+    } else {
+      serveStatic(app);
+    }
+
+    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+      const status = err.status || err.statusCode || 500;
+      const message = err.message || "Internal Server Error";
+      res.status(status).json({ message });
+      // Log but DO NOT re-throw — re-throwing inside an Express error
+      // handler triggers our uncaughtException trap and kills the process,
+      // which used to silently nuke the server on any handler-thrown error.
+      console.error('[express] error handler caught:', err);
+    });
+
+    routesReady = true;
+    console.log(
+      `✅ Routes registered and ready (total boot ${Date.now() - __bootStartedAt}ms)`,
+    );
+  } catch (err) {
+    console.error('[boot] FATAL during async startup', err);
+    // Keep the process alive long enough for Cloud Run to capture the log,
+    // then exit so the platform restarts with a clean state.
+    setTimeout(() => process.exit(1), 250);
+    return;
   }
-  
-  const duneKey = process.env.DUNE_API_KEY;
-  if (duneKey) {
-    console.log(`✅ DUNE_API_KEY configured (${duneKey.length} characters)`);
-  } else {
-    console.log(`⚠️  DUNE_API_KEY not configured (optional, for advanced analytics)`);
-  }
-  
-  console.log('========================================\n');
-  
-  const server = await registerRoutes(app);
 
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
-  }
-
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-    res.status(status).json({ message });
-    throw err;
-  });
-
-  const port = parseInt(process.env.PORT || '5000', 10);
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`🚀 Server listening on port ${port}`);
-    console.log(`✅ Server ready to accept requests on port ${port}`);
-  });
-
-  // Delay background services in production to ensure server starts first
+  // Delay background services in production to ensure server is responsive
+  // first. They are non-critical for serving traffic and must never block
+  // the deploy from going green.
   const startupDelay = app.get("env") === "production" ? 10000 : 100;
   setTimeout(async () => {
     console.log('🔄 Starting background services...');
+    const openaiKey = process.env.OPENAI_API_KEY;
     try {
       const resendKey = process.env.RESEND_API_KEY;
       if (resendKey) {
@@ -177,73 +243,49 @@ app.use((req, res, next) => {
 
       if (openaiKey) {
         console.log('\n🌐 ========== AUTONOMOUS ECOSYSTEM STARTUP ==========');
-        
-        console.log('🎯 Starting AI Market Resolver...');
+
         const { aiMarketResolver } = await import('./services/aiMarketResolver');
         aiMarketResolver.start();
-        console.log('✅ AI Market Resolver active - auto-resolving expired markets');
+        console.log('✅ AI Market Resolver active');
 
-        console.log('💧 Starting AI Liquidity Provider...');
         const { aiLiquidityProvider } = await import('./services/aiLiquidityProvider');
         aiLiquidityProvider.start();
-        console.log('✅ AI Liquidity Provider active - seeding markets with liquidity');
+        console.log('✅ AI Liquidity Provider active');
 
-        console.log('🔍 Starting AI Trend Spotter...');
         const { aiTrendSpotter } = await import('./services/aiTrendSpotter');
         aiTrendSpotter.start();
-        console.log('✅ AI Trend Spotter active - creating markets from crypto trends');
+        console.log('✅ AI Trend Spotter active');
 
-        console.log('🛡️ Starting AI Content Moderator...');
         const { aiContentModerator } = await import('./services/aiContentModerator');
         aiContentModerator.start();
-        console.log('✅ AI Content Moderator active - auto-scoring submissions');
+        console.log('✅ AI Content Moderator active');
 
-        console.log('👥 Starting AI Community Manager...');
         const { aiCommunityManager } = await import('./services/aiCommunityManager');
         aiCommunityManager.start();
-        console.log('✅ AI Community Manager active - engaging with community');
+        console.log('✅ AI Community Manager active');
 
-        console.log('💰 Starting AI Treasury Manager...');
         const { aiTreasuryManager } = await import('./services/aiTreasuryManager');
         aiTreasuryManager.start();
-        console.log('✅ AI Treasury Manager active - managing platform treasury');
+        console.log('✅ AI Treasury Manager active');
 
-        console.log('🎯 Starting AI Meta-Trader...');
         const { aiMetaTrader } = await import('./services/aiMetaTrader');
         aiMetaTrader.start();
-        console.log('✅ AI Meta-Trader active - exploiting market inefficiencies');
+        console.log('✅ AI Meta-Trader active');
 
-        console.log('📡 Starting Market Intelligence Notifier...');
         const { marketIntelligenceNotifier } = await import('./services/marketIntelligenceNotifier');
         marketIntelligenceNotifier.start();
-        console.log('✅ Market Intelligence Notifier active - real-time market alerts');
+        console.log('✅ Market Intelligence Notifier active');
 
-        console.log('📸 Starting Portfolio Snapshot Service...');
         const { portfolioSnapshotService } = await import('./services/portfolioSnapshotService');
         portfolioSnapshotService.start();
-        console.log('✅ Portfolio Snapshot Service active - capturing every 6 hours');
+        console.log('✅ Portfolio Snapshot Service active');
 
-        console.log('📅 Starting Scheduled Market Stream Service...');
         const { initScheduledMarketStreamService } = await import('./services/scheduledMarketStreamService');
         const scheduledStreamService = initScheduledMarketStreamService();
         await scheduledStreamService.start();
-        console.log('✅ Scheduled Market Streams active - 8am & 4pm EST daily');
+        console.log('✅ Scheduled Market Streams active');
 
-        console.log('========================================');
-        console.log('🚀 FULL AUTONOMOUS ECOSYSTEM OPERATIONAL');
-        console.log('   • 100 AI Social Agents (bounties, summaries, social)');
-        console.log('   • 50 AI Trading Bots (prediction markets)');
-        console.log('   • Market Resolver (auto-resolve expired markets)');
-        console.log('   • Liquidity Provider (seed new markets)');
-        console.log('   • Trend Spotter (create markets from trends)');
-        console.log('   • Content Moderator (auto-score quality)');
-        console.log('   • Community Manager (answer questions)');
-        console.log('   • Treasury Manager (manage platform fees)');
-        console.log('   • Meta-Trader (arbitrage & efficiency)');
-        console.log('   • Newsletter (Mon/Fri 8am EST)');
-        console.log('   • Market Intelligence (real-time alerts)');
-        console.log('   • Scheduled Streams (8am & 4pm EST)');
-        console.log('========================================\n');
+        console.log('🚀 FULL AUTONOMOUS ECOSYSTEM OPERATIONAL\n');
       } else {
         console.log('⚠️  Autonomous ecosystem disabled (requires OPENAI_API_KEY)');
       }
@@ -251,7 +293,7 @@ app.use((req, res, next) => {
       console.log('🤖 Starting Bot Trading Simulator...');
       const { botTradingSimulator } = await import('./services/botTradingSimulator');
       await botTradingSimulator.start();
-      console.log('✅ Bot Trading Simulator active - simulating trades for staked bots');
+      console.log('✅ Bot Trading Simulator active');
 
       console.log('🌱 Starting background database seeding...');
       autoSeedDatabase().then(() => {
@@ -261,7 +303,9 @@ app.use((req, res, next) => {
       });
 
     } catch (error) {
-      console.error('⚠️  Error starting background services:', error);
+      // Background-service failures must NEVER take the server down. Log
+      // and keep serving traffic.
+      console.error('⚠️  Error starting background services (non-fatal):', error);
     }
   }, startupDelay);
 })();

@@ -2,7 +2,7 @@ import OpenAI from 'openai';
 import { marketDataService } from './marketDataService';
 import { derivativesAnalyticsService } from './derivativesAnalyticsService';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key" });
 
 interface MarketContext {
   symbol: string;

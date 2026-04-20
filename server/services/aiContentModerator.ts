@@ -4,7 +4,7 @@ import { eq, isNull, and } from 'drizzle-orm';
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key",
 });
 
 interface ModerationResult {

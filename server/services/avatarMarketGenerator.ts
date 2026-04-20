@@ -4,7 +4,7 @@ import { predictionMarkets, users, knowledgeAvatars } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key",
 });
 
 interface GeneratedMarket {

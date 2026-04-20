@@ -2,7 +2,7 @@ import OpenAI from 'openai';
 import type { AgentPersonality, SkillLevel } from '../types/agents';
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key",
 });
 
 export interface SummaryCreationParams {

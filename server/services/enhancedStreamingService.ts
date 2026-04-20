@@ -11,7 +11,7 @@ import { getStreamingService } from './streamingService';
 import { AvatarVoiceService } from './avatarVoiceService';
 import webpush from 'web-push';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key" });
 
 interface MarketData {
   symbol: string;

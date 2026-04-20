@@ -11,7 +11,7 @@ import {
 import { and, desc, eq, lt, sql } from "drizzle-orm";
 
 const openai = process.env.OPENAI_API_KEY
-  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key" })
   : null;
 
 export interface FeedPostMetadata {

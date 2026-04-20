@@ -6,7 +6,7 @@ import { AvatarVoiceService } from './avatarVoiceService';
 import { AvatarPodcastEngine } from './avatarPodcastEngine';
 import OpenAI from 'openai';
 
-const openai = new OpenAI();
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key" });
 
 interface ActiveVoiceStream {
   streamId: string;

@@ -44,9 +44,7 @@ export class RealContentProcessor {
 
   constructor() {
     this.storage = new DatabaseStorage();
-    this.openai = new OpenAI({ 
-      apiKey: process.env.OPENAI_API_KEY 
-    });
+    this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key" });
   }
 
   static getInstance(): RealContentProcessor {

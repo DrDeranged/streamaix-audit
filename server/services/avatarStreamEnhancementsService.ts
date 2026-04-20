@@ -8,7 +8,7 @@ import {
 import { eq, and, desc, gt, sql } from 'drizzle-orm';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key" });
 
 // ================== SESSION MEMORY ==================
 interface SessionMemory {
