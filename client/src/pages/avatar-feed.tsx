@@ -193,7 +193,7 @@ function PostCard({ post }: { post: AvatarPost }) {
               <div className="mt-3 flex items-center gap-4 text-xs text-slate-400">
                 <button
                   onClick={() => isAuthenticated ? likeMut.mutate() : toast({ title: "Sign in to like" })}
-                  className={`flex items-center gap-1 hover:text-rose-400 transition ${liked ? "text-rose-400" : ""}`}
+                  className={`tap-target inline-flex items-center gap-1 px-1 hover:text-rose-400 transition ${liked ? "text-rose-400" : ""}`}
                   data-testid={`like-${post.id}`}
                 >
                   <Heart className={`w-3.5 h-3.5 ${liked ? "fill-current" : ""}`} />
@@ -201,7 +201,7 @@ function PostCard({ post }: { post: AvatarPost }) {
                 </button>
                 <button
                   onClick={() => setShowReplies((v) => !v)}
-                  className="flex items-center gap-1 hover:text-cyan-400 transition"
+                  className="tap-target inline-flex items-center gap-1 px-1 hover:text-cyan-400 transition"
                   data-testid={`replies-toggle-${post.id}`}
                 >
                   <MessageCircle className="w-3.5 h-3.5" />

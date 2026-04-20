@@ -272,7 +272,7 @@ function CommentCard({ comment, replies, onLike, onReply, isAuthenticated, isRep
             <button
               onClick={onLike}
               disabled={!isAuthenticated}
-              className={`flex items-center gap-1.5 text-sm transition-colors ${
+              className={`tap-target inline-flex items-center gap-1.5 px-1 text-sm transition-colors ${
                 comment.isLiked
                   ? "text-pink-500 dark:text-pink-400"
                   : "text-gray-600 dark:text-slate-400 hover:text-pink-500 dark:hover:text-pink-400"
@@ -286,7 +286,7 @@ function CommentCard({ comment, replies, onLike, onReply, isAuthenticated, isRep
             <button
               onClick={onReply}
               disabled={!isAuthenticated}
-              className={`flex items-center gap-1.5 text-sm text-gray-600 dark:text-slate-400 hover:text-purple-500 dark:hover:text-purple-400 transition-colors ${
+              className={`tap-target inline-flex items-center gap-1.5 px-1 text-sm text-gray-600 dark:text-slate-400 hover:text-purple-500 dark:hover:text-purple-400 transition-colors ${
                 !isAuthenticated ? "opacity-50 cursor-not-allowed" : ""
               }`}
               data-testid={`button-reply-${comment.id}`}
@@ -298,7 +298,7 @@ function CommentCard({ comment, replies, onLike, onReply, isAuthenticated, isRep
             {replies.length > 0 && (
               <button
                 onClick={() => setShowReplies(!showReplies)}
-                className="flex items-center gap-1.5 text-sm text-purple-600 dark:text-purple-400 hover:underline"
+                className="tap-target inline-flex items-center gap-1.5 px-1 text-sm text-purple-600 dark:text-purple-400 hover:underline"
               >
                 <MessageCircle className="w-4 h-4" />
                 <span>

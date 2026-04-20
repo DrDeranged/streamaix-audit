@@ -294,7 +294,7 @@ export function SocialPost({
                 description: 'Tip functionality coming soon!',
               });
             }}
-            className="flex-1 gap-2 text-gray-400 hover:text-yellow-500 transition-colors"
+            className="tap-target flex-1 gap-2 text-gray-400 hover:text-yellow-500 transition-colors"
             data-testid={`button-tip-${id}`}
           >
             <DollarSign className="w-4 h-4" />
