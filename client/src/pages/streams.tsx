@@ -69,6 +69,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
+import { PageHeader } from '@/components/PageHeader';
 import { 
   StreamCategoryFilter, 
   MultiStreamView, 
