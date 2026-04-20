@@ -332,7 +332,7 @@ export default function BountyCard({ bounty }: BountyCardProps) {
                     size="sm"
                     onClick={() => trackLike.mutate()}
                     disabled={trackLike.isPending}
-                    className="flex-1 border-pink-500/30 hover:bg-pink-500/10"
+                    className="tap-target flex-1 border-pink-500/30 hover:bg-pink-500/10"
                     data-testid={`button-like-${bounty.id}`}
                   >
                     <Heart className="w-4 h-4 mr-1" />
@@ -343,7 +343,7 @@ export default function BountyCard({ bounty }: BountyCardProps) {
                     size="sm"
                     onClick={() => trackShare.mutate()}
                     disabled={trackShare.isPending}
-                    className="flex-1 border-green-500/30 hover:bg-green-500/10"
+                    className="tap-target flex-1 border-green-500/30 hover:bg-green-500/10"
                     data-testid={`button-share-${bounty.id}`}
                   >
                     <Share2 className="w-4 h-4 mr-1" />

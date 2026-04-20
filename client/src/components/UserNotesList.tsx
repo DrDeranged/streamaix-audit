@@ -154,7 +154,7 @@ export default function UserNotesList({ summaryId, title }: UserNotesListProps) 
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                    className="tap-target text-blue-600 hover:text-blue-800 hover:bg-blue-50"
                     data-testid={`button-view-summary-${note.id}`}
                   >
                     <ExternalLink className="w-3 h-3 mr-1" />
@@ -165,7 +165,7 @@ export default function UserNotesList({ summaryId, title }: UserNotesListProps) 
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  className="text-gray-400 hover:text-red-600 hover:bg-red-50"
+                  className="tap-target text-gray-400 hover:text-red-600 hover:bg-red-50"
                   data-testid={`button-delete-note-${note.id}`}
                 >
                   <Trash2 className="w-3 h-3" />

@@ -355,7 +355,7 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
             size="sm"
             onClick={handleLike}
             disabled={likeMutation.isPending}
-            className={`flex-1 gap-1 h-6 text-[10px] ${isLiked ? 'text-pink-500' : 'text-gray-400'} hover:text-pink-500`}
+            className={`tap-target flex-1 gap-1 h-6 text-[10px] ${isLiked ? 'text-pink-500' : 'text-gray-400'} hover:text-pink-500`}
             data-testid={`button-like-${id}`}
           >
             <Heart className={`w-2.5 h-2.5 ${isLiked ? 'fill-current' : ''}`} />
@@ -366,7 +366,7 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
             variant="ghost"
             size="sm"
             onClick={() => setShowComments(!showComments)}
-            className="flex-1 gap-1 h-6 text-[10px] text-gray-400 hover:text-cyan-500"
+            className="tap-target flex-1 gap-1 h-6 text-[10px] text-gray-400 hover:text-cyan-500"
             data-testid={`button-comment-${id}`}
           >
             <MessageCircle className="w-2.5 h-2.5" />
@@ -378,7 +378,7 @@ export function SocialFeedCard({ id, type, content, engagement }: SocialFeedCard
             size="sm"
             onClick={handleSave}
             disabled={saveMutation.isPending}
-            className={`flex-1 gap-1 h-6 text-[10px] ${isSaved ? 'text-purple-400' : 'text-gray-400'} hover:text-purple-400`}
+            className={`tap-target flex-1 gap-1 h-6 text-[10px] ${isSaved ? 'text-purple-400' : 'text-gray-400'} hover:text-purple-400`}
             data-testid={`button-save-${id}`}
           >
             <Bookmark className={`w-2.5 h-2.5 ${isSaved ? 'fill-current' : ''}`} />

@@ -765,7 +765,7 @@ function LeaderboardContent() {
         </motion.div>
       ) : (
         <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/40 rounded-2xl overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="table-scroller relative w-full overflow-x-auto overscroll-x-contain">
             <table className="w-full text-xs min-w-[600px]">
               <thead>
                 <tr className="border-b border-slate-700/50 text-slate-500">
