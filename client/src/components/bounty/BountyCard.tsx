@@ -361,7 +361,7 @@ export default function BountyCard({ bounty }: BountyCardProps) {
             <Button
               onClick={handleClaim}
               disabled={claimBounty.isPending}
-              className="flex-1 bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600"
+              className="tap-target flex-1 bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600"
               data-testid={`button-claim-bounty-${bounty.id}`}
             >
               {claimBounty.isPending ? (
@@ -380,7 +380,7 @@ export default function BountyCard({ bounty }: BountyCardProps) {
               <DialogTrigger asChild>
                 <Button
                   variant="outline"
-                  className="border-purple-500/50 hover:bg-purple-500/10"
+                  className="tap-target border-purple-500/50 hover:bg-purple-500/10"
                   data-testid={`button-add-tip-${bounty.id}`}
                 >
                   <DollarSign className="w-4 h-4 mr-2" />

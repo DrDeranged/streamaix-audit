@@ -95,7 +95,7 @@ export function FollowButton({
       disabled={isLoading || followMutation.isPending}
       variant="ghost"
       size={size}
-      className={`${baseClassName} transition-all duration-300 shadow-lg hover:shadow-xl`}
+      className={`tap-target ${baseClassName} transition-all duration-300 shadow-lg hover:shadow-xl`}
       data-testid={`button-follow-${avatarId}`}
     >
       {showIcon && (

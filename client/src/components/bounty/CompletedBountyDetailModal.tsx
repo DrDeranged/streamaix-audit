@@ -678,7 +678,7 @@ export default function CompletedBountyDetailModal({ bounty, isOpen, onClose }: 
                 size="sm"
                 onClick={() => likeMutation.mutate()}
                 disabled={likeMutation.isPending || !isAuthenticated}
-                className={`${isLiked ? 'border-pink-500 bg-pink-500/20 text-pink-400' : 'border-pink-500/30 hover:bg-pink-500/10 hover:border-pink-500/50'}`}
+                className={`tap-target ${isLiked ? 'border-pink-500 bg-pink-500/20 text-pink-400' : 'border-pink-500/30 hover:bg-pink-500/10 hover:border-pink-500/50'}`}
                 data-testid="button-like-bounty"
               >
                 <Heart className={`w-4 h-4 mr-1.5 ${isLiked ? 'fill-current' : ''}`} />
@@ -689,7 +689,7 @@ export default function CompletedBountyDetailModal({ bounty, isOpen, onClose }: 
                 variant="outline"
                 size="sm"
                 onClick={() => setIsBookmarked(!isBookmarked)}
-                className={`${isBookmarked ? 'border-amber-500 bg-amber-500/20 text-amber-400' : 'border-amber-500/30 hover:bg-amber-500/10 hover:border-amber-500/50'}`}
+                className={`tap-target ${isBookmarked ? 'border-amber-500 bg-amber-500/20 text-amber-400' : 'border-amber-500/30 hover:bg-amber-500/10 hover:border-amber-500/50'}`}
                 data-testid="button-bookmark-bounty"
               >
                 <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
@@ -701,7 +701,7 @@ export default function CompletedBountyDetailModal({ bounty, isOpen, onClose }: 
                   variant="outline"
                   size="sm"
                   onClick={() => handleShare()}
-                  className="border-green-500/30 hover:bg-green-500/10 hover:border-green-500/50"
+                  className="tap-target border-green-500/30 hover:bg-green-500/10 hover:border-green-500/50"
                   data-testid="button-share-bounty"
                 >
                   <Share2 className="w-4 h-4 mr-1.5" />

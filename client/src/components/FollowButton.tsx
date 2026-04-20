@@ -84,7 +84,7 @@ export function FollowUserButton({
         onClick={handleClick}
         disabled={isPending}
         className={cn(
-          "p-2 rounded-full transition-all",
+          "tap-target p-2 rounded-full transition-all inline-flex items-center justify-center",
           isFollowing 
             ? "bg-emerald-500/20 text-emerald-400 hover:bg-red-500/20 hover:text-red-400" 
             : "bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30",
@@ -255,7 +255,7 @@ export function FollowCategoryButton({
         onClick={handleClick}
         disabled={isPending}
         className={cn(
-          "px-3 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1.5",
+          "tap-target px-3 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1.5",
           isFollowing 
             ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/40" 
             : "bg-purple-500/20 text-purple-300 border border-purple-500/40 hover:bg-purple-500/30",
