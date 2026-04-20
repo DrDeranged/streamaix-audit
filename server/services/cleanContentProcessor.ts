@@ -1,6 +1,6 @@
 import { DatabaseStorage } from '../storage';
-import OpenAI from 'openai';
-
+import { openai as lazyOpenai, hasOpenAIKey } from "../lib/openaiClient";
+const openai = lazyOpenai;
 interface VideoMetadata {
   title: string;
   description: string;
@@ -39,7 +39,7 @@ export class CleanContentProcessor {
 
   constructor() {
     this.storage = new DatabaseStorage();
-    this.openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key" }) : null;
+    this.openai = hasOpenAIKey() ? lazyOpenai : null;
   }
 
   static getInstance(): CleanContentProcessor {

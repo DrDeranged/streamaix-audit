@@ -1,8 +1,6 @@
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key",
-});
+import { openai as lazyOpenai } from "../lib/openaiClient";
+const openai = lazyOpenai;
+// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 export interface ExtractedPrediction {
   question: string;

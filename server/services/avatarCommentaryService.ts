@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+import { openai as lazyOpenai, hasOpenAIKey } from "../lib/openaiClient";
 import { db } from "../db";
 import {
   knowledgeAvatars,
@@ -10,9 +10,7 @@ import {
 } from "@shared/schema";
 import { and, desc, eq, lt, sql } from "drizzle-orm";
 
-const openai = process.env.OPENAI_API_KEY
-  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key" })
-  : null;
+const openai = hasOpenAIKey() ? lazyOpenai : null;
 
 export interface FeedPostMetadata {
   shares?: number;

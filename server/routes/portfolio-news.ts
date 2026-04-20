@@ -305,8 +305,7 @@ ${context.assets.slice(0, 5).map((a: any) => `- ${a.symbol} (${a.assetType}): $$
 ` : ''}` : '';
 
     try {
-      const OpenAI = (await import('openai')).default;
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key" });
+      const { openai } = await import("../lib/openaiClient");
       
       const completion = await openai.chat.completions.create({
         model: 'gpt-4o-mini',

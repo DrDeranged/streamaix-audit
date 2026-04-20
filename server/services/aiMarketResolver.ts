@@ -1,12 +1,11 @@
 import { db } from '../db';
 import { predictionMarkets, marketResolutions, autonomousSystemLogs } from '@shared/schema';
 import { eq, and, lt, isNull } from 'drizzle-orm';
-import OpenAI from 'openai';
+import { openai as lazyOpenai } from "../lib/openaiClient";
+const openai = lazyOpenai;
 import axios from 'axios';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key",
-});
+// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 interface ResolutionData {
   outcome: 'YES' | 'NO' | 'INVALID';

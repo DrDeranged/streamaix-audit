@@ -1,11 +1,10 @@
-import OpenAI from 'openai';
+import { openai as lazyOpenai } from "../lib/openaiClient";
+const openai = lazyOpenai;
 import { db } from "../db";
 import { predictionMarkets, users, knowledgeAvatars } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key",
-});
+// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 interface GeneratedMarket {
   question: string;

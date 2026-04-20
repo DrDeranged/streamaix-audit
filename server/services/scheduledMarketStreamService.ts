@@ -5,10 +5,11 @@ import { getStreamingService } from './streamingService';
 import { MarketDataService } from './marketDataService';
 import { AvatarVoiceService } from './avatarVoiceService';
 import { pushNotificationService } from './pushNotificationService';
-import OpenAI from 'openai';
+import { openai as lazyOpenai } from "../lib/openaiClient";
+const openai = lazyOpenai;
 import * as cron from 'node-cron';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key" });
+// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 // In-memory audio storage for scheduled stream replays
 const scheduledStreamAudio = new Map<string, string>(); // streamId -> base64 audio

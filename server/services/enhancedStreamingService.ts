@@ -1,4 +1,5 @@
-import OpenAI from 'openai';
+import { openai as lazyOpenai } from "../lib/openaiClient";
+const openai = lazyOpenai;
 import { db } from '../db';
 import { 
   liveStreams, streamMessages, streamParticipants, streamTips, streamPredictions, 
@@ -11,7 +12,7 @@ import { getStreamingService } from './streamingService';
 import { AvatarVoiceService } from './avatarVoiceService';
 import webpush from 'web-push';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "sk-missing-deploy-time-key" });
+// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 interface MarketData {
   symbol: string;
