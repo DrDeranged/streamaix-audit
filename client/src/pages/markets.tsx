@@ -186,7 +186,7 @@ export default function Markets() {
   const hasMoreMarkets = filteredMarkets.length > INITIAL_MARKET_COUNT;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 tnums-scope">
       <Navigation />
       <div className="section-container pt-24">
 

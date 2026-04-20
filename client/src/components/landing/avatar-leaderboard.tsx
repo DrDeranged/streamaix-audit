@@ -329,7 +329,7 @@ export function AvatarLeaderboardLanding() {
   return (
     <section
       id="avatar-leaderboard"
-      className="relative w-full max-w-5xl mx-auto px-4 py-12"
+      className="relative w-full max-w-5xl mx-auto px-4 py-12 tnums-scope"
       data-testid="avatar-leaderboard-section"
     >
       <div className="text-center mb-6">
