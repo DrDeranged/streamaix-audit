@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/PageHeader';
+import { StatGrid } from '@/components/StatGrid';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -174,7 +175,7 @@ export default function InsightsDashboard() {
           </Card>
         )}
 
-        <div className="grid md:grid-cols-4 gap-6">
+        <StatGrid>
           {[
             { label: 'Active Insights', value: insights.length, Icon: Zap, tint: 'from-purple-400 to-fuchsia-400' },
             { label: 'Avg Confidence', value: `${avgConfidence}%`, Icon: CheckCircle2, tint: 'from-fuchsia-400 to-cyan-400' },
@@ -195,7 +196,7 @@ export default function InsightsDashboard() {
               </CardContent>
             </Card>
           ))}
-        </div>
+        </StatGrid>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="surface-1 border border-purple-500/30 flex-wrap h-auto">

@@ -3,6 +3,7 @@ import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/PageHeader';
+import { StatGrid } from '@/components/StatGrid';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -515,8 +516,9 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+          className="mb-8"
         >
+          <StatGrid>
           {/* Summaries Card */}
           <div className="relative group">
             <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
@@ -580,6 +582,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           </div>
+          </StatGrid>
         </motion.div>
 
         {/* Engagement Stats Row */}
@@ -587,8 +590,9 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+          className="mb-8"
         >
+          <StatGrid>
           {/* Followers Card */}
           <div className="relative group">
             <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
@@ -652,6 +656,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           </div>
+          </StatGrid>
         </motion.div>
 
         {/* Mobile-First Main Content Layout */}

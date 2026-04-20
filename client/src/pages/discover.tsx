@@ -83,6 +83,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { WidgetSettingsPanel } from "@/components/WidgetSettingsPanel";
 import { PageHeader } from "@/components/PageHeader";
+import { StatGrid } from "@/components/StatGrid";
 import { useWidgetSettings } from "@/contexts/WidgetSettingsContext";
 
 interface PredictionMarket {
@@ -1179,7 +1180,7 @@ export default function Discover() {
         {/* Global Stats Cards */}
         <section className="space-y-3">
           {cgGlobal && (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <StatGrid>
               {/* Total Market Cap */}
               <div className="relative group">
                 <div className="absolute inset-0 bg-gradient-to-r from-cyan-600/20 to-blue-600/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -1253,7 +1254,7 @@ export default function Discover() {
                   </div>
                 </div>
               </div>
-            </div>
+            </StatGrid>
           )}
 
           {/* Tech/AI Stock Movers Grid - only show if we have data */}

@@ -28,6 +28,7 @@ import {
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/PageHeader';
+import { StatGrid } from '@/components/StatGrid';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -3768,7 +3769,7 @@ export default function PortfolioDashboard() {
               )}
 
               {/* Premium Stats Row */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+              <StatGrid className="mb-6">
                 {/* Total Value Card - Primary */}
                 <Card className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-purple-900/30 border-purple-500/20 p-5 hover:border-purple-500/40 transition-all hover:shadow-lg hover:shadow-purple-500/10">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
@@ -3839,7 +3840,7 @@ export default function PortfolioDashboard() {
                     </Badge>
                   </div>
                 </Card>
-              </div>
+              </StatGrid>
 
               {/* Quick Actions Bar */}
               <Card className="surface-1 p-3 mb-6">
