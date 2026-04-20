@@ -185,6 +185,7 @@ export class VoiceAssistantService {
         displayResponse:
           'The voice assistant is temporarily paused. Please use the text chat instead.',
         intent: { type: 'none' },
+        intentResult: null,
         audioBase64: null,
         audioMimeType: null,
         modelUsed: 'paused',
@@ -198,6 +199,7 @@ export class VoiceAssistantService {
         spokenResponse: "I didn't catch that. Try again.",
         displayResponse: "I couldn't hear anything. Please try recording again.",
         intent: { type: 'none' },
+        intentResult: null,
         audioBase64: null,
         audioMimeType: null,
         modelUsed: 'whisper-1',
