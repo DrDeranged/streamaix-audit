@@ -237,20 +237,29 @@
     font-feature-settings: 'tnum' 1, 'cv11' 1;
   }
 
-  /* Fading right edge on horizontal scroll containers (e.g. table wrapper),
-     so users get a visual cue there's more off-screen on phones. */
+  /* Scroll-aware shadow on horizontal scroll containers (e.g. table wrapper).
+     Uses the Roman Komarov / Lea Verou technique: two solid "cover" layers
+     pinned to the scroll viewport via background-attachment:local hide the
+     shadow when the user is already at the start/end of the scroll. So the
+     fade only appears when there is actually more content off-screen, and
+     disappears once the user has fully scrolled — the final column is never
+     permanently obscured. Pure CSS, no JS. */
   .table-scroller {
-    -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
-    mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
+    background:
+      /* left & right cover gradients (hide shadow when at edges) */
+      linear-gradient(to right, hsl(var(--background)) 30%, hsla(var(--background) / 0)) left center / 24px 100% no-repeat local,
+      linear-gradient(to left,  hsl(var(--background)) 30%, hsla(var(--background) / 0)) right center / 24px 100% no-repeat local,
+      /* shadow gradients (always there, but covered by the local layers above) */
+      radial-gradient(farthest-side at 0 50%,    hsla(0 0% 0% / 0.35), hsla(0 0% 0% / 0)) left center  / 16px 100% no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%, hsla(0 0% 0% / 0.35), hsla(0 0% 0% / 0)) right center / 16px 100% no-repeat scroll;
   }
-  /* Once scrolled to the right edge, drop the fade so the last column is fully visible. */
-  .table-scroller:not(:hover) { transition: -webkit-mask-image 200ms ease, mask-image 200ms ease; }
 
-  /* Tap target helpers — guarantee a 44px hit area on touch devices for
-     small icon buttons and pills used inside data-dense rows. */
+  /* Tap target helpers — guarantee a 44px hit area on touch devices for the
+     interactive element itself (e.g. an icon-only button). Intentionally
+     scoped to the element only, NOT descendants, so it can't distort the
+     internals of dense layouts. Apply directly to the <button>/<a>. */
   @media (pointer: coarse) {
-    .tap-target,
-    .tap-target * {
+    .tap-target {
       min-height: 44px;
       min-width: 44px;
     }
