@@ -18,11 +18,20 @@ export interface VoiceIntent {
   bountyId?: string;
 }
 
+export type VoiceIntentResult =
+  | { kind: 'market'; symbol: string; price: number; percentChange24h: number; source: 'live' | 'unavailable' }
+  | { kind: 'balance'; streamPoints: number; username: string | null }
+  | { kind: 'bounty'; bountyId: string; title: string; reward: number; status: string; summary: string }
+  | { kind: 'navigate'; path: string }
+  | { kind: 'error'; message: string }
+  | null;
+
 export interface VoiceAssistantResponse {
   transcript: string;
   spokenResponse: string;
   displayResponse: string;
   intent: VoiceIntent;
+  intentResult: VoiceIntentResult;
   audioBase64: string | null;
   audioMimeType: 'audio/mpeg' | null;
   modelUsed: string;
@@ -195,19 +204,178 @@ export class VoiceAssistantService {
       };
     }
 
-    const { spokenResponse, displayResponse, intent } = await this.respond(transcript, context);
+    const initial = await this.respond(transcript, context);
+    const executed = await this.executeIntent(initial.intent, context, transcript).catch(
+      (err): { intentResult: VoiceIntentResult; spokenResponse?: string; displayResponse?: string } => {
+        console.error('[VoiceAssistant] intent execution failed', err);
+        return { intentResult: null };
+      },
+    );
+
+    const spokenResponse = executed.spokenResponse ?? initial.spokenResponse;
+    const displayResponse = executed.displayResponse ?? initial.displayResponse;
     const audio = await this.synthesize(spokenResponse).catch(() => null);
 
     return {
       transcript,
       spokenResponse,
       displayResponse,
-      intent,
+      intent: initial.intent,
+      intentResult: executed.intentResult,
       audioBase64: audio ? audio.toString('base64') : null,
       audioMimeType: audio ? 'audio/mpeg' : null,
       modelUsed: 'whisper-1 + gpt-4o-mini + tts-1',
     };
   }
+
+  /**
+   * After the LLM picks an intent, fetch the real data needed to fulfill it.
+   * For lookup_market / check_balance / summarize_bounty we override the
+   * spoken & displayed text with templated copy that references the real
+   * numbers, so the user always hears live data instead of a hallucinated value.
+   */
+  async executeIntent(
+    intent: VoiceIntent,
+    context: VoiceAssistantContext,
+    transcript: string,
+  ): Promise<{ intentResult: VoiceIntentResult; spokenResponse?: string; displayResponse?: string }> {
+    if (intent.type === 'lookup_market') {
+      const symbol = (intent.symbol || extractSymbol(transcript) || '').toUpperCase();
+      if (!symbol) {
+        return {
+          intentResult: { kind: 'error', message: 'Tell me which asset to look up.' },
+          spokenResponse: 'Which asset should I check?',
+          displayResponse: "I didn't catch which asset you wanted. Try 'what's BTC at?'",
+        };
+      }
+      const quotes = await marketDataService.getCryptoQuotes([symbol]).catch((): CryptoQuote[] => []);
+      const quote = quotes.find((q) => q.symbol.toUpperCase() === symbol);
+      if (!quote) {
+        return {
+          intentResult: { kind: 'market', symbol, price: 0, percentChange24h: 0, source: 'unavailable' },
+          spokenResponse: `I don't have a live price for ${symbol} right now.`,
+          displayResponse: `Live price for ${symbol} is unavailable. Try again in a moment.`,
+        };
+      }
+      const dir = quote.percentChange24h >= 0 ? 'up' : 'down';
+      const pct = Math.abs(quote.percentChange24h).toFixed(2);
+      const priceFmt = quote.price >= 1 ? quote.price.toLocaleString(undefined, { maximumFractionDigits: 2 }) : quote.price.toPrecision(4);
+      return {
+        intentResult: {
+          kind: 'market',
+          symbol,
+          price: quote.price,
+          percentChange24h: quote.percentChange24h,
+          source: 'live',
+        },
+        spokenResponse: `${symbol} is at ${priceFmt} dollars, ${dir} ${pct} percent in the last day.`,
+        displayResponse: `${symbol} · $${priceFmt} (${quote.percentChange24h >= 0 ? '+' : '-'}${pct}% 24h)`,
+      };
+    }
+
+    if (intent.type === 'check_balance') {
+      const balance = context.walletBalance ?? 0;
+      const balanceFmt = balance.toLocaleString(undefined, { maximumFractionDigits: 0 });
+      return {
+        intentResult: {
+          kind: 'balance',
+          streamPoints: balance,
+          username: context.username ?? null,
+        },
+        spokenResponse: balance > 0
+          ? `You have ${balanceFmt} STREAM tokens.`
+          : "You don't have any STREAM tokens yet — claim a bounty to start earning.",
+        displayResponse: balance > 0
+          ? `${balanceFmt} STREAM tokens in your account.`
+          : 'Your STREAM balance is 0. Claim a bounty or summarize a video to start earning.',
+      };
+    }
+
+    if (intent.type === 'summarize_bounty') {
+      // Lazy import to avoid circular deps in tests
+      const { storage } = await import('../storage');
+      const bountyId = intent.bountyId || extractBountyId(transcript);
+      let bounty: { id: string; title: string; description?: string | null; reward: number; status: string } | undefined;
+      if (bountyId) {
+        bounty = (await storage.getBounty(bountyId).catch(() => undefined)) as typeof bounty;
+      }
+      // Fall back to the user's most recent bounty title
+      if (!bounty && context.recentBountyTitles && context.recentBountyTitles.length > 0) {
+        return {
+          intentResult: {
+            kind: 'bounty',
+            bountyId: 'recent',
+            title: context.recentBountyTitles[0],
+            reward: 0,
+            status: 'recent',
+            summary: `Your most recent bounty is "${context.recentBountyTitles[0]}".`,
+          },
+          spokenResponse: `Your most recent bounty is ${context.recentBountyTitles[0]}.`,
+          displayResponse: `Most recent bounty: "${context.recentBountyTitles[0]}". Tell me a specific bounty ID for a deeper summary.`,
+        };
+      }
+      if (!bounty) {
+        return {
+          intentResult: { kind: 'error', message: 'No bounty found.' },
+          spokenResponse: "I couldn't find that bounty.",
+          displayResponse: "I couldn't find that bounty. Try a bounty ID like 'summarize bounty abc123'.",
+        };
+      }
+      const desc = (bounty.description || '').replace(/\s+/g, ' ').trim();
+      const summary = desc
+        ? desc.length > 240 ? `${desc.slice(0, 240)}…` : desc
+        : `A ${bounty.reward} STREAM bounty currently ${bounty.status}.`;
+      return {
+        intentResult: {
+          kind: 'bounty',
+          bountyId: bounty.id,
+          title: bounty.title,
+          reward: bounty.reward,
+          status: bounty.status,
+          summary,
+        },
+        spokenResponse: `${bounty.title}. ${summary.slice(0, 220)}`,
+        displayResponse: `"${bounty.title}" · ${bounty.reward} STREAM · ${bounty.status}\n\n${summary}`,
+      };
+    }
+
+    if (intent.type === 'navigate' && intent.path) {
+      return { intentResult: { kind: 'navigate', path: intent.path } };
+    }
+
+    return { intentResult: null };
+  }
+}
+
+const SYMBOL_ALIASES: Record<string, string> = {
+  bitcoin: 'BTC', btc: 'BTC',
+  ethereum: 'ETH', ether: 'ETH', eth: 'ETH',
+  solana: 'SOL', sol: 'SOL',
+  binance: 'BNB', bnb: 'BNB',
+  ripple: 'XRP', xrp: 'XRP',
+  dogecoin: 'DOGE', doge: 'DOGE',
+  cardano: 'ADA', ada: 'ADA',
+  avalanche: 'AVAX', avax: 'AVAX',
+};
+
+function extractSymbol(transcript: string): string | null {
+  const lower = transcript.toLowerCase();
+  for (const [key, sym] of Object.entries(SYMBOL_ALIASES)) {
+    if (new RegExp(`\\b${key}\\b`).test(lower)) return sym;
+  }
+  // Look for a 3-5 letter uppercase ticker mention
+  const match = transcript.match(/\b([A-Z]{2,5})\b/);
+  return match ? match[1] : null;
+}
+
+function extractBountyId(transcript: string): string | undefined {
+  // Match UUID, then a 6+ char alphanumeric id, then a number like "bounty 12"
+  const uuid = transcript.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+  if (uuid) return uuid[0];
+  const id = transcript.match(/\b([a-zA-Z0-9]{6,})\b/);
+  if (id && /\d/.test(id[1])) return id[1];
+  const num = transcript.match(/\bbounty\s+(\d+)/i);
+  return num ? num[1] : undefined;
 }
 
 export const voiceAssistantService = new VoiceAssistantService();

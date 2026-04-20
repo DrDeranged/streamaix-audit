@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
-import { Mic, MicOff, Loader2, X, Volume2 } from "lucide-react";
+import { Mic, MicOff, Loader2, X, Volume2, TrendingUp, TrendingDown, Wallet, Trophy, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,13 +8,94 @@ import { apiRequest } from "@/lib/queryClient";
 
 type Status = "idle" | "recording" | "processing" | "speaking" | "error";
 
+type IntentResult =
+  | { kind: "market"; symbol: string; price: number; percentChange24h: number; source: "live" | "unavailable" }
+  | { kind: "balance"; streamPoints: number; username: string | null }
+  | { kind: "bounty"; bountyId: string; title: string; reward: number; status: string; summary: string }
+  | { kind: "navigate"; path: string }
+  | { kind: "error"; message: string }
+  | null;
+
 interface VoiceResult {
   transcript: string;
   spokenResponse: string;
   displayResponse: string;
   intent: { type: string; path?: string; symbol?: string; bountyId?: string };
+  intentResult: IntentResult;
   audioBase64: string | null;
   audioMimeType: string | null;
+}
+
+function IntentResultCard({ result }: { result: IntentResult }) {
+  if (!result) return null;
+  if (result.kind === "market") {
+    if (result.source === "unavailable") {
+      return (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 flex items-center gap-2 text-amber-200" data-testid="voice-result-market-unavailable">
+          <AlertTriangle className="h-4 w-4" />
+          <span className="text-xs">Live price for {result.symbol} unavailable.</span>
+        </div>
+      );
+    }
+    const up = result.percentChange24h >= 0;
+    return (
+      <div className="rounded-xl border border-cyan-500/30 bg-gradient-to-br from-cyan-500/15 to-purple-500/10 p-3" data-testid="voice-result-market">
+        <div className="flex items-center justify-between">
+          <span className="text-xs uppercase tracking-wider text-cyan-300">{result.symbol} · live</span>
+          <span className={`flex items-center gap-1 text-xs font-semibold ${up ? "text-emerald-400" : "text-rose-400"}`}>
+            {up ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+            {up ? "+" : ""}{result.percentChange24h.toFixed(2)}%
+          </span>
+        </div>
+        <p className="text-2xl font-bold text-white mt-1 font-orbitron" data-testid="voice-result-price">
+          ${result.price >= 1 ? result.price.toLocaleString(undefined, { maximumFractionDigits: 2 }) : result.price.toPrecision(4)}
+        </p>
+        <p className="text-[10px] text-slate-400 mt-1">24h change</p>
+      </div>
+    );
+  }
+  if (result.kind === "balance") {
+    return (
+      <div className="rounded-xl border border-purple-500/30 bg-gradient-to-br from-purple-500/15 to-fuchsia-500/10 p-3" data-testid="voice-result-balance">
+        <div className="flex items-center gap-2 mb-1">
+          <Wallet className="h-3.5 w-3.5 text-purple-300" />
+          <span className="text-xs uppercase tracking-wider text-purple-300">STREAM balance</span>
+        </div>
+        <p className="text-2xl font-bold text-white font-orbitron" data-testid="voice-result-balance-amount">
+          {result.streamPoints.toLocaleString()}
+        </p>
+        {result.username && <p className="text-[10px] text-slate-400 mt-1">@{result.username}</p>}
+      </div>
+    );
+  }
+  if (result.kind === "bounty") {
+    return (
+      <div className="rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-500/15 to-orange-500/10 p-3" data-testid="voice-result-bounty">
+        <div className="flex items-center justify-between mb-1">
+          <span className="flex items-center gap-1 text-xs uppercase tracking-wider text-amber-300">
+            <Trophy className="h-3.5 w-3.5" />
+            Bounty
+          </span>
+          {result.reward > 0 && (
+            <span className="text-xs font-semibold text-amber-200">{result.reward} STREAM</span>
+          )}
+        </div>
+        <p className="text-sm font-semibold text-white truncate" data-testid="voice-result-bounty-title">
+          {result.title}
+        </p>
+        <p className="text-xs text-slate-300 mt-1 line-clamp-3">{result.summary}</p>
+      </div>
+    );
+  }
+  if (result.kind === "error") {
+    return (
+      <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 flex items-center gap-2 text-rose-200" data-testid="voice-result-error">
+        <AlertTriangle className="h-4 w-4" />
+        <span className="text-xs">{result.message}</span>
+      </div>
+    );
+  }
+  return null;
 }
 
 const MIN_RECORDING_MS = 350;
@@ -255,8 +336,9 @@ export function VoiceAssistant() {
               </div>
               <div>
                 <p className="text-[10px] uppercase tracking-wide text-slate-500">Assistant</p>
-                <p className="text-white">{result.displayResponse}</p>
+                <p className="text-white whitespace-pre-line">{result.displayResponse}</p>
               </div>
+              <IntentResultCard result={result.intentResult} />
               {result.intent?.type === "navigate" && result.intent.path && (
                 <p className="text-xs text-cyan-300">Opening {result.intent.path}…</p>
               )}
@@ -265,7 +347,7 @@ export function VoiceAssistant() {
 
           {!result && !errorMsg && status === "idle" && (
             <p className="text-slate-400 text-xs">
-              Try: "What's BTC doing?", "Open prediction markets", "Show my dashboard".
+              Try: "What's BTC at?", "What's my balance?", "Summarize my last bounty", "Open prediction markets".
             </p>
           )}
         </div>
