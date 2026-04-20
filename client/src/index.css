@@ -168,11 +168,17 @@
     margin-left: auto;
     margin-right: auto;
     width: 100%;
-    max-width: var(--section-max-w);
+    /* Belt-and-suspenders: never exceed the viewport on phones. Without
+       this, a single non-shrinking child (chart, code block, long word)
+       can balloon the container past 100vw at 360px. */
+    max-width: min(var(--section-max-w), 100vw);
     padding-left: var(--section-px-mobile);
     padding-right: var(--section-px-mobile);
     padding-top: var(--section-py);
     padding-bottom: var(--section-py);
+    /* Allow children using min-w-0 / truncate to shrink below their
+       intrinsic width, which is the #1 cause of mobile overflow. */
+    min-width: 0;
   }
   @media (min-width: 768px) {
     .section-container {
@@ -305,10 +311,20 @@
 
   html {
     scroll-behavior: smooth;
+    /* Last-resort safety net: prevent any single overflowing element from
+       making the entire page horizontally scrollable on small phones.
+       `clip` is preferred over `hidden` because it does not establish a
+       new scroll container, so position:sticky inside still works. */
+    overflow-x: clip;
   }
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    overflow-x: clip;
+    /* Lock minimum body width to the smallest phone we target so layout
+       tools (flex/grid) treat 360px as the floor instead of computing
+       intrinsic widths from runaway children. */
+    min-width: 320px;
   }
   
   .font-orbitron {

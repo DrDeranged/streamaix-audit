@@ -249,7 +249,7 @@ export function SocialPost({
             size="sm"
             onClick={handleLike}
             disabled={likeMutation.isPending}
-            className={`flex-1 gap-1.5 h-8 text-xs ${isLiked ? 'text-pink-500' : 'text-gray-400'} hover:text-pink-500 transition-colors`}
+            className={`tap-target flex-1 gap-1.5 h-8 text-xs ${isLiked ? 'text-pink-500' : 'text-gray-400'} hover:text-pink-500 transition-colors`}
             data-testid={`button-like-${id}`}
           >
             <Heart className={`w-3.5 h-3.5 ${isLiked ? 'fill-current' : ''}`} />
@@ -260,7 +260,7 @@ export function SocialPost({
             variant="ghost"
             size="sm"
             onClick={() => setShowComments(!showComments)}
-            className="flex-1 gap-1.5 h-8 text-xs text-gray-400 hover:text-cyan-500 transition-colors"
+            className="tap-target flex-1 gap-1.5 h-8 text-xs text-gray-400 hover:text-cyan-500 transition-colors"
             data-testid={`button-comment-${id}`}
           >
             <MessageCircle className="w-3.5 h-3.5" />
@@ -270,7 +270,7 @@ export function SocialPost({
           <Button
             variant="ghost"
             size="sm"
-            className="flex-1 gap-1.5 h-8 text-xs text-gray-400 hover:text-purple-500 transition-colors"
+            className="tap-target flex-1 gap-1.5 h-8 text-xs text-gray-400 hover:text-purple-500 transition-colors"
             data-testid={`button-share-${id}`}
           >
             <Share2 className="w-3.5 h-3.5" />
