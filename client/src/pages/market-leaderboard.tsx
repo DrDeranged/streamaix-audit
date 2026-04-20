@@ -8,6 +8,7 @@ import { Trophy, TrendingUp, Target, Award, Zap, ArrowLeft, Flame, Star, Bot, Us
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/PageHeader";
 
 type LeaderboardEntry = {
   id: string;
@@ -113,27 +114,21 @@ export default function MarketLeaderboard() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center space-y-4"
           >
-            <Link href="/#prediction-markets">
-              <Button variant="ghost" className="mb-4 text-slate-400 hover:text-white">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Markets
-              </Button>
-            </Link>
-
-            <div className="flex items-center justify-center gap-4">
-              <motion.div
-                animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
-                transition={{ duration: 3, repeat: Infinity }}
-              >
-                <Trophy className="w-16 h-16 text-amber-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.6)]" />
-              </motion.div>
-              <h1 className="text-6xl font-bold bg-gradient-to-r from-amber-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent drop-shadow-lg">
-                Leaderboard
-              </h1>
-            </div>
-            <p className="text-slate-400 text-lg">Top prediction market traders ranked by performance</p>
+            <PageHeader
+              eyebrow="Prediction markets · top traders"
+              title="Markets Leaderboard"
+              subtitle="Top prediction market traders ranked by performance."
+              icon={<Trophy className="h-5 w-5" />}
+              actions={
+                <Link href="/#prediction-markets">
+                  <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Back to Markets
+                  </Button>
+                </Link>
+              }
+            />
           </motion.div>
 
           {/* Tabs */}

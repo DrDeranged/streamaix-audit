@@ -31,6 +31,7 @@ import {
 import { motion } from 'framer-motion';
 import { getAuthHeaders } from '@/lib/auth';
 import { Navigation } from '@/components/ui/navigation';
+import { PageHeader } from '@/components/PageHeader';
 
 interface WalletBalance {
   streamTokens: number;
@@ -255,63 +256,49 @@ export default function WalletDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
       <Navigation showBackButton title="Wallet Dashboard" />
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
-          <div className="flex items-center space-x-3 sm:space-x-4">
-            <div className="p-2 sm:p-3 rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500">
-              <Wallet className="w-6 h-6 sm:w-8 sm:h-8 text-gray-900 dark:text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">Wallet Dashboard</h1>
-              <div className="flex flex-col space-y-1">
-                <p className="text-slate-300 text-sm sm:text-base">
-                  {walletBalance?.ensName || formatAddress(wallet?.address || '')}
-                </p>
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span className="text-green-400 text-xs">Connected</span>
-                  {walletBalance?.chainId && (
-                    <span className="text-slate-400 text-xs">
-                      • Chain ID: {walletBalance.chainId}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2 sm:space-x-3">
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="border-purple-400/50 bg-purple-500/20 text-gray-900 dark:text-white hover:bg-purple-500/30 hover:border-purple-400 text-xs sm:text-sm"
-              onClick={() => window.open(`https://etherscan.io/address/${wallet?.address}`, '_blank')}
-            >
-              <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">View on Explorer</span>
-            </Button>
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="border-gray-400/50 bg-gray-500/20 text-gray-900 dark:text-white hover:bg-gray-500/30 hover:border-gray-400 text-xs sm:text-sm"
-              onClick={() => {
-                if (wallet?.address) {
-                  navigator.clipboard.writeText(wallet.address);
-                }
-              }}
-            >
-              <Copy className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Copy Address</span>
-            </Button>
-            <Button size="sm" className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 text-xs sm:text-sm">
-              <ArrowDownLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Deposit</span>
-            </Button>
-            <Button size="sm" variant="outline" className="border-red-400/50 bg-red-500/20 text-gray-900 dark:text-white hover:bg-red-500/30 hover:border-red-400 text-xs sm:text-sm">
-              <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Withdraw</span>
-            </Button>
-          </div>
-        </div>
+        <PageHeader
+          eyebrow={
+            <span className="inline-flex items-center gap-2">
+              <span className="inline-block h-2 w-2 rounded-full bg-emerald-400" />
+              Connected · {walletBalance?.ensName || formatAddress(wallet?.address || '')}
+              {walletBalance?.chainId && <span className="text-muted-foreground">· Chain {walletBalance.chainId}</span>}
+            </span>
+          }
+          title="Wallet Dashboard"
+          subtitle="Balances, transactions, and on-chain activity for your connected wallet."
+          icon={<Wallet className="h-5 w-5" />}
+          className="mb-6 sm:mb-8"
+          actions={
+            <>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => window.open(`https://etherscan.io/address/${wallet?.address}`, '_blank')}
+              >
+                <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Explorer</span>
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  if (wallet?.address) navigator.clipboard.writeText(wallet.address);
+                }}
+              >
+                <Copy className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Copy</span>
+              </Button>
+              <Button size="sm" className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:opacity-90">
+                <ArrowDownLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Deposit</span>
+              </Button>
+              <Button size="sm" variant="outline" className="border-red-400/50 text-red-300 hover:bg-red-500/10">
+                <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Withdraw</span>
+              </Button>
+            </>
+          }
+        />
 
         {/* Balance Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">

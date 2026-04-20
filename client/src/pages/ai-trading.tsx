@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { PageHeader } from '@/components/PageHeader';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -1433,87 +1434,53 @@ export default function AITrading() {
       <NeuralBackground />
       
       <div className="relative z-10 container mx-auto px-4 py-8 pt-20">
-        <motion.div 
-          initial={{ opacity: 0, y: -30 }} 
-          animate={{ opacity: 1, y: 0 }} 
+        <motion.div
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="mb-8"
         >
-          <div className="flex items-center justify-between flex-wrap gap-6">
-            <div className="space-y-3">
-              <div className="flex items-center gap-4">
-                <motion.div 
-                  className="relative"
-                  animate={{ rotate: [0, 360] }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                >
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/30 to-purple-500/30 flex items-center justify-center border border-cyan-500/30">
-                    <Brain className="w-8 h-8 text-cyan-400" />
-                  </div>
-                  <motion.div
-                    className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20"
-                    animate={{ opacity: [0.3, 0.6, 0.3] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    style={{ filter: 'blur(8px)', zIndex: -1 }}
-                  />
-                </motion.div>
-                <div>
-                  <h1 className="text-3xl md:text-5xl font-black tracking-tight">
-                    <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
-                      AI Trading Intelligence
-                    </span>
-                  </h1>
-                  <div className="flex items-center gap-3 mt-2">
-                    <span className="text-slate-400 text-sm">Multi-factor confluence analysis</span>
-                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/30">
-                      <motion.div 
-                        className="w-2 h-2 rounded-full bg-emerald-400"
-                        animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                      />
-                      <span className="text-xs text-emerald-400 font-medium">LIVE</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <motion.div 
-                className="flex items-center gap-3 bg-slate-800/60 backdrop-blur-xl rounded-xl px-4 py-2.5 border border-slate-700/50"
-                whileHover={{ borderColor: 'rgba(6, 182, 212, 0.3)' }}
-              >
-                <div className="flex items-center gap-2">
+          <PageHeader
+            eyebrow={
+              <span className="inline-flex items-center gap-2">
+                Multi-factor confluence
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 text-emerald-400">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" /> LIVE
+                </span>
+              </span>
+            }
+            title="AI Trading Intelligence"
+            subtitle="Real-time signals, confluence scoring, and actionable AI-driven trade ideas."
+            icon={<Brain className="h-5 w-5" />}
+            actions={
+              <>
+                <div className="flex items-center gap-2 rounded-xl border border-slate-700/50 bg-slate-800/60 px-3 py-2">
                   <Radio className="w-4 h-4 text-cyan-400" />
-                  <span className="text-xs text-slate-400 font-medium">Auto-refresh</span>
+                  <span className="text-xs text-slate-400 font-medium">Auto</span>
+                  <Switch checked={liveMode} onCheckedChange={setLiveMode} data-testid="switch-live-mode" />
                 </div>
-                <Switch checked={liveMode} onCheckedChange={setLiveMode} data-testid="switch-live-mode" />
-              </motion.div>
-              
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => exportToCSV(signals)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800/60 backdrop-blur-xl border border-slate-700/50 text-slate-300 hover:text-white hover:border-slate-600 transition-all"
-                data-testid="btn-export-csv"
-              >
-                <Download className="w-4 h-4" />
-                <span className="hidden sm:inline text-sm font-medium">Export</span>
-              </motion.button>
-              
-              <motion.button
-                whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(6, 182, 212, 0.3)' }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => refetch()}
-                disabled={isFetching}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500/20 to-purple-500/20 backdrop-blur-xl border border-cyan-500/30 text-cyan-300 hover:text-white transition-all disabled:opacity-50"
-                data-testid="btn-refresh-signals"
-              >
-                <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
-                <span className="text-sm font-medium">Refresh</span>
-              </motion.button>
-            </div>
-          </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => exportToCSV(signals)}
+                  data-testid="btn-export-csv"
+                >
+                  <Download className="w-4 h-4 mr-1.5" />
+                  <span className="hidden sm:inline">Export</span>
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => refetch()}
+                  disabled={isFetching}
+                  className="bg-gradient-to-r from-cyan-500/30 to-purple-500/30 border border-cyan-500/30 text-cyan-200 hover:text-white"
+                  data-testid="btn-refresh-signals"
+                >
+                  <RefreshCw className={`w-4 h-4 mr-1.5 ${isFetching ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+              </>
+            }
+          />
         </motion.div>
 
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">

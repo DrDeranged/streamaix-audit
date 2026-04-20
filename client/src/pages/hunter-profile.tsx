@@ -13,6 +13,7 @@ import { Progress } from '@/components/ui/progress';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { formatPoints } from '@/hooks/usePoints';
 import { useToast } from '@/hooks/use-toast';
+import { PageHeader } from '@/components/PageHeader';
 
 interface BountyHunter {
   id: number;
@@ -115,6 +116,19 @@ export default function HunterProfile() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
+          className="mb-6"
+        >
+          <PageHeader
+            eyebrow={`Bounty hunter · level ${hunter.level}`}
+            title={`User #${hunter.userId}`}
+            subtitle="Reputation, badges, and bounty performance."
+            icon={hunter.level >= 8 ? <Crown className="h-5 w-5" /> : <Trophy className="h-5 w-5" />}
+          />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
           <Card className="bg-gradient-to-br from-purple-900/50 to-purple-800/30 border-purple-500/30 backdrop-blur-sm p-8">
@@ -126,11 +140,6 @@ export default function HunterProfile() {
 
               {/* Info */}
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-3xl font-bold text-white">User #{hunter.userId}</h1>
-                  {hunter.level >= 8 && <Crown className="w-8 h-8 text-yellow-400" />}
-                </div>
-                
                 <div className="flex items-center gap-4 mb-4">
                   <Badge variant="outline" className="text-purple-400 border-purple-500/50">
                     Level {hunter.level}

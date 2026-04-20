@@ -1079,54 +1079,37 @@ export default function StreamsPage() {
       {/* Hexagon pattern overlay */}
       <div className="absolute inset-0 streaming-hex-pattern opacity-30 pointer-events-none" />
 
-      {/* Modern glassmorphism header */}
-      <div className="streaming-glass-panel border-b border-purple-500/10 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-              <div className="relative p-2 sm:p-3 rounded-xl sm:rounded-2xl streaming-morph-border overflow-hidden flex-shrink-0">
-                <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-pink-500/20 backdrop-blur-xl" />
-                <Radio className="w-4 h-4 sm:w-5 sm:h-5 text-red-400 relative z-10" />
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-sm sm:text-xl font-bold text-white font-orbitron tracking-tight streaming-glow-text truncate">Live Streams</h1>
-                <p className="text-[10px] sm:text-xs text-slate-400 hidden sm:block">Watch AI Avatars and creators stream live</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-              {/* Stats badges with glass effect */}
-              <div className="hidden lg:flex items-center gap-2 mr-2">
-                <div className="streaming-viewer-glow flex items-center gap-1.5 px-3 py-1.5 rounded-full backdrop-blur-sm">
-                  <span className="relative flex h-2 w-2 streaming-live-pulse rounded-full">
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                  </span>
-                  <span className="text-xs font-bold streaming-counter">{liveStreams.length}</span>
-                  <span className="text-xs text-slate-400">live</span>
-                </div>
-              </div>
-              <Badge className="lg:hidden streaming-viewer-glow text-red-400 text-[10px] sm:text-xs font-semibold px-1.5 sm:px-2 py-0.5">
-                {liveStreams.length} Live
-              </Badge>
-              
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-6 relative">
+        <PageHeader
+          eyebrow={
+            <span className="inline-flex items-center gap-2">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
+              </span>
+              {liveStreams.length} live now · Knowledge Avatars + creators
+            </span>
+          }
+          title="Live Streams"
+          subtitle="Watch AI avatars and creators stream live, then catch the replays."
+          icon={<Radio className="h-5 w-5" />}
+          actions={
+            <>
               <Link href="/replays">
-                <Button variant="outline" size="sm" className="streaming-pill-glass border-purple-500/20 text-slate-300 hover:text-white h-8 sm:h-9 gap-1 rounded-xl text-xs">
-                  <Play className="w-3 h-3 sm:w-4 sm:h-4" />
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <Play className="w-4 h-4" />
                   <span className="hidden sm:inline">Replays</span>
                 </Button>
               </Link>
               <Link href="/go-live">
-                <Button size="sm" className="streaming-neon-btn text-white h-8 sm:h-9 gap-1 rounded-xl font-semibold text-xs sm:text-sm px-2 sm:px-3">
-                  <span className="text-sm sm:text-lg leading-none">+</span>
-                  <span className="hidden sm:inline">Stream</span>
+                <Button size="sm" className="streaming-neon-btn text-white gap-1 font-semibold">
+                  <span className="text-lg leading-none">+</span>
+                  <span className="hidden sm:inline">Go Live</span>
                 </Button>
               </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-6">
+            </>
+          }
+        />
         {featuredStreams.length > 0 && (
           <section>
             <div className="flex items-center gap-2 mb-4">

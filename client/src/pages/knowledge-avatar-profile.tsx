@@ -31,6 +31,7 @@ import { FollowButton } from "@/components/avatars/follow-button";
 import { PortfolioSimulator } from "@/components/avatars/portfolio-simulator";
 import { AvatarChatButton } from "@/components/avatars/avatar-chat-button";
 import { InlineMarketCard } from "@/components/prediction/InlineMarketCard";
+import { PageHeader } from "@/components/PageHeader";
 
 interface DatabaseAvatar {
   id: string;
@@ -402,36 +403,42 @@ export default function KnowledgeAvatarProfile() {
           </motion.div>
 
           {/* Name and Actions Bar */}
-          <div className="mt-20 md:mt-24 mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">{avatar.name}</h1>
-              <p className="text-purple-400 font-mono">@{avatar.handle}</p>
-              <Badge variant="secondary" className="mt-2 bg-purple-500/20 text-purple-300 border-purple-500/30">
-                {avatar.expertise}
-              </Badge>
-            </div>
-            <div className="flex gap-3">
-              <FollowButton
-                avatarId={avatar.id}
-                avatarName={avatar.name}
-                className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700"
-              />
-              <AvatarChatButton avatar={avatar} />
-              {avatar.twitterHandle && (
-                <a href={`https://twitter.com/${avatar.twitterHandle}`} target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" size="icon" className="border-white/20 text-white hover:bg-white/10">
-                    <Twitter className="h-4 w-4" />
-                  </Button>
-                </a>
-              )}
-              {avatar.websiteUrl && (
-                <a href={avatar.websiteUrl} target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" size="icon" className="border-white/20 text-white hover:bg-white/10">
-                    <Globe className="h-4 w-4" />
-                  </Button>
-                </a>
-              )}
-            </div>
+          <div className="mt-20 md:mt-24 mb-8">
+            <PageHeader
+              eyebrow={
+                <span className="inline-flex items-center gap-2">
+                  <span className="font-mono text-purple-400">@{avatar.handle}</span>
+                  <Badge variant="secondary" className="bg-purple-500/20 text-purple-300 border-purple-500/30">
+                    {avatar.expertise}
+                  </Badge>
+                </span>
+              }
+              title={avatar.name}
+              actions={
+                <>
+                  <FollowButton
+                    avatarId={avatar.id}
+                    avatarName={avatar.name}
+                    className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700"
+                  />
+                  <AvatarChatButton avatar={avatar} />
+                  {avatar.twitterHandle && (
+                    <a href={`https://twitter.com/${avatar.twitterHandle}`} target="_blank" rel="noopener noreferrer">
+                      <Button variant="outline" size="icon" className="border-white/20 text-white hover:bg-white/10">
+                        <Twitter className="h-4 w-4" />
+                      </Button>
+                    </a>
+                  )}
+                  {avatar.websiteUrl && (
+                    <a href={avatar.websiteUrl} target="_blank" rel="noopener noreferrer">
+                      <Button variant="outline" size="icon" className="border-white/20 text-white hover:bg-white/10">
+                        <Globe className="h-4 w-4" />
+                      </Button>
+                    </a>
+                  )}
+                </>
+              }
+            />
           </div>
 
           {/* Main Content Grid */}

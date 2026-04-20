@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { PageHeader } from '@/components/PageHeader';
 import { 
   User,
   Heart,
@@ -809,17 +810,14 @@ export default function AvatarProfile() {
             </div>
 
             <div className="flex-1 text-white w-full">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 md:gap-4">
-                <div>
-                  <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-1 md:mb-2">{avatar.name}</h1>
-                  <p className="text-sm sm:text-base md:text-xl text-white/80 mb-1 md:mb-2">{avatar.handle}</p>
-                  <p className="text-xs sm:text-sm md:text-lg text-white/70">{avatar.expertise}</p>
-                  <p className="text-xs sm:text-sm md:text-base text-white/80 mt-2 md:mt-3 max-w-2xl line-clamp-2 md:line-clamp-none">{avatar.bio}</p>
-                </div>
-
-                <div className="flex flex-col sm:flex-row lg:flex-row gap-2 md:gap-4">
-                  {/* Social Links */}
-                  <div className="flex gap-2">
+              <PageHeader
+                eyebrow={
+                  <span className="text-white/80">{avatar.handle} · {avatar.expertise}</span>
+                }
+                title={avatar.name}
+                subtitle={avatar.bio}
+                actions={
+                  <>
                     {avatar.twitter_handle && (
                       <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 h-8 w-8 p-0">
                         <Twitter className="h-3 w-3 md:h-4 md:w-4" />
@@ -835,17 +833,13 @@ export default function AvatarProfile() {
                         <Globe className="h-3 w-3 md:h-4 md:w-4" />
                       </Button>
                     )}
-                  </div>
-
-                  {/* Follow Button */}
-                  <div className="flex gap-2">
                     <Button
                       onClick={() => followMutation.mutate()}
                       disabled={followMutation.isPending}
                       size="sm"
                       className={`${
-                        isFollowing 
-                          ? 'bg-purple-900/20 text-white border-purple-500/30' 
+                        isFollowing
+                          ? 'bg-purple-900/20 text-white border-purple-500/30'
                           : 'bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 text-white'
                       } hover:opacity-90 text-xs sm:text-sm h-8`}
                       data-testid="button-follow-avatar"
@@ -853,7 +847,6 @@ export default function AvatarProfile() {
                       <User className="h-3 w-3 md:h-4 md:w-4 mr-1.5" />
                       {isFollowing ? 'Following' : 'Follow'}
                     </Button>
-                    
                     {isFollowing && (
                       <Button
                         variant="outline"
@@ -865,9 +858,9 @@ export default function AvatarProfile() {
                         {notificationsEnabled ? <Bell className="h-3 w-3 md:h-4 md:w-4" /> : <BellOff className="h-3 w-3 md:h-4 md:w-4" />}
                       </Button>
                     )}
-                  </div>
-                </div>
-              </div>
+                  </>
+                }
+              />
 
               {/* Stats */}
               <div className="flex gap-3 sm:gap-5 md:gap-8 mt-3 md:mt-6 overflow-x-auto pb-2">

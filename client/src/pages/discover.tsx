@@ -82,6 +82,7 @@ import {
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { WidgetSettingsPanel } from "@/components/WidgetSettingsPanel";
+import { PageHeader } from "@/components/PageHeader";
 import { useWidgetSettings } from "@/contexts/WidgetSettingsContext";
 
 interface PredictionMarket {
@@ -1001,63 +1002,44 @@ export default function Discover() {
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-600/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-fuchsia-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
       
-      {/* Enhanced Header */}
-      <div className="sticky top-0 z-50 backdrop-blur-xl border-b border-white/5">
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-slate-900/90 to-slate-900/95" />
-        <div className="container mx-auto px-3 sm:px-6 py-3 sm:py-5 relative">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                <div className="relative flex-shrink-0 hidden xs:block sm:block">
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 rounded-xl blur-lg opacity-50" />
-                  <div className="relative p-2 sm:p-2.5 rounded-xl bg-gradient-to-br from-purple-500/20 to-cyan-500/20 border border-white/10">
-                    <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                  </div>
-                </div>
-                <div className="min-w-0">
-                  <h1 className="text-lg sm:text-2xl md:text-3xl font-orbitron font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent truncate">
-                    Discover
-                  </h1>
-                  <p className="text-xs sm:text-sm text-gray-400 hidden md:block">
-                    AI-Powered Market Intelligence
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-5 relative z-10">
+        <PageHeader
+          eyebrow={
+            <span className="inline-flex items-center gap-2">
+              <Radio className="h-3 w-3 animate-pulse text-emerald-400" />
+              Live · AI-powered market intelligence
+            </span>
+          }
+          title="Discover"
+          subtitle="Real-time signals, narratives, and market intelligence across crypto and traditional finance."
+          icon={<Brain className="h-5 w-5" />}
+          actions={
+            <>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleManualRefresh}
                 disabled={isRefreshing}
-                className="text-gray-400 hover:text-white hover:bg-white/10 rounded-xl h-8 w-8 sm:h-9 sm:w-9 p-0"
+                className="text-gray-400 hover:text-white hover:bg-white/10"
                 data-testid="button-refresh-data"
                 title="Refresh all data"
               >
                 <RefreshCw className={cn("w-4 h-4", isRefreshing && "animate-spin")} />
               </Button>
-              <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium">
-                <Radio className="w-2 h-2 sm:w-2.5 sm:h-2.5 mr-1 sm:mr-1.5 animate-pulse" />
-                <span>Live</span>
-              </Badge>
               <WidgetSettingsPanel />
               <Link href="/markets">
-                <Button 
+                <Button
                   size="sm"
-                  className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white border-0 rounded-xl h-8 sm:h-9 px-2.5 sm:px-4 text-[10px] sm:text-xs font-medium shadow-lg shadow-purple-500/20"
+                  className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white border-0"
                   data-testid="button-explore-markets"
                 >
-                  <Rocket className="w-3 h-3 sm:w-3.5 sm:h-3.5 sm:mr-1.5" />
-                  <span className="hidden sm:inline">Markets</span>
+                  <Rocket className="w-3.5 h-3.5 mr-1.5" />
+                  Markets
                 </Button>
               </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-5 relative z-10">
+            </>
+          }
+        />
         
         {/* Quick Stats Bar - Index Futures & Macro Indicators */}
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
