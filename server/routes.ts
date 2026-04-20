@@ -698,7 +698,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =============================================================================
   const leaderboardWss = new WebSocketServer({ noServer: true });
   const leaderboardClients = new Set<WebSocket>();
-  const { setLeaderboardBroadcaster, computeLeaderboard } =
+  const { setLeaderboardBroadcaster, computeLeaderboard, startLeaderboardTicker } =
     await import('./services/avatarLeaderboardService');
   leaderboardWss.on('connection', async (ws: WebSocket) => {
     leaderboardClients.add(ws);
@@ -717,6 +717,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     });
   });
+  // Re-broadcast on a 30s timer so mark-to-market price moves on open
+  // positions surface in the leaderboard between trade events.
+  startLeaderboardTicker(30_000);
 
   // =============================================================================
   // PORTFOLIO PRICES WEBSOCKET SERVER (Real-time price updates)
