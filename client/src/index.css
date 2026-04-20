@@ -237,6 +237,25 @@
     font-feature-settings: 'tnum' 1, 'cv11' 1;
   }
 
+  /* Fading right edge on horizontal scroll containers (e.g. table wrapper),
+     so users get a visual cue there's more off-screen on phones. */
+  .table-scroller {
+    -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
+    mask-image: linear-gradient(to right, black 0, black calc(100% - 24px), transparent 100%);
+  }
+  /* Once scrolled to the right edge, drop the fade so the last column is fully visible. */
+  .table-scroller:not(:hover) { transition: -webkit-mask-image 200ms ease, mask-image 200ms ease; }
+
+  /* Tap target helpers — guarantee a 44px hit area on touch devices for
+     small icon buttons and pills used inside data-dense rows. */
+  @media (pointer: coarse) {
+    .tap-target,
+    .tap-target * {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
   /* Page-level utility: opt an entire view (and every descendant) into
      tabular figures so leaderboards, P&L tables, balance cards, and live
      odds don't jitter horizontally as values update. Apply on the page

@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { Plus, TrendingUp, Filter, Search, Sparkles, ExternalLink, Home, ArrowLeft, Wallet, Copy, AlertTriangle, Trophy, Award, PieChart, Bot, Swords } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/PageHeader";
+import { StatGrid } from "@/components/StatGrid";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -299,7 +300,7 @@ export default function Markets() {
 
         {/* Stats - Enhanced with Animated Counters */}
         {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <StatGrid className="mb-6">
             <div className="transform transition-transform duration-200 hover:scale-[1.02]">
               <Card className="surface-2 border-purple-500/30 overflow-hidden">
                 <CardContent className="p-4 relative">
@@ -360,7 +361,7 @@ export default function Markets() {
                 </CardContent>
               </Card>
             </div>
-          </div>
+          </StatGrid>
         )}
 
         {/* Market Features Navigation */}
