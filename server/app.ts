@@ -172,16 +172,28 @@ export async function initializeApp(
         console.log("⚠️  Newsletter scheduler disabled (RESEND_API_KEY not configured)");
       }
 
-      // Helper: wraps a background service start so a thrown error or rejected
-      // promise from .start() is logged and swallowed instead of escaping as
-      // an unhandled rejection. Defence in depth — even a future service
-      // that forgets its own try/catch can no longer take the server down.
-      const safeStart = async (
+      // Helper: fire-and-forget wrapper for background services. We deliberately
+      // do NOT await `starter()` because most background services run an
+      // infinite loop inside .start() (e.g. `while (this.isRunning) { ... }`)
+      // and never resolve. Awaiting them would block all subsequent services
+      // from launching. Instead we kick the promise off, attach a .catch so
+      // any synchronous throw or async rejection is logged and swallowed
+      // (defence in depth — even a future service that forgets its own
+      // try/catch can no longer take the server down), and log activation
+      // immediately. The "active" line means "scheduled and running", not
+      // "completed".
+      const safeStart = (
         label: string,
         starter: () => unknown | Promise<unknown>,
-      ): Promise<void> => {
+      ): void => {
         try {
-          await Promise.resolve(starter());
+          const result = starter();
+          Promise.resolve(result).catch((err) => {
+            console.error(
+              `⚠️  ${label} crashed after start (non-fatal, server continues):`,
+              err,
+            );
+          });
           console.log(`✅ ${label} active`);
         } catch (err) {
           console.error(
@@ -196,7 +208,7 @@ export async function initializeApp(
         const { getAutonomousAgentService } = await import(
           "./services/autonomousAgentService"
         );
-        await safeStart(
+        safeStart(
           "Autonomous AI agent service - 100 agents engaging with platform",
           () => getAutonomousAgentService().start(),
         );
@@ -209,7 +221,7 @@ export async function initializeApp(
         const { getTradingBotService } = await import(
           "./services/aiTradingBotService"
         );
-        await safeStart(
+        safeStart(
           "AI trading bot service - 50 bots analyzing and trading on markets",
           () => getTradingBotService().start(),
         );
@@ -221,45 +233,45 @@ export async function initializeApp(
         console.log("\n🌐 ========== AUTONOMOUS ECOSYSTEM STARTUP ==========");
 
         const { aiMarketResolver } = await import("./services/aiMarketResolver");
-        await safeStart("AI Market Resolver", () => aiMarketResolver.start());
+        safeStart("AI Market Resolver", () => aiMarketResolver.start());
 
         const { aiLiquidityProvider } = await import(
           "./services/aiLiquidityProvider"
         );
-        await safeStart("AI Liquidity Provider", () => aiLiquidityProvider.start());
+        safeStart("AI Liquidity Provider", () => aiLiquidityProvider.start());
 
         const { aiTrendSpotter } = await import("./services/aiTrendSpotter");
-        await safeStart("AI Trend Spotter", () => aiTrendSpotter.start());
+        safeStart("AI Trend Spotter", () => aiTrendSpotter.start());
 
         const { aiContentModerator } = await import(
           "./services/aiContentModerator"
         );
-        await safeStart("AI Content Moderator", () => aiContentModerator.start());
+        safeStart("AI Content Moderator", () => aiContentModerator.start());
 
         const { aiCommunityManager } = await import(
           "./services/aiCommunityManager"
         );
-        await safeStart("AI Community Manager", () => aiCommunityManager.start());
+        safeStart("AI Community Manager", () => aiCommunityManager.start());
 
         const { aiTreasuryManager } = await import(
           "./services/aiTreasuryManager"
         );
-        await safeStart("AI Treasury Manager", () => aiTreasuryManager.start());
+        safeStart("AI Treasury Manager", () => aiTreasuryManager.start());
 
         const { aiMetaTrader } = await import("./services/aiMetaTrader");
-        await safeStart("AI Meta-Trader", () => aiMetaTrader.start());
+        safeStart("AI Meta-Trader", () => aiMetaTrader.start());
 
         const { marketIntelligenceNotifier } = await import(
           "./services/marketIntelligenceNotifier"
         );
-        await safeStart("Market Intelligence Notifier", () =>
+        safeStart("Market Intelligence Notifier", () =>
           marketIntelligenceNotifier.start(),
         );
 
         const { portfolioSnapshotService } = await import(
           "./services/portfolioSnapshotService"
         );
-        await safeStart("Portfolio Snapshot Service", () =>
+        safeStart("Portfolio Snapshot Service", () =>
           portfolioSnapshotService.start(),
         );
 
@@ -267,7 +279,7 @@ export async function initializeApp(
           "./services/scheduledMarketStreamService"
         );
         const scheduledStreamService = initScheduledMarketStreamService();
-        await safeStart("Scheduled Market Streams", () =>
+        safeStart("Scheduled Market Streams", () =>
           scheduledStreamService.start(),
         );
 
@@ -280,7 +292,7 @@ export async function initializeApp(
       const { botTradingSimulator } = await import(
         "./services/botTradingSimulator"
       );
-      await safeStart("Bot Trading Simulator", () => botTradingSimulator.start());
+      safeStart("Bot Trading Simulator", () => botTradingSimulator.start());
 
       console.log("🌱 Starting background database seeding...");
       autoSeedDatabase()
