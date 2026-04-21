@@ -41,8 +41,15 @@ export class AITrendSpotter {
     this.isRunning = true;
     console.log('🚀 Starting AI Trend Spotter service...');
 
-    // Get or create AI trend spotter user
-    await this.initializeTrendBot();
+    // Get or create AI trend spotter user. Guarded so a transient DB blip
+    // (e.g. Neon socket hang-up) doesn't escape as an unhandled rejection
+    // and crash the whole process — we just log and continue; the next
+    // loop iteration will retry on the cycle boundary.
+    try {
+      await this.initializeTrendBot();
+    } catch (err) {
+      console.error('⚠️  Trend spotter initialization failed (will continue):', err);
+    }
 
     while (this.isRunning) {
       try {

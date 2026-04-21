@@ -37,7 +37,11 @@ export class AIMetaTrader {
     this.isRunning = true;
     console.log('🚀 Starting AI Meta-Trader service...');
 
-    await this.initializeMetaTrader();
+    try {
+      await this.initializeMetaTrader();
+    } catch (err) {
+      console.error('⚠️  Meta-trader initialization failed (will continue):', err);
+    }
 
     while (this.isRunning) {
       try {

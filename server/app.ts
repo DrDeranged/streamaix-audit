@@ -172,13 +172,34 @@ export async function initializeApp(
         console.log("⚠️  Newsletter scheduler disabled (RESEND_API_KEY not configured)");
       }
 
+      // Helper: wraps a background service start so a thrown error or rejected
+      // promise from .start() is logged and swallowed instead of escaping as
+      // an unhandled rejection. Defence in depth — even a future service
+      // that forgets its own try/catch can no longer take the server down.
+      const safeStart = async (
+        label: string,
+        starter: () => unknown | Promise<unknown>,
+      ): Promise<void> => {
+        try {
+          await Promise.resolve(starter());
+          console.log(`✅ ${label} active`);
+        } catch (err) {
+          console.error(
+            `⚠️  ${label} failed to start (non-fatal, server continues):`,
+            err,
+          );
+        }
+      };
+
       if (openaiKey) {
         console.log("🤖 Starting autonomous AI agent service...");
         const { getAutonomousAgentService } = await import(
           "./services/autonomousAgentService"
         );
-        getAutonomousAgentService().start();
-        console.log("✅ Autonomous AI agent service active - 100 agents engaging with platform");
+        await safeStart(
+          "Autonomous AI agent service - 100 agents engaging with platform",
+          () => getAutonomousAgentService().start(),
+        );
       } else {
         console.log("⚠️  Autonomous AI agents disabled (requires OPENAI_API_KEY)");
       }
@@ -188,8 +209,10 @@ export async function initializeApp(
         const { getTradingBotService } = await import(
           "./services/aiTradingBotService"
         );
-        getTradingBotService().start();
-        console.log("✅ AI trading bot service active - 50 bots analyzing and trading on markets");
+        await safeStart(
+          "AI trading bot service - 50 bots analyzing and trading on markets",
+          () => getTradingBotService().start(),
+        );
       } else {
         console.log("⚠️  AI trading bots disabled (requires OPENAI_API_KEY)");
       }
@@ -198,59 +221,55 @@ export async function initializeApp(
         console.log("\n🌐 ========== AUTONOMOUS ECOSYSTEM STARTUP ==========");
 
         const { aiMarketResolver } = await import("./services/aiMarketResolver");
-        aiMarketResolver.start();
-        console.log("✅ AI Market Resolver active");
+        await safeStart("AI Market Resolver", () => aiMarketResolver.start());
 
         const { aiLiquidityProvider } = await import(
           "./services/aiLiquidityProvider"
         );
-        aiLiquidityProvider.start();
-        console.log("✅ AI Liquidity Provider active");
+        await safeStart("AI Liquidity Provider", () => aiLiquidityProvider.start());
 
         const { aiTrendSpotter } = await import("./services/aiTrendSpotter");
-        aiTrendSpotter.start();
-        console.log("✅ AI Trend Spotter active");
+        await safeStart("AI Trend Spotter", () => aiTrendSpotter.start());
 
         const { aiContentModerator } = await import(
           "./services/aiContentModerator"
         );
-        aiContentModerator.start();
-        console.log("✅ AI Content Moderator active");
+        await safeStart("AI Content Moderator", () => aiContentModerator.start());
 
         const { aiCommunityManager } = await import(
           "./services/aiCommunityManager"
         );
-        aiCommunityManager.start();
-        console.log("✅ AI Community Manager active");
+        await safeStart("AI Community Manager", () => aiCommunityManager.start());
 
         const { aiTreasuryManager } = await import(
           "./services/aiTreasuryManager"
         );
-        aiTreasuryManager.start();
-        console.log("✅ AI Treasury Manager active");
+        await safeStart("AI Treasury Manager", () => aiTreasuryManager.start());
 
         const { aiMetaTrader } = await import("./services/aiMetaTrader");
-        aiMetaTrader.start();
-        console.log("✅ AI Meta-Trader active");
+        await safeStart("AI Meta-Trader", () => aiMetaTrader.start());
 
         const { marketIntelligenceNotifier } = await import(
           "./services/marketIntelligenceNotifier"
         );
-        marketIntelligenceNotifier.start();
-        console.log("✅ Market Intelligence Notifier active");
+        await safeStart("Market Intelligence Notifier", () =>
+          marketIntelligenceNotifier.start(),
+        );
 
         const { portfolioSnapshotService } = await import(
           "./services/portfolioSnapshotService"
         );
-        portfolioSnapshotService.start();
-        console.log("✅ Portfolio Snapshot Service active");
+        await safeStart("Portfolio Snapshot Service", () =>
+          portfolioSnapshotService.start(),
+        );
 
         const { initScheduledMarketStreamService } = await import(
           "./services/scheduledMarketStreamService"
         );
         const scheduledStreamService = initScheduledMarketStreamService();
-        await scheduledStreamService.start();
-        console.log("✅ Scheduled Market Streams active");
+        await safeStart("Scheduled Market Streams", () =>
+          scheduledStreamService.start(),
+        );
 
         console.log("🚀 FULL AUTONOMOUS ECOSYSTEM OPERATIONAL\n");
       } else {
@@ -261,8 +280,7 @@ export async function initializeApp(
       const { botTradingSimulator } = await import(
         "./services/botTradingSimulator"
       );
-      await botTradingSimulator.start();
-      console.log("✅ Bot Trading Simulator active");
+      await safeStart("Bot Trading Simulator", () => botTradingSimulator.start());
 
       console.log("🌱 Starting background database seeding...");
       autoSeedDatabase()

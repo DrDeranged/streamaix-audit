@@ -57,7 +57,11 @@ export class AutonomousAvatarStreamService {
     console.log(`   Stream duration: ${STREAM_DURATION_MIN}-${STREAM_DURATION_MAX} minutes`);
     console.log(`   Rotation interval: ${STREAM_ROTATION_INTERVAL / 60000} minutes`);
 
-    await this.initializeStreams();
+    try {
+      await this.initializeStreams();
+    } catch (err) {
+      console.error('⚠️  Avatar stream initialization failed (will continue):', err);
+    }
 
     this.schedulerInterval = setInterval(() => {
       this.checkAndRotateStreams();

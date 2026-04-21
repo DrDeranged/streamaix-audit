@@ -34,20 +34,41 @@ process.stderr.write(
     `(pid=${process.pid}, node=${process.version}, env=${process.env.NODE_ENV ?? "unknown"})\n`,
 );
 
+// Fatal-vs-warn policy:
+//   - BEFORE the app is ready (i.e. during the bootstrap window), any
+//     uncaughtException / unhandledRejection is treated as FATAL and we
+//     exit(1). This preserves the safety net from #36: a silent boot crash
+//     must never disappear into empty logs.
+//   - AFTER the app is ready, the same kinds of errors are demoted to a
+//     loud WARN. Transient external-API blips (Neon socket hang-ups,
+//     OpenAI timeouts, etc.) are normal in steady-state production and
+//     must NOT take the server down — that was the cause of the
+//     "Internal Server Error" the user saw on streamaix.com. The error is
+//     still logged loudly with the full stack so the underlying issue
+//     remains diagnosable.
+let appReady = false;
+
 process.on("uncaughtException", (err: unknown) => {
   const stack = (err as Error)?.stack ?? String(err);
-  process.stderr.write(`[boot] FATAL uncaughtException: ${stack}\n`);
-  // Give the log stream a tick to flush before exiting.
-  setTimeout(() => process.exit(1), 50);
+  if (!appReady) {
+    process.stderr.write(`[boot] FATAL uncaughtException: ${stack}\n`);
+    // Give the log stream a tick to flush before exiting.
+    setTimeout(() => process.exit(1), 50);
+    return;
+  }
+  process.stderr.write(`[boot] WARN post-boot uncaughtException (non-fatal): ${stack}\n`);
 });
 
 process.on("unhandledRejection", (reason: unknown) => {
   const stack = (reason as Error)?.stack ?? String(reason);
-  process.stderr.write(`[boot] FATAL unhandledRejection: ${stack}\n`);
-  setTimeout(() => process.exit(1), 50);
+  if (!appReady) {
+    process.stderr.write(`[boot] FATAL unhandledRejection: ${stack}\n`);
+    setTimeout(() => process.exit(1), 50);
+    return;
+  }
+  process.stderr.write(`[boot] WARN post-boot unhandledRejection (non-fatal): ${stack}\n`);
 });
 
-let appReady = false;
 let realHandler:
   | ((req: IncomingMessage, res: ServerResponse) => void)
   | null = null;

@@ -34,7 +34,11 @@ export class AITreasuryManager {
     this.isRunning = true;
     console.log('🚀 Starting AI Treasury Manager service...');
 
-    await this.initializeTreasury();
+    try {
+      await this.initializeTreasury();
+    } catch (err) {
+      console.error('⚠️  Treasury manager initialization failed (will continue):', err);
+    }
 
     while (this.isRunning) {
       try {

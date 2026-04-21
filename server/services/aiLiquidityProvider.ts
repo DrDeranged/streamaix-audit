@@ -31,7 +31,11 @@ export class AILiquidityProvider {
     console.log('🚀 Starting AI Liquidity Provider service...');
 
     // Get or create AI liquidity provider user
-    await this.initializeLiquidityBot();
+    try {
+      await this.initializeLiquidityBot();
+    } catch (err) {
+      console.error('⚠️  Liquidity provider initialization failed (will continue):', err);
+    }
 
     while (this.isRunning) {
       try {

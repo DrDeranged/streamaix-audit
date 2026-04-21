@@ -27,7 +27,11 @@ export class AICommunityManager {
     this.isRunning = true;
     console.log('🚀 Starting AI Community Manager service...');
 
-    await this.initializeCommunityBot();
+    try {
+      await this.initializeCommunityBot();
+    } catch (err) {
+      console.error('⚠️  Community manager initialization failed (will continue):', err);
+    }
 
     while (this.isRunning) {
       try {
