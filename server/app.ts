@@ -160,18 +160,6 @@ export async function initializeApp(
     console.log("🔄 Starting background services...");
     const openaiKey = process.env.OPENAI_API_KEY;
     try {
-      const resendKey = process.env.RESEND_API_KEY;
-      if (resendKey) {
-        console.log("📧 Starting newsletter scheduler...");
-        const { newsletterScheduler } = await import(
-          "./services/newsletterScheduler"
-        );
-        newsletterScheduler.start();
-        console.log("✅ Newsletter scheduler active - Sends 8am & 4pm EST daily");
-      } else {
-        console.log("⚠️  Newsletter scheduler disabled (RESEND_API_KEY not configured)");
-      }
-
       // Helper: fire-and-forget wrapper for background services. We deliberately
       // do NOT await `starter()` because most background services run an
       // infinite loop inside .start() (e.g. `while (this.isRunning) { ... }`)
@@ -202,6 +190,19 @@ export async function initializeApp(
           );
         }
       };
+
+      const resendKey = process.env.RESEND_API_KEY;
+      if (resendKey) {
+        console.log("📧 Starting newsletter scheduler...");
+        const { newsletterScheduler } = await import(
+          "./services/newsletterScheduler"
+        );
+        safeStart("Newsletter scheduler - Sends 8am & 4pm EST daily", () =>
+          newsletterScheduler.start(),
+        );
+      } else {
+        console.log("⚠️  Newsletter scheduler disabled (RESEND_API_KEY not configured)");
+      }
 
       if (openaiKey) {
         console.log("🤖 Starting autonomous AI agent service...");
