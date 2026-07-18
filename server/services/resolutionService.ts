@@ -99,6 +99,10 @@ export class ResolutionService {
       // Update predictor stats
       await this.updatePredictorStats(marketId, resolution);
       
+      // Settle AI agent memories (best-effort, never throws)
+      const { agentResearchService } = await import('./agentResearchService');
+      await agentResearchService.settleMemoriesForMarket(marketId, resolution);
+      
       // Send push notifications to participants (non-blocking)
       this.sendResolutionNotifications(marketId, market[0].question, resolution).catch(err => 
         console.log('Push notification for resolution skipped:', err.message)

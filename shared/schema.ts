@@ -4872,6 +4872,28 @@ export const aiTrades = pgTable("ai_trades", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const agentMemory = pgTable("agent_memory", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").references(() => aiAgents.id).notNull(),
+  marketId: varchar("market_id").references(() => predictionMarkets.id).notNull(),
+  decision: text("decision").notNull(), // YES | NO
+  confidence: real("confidence").notNull(), // 0-1
+  stake: integer("stake").notNull(),
+  outcome: text("outcome").notNull().default("open"), // open | won | lost
+  pnl: integer("pnl").default(0),
+  reasoningSummary: varchar("reasoning_summary", { length: 500 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  resolvedAt: timestamp("resolved_at"),
+});
+
+export const insertAgentMemorySchema = createInsertSchema(agentMemory).omit({
+  id: true,
+  createdAt: true,
+  resolvedAt: true,
+});
+export type InsertAgentMemory = z.infer<typeof insertAgentMemorySchema>;
+export type AgentMemory = typeof agentMemory.$inferSelect;
+
 export const insertPredictionMarketSchema = createInsertSchema(predictionMarkets).omit({
   id: true,
   createdAt: true,

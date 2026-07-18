@@ -8,21 +8,38 @@ import {
 } from '@shared/schema';
 import { eq, and, sql } from 'drizzle-orm';
 import { aiAgentService } from './aiAgentService';
-import { ammService } from './ammService';
-import { marketDataService } from './marketDataService';
+import { agentResearchService, type ResearchContext } from './agentResearchService';
+import { jobScheduler } from '../jobs/scheduler';
 
 /**
  * Autonomous Trading Engine
- * Periodically analyzes markets and executes trades for AI agents
+ * Periodically analyzes markets and executes trades for AI agents.
+ *
+ * Batching (cost control, quality over volume):
+ * - Research context is built ONCE per market per cycle and reused by every
+ *   agent analyzing that market.
+ * - At most MAX_MARKETS_PER_CYCLE markets are analyzed per cycle.
+ * - At most AGENTS_PER_MARKET_PER_CYCLE agents analyze each market per cycle;
+ *   remaining agents/markets rotate in on later cycles.
+ * - ABSTAIN decisions never produce a trade.
  */
+
+const JOB_NAME = 'autonomous-trading-engine';
+const MAX_MARKETS_PER_CYCLE = 3;
+
+function agentsPerMarketCap(): number {
+  const parsed = parseInt(process.env.AGENTS_PER_MARKET_PER_CYCLE || '', 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 8;
+}
 
 class AutonomousTradingEngine {
   private isRunning = false;
-  private intervalId: NodeJS.Timeout | null = null;
   private tradingInterval = 30 * 60 * 1000; // 30 minutes default
+  private marketRotationOffset = 0;
+  private agentRotationOffset = 0;
 
   /**
-   * Start the autonomous trading engine
+   * Start the autonomous trading engine (registered through the job scheduler).
    */
   start(intervalMinutes: number = 30) {
     if (this.isRunning) {
@@ -32,18 +49,13 @@ class AutonomousTradingEngine {
 
     this.tradingInterval = intervalMinutes * 60 * 1000;
     console.log(`🤖 Starting Autonomous Trading Engine (interval: ${intervalMinutes} minutes)`);
-    
-    // Run immediately on start
-    this.executeTradingCycle().catch(error => {
-      console.error('❌ Initial trading cycle failed:', error);
-    });
 
-    // Then run periodically
-    this.intervalId = setInterval(() => {
-      this.executeTradingCycle().catch(error => {
-        console.error('❌ Trading cycle failed:', error);
-      });
-    }, this.tradingInterval);
+    jobScheduler.register(
+      JOB_NAME,
+      this.tradingInterval,
+      () => this.executeTradingCycle(),
+      { runOnStart: true, staggerMs: 30 * 1000, jitterMs: 60 * 1000 },
+    );
 
     this.isRunning = true;
     console.log('✅ Trading engine started successfully');
@@ -53,19 +65,16 @@ class AutonomousTradingEngine {
    * Stop the trading engine
    */
   stop() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
-    }
+    jobScheduler.cancel(JOB_NAME);
     this.isRunning = false;
     console.log('🛑 Trading engine stopped');
   }
 
   /**
-   * Execute a complete trading cycle
-   * 1. Fetch active markets and agents
-   * 2. For each market, have each agent analyze and trade
-   * 3. Update agent stats and positions
+   * Execute a complete trading cycle:
+   * 1. Rotate in up to MAX_MARKETS_PER_CYCLE active markets
+   * 2. Build research context once per market
+   * 3. Rotate in up to AGENTS_PER_MARKET_PER_CYCLE agents per market
    */
   private async executeTradingCycle() {
     console.log('\n═══════════════════════════════════════════════════');
@@ -73,13 +82,11 @@ class AutonomousTradingEngine {
     console.log('═══════════════════════════════════════════════════\n');
 
     try {
-      // Get all active agents
       const agents = await db
         .select()
         .from(aiAgents)
         .where(eq(aiAgents.isActive, true));
 
-      // Get all active markets
       const markets = await db
         .select()
         .from(predictionMarkets)
@@ -92,34 +99,49 @@ class AutonomousTradingEngine {
         return;
       }
 
-      // Get market context (live prices, news, sentiment)
-      const marketContext = await marketDataService.getMarketContext();
-      console.log(`📈 Market Sentiment: ${marketContext.marketSentiment.overall.toUpperCase()} (${marketContext.marketSentiment.confidence}% confidence)\n`);
+      const selectedMarkets = this.rotateSelect(markets, this.marketRotationOffset, MAX_MARKETS_PER_CYCLE);
+      this.marketRotationOffset = (this.marketRotationOffset + selectedMarkets.length) % Math.max(1, markets.length);
+
+      const agentCap = agentsPerMarketCap();
+      console.log(`🎛️  Cycle caps: ${selectedMarkets.length}/${markets.length} markets, ${Math.min(agentCap, agents.length)}/${agents.length} agents per market`);
 
       let totalTrades = 0;
       let totalVolume = 0;
+      let totalAbstains = 0;
 
-      // For each market, have each agent analyze and potentially trade
-      for (const market of markets) {
+      for (const market of selectedMarkets) {
         console.log(`\n🎯 Analyzing Market: "${market.question.substring(0, 80)}..."`);
         console.log(`   Current Price: ${this.calculateMarketPrice(market.yesLiquidity, market.noLiquidity)}% YES`);
 
-        for (const agent of agents) {
+        // Build research context ONCE per market per cycle; reused across agents.
+        const researchContext = await agentResearchService.buildResearchContext(market);
+        if (researchContext.sourcesFailed.length) {
+          console.log(`   ⚠️ Research sources unavailable: ${researchContext.sourcesFailed.join(', ')}`);
+        }
+
+        const selectedAgents = this.rotateSelect(agents, this.agentRotationOffset, agentCap);
+
+        for (const agent of selectedAgents) {
           try {
-            const traded = await this.analyzeAndTrade(agent, market, marketContext);
-            if (traded) {
+            const result = await this.analyzeAndTrade(agent, market, researchContext);
+            if (result === 'abstain') {
+              totalAbstains++;
+            } else if (result) {
               totalTrades++;
-              totalVolume += traded.amount;
+              totalVolume += result.amount;
             }
           } catch (error) {
             console.error(`   ❌ ${agent.name} trade failed:`, error);
           }
         }
+
+        this.agentRotationOffset = (this.agentRotationOffset + selectedAgents.length) % Math.max(1, agents.length);
       }
 
       console.log('\n═══════════════════════════════════════════════════');
       console.log(`✅ Trading Cycle Complete`);
       console.log(`   📊 Total Trades: ${totalTrades}`);
+      console.log(`   🤐 Abstains: ${totalAbstains}`);
       console.log(`   💰 Total Volume: ${totalVolume.toFixed(2)} STREAM`);
       console.log('═══════════════════════════════════════════════════\n');
 
@@ -128,14 +150,26 @@ class AutonomousTradingEngine {
     }
   }
 
+  /** Select up to `count` items starting at `offset`, wrapping around. */
+  private rotateSelect<T>(items: T[], offset: number, count: number): T[] {
+    if (items.length <= count) return items;
+    const start = offset % items.length;
+    const selected: T[] = [];
+    for (let i = 0; i < count; i++) {
+      selected.push(items[(start + i) % items.length]);
+    }
+    return selected;
+  }
+
   /**
-   * Have an AI agent analyze a market and execute a trade if confident enough
+   * Have an AI agent analyze a market and execute a trade if confident enough.
+   * Returns 'abstain' when the agent declines to take a position.
    */
   private async analyzeAndTrade(
     agent: any,
     market: any,
-    marketContext: any
-  ): Promise<{ amount: number; side: 'YES' | 'NO' } | null> {
+    researchContext: ResearchContext
+  ): Promise<{ amount: number; side: 'YES' | 'NO' } | 'abstain' | null> {
     // Check if agent already has a position in this market
     const existingPosition = await db
       .select()
@@ -150,15 +184,23 @@ class AutonomousTradingEngine {
 
     if (existingPosition.length > 0) {
       // Agent already has a position - skip for now
-      // In future, could implement position management (adding, reducing, closing)
       return null;
     }
 
-    // Generate prediction using GPT-4
-    const prediction = await aiAgentService.analyzeMarket(market, agent.id);
+    // Generate grounded prediction (reuses the per-market research context)
+    const prediction = await aiAgentService.analyzeMarket(market, agent.id, researchContext);
 
     console.log(`   🤖 ${agent.name}:`);
     console.log(`      Prediction: ${prediction.prediction} (${prediction.confidence}% confidence)`);
+
+    // Persist the full structured analysis so the frontend can render it
+    await this.recordPrediction(agent, market, prediction);
+
+    // ABSTAIN is a deliberate no-trade decision
+    if (prediction.prediction === 'ABSTAIN') {
+      console.log(`      🤐 Abstained - insufficient evidence`);
+      return 'abstain';
+    }
 
     // Check if confidence exceeds agent's threshold
     const confidenceThreshold = agent.confidenceThreshold * 100; // Convert to percentage
@@ -190,11 +232,47 @@ class AutonomousTradingEngine {
     );
 
     if (tradeSuccess) {
+      // Record decision in agent memory (outcome settled at market resolution)
+      await agentResearchService.recordDecision({
+        agentId: agent.id,
+        marketId: market.id,
+        decision: prediction.prediction,
+        confidence: prediction.confidence / 100,
+        stake: positionSize,
+        reasoningSummary: prediction.reasoning || '',
+      }).catch(err => console.error('   ⚠️ Failed to record agent memory:', err));
+
       console.log(`      ✅ Traded ${positionSize.toFixed(2)} STREAM on ${prediction.prediction}`);
       return { amount: positionSize, side: prediction.prediction };
     } else {
       console.log(`      ❌ Trade execution failed`);
       return null;
+    }
+  }
+
+  /** Persist the structured analysis into aiPredictions (best-effort). */
+  private async recordPrediction(
+    agent: any,
+    market: any,
+    prediction: { prediction: string; confidence: number; reasoning: string; analysisData: any }
+  ): Promise<void> {
+    try {
+      await db.insert(aiPredictions).values({
+        marketId: market.id,
+        agentId: agent.id,
+        prediction: prediction.prediction,
+        confidence: prediction.confidence,
+        reasoning: prediction.reasoning || '',
+        analysisData: prediction.analysisData,
+        marketDataSnapshot: {
+          yesPrice: market.yesPrice,
+          noPrice: market.noPrice,
+          totalVolume: market.totalVolume,
+          totalTrades: market.totalTrades
+        }
+      });
+    } catch (error) {
+      console.error('   ⚠️ Failed to record prediction:', error);
     }
   }
 
@@ -355,7 +433,9 @@ class AutonomousTradingEngine {
   getStatus() {
     return {
       isRunning: this.isRunning,
-      intervalMinutes: this.tradingInterval / 60000
+      intervalMinutes: this.tradingInterval / 60000,
+      maxMarketsPerCycle: MAX_MARKETS_PER_CYCLE,
+      agentsPerMarketPerCycle: agentsPerMarketCap()
     };
   }
 }

@@ -1,0 +1,51 @@
+Rebuild how AI agents make trading decisions. Today aiAgentService.analyzeMarket
+sends only the market question + current prices to gpt-4o-mini wrapped in a
+persona — no market data, no news, no memory. Replace with a grounded research
+loop through the model gateway. Keep the AMM, trade execution, and points
+mechanics EXACTLY as they are — this changes only how decisions are made.
+
+1. Create server/services/agentResearchService.ts:
+   buildResearchContext(market) assembles, with a 10s total budget and
+   Promise.allSettled (missing sources degrade gracefully, never block):
+   - Relevant asset prices + 24h/7d change from the existing marketDataService /
+     comprehensiveMarketService (match by market tags/category)
+   - Top 5 recent relevant headlines from the existing newsService
+   - Stock/macro context from stockMarketService / macroDataService when the
+     market category is stocks/macro
+   - Current AMM state: yesPrice, noPrice, total liquidity, 24h volume
+   - Cache the assembled context per market for 15 minutes in cacheService.
+
+2. Add agent memory. New table agent_memory in shared/schema.ts:
+   (id, agent_id, market_id, decision, confidence, stake, outcome
+   ['open','won','lost'], pnl, reasoning_summary varchar(500), created_at,
+   resolved_at) + migration. Write a row on every trade; update outcome/pnl
+   when a market resolves (hook the existing resolution flow). Add
+   getAgentTrackRecord(agentId): last 10 decisions + aggregate win rate + pnl.
+
+3. Rewrite aiAgentService.analyzeMarket to call the gateway at tier 'reasoning'
+   with:
+   - System: the agent persona (keep existing personality/strategy/riskTolerance)
+     PLUS its actual track record ("Your last 10 trades: 6 won, 4 lost, net
+     -142 points. Your worst recent call: ...") so agents can adapt.
+   - User: the market details PLUS the full research context from step 1.
+   - jsonSchema output: { prediction: 'YES'|'NO'|'ABSTAIN', confidence: 0-1,
+     reasoning: string, keyEvidence: string[] (each tied to a research fact),
+     riskAssessment, wouldChangeMindIf: string }
+   - ABSTAIN is new and important: instruct the model to abstain when research
+     context is insufficient to justify a position. The trading engine must
+     treat ABSTAIN as no-trade.
+
+4. In autonomousTradingEngine, batch efficiently: build research context ONCE
+   per market per cycle and reuse it across all agents analyzing that market.
+   Cap: max 3 markets analyzed per cycle, max 8 agents per market per cycle
+   (env-tunable AGENTS_PER_MARKET_PER_CYCLE) — quality over volume, and this
+   bounds cost. Remaining agents rotate in on later cycles.
+
+5. Store the full structured analysis (evidence, wouldChangeMindIf) in the
+   existing aiPredictions analysisData JSON so the frontend can render it.
+
+6. Tests: research context degrades gracefully when a source rejects; ABSTAIN
+   produces no trade; track record string includes real outcomes; per-cycle
+   caps enforced. Mock the gateway.
+
+Do not modify ammService, pointsService, or trade settlement math.

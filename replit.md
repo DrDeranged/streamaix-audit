@@ -38,7 +38,7 @@ Stack: Node.js/Express + TypeScript, Vite, PostgreSQL (Neon) with Drizzle ORM, O
 
 - Phase 0: **in progress**
 - Phase 1 (job scheduler): **done** — all background engines register through `server/jobs/scheduler.ts` (`jobScheduler`); status at `GET /api/admin/jobs` (admin-only); state persisted in `job_runs` table
-- Phase 2 (model gateway): not started
+- Phase 2 (model gateway): seeded — minimal gateway at `server/lib/modelGateway.ts` (tiers: reasoning→gpt-4o, fast→gpt-4o-mini; strict JSON schema output; respects PAUSE_OPENAI_API). AI agent trading decisions route through it; remaining services not yet migrated.
 - Phase 3: not started
 - Phase 4: not started
 

@@ -315,6 +315,10 @@ IMPORTANT:
       },
     });
 
+    // Settle AI agent memories (best-effort, never throws)
+    const { agentResearchService } = await import('./agentResearchService');
+    await agentResearchService.settleMemoriesForMarket(market.id, resolutionData.outcome);
+
     // Send push notifications to all users with positions in this market
     await this.notifyMarketParticipants(market, resolutionData.outcome);
   }
