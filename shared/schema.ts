@@ -4742,6 +4742,46 @@ export const insertRiskEventSchema = createInsertSchema(riskEvents).omit({
 export type InsertRiskEvent = z.infer<typeof insertRiskEventSchema>;
 export type RiskEvent = typeof riskEvents.$inferSelect;
 
+// Audit log of every attempted on-chain write (success or failure).
+export const onchainActions = pgTable("onchain_actions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  action: text("action").notNull(),
+  args: jsonb("args"),
+  txHash: text("tx_hash"),
+  gasUsed: text("gas_used"),
+  status: text("status").notNull(), // 'success' | 'failed'
+  error: text("error"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertOnchainActionSchema = createInsertSchema(onchainActions).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertOnchainAction = z.infer<typeof insertOnchainActionSchema>;
+export type OnchainAction = typeof onchainActions.$inferSelect;
+
+// Points-to-token bridge withdrawal requests. Feature is DORMANT BY DESIGN
+// (BRIDGE_ENABLED=false); see replit.md "TOKEN BRIDGE" section.
+export const bridgeRequests = pgTable("bridge_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  points: integer("points").notNull(),
+  status: text("status").notNull().default("pending"), // 'pending' | 'approved' | 'minted' | 'rejected'
+  createdAt: timestamp("created_at").defaultNow(),
+  decidedBy: varchar("decided_by"),
+  txHash: text("tx_hash"),
+});
+
+export const insertBridgeRequestSchema = createInsertSchema(bridgeRequests).omit({
+  id: true,
+  createdAt: true,
+  decidedBy: true,
+  txHash: true,
+});
+export type InsertBridgeRequest = z.infer<typeof insertBridgeRequestSchema>;
+export type BridgeRequest = typeof bridgeRequests.$inferSelect;
+
 export const liquidityProviders = pgTable("liquidity_providers", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   marketId: varchar("market_id").references(() => predictionMarkets.id).notNull(),

@@ -42,6 +42,16 @@ Stack: Node.js/Express + TypeScript, Vite, PostgreSQL (Neon) with Drizzle ORM, O
 - Phase 3: not started
 - Phase 4: not started
 
+## TOKEN BRIDGE: dormant by design
+
+The points-to-token bridge (`server/services/bridgeService.ts`, `server/routes/bridge.ts`, `bridge_requests` table) is scaffolded but **DISABLED on purpose**. Enabling `BRIDGE_ENABLED` and `ONCHAIN_WRITES_ENABLED` is a **business + legal decision requiring human sign-off, not a bug to fix**. Do not flip either flag, "helpfully" wire an automatic minting path, or treat the 403 "bridge not yet enabled" response as an error.
+
+- `ONCHAIN_WRITES_ENABLED=false` (default): every on-chain write in `contractService` throws; reads still work.
+- `BRIDGE_ENABLED=false` (default): all bridge endpoints return 403; `bridgeService` methods throw.
+- Minting a token requires BOTH flags on PLUS an explicit human admin approval (`POST /api/admin/bridge/:id/approve`). There is no automatic mint path anywhere — keep it that way.
+- Server writes sign with `SERVICE_SIGNER_PRIVATE_KEY` (limited MINTER_ROLE key). The legacy `PRIVATE_KEY` (admin key) is deprecated for server-side writes.
+- Every attempted write (success or failure) is audited in the `onchain_actions` table.
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.

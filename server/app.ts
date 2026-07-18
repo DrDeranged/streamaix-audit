@@ -132,6 +132,14 @@ export async function initializeApp(
   }
   console.log("========================================\n");
 
+  // Boot-time on-chain / bridge flag state (loud, never throws).
+  try {
+    const { logContractServiceBootState } = await import("./services/contractService");
+    logContractServiceBootState();
+  } catch (e: any) {
+    console.error("Failed to log on-chain/bridge flag state:", e?.message);
+  }
+
   await registerRoutes(app, httpServer);
 
   if (app.get("env") === "development") {

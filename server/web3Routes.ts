@@ -1,5 +1,6 @@
 import type { Express, Response } from "express";
 import { authenticateToken, type AuthRequest } from "./auth";
+import { requireAdmin } from "./routes/_shared";
 import { getContractService } from "./services/contractService";
 import { storage } from "./storage";
 import { ethers } from "ethers";
@@ -15,7 +16,6 @@ const asyncHandler = (fn: (req: any, res: Response) => Promise<any>) =>
 
 export function registerWeb3Routes(app: Express) {
   const contractService = getContractService();
-  const nftOwnerPrivateKey = process.env.NFT_OWNER_PRIVATE_KEY || '';
   
   // ==================== NFT ROUTES ====================
   
@@ -25,10 +25,6 @@ export function registerWeb3Routes(app: Express) {
     
     if (!summaryId || !recipientAddress || !ipfsHash) {
       return res.status(400).json({ error: 'Summary ID, recipient address, and IPFS hash are required' });
-    }
-    
-    if (!nftOwnerPrivateKey) {
-      return res.status(500).json({ error: 'NFT owner private key not configured' });
     }
     
     // Verify summary exists and belongs to user or is completed bounty
@@ -43,7 +39,6 @@ export function registerWeb3Routes(app: Express) {
     
     try {
       const result = await contractService.mintSummaryNFT(
-        nftOwnerPrivateKey,
         recipientAddress,
         ipfsHash,
         arweaveId || ''
@@ -134,8 +129,9 @@ export function registerWeb3Routes(app: Express) {
     }
   }));
   
-  // Reward user with tokens (platform operation, requires owner key)
-  app.post('/api/web3/reward-tokens', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
+  // Reward user with tokens (platform operation — ADMIN ONLY; also gated by
+  // ONCHAIN_WRITES_ENABLED + MINTER_ROLE pre-flight inside contractService)
+  app.post('/api/web3/reward-tokens', authenticateToken, requireAdmin, asyncHandler(async (req: AuthRequest, res: Response) => {
     const { recipientAddress, amount, reason } = req.body;
     
     if (!recipientAddress || !amount) {
@@ -146,15 +142,9 @@ export function registerWeb3Routes(app: Express) {
       return res.status(400).json({ error: 'Invalid recipient address' });
     }
     
-    const tokenOwnerKey = process.env.PRIVATE_KEY;
-    if (!tokenOwnerKey) {
-      return res.status(500).json({ error: 'Token owner private key not configured' });
-    }
-    
     try {
       const amountWei = ethers.parseEther(amount.toString());
       const txHash = await contractService.mintTokens(
-        tokenOwnerKey,
         recipientAddress,
         amountWei.toString()
       );

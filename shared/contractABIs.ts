@@ -5,6 +5,9 @@ export const STREAM_TOKEN_ABI = [
   "function allowance(address owner, address spender) view returns (uint256)",
   "function mint(address to, uint256 amount)",
   "function totalSupply() view returns (uint256)",
+  "function hasRole(bytes32 role, address account) view returns (bool)",
+  "function MINTER_ROLE() view returns (bytes32)",
+  "function RESOLVER_ROLE() view returns (bytes32)",
   "event Transfer(address indexed from, address indexed to, uint256 value)",
   "event Approval(address indexed owner, address indexed spender, uint256 value)"
 ];
@@ -28,6 +31,8 @@ export const SUMMARY_NFT_ABI = [
   "function tokenURI(uint256 tokenId) view returns (string)",
   "function balanceOf(address owner) view returns (uint256)",
   "function ownerOf(uint256 tokenId) view returns (address)",
+  "function hasRole(bytes32 role, address account) view returns (bool)",
+  "function MINTER_ROLE() view returns (bytes32)",
   "event SummaryMinted(uint256 indexed tokenId, address indexed owner, string ipfsHash, string arweaveId)"
 ];
 

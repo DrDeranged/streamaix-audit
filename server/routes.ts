@@ -129,6 +129,7 @@ import { registerBountiesRoutes } from "./routes/bounties";
 import { registerJobsRoutes } from "./routes/jobs";
 import { registerAdminResolutionsRoutes } from "./routes/admin-resolutions";
 import { registerAdminRiskRoutes } from "./routes/admin-risk";
+import { registerBridgeRoutes } from "./routes/bridge";
 import { registerCollaborationRoutes } from "./routes/collaboration";
 import { registerBountyTemplatesRoutes } from "./routes/bounty-templates";
 import { registerKnowledgeStackRoutes } from "./routes/knowledge-stack";
@@ -259,6 +260,7 @@ export async function registerRoutes(app: Express, existingServer?: Server): Pro
 
   await registerAdminResolutionsRoutes(app);
   await registerAdminRiskRoutes(app);
+  await registerBridgeRoutes(app);
   // ▶ Collaboration routes extracted to server/routes/collaboration.ts
   await registerCollaborationRoutes(app);
   // ▶ BountyTemplates routes extracted to server/routes/bounty-templates.ts
