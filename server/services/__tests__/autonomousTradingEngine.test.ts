@@ -73,6 +73,15 @@ vi.mock("../../jobs/scheduler", () => ({
   jobScheduler: { register: vi.fn(), cancel: vi.fn(), has: vi.fn(() => false) },
 }));
 
+// Risk engine allows everything here — its own checks are covered in riskEngine.test.ts
+const checkTradeMock = vi.fn(async () => ({ allowed: true as const }));
+vi.mock("../riskEngine", () => ({
+  riskEngine: {
+    checkTrade: (...a: any[]) => checkTradeMock(...(a as [])),
+    scanTradeAnomalies: vi.fn(async () => undefined),
+  },
+}));
+
 import { autonomousTradingEngine } from "../autonomousTradingEngine";
 
 const makeAgent = (i: number) => ({

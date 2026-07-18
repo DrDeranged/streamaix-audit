@@ -4710,6 +4710,38 @@ export const marketResolutionsAudit = pgTable("market_resolutions_audit", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const agentSuspensions = pgTable("agent_suspensions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").references(() => aiAgents.id).notNull(),
+  reason: text("reason").notNull(),
+  detail: jsonb("detail"),
+  suspendedUntil: timestamp("suspended_until").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertAgentSuspensionSchema = createInsertSchema(agentSuspensions).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertAgentSuspension = z.infer<typeof insertAgentSuspensionSchema>;
+export type AgentSuspension = typeof agentSuspensions.$inferSelect;
+
+export const riskEvents = pgTable("risk_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  type: text("type").notNull(),
+  agentId: varchar("agent_id"),
+  marketId: varchar("market_id"),
+  detail: jsonb("detail"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertRiskEventSchema = createInsertSchema(riskEvents).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertRiskEvent = z.infer<typeof insertRiskEventSchema>;
+export type RiskEvent = typeof riskEvents.$inferSelect;
+
 export const liquidityProviders = pgTable("liquidity_providers", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   marketId: varchar("market_id").references(() => predictionMarkets.id).notNull(),

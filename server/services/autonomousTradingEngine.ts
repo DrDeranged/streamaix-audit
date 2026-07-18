@@ -9,6 +9,7 @@ import {
 import { eq, and, sql } from 'drizzle-orm';
 import { aiAgentService } from './aiAgentService';
 import { agentResearchService, type ResearchContext } from './agentResearchService';
+import { riskEngine } from './riskEngine';
 import { jobScheduler } from '../jobs/scheduler';
 
 /**
@@ -221,6 +222,18 @@ class AutonomousTradingEngine {
       return null;
     }
 
+    // Risk guard — the single pre-trade check (caps, drawdown, concentration, breakers)
+    const riskCheck = await riskEngine.checkTrade({
+      agent,
+      market,
+      side: prediction.prediction,
+      amount: positionSize,
+    });
+    if (!riskCheck.allowed) {
+      console.log(`      🛑 Blocked by risk engine (${riskCheck.type})`);
+      return null;
+    }
+
     // Execute the trade
     const tradeSuccess = await this.executeTrade(
       agent,
@@ -241,6 +254,11 @@ class AutonomousTradingEngine {
         stake: positionSize,
         reasoningSummary: prediction.reasoning || '',
       }).catch(err => console.error('   ⚠️ Failed to record agent memory:', err));
+
+      // Non-blocking post-trade anomaly scan (oversized trades, rapid price moves)
+      riskEngine
+        .scanTradeAnomalies({ agent, market, side: prediction.prediction, amount: positionSize })
+        .catch(err => console.warn('   ⚠️ Risk anomaly scan failed:', err?.message || err));
 
       console.log(`      ✅ Traded ${positionSize.toFixed(2)} STREAM on ${prediction.prediction}`);
       return { amount: positionSize, side: prediction.prediction };

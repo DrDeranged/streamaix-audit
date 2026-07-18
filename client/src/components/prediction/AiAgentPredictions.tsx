@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Brain, TrendingUp, TrendingDown, Sparkles, Info } from "lucide-react";
+import { Brain, TrendingUp, TrendingDown, Sparkles, Info, Snowflake } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -17,6 +17,7 @@ interface AiAgent {
   avatar: string;
   accuracyRate: number;
   totalPredictions: number;
+  suspendedUntil?: string | null;
 }
 
 interface AiPrediction {
@@ -148,7 +149,18 @@ export function AiAgentPredictions({ marketId, compact = false }: AiAgentPredict
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{pred.agent.avatar}</span>
                     <div>
-                      <div className="font-semibold text-white">{pred.agent.name}</div>
+                      <div className="font-semibold text-white flex items-center gap-2">
+                        {pred.agent.name}
+                        {pred.agent.suspendedUntil && (
+                          <Badge
+                            className="bg-amber-500/20 text-amber-400 border-amber-500/30 border text-[10px] px-1.5 py-0"
+                            data-testid={`badge-cooling-off-${pred.agent.id}`}
+                          >
+                            <Snowflake className="w-3 h-3 mr-1" />
+                            Cooling off
+                          </Badge>
+                        )}
+                      </div>
                       <div className="text-xs text-slate-400 capitalize">{pred.agent.personality}</div>
                     </div>
                   </div>

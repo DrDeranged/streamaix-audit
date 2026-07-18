@@ -140,13 +140,24 @@ export async function registerAiAgentTradingRoutes(app: Express): Promise<void> 
     });
   }));
 
-  // Get all AI agents
+  // Get all AI agents (with active risk suspensions surfaced as suspendedUntil)
   app.get("/api/ai-agents", asyncHandler(async (req: Request, res: Response) => {
     const agents = await db.select().from(aiAgents).where(eq(aiAgents.isActive, true));
-    
+
+    const suspendedUntilByAgent = new Map<string, string>();
+    try {
+      const { riskEngine } = await import('../services/riskEngine');
+      for (const s of await riskEngine.getActiveSuspensions()) {
+        const until = s.suspendedUntil instanceof Date ? s.suspendedUntil.toISOString() : String(s.suspendedUntil);
+        if (!suspendedUntilByAgent.has(s.agentId)) suspendedUntilByAgent.set(s.agentId, until);
+      }
+    } catch (err: any) {
+      console.warn('Failed to load agent suspensions:', err?.message || err);
+    }
+
     res.json({
       success: true,
-      agents
+      agents: agents.map((a) => ({ ...a, suspendedUntil: suspendedUntilByAgent.get(a.id) ?? null }))
     });
   }));
 

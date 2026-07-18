@@ -299,7 +299,7 @@ Based on your ${agentPersonality.personality} personality, your ${agentPersonali
   /**
    * Get all predictions for a market
    */
-  async getMarketPredictions(marketId: string): Promise<Array<AiPrediction & { agent: AiAgent }>> {
+  async getMarketPredictions(marketId: string): Promise<Array<AiPrediction & { agent: AiAgent & { suspendedUntil?: string | null } }>> {
     const predictions = await db
       .select()
       .from(aiPredictions)
@@ -307,9 +307,24 @@ Based on your ${agentPersonality.personality} personality, your ${agentPersonali
       .where(eq(aiPredictions.marketId, marketId))
       .orderBy(desc(aiPredictions.confidence));
 
+    // Surface active risk suspensions ("cooling off") on the agent payload
+    const suspendedUntilByAgent = new Map<string, string>();
+    try {
+      const { riskEngine } = await import('./riskEngine');
+      for (const s of await riskEngine.getActiveSuspensions()) {
+        const until = s.suspendedUntil instanceof Date ? s.suspendedUntil.toISOString() : String(s.suspendedUntil);
+        if (!suspendedUntilByAgent.has(s.agentId)) suspendedUntilByAgent.set(s.agentId, until);
+      }
+    } catch (err: any) {
+      console.warn('Failed to load agent suspensions:', err?.message || err);
+    }
+
     return predictions.map(p => ({
       ...p.ai_predictions,
-      agent: p.ai_agents!
+      agent: {
+        ...p.ai_agents!,
+        suspendedUntil: p.ai_agents ? suspendedUntilByAgent.get(p.ai_agents.id) ?? null : null,
+      }
     }));
   }
 
