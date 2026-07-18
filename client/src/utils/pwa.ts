@@ -1,7 +1,23 @@
 // PWA Installation and Service Worker utilities
 
 export function registerServiceWorker() {
-  if ('serviceWorker' in navigator) {
+  if (!('serviceWorker' in navigator)) return;
+
+  if (import.meta.env.DEV) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      registrations.forEach((registration) => registration.unregister());
+    });
+    if ('caches' in window) {
+      caches.keys().then((names) => {
+        names
+          .filter((name) => name.startsWith('streamaix-'))
+          .forEach((name) => caches.delete(name));
+      });
+    }
+    return;
+  }
+
+  {
     window.addEventListener('load', () => {
       navigator.serviceWorker
         .register('/sw.js')

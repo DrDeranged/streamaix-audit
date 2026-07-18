@@ -30,6 +30,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { AiAgentPredictions } from "@/components/prediction/AiAgentPredictions";
+import { AgentAnalysis } from "@/components/prediction/AgentAnalysis";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { ConfidenceRing } from "@/components/ui/confidence-ring";
 import { PriceChart } from "@/components/market/PriceChart";
@@ -984,7 +985,8 @@ export default function PredictionMarket() {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="ai-predictions" className="mt-6">
+              <TabsContent value="ai-predictions" className="mt-6 space-y-6">
+                <AgentAnalysis marketId={market.id} />
                 <AiAgentPredictions marketId={market.id} />
               </TabsContent>
 

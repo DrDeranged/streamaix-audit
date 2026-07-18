@@ -1,0 +1,46 @@
+Market resolution currently happens via admin decision or a bare LLM call
+(aiMarketResolver) with no evidence trail. Replace with an evidence-gathering
+resolution pipeline that escalates when uncertain. This is a liability fix.
+
+1. Create server/services/evidenceResolutionService.ts:
+   resolveWithEvidence(market):
+   a. Gather evidence: current + historical prices from marketDataService for
+      price-threshold markets ("Will BTC close above X by DATE"); relevant
+      headlines from newsService; macro data from macroDataService when
+      applicable. Every evidence item stored as { source, fetchedAt, claim,
+      rawValue }.
+   b. Call the model gateway at tier 'reasoning' with the market question,
+      resolution criteria, and the evidence list. jsonSchema output:
+      { resolution: 'YES'|'NO'|'UNRESOLVABLE', confidence: 0-1,
+        citedEvidence: number[] (indices into the evidence list — the model must
+        cite which items justify the outcome), reasoning: string }
+   c. Decision rule: proceed to auto-resolution ONLY if confidence >=
+      RESOLUTION_CONFIDENCE_THRESHOLD (env, default 0.85) AND citedEvidence is
+      non-empty AND resolution != UNRESOLVABLE. Otherwise mark the market
+      status 'pending_review' (add to the status enum if needed + migration)
+      and notify admins through the existing notification service.
+
+2. New table market_resolutions_audit: (id, market_id, resolution, confidence,
+   evidence jsonb, reasoning, resolved_by ['ai'|'admin:<username>'],
+   auto_resolved boolean, created_at). EVERY resolution — AI or admin — writes
+   a row. Wire the existing admin resolution path in resolutionService to write
+   it too.
+
+3. Replace aiMarketResolver's internals to use this pipeline (keep its
+   scheduler registration from Phase 1). Delete the old bare-LLM resolution
+   call path.
+
+4. Admin review queue: GET /api/admin/resolutions/pending listing
+   pending_review markets WITH their gathered evidence and the AI's uncertain
+   assessment, and POST /api/admin/resolutions/:marketId/decide
+   { resolution, note } which resolves via the existing settlement flow and
+   writes the audit row. Admin-guarded, strict rate limit, Zod-validated.
+
+5. On the market detail page, after resolution, render a "How this resolved"
+   panel: outcome, who/what resolved it, confidence, and the cited evidence
+   items with timestamps.
+
+6. Tests: below-threshold escalates; UNRESOLVABLE escalates; empty citations
+   escalate; audit row written on both AI and admin paths. Mock gateway + db.
+
+Do not modify payout/settlement math in this task.

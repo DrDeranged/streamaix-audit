@@ -160,3 +160,7 @@ export const debateNextSchema = z.object({
   prompt: z.string().max(2000).optional(),
   speakerId: z.string().max(100).optional(),
 }).passthrough();
+
+export const agentTrackRecordParamsSchema = z.object({
+  id: z.string().min(1).max(100),
+});

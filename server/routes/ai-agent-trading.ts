@@ -195,6 +195,65 @@ export async function registerAiAgentTradingRoutes(app: Express): Promise<void> 
     });
   }));
 
+  // Recent agent trading decisions (public, cached 30s)
+  app.get("/api/agents/recent-decisions", mediumLimit, asyncHandler(async (req: Request, res: Response) => {
+    const cacheKey = "agents:recent-decisions";
+    const cached = cacheService.get<any[]>(cacheKey);
+    if (cached) {
+      return res.json({ success: true, decisions: cached, cached: true });
+    }
+
+    const rows = await db
+      .select({
+        id: aiPredictions.id,
+        prediction: aiPredictions.prediction,
+        confidence: aiPredictions.confidence,
+        reasoning: aiPredictions.reasoning,
+        createdAt: aiPredictions.createdAt,
+        agentId: aiAgents.id,
+        agentName: aiAgents.name,
+        agentAvatar: aiAgents.avatar,
+        agentPersonality: aiAgents.personality,
+        marketId: predictionMarkets.id,
+        marketQuestion: predictionMarkets.question,
+      })
+      .from(aiPredictions)
+      .leftJoin(aiAgents, eq(aiPredictions.agentId, aiAgents.id))
+      .leftJoin(predictionMarkets, eq(aiPredictions.marketId, predictionMarkets.id))
+      .orderBy(desc(aiPredictions.createdAt))
+      .limit(20);
+
+    const decisions = rows.map((r) => ({
+      id: r.id,
+      prediction: r.prediction,
+      confidence: r.confidence,
+      reasoning: r.reasoning,
+      createdAt: r.createdAt,
+      agent: { id: r.agentId, name: r.agentName, avatar: r.agentAvatar, personality: r.agentPersonality },
+      market: { id: r.marketId, question: r.marketQuestion },
+    }));
+
+    cacheService.set(cacheKey, decisions, 30);
+    res.json({ success: true, decisions });
+  }));
+
+  app.get("/api/agents/:id/track-record", mediumLimit, asyncHandler(async (req: Request, res: Response) => {
+    const params = schemas.agentTrackRecordParamsSchema.safeParse(req.params);
+    if (!params.success) {
+      return res.status(400).json({ success: false, message: "Invalid agent id" });
+    }
+    const agentId = params.data.id;
+    const cacheKey = `agent-track-record:${agentId}`;
+    const cached = cacheService.get<any>(cacheKey);
+    if (cached) {
+      return res.json({ success: true, trackRecord: cached, cached: true });
+    }
+    const { agentResearchService } = await import("../services/agentResearchService");
+    const trackRecord = await agentResearchService.getAgentTrackRecord(agentId);
+    cacheService.set(cacheKey, trackRecord, 300);
+    res.json({ success: true, trackRecord });
+  }));
+
   // Execute AI agent trade
   app.post("/api/ai-agents/:agentId/trade", authenticateToken, requireAdmin, strictLimit, validateBody(aiAgentTradeSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     const { aiAgentService } = await import('../services/aiAgentService');

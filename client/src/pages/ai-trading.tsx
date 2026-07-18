@@ -16,6 +16,7 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { PageHeader } from '@/components/PageHeader';
+import { ReasoningFeed } from '@/components/prediction/ReasoningFeed';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -1542,6 +1543,10 @@ export default function AITrading() {
             </div>
             <Sparkles className="w-5 h-5 text-amber-400/50" />
           </div>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+          <ReasoningFeed />
         </motion.div>
 
         {mainView === 'signals' && (

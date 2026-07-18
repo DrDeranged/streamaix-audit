@@ -101,6 +101,36 @@
   </head>
   <body class="font-inter">
     <div id="root"></div>
+    <script>
+      // Recover clients poisoned by an old service worker that cached stale
+      // dev modules (duplicate React copies). Unregister + clear caches, then
+      // reload once if this page load was still controlled by the old worker.
+      (function () {
+        if (!('serviceWorker' in navigator)) return;
+        var isDev = location.hostname === 'localhost' || /\.replit\.dev$/.test(location.hostname);
+        if (!isDev) return;
+        var wasControlled = !!navigator.serviceWorker.controller;
+        var work = [];
+        work.push(
+          navigator.serviceWorker.getRegistrations().then(function (regs) {
+            return Promise.all(regs.map(function (r) { return r.unregister(); }));
+          })
+        );
+        if (window.caches) {
+          work.push(
+            caches.keys().then(function (names) {
+              return Promise.all(names.map(function (n) { return caches.delete(n); }));
+            })
+          );
+        }
+        Promise.all(work).then(function () {
+          if (wasControlled && !sessionStorage.getItem('sw-recovered')) {
+            sessionStorage.setItem('sw-recovered', '1');
+            location.reload();
+          }
+        });
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
     <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
     <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>

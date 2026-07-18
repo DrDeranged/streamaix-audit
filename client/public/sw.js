@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const STATIC_CACHE = `streamaix-static-${CACHE_VERSION}`;
 const API_CACHE = `streamaix-api-${CACHE_VERSION}`;
 const IMAGE_CACHE = `streamaix-images-${CACHE_VERSION}`;
@@ -65,6 +65,18 @@ self.addEventListener('fetch', (event) => {
 
   if (request.method !== 'GET') return;
   if (!request.url.startsWith('http')) return;
+
+  // Never intercept Vite dev-server module URLs — caching them serves stale
+  // module graphs (duplicate React copies) and crashes the app in development.
+  if (
+    url.pathname.startsWith('/src/') ||
+    url.pathname.startsWith('/@') ||
+    url.pathname.includes('node_modules') ||
+    url.pathname.includes('.vite') ||
+    url.searchParams.has('v') && url.pathname.endsWith('.js') && url.pathname.includes('chunk-')
+  ) {
+    return;
+  }
 
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(networkFirstWithCache(request, API_CACHE));
