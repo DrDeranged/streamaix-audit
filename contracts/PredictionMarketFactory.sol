@@ -2,15 +2,20 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./ConditionalTokens.sol";
 
 /**
  * @title PredictionMarketFactory
  * @notice Factory contract for creating and managing prediction markets with AMM pricing
+ * @dev DEFAULT_ADMIN_ROLE (multisig) manages fees and can rotate the resolver key
+ *      via grantRole/revokeRole or rotateResolver() without redeploying.
+ *      RESOLVER_ROLE is the only role allowed to resolve markets.
  */
-contract PredictionMarketFactory is Ownable, ReentrancyGuard {
+contract PredictionMarketFactory is AccessControl, ReentrancyGuard {
+
+    bytes32 public constant RESOLVER_ROLE = keccak256("RESOLVER_ROLE");
     
     ConditionalTokens public conditionalTokens;
     IERC20 public streamToken;
@@ -55,15 +60,32 @@ contract PredictionMarketFactory is Ownable, ReentrancyGuard {
     event LiquidityAdded(uint256 indexed marketId, address indexed provider, uint256 amount, uint256 shares);
     event LiquidityRemoved(uint256 indexed marketId, address indexed provider, uint256 shares, uint256 amount);
     event PriceUpdated(uint256 indexed marketId, uint256 yesPrice, uint256 noPrice);
+    event FeeRecipientUpdated(address indexed previousRecipient, address indexed newRecipient);
+    event ResolverRotated(address indexed previousResolver, address indexed newResolver);
     
     constructor(
         address _conditionalTokens,
         address _streamToken,
-        address initialOwner
-    ) Ownable(initialOwner) {
+        address initialAdmin
+    ) {
+        require(initialAdmin != address(0), "Admin is zero address");
+        _grantRole(DEFAULT_ADMIN_ROLE, initialAdmin);
         conditionalTokens = ConditionalTokens(_conditionalTokens);
         streamToken = IERC20(_streamToken);
-        feeRecipient = initialOwner;
+        feeRecipient = initialAdmin;
+    }
+
+    /**
+     * @notice Rotate the resolver key in one transaction (admin only).
+     * @dev Equivalent to revokeRole + grantRole; no redeploy needed.
+     */
+    function rotateResolver(address previousResolver, address newResolver) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(newResolver != address(0), "Resolver is zero address");
+        if (previousResolver != address(0)) {
+            _revokeRole(RESOLVER_ROLE, previousResolver);
+        }
+        _grantRole(RESOLVER_ROLE, newResolver);
+        emit ResolverRotated(previousResolver, newResolver);
     }
     
     /**
@@ -249,7 +271,7 @@ contract PredictionMarketFactory is Ownable, ReentrancyGuard {
     /**
      * @notice Resolve market and distribute winnings
      */
-    function resolveMarket(uint256 marketId, ConditionalTokens.Resolution resolution) external onlyOwner {
+    function resolveMarket(uint256 marketId, ConditionalTokens.Resolution resolution) external onlyRole(RESOLVER_ROLE) {
         conditionalTokens.resolveMarket(marketId, resolution);
         
         // Transfer pool reserves based on outcome
@@ -316,7 +338,7 @@ contract PredictionMarketFactory is Ownable, ReentrancyGuard {
     /**
      * @notice Withdraw collected fees
      */
-    function withdrawFees() external onlyOwner {
+    function withdrawFees() external onlyRole(DEFAULT_ADMIN_ROLE) {
         uint256 amount = collectedFees;
         collectedFees = 0;
         require(streamToken.transfer(feeRecipient, amount), "Transfer failed");
@@ -325,7 +347,8 @@ contract PredictionMarketFactory is Ownable, ReentrancyGuard {
     /**
      * @notice Set fee recipient
      */
-    function setFeeRecipient(address _recipient) external onlyOwner {
+    function setFeeRecipient(address _recipient) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        emit FeeRecipientUpdated(feeRecipient, _recipient);
         feeRecipient = _recipient;
     }
 }

@@ -1,6 +1,8 @@
-import { ethers } from "hardhat";
+import hre from "hardhat";
+const { ethers } = hre;
 import * as fs from "fs";
 import * as path from "path";
+import { assertMainnetSafety, handoffRoles } from "./roles.ts";
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -10,6 +12,7 @@ async function main() {
   
   const network = await ethers.provider.getNetwork();
   console.log("Network:", network.name, "ChainId:", network.chainId.toString());
+  assertMainnetSafety(network.chainId);
   
   // Deploy STREAM Token
   console.log("\n1. Deploying STREAM Token...");
@@ -57,7 +60,8 @@ async function main() {
     }
   };
   
-  const deploymentsDir = path.join(__dirname, "../deployments");
+  const scriptDir = path.dirname(new URL(import.meta.url).pathname);
+  const deploymentsDir = path.join(scriptDir, "../deployments");
   if (!fs.existsSync(deploymentsDir)) {
     fs.mkdirSync(deploymentsDir, { recursive: true });
   }
@@ -102,6 +106,9 @@ async function main() {
   const tx = await streamToken.transfer(stakingAddress, rewardAllocation);
   await tx.wait();
   console.log("✅ Allocated 10M STREAM tokens to Staking contract");
+  
+  // Role handoff: service key gets MINTER_ROLE, admin goes to multisig, deployer renounces.
+  await handoffRoles(deployer.address, { streamToken, summaryNFT });
   
   console.log("\n✨ Deployment complete!");
 }

@@ -1,6 +1,8 @@
-import { ethers } from "hardhat";
+import hre from "hardhat";
+const { ethers } = hre;
 import * as fs from "fs";
 import * as path from "path";
+import { assertMainnetSafety, handoffRoles } from "./roles.ts";
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -21,6 +23,7 @@ async function main() {
     console.error("Current chain ID:", network.chainId.toString());
     process.exit(1);
   }
+  assertMainnetSafety(network.chainId);
   
   const contracts: Record<string, string> = {};
   
@@ -59,7 +62,7 @@ async function main() {
   // 5. Deploy Conditional Tokens (ERC-1155)
   console.log("\n5️⃣ Deploying Conditional Tokens (ERC-1155)...");
   const ConditionalTokens = await ethers.getContractFactory("ConditionalTokens");
-  const conditionalTokens = await ConditionalTokens.deploy();
+  const conditionalTokens = await ConditionalTokens.deploy(deployer.address);
   await conditionalTokens.waitForDeployment();
   contracts.ConditionalTokens = await conditionalTokens.getAddress();
   console.log("✅ Conditional Tokens:", contracts.ConditionalTokens);
@@ -67,7 +70,11 @@ async function main() {
   // 6. Deploy Prediction Market Factory
   console.log("\n6️⃣ Deploying Prediction Market Factory...");
   const PredictionMarketFactory = await ethers.getContractFactory("PredictionMarketFactory");
-  const factory = await PredictionMarketFactory.deploy(contracts.ConditionalTokens);
+  const factory = await PredictionMarketFactory.deploy(
+    contracts.ConditionalTokens,
+    contracts.StreamToken,
+    deployer.address
+  );
   await factory.waitForDeployment();
   contracts.PredictionMarketFactory = await factory.getAddress();
   console.log("✅ Prediction Market Factory:", contracts.PredictionMarketFactory);
@@ -81,7 +88,8 @@ async function main() {
     contracts,
   };
   
-  const deploymentsDir = path.join(__dirname, "../deployments");
+  const scriptDir = path.dirname(new URL(import.meta.url).pathname);
+  const deploymentsDir = path.join(scriptDir, "../deployments");
   if (!fs.existsSync(deploymentsDir)) {
     fs.mkdirSync(deploymentsDir, { recursive: true });
   }
@@ -106,6 +114,14 @@ async function main() {
   const tx = await streamToken.transfer(contracts.Staking, rewardAllocation);
   await tx.wait();
   console.log("✅ Allocated 10M STREAM to Staking contract");
+  
+  // 8. Role handoff: service key gets limited roles, admin moves to multisig, deployer renounces.
+  console.log("\n8️⃣ Role handoff...");
+  await handoffRoles(deployer.address, {
+    streamToken,
+    summaryNFT,
+    predictionMarketFactory: factory,
+  });
   
   // Print summary
   console.log("\n" + "=".repeat(80));
