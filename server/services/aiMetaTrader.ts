@@ -2,6 +2,7 @@ import { db } from '../db';
 import { predictionMarkets, users, marketTrades, autonomousSystemLogs } from '@shared/schema';
 import { eq, and, sql, ne } from 'drizzle-orm';
 import { openai as lazyOpenai } from "../lib/openaiClient";
+import { jobScheduler } from '../jobs/scheduler';
 const openai = lazyOpenai;
 // openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
@@ -43,25 +44,13 @@ export class AIMetaTrader {
       console.error('⚠️  Meta-trader initialization failed (will continue):', err);
     }
 
-    while (this.isRunning) {
-      try {
-        await this.findAndExecuteArbitrage();
-
-        // Run every 6 hours (MAJOR COST OPTIMIZATION: 6x reduction)
-        const delayMs = 6 * 60 * 60 * 1000;
-        console.log(`⏱️  Meta-trader sleeping for 6 hours...`);
-        await this.sleep(delayMs);
-
-      } catch (error) {
-        console.error('❌ Error in meta-trader:', error);
-        await this.sleep(60000);
-      }
-    }
+    jobScheduler.register('ai-meta-trader', 6 * 60 * 60 * 1000, () => this.findAndExecuteArbitrage(), { runOnStart: true, staggerMs: 120000 });
   }
 
   stop() {
     console.log('🛑 Stopping AI Meta-Trader...');
     this.isRunning = false;
+    jobScheduler.cancel('ai-meta-trader');
   }
 
   private async initializeMetaTrader() {

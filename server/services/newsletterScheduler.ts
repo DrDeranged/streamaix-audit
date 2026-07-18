@@ -1,6 +1,6 @@
-import cron from 'node-cron';
 import { newsletterService } from './newsletterService';
 import { storage } from '../storage';
+import { jobScheduler } from '../jobs/scheduler';
 
 /**
  * Newsletter scheduler service
@@ -8,9 +8,6 @@ import { storage } from '../storage';
  * Also sends weekly push digest to subscribed users on Sundays
  */
 class NewsletterScheduler {
-  private morningJob: cron.ScheduledTask | null = null;
-  private afternoonJob: cron.ScheduledTask | null = null;
-  private sundayDigestJob: cron.ScheduledTask | null = null;
   private isStarted = false;
 
   /**
@@ -25,31 +22,22 @@ class NewsletterScheduler {
     }
 
     // Morning newsletter at 8am EST - Pre-market alpha
-    this.morningJob = cron.schedule('0 8 * * *', async () => {
+    jobScheduler.registerCron('newsletter-morning', '0 8 * * *', async () => {
       console.log('📧 Morning market alpha newsletter starting...');
       await this.sendNewsletter('Morning');
-    }, {
-      scheduled: true,
-      timezone: "America/New_York"
-    });
+    }, { timezone: 'America/New_York' });
 
     // Afternoon newsletter at 4pm EST - Market close recap
-    this.afternoonJob = cron.schedule('0 16 * * *', async () => {
+    jobScheduler.registerCron('newsletter-market-close', '0 16 * * *', async () => {
       console.log('📧 Market close newsletter starting...');
       await this.sendNewsletter('Market Close');
-    }, {
-      scheduled: true,
-      timezone: "America/New_York"
-    });
+    }, { timezone: 'America/New_York' });
 
     // Sunday at 10am EST - Weekly push notification digest
-    this.sundayDigestJob = cron.schedule('0 10 * * 0', async () => {
+    jobScheduler.registerCron('newsletter-sunday-digest', '0 10 * * 0', async () => {
       console.log('📱 Sunday weekly push digest starting...');
       await this.sendWeeklyPushDigest();
-    }, {
-      scheduled: true,
-      timezone: "America/New_York"
-    });
+    }, { timezone: 'America/New_York' });
 
     this.isStarted = true;
     console.log('✅ Newsletter scheduler started - Sends 8am & 4pm EST daily, Push Digest Sunday 10am EST');
@@ -59,18 +47,9 @@ class NewsletterScheduler {
    * Stop the newsletter scheduler
    */
   stop(): void {
-    if (this.morningJob) {
-      this.morningJob.stop();
-      this.morningJob = null;
-    }
-    if (this.afternoonJob) {
-      this.afternoonJob.stop();
-      this.afternoonJob = null;
-    }
-    if (this.sundayDigestJob) {
-      this.sundayDigestJob.stop();
-      this.sundayDigestJob = null;
-    }
+    jobScheduler.cancel('newsletter-morning');
+    jobScheduler.cancel('newsletter-market-close');
+    jobScheduler.cancel('newsletter-sunday-digest');
     this.isStarted = false;
     console.log('⏹️ Newsletter scheduler stopped');
   }
@@ -101,8 +80,8 @@ class NewsletterScheduler {
   getStatus(): { isRunning: boolean; nextMorning: string | null; nextAfternoon: string | null } {
     return {
       isRunning: this.isStarted,
-      nextMorning: this.morningJob ? this.getNextRunTime(8) : null,
-      nextAfternoon: this.afternoonJob ? this.getNextRunTime(16) : null
+      nextMorning: jobScheduler.has('newsletter-morning') ? this.getNextRunTime(8) : null,
+      nextAfternoon: jobScheduler.has('newsletter-market-close') ? this.getNextRunTime(16) : null
     };
   }
 

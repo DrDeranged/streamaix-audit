@@ -7,7 +7,7 @@ import { AvatarVoiceService } from './avatarVoiceService';
 import { pushNotificationService } from './pushNotificationService';
 import { openai as lazyOpenai } from "../lib/openaiClient";
 const openai = lazyOpenai;
-import * as cron from 'node-cron';
+import { jobScheduler } from '../jobs/scheduler';
 
 // openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
@@ -52,8 +52,6 @@ const STREAM_DURATION_SECONDS = 150;
 export class ScheduledMarketStreamService {
   private isRunning = false;
   private marketDataService: MarketDataService;
-  private morningCron: ReturnType<typeof cron.schedule> | null = null;
-  private eveningCron: ReturnType<typeof cron.schedule> | null = null;
   private activeStream: ScheduledStream | null = null;
 
   constructor() {
@@ -93,19 +91,15 @@ export class ScheduledMarketStreamService {
     console.log('   Morning Update: 8:00 AM EST daily');
     console.log('   Market Close: 4:00 PM EST daily');
 
-    this.morningCron = cron.schedule('0 8 * * 1-5', async () => {
+    jobScheduler.registerCron('scheduled-stream-morning', '0 8 * * 1-5', async () => {
       console.log('[Scheduled Streams] 🌅 Starting 8 AM Morning Market Update');
       await this.runScheduledStream('morning_update');
-    }, {
-      timezone: 'America/New_York'
-    });
+    }, { timezone: 'America/New_York' });
 
-    this.eveningCron = cron.schedule('0 16 * * 1-5', async () => {
+    jobScheduler.registerCron('scheduled-stream-market-close', '0 16 * * 1-5', async () => {
       console.log('[Scheduled Streams] 🌙 Starting 4 PM Market Close Update');
       await this.runScheduledStream('market_close');
-    }, {
-      timezone: 'America/New_York'
-    });
+    }, { timezone: 'America/New_York' });
 
     console.log('[Scheduled Streams] ✅ Cron jobs scheduled');
 
@@ -186,14 +180,8 @@ export class ScheduledMarketStreamService {
 
   stop() {
     this.isRunning = false;
-    if (this.morningCron) {
-      this.morningCron.stop();
-      this.morningCron = null;
-    }
-    if (this.eveningCron) {
-      this.eveningCron.stop();
-      this.eveningCron = null;
-    }
+    jobScheduler.cancel('scheduled-stream-morning');
+    jobScheduler.cancel('scheduled-stream-market-close');
     console.log('📅 Scheduled Market Stream Service stopped');
   }
 

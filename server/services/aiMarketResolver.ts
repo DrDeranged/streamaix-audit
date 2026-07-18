@@ -4,6 +4,7 @@ import { eq, and, lt, isNull } from 'drizzle-orm';
 import { openai as lazyOpenai } from "../lib/openaiClient";
 const openai = lazyOpenai;
 import axios from 'axios';
+import { jobScheduler } from '../jobs/scheduler';
 
 // openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
@@ -40,25 +41,13 @@ export class AIMarketResolver {
     this.isRunning = true;
     console.log('🚀 Starting AI Market Resolver service...');
 
-    while (this.isRunning) {
-      try {
-        await this.resolveExpiredMarkets();
-
-        // Run every 12 hours (MAJOR COST OPTIMIZATION: 8x reduction)
-        const delayMs = 12 * 60 * 60 * 1000;
-        console.log(`⏱️  Market resolver sleeping for 12 hours...`);
-        await this.sleep(delayMs);
-
-      } catch (error) {
-        console.error('❌ Error in market resolver:', error);
-        await this.sleep(60000);
-      }
-    }
+    jobScheduler.register('ai-market-resolver', 12 * 60 * 60 * 1000, () => this.resolveExpiredMarkets(), { runOnStart: true, staggerMs: 30000 });
   }
 
   stop() {
     console.log('🛑 Stopping AI Market Resolver...');
     this.isRunning = false;
+    jobScheduler.cancel('ai-market-resolver');
   }
 
   private async resolveExpiredMarkets() {

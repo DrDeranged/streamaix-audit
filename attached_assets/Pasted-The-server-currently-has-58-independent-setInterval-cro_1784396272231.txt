@@ -1,0 +1,43 @@
+The server currently has ~58 independent setInterval/cron sites and ~15 background
+engines started in server/app.ts (trading engine, aiMarketResolver,
+aiLiquidityProvider, aiTrendSpotter, aiContentModerator, aiCommunityManager,
+aiTreasuryManager, aiMetaTrader, newsletterScheduler, marketIntelligenceNotifier,
+portfolioSnapshotService, scheduledStreamService, botTradingSimulator, and more).
+On every restart they all fire immediately, creating a thundering herd of API
+calls. Consolidate them behind one scheduler WITHOUT changing what any job does.
+
+1. Create server/jobs/scheduler.ts exporting a JobScheduler class:
+   - register(name, intervalMs, fn, opts?: { jitterMs?, runOnStart?, staggerMs? })
+   - Persists last-run timestamps in a new Postgres table job_runs
+     (name pk, last_started_at, last_finished_at, last_status, last_error,
+     run_count, consecutive_failures) via Drizzle — add it to shared/schema.ts
+     and generate the migration.
+   - On boot, a job only runs immediately if runOnStart is true AND its
+     last_started_at is older than its interval. Otherwise it waits for its next
+     slot. This is the restart-herd fix.
+   - Per-job overlap guard: skip a tick if the previous run of the same job is
+     still executing.
+   - Stagger: apply staggerMs offsets so registered jobs do not all fire on the
+     same tick after boot.
+   - Failure policy: after 5 consecutive failures, back the job off to 4x its
+     interval and log loudly; reset on success.
+   - getStatus() returning all jobs with health info.
+
+2. Migrate the background engines started in server/app.ts to register through
+   the scheduler instead of their internal setInterval loops. Keep each engine's
+   existing logic function intact — only replace its self-scheduling. Work
+   engine by engine; do not refactor engine internals.
+
+3. Add GET /api/admin/jobs (guarded by the existing requireAdminFlexible
+   middleware) returning scheduler.getStatus().
+
+4. Add tests: server/jobs/__tests__/scheduler.test.ts covering overlap guard,
+   boot-time skip when last run is recent, failure backoff. Use fake timers and
+   a mocked db.
+
+5. Leave any setInterval that is purely local housekeeping (e.g. the cache
+   cleanup sweep in cacheService) alone — this task targets the business-logic
+   engines.
+
+Run npm test and boot the dev server. Every previously-started engine must appear
+in /api/admin/jobs.

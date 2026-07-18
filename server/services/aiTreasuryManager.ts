@@ -2,6 +2,7 @@ import { db } from '../db';
 import { predictionMarkets, users, autonomousSystemLogs } from '@shared/schema';
 import { sql } from 'drizzle-orm';
 import { openai as lazyOpenai } from "../lib/openaiClient";
+import { jobScheduler } from '../jobs/scheduler';
 const openai = lazyOpenai;
 // openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
@@ -40,25 +41,13 @@ export class AITreasuryManager {
       console.error('⚠️  Treasury manager initialization failed (will continue):', err);
     }
 
-    while (this.isRunning) {
-      try {
-        await this.manageTreasury();
-
-        // Run every 72 hours (MAJOR COST OPTIMIZATION: 3x reduction)
-        const delayMs = 72 * 60 * 60 * 1000;
-        console.log(`⏱️  Treasury manager sleeping for 72 hours...`);
-        await this.sleep(delayMs);
-
-      } catch (error) {
-        console.error('❌ Error in treasury manager:', error);
-        await this.sleep(60000);
-      }
-    }
+    jobScheduler.register('ai-treasury-manager', 72 * 60 * 60 * 1000, () => this.manageTreasury(), { runOnStart: true, staggerMs: 105000 });
   }
 
   stop() {
     console.log('🛑 Stopping AI Treasury Manager...');
     this.isRunning = false;
+    jobScheduler.cancel('ai-treasury-manager');
   }
 
   private async initializeTreasury() {

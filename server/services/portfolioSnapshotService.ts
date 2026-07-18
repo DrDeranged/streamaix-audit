@@ -1,5 +1,5 @@
-import cron from 'node-cron';
 import { db } from '../db';
+import { jobScheduler } from '../jobs/scheduler';
 import { portfolios, portfolioAssets, portfolioSnapshots } from '@shared/schema';
 import { eq, desc, and, gte } from 'drizzle-orm';
 
@@ -12,12 +12,10 @@ class PortfolioSnapshotService {
 
     console.log('📸 Portfolio Snapshot Service initialized');
 
-    cron.schedule('0 */6 * * *', async () => {
+    jobScheduler.registerCron('portfolio-snapshots', '0 */6 * * *', async () => {
       console.log('[Snapshot] Running scheduled portfolio snapshot capture...');
       await this.captureAllSnapshots();
-    });
-
-    await this.captureAllSnapshots();
+    }, { runOnStart: true, freshForMs: 6 * 60 * 60 * 1000 });
 
     console.log('✅ Portfolio Snapshot Service active - Capturing every 6 hours');
   }

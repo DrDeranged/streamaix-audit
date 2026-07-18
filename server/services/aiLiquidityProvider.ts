@@ -2,6 +2,7 @@ import { db } from '../db';
 import { predictionMarkets, users, marketTrades, autonomousSystemLogs } from '@shared/schema';
 import { eq, and, lt, sql } from 'drizzle-orm';
 import { openai as lazyOpenai } from "../lib/openaiClient";
+import { jobScheduler } from '../jobs/scheduler';
 const openai = lazyOpenai;
 // openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
@@ -37,25 +38,13 @@ export class AILiquidityProvider {
       console.error('⚠️  Liquidity provider initialization failed (will continue):', err);
     }
 
-    while (this.isRunning) {
-      try {
-        await this.provideLiquidity();
-
-        // Run every 12 hours (MAJOR COST OPTIMIZATION: 6x reduction)
-        const delayMs = 12 * 60 * 60 * 1000;
-        console.log(`⏱️  Liquidity provider sleeping for 12 hours...`);
-        await this.sleep(delayMs);
-
-      } catch (error) {
-        console.error('❌ Error in liquidity provider:', error);
-        await this.sleep(60000);
-      }
-    }
+    jobScheduler.register('ai-liquidity-provider', 12 * 60 * 60 * 1000, () => this.provideLiquidity(), { runOnStart: true, staggerMs: 45000 });
   }
 
   stop() {
     console.log('🛑 Stopping AI Liquidity Provider...');
     this.isRunning = false;
+    jobScheduler.cancel('ai-liquidity-provider');
   }
 
   private async initializeLiquidityBot() {

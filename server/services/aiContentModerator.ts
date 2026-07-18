@@ -2,6 +2,7 @@ import { db } from '../db';
 import { summaries, bountyQualityScores, autonomousSystemLogs } from '@shared/schema';
 import { eq, isNull, and } from 'drizzle-orm';
 import { openai as lazyOpenai } from "../lib/openaiClient";
+import { jobScheduler } from '../jobs/scheduler';
 const openai = lazyOpenai;
 // openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
@@ -43,25 +44,13 @@ export class AIContentModerator {
     this.isRunning = true;
     console.log('🚀 Starting AI Content Moderator service...');
 
-    while (this.isRunning) {
-      try {
-        await this.moderateContent();
-
-        // Run every 8 hours (MAJOR COST OPTIMIZATION: 5x reduction)
-        const delayMs = 8 * 60 * 60 * 1000;
-        console.log(`⏱️  Content moderator sleeping for 8 hours...`);
-        await this.sleep(delayMs);
-
-      } catch (error) {
-        console.error('❌ Error in content moderator:', error);
-        await this.sleep(60000);
-      }
-    }
+    jobScheduler.register('ai-content-moderator', 8 * 60 * 60 * 1000, () => this.moderateContent(), { runOnStart: true, staggerMs: 75000 });
   }
 
   stop() {
     console.log('🛑 Stopping AI Content Moderator...');
     this.isRunning = false;
+    jobScheduler.cancel('ai-content-moderator');
   }
 
   private async moderateContent() {

@@ -1,4 +1,5 @@
 import { db } from '../db';
+import { jobScheduler } from '../jobs/scheduler';
 import { knowledgeAvatars, botStakes, botSimTrades, botPerformanceSnapshots, users } from '@shared/schema';
 import { eq, desc, sql, and, isNotNull } from 'drizzle-orm';
 import { getAvatarPersona, getAllAvatarHandles, type AvatarTradingPersona } from './avatarTradingPersonas';
@@ -123,7 +124,6 @@ function getCoingeckoId(symbol: string): string | null {
 }
 
 export class BotTradingSimulator {
-  private intervalId: NodeJS.Timeout | null = null;
   private lastSnapshotDate: Map<string, string> = new Map();
 
   async start() {
@@ -135,29 +135,15 @@ export class BotTradingSimulator {
     console.log('[Bot Simulator] Starting bot trading simulator (2-hour cycle)');
     console.log('[Bot Simulator] First cycle will run in 60 seconds...');
 
-    setTimeout(async () => {
-      try {
-        await this.runTradingCycle();
-      } catch (err) {
-        console.error('[Bot Simulator] Error in initial cycle:', err);
-      }
-    }, 60_000);
-
-    this.intervalId = setInterval(async () => {
-      try {
-        await this.runTradingCycle();
-      } catch (err) {
-        console.error('[Bot Simulator] Error in trading cycle:', err);
-      }
-    }, TWO_HOURS_MS);
+    jobScheduler.register('bot-trading-simulator', TWO_HOURS_MS, () => this.runTradingCycle(), {
+      runOnStart: true,
+      staggerMs: 60_000,
+    });
   }
 
   async stop() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
-      console.log('[Bot Simulator] Stopped');
-    }
+    jobScheduler.cancel('bot-trading-simulator');
+    console.log('[Bot Simulator] Stopped');
   }
 
   async runTradingCycle() {

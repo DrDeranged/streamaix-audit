@@ -1,4 +1,4 @@
-import cron from 'node-cron';
+import { jobScheduler } from '../jobs/scheduler';
 import { pushNotificationService } from './pushNotificationService';
 import { marketDataService } from './marketDataService';
 import { newsService } from './newsService';
@@ -104,134 +104,134 @@ class MarketIntelligenceNotifier {
     }
 
     // Morning Briefing - 8am EST weekdays
-    cron.schedule('0 8 * * 1-5', async () => {
+    jobScheduler.registerCron('market-intel-morning-briefing', '0 8 * * 1-5', async () => {
       console.log('🌅 Morning Briefing starting...');
       await this.sendMorningBriefing();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // Market Movers - Every 4 hours (6am, 10am, 2pm, 6pm, 10pm EST)
-    cron.schedule('0 6,10,14,18,22 * * *', async () => {
+    jobScheduler.registerCron('market-intel-market-movers', '0 6,10,14,18,22 * * *', async () => {
       console.log('📊 Market Movers update starting...');
       await this.sendMarketMovers();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // Price Monitor - Every 2 hours for significant moves (reduced from 15 min to save API calls)
-    cron.schedule('0 */2 * * *', async () => {
+    jobScheduler.registerCron('market-intel-price-alerts', '0 */2 * * *', async () => {
       await this.checkPriceAlerts();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // Macro Alerts - Check Fed/economic news every 2 hours
-    cron.schedule('0 */2 * * *', async () => {
+    jobScheduler.registerCron('market-intel-macro-alerts', '0 */2 * * *', async () => {
       console.log('🏛️ Checking macro events...');
       await this.checkMacroAlerts();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // Evening Recap - 6pm EST weekdays
-    cron.schedule('0 18 * * 1-5', async () => {
+    jobScheduler.registerCron('market-intel-evening-recap', '0 18 * * 1-5', async () => {
       console.log('🌆 Evening Recap starting...');
       await this.sendEveningRecap();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // Weekly Preview - Sunday 7pm EST
-    cron.schedule('0 19 * * 0', async () => {
+    jobScheduler.registerCron('market-intel-weekly-preview', '0 19 * * 0', async () => {
       console.log('📅 Weekly Preview starting...');
       await this.sendWeeklyPreview();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // CoinDesk Breaking News - Every 2 hours (reduced from 15 min to save API calls)
-    cron.schedule('0 */2 * * *', async () => {
+    jobScheduler.registerCron('market-intel-coin-desk-news', '0 */2 * * *', async () => {
       await this.checkCoinDeskNews();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // Trading Metrics Monitor - Every 3 hours (reduced from 10 min to save API calls)
-    cron.schedule('0 */3 * * *', async () => {
+    jobScheduler.registerCron('market-intel-trading-metrics', '0 */3 * * *', async () => {
       await this.checkTradingMetrics();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // Whale Alert Monitor - Every 2 hours (reduced from 5 min to save API calls)
-    cron.schedule('0 */2 * * *', async () => {
+    jobScheduler.registerCron('market-intel-whale-alerts', '0 */2 * * *', async () => {
       await this.checkWhaleAlerts();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // Liquidation Alert Monitor - Every 2 hours (reduced from 5 min to save API calls)
-    cron.schedule('0 */2 * * *', async () => {
+    jobScheduler.registerCron('market-intel-liquidation-alerts', '0 */2 * * *', async () => {
       await this.checkLiquidationAlerts();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // Funding Rate Monitor - Every 4 hours (reduced from 30 min to save API calls)
-    cron.schedule('0 */4 * * *', async () => {
+    jobScheduler.registerCron('market-intel-funding-rate-alerts', '0 */4 * * *', async () => {
       await this.checkFundingRateAlerts();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // High-Conviction Alpha Signals - Every 4 hours (reduced from 20 min to save API calls)
-    cron.schedule('0 */4 * * *', async () => {
+    jobScheduler.registerCron('market-intel-alpha-signals', '0 */4 * * *', async () => {
       console.log('🎯 Checking alpha signal confluence...');
       await this.checkAlphaSignals();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // ============================================================
     // ALPHA INTELLIGENCE NOTIFICATIONS (NEW)
     // ============================================================
 
     // Narrative Momentum Alerts - Every 6 hours (reduced from 30 min to save API calls)
-    cron.schedule('0 */6 * * *', async () => {
+    jobScheduler.registerCron('market-intel-narrative-momentum', '0 */6 * * *', async () => {
       await this.checkNarrativeMomentum();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // CT Alpha Feed - Every 4 hours (reduced from 15 min to save API calls)
-    cron.schedule('0 */4 * * *', async () => {
+    jobScheduler.registerCron('market-intel-ctalpha-signals', '0 */4 * * *', async () => {
       await this.checkCTAlphaSignals();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // Token Unlock Warnings - Every 4 hours
-    cron.schedule('0 */4 * * *', async () => {
+    jobScheduler.registerCron('market-intel-token-unlocks', '0 */4 * * *', async () => {
       await this.checkTokenUnlocks();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // Airdrop Radar - Daily at 9am EST
-    cron.schedule('0 9 * * *', async () => {
+    jobScheduler.registerCron('market-intel-airdrop-opportunities', '0 9 * * *', async () => {
       await this.checkAirdropOpportunities();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // Governance Critical Alerts - Every 6 hours (reduced from hourly to save API calls)
-    cron.schedule('0 */6 * * *', async () => {
+    jobScheduler.registerCron('market-intel-governance-alerts', '0 */6 * * *', async () => {
       await this.checkGovernanceAlerts();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // VC Wallet Activity - Every 4 hours (reduced from 10 min to save API calls)
-    cron.schedule('0 */4 * * *', async () => {
+    jobScheduler.registerCron('market-intel-vcwallet-activity', '0 */4 * * *', async () => {
       await this.checkVCWalletActivity();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // Exchange Flow Anomalies - Every 4 hours (reduced from 15 min to save API calls)
-    cron.schedule('0 */4 * * *', async () => {
+    jobScheduler.registerCron('market-intel-exchange-flow-anomalies', '0 */4 * * *', async () => {
       await this.checkExchangeFlowAnomalies();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // AI Trade Ideas - Every 4 hours
-    cron.schedule('0 */4 * * *', async () => {
+    jobScheduler.registerCron('market-intel-aitrade-ideas', '0 */4 * * *', async () => {
       await this.pushAITradeIdeas();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // Event Impact Pre-Alerts - Every 6 hours
-    cron.schedule('0 */6 * * *', async () => {
+    jobScheduler.registerCron('market-intel-event-impacts', '0 */6 * * *', async () => {
       await this.checkEventImpacts();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // Anomaly Detection - Every 4 hours (reduced from 10 min to save API calls)
-    cron.schedule('0 */4 * * *', async () => {
+    jobScheduler.registerCron('market-intel-market-anomalies', '0 */4 * * *', async () => {
       await this.checkMarketAnomalies();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // Conference Calendar - Weekly Sunday 5pm EST
-    cron.schedule('0 17 * * 0', async () => {
+    jobScheduler.registerCron('market-intel-conference-reminders', '0 17 * * 0', async () => {
       await this.sendConferenceReminders();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     // Tech/AI Stock Alerts - Every 30 minutes (market hours)
-    cron.schedule('*/30 9-16 * * 1-5', async () => {
+    jobScheduler.registerCron('market-intel-tech-stock-alerts', '*/30 9-16 * * 1-5', async () => {
       await this.checkTechStockAlerts();
-    }, { timezone: "America/New_York" });
+    }, { timezone: 'America/New_York' });
 
     this.isStarted = true;
     console.log('📡 Market Intelligence Notifier started');

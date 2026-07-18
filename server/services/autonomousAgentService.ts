@@ -5,6 +5,7 @@ import type { AgentPersonality, AgentMetadata, AgentAction } from '../types/agen
 import { getAgentBountyEngine } from './agentBountyEngine';
 import { getAgentSocialEngine } from './agentSocialEngine';
 import { agentMarketTrader } from './agentMarketTrader';
+import { jobScheduler } from '../jobs/scheduler';
 
 interface AgentUser {
   id: string;
@@ -40,23 +41,7 @@ export class AutonomousAgentService {
     this.isRunning = true;
     console.log('🚀 Starting autonomous agent service...');
     
-    while (this.isRunning) {
-      try {
-        await this.runCycle();
-        
-        // Random delay between 5-7 hours (MAJOR COST OPTIMIZATION: ~80% reduction)
-        const delayMinutes = 300 + Math.random() * 120;
-        const delayMs = delayMinutes * 60 * 1000;
-        
-        console.log(`⏱️  Cycle ${this.cycleCount} complete. Next cycle in ${Math.round(delayMinutes / 60)} hours.`);
-        await this.sleep(delayMs);
-        
-      } catch (error) {
-        console.error('❌ Error in agent service cycle:', error);
-        // Wait 30 seconds before retrying on error
-        await this.sleep(30000);
-      }
-    }
+    jobScheduler.register('autonomous-agents', 5 * 60 * 60 * 1000, () => this.runCycle(), { runOnStart: true, jitterMs: 2 * 60 * 60 * 1000 });
   }
   
   /**
@@ -65,6 +50,7 @@ export class AutonomousAgentService {
   stop() {
     console.log('🛑 Stopping autonomous agent service...');
     this.isRunning = false;
+    jobScheduler.cancel('autonomous-agents');
   }
   
   /**

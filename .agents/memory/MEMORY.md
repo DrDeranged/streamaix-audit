@@ -1,1 +1,2 @@
 - [Vitest testing setup](vitest-testing.md) — offline test harness conventions: mock db/websocket modules, set JWT_SECRET before importing auth, limiter buckets are module-level.
+- [Job scheduler conventions](job-scheduler.md) — all background work must go through jobScheduler; db:push blocked by blog_posts drift; admin-secret trick for testing guarded routes.

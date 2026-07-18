@@ -7526,3 +7526,18 @@ export type InsertBotSimTrade = z.infer<typeof insertBotSimTradeSchema>;
 export type BotSimTrade = typeof botSimTrades.$inferSelect;
 export type InsertBotPerformanceSnapshot = z.infer<typeof insertBotPerformanceSnapshotSchema>;
 export type BotPerformanceSnapshot = typeof botPerformanceSnapshots.$inferSelect;
+
+// ============ Job Scheduler (Phase 1) ============
+export const jobRuns = pgTable("job_runs", {
+  name: text("name").primaryKey(),
+  lastStartedAt: timestamp("last_started_at"),
+  lastFinishedAt: timestamp("last_finished_at"),
+  lastStatus: text("last_status"),
+  lastError: text("last_error"),
+  runCount: integer("run_count").default(0).notNull(),
+  consecutiveFailures: integer("consecutive_failures").default(0).notNull(),
+});
+
+export const insertJobRunSchema = createInsertSchema(jobRuns);
+export type InsertJobRun = z.infer<typeof insertJobRunSchema>;
+export type JobRun = typeof jobRuns.$inferSelect;

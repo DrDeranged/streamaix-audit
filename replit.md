@@ -37,7 +37,7 @@ Stack: Node.js/Express + TypeScript, Vite, PostgreSQL (Neon) with Drizzle ORM, O
 ## Current Phase Tracker
 
 - Phase 0: **in progress**
-- Phase 1 (job scheduler): not started
+- Phase 1 (job scheduler): **done** — all background engines register through `server/jobs/scheduler.ts` (`jobScheduler`); status at `GET /api/admin/jobs` (admin-only); state persisted in `job_runs` table
 - Phase 2 (model gateway): not started
 - Phase 3: not started
 - Phase 4: not started

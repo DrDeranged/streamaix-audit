@@ -2,6 +2,7 @@ import { db } from '../db';
 import { aiAgents, predictionMarkets, aiTrades, aiPredictions, aiPositions, autonomousSystemLogs } from '@shared/schema';
 import { eq, and, desc, sql, lt } from 'drizzle-orm';
 import { openai as lazyOpenai } from "../lib/openaiClient";
+import { jobScheduler } from '../jobs/scheduler';
 const openai = lazyOpenai;
 // openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
@@ -30,23 +31,7 @@ export class AITradingBotService {
     this.isRunning = true;
     console.log('🚀 Starting AI trading bot service...');
 
-    while (this.isRunning) {
-      try {
-        await this.runTradingCycle();
-
-        // Random delay between 5-7 hours (MAJOR COST OPTIMIZATION: ~80% reduction)
-        const delayMinutes = 300 + Math.random() * 120;
-        const delayMs = delayMinutes * 60 * 1000;
-
-        console.log(`⏱️  Trading cycle ${this.cycleCount} complete. Next cycle in ${Math.round(delayMinutes / 60)} hours.`);
-        await this.sleep(delayMs);
-
-      } catch (error) {
-        console.error('❌ Error in trading cycle:', error);
-        // Wait 60 seconds before retrying on error
-        await this.sleep(60000);
-      }
-    }
+    jobScheduler.register('ai-trading-bots', 5 * 60 * 60 * 1000, () => this.runTradingCycle(), { runOnStart: true, staggerMs: 15000, jitterMs: 2 * 60 * 60 * 1000 });
   }
 
   /**
@@ -55,6 +40,7 @@ export class AITradingBotService {
   stop() {
     console.log('🛑 Stopping AI trading bot service...');
     this.isRunning = false;
+    jobScheduler.cancel('ai-trading-bots');
   }
 
   /**
