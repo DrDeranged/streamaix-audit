@@ -1,0 +1,1 @@
+- [Vitest testing setup](vitest-testing.md) — offline test harness conventions: mock db/websocket modules, set JWT_SECRET before importing auth, limiter buckets are module-level.
