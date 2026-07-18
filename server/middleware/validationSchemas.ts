@@ -164,3 +164,12 @@ export const debateNextSchema = z.object({
 export const agentTrackRecordParamsSchema = z.object({
   id: z.string().min(1).max(100),
 });
+
+export const resolutionDecideParamsSchema = z.object({
+  marketId: z.string().min(1).max(100),
+});
+
+export const resolutionDecideSchema = z.object({
+  resolution: z.enum(['yes', 'no', 'invalid', 'YES', 'NO', 'INVALID']),
+  note: z.string().max(4000).optional(),
+}).passthrough();

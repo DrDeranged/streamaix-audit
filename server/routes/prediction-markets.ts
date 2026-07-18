@@ -90,7 +90,8 @@ import {
   streamRecordings, streamAchievements, userStreamAchievements, streamChatCommands,
   streamChatCommandLogs, streamViewerLeaderboard, knowledgeAvatars, bounties, summaries,
   avatarTrades as avatarTradesTable, avatarPositions, streamConversationMessages, pointsTransactions, dailyLoginStreak,
-  scheduledDebates, botStakes, botSimTrades, botPerformanceSnapshots
+  scheduledDebates, botStakes, botSimTrades, botPerformanceSnapshots,
+  marketResolutionsAudit
 } from "../../shared/schema";
 import { eq, and, desc, gte, lte, sql, asc, isNotNull, isNull, inArray, count } from "drizzle-orm";
 import * as validators from "../validators";
@@ -805,6 +806,48 @@ export async function registerPredictionMarketsRoutes(app: Express): Promise<voi
       console.error('Error fetching resolved markets:', error);
       res.json({ success: true, markets: [] });
     }
+  }));
+
+  // "How this resolved" — public audit trail for a resolved market
+  app.get("/api/prediction-markets/:marketId/resolution-audit", mediumLimit, asyncHandler(async (req: Request, res: Response) => {
+    const marketId = String(req.params.marketId || "").slice(0, 100);
+    if (!marketId) return res.status(400).json({ error: "Invalid marketId" });
+
+    const [market] = await db
+      .select({ id: predictionMarkets.id, status: predictionMarkets.status })
+      .from(predictionMarkets)
+      .where(eq(predictionMarkets.id, marketId))
+      .limit(1);
+    if (!market) return res.status(404).json({ error: "Market not found" });
+    if (market.status !== "resolved") {
+      return res.json({ success: true, audit: null });
+    }
+
+    const rows = await db
+      .select()
+      .from(marketResolutionsAudit)
+      .where(eq(marketResolutionsAudit.marketId, marketId))
+      .orderBy(desc(marketResolutionsAudit.createdAt))
+      .limit(10);
+
+    // Latest actual resolution row (an escalation assessment is never final)
+    const final = rows.find((r) => r.autoResolved || r.resolvedBy.startsWith("admin:")) || rows[0] || null;
+    if (!final) return res.json({ success: true, audit: null });
+
+    const ev = (final.evidence as any) || {};
+    res.json({
+      success: true,
+      audit: {
+        resolution: final.resolution,
+        confidence: final.confidence,
+        reasoning: final.reasoning,
+        resolvedBy: final.resolvedBy,
+        autoResolved: final.autoResolved,
+        createdAt: final.createdAt,
+        evidence: Array.isArray(ev.items) ? ev.items : [],
+        citedEvidence: Array.isArray(ev.citedEvidence) ? ev.citedEvidence : [],
+      },
+    });
   }));
 
   // Get single market details (MUST be last - dynamic route)

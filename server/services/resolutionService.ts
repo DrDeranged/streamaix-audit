@@ -1,5 +1,5 @@
 import { db } from "../db";
-import { predictionMarkets, marketResolutions, marketPositions, marketPredictors } from "@shared/schema";
+import { predictionMarkets, marketResolutions, marketResolutionsAudit, marketPositions, marketPredictors } from "@shared/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { Contract, JsonRpcProvider, Wallet } from "ethers";
 import CONDITIONAL_TOKENS_ABI from "../../contracts/abis/ConditionalTokensABI.json";
@@ -26,16 +26,23 @@ export class ResolutionService {
   async resolveMarket(
     marketId: string,
     resolution: 'yes' | 'no' | 'invalid',
-    resolvedBy: string,
+    resolvedBy: string | undefined,
     resolutionSource: string,
     resolutionData?: any,
-    privateKey?: string
+    privateKey?: string,
+    audit?: {
+      resolvedBy: string; // 'ai' | 'admin:<username>'
+      autoResolved: boolean;
+      confidence?: number | null;
+      evidence?: unknown;
+      reasoning?: string | null;
+    }
   ): Promise<void> {
     try {
       const market = await db.select().from(predictionMarkets).where(eq(predictionMarkets.id, marketId)).limit(1);
       if (!market[0]) throw new Error('Market not found');
       
-      if (market[0].status !== 'active') {
+      if (market[0].status !== 'active' && market[0].status !== 'pending_review') {
         throw new Error('Market already resolved or cancelled');
       }
       
@@ -95,6 +102,17 @@ export class ResolutionService {
           resolutionData: resolutionData || {},
         });
       }
+      
+      // Audit trail: EVERY resolution (AI or admin) writes an audit row
+      await db.insert(marketResolutionsAudit).values({
+        marketId: marketId,
+        resolution: resolution,
+        confidence: audit?.confidence ?? null,
+        evidence: audit?.evidence ?? null,
+        reasoning: audit?.reasoning ?? null,
+        resolvedBy: audit?.resolvedBy ?? `admin:${resolvedBy || 'unknown'}`,
+        autoResolved: audit?.autoResolved ?? false,
+      });
       
       // Update predictor stats
       await this.updatePredictorStats(marketId, resolution);

@@ -4698,6 +4698,18 @@ export const marketResolutions = pgTable("market_resolutions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const marketResolutionsAudit = pgTable("market_resolutions_audit", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  marketId: varchar("market_id").references(() => predictionMarkets.id).notNull(),
+  resolution: text("resolution").notNull(),
+  confidence: real("confidence"),
+  evidence: jsonb("evidence"),
+  reasoning: text("reasoning"),
+  resolvedBy: text("resolved_by").notNull(),
+  autoResolved: boolean("auto_resolved").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const liquidityProviders = pgTable("liquidity_providers", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   marketId: varchar("market_id").references(() => predictionMarkets.id).notNull(),
@@ -4916,6 +4928,11 @@ export const insertMarketResolutionSchema = createInsertSchema(marketResolutions
   createdAt: true,
 });
 
+export const insertMarketResolutionAuditSchema = createInsertSchema(marketResolutionsAudit).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertLiquidityProviderSchema = createInsertSchema(liquidityProviders).omit({
   id: true,
   createdAt: true,
@@ -5000,6 +5017,8 @@ export type InsertMarketTrade = z.infer<typeof insertMarketTradeSchema>;
 export type MarketTrade = typeof marketTrades.$inferSelect;
 
 export type InsertMarketResolution = z.infer<typeof insertMarketResolutionSchema>;
+export type InsertMarketResolutionAudit = z.infer<typeof insertMarketResolutionAuditSchema>;
+export type MarketResolutionAudit = typeof marketResolutionsAudit.$inferSelect;
 export type MarketResolution = typeof marketResolutions.$inferSelect;
 
 export type InsertLiquidityProvider = z.infer<typeof insertLiquidityProviderSchema>;

@@ -31,6 +31,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { AiAgentPredictions } from "@/components/prediction/AiAgentPredictions";
 import { AgentAnalysis } from "@/components/prediction/AgentAnalysis";
+import { HowThisResolved } from "@/components/prediction/HowThisResolved";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { ConfidenceRing } from "@/components/ui/confidence-ring";
 import { PriceChart } from "@/components/market/PriceChart";
@@ -872,6 +873,8 @@ export default function PredictionMarket() {
               </CardContent>
             </Card>
             </motion.div>
+
+            {market.status === "resolved" && <HowThisResolved marketId={market.id} />}
 
             {/* Market Details */}
             <Tabs defaultValue="overview" className="w-full">

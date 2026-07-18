@@ -127,6 +127,7 @@ import { registerSocialFeedRoutes } from "./routes/social-feed";
 import { registerFollowRoutes } from "./routes/follow";
 import { registerBountiesRoutes } from "./routes/bounties";
 import { registerJobsRoutes } from "./routes/jobs";
+import { registerAdminResolutionsRoutes } from "./routes/admin-resolutions";
 import { registerCollaborationRoutes } from "./routes/collaboration";
 import { registerBountyTemplatesRoutes } from "./routes/bounty-templates";
 import { registerKnowledgeStackRoutes } from "./routes/knowledge-stack";
@@ -254,6 +255,8 @@ export async function registerRoutes(app: Express, existingServer?: Server): Pro
   await registerBountiesRoutes(app);
   // ▶ Job scheduler admin routes (Phase 1)
   await registerJobsRoutes(app);
+
+  await registerAdminResolutionsRoutes(app);
   // ▶ Collaboration routes extracted to server/routes/collaboration.ts
   await registerCollaborationRoutes(app);
   // ▶ BountyTemplates routes extracted to server/routes/bounty-templates.ts
