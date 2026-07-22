@@ -1,5 +1,4 @@
-import { openai as lazyOpenai } from "../lib/openaiClient";
-const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 import { db } from '../db';
 import { knowledgeAvatars, avatarConversations, type KnowledgeAvatar, type AvatarConversation } from '@shared/schema';
 import { eq, and } from 'drizzle-orm';
@@ -87,7 +86,7 @@ export async function generateAvatarChatResponse(
   userId: string,
   userMessage: string
 ): Promise<{ response: string; conversationId: string }> {
-  if (process.env.PAUSE_OPENAI_API === 'true') {
+  if (process.env.PAUSE_ANTHROPIC_API === 'true') {
     return {
       response: 'The AI chat is currently paused for maintenance. Please try again later.',
       conversationId: '',
@@ -124,17 +123,19 @@ export async function generateAvatarChatResponse(
   });
 
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: buildAvatarSystemPrompt(avatar) },
-        ...messagesForAI,
-      ],
+    const conversationText = messagesForAI
+      .map(m => `${m.role === 'assistant' ? 'Assistant' : 'User'}: ${m.content}`)
+      .join('\n');
+
+    const result = await modelGateway.complete({
+      tier: "reasoning",
+      system: buildAvatarSystemPrompt(avatar),
+      user: conversationText,
       temperature: 0.8,
-      max_tokens: 800,
+      maxTokens: 800,
     });
 
-    const assistantMessage = response.choices[0]?.message?.content || 
+    const assistantMessage = result.content || 
       "I'm having trouble formulating a response right now. Please try again.";
 
     const newAssistantMessage: ChatMessage = {

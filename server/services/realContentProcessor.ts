@@ -1,5 +1,6 @@
 import { DatabaseStorage } from '../storage';
 import { openai as lazyOpenai } from "../lib/openaiClient";
+import { modelGateway } from "../lib/modelGateway";
 const openai = lazyOpenai;
 interface VideoMetadata {
   title: string;
@@ -55,7 +56,7 @@ export class RealContentProcessor {
   }
 
   async startProcessing(url: string, userId: string): Promise<string> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       throw new Error('Content processing is temporarily paused for maintenance. Please try again later.');
     }
     
@@ -266,17 +267,12 @@ Format as JSON with these fields:
 }
 `;
 
-      const response = await this.openai.chat.completions.create({
-        model: "gpt-4o-mini", // COST OPTIMIZATION (Apr 2026): legacy/orphaned processor — no live import path. Downgraded defensively in case it gets re-wired.
-        messages: [
-          { role: "system", content: "You are an expert content analyst. Provide detailed, contextual analysis based on the actual video content provided." },
-          { role: "user", content: prompt }
-        ],
-        response_format: { type: "json_object" },
-        max_tokens: 2000
+      const result = await modelGateway.completeJson<any>({
+        tier: "reasoning",
+        system: "You are an expert content analyst. Provide detailed, contextual analysis based on the actual video content provided.",
+        user: prompt,
+        maxTokens: 2000,
       });
-
-      const result = JSON.parse(response.choices[0].message.content || '{}');
       
       return {
         transcript: `Real transcript analysis for: ${metadata.title}`,

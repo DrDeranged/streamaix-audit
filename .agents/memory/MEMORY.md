@@ -3,3 +3,4 @@
 - [Job scheduler conventions](job-scheduler.md) — all background work must go through jobScheduler; db:push blocked by blog_posts drift; admin-secret trick for testing guarded routes.
 - [PWA service worker vs Vite dev](pwa-sw-dev-cache.md) — SW must never cache dev module URLs; stale caches caused duplicate-React preview crashes.
 - [Typecheck incremental cache trap](typecheck-cache-trap.md) — `npm run check` can falsely pass via tsc incremental cache; delete tsbuildinfo for an authoritative run; many latent server errors exist.
+- [AI provider split](ai-provider-split.md) — text AI = Anthropic via modelGateway only; OpenAI = audio (whisper/tts) only; pause flags are provider-scoped.

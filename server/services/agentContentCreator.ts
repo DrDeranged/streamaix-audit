@@ -1,8 +1,5 @@
-import { openai as lazyOpenai } from "../lib/openaiClient";
-const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 import type { AgentPersonality, SkillLevel } from '../types/agents';
-
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 export interface SummaryCreationParams {
   bountyTitle: string;
@@ -30,7 +27,7 @@ export class AgentContentCreator {
     keyInsights: any[];
     quality: number;
   } | null> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       console.log(`      ⏸️ OpenAI API paused - skipping summary generation`);
       return null;
     }
@@ -40,23 +37,15 @@ export class AgentContentCreator {
       
       const prompt = this.buildSummaryPrompt(params);
       
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: this.getSummarySystemPrompt(params.skillLevel),
-          },
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
+      const response = await modelGateway.complete({
+        tier: 'fast',
+        system: this.getSummarySystemPrompt(params.skillLevel),
+        user: prompt,
         temperature: this.getTemperatureForSkill(params.skillLevel),
-        max_tokens: 1500,
+        maxTokens: 1500,
       });
       
-      const content = response.choices[0]?.message?.content;
+      const content = response.content;
       if (!content) return null;
       
       // Parse the generated content
@@ -82,7 +71,7 @@ export class AgentContentCreator {
    * Generate a comment for social engagement
    */
   async generateComment(params: CommentCreationParams): Promise<string | null> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       console.log(`      ⏸️ OpenAI API paused - skipping comment generation`);
       return null;
     }
@@ -92,23 +81,15 @@ export class AgentContentCreator {
       
       const prompt = this.buildCommentPrompt(params);
       
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a crypto community member leaving thoughtful comments. Be concise, authentic, and add value. 1-3 sentences max.',
-          },
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
+      const response = await modelGateway.complete({
+        tier: 'fast',
+        system: 'You are a crypto community member leaving thoughtful comments. Be concise, authentic, and add value. 1-3 sentences max.',
+        user: prompt,
         temperature: 0.9,
-        max_tokens: 150,
+        maxTokens: 150,
       });
       
-      const comment = response.choices[0]?.message?.content?.trim();
+      const comment = response.content?.trim();
       
       if (!comment) return null;
       
@@ -137,23 +118,15 @@ export class AgentContentCreator {
 
 Provide a brief, data-driven rationale (2-3 sentences). Consider your trading style: ${params.personality.tradingStyle}.`;
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a crypto trader explaining your market predictions. Be concise and analytical.',
-          },
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
+      const response = await modelGateway.complete({
+        tier: 'fast',
+        system: 'You are a crypto trader explaining your market predictions. Be concise and analytical.',
+        user: prompt,
         temperature: 0.7,
-        max_tokens: 200,
+        maxTokens: 200,
       });
       
-      return response.choices[0]?.message?.content?.trim() || null;
+      return response.content?.trim() || null;
       
     } catch (error: any) {
       console.error(`      ❌ Rationale generation failed:`, error.message);

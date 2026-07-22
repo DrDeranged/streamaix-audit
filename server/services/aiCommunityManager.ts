@@ -1,10 +1,8 @@
 import { db } from '../db';
 import { conversations, users, autonomousSystemLogs } from '@shared/schema';
 import { eq, desc, and, isNull, sql } from 'drizzle-orm';
-import { openai as lazyOpenai } from "../lib/openaiClient";
+import { modelGateway } from "../lib/modelGateway";
 import { jobScheduler } from '../jobs/scheduler';
-const openai = lazyOpenai;
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 export class AICommunityManager {
   private isRunning: boolean = false;
@@ -20,7 +18,7 @@ export class AICommunityManager {
       return;
     }
 
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       console.log('👥 [Community Manager] ⏸️ OpenAI API paused - community manager disabled');
       return;
     }
@@ -163,17 +161,15 @@ Generate a helpful, friendly reply that:
 
 Keep it natural and conversational. Don't be overly formal or robotic.`;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // COST OPTIMIZATION: 90% cheaper for community replies
-      messages: [
-        { role: "system", content: "You are a helpful community manager. Be friendly and concise." },
-        { role: "user", content: prompt }
-      ],
-      max_tokens: 150,
+    const completion = await modelGateway.complete({
+      tier: "fast",
+      system: "You are a helpful community manager. Be friendly and concise.",
+      user: prompt,
+      maxTokens: 150,
       temperature: 0.8,
     });
 
-    return completion.choices[0].message.content?.trim() || "Thanks for sharing!";
+    return completion.content?.trim() || "Thanks for sharing!";
   }
 
   private async postReply(post: any, content: string) {

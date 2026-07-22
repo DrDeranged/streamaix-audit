@@ -1,4 +1,5 @@
 import { openai as lazyOpenai } from "../lib/openaiClient";
+import { modelGateway } from "../lib/modelGateway";
 const openai = lazyOpenai;
 import { z } from 'zod';
 import { marketDataService, type CryptoQuote } from './marketDataService';
@@ -139,20 +140,16 @@ export class VoiceAssistantService {
       .getCryptoQuotes(TRACKED_SYMBOLS)
       .catch((): CryptoQuote[] => []);
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: buildSystemPrompt(context, market) },
-        { role: 'user', content: transcript },
-      ],
-      response_format: { type: 'json_object' },
-      max_tokens: 500,
-      temperature: 0.5,
-    });
-
-    const raw = completion.choices[0]?.message?.content || '{}';
-    const parsedJson: unknown = JSON.parse(raw);
-    const parsed = modelOutputSchema.parse(parsedJson);
+    const parsed = await modelGateway.completeJson(
+      {
+        tier: 'fast',
+        system: buildSystemPrompt(context, market),
+        user: transcript,
+        maxTokens: 500,
+        temperature: 0.5,
+      },
+      (json) => modelOutputSchema.parse(json),
+    );
 
     return {
       spokenResponse: parsed.spokenResponse,

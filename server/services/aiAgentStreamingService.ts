@@ -2,8 +2,6 @@ import { db } from '../db';
 import { liveStreams, users, knowledgeAvatars, aiAgents, streamMessages } from '@shared/schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { getStreamingService } from './streamingService';
-import { openai as lazyOpenai } from "../lib/openaiClient";
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 interface AIAgentStreamConfig {
   agentId: string;
@@ -53,8 +51,8 @@ export class AIAgentStreamingService {
   private isRunning = false;
 
   async startAIAgentStream(config: AIAgentStreamConfig): Promise<string | null> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
-      console.log('[AI Streaming] ⏸️ OpenAI API paused - AI agent stream disabled');
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
+      console.log('[AI Streaming] ⏸️ Anthropic API paused - AI agent stream disabled');
       return null;
     }
     

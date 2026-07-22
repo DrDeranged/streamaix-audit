@@ -1,10 +1,8 @@
 import { db } from '../db';
 import { predictionMarkets, users, autonomousSystemLogs } from '@shared/schema';
 import { sql } from 'drizzle-orm';
-import { openai as lazyOpenai } from "../lib/openaiClient";
+import { modelGateway } from "../lib/modelGateway";
 import { jobScheduler } from '../jobs/scheduler';
-const openai = lazyOpenai;
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 interface TreasuryReport {
   totalFees: number;
@@ -27,7 +25,7 @@ export class AITreasuryManager {
       return;
     }
 
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       console.log('💰 [Treasury Manager] ⏸️ OpenAI API paused - treasury manager disabled');
       return;
     }
@@ -145,17 +143,12 @@ GUIDELINES:
 - Keep 10-30% in reserve for operations
 - Prioritize high-volume markets for liquidity additions`;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // COST OPTIMIZATION: 90% cheaper for treasury management
-      messages: [
-        { role: "system", content: "You are a treasury manager. Always return valid JSON." },
-        { role: "user", content: prompt }
-      ],
-      response_format: { type: "json_object" },
+    const response = await modelGateway.completeJson<any>({
+      tier: "fast",
+      system: "You are a treasury manager. Always return valid JSON.",
+      user: prompt,
       temperature: 0.3,
     });
-
-    const response = JSON.parse(completion.choices[0].message.content || '{}');
 
     return {
       totalFees: feeData.totalFees,

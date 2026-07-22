@@ -1,9 +1,6 @@
-import { openai as lazyOpenai } from "../lib/openaiClient";
-const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 import { marketDataService } from './marketDataService';
 import { derivativesAnalyticsService } from './derivativesAnalyticsService';
-
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 interface MarketContext {
   symbol: string;
@@ -83,7 +80,7 @@ class AlphaInsightsEngine {
     change24h: number,
     additionalContext?: { fundingRate?: number; volume24h?: number }
   ): Promise<PriceAlertInsight> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       return {
         headline: `${symbol} moved ${hourlyChange > 0 ? 'up' : 'down'} ${Math.abs(hourlyChange).toFixed(1)}%`,
         whyItMoved: 'AI analysis paused',
@@ -120,16 +117,13 @@ Respond in this EXACT JSON format (no markdown):
 
 Be specific, avoid generic statements. Reference actual levels and patterns.`;
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 300,
+      const insight = await modelGateway.completeJson<PriceAlertInsight>({
+        tier: 'reasoning',
+        system: 'You are a helpful assistant.',
+        user: prompt,
+        maxTokens: 300,
         temperature: 0.7,
       });
-
-      const content = response.choices[0]?.message?.content || '';
-      const cleanContent = content.replace(/```json\n?|\n?```/g, '').trim();
-      const insight = JSON.parse(cleanContent) as PriceAlertInsight;
       
       this.setCache(cacheKey, insight);
       return insight;
@@ -150,7 +144,7 @@ Be specific, avoid generic statements. Reference actual levels and patterns.`;
     economicEvents: any[],
     tradingMetrics?: { btcFunding?: number; ethFunding?: number; totalOI?: number }
   ): Promise<MorningBriefingInsight> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       const avgChange = cryptoData.reduce((sum, c) => sum + c.change24h, 0) / cryptoData.length;
       return {
         marketRegime: avgChange > 0 ? 'Risk-on environment' : 'Risk-off conditions',
@@ -202,16 +196,13 @@ Respond in this EXACT JSON format (no markdown):
 
 Be specific with levels and setups. No generic advice.`;
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 400,
+      const insight = await modelGateway.completeJson<MorningBriefingInsight>({
+        tier: 'reasoning',
+        system: 'You are a helpful assistant.',
+        user: prompt,
+        maxTokens: 400,
         temperature: 0.7,
       });
-
-      const content = response.choices[0]?.message?.content || '';
-      const cleanContent = content.replace(/```json\n?|\n?```/g, '').trim();
-      const insight = JSON.parse(cleanContent) as MorningBriefingInsight;
       
       this.setCache(cacheKey, insight);
       return insight;
@@ -233,7 +224,7 @@ Be specific with levels and setups. No generic advice.`;
     cryptoData: MarketContext[],
     tradingMetrics?: { totalLiquidations?: number; dominantSide?: string }
   ): Promise<EveningRecapInsight> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       const avgChange = cryptoData.reduce((sum, c) => sum + c.change24h, 0) / cryptoData.length;
       return {
         dayAnalysis: avgChange > 0 ? 'Bulls maintained control' : 'Bears dominated',
@@ -278,16 +269,13 @@ Respond in this EXACT JSON format (no markdown):
 
 Be specific about levels, not vague. Reference actual price action.`;
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 350,
+      const insight = await modelGateway.completeJson<EveningRecapInsight>({
+        tier: 'reasoning',
+        system: 'You are a helpful assistant.',
+        user: prompt,
+        maxTokens: 350,
         temperature: 0.7,
       });
-
-      const content = response.choices[0]?.message?.content || '';
-      const cleanContent = content.replace(/```json\n?|\n?```/g, '').trim();
-      const insight = JSON.parse(cleanContent) as EveningRecapInsight;
       
       this.setCache(cacheKey, insight);
       return insight;
@@ -351,16 +339,13 @@ Respond in this EXACT JSON format (no markdown):
 
 Focus on actionable advice, avoid generic statements.`;
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 300,
+      const insight = await modelGateway.completeJson<TradingSignalInsight>({
+        tier: 'reasoning',
+        system: 'You are a helpful assistant.',
+        user: prompt,
+        maxTokens: 300,
         temperature: 0.7,
       });
-
-      const content = response.choices[0]?.message?.content || '';
-      const cleanContent = content.replace(/```json\n?|\n?```/g, '').trim();
-      const insight = JSON.parse(cleanContent) as TradingSignalInsight;
       
       this.setCache(cacheKey, insight);
       return insight;
@@ -408,16 +393,13 @@ Respond in this EXACT JSON format (no markdown):
 
 Be bold but responsible. This is high-conviction alpha.`;
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 350,
+      const insight = await modelGateway.completeJson<AlphaInsight>({
+        tier: 'reasoning',
+        system: 'You are a helpful assistant.',
+        user: prompt,
+        maxTokens: 350,
         temperature: 0.6,
       });
-
-      const content = response.choices[0]?.message?.content || '';
-      const cleanContent = content.replace(/```json\n?|\n?```/g, '').trim();
-      const insight = JSON.parse(cleanContent) as AlphaInsight;
       
       return insight;
     } catch (error) {
@@ -462,16 +444,13 @@ Respond in this EXACT JSON format (no markdown):
 
 This is high-conviction alpha from multiple signals aligning. Be specific with levels.`;
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 200,
+      const insight = await modelGateway.completeJson<{ recommendation: string; timeframe: string; riskReward: string }>({
+        tier: 'reasoning',
+        system: 'You are a helpful assistant.',
+        user: prompt,
+        maxTokens: 200,
         temperature: 0.7,
       });
-
-      const content = response.choices[0]?.message?.content || '';
-      const cleanContent = content.replace(/```json\n?|\n?```/g, '').trim();
-      const insight = JSON.parse(cleanContent);
       
       this.setCache(cacheKey, insight);
       return insight;

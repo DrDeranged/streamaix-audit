@@ -1,5 +1,4 @@
-import { openai as lazyOpenai } from "../lib/openaiClient";
-const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 import { db } from "../db";
 import { predictionMarkets, users, knowledgeAvatars } from "@shared/schema";
 import { eq } from "drizzle-orm";
@@ -21,7 +20,7 @@ export class AvatarMarketGenerator {
    * Generate prediction markets based on avatar's activities and investments
    */
   async generateMarketsForAvatar(avatarId: string): Promise<GeneratedMarket[]> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       console.log('⏸️ OpenAI API paused - skipping avatar market generation');
       return [];
     }
@@ -74,23 +73,12 @@ Format your response as JSON array:
   }
 ]`;
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper for market generation
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert at creating engaging, tradeable prediction markets about influential people in crypto and tech.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
+      const result = await modelGateway.completeJson<any>({
+        tier: "reasoning",
+        system: 'You are an expert at creating engaging, tradeable prediction markets about influential people in crypto and tech.',
+        user: prompt,
         temperature: 0.8,
-        response_format: { type: "json_object" }
       });
-
-      const result = JSON.parse(response.choices[0].message.content || '{"markets": []}');
       const markets = result.markets || [];
 
       return markets.map((m: any) => {

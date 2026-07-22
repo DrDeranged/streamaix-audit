@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { modelGateway } from '../lib/modelGateway';
 import { ContentExtractor } from './contentExtractor';
 import { exec } from 'child_process';
 import { promises as fs, createReadStream } from 'fs';
@@ -114,8 +115,6 @@ export class AIService {
     }>;
     tags: string[];
   }> {
-    const client = this.getClient();
-    
     const lengthGuidance = {
       short: 'Keep the summary concise (200-400 words)',
       medium: 'Provide a detailed summary (400-800 words)',
@@ -128,88 +127,56 @@ export class AIService {
     const startTime = Date.now();
 
     try {
-      // Run all 4 API calls in PARALLEL for ~40% faster processing - ALL use GPT-4o-mini for 90% cost savings
+      // Run all 4 API calls in PARALLEL for ~40% faster processing
       const [summaryResponse, insightsResponse, chaptersResponse, tagsResponse] = await Promise.all([
-        // Generate main summary (GPT-4o-mini - cost optimized)
-        client.chat.completions.create({
-          model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper
-          messages: [
-            {
-              role: 'system',
-              content: `You are an expert content summarizer specializing in ${options.contentType} content. ${lengthGuidance[targetLength]}. Focus on practical insights and actionable takeaways.`
-            },
-            {
-              role: 'user',
-              content: `Please summarize this ${options.contentType} titled "${options.title}":\n\n${transcript}`
-            }
-          ],
+        // Generate main summary
+        modelGateway.complete({
+          tier: 'fast',
+          system: `You are an expert content summarizer specializing in ${options.contentType} content. ${lengthGuidance[targetLength]}. Focus on practical insights and actionable takeaways.`,
+          user: `Please summarize this ${options.contentType} titled "${options.title}":\n\n${transcript}`,
           temperature: 0.3,
-          max_tokens: targetLength === 'long' ? 1500 : targetLength === 'medium' ? 1000 : 600
+          maxTokens: targetLength === 'long' ? 1500 : targetLength === 'medium' ? 1000 : 600
         }),
         
-        // Extract key insights (GPT-4o-mini - cost optimized)
-        client.chat.completions.create({
-          model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper
-          messages: [
-            {
-              role: 'system',
-              content: 'Extract 5-8 key insights from this content. Rate each insight as high, medium, or low importance. Return as JSON array.'
-            },
-            {
-              role: 'user',
-              content: `Extract key insights from: ${transcript.slice(0, 12000)}...`
-            }
-          ],
+        // Extract key insights
+        modelGateway.complete({
+          tier: 'fast',
+          system: 'Extract 5-8 key insights from this content. Rate each insight as high, medium, or low importance. Return as JSON array.',
+          user: `Extract key insights from: ${transcript.slice(0, 12000)}...`,
           temperature: 0.2,
-          max_tokens: 800
+          maxTokens: 800
         }),
         
-        // Generate chapter breakdown (GPT-4o-mini - cost optimized)
-        client.chat.completions.create({
-          model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper
-          messages: [
-            {
-              role: 'system',
-              content: 'Break this ENTIRE content into comprehensive logical chapters with accurate timestamps covering the FULL duration. Create detailed chapters for the complete content, not just the beginning. Return as JSON array with title, startTime, endTime, and summary for each chapter. Include all sections and ensure timestamps span the entire content length.'
-            },
-            {
-              role: 'user',
-              content: `Create chapters for: ${transcript.slice(0, 15000)}...`
-            }
-          ],
+        // Generate chapter breakdown
+        modelGateway.complete({
+          tier: 'fast',
+          system: 'Break this ENTIRE content into comprehensive logical chapters with accurate timestamps covering the FULL duration. Create detailed chapters for the complete content, not just the beginning. Return as JSON array with title, startTime, endTime, and summary for each chapter. Include all sections and ensure timestamps span the entire content length.',
+          user: `Create chapters for: ${transcript.slice(0, 15000)}...`,
           temperature: 0.2,
-          max_tokens: 2000
+          maxTokens: 2000
         }),
         
-        // Generate relevant tags (GPT-4o-mini for speed - simple task)
-        client.chat.completions.create({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'system',
-              content: 'Generate 5-10 relevant tags for this content. Return as JSON array of strings.'
-            },
-            {
-              role: 'user',
-              content: `Generate tags for "${options.title}": ${transcript.slice(0, 8000)}...`
-            }
-          ],
+        // Generate relevant tags
+        modelGateway.complete({
+          tier: 'fast',
+          system: 'Generate 5-10 relevant tags for this content. Return as JSON array of strings.',
+          user: `Generate tags for "${options.title}": ${transcript.slice(0, 8000)}...`,
           temperature: 0.3,
-          max_tokens: 200
+          maxTokens: 200
         })
       ]);
       
       const processingTime = ((Date.now() - startTime) / 1000).toFixed(1);
       console.log(`✅ Parallel AI analysis complete in ${processingTime}s (vs ~${(parseFloat(processingTime) * 2.5).toFixed(1)}s sequential)`);
 
-      const summary = summaryResponse.choices[0]?.message?.content || '';
+      const summary = summaryResponse.content || '';
       
       let keyInsights: any[] = [];
       let chapters: any[] = [];
       let tags: string[] = [];
 
       try {
-        keyInsights = JSON.parse(insightsResponse.choices[0]?.message?.content || '[]');
+        keyInsights = JSON.parse(insightsResponse.content || '[]');
       } catch {
         keyInsights = [
           { insight: 'Key insights extraction in progress', importance: 'medium' }
@@ -217,7 +184,7 @@ export class AIService {
       }
 
       try {
-        chapters = JSON.parse(chaptersResponse.choices[0]?.message?.content || '[]');
+        chapters = JSON.parse(chaptersResponse.content || '[]');
       } catch {
         chapters = [
           { title: 'Full Content', startTime: '0:00', endTime: '0:00', summary: summary.slice(0, 200) }
@@ -225,7 +192,7 @@ export class AIService {
       }
 
       try {
-        tags = JSON.parse(tagsResponse.choices[0]?.message?.content || '[]');
+        tags = JSON.parse(tagsResponse.content || '[]');
       } catch {
         tags = ['AI Generated', options.contentType, 'Summary'];
       }
@@ -422,27 +389,15 @@ This transcript represents ${extractedContent.duration} seconds of processed aud
    * Generate chapters from transcript and segments
    */
   private static async generateChapters(transcript: string, segments?: any[]): Promise<any[]> {
-    const client = this.getClient();
-    
     try {
-      const response = await client.chat.completions.create({
-        model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper for chapter generation
-        messages: [
-          {
-            role: 'system',
-            content: 'Generate chapter markers from the transcript. Return as JSON array with title, start_time, end_time, and summary for each chapter. Aim for 5-8 chapters.'
-          },
-          {
-            role: 'user',
-            content: `Transcript: ${transcript.substring(0, 4000)}...`
-          }
-        ],
-        response_format: { type: "json_object" },
+      const result = await modelGateway.completeJson<{ chapters?: any[] }>({
+        tier: 'fast',
+        system: 'Generate chapter markers from the transcript. Return as JSON array with title, start_time, end_time, and summary for each chapter. Aim for 5-8 chapters.',
+        user: `Transcript: ${transcript.substring(0, 4000)}...`,
         temperature: 0.3,
-        max_tokens: 1000
+        maxTokens: 1000
       });
 
-      const result = JSON.parse(response.choices[0].message.content || '{"chapters": []}');
       return result.chapters || [];
     } catch (error) {
       console.error('Chapter generation failed:', error);
@@ -461,28 +416,18 @@ This transcript represents ${extractedContent.duration} seconds of processed aud
       confidence: number;
     }>;
   }> {
-    const client = this.getClient();
-
     try {
-      const response = await client.chat.completions.create({
-        model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper for recommendations
-        messages: [
-          {
-            role: 'system',
-            content: 'Generate personalized content recommendations based on user interests and recent activity. Return as JSON array.'
-          },
-          {
-            role: 'user',
-            content: `User interests: ${userInterests.join(', ')}\nRecent summaries: ${JSON.stringify(recentSummaries.slice(0, 3))}`
-          }
-        ],
+      const response = await modelGateway.complete({
+        tier: 'fast',
+        system: 'Generate personalized content recommendations based on user interests and recent activity. Return as JSON array.',
+        user: `User interests: ${userInterests.join(', ')}\nRecent summaries: ${JSON.stringify(recentSummaries.slice(0, 3))}`,
         temperature: 0.4,
-        max_tokens: 600
+        maxTokens: 600
       });
 
       let recommendations = [];
       try {
-        recommendations = JSON.parse(response.choices[0]?.message?.content || '[]');
+        recommendations = JSON.parse(response.content || '[]');
       } catch {
         recommendations = [
           {
@@ -533,15 +478,10 @@ This transcript represents ${extractedContent.duration} seconds of processed aud
     conflicts: any[];
     outlook: string;
   }> {
-    const client = this.getClient();
-
     try {
-      const response = await client.chat.completions.create({
-        model: 'gpt-4o-mini', // COST OPTIMIZATION: 60x cheaper than GPT-4o for content analysis
-        messages: [
-          {
-            role: 'system',
-            content: `Extract ALL comprehensive intelligence from content in a single analysis. Include:
+      const result = await modelGateway.completeJson<any>({
+        tier: 'reasoning',
+        system: `Extract ALL comprehensive intelligence from content in a single analysis. Include:
 
 CONTENT ANALYSIS:
 - Key trends (with strength/evidence)
@@ -560,20 +500,12 @@ CREDIBILITY & SENTIMENT:
 - Conflicting viewpoints
 - Overall outlook
 
-Return comprehensive JSON with ALL analysis in one response to maximize efficiency.`
-          },
-          {
-            role: 'user',
-            content: `Title: "${title}"\nContent: ${transcript.substring(0, 20000)}` // Increased to process full content length
-          }
-        ],
-        response_format: { type: "json_object" },
+Return comprehensive JSON with ALL analysis in one response to maximize efficiency.`,
+        user: `Title: "${title}"\nContent: ${transcript.substring(0, 20000)}`, // Increased to process full content length
         temperature: 0.1,
-        max_tokens: 3000 // Increased to handle comprehensive full-length content analysis
+        maxTokens: 3000 // Increased to handle comprehensive full-length content analysis
       });
 
-      const result = JSON.parse(response.choices[0].message.content || '{}');
-      
       return {
         keyInsights: result.keyInsights || [
           { insight: "Main technology trends shifting toward decentralization", importance: "high", timestamp: "2:15", category: "technology" },
@@ -663,15 +595,10 @@ Return comprehensive JSON with ALL analysis in one response to maximize efficien
     conflicts: any[];
     outlook: string;
   }> {
-    const client = this.getClient();
-
     try {
-      const response = await client.chat.completions.create({
-        model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper for sentiment analysis
-        messages: [
-          {
-            role: 'system',
-            content: `Analyze the market sentiment, identify conflicting viewpoints, and provide overall market outlook. 
+      const result = await modelGateway.completeJson<any>({
+        tier: 'fast',
+        system: `Analyze the market sentiment, identify conflicting viewpoints, and provide overall market outlook. 
             
             Extract:
             1. Overall sentiment (BULLISH/BEARISH/NEUTRAL/MIXED)
@@ -680,20 +607,12 @@ Return comprehensive JSON with ALL analysis in one response to maximize efficien
             4. Sentiment drivers and catalysts
             5. Fear/greed indicators mentioned
             
-            Return detailed JSON analysis.`
-          },
-          {
-            role: 'user',
-            content: `Sentiment analysis for: ${transcript.substring(0, 3000)}`
-          }
-        ],
-        response_format: { type: "json_object" },
+            Return detailed JSON analysis.`,
+        user: `Sentiment analysis for: ${transcript.substring(0, 3000)}`,
         temperature: 0.2,
-        max_tokens: 1000
+        maxTokens: 1000
       });
 
-      const result = JSON.parse(response.choices[0].message.content || '{}');
-      
       return {
         sentiment: result.overallSentiment || "NEUTRAL",
         conflicts: result.conflictingViews || [
@@ -718,35 +637,22 @@ Return comprehensive JSON with ALL analysis in one response to maximize efficien
     credibilityScore: number;
     sourceRating: string;
   }> {
-    const client = this.getClient();
-
     try {
-      const response = await client.chat.completions.create({
-        model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper for credibility analysis
-        messages: [
-          {
-            role: 'system',
-            content: `Assess the credibility of the speaker/source based on:
+      const result = await modelGateway.completeJson<any>({
+        tier: 'fast',
+        system: `Assess the credibility of the speaker/source based on:
             1. Track record mentions
             2. Specific credentials or achievements
             3. Quality of analysis depth
             4. Balanced vs biased viewpoints
             5. Use of data and evidence
             
-            Return credibility score (0-100) and rating (A+, A, B+, B, C+, C, D).`
-          },
-          {
-            role: 'user',
-            content: `Assess credibility for: "${title}"\n\nContent: ${transcript.substring(0, 2000)}`
-          }
-        ],
-        response_format: { type: "json_object" },
+            Return credibility score (0-100) and rating (A+, A, B+, B, C+, C, D).`,
+        user: `Assess credibility for: "${title}"\n\nContent: ${transcript.substring(0, 2000)}`,
         temperature: 0.1,
-        max_tokens: 500
+        maxTokens: 500
       });
 
-      const result = JSON.parse(response.choices[0].message.content || '{}');
-      
       return {
         credibilityScore: result.credibilityScore || 75,
         sourceRating: result.sourceRating || "B+"

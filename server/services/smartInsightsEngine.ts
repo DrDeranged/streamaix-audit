@@ -1,5 +1,4 @@
-import { openai as lazyOpenai } from "../lib/openaiClient";
-const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 import { z } from 'zod';
 import { marketDataService, type CryptoQuote } from './marketDataService';
 import { cacheService } from './cacheService';
@@ -160,7 +159,7 @@ export class SmartInsightsEngine {
       marketCap: c.marketCap ?? 0,
     }));
 
-    if (process.env.PAUSE_OPENAI_API === 'true' || !process.env.OPENAI_API_KEY) {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true' || !process.env.ANTHROPIC_API_KEY) {
       const fb = buildFallback(snapshot);
       cacheService.set(CACHE_KEY, fb, CACHE_TTL_SECONDS);
       return fb;
@@ -222,24 +221,17 @@ Respond with EXACT JSON (no markdown):
 }`;
 
     try {
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o', // PREMIUM JUSTIFIED (Apr 2026): highest-visibility surface; reasoning-chain quality directly drives the investor pitch demo
-        messages: [
-          {
-            role: 'system',
-            content:
-              'You are a senior crypto market strategist. You always show reasoning step by step using the exact numbers given. Output strict JSON only.',
-          },
-          { role: 'user', content: prompt },
-        ],
-        response_format: { type: 'json_object' },
-        max_tokens: 1800,
-        temperature: 0.6,
-      });
-
-      const raw = response.choices[0]?.message?.content || '{}';
-      const parsedJson: unknown = JSON.parse(raw);
-      const parsed = openAiPayloadSchema.parse(parsedJson);
+      const parsed = await modelGateway.completeJson(
+        {
+          tier: 'reasoning',
+          system:
+            'You are a senior crypto market strategist. You always show reasoning step by step using the exact numbers given. Output strict JSON only.',
+          user: prompt,
+          maxTokens: 1800,
+          temperature: 0.6,
+        },
+        (json) => openAiPayloadSchema.parse(json),
+      );
       const now = new Date().toISOString();
 
       const payload: SmartInsightsPayload = {

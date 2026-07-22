@@ -4,8 +4,7 @@ import { eq, sql, desc, and, ne } from 'drizzle-orm';
 import { getStreamingService } from './streamingService';
 import { AvatarVoiceService } from './avatarVoiceService';
 import { AvatarPodcastEngine } from './avatarPodcastEngine';
-import { openai as lazyOpenai } from "../lib/openaiClient";
-const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 // openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 interface ActiveVoiceStream {
@@ -185,26 +184,21 @@ export class AutonomousAvatarStreamService {
 
   private async generateStreamTopic(avatar: any, streamType: string): Promise<string> {
     try {
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `You are creating a topic for a crypto live stream by ${avatar.name}.
+      const response = await modelGateway.complete({
+        tier: 'fast',
+        system: `You are creating a topic for a crypto live stream by ${avatar.name}.
 Their expertise: ${avatar.expertise || 'crypto markets'}
 Their investment thesis: ${avatar.investmentThesis || 'strategic investing'}
 Stream type: ${streamType}
 
 Generate a specific, engaging topic (5-10 words) that ${avatar.name} would discuss.
-Just output the topic, nothing else.`
-          },
-          { role: 'user', content: 'Generate the stream topic:' }
-        ],
-        max_tokens: 30,
+Just output the topic, nothing else.`,
+        user: 'Generate the stream topic:',
+        maxTokens: 30,
         temperature: 0.9,
       });
 
-      return response.choices[0]?.message?.content?.trim() || 'Market Analysis and Alpha Insights';
+      return response.content?.trim() || 'Market Analysis and Alpha Insights';
     } catch (error) {
       console.error('[Avatar Voice] Topic generation error:', error);
       return 'Current Market Dynamics and Trading Opportunities';

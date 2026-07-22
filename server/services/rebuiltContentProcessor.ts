@@ -1,5 +1,6 @@
 import { DatabaseStorage } from '../storage';
 import OpenAI from 'openai';
+import { modelGateway } from "../lib/modelGateway";
 import { marketDataService } from './marketDataService';
 import { comprehensiveMarketService } from './comprehensiveMarketService';
 
@@ -70,7 +71,7 @@ export class RebuiltContentProcessor {
   async processContent(url: string, userId?: string, options?: {
     useTranscription?: boolean;
   }): Promise<{ summaryId: string }> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       throw new Error('Content processing is temporarily paused for maintenance. Please try again later.');
     }
     
@@ -724,17 +725,12 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
 `.replace('DYNAMIC_CHAPTERS_PLACEHOLDER', dynamicChapters);
 
     try {
-      const response = await this.openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          { role: "system", content: "You are an expert business analyst and prediction market specialist. Provide detailed, accurate analysis based on the video content, including tradeable prediction markets." },
-          { role: "user", content: prompt }
-        ],
-        response_format: { type: "json_object" },
-        max_tokens: 4000  // Increased for unified response with prediction markets
+      const result = await modelGateway.completeJson<any>({
+        tier: "reasoning",
+        system: "You are an expert business analyst and prediction market specialist. Provide detailed, accurate analysis based on the video content, including tradeable prediction markets.",
+        user: prompt,
+        maxTokens: 4000,  // Increased for unified response with prediction markets
       });
-
-      const result = JSON.parse(response.choices[0].message.content || '{}');
       
       // Return ONLY real AI analysis results - no fallbacks or mock data
       if (!result.summary || !result.tldrSummary || !result.bulletPoints) {

@@ -1,5 +1,4 @@
-import { openai as lazyOpenai } from "../lib/openaiClient";
-const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 import { marketDataService } from './marketDataService';
 
 // openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
@@ -982,16 +981,10 @@ class AlphaIntelligenceService {
     const fetPrice = livePrices.get('FET') || 1.35;
 
     try {
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `You are an expert crypto trading analyst. Generate 3 actionable trade ideas based on REAL current market prices provided. For each trade, provide entry, target, stop loss, and reasoning. Focus on risk/reward > 2:1. Return JSON array only.`
-          },
-          {
-            role: 'user',
-            content: `Generate 3 crypto trade ideas using these LIVE CoinGecko prices:
+      const response = await modelGateway.complete({
+        tier: "reasoning",
+        system: `You are an expert crypto trading analyst. Generate 3 actionable trade ideas based on REAL current market prices provided. For each trade, provide entry, target, stop loss, and reasoning. Focus on risk/reward > 2:1. Return JSON array only.`,
+        user: `Generate 3 crypto trade ideas using these LIVE CoinGecko prices:
             - BTC: $${btcPrice.toLocaleString()}
             - ETH: $${ethPrice.toLocaleString()}
             - SOL: $${solPrice.toFixed(2)}
@@ -999,14 +992,12 @@ class AlphaIntelligenceService {
             - FET: $${fetPrice.toFixed(3)}
             
             Return format:
-            [{"asset": "TOKEN", "direction": "long/short", "entry": price, "target": price, "stopLoss": price, "riskReward": number, "confidence": 1-100, "timeframe": "4h/1d/1w", "reasoning": "brief explanation", "signals": ["signal1", "signal2"]}]`
-          }
-        ],
-        max_tokens: 1000,
-        temperature: 0.7
+            [{"asset": "TOKEN", "direction": "long/short", "entry": price, "target": price, "stopLoss": price, "riskReward": number, "confidence": 1-100, "timeframe": "4h/1d/1w", "reasoning": "brief explanation", "signals": ["signal1", "signal2"]}]`,
+        maxTokens: 1000,
+        temperature: 0.7,
       });
 
-      const content = response.choices[0].message.content || '[]';
+      const content = response.content || '[]';
       const ideas = JSON.parse(content.replace(/```json\n?|\n?```/g, ''));
       
       const formattedIdeas = ideas.map((idea: any, idx: number) => ({

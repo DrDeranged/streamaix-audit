@@ -1,5 +1,4 @@
-import { openai as lazyOpenai } from "../lib/openaiClient";
-const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 import { db } from '../db';
 import { 
   liveStreams, streamMessages, streamParticipants, streamTips, streamPredictions, 
@@ -11,8 +10,6 @@ import { eq, and, desc, gt, sql, ne, isNull } from 'drizzle-orm';
 import { getStreamingService } from './streamingService';
 import { AvatarVoiceService } from './avatarVoiceService';
 import webpush from 'web-push';
-
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 interface MarketData {
   symbol: string;
@@ -59,7 +56,7 @@ export class EnhancedStreamingService {
   private priceAlertThreshold = 2.0;
 
   async generateAIMarketCommentary(streamId: string): Promise<string | null> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       return null;
     }
     
@@ -83,14 +80,15 @@ Stream tags: ${stream.tags?.join(', ') || 'general crypto'}
 
 Generate a brief, engaging market update (2-3 sentences max) that would be relevant to the stream's audience. Be conversational and include one actionable insight. Don't use emojis excessively.`;
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 150,
+      const response = await modelGateway.complete({
+        tier: 'fast',
+        system: 'You are a helpful assistant.',
+        user: prompt,
+        maxTokens: 150,
         temperature: 0.8,
       });
 
-      return response.choices[0]?.message?.content || null;
+      return response.content || null;
     } catch (error) {
       console.error('[EnhancedStreaming] Error generating AI commentary:', error);
       return null;
@@ -227,14 +225,15 @@ ${predictions.slice(0, 5).map(p => `- ${p.predictionText}`).join('\n')}
 
 Create a concise 3-4 sentence summary highlighting the main topics discussed, key market insights shared, and any notable predictions made. This will be shown to users who missed the stream.`;
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 250,
+      const response = await modelGateway.complete({
+        tier: 'fast',
+        system: 'You are a helpful assistant.',
+        user: prompt,
+        maxTokens: 250,
         temperature: 0.7,
       });
 
-      const summary = response.choices[0]?.message?.content;
+      const summary = response.content;
       
       if (summary) {
         await db.update(liveStreams)
@@ -271,14 +270,15 @@ Return a JSON array of key moments with this format:
 
 Focus on: market insights, price predictions, important announcements, and viewer engagement spikes.`;
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 500,
+      const response = await modelGateway.complete({
+        tier: 'fast',
+        system: 'You are a helpful assistant.',
+        user: prompt,
+        maxTokens: 500,
         temperature: 0.5,
       });
 
-      const content = response.choices[0]?.message?.content;
+      const content = response.content;
       if (!content) return [];
 
       const jsonMatch = content.match(/\[[\s\S]*\]/);
@@ -758,7 +758,7 @@ Focus on: market insights, price predictions, important announcements, and viewe
   }
 
   isTtsActiveForStream(streamId: string): boolean {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       return false;
     }
     return this.ttsActivatedStreams.has(streamId);
@@ -1126,7 +1126,7 @@ Focus on: market insights, price predictions, important announcements, and viewe
       return { audioBase64: cached, fromCache: true };
     }
 
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       throw new Error('OpenAI API is paused');
     }
 
@@ -1316,26 +1316,21 @@ Focus on: market insights, price predictions, important announcements, and viewe
     currentPrice: number,
     avatarName: string
   ): Promise<string> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       const direction = priceChange > 0 ? 'up' : 'down';
       return `${symbol} just moved ${Math.abs(priceChange).toFixed(1)}% ${direction} to $${currentPrice.toLocaleString()}!`;
     }
 
     const direction = priceChange > 0 ? 'surged' : 'dropped';
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [{
-        role: 'system',
-        content: `You are ${avatarName}, a crypto expert. Give a brief, insightful 1-2 sentence reaction to this price movement. Be specific and actionable.`
-      }, {
-        role: 'user',
-        content: `${symbol} just ${direction} ${Math.abs(priceChange).toFixed(1)}% to $${currentPrice.toLocaleString()}. Give your quick take.`
-      }],
-      max_tokens: 100
+    const response = await modelGateway.complete({
+      tier: 'fast',
+      system: `You are ${avatarName}, a crypto expert. Give a brief, insightful 1-2 sentence reaction to this price movement. Be specific and actionable.`,
+      user: `${symbol} just ${direction} ${Math.abs(priceChange).toFixed(1)}% to $${currentPrice.toLocaleString()}. Give your quick take.`,
+      maxTokens: 100,
     });
 
-    return response.choices[0]?.message?.content || `${symbol} ${direction} ${Math.abs(priceChange).toFixed(1)}%!`;
+    return response.content || `${symbol} ${direction} ${Math.abs(priceChange).toFixed(1)}%!`;
   }
 
   // ==================== USER GO-LIVE SYSTEM ====================

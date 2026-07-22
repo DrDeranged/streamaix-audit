@@ -1,6 +1,4 @@
-import { openai as lazyOpenai } from "../lib/openaiClient";
-const openai = lazyOpenai;
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
+import { modelGateway } from "../lib/modelGateway";
 
 interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
@@ -80,30 +78,32 @@ export async function generateChatResponse(
   messages: ChatMessage[],
   userContext?: { summariesCount?: number; bountiesCount?: number; walletBalance?: number }
 ): Promise<string> {
-  if (process.env.PAUSE_OPENAI_API === 'true') {
+  if (process.env.PAUSE_ANTHROPIC_API === 'true') {
     return 'The AI assistant is currently paused. Please try again later.';
   }
 
   try {
-    const systemMessage: ChatMessage = {
-      role: 'system',
-      content: SYSTEM_PROMPT,
-    };
+    let systemContent = SYSTEM_PROMPT;
 
     // Add user context if available
     if (userContext) {
       const contextString = `\n\nUser Context: ${userContext.summariesCount || 0} summaries created, ${userContext.bountiesCount || 0} bounties claimed, ${userContext.walletBalance || 0} STREAM tokens in wallet.`;
-      systemMessage.content += contextString;
+      systemContent += contextString;
     }
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper for chat
-      messages: [systemMessage, ...messages],
+    const userContent = messages
+      .map((m) => `${m.role}: ${m.content}`)
+      .join('\n\n');
+
+    const response = await modelGateway.complete({
+      tier: 'fast',
+      system: systemContent,
+      user: userContent,
       temperature: 0.7,
-      max_tokens: 1000,
+      maxTokens: 1000,
     });
 
-    return response.choices[0]?.message?.content || 'I apologize, but I encountered an issue generating a response. Please try again.';
+    return response.content || 'I apologize, but I encountered an issue generating a response. Please try again.';
   } catch (error) {
     console.error('OpenAI API error:', error);
     throw new Error('Failed to generate chat response');
@@ -115,32 +115,32 @@ export async function generateStreamingChatResponse(
   userContext?: { summariesCount?: number; bountiesCount?: number; walletBalance?: number }
 ): Promise<AsyncIterable<string>> {
   try {
-    const systemMessage: ChatMessage = {
-      role: 'system',
-      content: SYSTEM_PROMPT,
-    };
+    let systemContent = SYSTEM_PROMPT;
 
     if (userContext) {
       const contextString = `\n\nUser Context: ${userContext.summariesCount || 0} summaries created, ${userContext.bountiesCount || 0} bounties claimed, ${userContext.walletBalance || 0} STREAM tokens in wallet.`;
-      systemMessage.content += contextString;
+      systemContent += contextString;
     }
 
-    const stream = await openai.chat.completions.create({
-      model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper for chat
-      messages: [systemMessage, ...messages],
+    const userContent = messages
+      .map((m) => `${m.role}: ${m.content}`)
+      .join('\n\n');
+
+    const response = await modelGateway.complete({
+      tier: 'fast',
+      system: systemContent,
+      user: userContent,
       temperature: 0.7,
-      max_tokens: 1000,
-      stream: true,
+      maxTokens: 1000,
     });
 
-    async function* generateChunks() {
-      for await (const chunk of stream) {
-        const content = chunk.choices[0]?.delta?.content;
-        if (content) {
-          yield content;
-        }
+    const content = response.content;
+
+    const generateChunks = async function* () {
+      if (content) {
+        yield content;
       }
-    }
+    };
 
     return generateChunks();
   } catch (error) {

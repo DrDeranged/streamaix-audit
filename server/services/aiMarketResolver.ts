@@ -29,8 +29,8 @@ export class AIMarketResolver {
       return;
     }
 
-    if (process.env.PAUSE_OPENAI_API === 'true') {
-      console.log('🎯 [Market Resolver] ⏸️ OpenAI API paused - market resolver disabled');
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
+      console.log('🎯 [Market Resolver] ⏸️ Anthropic API paused - market resolver disabled');
       return;
     }
 

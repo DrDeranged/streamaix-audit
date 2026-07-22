@@ -1,0 +1,59 @@
+Migrate all TEXT/reasoning AI calls to the Anthropic Claude API through the
+model gateway. ANTHROPIC_API_KEY is already set in Secrets.
+
+HARD CONSTRAINT — AUDIO STAYS ON OPENAI: Anthropic has no speech-to-text or
+TTS API. Every whisper-1 transcription call and every tts-1 call MUST remain
+on the OpenAI client unchanged. Do not touch them. Only chat/completion text
+calls migrate.
+
+1. Install @anthropic-ai/sdk. Rebuild server/lib/modelGateway.ts:
+   - Keep the existing exported interface (complete / completeJson, tiers)
+     exactly — callers must not change.
+   - Tier routing via env with these defaults:
+       MODEL_REASONING=claude-sonnet-4-6
+       MODEL_FAST=claude-haiku-4-5-20251001
+     Both tiers now route to Anthropic's Messages API. Read model IDs from
+     env at call time so they can be re-pointed (including to a stronger
+     Claude model) without code changes.
+   - Anthropic specifics: max_tokens is REQUIRED on every request (default
+     1024, allow per-call override); system prompt goes in the top-level
+     `system` parameter, not the messages array; response text is in
+     content blocks — concatenate all text blocks.
+   - completeJson: Anthropic has no response_format json mode. Enforce via
+     instruction ("Respond with ONLY valid JSON matching this schema, no
+     markdown fences, no prose") + keep the existing defensive fence-stripping
+     and zod validation, and add one retry that feeds the parse/validation
+     error back to the model before throwing.
+   - Add PAUSE_ANTHROPIC_API flag honored identically to PAUSE_OPENAI_API.
+     Keep honoring PAUSE_OPENAI_API for any OpenAI-routed call.
+   - Timeouts 60s, one retry with backoff+jitter on 429/5xx/overloaded_error.
+   - Update the gateway's existing tests for the new client (mock
+     @anthropic-ai/sdk); add tests for the JSON-repair retry and both pause
+     flags.
+
+2. Migrate every remaining DIRECT OpenAI chat-completions call site to the
+   gateway. Search the whole server/ tree for openai.chat.completions.create —
+   there are roughly 50+ sites across services (aiService, smartInsightsEngine,
+   avatarCommentaryService, agentPersonaGenerator, qualityScorerService,
+   aiContentModerator, debateManagerService, streamConversationService,
+   newsService sentiment, and others). For each:
+   - Deep analysis / trading / resolution / market-generation / insight
+     reasoning → tier 'reasoning'
+   - Classification, sentiment, tagging, chatter, social filler, quality
+     scoring, persona text → tier 'fast'
+   - Preserve each site's existing prompt content, temperature intent, and
+     output handling. Where a site used response_format json_object, use
+     completeJson with a zod schema matching what the caller already parses.
+   Work file by file. After each file, run npm run check.
+
+3. When done, the ONLY remaining direct OpenAI usages in server/ must be:
+   whisper-1 transcription, tts-1 audio generation, and the OpenAI client
+   setup that serves them. Verify with a search and list the surviving call
+   sites in your summary.
+
+4. Update replit.md: gateway is Anthropic-backed for text (env-pointed
+   models), OpenAI retained for audio only; rule remains "all AI calls go
+   through the gateway."
+
+Finish with npm run check && npm test && npm run build all passing. Do not
+modify prompts' semantic content, the AMM, points, risk, or bridge code.

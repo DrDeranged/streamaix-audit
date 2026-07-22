@@ -1,9 +1,8 @@
 import { db } from '../db';
 import { summaries, bountyQualityScores, autonomousSystemLogs } from '@shared/schema';
 import { eq, isNull, and } from 'drizzle-orm';
-import { openai as lazyOpenai } from "../lib/openaiClient";
+import { modelGateway } from "../lib/modelGateway";
 import { jobScheduler } from '../jobs/scheduler';
-const openai = lazyOpenai;
 // openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 interface ModerationResult {
@@ -36,7 +35,7 @@ export class AIContentModerator {
       return;
     }
 
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       console.log('🛡️ [Content Moderator] ⏸️ OpenAI API paused - content moderator disabled');
       return;
     }
@@ -162,17 +161,12 @@ GUIDELINES:
 - High-quality: 70-100, Medium: 40-69, Low: 0-39
 - Be fair but maintain quality standards`;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // COST OPTIMIZATION: 90% cheaper for moderation
-      messages: [
-        { role: "system", content: "You are a content moderator. Always return valid JSON." },
-        { role: "user", content: prompt }
-      ],
-      response_format: { type: "json_object" },
+    const response = await modelGateway.completeJson<any>({
+      tier: "fast",
+      system: "You are a content moderator. Always return valid JSON.",
+      user: prompt,
       temperature: 0.3,
     });
-
-    const response = JSON.parse(completion.choices[0].message.content || '{}');
 
     return {
       qualityScore: Math.min(Math.max(response.qualityScore || 50, 0), 100),

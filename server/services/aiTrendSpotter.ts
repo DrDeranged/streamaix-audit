@@ -1,8 +1,7 @@
 import { db } from '../db';
 import { predictionMarkets, users, autonomousSystemLogs } from '@shared/schema';
 import { eq } from 'drizzle-orm';
-import { openai as lazyOpenai } from "../lib/openaiClient";
-const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 import axios from 'axios';
 import { jobScheduler } from '../jobs/scheduler';
 
@@ -34,7 +33,7 @@ export class AITrendSpotter {
       return;
     }
 
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       console.log('🔍 [Trend Spotter] ⏸️ OpenAI API paused - trend spotter disabled');
       return;
     }
@@ -273,17 +272,12 @@ GUIDELINES:
 - Mix short-term (7 days) and long-term (30-90 days) markets
 - Make questions specific and measurable`;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // COST OPTIMIZATION: 90% cheaper for trend spotting
-      messages: [
-        { role: "system", content: "You are a prediction market creator. Always return valid JSON array." },
-        { role: "user", content: prompt }
-      ],
-      response_format: { type: "json_object" },
+    const response = await modelGateway.completeJson<any>({
+      tier: "reasoning",
+      system: "You are a prediction market creator. Always return valid JSON array.",
+      user: prompt,
       temperature: 0.7,
     });
-
-    const response = JSON.parse(completion.choices[0].message.content || '{"markets":[]}');
     const markets = response.markets || [];
 
     return markets.map((m: any) => {

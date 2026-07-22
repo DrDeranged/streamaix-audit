@@ -118,7 +118,7 @@ export class AIAgentService {
     reasoning: string;
     analysisData: any;
   }> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       return {
         prediction: "ABSTAIN",
         confidence: 0,

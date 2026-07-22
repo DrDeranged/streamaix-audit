@@ -1,10 +1,8 @@
 import { db } from '../db';
 import { predictionMarkets, users, marketTrades, autonomousSystemLogs } from '@shared/schema';
 import { eq, and, sql, ne } from 'drizzle-orm';
-import { openai as lazyOpenai } from "../lib/openaiClient";
+import { modelGateway } from "../lib/modelGateway";
 import { jobScheduler } from '../jobs/scheduler';
-const openai = lazyOpenai;
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 interface ArbitrageOpportunity {
   marketId: string;
@@ -30,7 +28,7 @@ export class AIMetaTrader {
       return;
     }
 
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       console.log('🎯 [Meta-Trader] ⏸️ OpenAI API paused - meta-trader disabled');
       return;
     }
@@ -192,17 +190,12 @@ Respond with JSON:
   "reasoning": "Why this is mispriced and expected value calculation"
 }`;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // COST OPTIMIZATION: 90% cheaper for trading analysis
-      messages: [
-        { role: "system", content: "You are an arbitrage expert. Always return valid JSON." },
-        { role: "user", content: prompt }
-      ],
-      response_format: { type: "json_object" },
+    const response = await modelGateway.completeJson<any>({
+      tier: "reasoning",
+      system: "You are an arbitrage expert. Always return valid JSON.",
+      user: prompt,
       temperature: 0.2,
     });
-
-    const response = JSON.parse(completion.choices[0].message.content || '{}');
 
     return {
       marketId: market.id,

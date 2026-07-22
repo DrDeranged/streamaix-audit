@@ -1,5 +1,6 @@
 import { openai as lazyOpenai } from "../lib/openaiClient";
 const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 import { db } from '../db';
 import { knowledgeAvatars } from '@shared/schema';
 import { eq } from 'drizzle-orm';
@@ -195,20 +196,15 @@ export class AvatarVoiceService {
     };
 
     try {
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          { 
-            role: 'system', 
-            content: `You are ${avatarName}. Speak naturally as if on a live podcast. Use conversational language, occasional filler words for authenticity, and your signature phrases. Never break character. Do not use markdown or formatting - just natural speech.` 
-          },
-          { role: 'user', content: prompts[segmentType] }
-        ],
-        max_tokens: 300,
+      const completion = await modelGateway.complete({
+        tier: 'fast',
+        system: `You are ${avatarName}. Speak naturally as if on a live podcast. Use conversational language, occasional filler words for authenticity, and your signature phrases. Never break character. Do not use markdown or formatting - just natural speech.`,
+        user: prompts[segmentType],
+        maxTokens: 300,
         temperature: 0.8,
       });
 
-      const text = completion.choices[0]?.message?.content || '';
+      const text = completion.content || '';
       
       const audioBase64 = await this.textToSpeechBase64(text, avatarName);
       
@@ -235,23 +231,15 @@ export class AvatarVoiceService {
     const voiceConfig = this.getVoiceForAvatar(avatarName);
     
     try {
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          { 
-            role: 'system', 
-            content: `You are ${avatarName}, hosting a live crypto podcast stream. Speak naturally and conversationally. Your style: ${voiceConfig.style}. Continue the conversation naturally, referencing previous points when relevant. Keep responses to 2-3 sentences (15-30 seconds of speech). Never use markdown.` 
-          },
-          { 
-            role: 'user', 
-            content: `Topic: ${topic}\nMarket: ${marketContext}\n${previousContext ? `Previous: ${previousContext}\n` : ''}Continue your live commentary...` 
-          }
-        ],
-        max_tokens: 150,
+      const completion = await modelGateway.complete({
+        tier: 'fast',
+        system: `You are ${avatarName}, hosting a live crypto podcast stream. Speak naturally and conversationally. Your style: ${voiceConfig.style}. Continue the conversation naturally, referencing previous points when relevant. Keep responses to 2-3 sentences (15-30 seconds of speech). Never use markdown.`,
+        user: `Topic: ${topic}\nMarket: ${marketContext}\n${previousContext ? `Previous: ${previousContext}\n` : ''}Continue your live commentary...`,
+        maxTokens: 150,
         temperature: 0.85,
       });
 
-      const text = completion.choices[0]?.message?.content || '';
+      const text = completion.content || '';
       const audioBase64 = await this.textToSpeechBase64(text, avatarName);
       
       return { text, audioBase64 };
@@ -270,23 +258,15 @@ export class AvatarVoiceService {
     const voiceConfig = this.getVoiceForAvatar(avatarName);
     
     try {
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          { 
-            role: 'system', 
-            content: `You are ${avatarName} on a live stream. A viewer named ${viewerName} just asked a question. Acknowledge them by name, then answer thoughtfully in your authentic voice. Style: ${voiceConfig.style}. Keep response to 30-45 seconds. No markdown.` 
-          },
-          { 
-            role: 'user', 
-            content: `Viewer ${viewerName} asks: "${question}"\n\nMarket context: ${marketContext}` 
-          }
-        ],
-        max_tokens: 200,
+      const completion = await modelGateway.complete({
+        tier: 'fast',
+        system: `You are ${avatarName} on a live stream. A viewer named ${viewerName} just asked a question. Acknowledge them by name, then answer thoughtfully in your authentic voice. Style: ${voiceConfig.style}. Keep response to 30-45 seconds. No markdown.`,
+        user: `Viewer ${viewerName} asks: "${question}"\n\nMarket context: ${marketContext}`,
+        maxTokens: 200,
         temperature: 0.8,
       });
 
-      const text = completion.choices[0]?.message?.content || '';
+      const text = completion.content || '';
       const audioBase64 = await this.textToSpeechBase64(text, avatarName);
       
       return { text, audioBase64 };
@@ -307,23 +287,15 @@ export class AvatarVoiceService {
     const urgency = Math.abs(priceChange) > 5 ? 'breaking news' : 'notable move';
     
     try {
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          { 
-            role: 'system', 
-            content: `You are ${avatarName} reacting live to a market move. Be authentic, show appropriate emotion for the magnitude of the move. Style: ${voiceConfig.style}. Keep it brief - 10-20 seconds. No markdown.` 
-          },
-          { 
-            role: 'user', 
-            content: `${urgency.toUpperCase()}: ${asset} is ${direction}! ${priceChange > 0 ? '+' : ''}${priceChange.toFixed(2)}% to $${currentPrice.toLocaleString()}. React and provide quick analysis.` 
-          }
-        ],
-        max_tokens: 100,
+      const completion = await modelGateway.complete({
+        tier: 'fast',
+        system: `You are ${avatarName} reacting live to a market move. Be authentic, show appropriate emotion for the magnitude of the move. Style: ${voiceConfig.style}. Keep it brief - 10-20 seconds. No markdown.`,
+        user: `${urgency.toUpperCase()}: ${asset} is ${direction}! ${priceChange > 0 ? '+' : ''}${priceChange.toFixed(2)}% to $${currentPrice.toLocaleString()}. React and provide quick analysis.`,
+        maxTokens: 100,
         temperature: 0.9,
       });
 
-      const text = completion.choices[0]?.message?.content || '';
+      const text = completion.content || '';
       const audioBase64 = await this.textToSpeechBase64(text, avatarName);
       
       return { text, audioBase64 };

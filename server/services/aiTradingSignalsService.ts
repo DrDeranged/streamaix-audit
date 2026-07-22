@@ -1,5 +1,4 @@
-import { openai as lazyOpenai } from "../lib/openaiClient";
-const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 // openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 export interface TradingAsset {
@@ -526,7 +525,7 @@ async function generateAISignal(
   regime: MarketRegime,
   confluence: ConfluenceScore
 ): Promise<TradingSignal> {
-  if (process.env.PAUSE_OPENAI_API === 'true') {
+  if (process.env.PAUSE_ANTHROPIC_API === 'true') {
     return generateFallbackSignal(asset, priceData, technicals, onChain, sentiment, regime, confluence);
   }
 
@@ -608,26 +607,13 @@ Respond in this exact JSON format:
   "alertPriority": "high|medium|low"
 }`;
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini', // COST OPTIMIZATION (Apr 2026): downgraded from gpt-4o; structured trade signal generation works on mini at ~95% perceived quality and 1/30 the cost
-      messages: [
-        { 
-          role: 'system', 
-          content: 'You are an elite quantitative trading analyst. Provide institutional-grade trade signals with precise entry/exit levels, proper risk management, and multi-factor confluence analysis. Your signals should be actionable and include proper position sizing recommendations.' 
-        },
-        { role: 'user', content: prompt }
-      ],
-      response_format: { type: 'json_object' },
-      max_tokens: 1000,
+    const analysis = await modelGateway.completeJson<any>({
+      tier: "reasoning",
+      system: 'You are an elite quantitative trading analyst. Provide institutional-grade trade signals with precise entry/exit levels, proper risk management, and multi-factor confluence analysis. Your signals should be actionable and include proper position sizing recommendations.',
+      user: prompt,
+      maxTokens: 1000,
       temperature: 0.5,
     });
-
-    const content = response.choices[0]?.message?.content;
-    if (!content) {
-      throw new Error('Empty response from OpenAI');
-    }
-
-    const analysis = JSON.parse(content);
     
     return {
       asset,

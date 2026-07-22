@@ -1,10 +1,8 @@
 import { db } from '../db';
 import { aiAgents, predictionMarkets, aiTrades, aiPredictions, aiPositions, autonomousSystemLogs } from '@shared/schema';
 import { eq, and, desc, sql, lt } from 'drizzle-orm';
-import { openai as lazyOpenai } from "../lib/openaiClient";
+import { modelGateway } from "../lib/modelGateway";
 import { jobScheduler } from '../jobs/scheduler';
-const openai = lazyOpenai;
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 export class AITradingBotService {
   private isRunning: boolean = false;
@@ -23,7 +21,7 @@ export class AITradingBotService {
       return;
     }
 
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       console.log('💹 [Trading Bots] ⏸️ OpenAI API paused - trading bots disabled');
       return;
     }
@@ -47,7 +45,7 @@ export class AITradingBotService {
    * Run a single trading cycle
    */
   private async runTradingCycle() {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       console.log('💹 [Trading Bots] ⏸️ OpenAI API paused - skipping trading cycle');
       return;
     }
@@ -202,17 +200,12 @@ Provide your analysis in JSON format:
 }`;
 
     try {
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        response_format: { type: 'json_object' },
+      const analysis = await modelGateway.completeJson<any>({
+        tier: "reasoning",
+        system: systemPrompt,
+        user: userPrompt,
         temperature: bot.personality === 'contrarian' ? 0.9 : 0.7,
       });
-
-      const analysis = JSON.parse(completion.choices[0].message.content || '{}');
 
       return {
         prediction: analysis.prediction,

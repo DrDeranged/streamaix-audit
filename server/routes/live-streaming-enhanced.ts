@@ -1014,13 +1014,14 @@ export async function registerLiveStreamingEnhancedRoutes(app: Express): Promise
       
       case 'ai_query':
         try {
-          const openai = new (await import('openai')).default();
-          const completion = await openai.chat.completions.create({
-            model: 'gpt-4o-mini',
-            messages: [{ role: 'user', content: cmd.promptTemplate || 'Provide a brief crypto market insight.' }],
-            max_tokens: 150,
+          const { modelGateway } = await import("../lib/modelGateway");
+          const completion = await modelGateway.complete({
+            tier: "fast",
+            system: "You are a helpful assistant.",
+            user: cmd.promptTemplate || 'Provide a brief crypto market insight.',
+            maxTokens: 150,
           });
-          response = completion.choices[0]?.message?.content || 'No insight available';
+          response = completion.content || 'No insight available';
         } catch (error) {
           response = 'AI is currently unavailable';
         }

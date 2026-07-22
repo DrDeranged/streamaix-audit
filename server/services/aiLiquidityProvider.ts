@@ -1,10 +1,8 @@
 import { db } from '../db';
 import { predictionMarkets, users, marketTrades, autonomousSystemLogs } from '@shared/schema';
 import { eq, and, lt, sql } from 'drizzle-orm';
-import { openai as lazyOpenai } from "../lib/openaiClient";
+import { modelGateway } from "../lib/modelGateway";
 import { jobScheduler } from '../jobs/scheduler';
-const openai = lazyOpenai;
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 export class AILiquidityProvider {
   private isRunning: boolean = false;
@@ -23,7 +21,7 @@ export class AILiquidityProvider {
       return;
     }
 
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       console.log('💧 [Liquidity Provider] ⏸️ OpenAI API paused - liquidity provider disabled');
       return;
     }
@@ -181,17 +179,12 @@ GUIDELINES:
 - Total liquidity should be 4000-8000 STREAM for most markets
 - More liquidity for high-interest categories (crypto, defi)`;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // COST OPTIMIZATION: 90% cheaper for liquidity decisions
-      messages: [
-        { role: "system", content: "You are a liquidity provider. Always return valid JSON." },
-        { role: "user", content: prompt }
-      ],
-      response_format: { type: "json_object" },
+    const response = await modelGateway.completeJson<any>({
+      tier: "fast",
+      system: "You are a liquidity provider. Always return valid JSON.",
+      user: prompt,
       temperature: 0.5,
     });
-
-    const response = JSON.parse(completion.choices[0].message.content || '{}');
 
     return {
       yesAmount: Math.min(Math.max(response.yesAmount || 3000, 2000), 5000),

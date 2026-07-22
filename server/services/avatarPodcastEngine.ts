@@ -3,8 +3,6 @@ import { liveStreams, streamMessages, knowledgeAvatars, users } from '@shared/sc
 import { eq, desc, and, gt } from 'drizzle-orm';
 import { AvatarVoiceService } from './avatarVoiceService';
 import { notificationDataValidator } from './notificationDataValidator';
-import { openai as lazyOpenai } from "../lib/openaiClient";
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 interface PodcastSession {
   streamId: string;
@@ -66,9 +64,9 @@ export class AvatarPodcastEngine {
       }
 
       // Check if API is paused AND avatar is not TTS-enabled
-      if (process.env.PAUSE_OPENAI_API === 'true') {
+      if (process.env.PAUSE_ANTHROPIC_API === 'true') {
         if (!AvatarVoiceService.isAvatarTtsEnabled(avatar.name)) {
-          console.log(`[Podcast] ⏸️ OpenAI API paused - podcast session disabled for ${avatar.name}`);
+          console.log(`[Podcast] ⏸️ Anthropic API paused - podcast session disabled for ${avatar.name}`);
           return false;
         }
         console.log(`[Podcast] 🎙️ ON-DEMAND: ${avatar.name} is TTS-enabled, starting podcast despite API pause`);

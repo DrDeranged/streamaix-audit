@@ -6,8 +6,7 @@ import {
   users
 } from '@shared/schema';
 import { eq, and, desc, gt, sql } from 'drizzle-orm';
-import { openai as lazyOpenai } from "../lib/openaiClient";
-const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 // openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 // ================== SESSION MEMORY ==================
@@ -198,7 +197,7 @@ export async function generateMarketPrediction(
   asset: string,
   marketContext: string
 ): Promise<MarketPrediction | null> {
-  if (process.env.PAUSE_OPENAI_API === 'true') {
+  if (process.env.PAUSE_ANTHROPIC_API === 'true') {
     return null;
   }
   
@@ -210,27 +209,13 @@ export async function generateMarketPrediction(
     
     if (!avatar) return null;
     
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: `You are ${avatar.name}, a ${avatar.tradingStyle || 'balanced'} trader with ${avatar.riskTolerance || 'moderate'} risk tolerance and a ${avatar.marketOutlook || 'neutral'} outlook. Generate a brief market prediction.`
-        },
-        {
-          role: 'user',
-          content: `Based on current market conditions:\n${marketContext}\n\nGenerate a prediction for ${asset} over the next 24-48 hours. Respond in JSON format: {"direction": "bullish|bearish|neutral", "confidence": 0-100, "timeframe": "24h|48h|1w", "reasoning": "brief explanation"}`
-        }
-      ],
+    const parsed = await modelGateway.completeJson<any>({
+      tier: "reasoning",
+      system: `You are ${avatar.name}, a ${avatar.tradingStyle || 'balanced'} trader with ${avatar.riskTolerance || 'moderate'} risk tolerance and a ${avatar.marketOutlook || 'neutral'} outlook. Generate a brief market prediction.`,
+      user: `Based on current market conditions:\n${marketContext}\n\nGenerate a prediction for ${asset} over the next 24-48 hours. Respond in JSON format: {"direction": "bullish|bearish|neutral", "confidence": 0-100, "timeframe": "24h|48h|1w", "reasoning": "brief explanation"}`,
       temperature: 0.7,
-      max_tokens: 200,
+      maxTokens: 200,
     });
-    
-    const content = response.choices[0]?.message?.content || '';
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return null;
-    
-    const parsed = JSON.parse(jsonMatch[0]);
     
     return {
       asset,
@@ -289,7 +274,7 @@ export async function generateDebateResponse(
   streamId: string,
   previousStatement?: string
 ): Promise<{ speakerName: string; response: string } | null> {
-  if (process.env.PAUSE_OPENAI_API === 'true') return null;
+  if (process.env.PAUSE_ANTHROPIC_API === 'true') return null;
   
   const session = debateSessions.get(streamId);
   if (!session || !session.isActive) return null;
@@ -304,25 +289,17 @@ export async function generateDebateResponse(
   if (!avatar) return null;
   
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: `You are ${avatar.name}. You're in a friendly debate about "${session.topic}". Your style: ${avatar.tradingStyle}, outlook: ${avatar.marketOutlook}. Be conversational, make your points clearly, and acknowledge the other side's valid points while defending your position.`
-        },
-        {
-          role: 'user',
-          content: previousStatement 
-            ? `The other debater just said: "${previousStatement}"\n\nRespond with your perspective (2-3 sentences).`
-            : `Start the debate with your opening statement on ${session.topic} (2-3 sentences).`
-        }
-      ],
+    const result = await modelGateway.complete({
+      tier: "reasoning",
+      system: `You are ${avatar.name}. You're in a friendly debate about "${session.topic}". Your style: ${avatar.tradingStyle}, outlook: ${avatar.marketOutlook}. Be conversational, make your points clearly, and acknowledge the other side's valid points while defending your position.`,
+      user: previousStatement 
+        ? `The other debater just said: "${previousStatement}"\n\nRespond with your perspective (2-3 sentences).`
+        : `Start the debate with your opening statement on ${session.topic} (2-3 sentences).`,
       temperature: 0.8,
-      max_tokens: 200,
+      maxTokens: 200,
     });
     
-    const content = response.choices[0]?.message?.content || '';
+    const content = result.content || '';
     
     session.exchanges.push({
       speakerId: currentAvatarId,

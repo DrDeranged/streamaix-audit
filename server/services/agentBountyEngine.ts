@@ -1,8 +1,7 @@
 import { db } from '../db';
 import { bounties, users } from '../../shared/schema';
 import { eq } from 'drizzle-orm';
-import { openai as lazyOpenai } from "../lib/openaiClient";
-const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 import type { AgentPersonality } from '../types/agents';
 
 // openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
@@ -117,7 +116,7 @@ export class AgentBountyEngine {
    * Use GPT-4 to generate a realistic bounty
    */
   private async generateBountyWithAI(params: BountyCreationParams): Promise<GeneratedBounty | null> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       console.log(`      ⏸️ OpenAI API paused - skipping bounty generation`);
       return null;
     }
@@ -167,30 +166,14 @@ Respond in JSON format:
   "tags": ["tag1", "tag2", "tag3"]
 }`;
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a helpful assistant that generates realistic bounty requests for crypto, stocks, and macro economics content. Always respond with valid JSON.',
-          },
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
+      const data = await modelGateway.completeJson<any>({
+        tier: "fast",
+        system: 'You are a helpful assistant that generates realistic bounty requests for crypto, stocks, and macro economics content. Always respond with valid JSON.',
+        user: prompt,
         temperature: 0.8,
-        max_tokens: 400,
+        maxTokens: 400,
       });
-      
-      const content = response.choices[0]?.message?.content;
-      if (!content) return null;
-      
-      // Parse JSON response
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) return null;
-      
-      const data = JSON.parse(jsonMatch[0]);
+      if (!data) return null;
       
       // Generate a realistic content URL
       const contentUrl = this.generateContentUrl(data.category);

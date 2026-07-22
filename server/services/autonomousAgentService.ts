@@ -33,8 +33,8 @@ export class AutonomousAgentService {
       return;
     }
     
-    if (process.env.PAUSE_OPENAI_API === 'true') {
-      console.log('🤖 [Autonomous Agents] ⏸️ OpenAI API paused - agent service disabled');
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
+      console.log('🤖 [Autonomous Agents] ⏸️ Anthropic API paused - agent service disabled');
       return;
     }
     

@@ -1,5 +1,4 @@
-import { openai as lazyOpenai } from "../lib/openaiClient";
-const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 import { db } from "../db";
 import { predictionMarkets, users } from "@shared/schema";
 import { eq } from "drizzle-orm";
@@ -32,7 +31,7 @@ export class SocialMarketGenerator {
    * Analyze a news article and generate a prediction market
    */
   async generateMarketFromNews(article: NewsArticle): Promise<GeneratedMarket | null> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       console.log('⏸️ OpenAI API paused - skipping news market generation');
       return null;
     }
@@ -75,23 +74,12 @@ Format your response as JSON:
   "tags": ["tag1", "tag2", "tag3"]
 }`;
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper for market generation
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert at creating engaging, tradeable prediction markets from news articles. Create questions that traders will want to bet on.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
+      const result = await modelGateway.completeJson<any>({
+        tier: "reasoning",
+        system: 'You are an expert at creating engaging, tradeable prediction markets from news articles. Create questions that traders will want to bet on.',
+        user: prompt,
         temperature: 0.8,
-        response_format: { type: "json_object" }
       });
-
-      const result = JSON.parse(response.choices[0].message.content || '{}');
       
       // Validate the response
       if (!result.question || !result.description) {

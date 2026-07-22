@@ -1,12 +1,9 @@
 import { db } from '../db';
 import { scheduledDebates, knowledgeAvatars, liveStreams } from '@shared/schema';
 import { eq, and, lte, gt, desc, or } from 'drizzle-orm';
-import { openai as lazyOpenai } from "../lib/openaiClient";
-const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 import { AvatarVoiceService } from './avatarVoiceService';
 import { WebSocketServer, WebSocket } from 'ws';
-
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 interface DebateExchange {
   speakerId: string;
@@ -51,7 +48,7 @@ export class DebateManagerService {
   }
 
   static async checkScheduledDebates() {
-    if (process.env.QUIET_MODE === 'true' || process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.QUIET_MODE === 'true' || process.env.PAUSE_ANTHROPIC_API === 'true') {
       return;
     }
 
@@ -271,32 +268,24 @@ export class DebateManagerService {
     avatar: { id: string; name: string; tradingStyle?: string; marketOutlook?: string },
     topic: string
   ): Promise<string | null> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       return `Hey everyone, I'm ${avatar.name}. Really excited to dive into ${topic} today - this is going to be a great conversation.`;
     }
 
     try {
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `You are ${avatar.name} introducing yourself at the start of a podcast conversation. Background: ${avatar.tradingStyle || 'experienced professional'}. 
+      const response = await modelGateway.complete({
+        tier: 'reasoning',
+        system: `You are ${avatar.name} introducing yourself at the start of a podcast conversation. Background: ${avatar.tradingStyle || 'experienced professional'}. 
 
 Be warm and natural like you're greeting friends. Don't be formal or stiff. Use natural speech like "Hey everyone" or "What's up, I'm..." 
 
-Keep it to 1-2 short sentences. Mention why you're excited about today's topic.`
-          },
-          {
-            role: 'user',
-            content: `Give a brief, warm podcast introduction for a conversation about: "${topic}". Be yourself - natural and engaging.`
-          }
-        ],
+Keep it to 1-2 short sentences. Mention why you're excited about today's topic.`,
+        user: `Give a brief, warm podcast introduction for a conversation about: "${topic}". Be yourself - natural and engaging.`,
         temperature: 0.9,
-        max_tokens: 80,
+        maxTokens: 80,
       });
 
-      return response.choices[0]?.message?.content || null;
+      return response.content || null;
     } catch (error) {
       console.error(`[DebateManager] Intro generation error:`, error);
       return `Hey there, I'm ${avatar.name}. Super excited to chat about ${topic} today.`;
@@ -390,7 +379,7 @@ Keep it to 1-2 short sentences. Mention why you're excited about today's topic.`
     avatar: { id: string; name: string; tradingStyle?: string; marketOutlook?: string },
     previousStatement?: string
   ): Promise<string | null> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       return `[${avatar.name}'s response would appear here - API paused for cost control]`;
     }
 
@@ -432,17 +421,15 @@ This is round ${debate.currentRound + 1} of ${debate.maxRounds}. ${conversationP
         ? `Conversation so far:\n${conversationContext}\n\n${otherAvatar.name} just said: "${previousStatement}"\n\nRespond naturally as ${avatar.name}.`
         : `You're starting this conversation on "${debate.topic}" with ${otherAvatar.name}. Give a warm, engaging opening that sets the stage.`;
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
+      const response = await modelGateway.complete({
+        tier: 'reasoning',
+        system: systemPrompt,
+        user: userPrompt,
         temperature: 0.85,
-        max_tokens: 250,
+        maxTokens: 250,
       });
 
-      return response.choices[0]?.message?.content || null;
+      return response.content || null;
     } catch (error) {
       console.error(`[DebateManager] OpenAI error:`, error);
       return null;

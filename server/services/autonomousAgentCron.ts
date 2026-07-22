@@ -31,8 +31,8 @@ export class AutonomousAgentCron {
       return;
     }
 
-    if (process.env.PAUSE_OPENAI_API === 'true') {
-      console.log('🤖 [Agent Cron] ⏸️ OpenAI API paused - autonomous agent cron disabled');
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
+      console.log('🤖 [Agent Cron] ⏸️ Anthropic API paused - autonomous agent cron disabled');
       return;
     }
 

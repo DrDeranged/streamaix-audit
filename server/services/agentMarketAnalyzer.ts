@@ -1,5 +1,4 @@
-import { openai as lazyOpenai } from "../lib/openaiClient";
-const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 import { db } from "../db";
 import { predictionMarkets, users, type PredictionMarket, type User } from "@shared/schema";
 import { eq, and, sql, desc } from "drizzle-orm";
@@ -104,7 +103,7 @@ export class AgentMarketAnalyzer {
     agent: User,
     market: PredictionMarket
   ): Promise<MarketAnalysis> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       return {
         shouldTrade: false,
         outcome: "YES",
@@ -168,18 +167,13 @@ Respond in JSON format:
 }`;
 
     try {
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini", // COST OPTIMIZATION: 90% cheaper for agent market analysis
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ],
-        response_format: { type: "json_object" },
+      const analysis = await modelGateway.completeJson<any>({
+        tier: "reasoning",
+        system: systemPrompt,
+        user: userPrompt,
         temperature: 0.7,
-        max_tokens: 300,
+        maxTokens: 300,
       });
-
-      const analysis = JSON.parse(completion.choices[0].message.content || "{}");
       
       // Calculate position size if trading
       const positionSize = analysis.shouldTrade

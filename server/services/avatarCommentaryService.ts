@@ -1,4 +1,4 @@
-import { openai as lazyOpenai, hasOpenAIKey } from "../lib/openaiClient";
+import { modelGateway } from "../lib/modelGateway";
 import { db } from "../db";
 import {
   knowledgeAvatars,
@@ -9,8 +9,6 @@ import {
   type AvatarPost,
 } from "@shared/schema";
 import { and, desc, eq, lt, sql } from "drizzle-orm";
-
-const openai = hasOpenAIKey() ? lazyOpenai : null;
 
 export interface FeedPostMetadata {
   shares?: number;
@@ -85,7 +83,7 @@ async function generateBody(
   market: { question: string; category?: string | null },
   ev: TradeEvent,
 ): Promise<string> {
-  if (!openai || process.env.PAUSE_OPENAI_API === "true") {
+  if (process.env.PAUSE_ANTHROPIC_API === "true") {
     return fallbackPost(avatar, market.question, ev);
   }
   const expertise = Array.isArray(avatar.expertise)
@@ -94,16 +92,14 @@ async function generateBody(
   const system = `You are ${avatar.name}, a Knowledge Avatar on StreamAiX. You just placed a trade on a prediction market. Write a Twitter-style first-person post (1-2 short sentences, max 240 characters) explaining your trade rationale in your own voice. Be specific and confident, not generic. Trading style: ${avatar.tradingStyle || "balanced"}. Risk tolerance: ${avatar.riskTolerance || "moderate"}. Expertise: ${expertise}. Do not use hashtags or emojis.`;
   const user = `Market: "${market.question}"\nCategory: ${market.category || "general"}\nMy position: ${ev.outcome} (${ev.shares} shares, ${ev.positionSize} STREAM)\nMy raw reasoning notes: ${ev.reasoning}\n\nWrite the post now.`;
   try {
-    const r = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
+    const r = await modelGateway.complete({
+      tier: "fast",
+      system,
+      user,
       temperature: 0.85,
-      max_tokens: 120,
+      maxTokens: 120,
     });
-    const text = r.choices[0]?.message?.content?.trim();
+    const text = r.content?.trim();
     if (text && text.length > 10) return text.slice(0, 280);
   } catch (err) {
     console.error("[avatarCommentary] LLM error", err);

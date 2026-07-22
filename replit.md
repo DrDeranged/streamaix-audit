@@ -38,7 +38,7 @@ Stack: Node.js/Express + TypeScript, Vite, PostgreSQL (Neon) with Drizzle ORM, O
 
 - Phase 0: tests **done** (121 passing); root cleanup **NOT done**
 - Phase 1 (job scheduler): **done** — all background engines register through `server/jobs/scheduler.ts` (`jobScheduler`); status at `GET /api/admin/jobs` (admin-only); state persisted in `job_runs` table. **BUDGET ENFORCEMENT NOT IMPLEMENTED** — no `checkBudget` in `apiCostTracker`; this is the top known gap.
-- Phase 2 (model gateway): gateway exists at `server/lib/modelGateway.ts` (tiers: reasoning→gpt-4o, fast→gpt-4o-mini; strict JSON schema output; respects PAUSE_OPENAI_API). OpenAI-only — Anthropic migration pending. AI agent trading decisions route through it; remaining services not yet migrated.
+- Phase 2 (model gateway): **done** — gateway at `server/lib/modelGateway.ts` is Anthropic-backed (tiers: reasoning→claude-sonnet-4-6, fast→claude-haiku-4-5-20251001, overridable via `MODEL_REASONING`/`MODEL_FAST` env; JSON via instruction + fence-strip + one repair retry; respects `PAUSE_ANTHROPIC_API`). ALL text/reasoning AI calls in `server/` route through it — zero direct `chat.completions.create` remain. OpenAI is used ONLY for audio: whisper-1 transcription and tts-1 speech (aiService, avatarVoiceService, voiceAssistantService, streamConversationService) plus the shared client in `server/lib/openaiClient.ts`; these still respect `PAUSE_OPENAI_API`.
 - Phase 3 (evidence resolution + risk engine): **done**
 - Phase 4 (token bridge scaffolding): server scaffolding **done**; contracts NOT deployed; `ONCHAIN_WRITES_ENABLED` and `BRIDGE_ENABLED` both off
 

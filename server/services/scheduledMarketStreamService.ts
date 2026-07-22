@@ -5,8 +5,7 @@ import { getStreamingService } from './streamingService';
 import { MarketDataService } from './marketDataService';
 import { AvatarVoiceService } from './avatarVoiceService';
 import { pushNotificationService } from './pushNotificationService';
-import { openai as lazyOpenai } from "../lib/openaiClient";
-const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 import { jobScheduler } from '../jobs/scheduler';
 
 // openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
@@ -186,7 +185,7 @@ export class ScheduledMarketStreamService {
   }
 
   async runScheduledStream(type: 'morning_update' | 'market_close'): Promise<string | null> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       console.log(`[Scheduled Streams] ⏸️ OpenAI API paused - skipping ${type}`);
       return null;
     }
@@ -449,14 +448,15 @@ IMPORTANT RULES:
 Return the commentary as a single flowing script, broken into 4-6 paragraphs for pacing.`;
 
     try {
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 800,
-        temperature: 0.7
+      const result = await modelGateway.complete({
+        tier: "reasoning",
+        system: "You are a helpful assistant.",
+        user: prompt,
+        maxTokens: 800,
+        temperature: 0.7,
       });
 
-      const fullCommentary = response.choices[0]?.message?.content || '';
+      const fullCommentary = result.content || '';
       const paragraphs = fullCommentary.split('\n\n').filter(p => p.trim().length > 0);
       
       console.log(`[Scheduled Streams] Generated ${paragraphs.length} commentary segments (${fullCommentary.length} chars)`);

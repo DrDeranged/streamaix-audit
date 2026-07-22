@@ -3,8 +3,7 @@ import { liveStreams, knowledgeAvatars, streamMessages } from '@shared/schema';
 import { eq, sql, desc } from 'drizzle-orm';
 import { getStreamingService } from './streamingService';
 import { notificationDataValidator } from './notificationDataValidator';
-import { openai as lazyOpenai } from "../lib/openaiClient";
-const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 // openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 interface AvatarStreamConfig {
@@ -84,7 +83,7 @@ export class AvatarAlphaStreamService {
   private isRunning = false;
 
   async startAvatarStream(config: AvatarStreamConfig): Promise<string | null> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       console.log('[Avatar Alpha] ⏸️ OpenAI API paused - avatar stream disabled');
       return null;
     }
@@ -286,17 +285,15 @@ Include specific details like price levels, percentages, or actionable insights 
 Use your unique voice and perspective. Be bold with predictions.
 Do NOT use hashtags. Keep it conversational but packed with alpha.`;
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `${marketContext}\n\nShare an alpha insight about ${randomTopic} in your stream.` }
-        ],
-        max_tokens: 150,
+      const response = await modelGateway.complete({
+        tier: "reasoning",
+        system: systemPrompt,
+        user: `${marketContext}\n\nShare an alpha insight about ${randomTopic} in your stream.`,
+        maxTokens: 150,
         temperature: 0.8,
       });
 
-      const message = response.choices[0]?.message?.content?.trim();
+      const message = response.content?.trim();
       if (message) {
         // Add relevant emoji based on content
         const emoji = this.getAlphaEmoji(message, streamType);

@@ -305,30 +305,22 @@ ${context.assets.slice(0, 5).map((a: any) => `- ${a.symbol} (${a.assetType}): $$
 ` : ''}` : '';
 
     try {
-      const { openai } = await import("../lib/openaiClient");
+      const { modelGateway } = await import("../lib/modelGateway");
       
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `You are a helpful AI financial advisor for StreamAiX, a decentralized investment platform. Provide concise, actionable advice based on the user's portfolio. Be friendly but professional. Focus on:
+      const completion = await modelGateway.complete({
+        tier: "reasoning",
+        system: `You are a helpful AI financial advisor for StreamAiX, a decentralized investment platform. Provide concise, actionable advice based on the user's portfolio. Be friendly but professional. Focus on:
 - Risk management and diversification
 - Tax optimization strategies
 - Rebalancing recommendations
 - Market insights relevant to their holdings
-Keep responses under 200 words. Do not provide specific buy/sell recommendations for individual securities.`
-          },
-          {
-            role: 'user',
-            content: `${portfolioContext}\n\nUser Question: ${question}`
-          }
-        ],
-        max_tokens: 500,
+Keep responses under 200 words. Do not provide specific buy/sell recommendations for individual securities.`,
+        user: `${portfolioContext}\n\nUser Question: ${question}`,
+        maxTokens: 500,
         temperature: 0.7,
       });
       
-      const response = completion.choices[0]?.message?.content || 'I apologize, but I could not generate a response. Please try again.';
+      const response = completion.content || 'I apologize, but I could not generate a response. Please try again.';
       
       res.json({ success: true, response });
     } catch (error: any) {

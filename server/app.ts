@@ -116,13 +116,21 @@ export async function initializeApp(
   // Boot-time env validation (loud, but never throws — boot-killing throws
   // would defeat the whole point of the bootstrap).
   console.log("\n🔐 ========== ENVIRONMENT VALIDATION ==========");
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  if (!anthropicKey) {
+    console.error("❌ CRITICAL: ANTHROPIC_API_KEY is NOT configured!");
+    console.error("📍 AI text/reasoning features (model gateway) will fail without this key.");
+    console.error("🔧 Please set ANTHROPIC_API_KEY in your environment or .env file");
+  } else {
+    console.log(`✅ ANTHROPIC_API_KEY configured (${anthropicKey.length} characters)`);
+  }
   const openaiKey = process.env.OPENAI_API_KEY;
   if (!openaiKey) {
     console.error("❌ CRITICAL: OPENAI_API_KEY is NOT configured!");
-    console.error("📍 AI content processing will fail without this key.");
+    console.error("📍 Audio features (Whisper transcription, TTS) will fail without this key.");
     console.error("🔧 Please set OPENAI_API_KEY in your environment or .env file");
   } else {
-    console.log(`✅ OPENAI_API_KEY configured (${openaiKey.length} characters)`);
+    console.log(`✅ OPENAI_API_KEY configured (${openaiKey.length} characters, audio only)`);
   }
   const duneKey = process.env.DUNE_API_KEY;
   if (duneKey) {

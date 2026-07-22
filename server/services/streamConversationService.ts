@@ -10,6 +10,7 @@ import {
 import { eq, and, desc } from 'drizzle-orm';
 import { openai as lazyOpenai } from "../lib/openaiClient";
 const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 // openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 interface ConversationParticipant {
@@ -83,6 +84,7 @@ export class StreamConversationService {
   private participantConnections = new Map<string, WebSocket>(); // participantId -> ws
   
   private readonly PAUSE_OPENAI = process.env.PAUSE_OPENAI_API === 'true';
+  private readonly PAUSE_ANTHROPIC = process.env.PAUSE_ANTHROPIC_API === 'true';
   private readonly QUIET_MODE = process.env.QUIET_MODE === 'true';
   private readonly MAX_CONTEXT_MESSAGES = 30;
   private readonly TTS_WHITELIST = ['haydenzadams', 'hayden adams', 'Hayden Adams'];
@@ -597,8 +599,8 @@ export class StreamConversationService {
   }
 
   private async triggerAvatarResponse(room: ConversationRoom, triggerMessage: ConversationMessage) {
-    if (this.PAUSE_OPENAI) {
-      console.log('[StreamConversation] OpenAI API paused, skipping avatar response');
+    if (this.PAUSE_ANTHROPIC) {
+      console.log('[StreamConversation] Anthropic API paused, skipping avatar response');
       return;
     }
 
@@ -631,17 +633,15 @@ Background: ${avatar.bio || 'A respected industry figure with deep expertise.'}
 You are participating in a live audio conversation stream. Keep responses conversational, concise (2-4 sentences max), and engaging.
 Never break character. Respond naturally as if in a real conversation.`;
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Recent conversation:\n${conversationContext}\n\nRespond to the latest message from ${triggerMessage.speakerName}.` }
-        ],
-        max_tokens: 200,
+      const response = await modelGateway.complete({
+        tier: "reasoning",
+        system: systemPrompt,
+        user: `Recent conversation:\n${conversationContext}\n\nRespond to the latest message from ${triggerMessage.speakerName}.`,
+        maxTokens: 200,
         temperature: 0.8,
       });
 
-      const responseText = response.choices[0]?.message?.content;
+      const responseText = response.content;
       if (!responseText) return;
 
       // Find avatar participant or create one

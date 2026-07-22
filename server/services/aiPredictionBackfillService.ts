@@ -1,5 +1,4 @@
-import { openai as lazyOpenai } from "../lib/openaiClient";
-const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 import { db } from "../db";
 import { predictionMarkets } from "@shared/schema";
 import { isNull, eq } from "drizzle-orm";
@@ -14,7 +13,7 @@ export class AIPredictionBackfillService {
     aiProbability: number;
     aiReasoning: string;
   }> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
+    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
       return {
         aiProbability: 50,
         aiReasoning: 'AI prediction paused - using default value'
@@ -36,23 +35,12 @@ Format your response as JSON:
   "reasoning": "<your reasoning>"
 }`;
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper for prediction backfill
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert prediction analyst. Provide probability assessments based on current trends, data, and logical reasoning.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
+      const result = await modelGateway.completeJson<any>({
+        tier: "reasoning",
+        system: 'You are an expert prediction analyst. Provide probability assessments based on current trends, data, and logical reasoning.',
+        user: prompt,
         temperature: 0.7,
-        response_format: { type: "json_object" }
       });
-
-      const result = JSON.parse(response.choices[0].message.content || '{}');
       
       return {
         aiProbability: result.probability || 50,

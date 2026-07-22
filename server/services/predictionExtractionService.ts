@@ -1,5 +1,4 @@
-import { openai as lazyOpenai } from "../lib/openaiClient";
-const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 // openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 export interface ExtractedPrediction {
@@ -99,7 +98,7 @@ export async function extractPredictionsFromSummary(
   summaryTitle: string,
   summaryUrl: string
 ): Promise<PredictionExtractionResult> {
-  if (process.env.PAUSE_OPENAI_API === 'true') {
+  if (process.env.PAUSE_ANTHROPIC_API === 'true') {
     return {
       predictions: generateFallbackMarkets(summaryTitle, summaryUrl, 3),
       summaryInsights: 'AI analysis paused - using fallback markets',
@@ -166,29 +165,13 @@ Return ONLY valid JSON in this exact format:
   "totalFound": 3
 }`;
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini', // COST OPTIMIZATION: 90% cheaper for prediction extraction
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a prediction market expert that extracts verifiable claims from content and formats them as binary prediction markets. Always return valid JSON.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
+    const result = await modelGateway.completeJson<PredictionExtractionResult>({
+      tier: "reasoning",
+      system: 'You are a prediction market expert that extracts verifiable claims from content and formats them as binary prediction markets. Always return valid JSON.',
+      user: prompt,
       temperature: 0.3,
-      max_tokens: 3000,
-      response_format: { type: 'json_object' }
+      maxTokens: 3000,
     });
-
-    const content = response.choices[0].message.content;
-    if (!content) {
-      throw new Error('No response from OpenAI');
-    }
-
-    const result = JSON.parse(content) as PredictionExtractionResult;
 
     // Validate and filter predictions
     const validPredictions = result.predictions.filter(pred => {
