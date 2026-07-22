@@ -2,3 +2,4 @@
 - [Vitest testing setup](vitest-testing.md) — offline test harness conventions: mock db/websocket modules, set JWT_SECRET before importing auth, limiter buckets are module-level.
 - [Job scheduler conventions](job-scheduler.md) — all background work must go through jobScheduler; db:push blocked by blog_posts drift; admin-secret trick for testing guarded routes.
 - [PWA service worker vs Vite dev](pwa-sw-dev-cache.md) — SW must never cache dev module URLs; stale caches caused duplicate-React preview crashes.
+- [Typecheck incremental cache trap](typecheck-cache-trap.md) — `npm run check` can falsely pass via tsc incremental cache; delete tsbuildinfo for an authoritative run; many latent server errors exist.

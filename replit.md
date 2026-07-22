@@ -36,11 +36,11 @@ Stack: Node.js/Express + TypeScript, Vite, PostgreSQL (Neon) with Drizzle ORM, O
 
 ## Current Phase Tracker
 
-- Phase 0: **in progress**
-- Phase 1 (job scheduler): **done** — all background engines register through `server/jobs/scheduler.ts` (`jobScheduler`); status at `GET /api/admin/jobs` (admin-only); state persisted in `job_runs` table
-- Phase 2 (model gateway): seeded — minimal gateway at `server/lib/modelGateway.ts` (tiers: reasoning→gpt-4o, fast→gpt-4o-mini; strict JSON schema output; respects PAUSE_OPENAI_API). AI agent trading decisions route through it; remaining services not yet migrated.
-- Phase 3: not started
-- Phase 4: not started
+- Phase 0: tests **done** (121 passing); root cleanup **NOT done**
+- Phase 1 (job scheduler): **done** — all background engines register through `server/jobs/scheduler.ts` (`jobScheduler`); status at `GET /api/admin/jobs` (admin-only); state persisted in `job_runs` table. **BUDGET ENFORCEMENT NOT IMPLEMENTED** — no `checkBudget` in `apiCostTracker`; this is the top known gap.
+- Phase 2 (model gateway): gateway exists at `server/lib/modelGateway.ts` (tiers: reasoning→gpt-4o, fast→gpt-4o-mini; strict JSON schema output; respects PAUSE_OPENAI_API). OpenAI-only — Anthropic migration pending. AI agent trading decisions route through it; remaining services not yet migrated.
+- Phase 3 (evidence resolution + risk engine): **done**
+- Phase 4 (token bridge scaffolding): server scaffolding **done**; contracts NOT deployed; `ONCHAIN_WRITES_ENABLED` and `BRIDGE_ENABLED` both off
 
 ## TOKEN BRIDGE: dormant by design
 

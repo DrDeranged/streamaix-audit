@@ -1,0 +1,41 @@
+Pre-deployment cleanup. Four tasks, no feature changes.
+
+1. LOCKFILE: package-lock.json contains ~129 dependency entries resolved to
+   http://package-firewall.replit.local/npm/... (Replit's internal proxy).
+   Rewrite every one of them to the public registry by replacing the prefix
+   "http://package-firewall.replit.local/npm/" with
+   "https://registry.npmjs.org/" throughout package-lock.json. Then run
+   npm install and npm test to confirm the tree still resolves and all 121
+   tests pass. Zero occurrences of "package-firewall" may remain.
+
+2. DEAD FILE: client/src/pages/governance.tsx has 7 TypeScript syntax errors
+   and is imported nowhere (not in App.tsx routing, not in navigation) — it is
+   orphaned dead code that makes `npm run check` fail. Delete the file. Then
+   run `npx tsc --noEmit` and confirm it exits clean with zero errors. If any
+   OTHER file errors surface after this, report them — do not delete anything
+   else.
+
+3. ENV DOCS: append a new section to .env.example documenting the flags added
+   in recent phases, each with a one-line comment and safe default:
+   - ANTHROPIC_API_KEY= (Claude API key from console.anthropic.com)
+   - RESOLUTION_CONFIDENCE_THRESHOLD=0.85 (below this, markets escalate to
+     admin review instead of auto-resolving)
+   - AGENT_MAX_STAKE=500, AGENT_MAX_EXPOSURE=2000, AGENT_DRAWDOWN_LIMIT=1500,
+     GLOBAL_HOURLY_SPEND_LIMIT=20000 (risk engine caps)
+   - ONCHAIN_WRITES_ENABLED=false (KILL SWITCH — leave false; all contract
+     writes disabled)
+   - BRIDGE_ENABLED=false (KILL SWITCH — leave false; points-to-token bridge
+     dormant, enabling is a legal/business decision)
+   - SERVICE_SIGNER_PRIVATE_KEY= (LEAVE EMPTY until contracts deploy with a
+     limited MINTER_ROLE; never put the admin key here)
+
+4. TRACKER SYNC: update the "Current Phase Tracker" section in replit.md to
+   reflect reality: Phase 0 tests done (121 passing) but root cleanup NOT done;
+   Phase 1 scheduler done but BUDGET ENFORCEMENT NOT IMPLEMENTED (no
+   checkBudget in apiCostTracker — flag as the top known gap); Phase 2 gateway
+   exists at server/lib/modelGateway.ts, OpenAI-only pending Anthropic
+   migration; Phase 3 (evidence resolution + risk engine) DONE; Phase 4 server
+   scaffolding DONE, contracts not deployed, both flags off.
+
+Finish by running: npm run check && npm test && npm run build — all three must
+succeed. Do not modify server/index.ts or any service logic.
