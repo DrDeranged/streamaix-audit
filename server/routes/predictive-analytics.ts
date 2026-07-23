@@ -17,6 +17,10 @@ import {
   validateBody,
 } from "../middleware/security";
 import * as schemas from "../middleware/validationSchemas";
+import { marketDataService } from "../services/marketDataService";
+import { PredictiveAnalyticsService } from "../services/predictiveAnalyticsService";
+
+const predictiveAnalyticsService = new PredictiveAnalyticsService(storage as DatabaseStorage);
 import {
   followBodySchema,
   castActionSchema,

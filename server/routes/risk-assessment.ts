@@ -17,6 +17,9 @@ import {
   validateBody,
 } from "../middleware/security";
 import * as schemas from "../middleware/validationSchemas";
+import { RiskAssessmentService } from "../services/riskAssessmentService";
+
+const riskAssessmentService = RiskAssessmentService.getInstance();
 import {
   followBodySchema,
   castActionSchema,

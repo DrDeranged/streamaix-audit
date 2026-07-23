@@ -17,6 +17,7 @@ import {
   validateBody,
 } from "../middleware/security";
 import * as schemas from "../middleware/validationSchemas";
+import { marketPositions } from "@shared/schema";
 import {
   followBodySchema,
   castActionSchema,

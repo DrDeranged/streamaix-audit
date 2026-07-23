@@ -33,6 +33,7 @@ Stack: Node.js/Express + TypeScript, Vite, PostgreSQL (Neon) with Drizzle ORM, O
 4. **All AI calls must go through the model gateway** (added in Phase 2) — never instantiate a raw OpenAI/Anthropic client.
 5. **Never touch `process.env.PRIVATE_KEY` handling** without explicit human approval.
 6. **Run `npm run check` and `npm test`** before declaring any task complete.
+7. **After any npm install, run `npm run lockfile:scrub` before committing** — Replit's proxy contaminates resolved URLs and breaks builds outside Replit.
 
 ## Current Phase Tracker
 

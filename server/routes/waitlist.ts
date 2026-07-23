@@ -16,6 +16,9 @@ import {
   validateBody,
 } from "../middleware/security";
 import * as schemas from "../middleware/validationSchemas";
+import { macroDataService } from "../services/macroDataService";
+import { advancedMarketIntelService } from "../services/advancedMarketIntelService";
+import { cryptoIntelligenceService } from "../services/cryptoIntelligenceService";
 import {
   followBodySchema,
   castActionSchema,

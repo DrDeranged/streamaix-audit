@@ -17,6 +17,32 @@ import {
   validateBody,
 } from "../middleware/security";
 import * as schemas from "../middleware/validationSchemas";
+import { marketDataService } from "../services/marketDataService";
+import { portfolios, portfolioAssets } from "@shared/schema";
+
+// Helper restored after route split — recomputes portfolio totals/allocations.
+async function updatePortfolioTotals(portfolioId: string) {
+  const assets = await db.select().from(portfolioAssets).where(eq(portfolioAssets.portfolioId, portfolioId));
+
+  const totalValue = assets.reduce((sum, a) => sum + (a.currentValue || 0), 0);
+  const totalCostBasis = assets.reduce((sum, a) => sum + (a.totalCostBasis || 0), 0);
+  const totalPnl = totalValue - totalCostBasis;
+  const totalPnlPercent = totalCostBasis > 0 ? (totalPnl / totalCostBasis) * 100 : 0;
+
+  for (const asset of assets) {
+    const allocationPercent = totalValue > 0 ? ((asset.currentValue || 0) / totalValue) * 100 : 0;
+    await db.update(portfolioAssets).set({ allocationPercent }).where(eq(portfolioAssets.id, asset.id));
+  }
+
+  await db.update(portfolios).set({
+    totalValue,
+    totalCostBasis,
+    totalPnl,
+    totalPnlPercent,
+    lastSyncedAt: new Date(),
+    updatedAt: new Date(),
+  }).where(eq(portfolios.id, portfolioId));
+}
 import {
   followBodySchema,
   castActionSchema,

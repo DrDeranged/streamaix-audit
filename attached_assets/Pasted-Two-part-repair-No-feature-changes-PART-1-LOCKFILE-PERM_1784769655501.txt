@@ -1,0 +1,35 @@
+Two-part repair. No feature changes.
+
+PART 1 — LOCKFILE, PERMANENT FIX:
+package-lock.json again contains entries resolved to
+http://package-firewall.replit.local/npm/... (re-introduced by installing
+@anthropic-ai/sdk inside Replit — this recurs on every install).
+a. Scrub now: replace every "http://package-firewall.replit.local/npm/"
+   with "https://registry.npmjs.org/" in package-lock.json. Zero occurrences
+   may remain.
+b. Make it repeatable: create scripts/scrub-lockfile.sh containing that sed,
+   add a package.json script "lockfile:scrub", and add a rule to replit.md
+   under Hard Rules: "After any npm install, run npm run lockfile:scrub
+   before committing — Replit's proxy contaminates resolved URLs and breaks
+   builds outside Replit."
+
+PART 2 — FIX BROKEN MOUNTED ENDPOINTS (missing runtime imports):
+These registered route files reference identifiers that are never imported,
+so their endpoints throw ReferenceError at runtime:
+  server/routes/waitlist.ts, server/routes/prediction-markets.ts,
+  server/routes/live-streaming-portfolio.ts, server/routes/price-alerts.ts,
+  server/routes/risk-assessment.ts, server/routes/predictive-analytics.ts,
+  server/routes/portfolio-correlations.ts,
+  server/routes/live-streaming-monetization.ts
+For each file: run npx tsc --noEmit, take only the TS2304 "Cannot find name"
+errors in that file, and add the correct import from the module where that
+service/table actually lives (e.g. marketDataService from
+server/services/marketDataService, marketPositions from @shared/schema).
+If an identifier no longer exists anywhere in the codebase, do NOT invent a
+replacement — comment out that route handler's body, return 501 with
+{ error: "temporarily unavailable" }, and list it in your summary for human
+review. Do not modify any other files, do not fix unrelated type errors, and
+do not change any business logic.
+
+Finish: npm test (all pass) and npm run build (succeeds). Report the TS2304
+count in those 8 files before and after — after must be zero.
