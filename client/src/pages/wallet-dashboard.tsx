@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { WalletConnector } from '@/components/wallet/WalletConnector';
 import { useWeb3 } from '@/hooks/useWeb3';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 import { 
   Wallet, 
   Coins, 
@@ -18,18 +18,14 @@ import {
   ArrowDownLeft,
   Gift,
   Users,
-  Zap,
-  Crown,
   Star,
   Award,
   Clock,
   DollarSign,
   ExternalLink,
   Copy,
-  RefreshCw
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getAuthHeaders } from '@/lib/auth';
 import { Navigation } from '@/components/ui/navigation';
 import { PageHeader } from '@/components/PageHeader';
 
@@ -86,7 +82,7 @@ export default function WalletDashboard() {
       
       try {
         // Get real ETH balance
-        const ethBalance = parseFloat(formatBalance(wallet.balance));
+        const ethBalance = parseFloat(formatBalance(wallet.balance || '0'));
         
         // Mock token data - in production, this would fetch real token balances
         const streamTokens = 1247.85; // This would be fetched from smart contract
@@ -202,8 +198,8 @@ export default function WalletDashboard() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
-        <div className="text-center text-gray-900 dark:text-white">
+      <div className="min-h-screen bg-ink-page flex items-center justify-center">
+        <div className="text-center text-primary">
           <h1 className="text-2xl font-bold mb-4">Authentication Required</h1>
           <p className="mb-4">Please sign in to view your wallet</p>
         </div>
@@ -213,14 +209,14 @@ export default function WalletDashboard() {
 
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
+      <div className="min-h-screen bg-ink-page">
         <Navigation showBackButton title="Wallet Dashboard" />
         <div className="container mx-auto px-4 sm:px-6 py-8 flex items-center justify-center min-h-[80vh]">
-          <div className="text-center text-gray-900 dark:text-white max-w-md">
+          <div className="text-center text-primary max-w-md">
             <div className="mb-6">
-              <Wallet className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+              <Wallet className="w-16 h-16 mx-auto text-muted mb-4" />
               <h1 className="text-2xl font-bold mb-2">Connect Your Wallet</h1>
-              <p className="text-gray-300">Connect your Web3 wallet to view your portfolio and manage your assets</p>
+              <p className="text-body">Connect your Web3 wallet to view your portfolio and manage your assets</p>
             </div>
             <WalletConnector />
           </div>
@@ -232,36 +228,36 @@ export default function WalletDashboard() {
   const getTransactionIcon = (type: string) => {
     switch (type) {
       case 'reward':
-        return <Award className="w-4 h-4 text-fuchsia-400" />;
+        return <Award className="w-4 h-4 text-accent-bright" />;
       case 'bounty_payment':
-        return <Gift className="w-4 h-4 text-purple-400" />;
+        return <Gift className="w-4 h-4 text-accent-bright" />;
       case 'tip_received':
-        return <ArrowDownLeft className="w-4 h-4 text-cyan-400" />;
+        return <ArrowDownLeft className="w-4 h-4 text-accent-bright" />;
       case 'tip_sent':
-        return <ArrowUpRight className="w-4 h-4 text-purple-400" />;
+        return <ArrowUpRight className="w-4 h-4 text-accent-bright" />;
       case 'withdrawal':
-        return <ArrowUpRight className="w-4 h-4 text-fuchsia-400" />;
+        return <ArrowUpRight className="w-4 h-4 text-accent-bright" />;
       default:
-        return <Coins className="w-4 h-4 text-gray-400" />;
+        return <Coins className="w-4 h-4 text-muted" />;
     }
   };
 
   const getTransactionColor = (type: string, amount: number) => {
-    if (amount > 0) return 'text-green-400';
-    if (type === 'withdrawal') return 'text-red-400';
-    return 'text-orange-400';
+    if (amount > 0) return 'text-gain';
+    if (type === 'withdrawal') return 'text-loss';
+    return 'text-warn';
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
+    <div className="min-h-screen bg-ink-page">
       <Navigation showBackButton title="Wallet Dashboard" />
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         <PageHeader
           eyebrow={
             <span className="inline-flex items-center gap-2">
-              <span className="inline-block h-2 w-2 rounded-full bg-emerald-400" />
+              <span className="inline-block h-2 w-2 rounded-full bg-gain" />
               Connected · {walletBalance?.ensName || formatAddress(wallet?.address || '')}
-              {walletBalance?.chainId && <span className="text-muted-foreground">· Chain {walletBalance.chainId}</span>}
+              {walletBalance?.chainId && <span className="text-muted">· Chain {walletBalance.chainId}</span>}
             </span>
           }
           title="Wallet Dashboard"
@@ -288,11 +284,11 @@ export default function WalletDashboard() {
                 <Copy className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Copy</span>
               </Button>
-              <Button size="sm" className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:opacity-90">
+              <Button size="sm" className="grad-accent glow-accent text-primary hover:bg-accent-deep">
                 <ArrowDownLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Deposit</span>
               </Button>
-              <Button size="sm" variant="outline" className="border-red-400/50 text-red-300 hover:bg-red-500/10">
+              <Button size="sm" variant="outline" className="border-loss/50 text-loss hover:bg-loss/10">
                 <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Withdraw</span>
               </Button>
@@ -307,26 +303,26 @@ export default function WalletDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <Card className="backdrop-blur-lg bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
-              <CardContent className="p-3 sm:p-6">
+            <Surface className="p-0">
+              <div className="p-3 sm:p-6">
                 <div className="flex items-center justify-between mb-1 sm:mb-2">
-                  <span className="text-slate-400 text-xs sm:text-sm">ETH Balance</span>
-                  <Coins className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
+                  <span className="text-muted text-xs sm:text-sm">ETH Balance</span>
+                  <Coins className="w-4 h-4 sm:w-5 sm:h-5 text-accent-bright" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
+                  <p className="tabular text-lg sm:text-2xl font-bold text-primary">
                     {walletBalance?.ethBalance?.toFixed(4) || '0.0000'} ETH
                   </p>
-                  <p className="text-slate-300 text-xs sm:text-sm">
+                  <p className="tabular text-body text-xs sm:text-sm">
                     ${((walletBalance?.ethBalance || 0) * 3000).toFixed(2)} USD
                   </p>
                   <div className="flex items-center space-x-1">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                    <span className="text-purple-400 text-xs">Native Token</span>
+                    <div className="w-2 h-2 bg-accent-core rounded-full"></div>
+                    <span className="text-accent-bright text-xs">Native Token</span>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
           </motion.div>
           
           <motion.div
@@ -334,32 +330,32 @@ export default function WalletDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
           >
-            <Card className="backdrop-blur-lg bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
-              <CardContent className="p-3 sm:p-6">
+            <Surface className="p-0">
+              <div className="p-3 sm:p-6">
                 <div className="flex items-center justify-between mb-1 sm:mb-2">
-                  <span className="text-slate-400 text-xs sm:text-sm">STREAM Points</span>
-                  <Star className="w-4 h-4 sm:w-5 sm:h-5 text-fuchsia-400" />
+                  <span className="text-muted text-xs sm:text-sm">STREAM Points</span>
+                  <Star className="w-4 h-4 sm:w-5 sm:h-5 text-accent-bright" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
+                  <p className="tabular text-lg sm:text-2xl font-bold text-primary">
                     {walletBalance?.streamTokens?.toFixed(2) || '0.00'} STREAM
                   </p>
-                  <p className="text-slate-300 text-xs sm:text-sm">
+                  <p className="tabular text-body text-xs sm:text-sm">
                     ${((walletBalance?.streamTokens || 0) * 3.0).toFixed(2)} USD
                   </p>
                   <div className="flex items-center space-x-1">
                     {walletBalance && walletBalance.change24h > 0 ? (
-                      <TrendingUp className="w-3 h-3 text-green-400" />
+                      <TrendingUp className="w-3 h-3 text-gain" />
                     ) : (
-                      <TrendingDown className="w-3 h-3 text-red-400" />
+                      <TrendingDown className="w-3 h-3 text-loss" />
                     )}
-                    <span className={`text-xs ${walletBalance && walletBalance.change24h > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {walletBalance?.change24h.toFixed(1)}% (24h)
+                    <span className={`tabular text-xs ${walletBalance && walletBalance.change24h > 0 ? 'text-gain' : 'text-loss'}`}>
+                      {walletBalance ? `${walletBalance.change24h >= 0 ? '+' : ''}${walletBalance.change24h.toFixed(2)}%` : '0.00%'} (24h)
                     </span>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
           </motion.div>
 
           <motion.div
@@ -367,30 +363,30 @@ export default function WalletDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 }}
           >
-            <Card className="backdrop-blur-lg bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
-              <CardContent className="p-3 sm:p-6">
+            <Surface className="p-0">
+              <div className="p-3 sm:p-6">
                 <div className="flex items-center justify-between mb-1 sm:mb-2">
-                  <span className="text-slate-400 text-xs sm:text-sm">Total Portfolio</span>
-                  <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
+                  <span className="text-muted text-xs sm:text-sm">Total Portfolio</span>
+                  <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-accent-bright" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
+                  <p className="tabular text-lg sm:text-2xl font-bold text-primary">
                     ${walletBalance?.usdValue.toFixed(2)}
                   </p>
-                  <p className="text-slate-400 text-xs sm:text-sm">Total USD Value</p>
+                  <p className="text-secondary text-xs sm:text-sm">Total USD Value</p>
                   <div className="flex items-center space-x-1">
                     {walletBalance && walletBalance.change24h > 0 ? (
-                      <TrendingUp className="w-3 h-3 text-green-400" />
+                      <TrendingUp className="w-3 h-3 text-gain" />
                     ) : (
-                      <TrendingDown className="w-3 h-3 text-red-400" />
+                      <TrendingDown className="w-3 h-3 text-loss" />
                     )}
-                    <span className={`text-xs ${walletBalance && walletBalance.change24h > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {walletBalance?.change24h.toFixed(1)}% (24h)
+                    <span className={`tabular text-xs ${walletBalance && walletBalance.change24h > 0 ? 'text-gain' : 'text-loss'}`}>
+                      {walletBalance ? `${walletBalance.change24h >= 0 ? '+' : ''}${walletBalance.change24h.toFixed(2)}%` : '0.00%'} (24h)
                     </span>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
           </motion.div>
 
           <motion.div
@@ -398,47 +394,46 @@ export default function WalletDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35 }}
           >
-            <Card className="backdrop-blur-lg bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
-              <CardContent className="p-3 sm:p-6">
+            <Surface className="p-0">
+              <div className="p-3 sm:p-6">
                 <div className="flex items-center justify-between mb-1 sm:mb-2">
-                  <span className="text-slate-400 text-xs sm:text-sm">Rewards Earned</span>
-                  <Award className="w-4 h-4 sm:w-5 sm:h-5 text-fuchsia-400" />
+                  <span className="text-muted text-xs sm:text-sm">Rewards Earned</span>
+                  <Award className="w-4 h-4 sm:w-5 sm:h-5 text-accent-bright" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
+                  <p className="tabular text-lg sm:text-2xl font-bold text-primary">
                     {walletBalance?.totalEarned.toFixed(2)}
                   </p>
-                  <p className="text-slate-400 text-xs sm:text-sm">STREAM earned</p>
+                  <p className="text-secondary text-xs sm:text-sm">STREAM earned</p>
                   <div className="flex items-center space-x-1">
-                    <Clock className="w-3 h-3 text-yellow-400" />
-                    <span className="text-yellow-400 text-xs">
+                    <Clock className="w-3 h-3 text-warn" />
+                    <span className="text-warn text-xs">
                       {walletBalance?.pendingRewards.toFixed(2)} pending
                     </span>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
           </motion.div>
         </div>
 
         {/* Main Content */}
-        <Card className="backdrop-blur-lg bg-white/10 border-white/20">
-          <CardHeader>
-            <CardTitle className="text-gray-900 dark:text-white">Wallet Activity</CardTitle>
-            <CardDescription className="text-slate-300">
+        <Surface className="p-4 sm:p-6">
+          <div className="mb-4">
+            <SectionTitle as="h2">Wallet Activity</SectionTitle>
+            <p className="text-secondary">
               Track your transactions, rewards, and distributions
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+            </p>
+          </div>
             <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-              <TabsList className="grid w-full grid-cols-3 bg-white/10">
-                <TabsTrigger value="overview" className="data-[state=active]:bg-white/20">
+              <TabsList className="grid w-full grid-cols-3 bg-ink-raised">
+                <TabsTrigger value="overview" className="data-[state=active]:bg-accent-core data-[state=active]:text-white">
                   Overview
                 </TabsTrigger>
-                <TabsTrigger value="transactions" className="data-[state=active]:bg-white/20">
+                <TabsTrigger value="transactions" className="data-[state=active]:bg-accent-core data-[state=active]:text-white">
                   Transactions
                 </TabsTrigger>
-                <TabsTrigger value="rewards" className="data-[state=active]:bg-white/20">
+                <TabsTrigger value="rewards" className="data-[state=active]:bg-accent-core data-[state=active]:text-white">
                   Reward Distributions
                 </TabsTrigger>
               </TabsList>
@@ -446,19 +441,17 @@ export default function WalletDashboard() {
               <TabsContent value="overview" className="mt-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Recent Transactions */}
-                  <Card className="bg-white/5 border-white/10">
-                    <CardHeader>
-                      <CardTitle className="text-gray-900 dark:text-white text-lg">Recent Transactions</CardTitle>
-                    </CardHeader>
-                    <CardContent>
+                  <Surface variant="raised" className="p-4">
+                    <SectionTitle as="h3">Recent Transactions</SectionTitle>
+                    <div className="mt-4">
                       <div className="space-y-4">
                         {transactions.slice(0, 5).map((tx) => (
-                          <div key={tx.id} className="flex items-center justify-between p-3 rounded-lg bg-white/5">
+                          <div key={tx.id} className="flex items-center justify-between p-3 rounded-xl bg-ink-surface border border-ink-divider">
                             <div className="flex items-center space-x-3">
                               {getTransactionIcon(tx.type)}
                               <div>
-                                <p className="text-gray-900 dark:text-white text-sm font-medium">{tx.description}</p>
-                                <p className="text-slate-400 text-xs">
+                                <p className="text-primary text-sm font-medium">{tx.description}</p>
+                                <p className="text-muted text-xs">
                                   {new Date(tx.timestamp).toLocaleString()}
                                 </p>
                               </div>
@@ -468,9 +461,9 @@ export default function WalletDashboard() {
                                 {tx.amount > 0 ? '+' : ''}{Math.round(Math.abs(tx.amount)).toLocaleString()} STREAM
                               </p>
                               <Badge className={`text-xs ${
-                                tx.status === 'completed' ? 'bg-green-500/20 text-green-400' :
-                                tx.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
-                                'bg-red-500/20 text-red-400'
+                                 tx.status === 'completed' ? 'bg-gain/20 text-gain' :
+                                 tx.status === 'pending' ? 'bg-warn/20 text-warn' :
+                                 'bg-loss/20 text-loss'
                               }`}>
                                 {tx.status}
                               </Badge>
@@ -478,28 +471,26 @@ export default function WalletDashboard() {
                           </div>
                         ))}
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </Surface>
 
                   {/* Top Reward Distributions */}
-                  <Card className="bg-white/5 border-white/10">
-                    <CardHeader>
-                      <CardTitle className="text-gray-900 dark:text-white text-lg">Top Reward Distributions</CardTitle>
-                    </CardHeader>
-                    <CardContent>
+                  <Surface variant="raised" className="p-4">
+                    <SectionTitle as="h3">Top Reward Distributions</SectionTitle>
+                    <div className="mt-4">
                       <div className="space-y-4">
                         {rewardDistributions.slice(0, 3).map((distribution) => (
-                          <div key={distribution.summaryId} className="p-3 rounded-lg bg-white/5">
+                          <div key={distribution.summaryId} className="p-3 rounded-xl bg-ink-surface border border-ink-divider">
                             <div className="flex items-start justify-between mb-2">
-                              <h4 className="text-gray-900 dark:text-white font-medium text-sm">{distribution.summaryTitle}</h4>
-                              <Badge className="bg-purple-500/20 text-purple-400 text-xs">
+                              <h4 className="text-primary font-medium text-sm">{distribution.summaryTitle}</h4>
+                              <Badge className="bg-accent-core/20 text-accent-bright text-xs">
                                 {distribution.accuracy}% accuracy
                               </Badge>
                             </div>
                             <div className="space-y-2">
                               <div className="flex justify-between text-sm">
-                                <span className="text-slate-400">Distributed</span>
-                                <span className="text-green-400 font-medium">
+                                <span className="text-muted">Distributed</span>
+                                <span className="text-gain font-medium">
                                   {Math.round(distribution.distributedAmount).toLocaleString()} / {Math.round(distribution.totalRewards).toLocaleString()} STREAM
                                 </span>
                               </div>
@@ -507,7 +498,7 @@ export default function WalletDashboard() {
                                 value={(distribution.distributedAmount / distribution.totalRewards) * 100} 
                                 className="h-1"
                               />
-                              <div className="flex justify-between text-xs text-slate-400">
+                              <div className="flex justify-between text-xs text-muted">
                                 <span>{distribution.recipientCount} recipients</span>
                                 <span>{new Date(distribution.createdAt).toLocaleDateString()}</span>
                               </div>
@@ -515,45 +506,44 @@ export default function WalletDashboard() {
                           </div>
                         ))}
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </Surface>
                 </div>
               </TabsContent>
 
               <TabsContent value="transactions" className="mt-6">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-gray-900 dark:text-white text-lg font-semibold">Transaction History</h3>
-                    <Button variant="outline" className="border-white/20 text-gray-900 dark:text-white">
+                    <SectionTitle as="h3">Transaction History</SectionTitle>
+                    <Button variant="outline" className="border-ink-edge text-body">
                       Export CSV
                     </Button>
                   </div>
                   
                   <div className="space-y-3">
                     {transactions.map((tx) => (
-                      <Card key={tx.id} className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
-                        <CardContent className="p-4">
+                      <Surface key={tx.id} variant="raised" className="p-4 hover:bg-ink-surface transition-colors">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-4">
-                              <div className="p-2 rounded-full bg-white/10">
+                              <div className="p-2 rounded-xl bg-ink-surface">
                                 {getTransactionIcon(tx.type)}
                               </div>
                               <div>
-                                <p className="text-gray-900 dark:text-white font-medium">{tx.description}</p>
+                                <p className="text-primary font-medium">{tx.description}</p>
                                 <div className="flex items-center space-x-2 mt-1">
-                                  <p className="text-slate-400 text-sm">
+                                  <p className="text-muted text-sm">
                                     {new Date(tx.timestamp).toLocaleString()}
                                   </p>
                                   <Badge className={`text-xs ${
-                                    tx.status === 'completed' ? 'bg-green-500/20 text-green-400' :
-                                    tx.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
-                                    'bg-red-500/20 text-red-400'
+                                     tx.status === 'completed' ? 'bg-gain/20 text-gain' :
+                                     tx.status === 'pending' ? 'bg-warn/20 text-warn' :
+                                     'bg-loss/20 text-loss'
                                   }`}>
                                     {tx.status}
                                   </Badge>
                                 </div>
                                 {tx.fromUser && (
-                                  <p className="text-blue-400 text-sm">From: @{tx.fromUser}</p>
+                                  <p className="text-accent-bright text-sm">From: @{tx.fromUser}</p>
                                 )}
                               </div>
                             </div>
@@ -561,13 +551,13 @@ export default function WalletDashboard() {
                               <p className={`text-lg font-bold ${getTransactionColor(tx.type, tx.amount)}`}>
                                 {tx.amount > 0 ? '+' : ''}{Math.round(Math.abs(tx.amount)).toLocaleString()} STREAM
                               </p>
-                              <p className="text-slate-400 text-sm">
+                              <p className="text-secondary text-sm">
                                 ${(tx.amount * 3.0).toFixed(2)} USD
                               </p>
                               {tx.txHash && (
                                 <button 
                                   onClick={() => window.open(`https://etherscan.io/tx/${tx.txHash}`, '_blank')}
-                                  className="text-blue-400 text-xs hover:underline flex items-center mt-1"
+                                   className="text-accent-bright text-xs hover:underline flex items-center mt-1"
                                 >
                                   <ExternalLink className="w-3 h-3 mr-1" />
                                   View on Explorer
@@ -575,8 +565,7 @@ export default function WalletDashboard() {
                               )}
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
+                      </Surface>
                     ))}
                   </div>
                 </div>
@@ -585,20 +574,19 @@ export default function WalletDashboard() {
               <TabsContent value="rewards" className="mt-6">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-gray-900 dark:text-white text-lg font-semibold">Reward Distributions</h3>
-                    <Badge className="bg-yellow-500/20 text-yellow-400">
+                    <SectionTitle as="h3">Reward Distributions</SectionTitle>
+                    <Badge className="bg-warn/20 text-warn">
                       Total Distributed: {Math.round(rewardDistributions.reduce((sum, r) => sum + r.distributedAmount, 0)).toLocaleString()} STREAM
                     </Badge>
                   </div>
                   
                   <div className="grid gap-4">
                     {rewardDistributions.map((distribution) => (
-                      <Card key={distribution.summaryId} className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
-                        <CardContent className="p-6">
+                      <Surface key={distribution.summaryId} variant="raised" className="p-6 hover:bg-ink-surface transition-colors">
                           <div className="flex items-start justify-between mb-4">
                             <div className="flex-1">
-                              <h4 className="text-gray-900 dark:text-white font-semibold text-lg mb-2">{distribution.summaryTitle}</h4>
-                              <div className="flex items-center space-x-4 text-sm text-slate-400">
+                              <h4 className="text-primary font-semibold text-lg mb-2">{distribution.summaryTitle}</h4>
+                              <div className="flex items-center space-x-4 text-sm text-secondary">
                                 <span className="flex items-center">
                                   <Users className="w-4 h-4 mr-1" />
                                   {distribution.recipientCount} recipients
@@ -614,10 +602,10 @@ export default function WalletDashboard() {
                               </div>
                             </div>
                             <div className="text-right">
-                              <p className="text-lg font-bold text-green-400">
+                              <p className="tabular text-lg font-bold text-gain">
                                 {Math.round(distribution.distributedAmount).toLocaleString()} STREAM
                               </p>
-                              <p className="text-slate-400 text-sm">
+                              <p className="text-secondary text-sm">
                                 of {Math.round(distribution.totalRewards).toLocaleString()} total
                               </p>
                             </div>
@@ -625,8 +613,8 @@ export default function WalletDashboard() {
                           
                           <div className="space-y-2">
                             <div className="flex justify-between text-sm">
-                              <span className="text-slate-400">Distribution Progress</span>
-                              <span className="text-gray-900 dark:text-white">
+                              <span className="text-muted">Distribution Progress</span>
+                              <span className="tabular text-primary">
                                 {((distribution.distributedAmount / distribution.totalRewards) * 100).toFixed(1)}%
                               </span>
                             </div>
@@ -637,19 +625,17 @@ export default function WalletDashboard() {
                           </div>
                           
                           <div className="flex justify-end mt-4">
-                            <Button size="sm" variant="outline" className="border-blue-400/50 bg-blue-500/20 text-gray-900 dark:text-white hover:bg-blue-500/30 hover:border-blue-400">
+                            <Button size="sm" variant="outline" className="border-accent-core/50 bg-accent-core/20 text-primary hover:bg-accent-core/30 hover:border-accent-core">
                               View Details
                             </Button>
                           </div>
-                        </CardContent>
-                      </Card>
+                      </Surface>
                     ))}
                   </div>
                 </div>
               </TabsContent>
             </Tabs>
-          </CardContent>
-        </Card>
+        </Surface>
       </div>
     </div>
   );

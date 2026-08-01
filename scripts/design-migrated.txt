@@ -38,3 +38,10 @@ client/src/pages/nft-gallery.tsx
 client/src/pages/notification-settings.tsx
 client/src/pages/leagues.tsx
 client/src/pages/bounty-board.tsx
+client/src/pages/defi-dashboard.tsx
+client/src/pages/go-live.tsx
+client/src/pages/gamification.tsx
+client/src/pages/wallet-dashboard.tsx
+client/src/pages/knowledge-avatar-profile.tsx
+client/src/pages/create-summary.tsx
+client/src/pages/processing-results.tsx

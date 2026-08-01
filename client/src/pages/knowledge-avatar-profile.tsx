@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams, Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
+import Surface from "@/components/ds/Surface";
+import SectionTitle from "@/components/ds/SectionTitle";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -67,20 +69,20 @@ interface DatabaseAvatar {
 
 const getAvatarGradient = (name: string) => {
   const gradients: Record<string, string> = {
-    'Naval Ravikant': 'from-slate-950 via-purple-950 to-slate-950',
-    'Vitalik Buterin': 'from-purple-950 via-fuchsia-950 to-purple-950',
-    'Michael Saylor': 'from-slate-950 via-purple-950 to-cyan-950',
-    'Brian Armstrong': 'from-purple-950 via-cyan-950 to-teal-950',
-    'Changpeng Zhao': 'from-purple-950 via-fuchsia-950 to-purple-950',
-    'Cathie Wood': 'from-purple-950 via-fuchsia-950 to-purple-950',
-    'Tyler Winklevoss': 'from-teal-950 via-cyan-950 to-purple-950',
-    'Cameron Winklevoss': 'from-purple-950 via-cyan-950 to-cyan-950',
-    'Balaji Srinivasan': 'from-cyan-950 via-purple-950 to-purple-950',
-    'Paul Graham': 'from-slate-950 via-gray-950 to-zinc-950',
-    'Elon Musk': 'from-slate-950 via-blue-950 to-slate-950',
-    'Sam Altman': 'from-emerald-950 via-teal-950 to-cyan-950'
+    'Naval Ravikant': 'grad-surface',
+    'Vitalik Buterin': 'grad-surface',
+    'Michael Saylor': 'grad-surface',
+    'Brian Armstrong': 'grad-surface',
+    'Changpeng Zhao': 'grad-surface',
+    'Cathie Wood': 'grad-surface',
+    'Tyler Winklevoss': 'grad-surface',
+    'Cameron Winklevoss': 'grad-surface',
+    'Balaji Srinivasan': 'grad-surface',
+    'Paul Graham': 'grad-surface',
+    'Elon Musk': 'grad-surface',
+    'Sam Altman': 'grad-surface'
   };
-  return gradients[name] || 'from-slate-950 via-gray-950 to-zinc-950';
+  return gradients[name] || 'grad-surface';
 };
 
 const formatFollowerCount = (count: number | undefined | null) => {
@@ -192,47 +194,47 @@ function AvatarMarketsSection({ avatarId, avatarName }: { avatarId: string; avat
 
   if (isLoading) {
     return (
-      <Card className="bg-slate-900/60 border-purple-500/20 backdrop-blur-xl">
+      <Surface className="p-0">
         <CardContent className="p-6">
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="h-5 w-5 text-purple-500/50" />
-            <span className="text-lg font-semibold text-white/50">Loading Markets...</span>
+            <TrendingUp className="h-5 w-5 text-accent-bright/50" />
+            <span className="text-lg font-semibold text-secondary">Loading Markets...</span>
           </div>
           <div className="animate-pulse space-y-3">
-            <div className="h-20 bg-slate-800/50 rounded-lg"></div>
-            <div className="h-20 bg-slate-800/50 rounded-lg"></div>
+            <div className="h-20 bg-ink-raised rounded-xl"></div>
+            <div className="h-20 bg-ink-raised rounded-xl"></div>
           </div>
         </CardContent>
-      </Card>
+      </Surface>
     );
   }
 
   if (markets.length === 0) {
     return (
-      <Card className="bg-slate-900/60 border-purple-500/20 backdrop-blur-xl">
+      <Surface className="p-0">
         <CardContent className="p-6">
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="h-5 w-5 text-purple-500" />
-            <span className="text-lg font-semibold text-white">Prediction Markets</span>
+            <TrendingUp className="h-5 w-5 text-accent-bright" />
+            <span className="text-lg font-semibold text-primary">Prediction Markets</span>
           </div>
-          <div className="bg-purple-500/5 border border-purple-500/10 rounded-lg p-6 text-center">
-            <TrendingUp className="h-8 w-8 text-purple-500/30 mx-auto mb-2" />
-            <span className="text-sm text-white/50">No prediction markets created by {avatarName} yet</span>
+          <div className="bg-ink-raised border border-ink-edge rounded-xl p-6 text-center">
+            <TrendingUp className="h-8 w-8 text-accent-bright/30 mx-auto mb-2" />
+            <span className="text-sm text-secondary">No prediction markets created by {avatarName} yet</span>
           </div>
         </CardContent>
-      </Card>
+      </Surface>
     );
   }
 
   return (
-    <Card className="bg-slate-900/60 border-purple-500/20 backdrop-blur-xl">
+    <Surface className="p-0">
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-purple-500" />
-            <span className="text-lg font-semibold text-white">Live Prediction Markets</span>
+            <TrendingUp className="h-5 w-5 text-accent-bright" />
+            <span className="text-lg font-semibold text-primary">Live Prediction Markets</span>
           </div>
-          <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/30">
+          <Badge variant="outline" className="bg-accent-core/10 text-accent-bright border-accent-core/30">
             {markets.length} Active
           </Badge>
         </div>
@@ -251,21 +253,21 @@ function AvatarMarketsSection({ avatarId, avatarName }: { avatarId: string; avat
         {markets.length > 4 && (
           <div className="mt-4 text-center">
             <Link href="/markets">
-              <Button variant="ghost" size="sm" className="text-purple-400 hover:text-purple-300">
+              <Button variant="ghost" size="sm" className="text-accent-bright hover:text-primary">
                 View all {markets.length} markets
               </Button>
             </Link>
           </div>
         )}
       </CardContent>
-    </Card>
+    </Surface>
   );
 }
 
 export default function KnowledgeAvatarProfile() {
   const params = useParams();
   const id = params?.id;
-  const { user } = useAuth();
+  useAuth();
 
   const { data: avatar, isLoading, error, isFetching } = useQuery<DatabaseAvatar>({
     queryKey: [`/api/avatars/by-id/${id}`],
@@ -274,30 +276,30 @@ export default function KnowledgeAvatarProfile() {
 
   if (!id) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
-        <Card className="bg-slate-900/80 border-red-500/30 p-8 max-w-md">
+      <div className="min-h-screen bg-ink-page flex items-center justify-center">
+        <Surface className="max-w-md p-8">
           <div className="text-center">
-            <h2 className="text-xl font-bold text-white mb-2">Invalid Avatar Link</h2>
-            <p className="text-white/60 mb-4">No avatar ID was provided.</p>
+            <SectionTitle as="h2" className="mb-2">Invalid Avatar Link</SectionTitle>
+            <p className="text-secondary mb-4">No avatar ID was provided.</p>
             <Button 
-              className="bg-purple-600 hover:bg-purple-700"
+              className="grad-accent glow-accent text-primary"
               onClick={() => window.history.back()}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
           </div>
-        </Card>
+        </Surface>
       </div>
     );
   }
 
   if (isLoading || isFetching) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-ink-page flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-purple-400 mx-auto mb-4" />
-          <p className="text-white/70">Loading avatar profile...</p>
+          <Loader2 className="h-12 w-12 animate-spin text-accent-bright mx-auto mb-4" />
+          <p className="text-secondary">Loading avatar profile...</p>
         </div>
       </div>
     );
@@ -305,20 +307,20 @@ export default function KnowledgeAvatarProfile() {
 
   if (error || !avatar) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
-        <Card className="bg-slate-900/80 border-red-500/30 p-8 max-w-md">
+      <div className="min-h-screen bg-ink-page flex items-center justify-center">
+        <Surface className="max-w-md p-8">
           <div className="text-center">
-            <h2 className="text-xl font-bold text-white mb-2">Avatar Not Found</h2>
-            <p className="text-white/60 mb-4">The knowledge avatar you're looking for doesn't exist.</p>
+            <SectionTitle as="h2" className="mb-2">Avatar Not Found</SectionTitle>
+            <p className="text-secondary mb-4">The knowledge avatar you're looking for doesn't exist.</p>
             <Button 
-              className="bg-purple-600 hover:bg-purple-700"
+              className="grad-accent glow-accent text-primary"
               onClick={() => window.history.back()}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
           </div>
-        </Card>
+        </Surface>
       </div>
     );
   }
@@ -348,14 +350,14 @@ export default function KnowledgeAvatarProfile() {
     : getWorstCalls(avatar.name);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
+    <div className="min-h-screen bg-ink-page">
       <ScrollArea className="h-screen">
         <div className="max-w-7xl mx-auto px-4 py-6">
           {/* Back Button */}
           <div className="mb-6">
             <Button 
               variant="ghost" 
-              className="text-white/70 hover:text-white hover:bg-white/10"
+              className="text-secondary hover:text-primary hover:bg-ink-raised"
               onClick={() => window.history.back()}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -369,14 +371,14 @@ export default function KnowledgeAvatarProfile() {
             animate={{ opacity: 1, y: 0 }}
             className="relative mb-8"
           >
-            <div className={`h-48 md:h-64 rounded-2xl bg-gradient-to-br ${getAvatarGradient(avatar.name)} relative overflow-hidden`}>
-              <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent" />
+            <div className={`h-48 md:h-64 rounded-2xl ${getAvatarGradient(avatar.name)} relative overflow-hidden`}>
+              <div className="absolute inset-0 bg-ink-page/40" />
+              <div className="absolute bottom-0 left-0 right-0 h-32 bg-ink-page/70" />
               
               {/* Live indicator */}
               <div className="absolute top-4 right-4 flex items-center gap-2">
                 <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50" />
-                <span className="text-xs text-emerald-400 font-mono">LIVE</span>
+                <span className="text-xs text-gain font-mono">LIVE</span>
               </div>
             </div>
 
@@ -385,17 +387,17 @@ export default function KnowledgeAvatarProfile() {
               <div className="relative">
                 <Avatar className="w-28 h-28 md:w-36 md:h-36 ring-4 ring-purple-500/40 border-4 border-slate-950 shadow-2xl">
                   <AvatarImage 
-                    src={avatar.imageUrl || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face`}
+                    src={avatar.imageUrl || undefined}
                     alt={avatar.name}
                     className="object-cover"
                   />
-                  <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-purple-600 to-fuchsia-600 text-white">
+                  <AvatarFallback className="text-2xl font-bold bg-accent-core text-primary">
                     {avatar.name.split(' ').map(n => n[0]).join('')}
                   </AvatarFallback>
                 </Avatar>
                 {avatar.verificationStatus === 'verified' && (
-                  <div className="absolute -bottom-1 -right-1 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full p-2 shadow-lg">
-                    <CheckCircle className="h-5 w-5 text-white" />
+                  <div className="absolute -bottom-1 -right-1 bg-accent-core rounded-full p-2 shadow-lg">
+                    <CheckCircle className="h-5 w-5 text-primary" />
                   </div>
                 )}
               </div>
@@ -407,8 +409,8 @@ export default function KnowledgeAvatarProfile() {
             <PageHeader
               eyebrow={
                 <span className="inline-flex items-center gap-2">
-                  <span className="font-mono text-purple-400">@{avatar.handle}</span>
-                  <Badge variant="secondary" className="bg-purple-500/20 text-purple-300 border-purple-500/30">
+                  <span className="font-mono text-accent-bright">@{avatar.handle}</span>
+                  <Badge variant="secondary" className="bg-accent-core/20 text-accent-bright border-accent-core/30">
                     {avatar.expertise}
                   </Badge>
                 </span>
@@ -419,19 +421,19 @@ export default function KnowledgeAvatarProfile() {
                   <FollowButton
                     avatarId={avatar.id}
                     avatarName={avatar.name}
-                    className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700"
+                    className="grad-accent glow-accent"
                   />
                   <AvatarChatButton avatar={avatar} />
                   {avatar.twitterHandle && (
                     <a href={`https://twitter.com/${avatar.twitterHandle}`} target="_blank" rel="noopener noreferrer">
-                      <Button variant="outline" size="icon" className="border-white/20 text-white hover:bg-white/10">
+                      <Button variant="outline" size="icon" className="border-ink-edge text-primary hover:bg-ink-raised">
                         <Twitter className="h-4 w-4" />
                       </Button>
                     </a>
                   )}
                   {avatar.websiteUrl && (
                     <a href={avatar.websiteUrl} target="_blank" rel="noopener noreferrer">
-                      <Button variant="outline" size="icon" className="border-white/20 text-white hover:bg-white/10">
+                      <Button variant="outline" size="icon" className="border-ink-edge text-primary hover:bg-ink-raised">
                         <Globe className="h-4 w-4" />
                       </Button>
                     </a>
@@ -446,178 +448,178 @@ export default function KnowledgeAvatarProfile() {
             {/* Left Column - Stats & Info */}
             <div className="space-y-6">
               {/* Key Stats */}
-              <Card className="bg-slate-900/60 border-purple-500/20 backdrop-blur-xl">
+              <Surface className="p-0">
                 <CardContent className="p-6 space-y-4">
-                  <h3 className="text-lg font-semibold text-white mb-4">Key Metrics</h3>
+                  <SectionTitle as="h3" className="mb-4">Key Metrics</SectionTitle>
                   
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-slate-800/50 rounded-lg p-4 border border-purple-500/10">
+                    <Surface variant="raised" className="rounded-xl p-4 border border-ink-edge">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-purple-400/80 font-mono uppercase">Portfolio ROI</span>
+                        <span className="text-xs text-muted font-mono uppercase">Portfolio ROI</span>
                         {trend === 'up' ? (
-                          <ArrowUpRight className="h-4 w-4 text-emerald-400" />
+                           <ArrowUpRight className="h-4 w-4 text-gain" />
                         ) : (
-                          <ArrowDownRight className="h-4 w-4 text-red-400" />
+                           <ArrowDownRight className="h-4 w-4 text-loss" />
                         )}
                       </div>
-                      <div className={`text-2xl font-bold font-mono ${portfolioRoi >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                        {portfolioRoi >= 0 ? '+' : ''}{portfolioRoi}%
+                      <div className={`tabular text-2xl font-bold font-mono ${portfolioRoi >= 0 ? 'text-gain' : 'text-loss'}`}>
+                        {portfolioRoi >= 0 ? '+' : ''}{portfolioRoi.toFixed(2)}%
                       </div>
-                    </div>
+                    </Surface>
                     
-                    <div className="bg-slate-800/50 rounded-lg p-4 border border-purple-500/10">
+                    <Surface variant="raised" className="rounded-xl p-4 border border-ink-edge">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-purple-400/80 font-mono uppercase">Accuracy</span>
-                        <Target className="h-4 w-4 text-purple-400" />
+                        <span className="text-xs text-muted font-mono uppercase">Accuracy</span>
+                        <Target className="h-4 w-4 text-accent-bright" />
                       </div>
-                      <div className={`text-2xl font-bold font-mono ${accuracyPercentage >= 80 ? 'text-emerald-400' : accuracyPercentage >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
-                        {accuracyPercentage}%
+                      <div className={`tabular text-2xl font-bold font-mono ${accuracyPercentage >= 80 ? 'text-gain' : accuracyPercentage >= 60 ? 'text-warn' : 'text-loss'}`}>
+                        {accuracyPercentage.toFixed(2)}%
                       </div>
-                    </div>
+                    </Surface>
                     
-                    <div className="bg-slate-800/50 rounded-lg p-4 border border-purple-500/10">
+                    <Surface variant="raised" className="rounded-xl p-4 border border-ink-edge">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-purple-400/80 font-mono uppercase">Influence</span>
-                        <Star className="h-4 w-4 text-cyan-400" />
+                        <span className="text-xs text-muted font-mono uppercase">Influence</span>
+                        <Star className="h-4 w-4 text-accent-bright" />
                       </div>
-                      <div className="text-2xl font-bold font-mono text-cyan-400">
+                      <div className="tabular text-2xl font-bold font-mono text-accent-bright">
                         {Math.round(influenceScore)}
                       </div>
-                    </div>
+                    </Surface>
                     
-                    <div className="bg-slate-800/50 rounded-lg p-4 border border-purple-500/10">
+                    <Surface variant="raised" className="rounded-xl p-4 border border-ink-edge">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-purple-400/80 font-mono uppercase">Net Worth</span>
-                        <DollarSign className="h-4 w-4 text-emerald-400" />
+                        <span className="text-xs text-muted font-mono uppercase">Net Worth</span>
+                        <DollarSign className="h-4 w-4 text-gain" />
                       </div>
-                      <div className="text-xl font-bold font-mono text-emerald-400 truncate">
+                      <div className="tabular text-xl font-bold font-mono text-gain truncate">
                         {netWorth}
                       </div>
-                    </div>
+                    </Surface>
                   </div>
 
-                  <div className="border-t border-purple-500/20 pt-4 space-y-3">
+                  <div className="border-t border-ink-divider pt-4 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-white/60 flex items-center gap-2 text-sm">
+                      <span className="text-secondary flex items-center gap-2 text-sm">
                         <Users className="h-4 w-4" />
                         Followers
                       </span>
-                      <span className="font-mono font-bold text-cyan-400">{formatFollowerCount(avatar.followerCount)}</span>
+                      <span className="tabular font-mono font-bold text-accent-bright">{formatFollowerCount(avatar.followerCount)}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-white/60 flex items-center gap-2 text-sm">
+                      <span className="text-secondary flex items-center gap-2 text-sm">
                         <Building2 className="h-4 w-4" />
                         Investments
                       </span>
-                      <span className="font-mono font-bold text-cyan-400">{avatar.notableInvestments?.length || 0}</span>
+                      <span className="tabular font-mono font-bold text-accent-bright">{avatar.notableInvestments?.length || 0}</span>
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </Surface>
 
               {/* Investment Thesis */}
-              <Card className="bg-slate-900/60 border-purple-500/20 backdrop-blur-xl">
+              <Surface className="p-0">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-3">
-                    <Target className="h-5 w-5 text-purple-400" />
-                    <h3 className="text-lg font-semibold text-white">Investment Thesis</h3>
+                    <Target className="h-5 w-5 text-accent-bright" />
+                    <SectionTitle as="h3">Investment Thesis</SectionTitle>
                   </div>
-                  <p className="text-white/70 leading-relaxed">{investmentThesis}</p>
+                  <p className="text-body leading-relaxed">{investmentThesis}</p>
                   
-                  <div className="mt-4 pt-4 border-t border-purple-500/20">
-                    <p className="text-sm text-white/50 mb-2">Market Outlook</p>
-                    <p className="text-white/80">{marketOutlook}</p>
+                  <div className="mt-4 pt-4 border-t border-ink-divider">
+                    <p className="text-sm text-muted mb-2">Market Outlook</p>
+                    <p className="text-body">{marketOutlook}</p>
                   </div>
                 </CardContent>
-              </Card>
+              </Surface>
 
               {/* Recent Activity */}
-              <Card className="bg-slate-900/60 border-purple-500/20 backdrop-blur-xl">
+              <Surface className="p-0">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <Activity className="h-5 w-5 text-cyan-400" />
-                    <h3 className="text-lg font-semibold text-white">Recent Activity</h3>
+                    <Activity className="h-5 w-5 text-accent-bright" />
+                    <SectionTitle as="h3">Recent Activity</SectionTitle>
                   </div>
                   <div className="space-y-3">
                     {recentActivityData.slice(0, 5).map((activity: any, idx: number) => (
-                      <div key={idx} className="bg-slate-800/50 rounded-lg p-3 border border-purple-500/10">
-                        <p className="text-sm text-white/90 mb-2">{activity.text}</p>
+                      <Surface key={idx} variant="raised" className="rounded-xl p-3 border border-ink-edge">
+                        <p className="text-sm text-body mb-2">{activity.text}</p>
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-white/50 font-mono">{activity.time}</span>
+                          <span className="text-xs text-muted font-mono">{activity.time}</span>
                           <Badge 
                             variant="outline" 
                             className={`text-xs ${
-                              activity.impact === 'high' ? 'border-red-500/50 text-red-400' :
-                              activity.impact === 'medium' ? 'border-yellow-500/50 text-yellow-400' :
-                              'border-emerald-500/50 text-emerald-400'
+                              activity.impact === 'high' ? 'border-loss/50 text-loss' :
+                              activity.impact === 'medium' ? 'border-warn/50 text-warn' :
+                              'border-gain/50 text-gain'
                             }`}
                           >
                             {activity.impact}
                           </Badge>
                         </div>
-                      </div>
+                      </Surface>
                     ))}
                   </div>
                 </CardContent>
-              </Card>
+              </Surface>
             </div>
 
             {/* Right Column - Analytics */}
             <div className="lg:col-span-2 space-y-6">
               {/* Performance Cards */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Card className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-blue-500/20">
+                <Surface variant="raised" className="border border-ink-edge">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-lg font-bold text-white">{formatFollowerCount(avatar.followerCount)}</span>
-                      <Users className="h-5 w-5 text-blue-400" />
+                      <span className="tabular text-lg font-bold text-primary">{formatFollowerCount(avatar.followerCount)}</span>
+                      <Users className="h-5 w-5 text-accent-bright" />
                     </div>
-                    <p className="text-xs text-white/60">Total Followers</p>
-                    <p className="text-xs text-emerald-400">+12.3% this month</p>
+                    <p className="text-xs text-muted">Total Followers</p>
+                    <p className="tabular text-xs text-gain">+12.30% this month</p>
                   </CardContent>
-                </Card>
+                </Surface>
                 
-                <Card className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border-emerald-500/20">
+                <Surface variant="raised" className="border border-ink-edge">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className={`text-lg font-bold ${portfolioRoi >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                        {portfolioRoi >= 0 ? '+' : ''}{portfolioRoi}%
+                      <span className={`tabular text-lg font-bold ${portfolioRoi >= 0 ? 'text-gain' : 'text-loss'}`}>
+                        {portfolioRoi >= 0 ? '+' : ''}{portfolioRoi.toFixed(2)}%
                       </span>
-                      <TrendingUp className="h-5 w-5 text-emerald-400" />
+                      <TrendingUp className="h-5 w-5 text-gain" />
                     </div>
-                    <p className="text-xs text-white/60">Portfolio ROI</p>
-                    <p className="text-xs text-emerald-400">All-time returns</p>
+                    <p className="text-xs text-muted">Portfolio ROI</p>
+                    <p className="text-xs text-gain">All-time returns</p>
                   </CardContent>
-                </Card>
+                </Surface>
                 
-                <Card className="bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10 border-purple-500/20">
+                <Surface variant="raised" className="border border-ink-edge">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-lg font-bold text-white">{accuracyPercentage}%</span>
-                      <Target className="h-5 w-5 text-purple-400" />
+                      <span className="tabular text-lg font-bold text-primary">{accuracyPercentage.toFixed(2)}%</span>
+                      <Target className="h-5 w-5 text-accent-bright" />
                     </div>
-                    <p className="text-xs text-white/60">Prediction Accuracy</p>
-                    <p className="text-xs text-purple-400">Last 100 predictions</p>
+                    <p className="text-xs text-muted">Prediction Accuracy</p>
+                    <p className="text-xs text-accent-bright">Last 100 predictions</p>
                   </CardContent>
-                </Card>
+                </Surface>
                 
-                <Card className="bg-gradient-to-br from-orange-500/10 to-red-500/10 border-orange-500/20">
+                <Surface variant="raised" className="border border-ink-edge">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-base font-bold text-white truncate">{netWorth}</span>
-                      <PieChart className="h-5 w-5 text-orange-400" />
+                      <span className="tabular text-base font-bold text-primary truncate">{netWorth}</span>
+                      <PieChart className="h-5 w-5 text-warn" />
                     </div>
-                    <p className="text-xs text-white/60">Assets Under Management</p>
-                    <p className="text-xs text-orange-400">Public portfolio</p>
+                    <p className="text-xs text-muted">Assets Under Management</p>
+                    <p className="text-xs text-warn">Public portfolio</p>
                   </CardContent>
-                </Card>
+                </Surface>
               </div>
 
               {/* Prediction Markets Section */}
               <AvatarMarketsSection avatarId={avatar.id} avatarName={avatar.name} />
 
               {/* Analytics Chart */}
-              <Card className="bg-slate-900/60 border-purple-500/20 backdrop-blur-xl">
+              <Surface className="p-0">
                 <CardContent className="p-6">
                   <EntrepreneurAnalytics 
                     entrepreneur={{
@@ -641,10 +643,10 @@ export default function KnowledgeAvatarProfile() {
                     showMetrics={false}
                   />
                 </CardContent>
-              </Card>
+              </Surface>
 
               {/* Portfolio Simulator */}
-              <Card className="bg-slate-900/60 border-purple-500/20 backdrop-blur-xl">
+              <Surface className="p-0">
                 <CardContent className="p-6">
                   <PortfolioSimulator 
                     avatars={[{
@@ -658,7 +660,7 @@ export default function KnowledgeAvatarProfile() {
                     }]}
                   />
                 </CardContent>
-              </Card>
+              </Surface>
             </div>
           </div>
         </div>

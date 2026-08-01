@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
+import { CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/PageHeader';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
+import StatValue from '@/components/ds/StatValue';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Navigation } from '@/components/ui/navigation';
 import { useContracts } from '@/hooks/useContracts';
@@ -21,11 +23,9 @@ import {
   PieChart,
   BarChart3,
   ArrowUpRight,
-  ArrowDownRight,
   RefreshCw,
   ExternalLink,
   Shield,
-  Target
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -122,26 +122,26 @@ export default function DeFiDashboard() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
+      <div className="min-h-[100dvh] bg-ink-page">
         <Navigation />
         <div className="max-w-2xl mx-auto p-6 flex items-center justify-center min-h-[80vh]">
-          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
+          <Surface className="rounded-xl p-0">
             <CardContent className="p-8 text-center">
-              <PieChart className="h-16 w-16 text-purple-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Authentication Required</h2>
-              <p className="text-gray-300 mb-6">Please sign in to access DeFi features.</p>
-              <Button className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600">
+               <PieChart className="mx-auto mb-4 h-16 w-16 text-accent-bright" />
+               <SectionTitle as="h2" className="mb-2">Authentication Required</SectionTitle>
+               <p className="mb-6 text-body">Please sign in to access DeFi features.</p>
+               <Button className="grad-accent glow-accent rounded-xl text-primary">
                 Sign In
               </Button>
             </CardContent>
-          </Card>
+          </Surface>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
+    <div className="min-h-[100dvh] bg-ink-page">
       <Navigation />
       
       <div className="max-w-7xl mx-auto p-6">
@@ -161,7 +161,7 @@ export default function DeFiDashboard() {
                 onClick={handleRefresh}
                 disabled={isLoading}
                 variant="outline"
-                className="min-h-[44px] border-white/20 text-gray-900 dark:text-white hover:bg-white/10"
+                 className="min-h-[44px] rounded-xl border border-ink-edge text-primary hover:bg-ink-raised"
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
                 Refresh
@@ -177,18 +177,18 @@ export default function DeFiDashboard() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mb-8"
           >
-            <Card className="bg-yellow-500/10 border-yellow-500/20">
+             <Surface className="border-warn/30 bg-warn/10">
               <CardContent className="p-6 text-center">
-                <Shield className="h-12 w-12 text-yellow-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Connect Wallet Required</h3>
-                <p className="text-yellow-300 mb-4">
+                <Shield className="mx-auto mb-4 h-12 w-12 text-warn" />
+                <SectionTitle as="h3" className="mb-2">Connect Wallet Required</SectionTitle>
+                <p className="mb-4 text-warn">
                   Please connect your Web3 wallet to access DeFi features and smart contracts.
                 </p>
-                <Button className="bg-yellow-600 hover:bg-yellow-700">
+                <Button className="rounded-xl bg-warn text-ink-page hover:bg-warn/80">
                   Connect Wallet
                 </Button>
               </CardContent>
-            </Card>
+             </Surface>
           </motion.div>
         )}
 
@@ -199,71 +199,71 @@ export default function DeFiDashboard() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
         >
-          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
+           <Surface>
             <CardHeader className="pb-2">
-              <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Total Value Locked</CardTitle>
+              <SectionTitle as="h3" className="text-sm font-medium">Total Value Locked</SectionTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">{defiData.totalValueLocked}</p>
-                  <p className="text-fuchsia-400 text-sm flex items-center">
+                   <StatValue label="TVL" value={defiData.totalValueLocked} delta={12.5} />
+                   <p className="flex items-center text-sm text-gain">
                     <TrendingUp className="h-3 w-3 mr-1" />
                     +12.5%
                   </p>
                 </div>
-                <Lock className="h-8 w-8 text-purple-400" />
+                 <Lock className="h-8 w-8 text-accent-bright" />
               </div>
             </CardContent>
-          </Card>
+           </Surface>
 
-          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
+           <Surface>
             <CardHeader className="pb-2">
-              <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">24h Volume</CardTitle>
+              <SectionTitle as="h3" className="text-sm font-medium">24h Volume</SectionTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">{defiData.dailyVolume}</p>
-                  <p className="text-fuchsia-400 text-sm flex items-center">
+                   <StatValue label="24h volume" value={defiData.dailyVolume} delta={8.3} />
+                   <p className="flex items-center text-sm text-gain">
                     <ArrowUpRight className="h-3 w-3 mr-1" />
                     +8.3%
                   </p>
                 </div>
-                <BarChart3 className="h-8 w-8 text-cyan-400" />
+                 <BarChart3 className="h-8 w-8 text-accent-bright" />
               </div>
             </CardContent>
-          </Card>
+           </Surface>
 
-          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
+           <Surface>
             <CardHeader className="pb-2">
-              <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Your STREAM Balance</CardTitle>
+              <SectionTitle as="h3" className="text-sm font-medium">Your STREAM Balance</SectionTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{streamBalance}</p>
-                  <p className="text-gray-400 text-sm">STREAM</p>
+                   <p className="tabular font-display text-xl text-primary sm:text-2xl">{streamBalance}</p>
+                   <p className="text-sm text-secondary">STREAM</p>
                 </div>
-                <Coins className="h-8 w-8 text-purple-400" />
+                 <Coins className="h-8 w-8 text-accent-bright" />
               </div>
             </CardContent>
-          </Card>
+           </Surface>
 
-          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
+           <Surface>
             <CardHeader className="pb-2">
-              <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Staked Tokens</CardTitle>
+              <SectionTitle as="h3" className="text-sm font-medium">Staked Tokens</SectionTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{stakingInfo.stakedAmount}</p>
-                  <p className="text-purple-400 text-sm">APR: {stakingInfo.apr}%</p>
+                   <p className="tabular font-display text-xl text-primary sm:text-2xl">{stakingInfo.stakedAmount}</p>
+                   <p className="text-sm text-accent-bright">APR: {stakingInfo.apr}%</p>
                 </div>
-                <Zap className="h-8 w-8 text-yellow-400" />
+                 <Zap className="h-8 w-8 text-warn" />
               </div>
             </CardContent>
-          </Card>
+           </Surface>
         </motion.div>
 
         {/* Main DeFi Features */}
@@ -274,20 +274,20 @@ export default function DeFiDashboard() {
           className="mb-8"
         >
           <Tabs defaultValue="staking" className="space-y-6">
-            <TabsList className="bg-white/10 border border-white/20">
-              <TabsTrigger value="staking" className="text-gray-900 dark:text-white data-[state=active]:bg-purple-600">
+            <TabsList className="rounded-xl border border-ink-edge bg-ink-surface">
+              <TabsTrigger value="staking" className="text-secondary data-[state=active]:bg-accent-core data-[state=active]:text-white">
                 <Zap className="h-4 w-4 mr-2" />
                 Staking
               </TabsTrigger>
-              <TabsTrigger value="liquidity" className="text-gray-900 dark:text-white data-[state=active]:bg-purple-600">
+              <TabsTrigger value="liquidity" className="text-secondary data-[state=active]:bg-accent-core data-[state=active]:text-white">
                 <PieChart className="h-4 w-4 mr-2" />
                 Liquidity
               </TabsTrigger>
-              <TabsTrigger value="yield" className="text-gray-900 dark:text-white data-[state=active]:bg-purple-600">
+              <TabsTrigger value="yield" className="text-secondary data-[state=active]:bg-accent-core data-[state=active]:text-white">
                 <TrendingUp className="h-4 w-4 mr-2" />
                 Yield Farming
               </TabsTrigger>
-              <TabsTrigger value="transfer" className="text-gray-900 dark:text-white data-[state=active]:bg-purple-600">
+              <TabsTrigger value="transfer" className="text-secondary data-[state=active]:bg-accent-core data-[state=active]:text-white">
                 <ArrowUpRight className="h-4 w-4 mr-2" />
                 Transfer
               </TabsTrigger>
@@ -296,64 +296,64 @@ export default function DeFiDashboard() {
             {/* Staking Tab */}
             <TabsContent value="staking" className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
+                <Surface>
                   <CardHeader>
-                    <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
+                    <SectionTitle as="h3" className="flex items-center gap-2">
                       <Lock className="h-5 w-5" />
                       Stake STREAM
-                    </CardTitle>
-                    <p className="text-gray-400 text-sm">
+                    </SectionTitle>
+                    <p className="text-sm text-secondary">
                       Earn {stakingInfo.apr}% APR by staking your STREAM points
                     </p>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <Label className="text-gray-900 dark:text-white">Amount to Stake</Label>
+                      <Label className="text-primary">Amount to Stake</Label>
                       <Input
                         type="number"
                         placeholder="Enter amount"
                         value={stakeAmount}
                         onChange={(e) => setStakeAmount(e.target.value)}
-                        className="bg-white/10 border-white/20 text-gray-900 dark:text-white"
+                        className="rounded-xl border border-ink-edge bg-ink-raised text-primary"
                         disabled={!isConnected || !isContractSupported}
                       />
-                      <p className="text-sm text-gray-400 mt-1">
+                      <p className="mt-1 text-sm text-secondary">
                         Available: {streamBalance} STREAM
                       </p>
                     </div>
                     <Button
                       onClick={handleStake}
                       disabled={!stakeAmount || isLoading || !isConnected}
-                      className="w-full bg-gradient-to-r from-purple-600 to-blue-600"
+                      className="grad-accent glow-accent w-full rounded-xl text-primary"
                     >
                       <Lock className="h-4 w-4 mr-2" />
                       Stake Tokens
                     </Button>
                   </CardContent>
-                </Card>
+                </Surface>
 
-                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
+                <Surface>
                   <CardHeader>
-                    <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
+                    <SectionTitle as="h3" className="flex items-center gap-2">
                       <Unlock className="h-5 w-5" />
                       Unstake STREAM
-                    </CardTitle>
-                    <p className="text-gray-400 text-sm">
+                    </SectionTitle>
+                    <p className="text-sm text-secondary">
                       Unstake your tokens and claim pending rewards
                     </p>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <Label className="text-gray-900 dark:text-white">Amount to Unstake</Label>
+                      <Label className="text-primary">Amount to Unstake</Label>
                       <Input
                         type="number"
                         placeholder="Enter amount"
                         value={unstakeAmount}
                         onChange={(e) => setUnstakeAmount(e.target.value)}
-                        className="bg-white/10 border-white/20 text-gray-900 dark:text-white"
+                        className="rounded-xl border border-ink-edge bg-ink-raised text-primary"
                         disabled={!isConnected || !isContractSupported}
                       />
-                      <p className="text-sm text-gray-400 mt-1">
+                      <p className="mt-1 text-sm text-secondary">
                         Staked: {stakingInfo.stakedAmount} STREAM
                       </p>
                     </div>
@@ -362,7 +362,7 @@ export default function DeFiDashboard() {
                         onClick={handleUnstake}
                         disabled={!unstakeAmount || isLoading || !isConnected}
                         variant="outline"
-                        className="flex-1 border-white/20 text-gray-900 dark:text-white hover:bg-white/10"
+                        className="flex-1 rounded-xl border border-ink-edge text-primary hover:bg-ink-raised"
                       >
                         <Unlock className="h-4 w-4 mr-2" />
                         Unstake
@@ -370,53 +370,53 @@ export default function DeFiDashboard() {
                       <Button
                         onClick={handleClaimRewards}
                         disabled={isLoading || !isConnected || stakingInfo.pendingRewards === '0.0000'}
-                        className="flex-1 bg-gradient-to-r from-green-600 to-blue-600"
+                        className="grad-accent glow-accent flex-1 rounded-xl text-primary"
                       >
                         <Gift className="h-4 w-4 mr-2" />
                         Claim ({stakingInfo.pendingRewards})
                       </Button>
                     </div>
                   </CardContent>
-                </Card>
+                </Surface>
               </div>
 
               {/* Staking Stats */}
-              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
+              <Surface>
                 <CardHeader>
-                  <CardTitle className="text-gray-900 dark:text-white">Staking Statistics</CardTitle>
+                  <SectionTitle>Staking Statistics</SectionTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div className="text-center">
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{stakingInfo.totalStaked}</p>
-                      <p className="text-gray-400 text-sm">Total Staked</p>
+                      <p className="tabular font-display text-xl text-primary sm:text-2xl">{stakingInfo.totalStaked}</p>
+                      <p className="text-sm text-secondary">Total Staked</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-2xl font-bold text-green-400">{stakingInfo.apr}%</p>
-                      <p className="text-gray-400 text-sm">Current APR</p>
+                      <p className="tabular font-display text-xl text-gain sm:text-2xl">{stakingInfo.apr}%</p>
+                      <p className="text-sm text-secondary">Current APR</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-2xl font-bold text-purple-400">{stakingInfo.stakedAmount}</p>
-                      <p className="text-gray-400 text-sm">Your Staked</p>
+                      <p className="tabular font-display text-xl text-accent-bright sm:text-2xl">{stakingInfo.stakedAmount}</p>
+                      <p className="text-sm text-secondary">Your Staked</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-2xl font-bold text-yellow-400">{stakingInfo.pendingRewards}</p>
-                      <p className="text-gray-400 text-sm">Pending Rewards</p>
+                      <p className="tabular font-display text-xl text-warn sm:text-2xl">{stakingInfo.pendingRewards}</p>
+                      <p className="text-sm text-secondary">Pending Rewards</p>
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </Surface>
             </TabsContent>
 
             {/* Liquidity Tab */}
             <TabsContent value="liquidity" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {defiData.liquidityPools.map((pool, index) => (
-                  <Card key={pool.pair} className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
+                  <Surface key={pool.pair}>
                     <CardHeader>
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-gray-900 dark:text-white">{pool.pair}</CardTitle>
-                        <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
+                        <SectionTitle as="h3">{pool.pair}</SectionTitle>
+                        <Badge className="border border-gain/30 bg-gain/10 text-gain">
                           {pool.apr} APR
                         </Badge>
                       </div>
@@ -424,30 +424,30 @@ export default function DeFiDashboard() {
                     <CardContent className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <p className="text-gray-400 text-sm">TVL</p>
-                          <p className="text-gray-900 dark:text-white font-semibold">{pool.tvl}</p>
+                           <p className="text-sm text-muted">TVL</p>
+                           <p className="tabular font-semibold text-primary">{pool.tvl}</p>
                         </div>
                         <div>
-                          <p className="text-gray-400 text-sm">24h Volume</p>
-                          <p className="text-gray-900 dark:text-white font-semibold">{pool.volume24h}</p>
+                           <p className="text-sm text-muted">24h Volume</p>
+                           <p className="tabular font-semibold text-primary">{pool.volume24h}</p>
                         </div>
                         <div>
-                          <p className="text-gray-400 text-sm">Your Liquidity</p>
-                          <p className="text-purple-400 font-semibold">{pool.userLiquidity}</p>
+                           <p className="text-sm text-muted">Your Liquidity</p>
+                           <p className="tabular font-semibold text-accent-bright">{pool.userLiquidity}</p>
                         </div>
                         <div>
-                          <p className="text-gray-400 text-sm">Pool Share</p>
-                          <p className="text-blue-400 font-semibold">{pool.userShare}</p>
+                           <p className="text-sm text-muted">Pool Share</p>
+                           <p className="tabular font-semibold text-accent-bright">{pool.userShare}</p>
                         </div>
                       </div>
                       <Button 
-                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600"
+                         className="grad-accent glow-accent w-full rounded-xl text-primary"
                         disabled={!isConnected}
                       >
                         Add Liquidity
                       </Button>
                     </CardContent>
-                  </Card>
+                  </Surface>
                 ))}
               </div>
             </TabsContent>
@@ -456,84 +456,84 @@ export default function DeFiDashboard() {
             <TabsContent value="yield" className="space-y-6">
               <div className="space-y-4">
                 {defiData.yieldFarms.map((farm, index) => (
-                  <Card key={farm.pool} className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
+                  <Surface key={farm.pool}>
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-                            <Coins className="h-6 w-6 text-gray-900 dark:text-white" />
+                          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-deep">
+                            <Coins className="h-6 w-6 text-primary" />
                           </div>
                           <div>
-                            <h3 className="text-gray-900 dark:text-white font-semibold">{farm.pool}</h3>
-                            <p className="text-gray-400 text-sm">APY: {farm.apy}</p>
+                            <h3 className="font-semibold text-primary">{farm.pool}</h3>
+                            <p className="text-sm text-secondary">APY: {farm.apy}</p>
                           </div>
                         </div>
                         
                         <div className="text-right">
                           <div className="grid grid-cols-3 gap-6">
                             <div>
-                              <p className="text-gray-400 text-sm">Total Staked</p>
-                              <p className="text-gray-900 dark:text-white font-semibold">{farm.totalStaked}</p>
+                               <p className="text-sm text-muted">Total Staked</p>
+                               <p className="tabular font-semibold text-primary">{farm.totalStaked}</p>
                             </div>
                             <div>
-                              <p className="text-gray-400 text-sm">Your Staked</p>
-                              <p className="text-purple-400 font-semibold">{farm.userStaked}</p>
+                               <p className="text-sm text-muted">Your Staked</p>
+                               <p className="tabular font-semibold text-accent-bright">{farm.userStaked}</p>
                             </div>
                             <div>
-                              <p className="text-gray-400 text-sm">Pending</p>
-                              <p className="text-yellow-400 font-semibold">{farm.pendingRewards}</p>
+                               <p className="text-sm text-muted">Pending</p>
+                               <p className="tabular font-semibold text-warn">{farm.pendingRewards}</p>
                             </div>
                           </div>
                         </div>
                       </div>
                     </CardContent>
-                  </Card>
+                  </Surface>
                 ))}
               </div>
             </TabsContent>
 
             {/* Transfer Tab */}
             <TabsContent value="transfer" className="space-y-6">
-              <Card className="bg-white/10 border-white/20 backdrop-blur-lg max-w-md mx-auto">
+              <Surface className="mx-auto max-w-md">
                 <CardHeader>
-                  <CardTitle className="text-gray-900 dark:text-white">Transfer STREAM Points</CardTitle>
-                  <p className="text-gray-400 text-sm">Send points to another address</p>
+                  <SectionTitle>Transfer STREAM Points</SectionTitle>
+                  <p className="text-sm text-secondary">Send points to another address</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label className="text-gray-900 dark:text-white">Recipient Address</Label>
+                    <Label className="text-primary">Recipient Address</Label>
                     <Input
                       placeholder="0x..."
                       value={transferAddress}
                       onChange={(e) => setTransferAddress(e.target.value)}
-                      className="bg-white/10 border-white/20 text-gray-900 dark:text-white"
+                      className="rounded-xl border border-ink-edge bg-ink-raised text-primary"
                       disabled={!isConnected}
                     />
                   </div>
                   <div>
-                    <Label className="text-gray-900 dark:text-white">Amount</Label>
+                    <Label className="text-primary">Amount</Label>
                     <Input
                       type="number"
                       placeholder="Enter amount"
                       value={transferAmount}
                       onChange={(e) => setTransferAmount(e.target.value)}
-                      className="bg-white/10 border-white/20 text-gray-900 dark:text-white"
+                      className="rounded-xl border border-ink-edge bg-ink-raised text-primary"
                       disabled={!isConnected}
                     />
-                    <p className="text-sm text-gray-400 mt-1">
+                    <p className="mt-1 text-sm text-secondary">
                       Available: {streamBalance} STREAM
                     </p>
                   </div>
                   <Button
                     onClick={handleTransfer}
                     disabled={!transferAmount || !transferAddress || isLoading || !isConnected}
-                    className="w-full bg-gradient-to-r from-green-600 to-blue-600"
+                    className="grad-accent glow-accent w-full rounded-xl text-primary"
                   >
                     <ArrowUpRight className="h-4 w-4 mr-2" />
                     Transfer Tokens
                   </Button>
                 </CardContent>
-              </Card>
+              </Surface>
             </TabsContent>
           </Tabs>
         </motion.div>
@@ -545,23 +545,23 @@ export default function DeFiDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
-            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
+            <Surface>
               <CardHeader>
-                <CardTitle className="text-gray-900 dark:text-white">Network Information</CardTitle>
+                <SectionTitle>Network Information</SectionTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div>
-                    <p className="text-gray-400 text-sm">Network</p>
-                    <p className="text-gray-900 dark:text-white font-semibold">{networkInfo?.name || 'Unknown'}</p>
+                    <p className="text-sm text-muted">Network</p>
+                    <p className="font-semibold text-primary">{networkInfo?.name || 'Unknown'}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm">Wallet</p>
-                    <p className="text-gray-900 dark:text-white font-semibold">{wallet ? formatAddress(wallet.address) : 'Not connected'}</p>
+                    <p className="text-sm text-muted">Wallet</p>
+                    <p className="font-semibold text-primary">{wallet ? formatAddress(wallet.address) : 'Not connected'}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm">Contract Support</p>
-                    <Badge className={isContractSupported ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-red-500/20 text-red-300 border-red-500/30'}>
+                    <p className="text-sm text-muted">Contract Support</p>
+                    <Badge className={isContractSupported ? 'border border-gain/30 bg-gain/10 text-gain' : 'border border-loss/30 bg-loss/10 text-loss'}>
                       {isContractSupported ? 'Supported' : 'Unsupported'}
                     </Badge>
                   </div>
@@ -569,7 +569,7 @@ export default function DeFiDashboard() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10"
+                      className="rounded-xl border border-ink-edge text-primary hover:bg-ink-raised"
                       onClick={() => window.open(networkInfo?.blockExplorer, '_blank')}
                       disabled={!networkInfo}
                     >
@@ -579,7 +579,7 @@ export default function DeFiDashboard() {
                   </div>
                 </div>
               </CardContent>
-            </Card>
+            </Surface>
           </motion.div>
         )}
 
@@ -590,11 +590,11 @@ export default function DeFiDashboard() {
             transition={{ duration: 0.5 }}
             className="mt-6"
           >
-            <Card className="bg-red-500/10 border-red-500/20">
+            <Surface className="border border-loss/30 bg-loss/10">
               <CardContent className="p-4">
-                <p className="text-red-300 text-sm">{error}</p>
+                <p className="text-sm text-loss">{error}</p>
               </CardContent>
-            </Card>
+            </Surface>
           </motion.div>
         )}
       </div>
