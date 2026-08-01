@@ -5,8 +5,10 @@ import { Plus, TrendingUp, Filter, Search, Sparkles, ExternalLink, Home, ArrowLe
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/PageHeader";
 import { StatGrid } from "@/components/StatGrid";
+import Surface from "@/components/ds/Surface";
+import SectionTitle from "@/components/ds/SectionTitle";
+import StatValue from "@/components/ds/StatValue";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Navigation } from "@/components/landing/navigation";
@@ -66,7 +68,7 @@ const MarketCard = memo(({ market }: { market: PredictionMarket }) => {
   return (
     <Link href={`/markets/${market.id}`}>
       <div className="transform transition-all duration-200 hover:scale-[1.03] hover:-translate-y-1.5">
-        <Card className="surface-2 surface-interactive overflow-hidden hover:border-neon-purple/60 h-full cursor-pointer">
+        <Surface className="surface-interactive overflow-hidden hover:border-accent-core/60 h-full cursor-pointer">
           {market.imageUrl && (
             <div className="h-32 overflow-hidden relative">
               <img 
@@ -75,35 +77,35 @@ const MarketCard = memo(({ market }: { market: PredictionMarket }) => {
                 loading="lazy"
                 className="w-full h-full object-cover opacity-70"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent" />
+              <div className="absolute inset-0 bg-ink-page/70" />
             </div>
           )}
           
-          <CardContent className="p-4 space-y-3">
+          <div className="p-4 space-y-3">
             <div className="flex items-start justify-between gap-2">
               <div className="flex gap-2 flex-wrap">
-                <span className="px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded border border-purple-500/30">
+                <span className="px-2 py-1 bg-accent-core/15 text-accent-bright text-xs rounded-xl border border-accent-core/30">
                   {market.category.replace('_', ' ').toUpperCase()}
                 </span>
                 {market.sourceContentId && (
-                  <span className="px-2 py-1 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-300 text-xs rounded border border-cyan-500/30 flex items-center gap-1">
+                  <span className="px-2 py-1 bg-accent-core/15 text-accent-bright text-xs rounded-xl border border-accent-core/30 flex items-center gap-1">
                     <Sparkles className="w-3 h-3" />
                     AI-Generated
                   </span>
                 )}
               </div>
-              <span className="text-xs text-slate-400">{daysLeft}d left</span>
+              <span className="text-xs text-muted">{daysLeft}d left</span>
             </div>
 
             <AIConsensusCard marketId={market.id} compact />
 
-            <h3 className="text-sm font-semibold text-white line-clamp-2 leading-snug">
+            <h3 className="text-sm font-semibold text-primary line-clamp-2 leading-snug">
               {market.question}
             </h3>
             
             {market.sourceSummary && (
               <Link href={`/summary/${market.sourceContentId}`}>
-                <div className="flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 transition-colors">
+                <div className="flex items-center gap-1 text-xs text-accent-bright hover:text-primary transition-colors">
                   <ExternalLink className="w-3 h-3" />
                   <span className="line-clamp-1">{market.sourceSummary.title}</span>
                 </div>
@@ -111,22 +113,22 @@ const MarketCard = memo(({ market }: { market: PredictionMarket }) => {
             )}
 
             <div className="flex gap-2">
-              <div className="flex-1 bg-green-500/20 rounded-lg p-3 border border-green-500/40 shadow-inner">
-                <div className="text-xs font-medium text-green-300 mb-0.5">YES</div>
-                <div className="text-xl md:text-2xl font-bold text-green-400">{yesPercentage}%</div>
+                <div className="flex-1 bg-ink-raised rounded-xl p-3 border border-gain/40">
+                  <div className="text-xs font-medium text-gain mb-0.5">YES</div>
+                  <StatValue label="" value={`${yesPercentage}%`} valueClassName="text-gain text-xl md:text-2xl font-bold" />
               </div>
-              <div className="flex-1 bg-red-500/20 rounded-lg p-3 border border-red-500/40 shadow-inner">
-                <div className="text-xs font-medium text-red-300 mb-0.5">NO</div>
-                <div className="text-xl md:text-2xl font-bold text-red-400">{noPercentage}%</div>
+                <div className="flex-1 bg-ink-raised rounded-xl p-3 border border-loss/40">
+                  <div className="text-xs font-medium text-loss mb-0.5">NO</div>
+                  <StatValue label="" value={`${noPercentage}%`} valueClassName="text-loss text-xl md:text-2xl font-bold" />
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/60">
+            <div className="flex items-center justify-between text-xs text-muted pt-2 border-t border-ink-divider">
               <span>{(market.totalVolume / 1000).toFixed(1)}K Vol</span>
               <span>{market.totalTrades} Trades</span>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </Surface>
       </div>
     </Link>
   );
@@ -187,7 +189,7 @@ export default function Markets() {
   const hasMoreMarkets = filteredMarkets.length > INITIAL_MARKET_COUNT;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 tnums-scope">
+    <div className="min-h-screen bg-ink-page tnums-scope">
       <Navigation />
       <div className="section-container pt-24">
 
@@ -206,7 +208,7 @@ export default function Markets() {
                 onClick={() => connectWallet('metamask')}
                 disabled={isConnecting}
                 variant="outline"
-                className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-400 transition-all duration-300"
+                 className="border-accent-core/50 text-accent-bright hover:bg-accent-core/10 hover:border-accent-core transition-all duration-300"
                 data-testid="button-connect-wallet"
               >
                 <Wallet className="w-4 h-4 mr-2" />
@@ -217,36 +219,36 @@ export default function Markets() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
-                    className="border-cyan-500/50 hover:bg-cyan-500/10 hover:border-cyan-400 transition-all duration-300"
+                     className="border-accent-core/50 hover:bg-accent-core/10 hover:border-accent-core transition-all duration-300"
                     data-testid="button-wallet-menu"
                   >
                     <Wallet className="w-4 h-4 mr-2" />
-                    <span className="text-cyan-400">{formatAddress(wallet?.address || '')}</span>
+                     <span className="text-accent-bright">{formatAddress(wallet?.address || '')}</span>
                     {wallet?.chainId === 8453 ? (
-                      <Badge className="ml-2 bg-green-500/20 text-green-400 border-green-500/30 text-xs" data-testid="badge-base-network">
+                        <Badge className="ml-2 bg-gain/15 text-gain border-gain/30 text-xs" data-testid="badge-base-network">
                         Base
                       </Badge>
                     ) : (
-                      <Badge className="ml-2 bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs" data-testid="badge-wrong-network">
+                        <Badge className="ml-2 bg-warn/15 text-warn border-warn/30 text-xs" data-testid="badge-wrong-network">
                         Wrong Network
                       </Badge>
                     )}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="surface-2 text-foreground w-64">
-                  <DropdownMenuLabel className="text-slate-400">Wallet</DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-muted" />
+                <DropdownMenuContent align="end" className="bg-ink-surface border border-ink-edge text-body w-64">
+                  <DropdownMenuLabel className="text-secondary">Wallet</DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-ink-divider" />
                   <div className="px-2 py-3 space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-400">Address:</span>
+                      <span className="text-secondary">Address:</span>
                       <div className="flex items-center gap-2">
-                        <code className="text-cyan-400 text-xs">{formatAddress(wallet?.address || '')}</code>
+                        <code className="text-accent-bright text-xs">{formatAddress(wallet?.address || '')}</code>
                         <button
                           onClick={() => {
                             navigator.clipboard.writeText(wallet?.address || '');
                             toast({ title: "Copied!", description: "Address copied to clipboard" });
                           }}
-                          className="hover:text-cyan-400 transition-colors"
+                          className="hover:text-accent-bright transition-colors"
                         >
                           <Copy className="w-3 h-3" />
                         </button>
@@ -254,20 +256,20 @@ export default function Markets() {
                     </div>
                     {wallet?.balance && (
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-400">Balance:</span>
-                        <span className="text-white">{formatBalance(wallet.balance)} ETH</span>
+                        <span className="text-secondary">Balance:</span>
+                        <span className="text-primary">{formatBalance(wallet.balance)} ETH</span>
                       </div>
                     )}
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-400">Network:</span>
-                      <span className="text-white">{getNetworkInfo(wallet?.chainId || 1)?.name || 'Unknown'}</span>
+                      <span className="text-secondary">Network:</span>
+                      <span className="text-primary">{getNetworkInfo(wallet?.chainId || 1)?.name || 'Unknown'}</span>
                     </div>
                   </div>
                   <DropdownMenuSeparator className="bg-muted" />
                   {wallet?.chainId !== 8453 && (
                     <DropdownMenuItem
                       onClick={() => switchNetwork(8453)}
-                      className="text-yellow-400 focus:text-yellow-300 focus:bg-yellow-500/10 cursor-pointer"
+                      className="text-warn focus:text-warn focus:bg-warn/10 cursor-pointer"
                       data-testid="menu-switch-to-base"
                     >
                       <AlertTriangle className="w-4 h-4 mr-2" />
@@ -276,7 +278,7 @@ export default function Markets() {
                   )}
                   <DropdownMenuItem
                     onClick={disconnect}
-                    className="text-red-400 focus:text-red-300 focus:bg-red-500/10 cursor-pointer"
+                    className="text-loss focus:text-loss focus:bg-loss/10 cursor-pointer"
                     data-testid="menu-disconnect"
                   >
                     Disconnect Wallet
@@ -288,7 +290,7 @@ export default function Markets() {
             {/* Create Market Button */}
             <Button
               onClick={() => setCreateModalOpen(true)}
-              className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 text-white border-0 hover:shadow-xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105"
+              className="grad-accent glow-accent text-primary border-0 transition-all duration-300 hover:scale-105"
               data-testid="button-create-market"
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -302,64 +304,61 @@ export default function Markets() {
         {stats && (
           <StatGrid className="mb-6">
             <div className="transform transition-transform duration-200 hover:scale-[1.02]">
-              <Card className="surface-2 border-purple-500/30 overflow-hidden">
-                <CardContent className="p-4 relative">
-                  <div className="text-xs font-semibold text-purple-300/90 mb-1">Active Markets</div>
+              <Surface className="overflow-hidden">
+                <div className="p-4 relative">
+                  <StatValue label="Active Markets" value={stats.activeMarkets} />
                   <AnimatedCounter 
                     value={stats.activeMarkets} 
-                    className="bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent"
+                    className="text-primary tabular"
                     duration={800}
                   />
-                  <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-purple-500/10 rounded-full blur-xl" />
-                </CardContent>
-              </Card>
+                </div>
+              </Surface>
             </div>
             
             <div className="transform transition-transform duration-200 hover:scale-[1.02]">
-              <Card className="surface-2 border-cyan-500/30 overflow-hidden">
-                <CardContent className="p-4 relative">
-                  <div className="text-xs font-semibold text-cyan-300/90 mb-1">Total Volume</div>
+              <Surface className="overflow-hidden">
+                <div className="p-4 relative">
+                  <StatValue label="Total Volume" value={`${(stats.totalVolume / 1000000).toFixed(1)}M`} delta={12} />
                   <AnimatedCounter 
                     value={stats.totalVolume / 1000000} 
                     formatValue={(v) => `${v.toFixed(1)}M`}
-                    className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent"
+                    className="text-primary tabular"
                     trend="up"
                     trendValue="+12%"
                     duration={1000}
                   />
-                  <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-cyan-500/10 rounded-full blur-xl" />
-                </CardContent>
-              </Card>
+                </div>
+              </Surface>
             </div>
             
             <div className="transform transition-transform duration-200 hover:scale-[1.02]">
-              <Card className="surface-2 border-emerald-500/30 overflow-hidden">
-                <CardContent className="p-4 relative">
-                  <div className="text-xs font-semibold text-green-300/90 mb-1">Total Trades</div>
+              <Surface className="overflow-hidden">
+                <div className="p-4 relative">
+                  <StatValue label="Total Trades" value={stats.totalTrades.toLocaleString()} />
                   <AnimatedCounter 
                     value={stats.totalTrades} 
                     formatValue={(v) => v.toLocaleString()}
-                    className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent"
+                    className="text-primary tabular"
                     showSparkle={true}
                     duration={900}
                   />
                   <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-emerald-500/10 rounded-full blur-xl" />
-                </CardContent>
-              </Card>
+                </div>
+              </Surface>
             </div>
             
             <div className="transform transition-transform duration-200 hover:scale-[1.02]">
-              <Card className="surface-2 border-amber-500/30 overflow-hidden">
-                <CardContent className="p-4 relative">
-                  <div className="text-xs font-semibold text-orange-300/90 mb-1">All Markets</div>
+              <Surface className="overflow-hidden">
+                <div className="p-4 relative">
+                  <StatValue label="All Markets" value={stats.totalMarkets} />
                   <AnimatedCounter 
                     value={stats.totalMarkets} 
-                    className="bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent"
+                    className="text-primary tabular"
                     duration={850}
                   />
-                  <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-orange-500/10 rounded-full blur-xl" />
-                </CardContent>
-              </Card>
+                </div>
+              </Surface>
             </div>
           </StatGrid>
         )}
@@ -369,85 +368,81 @@ export default function Markets() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link href="/leagues">
               <div className="cursor-pointer transform transition-all duration-200 hover:scale-[1.02] hover:-translate-y-0.5">
-                <Card className="bg-gradient-to-br from-fuchsia-900/20 via-fuchsia-800/10 to-transparent border-fuchsia-500/30 hover:border-fuchsia-400/50 transition-all duration-300 overflow-hidden group">
-                  <CardContent className="p-4 relative">
+                <Surface className="overflow-hidden group">
+                  <div className="p-4 relative">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-fuchsia-500/20 group-hover:bg-fuchsia-500/30 transition-colors">
-                        <Swords className="w-5 h-5 text-fuchsia-400" />
+                      <div className="p-2 rounded-xl bg-accent-core/15 group-hover:bg-accent-core/25 transition-colors">
+                        <Swords className="w-5 h-5 text-accent-bright" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-white text-sm flex items-center gap-2">
+                        <h3 className="font-semibold text-primary text-sm flex items-center gap-2">
                           Prediction Leagues
                           {aiStats && aiStats.totalAiInLeagues > 0 && (
-                            <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 px-1.5 py-0 text-[10px]">
+                            <Badge className="bg-accent-core/15 text-accent-bright border-accent-core/30 px-1.5 py-0 text-[10px]">
                               <Bot className="w-2.5 h-2.5 mr-0.5" />
                               {aiStats.totalAiInLeagues} AI
                             </Badge>
                           )}
                         </h3>
-                        <p className="text-xs text-slate-400">Compete for prizes</p>
+                        <p className="text-xs text-secondary">Compete for prizes</p>
                       </div>
                     </div>
-                    <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-fuchsia-500/10 rounded-full blur-2xl" />
-                  </CardContent>
-                </Card>
+                  </div>
+                </Surface>
               </div>
             </Link>
 
             <Link href="/markets/leaderboard">
               <div className="cursor-pointer transform transition-all duration-200 hover:scale-[1.02] hover:-translate-y-0.5">
-                <Card className="bg-gradient-to-br from-amber-900/20 via-amber-800/10 to-transparent border-amber-500/30 hover:border-amber-400/50 transition-all duration-300 overflow-hidden group">
-                  <CardContent className="p-4 relative">
+                <Surface className="overflow-hidden group">
+                  <div className="p-4 relative">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-amber-500/20 group-hover:bg-amber-500/30 transition-colors">
-                        <Trophy className="w-5 h-5 text-amber-400" />
+                      <div className="p-2 rounded-xl bg-warn/15 group-hover:bg-warn/25 transition-colors">
+                        <Trophy className="w-5 h-5 text-warn" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-white text-sm">Leaderboard</h3>
-                        <p className="text-xs text-slate-400">Top traders & rankings</p>
+                        <h3 className="font-semibold text-primary text-sm">Leaderboard</h3>
+                        <p className="text-xs text-secondary">Top traders & rankings</p>
                       </div>
                     </div>
-                    <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl" />
-                  </CardContent>
-                </Card>
+                  </div>
+                </Surface>
               </div>
             </Link>
 
             <Link href="/markets/achievements">
               <div className="cursor-pointer transform transition-all duration-200 hover:scale-[1.02] hover:-translate-y-0.5">
-                <Card className="bg-gradient-to-br from-purple-900/20 via-purple-800/10 to-transparent border-purple-500/30 hover:border-purple-400/50 transition-all duration-300 overflow-hidden group">
-                  <CardContent className="p-4 relative">
+                <Surface className="overflow-hidden group">
+                  <div className="p-4 relative">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-purple-500/20 group-hover:bg-purple-500/30 transition-colors">
-                        <Award className="w-5 h-5 text-purple-400" />
+                      <div className="p-2 rounded-xl bg-accent-core/15 group-hover:bg-accent-core/25 transition-colors">
+                        <Award className="w-5 h-5 text-accent-bright" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-white text-sm">Achievements</h3>
-                        <p className="text-xs text-slate-400">Unlock badges & rewards</p>
+                        <h3 className="font-semibold text-primary text-sm">Achievements</h3>
+                        <p className="text-xs text-secondary">Unlock badges & rewards</p>
                       </div>
                     </div>
-                    <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl" />
-                  </CardContent>
-                </Card>
+                  </div>
+                </Surface>
               </div>
             </Link>
 
             <Link href="/markets/portfolio">
               <div className="cursor-pointer transform transition-all duration-200 hover:scale-[1.02] hover:-translate-y-0.5">
-                <Card className="bg-gradient-to-br from-cyan-900/20 via-cyan-800/10 to-transparent border-cyan-500/30 hover:border-cyan-400/50 transition-all duration-300 overflow-hidden group">
-                  <CardContent className="p-4 relative">
+                <Surface className="overflow-hidden group">
+                  <div className="p-4 relative">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-cyan-500/20 group-hover:bg-cyan-500/30 transition-colors">
-                        <PieChart className="w-5 h-5 text-cyan-400" />
+                      <div className="p-2 rounded-xl bg-accent-core/15 group-hover:bg-accent-core/25 transition-colors">
+                        <PieChart className="w-5 h-5 text-accent-bright" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-white text-sm">Portfolio</h3>
-                        <p className="text-xs text-slate-400">Track your P&L & trades</p>
+                        <h3 className="font-semibold text-primary text-sm">Portfolio</h3>
+                        <p className="text-xs text-secondary">Track your P&L & trades</p>
                       </div>
                     </div>
-                    <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl" />
-                  </CardContent>
-                </Card>
+                  </div>
+                </Surface>
               </div>
             </Link>
           </div>
@@ -456,7 +451,7 @@ export default function Markets() {
         {/* Filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-8">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted" />
             <Input
               placeholder="Search markets..."
               value={searchQuery}
@@ -498,8 +493,7 @@ export default function Markets() {
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <Card key={i} className="surface-1 border-border/50">
-                    <CardContent className="p-4 space-y-3">
+                  <Surface key={i} className="p-4 space-y-3">
                       <Skeleton className="h-4 w-24 bg-muted" />
                       <Skeleton className="h-12 w-full bg-muted" />
                       <div className="flex gap-2">
@@ -507,8 +501,7 @@ export default function Markets() {
                         <Skeleton className="h-16 flex-1 bg-muted" />
                       </div>
                       <Skeleton className="h-4 w-full bg-muted" />
-                    </CardContent>
-                  </Card>
+                  </Surface>
                 ))}
               </div>
             ) : filteredMarkets.length > 0 ? (
@@ -525,7 +518,7 @@ export default function Markets() {
                     <Button
                       variant="outline"
                       onClick={() => setShowAllMarkets(!showAllMarkets)}
-                      className="border-purple-500/50 text-purple-300 hover:bg-purple-500/10 hover:border-purple-400 transition-all"
+                      className="border-accent-core/50 text-accent-bright hover:bg-accent-core/10 hover:border-accent-core transition-all"
                       data-testid="button-toggle-markets"
                     >
                       {showAllMarkets ? (
@@ -538,23 +531,21 @@ export default function Markets() {
                 )}
               </div>
             ) : (
-              <Card className="surface-1 border-border/50">
-                <CardContent className="p-12 text-center">
-                  <TrendingUp className="w-16 h-16 mx-auto mb-4 text-slate-600" />
-                  <h3 className="text-xl font-semibold text-white mb-2">No Markets Found</h3>
-                  <p className="text-slate-400 mb-6">
+              <Surface className="p-12 text-center">
+                  <TrendingUp className="w-16 h-16 mx-auto mb-4 text-muted" />
+                  <SectionTitle as="h3" className="mb-2">No Markets Found</SectionTitle>
+                  <p className="text-secondary mb-6">
                     {searchQuery ? "Try a different search term" : "Be the first to create a market"}
                   </p>
                   <Button
                     onClick={() => setCreateModalOpen(true)}
-                    className="bg-gradient-to-r from-purple-500 to-cyan-500 text-white border-0"
+                    className="grad-accent text-primary border-0"
                     data-testid="button-create-first-market"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Create Market
                   </Button>
-                </CardContent>
-              </Card>
+              </Surface>
             )}
           </div>
 
@@ -569,96 +560,88 @@ export default function Markets() {
               <div className="space-y-3 animate-fade-in">
                 {/* Quick Engagement Links */}
                 <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="w-4 h-4 text-purple-400" />
-                  <h4 className="text-sm font-semibold text-slate-300">Compete & Earn</h4>
+                  <Sparkles className="w-4 h-4 text-accent-bright" />
+                  <h4 className="text-sm font-semibold text-body">Compete & Earn</h4>
                 </div>
                 
                 {/* Leagues Card */}
                 <Link href="/leagues">
-                  <Card className="bg-gradient-to-br from-fuchsia-900/30 via-fuchsia-800/20 to-slate-900/50 border-fuchsia-500/30 hover:border-fuchsia-400/50 transition-all cursor-pointer group">
-                    <CardContent className="p-3">
+                  <Surface className="p-3 cursor-pointer group">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="p-1.5 rounded-lg bg-fuchsia-500/20">
-                            <Swords className="w-4 h-4 text-fuchsia-400" />
+                          <div className="p-1.5 rounded-xl bg-accent-core/15">
+                            <Swords className="w-4 h-4 text-accent-bright" />
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="text-sm font-semibold text-white">Prediction Leagues</span>
+                              <span className="text-sm font-semibold text-primary">Prediction Leagues</span>
                               {aiStats && aiStats.totalAiInLeagues > 0 && (
-                                <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 px-1 py-0 text-[10px]">
+                                <Badge className="bg-accent-core/15 text-accent-bright border-accent-core/30 px-1 py-0 text-[10px]">
                                   <Bot className="w-2.5 h-2.5 mr-0.5" />
                                   {aiStats.totalAiInLeagues}
                                 </Badge>
                               )}
                             </div>
-                            <p className="text-xs text-slate-400">Compete for STREAM prizes</p>
+                            <p className="text-xs text-secondary">Compete for STREAM prizes</p>
                           </div>
                         </div>
-                        <TrendingUp className="w-4 h-4 text-fuchsia-400 group-hover:translate-x-1 transition-transform" />
+                        <TrendingUp className="w-4 h-4 text-accent-bright group-hover:translate-x-1 transition-transform" />
                       </div>
-                    </CardContent>
-                  </Card>
+                  </Surface>
                 </Link>
                 
                 {/* Leaderboard Card */}
                 <Link href="/markets/leaderboard">
-                  <Card className="bg-gradient-to-br from-amber-900/30 via-amber-800/20 to-slate-900/50 border-amber-500/30 hover:border-amber-400/50 transition-all cursor-pointer group">
-                    <CardContent className="p-3">
+                  <Surface className="p-3 cursor-pointer group">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="p-1.5 rounded-lg bg-amber-500/20">
-                            <Trophy className="w-4 h-4 text-amber-400" />
+                          <div className="p-1.5 rounded-xl bg-warn/15">
+                            <Trophy className="w-4 h-4 text-warn" />
                           </div>
                           <div>
-                            <span className="text-sm font-semibold text-white block">Leaderboard</span>
-                            <p className="text-xs text-slate-400">Top traders & rankings</p>
+                            <span className="text-sm font-semibold text-primary block">Leaderboard</span>
+                            <p className="text-xs text-secondary">Top traders & rankings</p>
                           </div>
                         </div>
-                        <TrendingUp className="w-4 h-4 text-amber-400 group-hover:translate-x-1 transition-transform" />
+                        <TrendingUp className="w-4 h-4 text-warn group-hover:translate-x-1 transition-transform" />
                       </div>
-                    </CardContent>
-                  </Card>
+                  </Surface>
                 </Link>
                 
                 {/* Achievements Card */}
                 <Link href="/markets/achievements">
-                  <Card className="bg-gradient-to-br from-purple-900/30 via-purple-800/20 to-slate-900/50 border-purple-500/30 hover:border-purple-400/50 transition-all cursor-pointer group">
-                    <CardContent className="p-3">
+                  <Surface className="p-3 cursor-pointer group">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="p-1.5 rounded-lg bg-purple-500/20">
-                            <Award className="w-4 h-4 text-purple-400" />
+                          <div className="p-1.5 rounded-xl bg-accent-core/15">
+                            <Award className="w-4 h-4 text-accent-bright" />
                           </div>
                           <div>
-                            <span className="text-sm font-semibold text-white block">Achievements</span>
-                            <p className="text-xs text-slate-400">Unlock badges & rewards</p>
+                            <span className="text-sm font-semibold text-primary block">Achievements</span>
+                            <p className="text-xs text-secondary">Unlock badges & rewards</p>
                           </div>
                         </div>
-                        <TrendingUp className="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform" />
+                        <TrendingUp className="w-4 h-4 text-accent-bright group-hover:translate-x-1 transition-transform" />
                       </div>
-                    </CardContent>
-                  </Card>
+                  </Surface>
                 </Link>
                 
                 {/* Portfolio Card */}
                 <Link href="/markets/portfolio">
-                  <Card className="bg-gradient-to-br from-cyan-900/30 via-cyan-800/20 to-slate-900/50 border-cyan-500/30 hover:border-cyan-400/50 transition-all cursor-pointer group">
-                    <CardContent className="p-3">
+                  <Surface className="p-3 cursor-pointer group">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="p-1.5 rounded-lg bg-cyan-500/20">
-                            <PieChart className="w-4 h-4 text-cyan-400" />
+                          <div className="p-1.5 rounded-xl bg-accent-core/15">
+                            <PieChart className="w-4 h-4 text-accent-bright" />
                           </div>
                           <div>
-                            <span className="text-sm font-semibold text-white block">Portfolio</span>
-                            <p className="text-xs text-slate-400">Track your P&L</p>
+                            <span className="text-sm font-semibold text-primary block">Portfolio</span>
+                            <p className="text-xs text-secondary">Track your P&L</p>
                           </div>
                         </div>
-                        <TrendingUp className="w-4 h-4 text-cyan-400 group-hover:translate-x-1 transition-transform" />
+                        <TrendingUp className="w-4 h-4 text-accent-bright group-hover:translate-x-1 transition-transform" />
                       </div>
-                    </CardContent>
-                  </Card>
+                  </Surface>
                 </Link>
               </div>
             </div>

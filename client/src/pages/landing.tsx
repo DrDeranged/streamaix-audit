@@ -24,10 +24,10 @@ const AvatarLeaderboardLanding = lazy(() => import("@/components/landing/avatar-
 
 function SectionLoader() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-ink-page">
       <div className="text-center">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-400 mx-auto mb-3" />
-        <p className="text-white/50 text-sm">Loading section...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-accent-bright mx-auto mb-3" />
+        <p className="text-muted text-sm">Loading section...</p>
       </div>
     </div>
   );
@@ -57,7 +57,7 @@ export default function Landing() {
       id: "discover",
       label: "Discover",
       component: (
-        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-amber-950/10 to-slate-950" fullHeight={false}>
+        <SectionWrapper className="relative bg-ink-page" fullHeight={false}>
           <NeuralNetworkBackground />
           <div className="relative z-10">
             <Suspense fallback={<SectionLoader />}>
@@ -71,7 +71,7 @@ export default function Landing() {
       id: "bounties",
       label: "Bounties",
       component: (
-        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-emerald-950/10 to-slate-950">
+        <SectionWrapper className="relative bg-ink-page">
           <NeuralNetworkBackground />
           <div className="relative z-10">
             <Navigation />
@@ -86,7 +86,7 @@ export default function Landing() {
       id: "prediction-markets",
       label: "Prediction Markets",
       component: (
-        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-blue-950/10 to-slate-950">
+        <SectionWrapper className="relative bg-ink-page">
           <NeuralNetworkBackground />
           <div className="relative z-10">
             <Navigation />
@@ -101,7 +101,7 @@ export default function Landing() {
       id: "social",
       label: "Social Feed",
       component: (
-        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-pink-950/10 to-slate-950">
+        <SectionWrapper className="relative bg-ink-page">
           <NeuralNetworkBackground />
           <div className="relative z-10">
             <Navigation />
@@ -134,7 +134,7 @@ export default function Landing() {
       id: "live-streams",
       label: "Live Streams",
       component: (
-        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-purple-950/10 to-slate-950">
+        <SectionWrapper className="relative bg-ink-page">
           <NeuralNetworkBackground />
           <div className="relative z-10">
             <Navigation />
@@ -149,7 +149,7 @@ export default function Landing() {
       id: "ai-processor",
       label: "AI Processing",
       component: (
-        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-cyan-950/10 to-slate-950" fullHeight={false}>
+        <SectionWrapper className="relative bg-ink-page" fullHeight={false}>
           <NeuralNetworkBackground />
           <div className="relative z-10">
             <Navigation />
@@ -165,7 +165,7 @@ export default function Landing() {
       id: "avatars",
       label: "Knowledge Avatars",
       component: (
-        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-violet-950/10 to-slate-950">
+        <SectionWrapper className="relative bg-ink-page">
           <NeuralNetworkBackground />
           <div className="relative z-10">
             <Navigation />
@@ -180,7 +180,7 @@ export default function Landing() {
       id: "ai-suggestions",
       label: "AI Suggestions",
       component: (
-        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-teal-950/10 to-slate-950">
+        <SectionWrapper className="relative bg-ink-page">
           <NeuralNetworkBackground />
           <div className="relative z-10">
             <Navigation />
@@ -195,7 +195,7 @@ export default function Landing() {
       id: "ai-trading",
       label: "AI Trading",
       component: (
-        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-cyan-950/10 to-slate-950" fullHeight={false}>
+        <SectionWrapper className="relative bg-ink-page" fullHeight={false}>
           <NeuralNetworkBackground />
           <div className="relative z-10">
             <Suspense fallback={<SectionLoader />}>
@@ -209,7 +209,7 @@ export default function Landing() {
       id: "bot-trading",
       label: "Bot Trading",
       component: (
-        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-cyan-950/10 to-slate-950" fullHeight={false}>
+        <SectionWrapper className="relative bg-ink-page" fullHeight={false}>
           <NeuralNetworkBackground />
           <div className="relative z-10">
             <Suspense fallback={<SectionLoader />}>
@@ -223,7 +223,7 @@ export default function Landing() {
       id: "portfolio",
       label: "Portfolio",
       component: (
-        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-fuchsia-950/10 to-slate-950" fullHeight={false}>
+        <SectionWrapper className="relative bg-ink-page" fullHeight={false}>
           <NeuralNetworkBackground />
           <div className="relative z-10">
             <Navigation />
@@ -238,7 +238,7 @@ export default function Landing() {
       id: "learn",
       label: "Learning Hub",
       component: (
-        <SectionWrapper className="relative bg-gradient-to-b from-slate-950 via-violet-950/10 to-slate-950" fullHeight={false}>
+        <SectionWrapper className="relative bg-ink-page" fullHeight={false}>
           <NeuralNetworkBackground />
           <div className="relative z-10">
             <Navigation />
@@ -252,7 +252,7 @@ export default function Landing() {
   ], [handleNavigateToSection]);
 
   return (
-    <div className="relative bg-background text-foreground">
+    <div className="relative bg-ink-page text-body">
       <SlidingPageContainer ref={slidingRef} sections={sections} initialSection={4} />
     </div>
   );

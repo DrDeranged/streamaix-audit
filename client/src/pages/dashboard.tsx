@@ -4,7 +4,9 @@ import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/PageHeader';
 import { StatGrid } from '@/components/StatGrid';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import Surface from '@/components/ds/Surface';
+import StatValue from '@/components/ds/StatValue';
+import SectionTitle from '@/components/ds/SectionTitle';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,7 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
+import { toast, useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import InvestmentJournal from '@/components/InvestmentJournal';
@@ -23,7 +25,7 @@ import BountyBoardSection from '@/components/bounty/BountyBoardSection';
 import RelatedBountiesWidget from '@/components/bounty/RelatedBountiesWidget';
 import ActivePredictionMarkets from '@/components/dashboard/ActivePredictionMarkets';
 import HotAvatarTrades from '@/components/dashboard/HotAvatarTrades';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, animate } from 'framer-motion';
 import { 
   Plus, 
   Play, 
@@ -394,9 +396,9 @@ export default function Dashboard() {
   };
 
   const getChangeColor = (change: number) => {
-    if (change > 0) return 'text-green-400';
-    if (change < 0) return 'text-red-400';
-    return 'text-gray-400';
+    if (change > 0) return 'text-gain';
+    if (change < 0) return 'text-loss';
+    return 'text-muted';
   };
 
   const getChangeIcon = (change: number) => {
@@ -406,20 +408,20 @@ export default function Dashboard() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-500/20 text-green-300 border-green-400/30';
+        return 'bg-gain/10 text-gain border-gain/30';
       case 'processing':
-        return 'bg-yellow-500/20 text-yellow-300 border-yellow-400/30';
+        return 'bg-warn/10 text-warn border-warn/30';
       case 'pending':
-        return 'bg-blue-500/20 text-blue-300 border-blue-400/30';
+        return 'bg-accent-core/10 text-accent-bright border-accent-core/30';
       case 'failed':
-        return 'bg-red-500/20 text-red-300 border-red-400/30';
+        return 'bg-loss/10 text-loss border-loss/30';
       default:
-        return 'bg-gray-500/20 text-gray-300 border-gray-400/30';
+        return 'bg-ink-raised text-secondary border-ink-edge';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 pt-16">
+    <div className="min-h-screen bg-ink-page pt-16">
       {/* Subtle Grid Background */}
       <div className="fixed inset-0" style={{
         backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.03\"%3E%3Ccircle cx=\"30\" cy=\"30\" r=\"1\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')",
@@ -428,16 +430,16 @@ export default function Dashboard() {
       
 
       {/* ENHANCED FINANCIAL NEWS SECTION */}
-      <div className="relative z-10 bg-gradient-to-r from-purple-900/30 via-fuchsia-900/20 to-cyan-900/30 border-b border-purple-500/10">
+      <div className="relative z-10 bg-ink-surface border-b border-ink-divider">
         <div className="max-w-7xl mx-auto px-4 py-2">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <Newspaper className="h-4 w-4 text-blue-400" />
-              <h3 className="text-white text-sm font-medium">Today's Financial News</h3>
+              <Newspaper className="h-4 w-4 text-accent-bright" />
+              <SectionTitle as="h3">Today's Financial News</SectionTitle>
             </div>
             <div className="flex gap-1">
               <button 
-                className="text-white/50 hover:text-white p-1 rounded transition-colors"
+                className="text-secondary hover:text-primary p-1 rounded-xl transition-colors"
                 onClick={() => {
                   const container = document.querySelector('.news-scroll-container');
                   container?.scrollBy({ left: -300, behavior: 'smooth' });
@@ -446,7 +448,7 @@ export default function Dashboard() {
                 <ChevronLeft className="h-4 w-4" />
               </button>
               <button 
-                className="text-white/50 hover:text-white p-1 rounded transition-colors"
+                className="text-secondary hover:text-primary p-1 rounded-xl transition-colors"
                 onClick={() => {
                   const container = document.querySelector('.news-scroll-container');
                   container?.scrollBy({ left: 300, behavior: 'smooth' });
@@ -465,11 +467,11 @@ export default function Dashboard() {
                 return (
                   <div
                     key={index}
-                    className="min-w-[240px] max-w-[240px] surface-1 surface-interactive rounded-lg p-2.5"
+                    className="min-w-[240px] max-w-[240px] rounded-xl border border-ink-edge bg-ink-raised p-2.5"
                     onClick={() => window.open(article.url, '_blank')}
                     data-testid={`news-article-${index}`}
                   >
-                    <h4 className="text-white text-xs font-semibold line-clamp-4 leading-tight">
+                    <h4 className="text-primary text-xs font-semibold line-clamp-4 leading-tight">
                       {headline}
                     </h4>
                   </div>
@@ -501,7 +503,7 @@ export default function Dashboard() {
                 onClick={() => setLocation('/')}
                 variant="outline"
                 size="sm"
-                className="surface-1 text-white hover:border-neon-cyan/50 min-h-[44px]"
+                className="bg-ink-surface text-primary border border-ink-edge hover:border-accent-core/50 min-h-[44px] rounded-xl"
                 data-testid="button-back-home"
               >
                 <Home className="h-4 w-4 sm:mr-2" />
@@ -521,66 +523,62 @@ export default function Dashboard() {
           <StatGrid>
           {/* Summaries Card */}
           <div className="relative group">
-            <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
-            <Card className="relative surface-1 surface-interactive border-purple-500/30 hover:border-purple-500/60 touch-manipulation">
-              <CardContent className="p-5">
+            <Surface className="relative border border-ink-edge bg-ink-surface touch-manipulation">
+              <div className="p-5">
                 <div className="text-center">
-                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center mx-auto mb-3">
-                    <BarChart3 className="h-6 w-6 text-purple-300" />
+                  <div className="h-12 w-12 rounded-xl bg-accent-core/10 flex items-center justify-center mx-auto mb-3">
+                    <BarChart3 className="h-6 w-6 text-accent-bright" />
                   </div>
-                  <p className="text-gray-400 text-xs font-medium tracking-wider uppercase mb-1">Summaries</p>
-                  <p className="text-white text-xl font-bold">{stats.totalSummaries}</p>
+                  <p className="text-muted text-xs font-medium tracking-wider uppercase mb-1">Summaries</p>
+                  <StatValue label="" value={stats.totalSummaries} />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
           </div>
 
           {/* Views Card */}
           <div className="relative group">
-            <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
-            <Card className="relative surface-1 surface-interactive border-blue-500/30 hover:border-blue-500/60 touch-manipulation">
-              <CardContent className="p-5">
+            <Surface className="relative border border-ink-edge bg-ink-surface touch-manipulation">
+              <div className="p-5">
                 <div className="text-center">
-                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center mx-auto mb-3">
-                    <Eye className="h-6 w-6 text-blue-300" />
+                  <div className="h-12 w-12 rounded-xl bg-accent-core/10 flex items-center justify-center mx-auto mb-3">
+                    <Eye className="h-6 w-6 text-accent-bright" />
                   </div>
-                  <p className="text-gray-400 text-xs font-medium tracking-wider uppercase mb-1">Views</p>
-                  <p className="text-white text-xl font-bold">{stats.totalViews}</p>
+                  <p className="text-muted text-xs font-medium tracking-wider uppercase mb-1">Views</p>
+                  <StatValue label="" value={stats.totalViews} />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
           </div>
 
           {/* STREAM Card */}
           <div className="relative group">
-            <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
-            <Card className="relative surface-1 surface-interactive border-emerald-500/30 hover:border-emerald-500/60 touch-manipulation">
-              <CardContent className="p-5">
+            <Surface className="relative border border-ink-edge bg-ink-surface touch-manipulation">
+              <div className="p-5">
                 <div className="text-center">
-                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-emerald-500/20 to-green-500/20 flex items-center justify-center mx-auto mb-3">
-                    <Wallet className="h-6 w-6 text-emerald-300" />
+                  <div className="h-12 w-12 rounded-xl bg-gain/10 flex items-center justify-center mx-auto mb-3">
+                    <Wallet className="h-6 w-6 text-gain" />
                   </div>
-                  <p className="text-gray-400 text-xs font-medium tracking-wider uppercase mb-1">STREAM</p>
-                  <p className="text-white text-xl font-bold">{balance.streamTokens.toFixed(0)}</p>
+                  <p className="text-muted text-xs font-medium tracking-wider uppercase mb-1">STREAM</p>
+                  <StatValue label="" value={balance.streamTokens.toFixed(0)} />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
           </div>
 
           {/* Rank Card */}
           <div className="relative group">
-            <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
-            <Card className="relative surface-1 surface-interactive border-amber-500/30 hover:border-amber-500/60 touch-manipulation">
-              <CardContent className="p-5">
+            <Surface className="relative border border-ink-edge bg-ink-surface touch-manipulation">
+              <div className="p-5">
                 <div className="text-center">
-                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center mx-auto mb-3">
-                    <Award className="h-6 w-6 text-amber-300" />
+                  <div className="h-12 w-12 rounded-xl bg-warn/10 flex items-center justify-center mx-auto mb-3">
+                    <Award className="h-6 w-6 text-warn" />
                   </div>
-                  <p className="text-gray-400 text-xs font-medium tracking-wider uppercase mb-1">Rank</p>
-                  <p className="text-white text-xl font-bold">{stats.level}</p>
+                  <p className="text-muted text-xs font-medium tracking-wider uppercase mb-1">Rank</p>
+                  <StatValue label="" value={stats.level} />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
           </div>
           </StatGrid>
         </motion.div>
@@ -595,66 +593,62 @@ export default function Dashboard() {
           <StatGrid>
           {/* Followers Card */}
           <div className="relative group">
-            <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
-            <Card className="relative surface-1 surface-interactive border-pink-500/30 hover:border-pink-500/60 touch-manipulation">
-              <CardContent className="p-5">
+            <Surface className="relative border border-ink-edge bg-ink-surface touch-manipulation">
+              <div className="p-5">
                 <div className="text-center">
-                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-pink-500/20 to-rose-500/20 flex items-center justify-center mx-auto mb-3">
-                    <Users className="h-6 w-6 text-pink-300" />
+                  <div className="h-12 w-12 rounded-xl bg-accent-core/10 flex items-center justify-center mx-auto mb-3">
+                    <Users className="h-6 w-6 text-accent-bright" />
                   </div>
-                  <p className="text-gray-400 text-xs font-medium tracking-wider uppercase mb-1">Followers</p>
-                  <p className="text-white text-xl font-bold" data-testid="stat-followers">{followStatsData?.followersCount || 0}</p>
+                  <p className="text-muted text-xs font-medium tracking-wider uppercase mb-1">Followers</p>
+                  <StatValue label="" value={followStatsData?.followersCount || 0} data-testid="stat-followers" />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
           </div>
 
           {/* Following Card */}
           <div className="relative group">
-            <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
-            <Card className="relative surface-1 surface-interactive border-violet-500/30 hover:border-violet-500/60 touch-manipulation">
-              <CardContent className="p-5">
+            <Surface className="relative border border-ink-edge bg-ink-surface touch-manipulation">
+              <div className="p-5">
                 <div className="text-center">
-                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center mx-auto mb-3">
-                    <UserPlus className="h-6 w-6 text-violet-300" />
+                  <div className="h-12 w-12 rounded-xl bg-accent-core/10 flex items-center justify-center mx-auto mb-3">
+                    <UserPlus className="h-6 w-6 text-accent-bright" />
                   </div>
-                  <p className="text-gray-400 text-xs font-medium tracking-wider uppercase mb-1">Following</p>
-                  <p className="text-white text-xl font-bold" data-testid="stat-following">{followStatsData?.followingCount || 0}</p>
+                  <p className="text-muted text-xs font-medium tracking-wider uppercase mb-1">Following</p>
+                  <StatValue label="" value={followStatsData?.followingCount || 0} data-testid="stat-following" />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
           </div>
 
           {/* Followed Avatars Card */}
           <div className="relative group">
-            <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
-            <Card className="relative surface-1 surface-interactive border-cyan-500/30 hover:border-cyan-500/60 touch-manipulation">
-              <CardContent className="p-5">
+            <Surface className="relative border border-ink-edge bg-ink-surface touch-manipulation">
+              <div className="p-5">
                 <div className="text-center">
-                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-cyan-500/20 to-teal-500/20 flex items-center justify-center mx-auto mb-3">
-                    <Sparkles className="h-6 w-6 text-cyan-300" />
+                  <div className="h-12 w-12 rounded-xl bg-accent-core/10 flex items-center justify-center mx-auto mb-3">
+                    <Sparkles className="h-6 w-6 text-accent-bright" />
                   </div>
-                  <p className="text-gray-400 text-xs font-medium tracking-wider uppercase mb-1">Avatars</p>
-                  <p className="text-white text-xl font-bold" data-testid="stat-avatars">{(followedAvatarsData as any)?.followedAvatars?.length || 0}</p>
+                  <p className="text-muted text-xs font-medium tracking-wider uppercase mb-1">Avatars</p>
+                  <StatValue label="" value={(followedAvatarsData as any)?.followedAvatars?.length || 0} data-testid="stat-avatars" />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
           </div>
 
           {/* Streak Card */}
           <div className="relative group">
-            <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-orange-500 via-yellow-500 to-amber-500 opacity-0 group-hover:opacity-60 blur transition-opacity duration-300" />
-            <Card className="relative surface-1 surface-interactive border-orange-500/30 hover:border-orange-500/60 touch-manipulation">
-              <CardContent className="p-5">
+            <Surface className="relative border border-ink-edge bg-ink-surface touch-manipulation">
+              <div className="p-5">
                 <div className="text-center">
-                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-orange-500/20 to-yellow-500/20 flex items-center justify-center mx-auto mb-3">
-                    <Zap className="h-6 w-6 text-orange-300" />
+                  <div className="h-12 w-12 rounded-xl bg-warn/10 flex items-center justify-center mx-auto mb-3">
+                    <Zap className="h-6 w-6 text-warn" />
                   </div>
-                  <p className="text-gray-400 text-xs font-medium tracking-wider uppercase mb-1">Streak</p>
-                  <p className="text-white text-xl font-bold" data-testid="stat-streak">{stats.streak} days</p>
+                  <p className="text-muted text-xs font-medium tracking-wider uppercase mb-1">Streak</p>
+                  <StatValue label="" value={`${stats.streak} days`} data-testid="stat-streak" />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
           </div>
           </StatGrid>
         </motion.div>
@@ -669,53 +663,53 @@ export default function Dashboard() {
               transition={{ delay: 0.2 }}
             >
               <Tabs defaultValue="summaries" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 surface-1 border border-purple-500/20 rounded-xl p-1 touch-manipulation">
-                  <TabsTrigger value="summaries" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/30 data-[state=active]:to-fuchsia-500/30 data-[state=active]:border-purple-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/20 rounded-lg px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px] text-gray-400 data-[state=active]:text-white transition-all duration-300 border border-transparent">
+                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 surface-1 border border-ink-edge rounded-xl p-1 touch-manipulation">
+                  <TabsTrigger value="summaries" className="data-[state=active]:bg-accent-core/15 data-[state=active]:border-accent-core/40 rounded-xl px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px] text-secondary data-[state=active]:text-primary transition-all duration-300 border border-transparent">
                     <FileText className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Summaries</span>
                   </TabsTrigger>
-                  <TabsTrigger value="markets" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500/30 data-[state=active]:to-cyan-500/30 data-[state=active]:border-emerald-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-emerald-500/20 rounded-lg px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px] text-gray-400 data-[state=active]:text-white transition-all duration-300 border border-transparent">
+                  <TabsTrigger value="markets" className="data-[state=active]:bg-accent-core/15 data-[state=active]:border-accent-core/40 rounded-xl px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px] text-secondary data-[state=active]:text-primary transition-all duration-300 border border-transparent">
                     <TrendingUp className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Markets</span>
                   </TabsTrigger>
-                  <TabsTrigger value="avatars" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/30 data-[state=active]:to-purple-500/30 data-[state=active]:border-blue-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/20 rounded-lg px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px] text-gray-400 data-[state=active]:text-white transition-all duration-300 border border-transparent">
+                  <TabsTrigger value="avatars" className="data-[state=active]:bg-accent-core/15 data-[state=active]:border-accent-core/40 rounded-xl px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px] text-secondary data-[state=active]:text-primary transition-all duration-300 border border-transparent">
                     <Users className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Avatars</span>
                   </TabsTrigger>
-                  <TabsTrigger value="notes" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/30 data-[state=active]:to-orange-500/30 data-[state=active]:border-amber-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-amber-500/20 rounded-lg px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px] text-gray-400 data-[state=active]:text-white transition-all duration-300 border border-transparent">
+                  <TabsTrigger value="notes" className="data-[state=active]:bg-accent-core/15 data-[state=active]:border-accent-core/40 rounded-xl px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px] text-secondary data-[state=active]:text-primary transition-all duration-300 border border-transparent">
                     <BookmarkPlus className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Notes</span>
                   </TabsTrigger>
-                  <TabsTrigger value="wallet" className="hidden sm:flex data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500/30 data-[state=active]:to-emerald-500/30 data-[state=active]:border-green-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-green-500/20 rounded-lg px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px] text-gray-400 data-[state=active]:text-white transition-all duration-300 border border-transparent">
+                  <TabsTrigger value="wallet" className="hidden sm:flex data-[state=active]:bg-ink-raised data-[state=active]:bg-ink-raised data-[state=active]:bg-ink-raised data-[state=active]:border-green-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-green-500/20 rounded-xl px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px] text-muted data-[state=active]:text-primary transition-all duration-300 border border-transparent">
                     <Wallet className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Wallet</span>
                   </TabsTrigger>
-                  <TabsTrigger value="bounties" className="hidden lg:flex data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/30 data-[state=active]:to-rose-500/30 data-[state=active]:border-pink-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-pink-500/20 rounded-lg px-3 py-3 text-xs font-medium text-gray-400 data-[state=active]:text-white transition-all duration-300 border border-transparent">
+                  <TabsTrigger value="bounties" className="hidden lg:flex data-[state=active]:bg-ink-raised data-[state=active]:bg-ink-raised data-[state=active]:bg-ink-raised data-[state=active]:border-ink-edge data-[state=active]:shadow-lg data-[state=active]:shadow-pink-500/20 rounded-xl px-3 py-3 text-xs font-medium text-muted data-[state=active]:text-primary transition-all duration-300 border border-transparent">
                     <Target className="h-4 w-4 lg:mr-2" />
                     <span className="hidden lg:inline">Bounties</span>
                   </TabsTrigger>
-                  <TabsTrigger value="overview" className="hidden lg:flex data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/30 data-[state=active]:to-blue-500/30 data-[state=active]:border-cyan-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-cyan-500/20 rounded-lg px-3 py-3 text-xs font-medium text-gray-400 data-[state=active]:text-white transition-all duration-300 border border-transparent">
+                  <TabsTrigger value="overview" className="hidden lg:flex data-[state=active]:bg-ink-raised data-[state=active]:bg-ink-raised data-[state=active]:bg-ink-raised data-[state=active]:border-ink-edge data-[state=active]:shadow-lg data-[state=active]:shadow-cyan-500/20 rounded-xl px-3 py-3 text-xs font-medium text-muted data-[state=active]:text-primary transition-all duration-300 border border-transparent">
                     <Activity className="h-4 w-4 lg:mr-2" />
                     <span className="hidden lg:inline">Overview</span>
                   </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="space-y-6 mt-6">
-                  <Card className="surface-2">
-                    <CardHeader>
-                      <CardTitle className="text-white">Recent Activity</CardTitle>
-                    </CardHeader>
-                    <CardContent>
+                  <Surface variant="raised">
+                    <div>
+                      <SectionTitle className="text-primary">Recent Activity</SectionTitle>
+                    </div>
+                    <div>
                       <div className="space-y-4">
                         {recentSummaries.map((summary: Summary, index: number) => (
-                          <div key={summary.id} className="flex items-center justify-between p-3 surface-1 rounded-lg">
+                          <div key={summary.id} className="flex items-center justify-between p-3 surface-1 rounded-xl">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
-                                <FileText className="h-5 w-5 text-white" />
+                              <div className="w-10 h-10 bg-ink-raised rounded-xl flex items-center justify-center">
+                                <FileText className="h-5 w-5 text-primary" />
                               </div>
                               <div>
-                                <h4 className="text-white font-medium">{summary.title}</h4>
-                                <p className="text-gray-400 text-sm">{summary.platform}</p>
+                                <h4 className="text-primary font-medium">{summary.title}</h4>
+                                <p className="text-muted text-sm">{summary.platform}</p>
                               </div>
                             </div>
                             <Badge variant="outline" className={getStatusColor(summary.processingStatus)}>
@@ -724,8 +718,8 @@ export default function Dashboard() {
                           </div>
                         ))}
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </Surface>
                 </TabsContent>
 
                 <TabsContent value="markets" className="mt-6 space-y-6">
@@ -741,14 +735,14 @@ export default function Dashboard() {
 
                 <TabsContent value="avatars" className="space-y-4 mt-4">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                    <h2 className="text-white text-lg font-bold">
+                    <h2 className="text-primary text-lg font-bold">
                       Following ({(followedAvatarsData as any)?.followedAvatars?.length || 0})
                     </h2>
                     <Link to="/landing#knowledge-avatars">
                       <Button 
                         variant="outline" 
                         size="sm"
-                        className="text-purple-300 bg-purple-500/10 border-purple-400/30 hover:bg-purple-500/20"
+                        className="text-accent-bright bg-ink-raised border-ink-edge hover:bg-ink-raised"
                         data-testid="button-discover-avatars"
                       >
                         <Users className="h-4 w-4 mr-2" />
@@ -760,7 +754,7 @@ export default function Dashboard() {
                   <div className="space-y-4">
                     {followedAvatarsLoading ? (
                       <div className="text-center py-8">
-                        <RefreshCw className="h-8 w-8 animate-spin text-purple-400 mx-auto" />
+                        <RefreshCw className="h-8 w-8 animate-spin text-accent-bright mx-auto" />
                       </div>
                     ) : (followedAvatarsData as any)?.followedAvatars?.length > 0 ? (
                       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
@@ -769,12 +763,12 @@ export default function Dashboard() {
                             key={followData.avatarId}
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="surface-2 rounded-lg p-4 touch-manipulation"
+                            className="surface-2 rounded-xl p-4 touch-manipulation"
                             data-testid={`followed-avatar-${followData.avatar.handle}`}
                           >
                             <div className="flex items-start gap-4">
                               <div className="flex-shrink-0">
-                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center overflow-hidden">
+                                <div className="w-12 h-12 rounded-full bg-ink-raised flex items-center justify-center overflow-hidden">
                                   {followData.avatar.imageUrl ? (
                                     <img 
                                       src={followData.avatar.imageUrl} 
@@ -782,7 +776,7 @@ export default function Dashboard() {
                                       className="w-full h-full object-cover"
                                     />
                                   ) : (
-                                    <span className="text-white font-bold text-lg">
+                                    <span className="text-primary font-bold text-lg">
                                       {followData.avatar.name?.charAt(0) || '?'}
                                     </span>
                                   )}
@@ -792,24 +786,24 @@ export default function Dashboard() {
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between mb-2">
                                   <div>
-                                    <h3 className="text-white font-semibold text-base">
+                                    <h3 className="text-primary font-semibold text-base">
                                       {followData.avatar.name}
                                     </h3>
-                                    <p className="text-gray-400 text-sm">@{followData.avatar.handle}</p>
+                                    <p className="text-muted text-sm">@{followData.avatar.handle}</p>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <Badge variant="outline" className="text-xs text-blue-400 border-blue-400/30">
+                                    <Badge variant="outline" className="text-xs text-accent-bright border-ink-edge">
                                       {followData.avatar.expertise}
                                     </Badge>
                                   </div>
                                 </div>
                                 
-                                <p className="text-gray-300 text-sm mb-3 line-clamp-2">
+                                <p className="text-body text-sm mb-3 line-clamp-2">
                                   {followData.avatar.bio}
                                 </p>
                                 
                                 <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-4 text-xs text-gray-400">
+                                  <div className="flex items-center gap-4 text-xs text-muted">
                                     <span className="flex items-center gap-1">
                                       <Users className="h-3 w-3" />
                                       {followData.avatar.followerCount?.toLocaleString() || 0} followers
@@ -847,25 +841,25 @@ export default function Dashboard() {
                         ))}
                       </div>
                     ) : (
-                      <Card className="surface-1">
-                        <CardContent className="p-8 text-center">
-                          <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                          <h3 className="text-white text-lg font-semibold mb-2">No Avatars Followed Yet</h3>
-                          <p className="text-gray-400 mb-4">
+                      <Surface>
+                        <div className="p-8 text-center">
+                          <Users className="h-12 w-12 text-muted mx-auto mb-4" />
+                          <h3 className="text-primary text-lg font-semibold mb-2">No Avatars Followed Yet</h3>
+                          <p className="text-muted mb-4">
                             Start following knowledge avatars to see their latest insights and thoughts right here.
                           </p>
                           <Link to="/landing#knowledge-avatars">
                             <Button 
                               variant="outline" 
-                              className="text-purple-300 bg-purple-500/10 border-purple-400/30 hover:bg-purple-500/20"
-                              data-testid="button-discover-first-avatars"
+                              className="text-accent-bright bg-ink-raised border-ink-edge hover:bg-ink-raised"
+                             data-testid="button-discover-first-avatars"
                             >
                               <Users className="h-4 w-4 mr-2" />
                               Discover Knowledge Avatars
                             </Button>
                           </Link>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </Surface>
                     )}
                   </div>
 
@@ -873,8 +867,8 @@ export default function Dashboard() {
                   {!recommendationsLoading && (recommendationsData as any)?.recommendations?.length > 0 && (
                     <div className="mt-8 space-y-4">
                       <div className="flex items-center justify-between">
-                        <h2 className="text-white text-lg font-bold flex items-center gap-2">
-                          <Zap className="h-5 w-5 text-purple-400" />
+                        <h2 className="text-primary text-lg font-bold flex items-center gap-2">
+                          <Zap className="h-5 w-5 text-accent-bright" />
                           Recommended For You
                         </h2>
                       </div>
@@ -885,23 +879,23 @@ export default function Dashboard() {
                             key={rec.avatar.id}
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="bg-gradient-to-br from-purple-950/40 to-blue-950/40 backdrop-blur-lg rounded-lg border border-purple-500/20 p-4"
+                            className="bg-ink-raised backdrop-blur-lg rounded-xl border border-ink-edge p-4"
                           >
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center overflow-hidden">
+                                <div className="w-10 h-10 rounded-full bg-ink-raised flex items-center justify-center overflow-hidden">
                                   {rec.avatar.imageUrl ? (
                                     <img src={rec.avatar.imageUrl} alt={rec.avatar.name} className="w-full h-full object-cover" />
                                   ) : (
-                                    <span className="text-white font-bold">{rec.avatar.name.charAt(0)}</span>
+                                    <span className="text-primary font-bold">{rec.avatar.name.charAt(0)}</span>
                                   )}
                                 </div>
                                 <div>
-                                  <h3 className="text-white font-semibold text-sm">{rec.avatar.name}</h3>
-                                  <p className="text-purple-200/70 text-xs">@{rec.avatar.handle}</p>
+                                  <h3 className="text-primary font-semibold text-sm">{rec.avatar.name}</h3>
+                                  <p className="text-accent-bright text-xs">@{rec.avatar.handle}</p>
                                 </div>
                               </div>
-                              <Badge variant="outline" className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-xs">
+                              <Badge variant="outline" className="bg-ink-raised text-accent-bright border-ink-edge text-xs">
                                 {rec.score}% match
                               </Badge>
                             </div>
@@ -909,8 +903,8 @@ export default function Dashboard() {
                             <div className="space-y-1.5 mb-3">
                               {rec.reasons.slice(0, 2).map((reason: string, idx: number) => (
                                 <div key={idx} className="flex items-start gap-2">
-                                  <Star className="w-3 h-3 text-purple-400 mt-0.5 flex-shrink-0" />
-                                  <p className="text-purple-200/80 text-xs">{reason}</p>
+                                  <Star className="w-3 h-3 text-accent-bright mt-0.5 flex-shrink-0" />
+                                  <p className="text-accent-bright text-xs">{reason}</p>
                                 </div>
                               ))}
                             </div>
@@ -919,7 +913,7 @@ export default function Dashboard() {
                               avatarId={rec.avatar.id}
                               avatarName={rec.avatar.name}
                               size="sm"
-                              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-xs"
+                              className="w-full bg-ink-raised hover:bg-ink-raised hover:bg-ink-raised text-xs"
                             />
                           </motion.div>
                         ))}
@@ -931,7 +925,7 @@ export default function Dashboard() {
                   {!trendingLoading && (trendingData as any)?.trending?.length > 0 && (
                     <div className="mt-8 space-y-4">
                       <div className="flex items-center justify-between">
-                        <h2 className="text-white text-lg font-bold flex items-center gap-2">
+                        <h2 className="text-primary text-lg font-bold flex items-center gap-2">
                           <TrendingUp className="h-5 w-5 text-green-400" />
                           Trending Now
                         </h2>
@@ -944,23 +938,23 @@ export default function Dashboard() {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: idx * 0.1 }}
-                            className="bg-gradient-to-br from-green-950/40 to-emerald-950/40 backdrop-blur-lg rounded-lg border border-green-500/20 p-3"
+                            className="bg-ink-raised backdrop-blur-lg rounded-xl border border-green-500/20 p-3"
                           >
                             <div className="flex items-center gap-2 mb-2">
                               <div className="relative">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center overflow-hidden">
+                                <div className="w-10 h-10 rounded-full bg-ink-raised flex items-center justify-center overflow-hidden">
                                   {avatar.imageUrl ? (
                                     <img src={avatar.imageUrl} alt={avatar.name} className="w-full h-full object-cover" />
                                   ) : (
-                                    <span className="text-white font-bold text-sm">{avatar.name.charAt(0)}</span>
+                                    <span className="text-primary font-bold text-sm">{avatar.name.charAt(0)}</span>
                                   )}
                                 </div>
-                                <div className="absolute -top-1 -right-1 bg-green-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                <div className="absolute -top-1 -right-1 bg-green-500 text-primary text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                                   {idx + 1}
                                 </div>
                               </div>
                               <div className="flex-1 min-w-0">
-                                <h3 className="text-white font-semibold text-sm truncate">{avatar.name}</h3>
+                                <h3 className="text-primary font-semibold text-sm truncate">{avatar.name}</h3>
                                 <p className="text-green-200/70 text-xs truncate">@{avatar.handle}</p>
                               </div>
                             </div>
@@ -975,7 +969,7 @@ export default function Dashboard() {
                               avatarId={avatar.id}
                               avatarName={avatar.name}
                               size="sm"
-                              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-xs"
+                              className="w-full bg-ink-raised hover:bg-ink-raised hover:bg-ink-raised text-xs"
                             />
                           </motion.div>
                         ))}
@@ -986,12 +980,12 @@ export default function Dashboard() {
 
                 <TabsContent value="summaries" className="space-y-4 mt-4">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                    <h2 className="text-white text-lg font-bold">Recent Summaries ({recentSummaries.length})</h2>
+                    <h2 className="text-primary text-lg font-bold">Recent Summaries ({recentSummaries.length})</h2>
                   </div>
 
                   {summariesLoading ? (
                     <div className="text-center py-8">
-                      <RefreshCw className="h-8 w-8 animate-spin text-purple-400 mx-auto" />
+                      <RefreshCw className="h-8 w-8 animate-spin text-accent-bright mx-auto" />
                     </div>
                   ) : recentSummaries.length > 0 ? (
                     <div className="lg:grid lg:grid-cols-3 lg:gap-6">
@@ -1004,14 +998,14 @@ export default function Dashboard() {
                               key={summary.id}
                               initial={{ opacity: 0, scale: 0.95 }}
                               animate={{ opacity: 1, scale: 1 }}
-                              className="surface-2 rounded-lg p-4 touch-manipulation"
+                              className="surface-2 rounded-xl p-4 touch-manipulation"
                               data-testid={`summary-${summary.id}`}
                             >
                               <div className="space-y-3">
                                 <div className="flex items-start justify-between">
                                   <div className="flex-1 min-w-0">
-                                    <h3 className="text-white text-base font-semibold mb-2 line-clamp-2">{summary.title}</h3>
-                                    <div className="flex flex-col sm:flex-row gap-2 text-xs text-gray-400">
+                                    <h3 className="text-primary text-base font-semibold mb-2 line-clamp-2">{summary.title}</h3>
+                                    <div className="flex flex-col sm:flex-row gap-2 text-xs text-muted">
                                       <span className="flex items-center gap-1">
                                         <Globe className="h-3 w-3" />
                                         {summary.platform}
@@ -1042,7 +1036,7 @@ export default function Dashboard() {
                                         variant="outline" 
                                         size="sm" 
                                         disabled={deleteSummaryMutation.isPending}
-                                        className="text-red-400 bg-red-500/10 border-red-400/30 hover:bg-red-500/20 backdrop-blur-md transition-all duration-200 touch-manipulation py-2.5 px-3 disabled:opacity-50"
+                                        className="text-red-400 bg-red-500/10 border-ink-edge hover:bg-red-500/20 backdrop-blur-md transition-all duration-200 touch-manipulation py-2.5 px-3 disabled:opacity-50"
                                         data-testid={`button-delete-summary-${summary.id}`}
                                       >
                                         <Trash2 className="h-4 w-4" />
@@ -1050,18 +1044,18 @@ export default function Dashboard() {
                                     </AlertDialogTrigger>
                                     <AlertDialogContent className="surface-2">
                                       <AlertDialogHeader>
-                                        <AlertDialogTitle className="text-white">Delete Summary</AlertDialogTitle>
-                                        <AlertDialogDescription className="text-gray-300">
+                                        <AlertDialogTitle className="text-primary">Delete Summary</AlertDialogTitle>
+                                        <AlertDialogDescription className="text-body">
                                           Are you sure you want to delete "{summary.title}"? This action cannot be undone.
                                         </AlertDialogDescription>
                                       </AlertDialogHeader>
                                       <AlertDialogFooter>
-                                        <AlertDialogCancel className="bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600">
+                                        <AlertDialogCancel className="bg-ink-raised text-body border-ink-edge hover:bg-ink-raised">
                                           Cancel
                                         </AlertDialogCancel>
                                         <AlertDialogAction 
                                           onClick={() => deleteSummaryMutation.mutate(summary.id)}
-                                          className="bg-red-600 hover:bg-red-700 text-white"
+                                          className="bg-red-600 hover:bg-red-700 text-primary"
                                         >
                                           Delete
                                         </AlertDialogAction>
@@ -1076,12 +1070,12 @@ export default function Dashboard() {
                           {/* Show "View All" button if there are more than 5 summaries */}
                           {summaries.length > 5 && (
                             <div className="text-center pt-2">
-                              <p className="text-gray-400 text-xs mb-3">
+                              <p className="text-muted text-xs mb-3">
                                 Showing 5 of {summaries.length} summaries
                               </p>
                               <Button 
                                 variant="outline"
-                                className="w-full text-purple-300 bg-purple-500/10 border-purple-400/30 hover:bg-purple-500/20 touch-manipulation py-3"
+                                className="w-full text-accent-bright bg-ink-raised border-ink-edge hover:bg-ink-raised touch-manipulation py-3"
                                 onClick={() => {
                                   // For now, we'll just show a toast - could implement a full list modal later
                                   toast({ 
@@ -1105,14 +1099,14 @@ export default function Dashboard() {
                               key={summary.id}
                               initial={{ opacity: 0, scale: 0.95 }}
                               animate={{ opacity: 1, scale: 1 }}
-                              className="surface-2 rounded-lg p-4"
+                              className="surface-2 rounded-xl p-4"
                               data-testid={`summary-${summary.id}`}
                             >
                               <div className="space-y-3">
                                 <div className="flex items-start justify-between">
                                   <div className="flex-1 min-w-0">
-                                    <h3 className="text-white text-base font-semibold mb-2 line-clamp-2">{summary.title}</h3>
-                                    <div className="flex flex-col sm:flex-row gap-2 text-xs text-gray-400">
+                                    <h3 className="text-primary text-base font-semibold mb-2 line-clamp-2">{summary.title}</h3>
+                                    <div className="flex flex-col sm:flex-row gap-2 text-xs text-muted">
                                       <span className="flex items-center gap-1">
                                         <Globe className="h-3 w-3" />
                                         {summary.platform}
@@ -1141,8 +1135,8 @@ export default function Dashboard() {
                               {summary.accuracy && (
                                 <div className="mb-4">
                                   <div className="flex items-center justify-between text-sm mb-1">
-                                    <span className="text-gray-300">AI Accuracy</span>
-                                    <span className="text-white">{summary.accuracy}%</span>
+                                    <span className="text-body">AI Accuracy</span>
+                                    <span className="text-primary">{summary.accuracy}%</span>
                                   </div>
                                   <Progress value={summary.accuracy} className="h-2" />
                                 </div>
@@ -1151,16 +1145,16 @@ export default function Dashboard() {
                               <div className="flex items-center justify-between">
                                 <div className="flex gap-2">
                                   {summary.tags?.slice(0, 3).map((tag, index) => (
-                                    <Badge key={index} variant="outline" className="text-xs bg-gray-500/20 text-gray-300">
+                                    <Badge key={index} variant="outline" className="text-xs bg-ink-raised text-body">
                                       #{tag}
                                     </Badge>
                                   ))}
                                 </div>
-                                <div className="flex items-center gap-2 text-gray-400">
-                                  <button className="hover:text-white transition-colors">
+                                <div className="flex items-center gap-2 text-muted">
+                                  <button className="hover:text-primary transition-colors">
                                     <Bookmark className="h-4 w-4" />
                                   </button>
-                                  <button className="hover:text-white transition-colors">
+                                  <button className="hover:text-primary transition-colors">
                                     <Share className="h-4 w-4" />
                                   </button>
                                   <AlertDialog>
@@ -1175,18 +1169,18 @@ export default function Dashboard() {
                                     </AlertDialogTrigger>
                                     <AlertDialogContent className="surface-2">
                                       <AlertDialogHeader>
-                                        <AlertDialogTitle className="text-white">Delete Summary</AlertDialogTitle>
-                                        <AlertDialogDescription className="text-gray-300">
+                                        <AlertDialogTitle className="text-primary">Delete Summary</AlertDialogTitle>
+                                        <AlertDialogDescription className="text-body">
                                           Are you sure you want to delete "{summary.title}"? This action cannot be undone.
                                         </AlertDialogDescription>
                                       </AlertDialogHeader>
                                       <AlertDialogFooter>
-                                        <AlertDialogCancel className="bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600">
+                                        <AlertDialogCancel className="bg-ink-raised text-body border-ink-edge hover:bg-ink-raised">
                                           Cancel
                                         </AlertDialogCancel>
                                         <AlertDialogAction 
                                           onClick={() => deleteSummaryMutation.mutate(summary.id)}
-                                          className="bg-red-600 hover:bg-red-700 text-white"
+                                          className="bg-red-600 hover:bg-red-700 text-primary"
                                         >
                                           Delete
                                         </AlertDialogAction>
@@ -1203,8 +1197,8 @@ export default function Dashboard() {
                       {/* Related Bounties Column - 1/3 width on desktop, hidden on mobile */}
                       <div className="hidden lg:block lg:col-span-1">
                         <div className="sticky top-4">
-                          <h3 className="text-white text-base font-bold mb-4 flex items-center gap-2">
-                            <Trophy className="h-4 w-4 text-cyan-400" />
+                          <h3 className="text-primary text-base font-bold mb-4 flex items-center gap-2">
+                            <Trophy className="h-4 w-4 text-accent-bright" />
                             Related Bounties
                           </h3>
                           {recentSummaries.length > 0 && (
@@ -1218,12 +1212,12 @@ export default function Dashboard() {
                       </div>
                     </div>
                   ) : (
-                    <Card className="surface-1">
-                      <CardContent className="p-8 text-center">
-                        <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-300">No summaries yet. Create your first AI-powered summary!</p>
-                      </CardContent>
-                    </Card>
+                    <Surface>
+                      <div className="p-8 text-center">
+                        <FileText className="h-12 w-12 text-muted mx-auto mb-4" />
+                        <p className="text-body">No summaries yet. Create your first AI-powered summary!</p>
+                      </div>
+                    </Surface>
                   )}
                 </TabsContent>
 
@@ -1237,18 +1231,18 @@ export default function Dashboard() {
                 </TabsContent>
 
                 <TabsContent value="wallet" className="space-y-6 mt-6">
-                  <Card className="surface-2">
-                    <CardHeader>
-                      <CardTitle className="text-white flex items-center gap-2">
+                  <Surface variant="raised">
+                    <div>
+                      <SectionTitle className="text-primary flex items-center gap-2">
                         <Wallet className="h-5 w-5" />
                         Wallet Overview
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
+                      </SectionTitle>
+                    </div>
+                    <div className="space-y-6">
                       <div className="text-center">
-                        <p className="text-gray-400 text-sm">Current Balance</p>
-                        <p className="text-white text-4xl font-bold">{balance.streamTokens.toFixed(2)} STREAM</p>
-                        <p className="text-gray-400 text-lg">≈ ${balance.usdValue.toFixed(2)} USD</p>
+                        <p className="text-muted text-sm">Current Balance</p>
+                        <p className="text-primary text-4xl font-bold">{balance.streamTokens.toFixed(2)} STREAM</p>
+                        <p className="text-muted text-lg">≈ ${balance.usdValue.toFixed(2)} USD</p>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
@@ -1280,8 +1274,8 @@ export default function Dashboard() {
                           Withdraw
                         </Button>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </Surface>
                 </TabsContent>
 
               </Tabs>
@@ -1296,21 +1290,21 @@ export default function Dashboard() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <Card className="surface-1 border-purple-500/30">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-white text-sm flex items-center gap-2">
-                    <Zap className="h-4 w-4 text-purple-400" />
+              <Surface>
+                <div className="pb-3">
+                  <SectionTitle className="text-primary text-sm flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-accent-bright" />
                     Quick Actions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2.5">
+                  </SectionTitle>
+                </div>
+                <div className="space-y-2.5">
                   {/* Create Summary - Primary Action */}
                   <Link to="/create-summary">
                     <Button 
-                      className="w-full h-11 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40 text-purple-200 hover:text-white backdrop-blur-sm transition-all duration-200 font-medium touch-manipulation text-sm"
+                      className="w-full h-11 bg-ink-raised hover:bg-ink-raised border border-ink-edge text-accent-bright hover:text-primary backdrop-blur-sm transition-all duration-200 font-medium touch-manipulation text-sm"
                       data-testid="button-create-summary"
                     >
-                      <PlayCircle className="h-4 w-4 mr-2 flex-shrink-0 text-purple-400" />
+                      <PlayCircle className="h-4 w-4 mr-2 flex-shrink-0 text-accent-bright" />
                       Create Summary
                     </Button>
                   </Link>
@@ -1318,10 +1312,10 @@ export default function Dashboard() {
                   {/* Browse Markets */}
                   <Link to="/markets">
                     <Button 
-                      className="w-full h-11 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 hover:text-white backdrop-blur-sm transition-all duration-200 font-medium touch-manipulation text-sm"
+                      className="w-full h-11 bg-emerald-500/20 hover:bg-emerald-500/30 border border-ink-edge text-accent-bright hover:text-primary backdrop-blur-sm transition-all duration-200 font-medium touch-manipulation text-sm"
                       data-testid="button-browse-markets"
                     >
-                      <TrendingUp className="h-4 w-4 mr-2 flex-shrink-0 text-emerald-400" />
+                      <TrendingUp className="h-4 w-4 mr-2 flex-shrink-0 text-accent-bright" />
                       Browse Markets
                     </Button>
                   </Link>
@@ -1329,10 +1323,10 @@ export default function Dashboard() {
                   {/* Find Bounties */}
                   <Link to="/bounties">
                     <Button 
-                      className="w-full h-11 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 hover:text-white backdrop-blur-sm transition-all duration-200 font-medium touch-manipulation text-sm"
+                      className="w-full h-11 bg-amber-500/20 hover:bg-amber-500/30 border border-ink-edge text-accent-bright hover:text-primary backdrop-blur-sm transition-all duration-200 font-medium touch-manipulation text-sm"
                       data-testid="button-find-bounties"
                     >
-                      <Target className="h-4 w-4 mr-2 flex-shrink-0 text-amber-400" />
+                      <Target className="h-4 w-4 mr-2 flex-shrink-0 text-accent-bright" />
                       Find Bounties
                     </Button>
                   </Link>
@@ -1340,10 +1334,10 @@ export default function Dashboard() {
                   {/* Discover Analytics */}
                   <Link to="/discover">
                     <Button 
-                      className="w-full h-11 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/40 text-blue-200 hover:text-white backdrop-blur-sm transition-all duration-200 font-medium touch-manipulation text-sm"
+                      className="w-full h-11 bg-blue-500/20 hover:bg-blue-500/30 border border-ink-edge text-accent-bright hover:text-primary backdrop-blur-sm transition-all duration-200 font-medium touch-manipulation text-sm"
                       data-testid="button-discover"
                     >
-                      <Compass className="h-4 w-4 mr-2 flex-shrink-0 text-blue-400" />
+                      <Compass className="h-4 w-4 mr-2 flex-shrink-0 text-accent-bright" />
                       Discover Analytics
                     </Button>
                   </Link>
@@ -1351,26 +1345,26 @@ export default function Dashboard() {
                   {/* Explore Avatars */}
                   <Link to="/landing#knowledge-avatars">
                     <Button 
-                      className="w-full h-11 bg-pink-500/20 hover:bg-pink-500/30 border border-pink-500/40 text-pink-200 hover:text-white backdrop-blur-sm transition-all duration-200 font-medium touch-manipulation text-sm"
+                      className="w-full h-11 bg-pink-500/20 hover:bg-pink-500/30 border border-ink-edge text-accent-bright hover:text-primary backdrop-blur-sm transition-all duration-200 font-medium touch-manipulation text-sm"
                       data-testid="button-explore-avatars"
                     >
-                      <Users className="h-4 w-4 mr-2 flex-shrink-0 text-pink-400" />
+                      <Users className="h-4 w-4 mr-2 flex-shrink-0 text-accent-bright" />
                       Explore Avatars
                     </Button>
                   </Link>
 
                   {/* Divider */}
-                  <div className="border-t border-purple-500/20 my-3" />
+                  <div className="border-t border-ink-edge my-3" />
 
                   {/* Add Note */}
                   <Dialog open={noteDialogOpen} onOpenChange={setNoteDialogOpen}>
                     <DialogTrigger asChild>
                       <Button 
                         variant="outline"
-                        className="w-full h-10 surface-1 hover:border-neon-cyan/50 text-gray-300 hover:text-white font-medium touch-manipulation text-sm"
+                        className="w-full h-10 surface-1 hover:border-neon-cyan/50 text-body hover:text-primary font-medium touch-manipulation text-sm"
                         data-testid="button-add-note"
                       >
-                        <BookmarkPlus className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
+                        <BookmarkPlus className="h-4 w-4 mr-2 text-muted flex-shrink-0" />
                         Add Note
                       </Button>
                     </DialogTrigger>
@@ -1386,7 +1380,7 @@ export default function Dashboard() {
                             value={noteTitle}
                             onChange={(e) => setNoteTitle(e.target.value)}
                             placeholder="Enter note title..."
-                            className="bg-gray-800 border-gray-600 text-white"
+                            className="bg-ink-raised border-ink-edge text-primary"
                           />
                         </div>
                         <div>
@@ -1396,7 +1390,7 @@ export default function Dashboard() {
                             value={noteContent}
                             onChange={(e) => setNoteContent(e.target.value)}
                             placeholder="Write your note here..."
-                            className="bg-gray-800 border-gray-600 text-white min-h-[120px]"
+                            className="bg-ink-raised border-ink-edge text-primary min-h-[120px]"
                           />
                         </div>
                         <div className="flex gap-2">
@@ -1426,10 +1420,10 @@ export default function Dashboard() {
                     <DialogTrigger asChild>
                       <Button 
                         variant="outline"
-                        className="w-full h-10 surface-1 hover:border-neon-cyan/50 text-gray-300 hover:text-white font-medium touch-manipulation text-sm"
+                        className="w-full h-10 surface-1 hover:border-neon-cyan/50 text-body hover:text-primary font-medium touch-manipulation text-sm"
                         data-testid="button-share-profile"
                       >
-                        <Share className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
+                        <Share className="h-4 w-4 mr-2 text-muted flex-shrink-0" />
                         Share Profile
                       </Button>
                     </DialogTrigger>
@@ -1444,7 +1438,7 @@ export default function Dashboard() {
                             <Input
                               value={`${window.location.origin}/users/${user?.id}`}
                               readOnly
-                              className="bg-gray-800 border-gray-600 text-white"
+                              className="bg-ink-raised border-ink-edge text-primary"
                             />
                             <Button
                               size="sm"
@@ -1474,23 +1468,23 @@ export default function Dashboard() {
                   </Dialog>
 
                   {/* Divider */}
-                  <div className="border-t border-purple-500/20 my-3" />
+                  <div className="border-t border-ink-edge my-3" />
 
                   {/* Start Tour - Help for new users */}
                   <Button 
                     variant="ghost"
-                    className="w-full h-10 surface-1 hover:border-neon-cyan/50 text-gray-300 hover:text-white font-medium touch-manipulation text-sm"
+                    className="w-full h-10 surface-1 hover:border-neon-cyan/50 text-body hover:text-primary font-medium touch-manipulation text-sm"
                     data-testid="button-start-tour"
                     onClick={() => {
                       window.dispatchEvent(new CustomEvent('triggerOnboardingTour'));
                       toast({ title: "Tour Started!", description: "Follow the guide to learn about StreamAiX features." });
                     }}
                   >
-                    <HelpCircle className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
+                    <HelpCircle className="h-4 w-4 mr-2 text-muted flex-shrink-0" />
                     Take a Tour
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </Surface>
             </motion.div>
 
           </div>
