@@ -4,3 +4,4 @@ client/src/pages/landing.tsx
 client/src/pages/prediction-market.tsx
 client/src/pages/ai-trading.tsx
 client/src/pages/avatar-feed.tsx
+client/src/pages/portfolio-dashboard.tsx
