@@ -1031,7 +1031,7 @@ export default function Discover() {
               <Link href="/markets">
                 <Button
                   size="sm"
-                  className="hover:hover:text-primary border-0"
+                  className="hover:text-primary border-0"
                   data-testid="button-explore-markets"
                 >
                   <Rocket className="w-3.5 h-3.5 mr-1.5" />
@@ -3944,7 +3944,7 @@ export default function Discover() {
             Join the AI-powered prediction market revolution
           </p>
           <Link href="/markets">
-            <Button className="hover:hover:text-primary border-0 rounded-xl px-6" data-testid="button-start-trading">
+            <Button className="hover:text-primary border-0 rounded-xl px-6" data-testid="button-start-trading">
               <Rocket className="w-4 h-4 mr-2" />
               Start Trading
             </Button>

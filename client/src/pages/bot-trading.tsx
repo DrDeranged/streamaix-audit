@@ -166,7 +166,7 @@ function BotCard({ bot, onSelect, rank }: { bot: any; onSelect: () => void; rank
       className="cursor-pointer group"
       onClick={onSelect}
     >
-      <div className="relative bg-ink-surface/60 backdrop-blur-xl border border-ink-edge/40 rounded-2xl p-5 hover:border-accent-core/500/40 transition-all duration-300 overflow-hidden">
+      <div className="relative bg-ink-surface/60 backdrop-blur-xl border border-ink-edge/40 rounded-2xl p-5 hover:border-accent-core/40 transition-all duration-300 overflow-hidden">
 
         <div className="relative z-10">
           <div className="flex items-start justify-between mb-4">
@@ -418,7 +418,7 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
                               <tr key={i} className="border-b border-ink-edge/20 hover:bg-ink-raised/50 transition-colors">
                                 <td className="p-2.5 text-primary font-medium">{trade.asset || trade.symbol || '-'}</td>
                                 <td className="p-2.5">
-                                  <Badge variant="outline" className={`text-[10px] ${isLong ? 'text-gain border-gain/500/30' : 'text-loss border-loss/500/30'}`}>
+                                  <Badge variant="outline" className={`text-[10px] ${isLong ? 'text-gain border-gain/30' : 'text-loss border-loss/30'}`}>
                                     {isLong ? '↑ Long' : '↓ Short'}
                                   </Badge>
                                 </td>
@@ -428,7 +428,7 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
                                   {pnl >= 0 ? '+' : ''}{Number(pnl).toFixed(2)}
                                 </td>
                                 <td className="p-2.5">
-                                  <Badge variant="outline" className={`text-[10px] ${trade.status === 'open' ? 'text-warn border-warn/500/30' : 'text-secondary border-ink-edge'}`}>
+                                  <Badge variant="outline" className={`text-[10px] ${trade.status === 'open' ? 'text-warn border-warn/30' : 'text-secondary border-ink-edge'}`}>
                                     {trade.status || 'closed'}
                                   </Badge>
                                 </td>
@@ -447,7 +447,7 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
                   <h3 className="text-sm font-medium text-body mb-2 flex items-center gap-2">
                     <Brain className="w-4 h-4 text-accent-bright" /> Trading Philosophy
                   </h3>
-                  <div className="bg-ink-raised/30 rounded-xl border border-accent-core/500/20 p-4">
+                  <div className="bg-ink-raised/30 rounded-xl border border-accent-core/20 p-4">
                     <p className="text-xs text-body/80 leading-relaxed italic">{bot.personaPhilosophy}</p>
                   </div>
                 </div>
@@ -460,7 +460,7 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
                   </h3>
                   <div className="flex flex-wrap gap-1.5">
                     {preferredAssets.map((a: any, i: number) => (
-                      <Badge key={i} variant="outline" className="text-[10px] text-warn border-warn/500/30 bg-warn/500/5">
+                      <Badge key={i} variant="outline" className="text-[10px] text-warn border-warn/30 bg-warn/5">
                         {a.name || a.symbol} ({a.type})
                       </Badge>
                     ))}
@@ -480,7 +480,7 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
                         <div key={i} className="bg-ink-raised/50 rounded-xl p-3 border border-ink-edge/30">
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-xs text-primary font-semibold">{pos.asset}</span>
-                            <Badge variant="outline" className={`text-[9px] ${isLong ? 'text-gain border-gain/500/30' : 'text-loss border-loss/500/30'}`}>
+                            <Badge variant="outline" className={`text-[9px] ${isLong ? 'text-gain border-gain/30' : 'text-loss border-loss/30'}`}>
                               {isLong ? '↑ Long' : '↓ Short'}
                             </Badge>
                           </div>
@@ -540,7 +540,7 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
                           <div>
                             <div className="flex items-center gap-2 mb-1">
                               <Badge variant="outline" className="text-[9px] text-accent-bright border-accent-core/30">{r.asset}</Badge>
-                              <Badge variant="outline" className={`text-[9px] ${r.direction === 'long' ? 'text-gain border-gain/500/30' : 'text-loss border-loss/500/30'}`}>
+                              <Badge variant="outline" className={`text-[9px] ${r.direction === 'long' ? 'text-gain border-gain/30' : 'text-loss border-loss/30'}`}>
                                 {r.direction === 'long' ? '↑ Long' : '↓ Short'}
                               </Badge>
                             </div>
@@ -572,12 +572,12 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
                         <p className="text-lg font-bold text-accent-bright">{Number(userStake.currentValue ?? 0).toLocaleString()}</p>
                       </div>
                     </div>
-                    <div className={`text-center p-2.5 rounded-xl font-medium text-sm ${(userStake.totalPnl ?? 0) >= 0 ? 'bg-gain/500/10 text-gain border border-gain/500/20' : 'bg-loss/500/10 text-loss border border-loss/500/20'}`}>
+                    <div className={`text-center p-2.5 rounded-xl font-medium text-sm ${(userStake.totalPnl ?? 0) >= 0 ? 'bg-gain/10 text-gain border border-gain/20' : 'bg-loss/10 text-loss border border-loss/20'}`}>
                       P&L: {(userStake.totalPnl ?? 0) >= 0 ? '+' : ''}{Number(userStake.totalPnl ?? 0).toFixed(2)} ({Number(userStake.totalPnlPercent ?? 0).toFixed(1)}%)
                     </div>
                     <Button
                       variant="outline"
-                      className="w-full border-loss/500/30 text-loss hover:bg-loss/500/10 hover:border-loss/500/50"
+                      className="w-full border-loss/30 text-loss hover:bg-loss/10 hover:border-loss/50"
                       onClick={() => withdrawMutation.mutate(userStake.id)}
                       disabled={withdrawMutation.isPending}
                     >
@@ -689,7 +689,7 @@ function LiveTradeFeed() {
                   <div className="flex items-center gap-2 mb-1.5">
                     <AvatarImage src={trade.avatarImageUrl} size="sm" className="!w-7 !h-7" />
                     <span className="text-xs text-primary font-medium truncate">{trade.avatarName}</span>
-                    <Badge variant="outline" className={`text-[9px] ml-auto ${isLong ? 'text-gain border-gain/500/30' : 'text-loss border-loss/500/30'}`}>
+                    <Badge variant="outline" className={`text-[9px] ml-auto ${isLong ? 'text-gain border-gain/30' : 'text-loss border-loss/30'}`}>
                       {isLong ? '↑ Long' : '↓ Short'}
                     </Badge>
                   </div>
@@ -701,7 +701,7 @@ function LiveTradeFeed() {
                       </span>
                     )}
                     {trade.status === 'open' && (
-                      <Badge variant="outline" className="text-[9px] text-warn border-warn/500/30">Open</Badge>
+                      <Badge variant="outline" className="text-[9px] text-warn border-warn/30">Open</Badge>
                     )}
                   </div>
                   {reasoning && (
@@ -740,8 +740,8 @@ function LeaderboardContent() {
             size="sm"
             className={`text-xs h-8 ${
               period === p.value
-                ? 'bg-accent-core/600/20 border-accent-core/500/50 text-accent-bright'
-                : 'border-ink-edge/50 text-secondary hover:text-primary hover:border-accent-core/500/50'
+                ? 'bg-accent-core/20 border-accent-core/50 text-accent-bright'
+                : 'border-ink-edge/50 text-secondary hover:text-primary hover:border-accent-core/50'
             }`}
             onClick={() => setPeriod(p.value)}
           >
@@ -932,7 +932,7 @@ export default function BotTradingPage() {
             <Button
               variant="outline"
               size="sm"
-              className="bg-ink-surface/60 backdrop-blur-xl border-ink-edge/50 hover:border-accent-core/500/50 hover:bg-accent-core/500/5 text-secondary hover:text-accent-bright transition-all duration-300 rounded-xl"
+              className="bg-ink-surface/60 backdrop-blur-xl border-ink-edge/50 hover:border-accent-core/50 hover:bg-accent-core/5 text-secondary hover:text-accent-bright transition-all duration-300 rounded-xl"
             >
               <Home className="w-4 h-4 mr-2" />
               Back to Home
@@ -965,10 +965,10 @@ export default function BotTradingPage() {
           className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8"
         >
           {[
-            { icon: Coins, label: 'Total Staked', value: stats?.totalStaked ? `${(Number(stats.totalStaked) / 1000).toFixed(0)}k` : '0', sub: 'STREAM', iconBg: 'bg-accent-core/500/10', iconBorder: 'border-accent-core/500/20', iconColor: 'text-accent-bright', subColor: 'text-accent-bright/70', hoverBorder: 'hover:border-accent-core/500/40', glow: 'shadow-cyan-500/10' },
-            { icon: Users, label: 'Active Traders', value: stats?.activeTraders ?? '0', sub: 'staking now', iconBg: 'bg-accent-core/500/10', iconBorder: 'border-accent-core/500/20', iconColor: 'text-accent-bright', subColor: 'text-accent-bright/70', hoverBorder: 'hover:border-accent-core/500/40', glow: 'shadow-purple-500/10' },
-            { icon: Trophy, label: 'Top Avatar', value: stats?.topBot?.name ?? '—', sub: stats?.topBot ? `${(stats.topBot.avgTradeRoi ?? 0).toFixed(1)}% ROI` : '', iconBg: 'bg-gain/500/10', iconBorder: 'border-gain/500/20', iconColor: 'text-gain', subColor: 'text-gain/70', hoverBorder: 'hover:border-gain/500/40', glow: 'shadow-emerald-500/10', imageUrl: stats?.topBot?.imageUrl },
-            { icon: Activity, label: 'Total Trades', value: stats?.totalTrades ?? '0', sub: 'executed', iconBg: 'bg-warn/500/10', iconBorder: 'border-warn/500/20', iconColor: 'text-warn', subColor: 'text-warn/70', hoverBorder: 'hover:border-warn/500/40', glow: 'shadow-amber-500/10' },
+            { icon: Coins, label: 'Total Staked', value: stats?.totalStaked ? `${(Number(stats.totalStaked) / 1000).toFixed(0)}k` : '0', sub: 'STREAM', iconBg: 'bg-accent-core/10', iconBorder: 'border-accent-core/20', iconColor: 'text-accent-bright', subColor: 'text-accent-bright/70', hoverBorder: 'hover:border-accent-core/40', glow: 'shadow-cyan-500/10' },
+            { icon: Users, label: 'Active Traders', value: stats?.activeTraders ?? '0', sub: 'staking now', iconBg: 'bg-accent-core/10', iconBorder: 'border-accent-core/20', iconColor: 'text-accent-bright', subColor: 'text-accent-bright/70', hoverBorder: 'hover:border-accent-core/40', glow: 'shadow-purple-500/10' },
+            { icon: Trophy, label: 'Top Avatar', value: stats?.topBot?.name ?? '—', sub: stats?.topBot ? `${(stats.topBot.avgTradeRoi ?? 0).toFixed(1)}% ROI` : '', iconBg: 'bg-gain/10', iconBorder: 'border-gain/20', iconColor: 'text-gain', subColor: 'text-gain/70', hoverBorder: 'hover:border-gain/40', glow: 'shadow-emerald-500/10', imageUrl: stats?.topBot?.imageUrl },
+            { icon: Activity, label: 'Total Trades', value: stats?.totalTrades ?? '0', sub: 'executed', iconBg: 'bg-warn/10', iconBorder: 'border-warn/20', iconColor: 'text-warn', subColor: 'text-warn/70', hoverBorder: 'hover:border-warn/40', glow: 'shadow-amber-500/10' },
           ].map((item, i) => (
             <motion.div
               key={i}
@@ -996,15 +996,15 @@ export default function BotTradingPage() {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <TabsList className="bg-ink-surface/60 border border-ink-edge/40 p-1 w-full sm:w-auto overflow-x-auto">
-              <TabsTrigger value="all" className="data-[state=active]:bg-accent-core/600/20 data-[state=active]:text-accent-bright data-[state=active]:shadow-sm px-3 sm:px-5">
+              <TabsTrigger value="all" className="data-[state=active]:bg-accent-core/20 data-[state=active]:text-accent-bright data-[state=active]:shadow-sm px-3 sm:px-5">
                 <Sparkles className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">All Avatars</span><span className="sm:hidden">All</span>
                 <Badge variant="outline" className="ml-1.5 sm:ml-2 text-[10px] border-ink-edge text-secondary">{totalBots}</Badge>
               </TabsTrigger>
-              <TabsTrigger value="my" className="data-[state=active]:bg-accent-core/600/20 data-[state=active]:text-accent-bright data-[state=active]:shadow-sm px-3 sm:px-5">
+              <TabsTrigger value="my" className="data-[state=active]:bg-accent-core/20 data-[state=active]:text-accent-bright data-[state=active]:shadow-sm px-3 sm:px-5">
                 <Wallet className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">My Stakes</span><span className="sm:hidden">Stakes</span>
                 {stakes.length > 0 && <Badge variant="outline" className="ml-1.5 sm:ml-2 text-[10px] border-accent-core/30 text-accent-bright">{stakes.length}</Badge>}
               </TabsTrigger>
-              <TabsTrigger value="leaderboard" className="data-[state=active]:bg-warn/600/20 data-[state=active]:text-warn data-[state=active]:shadow-sm px-3 sm:px-5">
+              <TabsTrigger value="leaderboard" className="data-[state=active]:bg-warn/20 data-[state=active]:text-warn data-[state=active]:shadow-sm px-3 sm:px-5">
                 <Trophy className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">Leaderboard</span><span className="sm:hidden">Board</span>
               </TabsTrigger>
             </TabsList>
@@ -1071,7 +1071,7 @@ export default function BotTradingPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="border-ink-edge/50 text-secondary hover:text-primary hover:border-accent-core/500/50 disabled:opacity-30"
+                      className="border-ink-edge/50 text-secondary hover:text-primary hover:border-accent-core/50 disabled:opacity-30"
                       onClick={() => setPage(p => Math.max(1, p - 1))}
                       disabled={page <= 1}
                     >
@@ -1085,8 +1085,8 @@ export default function BotTradingPage() {
                         size="sm"
                         className={`w-9 h-9 ${
                           p === page
-                            ? 'bg-accent-core/600/20 border-accent-core/500/50 text-accent-bright'
-                            : 'border-ink-edge/50 text-secondary hover:text-primary hover:border-accent-core/500/50'
+                            ? 'bg-accent-core/20 border-accent-core/50 text-accent-bright'
+                            : 'border-ink-edge/50 text-secondary hover:text-primary hover:border-accent-core/50'
                         }`}
                         onClick={() => setPage(p)}
                       >
@@ -1097,7 +1097,7 @@ export default function BotTradingPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="border-ink-edge/50 text-secondary hover:text-primary hover:border-accent-core/500/50 disabled:opacity-30"
+                      className="border-ink-edge/50 text-secondary hover:text-primary hover:border-accent-core/50 disabled:opacity-30"
                       onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                       disabled={page >= totalPages}
                     >
@@ -1116,7 +1116,7 @@ export default function BotTradingPage() {
           <TabsContent value="my">
             {!isAuthenticated ? (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 bg-ink-surface/40 backdrop-blur-xl border border-ink-edge/40 rounded-2xl">
-                <div className="w-16 h-16 rounded-2xl bg-accent-core/500/10 border border-accent-core/500/20 flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 rounded-2xl bg-accent-core/10 border border-accent-core/20 flex items-center justify-center mx-auto mb-4">
                   <LogIn className="w-8 h-8 text-accent-bright" />
                 </div>
                 <p className="text-body text-lg font-medium mb-1">Sign in to view your stakes</p>
@@ -1151,7 +1151,7 @@ export default function BotTradingPage() {
                   </div>
                 ) : stakes.length === 0 ? (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16 bg-ink-surface/40 backdrop-blur-xl border border-ink-edge/40 rounded-2xl">
-                    <div className="w-16 h-16 rounded-2xl bg-accent-core/500/10 border border-accent-core/500/20 flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 rounded-2xl bg-accent-core/10 border border-accent-core/20 flex items-center justify-center mx-auto mb-4">
                       <Sparkles className="w-8 h-8 text-accent-bright" />
                     </div>
                     <p className="text-body font-medium mb-1">No active stakes yet</p>
@@ -1223,7 +1223,7 @@ export default function BotTradingPage() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="border-loss/500/30 text-loss hover:bg-loss/500/10 hover:border-loss/500/50 shrink-0"
+                                  className="border-loss/30 text-loss hover:bg-loss/10 hover:border-loss/50 shrink-0"
                                   onClick={() => withdrawMutation.mutate(stake.id)}
                                   disabled={withdrawMutation.isPending}
                                 >

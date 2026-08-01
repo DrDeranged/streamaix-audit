@@ -9,7 +9,7 @@ cd "$(dirname "$0")/.."
 MIGRATED_LIST="scripts/design-migrated.txt"
 
 # Banned class patterns (word-prefixed to avoid false positives inside longer tokens)
-BANNED='(^|[^-[:alnum:]])(bg-slate-|bg-gray-|bg-zinc-|bg-purple-|bg-violet-|bg-indigo-|text-gray-|rounded-lg([^-]|$)|rounded-3xl|from-[[:alnum:]]|to-[[:alnum:]])'
+BANNED='(^|[^-[:alnum:]])(bg-slate-|bg-gray-|bg-zinc-|bg-purple-|bg-violet-|bg-indigo-|text-gray-|rounded-lg([^-]|$)|rounded-3xl|from-[[:alnum:]]|to-[[:alnum:]])|-(core|bright|deep|gain|loss|warn|page|surface|raised|edge|divider)/[0-9]{3}/[0-9]|(^|[^-[:alnum:]])(gain|loss|warn)/[0-9]{3}/[0-9]|hover:hover:|hover:( |")|data-\[state=[a-z]+\]:( |")'
 
 if [[ ! -f "$MIGRATED_LIST" ]]; then
   echo "design:lint — no $MIGRATED_LIST found; nothing to enforce."

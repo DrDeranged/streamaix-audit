@@ -483,11 +483,11 @@ const getAvatarRole = (expertise: string) => {
 };
 
 const getDefaultAvatar = (name: string) => {
-    return '/api/placeholder/128/128';
+  return 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face';
 };
 
 const getAvatarBanner = (name: string) => {
-    return '';
+  return 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=400&fit=crop';
 };
 
 const transformInvestments = (investments: string[] | undefined) => {

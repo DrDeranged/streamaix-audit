@@ -423,7 +423,7 @@ const StreamerCard = memo(function StreamerCard({ stream, isFollowing }: { strea
             "flex-1",
             isFollowing
               ? "bg-ink-raised hover:bg-ink-edge"
-              : "bg-ink-raised hover: hover:"
+              : "bg-ink-raised "
           )}
           data-testid="button-follow-streamer"
         >
@@ -924,7 +924,7 @@ export default function StreamViewPage() {
         <h1 className="text-xl font-bold text-primary">Stream not found</h1>
         <p className="text-secondary text-center max-w-md">This stream may have ended or doesn't exist.</p>
         <Link href="/streams">
-          <Button className="bg-ink-raised hover: hover: mt-2">
+          <Button className="bg-ink-raised   mt-2">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Browse Streams
           </Button>
@@ -1058,7 +1058,7 @@ export default function StreamViewPage() {
           {/* Back to streams button */}
           <div className="flex justify-center">
             <Link href="/replays">
-              <Button className="bg-ink-raised hover: hover:">
+              <Button className="bg-ink-raised ">
                 <Video className="w-4 h-4 mr-2" />
                 Browse More Replays
               </Button>
@@ -1370,7 +1370,7 @@ export default function StreamViewPage() {
                           setHasAttemptedLiveKitConnect(false);
                           connectLiveKit();
                         }}
-                        className="bg-ink-raised hover: hover: text-primary"
+                        className="bg-ink-raised   text-primary"
                         data-testid="button-retry-video"
                       >
                         <Radio className="w-4 h-4 mr-2" />
@@ -1414,7 +1414,7 @@ export default function StreamViewPage() {
                 />
                 <Button
                   onClick={() => setShowPredictionPanel(true)}
-                  className="bg-ink-raised hover: hover: border-0 h-8 sm:h-10 min-h-0 sm:min-h-[44px] px-2 sm:px-4 text-xs sm:text-sm font-medium shadow-lg shadow-fuchsia-500/25 transition-all duration-200 hover:scale-105 active:scale-95"
+                  className="bg-ink-raised   border-0 h-8 sm:h-10 min-h-0 sm:min-h-[44px] px-2 sm:px-4 text-xs sm:text-sm font-medium shadow-lg shadow-fuchsia-500/25 transition-all duration-200 hover:scale-105 active:scale-95"
                   data-testid="button-create-prediction"
                 >
                   <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-2" />
@@ -1422,7 +1422,7 @@ export default function StreamViewPage() {
                 </Button>
                 <Button
                   onClick={() => setShowTipPanel(true)}
-                  className="bg-ink-raised hover: hover: border-0 h-8 sm:h-10 min-h-0 sm:min-h-[44px] px-2 sm:px-4 text-xs sm:text-sm font-medium shadow-lg shadow-amber-500/25 transition-all duration-200 hover:scale-105 active:scale-95"
+                  className="bg-ink-raised   border-0 h-8 sm:h-10 min-h-0 sm:min-h-[44px] px-2 sm:px-4 text-xs sm:text-sm font-medium shadow-lg shadow-amber-500/25 transition-all duration-200 hover:scale-105 active:scale-95"
                   data-testid="button-open-tip-panel"
                 >
                   <Gift className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-2" />
@@ -1772,7 +1772,7 @@ export default function StreamViewPage() {
                         size="icon"
                         onClick={handleSendMessage}
                         disabled={!isConnected || !message.trim()}
-                        className="bg-ink-raised hover: hover: h-12 w-12 min-w-[48px] min-h-[48px] flex-shrink-0 rounded-xl shadow-lg shadow-purple-500/25 transition-all duration-200 disabled:opacity-50 disabled:shadow-none"
+                        className="bg-ink-raised   h-12 w-12 min-w-[48px] min-h-[48px] flex-shrink-0 rounded-xl shadow-lg shadow-purple-500/25 transition-all duration-200 disabled:opacity-50 disabled:shadow-none"
                         data-testid="button-send-message"
                       >
                         <Send className="w-5 h-5" />
@@ -1780,7 +1780,7 @@ export default function StreamViewPage() {
                     </div>
                   ) : (
                     <Link href="/auth">
-                      <Button className="w-full bg-ink-raised hover: hover: h-12 rounded-xl shadow-lg shadow-purple-500/25 font-semibold">
+                      <Button className="w-full bg-ink-raised   h-12 rounded-xl shadow-lg shadow-purple-500/25 font-semibold">
                         Sign in to Chat
                       </Button>
                     </Link>
@@ -1828,7 +1828,7 @@ export default function StreamViewPage() {
                     <Button
                       onClick={() => handleTip()}
                       disabled={!isAuthenticated || !tipAmount || tipMutation.isPending}
-                      className="w-full bg-ink-raised hover: hover: h-11"
+                      className="w-full bg-ink-raised   h-11"
                       data-testid="button-send-tip"
                     >
                       <Gift className="w-4 h-4 mr-2" />
@@ -1909,7 +1909,7 @@ export default function StreamViewPage() {
                       <li className="flex items-center gap-2"><Check className="w-3 h-3 text-accent-bright" /> Custom emotes (10+)</li>
                       <li className="flex items-center gap-2"><Check className="w-3 h-3 text-accent-bright" /> Ad-free viewing</li>
                     </ul>
-                    <Button className="w-full bg-ink-raised hover: hover: h-9 text-sm">
+                    <Button className="w-full bg-ink-raised   h-9 text-sm">
                       Subscribe - 100 STREAM
                     </Button>
                   </div>
@@ -1946,7 +1946,7 @@ export default function StreamViewPage() {
                       <li className="flex items-center gap-2"><Check className="w-3 h-3 text-warn" /> Exclusive Discord role</li>
                       <li className="flex items-center gap-2"><Check className="w-3 h-3 text-warn" /> Monthly shoutout on stream</li>
                     </ul>
-                    <Button className="w-full bg-ink-raised hover: hover: h-9 text-sm text-primary font-semibold">
+                    <Button className="w-full bg-ink-raised   h-9 text-sm text-primary font-semibold">
                       Subscribe - 500 STREAM
                     </Button>
                   </div>
@@ -1985,7 +1985,7 @@ export default function StreamViewPage() {
                     </p>
                     {!isAuthenticated && (
                       <Link href="/auth">
-                        <Button className="bg-ink-raised hover: hover:">
+                        <Button className="bg-ink-raised ">
                           Sign in to Join
                         </Button>
                       </Link>
@@ -2107,7 +2107,7 @@ export default function StreamViewPage() {
             <Button
               onClick={() => handleTip()}
               disabled={!tipAmount || tipMutation.isPending}
-              className="w-full bg-ink-raised hover: hover: h-12 text-lg"
+              className="w-full bg-ink-raised   h-12 text-lg"
             >
               {tipMutation.isPending ? 'Sending...' : `Send ${tipAmount || '0'} STREAM`}
             </Button>
@@ -2148,7 +2148,7 @@ export default function StreamViewPage() {
             <Button
               onClick={handleCreatePrediction}
               disabled={!predictionText.trim() || predictionMutation.isPending}
-              className="w-full bg-ink-raised hover: hover: h-12"
+              className="w-full bg-ink-raised   h-12"
             >
               {predictionMutation.isPending ? 'Creating...' : 'Share Prediction'}
             </Button>

@@ -843,7 +843,7 @@ function AddToWatchlistDialog({ onSuccess }: { onSuccess: () => void }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          className="bg-ink-raised   hover: hover:"
+          className="bg-ink-raised   "
           data-testid="add-watchlist-button"
         >
           <BookMarked className="w-4 h-4 mr-2" />
@@ -3250,7 +3250,7 @@ function AIAdvisorChat({
                 size="sm"
                 onClick={() => sendMessage(input)}
                 disabled={isLoading || !input.trim()}
-                className="bg-ink-raised   hover: hover: h-9 px-3"
+                className="bg-ink-raised     h-9 px-3"
                 data-testid="button-send-advisor"
               >
                 <Send className="w-3 h-3" />
@@ -3562,7 +3562,7 @@ function AddAssetDialog({
     >
       <DialogTrigger asChild>
         <Button
-          className="bg-ink-raised   hover: hover:"
+          className="bg-ink-raised   "
           data-testid="add-asset-button"
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -3842,7 +3842,7 @@ function AddAssetDialog({
                   });
                 }}
                 disabled={addAssetMutation.isPending}
-                className="w-full h-11 bg-ink-raised   hover: hover: text-primary font-medium"
+                className="w-full h-11 bg-ink-raised     text-primary font-medium"
               >
                 {addAssetMutation.isPending ? "Adding..." : "Add Cash Balance"}
               </Button>
@@ -3972,7 +3972,7 @@ function AddAssetDialog({
                   });
                 }}
                 disabled={addAssetMutation.isPending}
-                className="w-full h-11 bg-ink-raised   hover: hover: text-primary font-medium"
+                className="w-full h-11 bg-ink-raised     text-primary font-medium"
               >
                 {addAssetMutation.isPending
                   ? "Adding..."
@@ -4056,7 +4056,7 @@ function AddAssetDialog({
               <Button
                 onClick={handleSubmit}
                 disabled={addAssetMutation.isPending}
-                className="w-full h-11 bg-ink-raised   hover: hover: text-primary font-medium"
+                className="w-full h-11 bg-ink-raised     text-primary font-medium"
               >
                 {addAssetMutation.isPending ? "Adding..." : "Add Asset"}
               </Button>
@@ -4144,7 +4144,7 @@ function AddAssetDialog({
               <Button
                 onClick={handleSubmit}
                 disabled={addAssetMutation.isPending}
-                className="w-full h-11 bg-ink-raised   hover: hover: text-primary font-medium"
+                className="w-full h-11 bg-ink-raised     text-primary font-medium"
               >
                 {addAssetMutation.isPending ? "Adding..." : "Add Asset"}
               </Button>
@@ -4562,7 +4562,7 @@ function EditAssetDialog({
               <Button
                 onClick={handleSubmit}
                 disabled={updateMutation.isPending}
-                className="flex-1 bg-ink-raised   hover: hover:"
+                className="flex-1 bg-ink-raised   "
                 data-testid={`save-asset-${asset.symbol}`}
               >
                 {updateMutation.isPending ? (
@@ -5110,7 +5110,7 @@ export default function PortfolioDashboard() {
                 <Button
                   onClick={() => createPortfolioMutation.mutate()}
                   disabled={createPortfolioMutation.isPending}
-                  className="w-full bg-ink-raised   hover: hover: text-primary font-semibold py-6 rounded-xl"
+                  className="w-full bg-ink-raised     text-primary font-semibold py-6 rounded-xl"
                   data-testid="create-portfolio-button"
                 >
                   {createPortfolioMutation.isPending ? (
