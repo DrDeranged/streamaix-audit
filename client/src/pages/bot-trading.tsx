@@ -10,6 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import Surface from '@/components/ds/Surface';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'wouter';
@@ -22,19 +23,19 @@ import {
 } from 'lucide-react';
 
 const categoryConfig: Record<string, { label: string; color: string; icon: any; gradient: string }> = {
-  VC: { label: 'VC', color: 'text-purple-400 bg-purple-500/15 border-purple-500/30', icon: Briefcase, gradient: 'from-purple-500/20 to-pink-500/20' },
-  DeFi: { label: 'DeFi', color: 'text-cyan-400 bg-cyan-500/15 border-cyan-500/30', icon: Layers, gradient: 'from-cyan-500/20 to-blue-500/20' },
-  'L1/L2': { label: 'L1/L2', color: 'text-blue-400 bg-blue-500/15 border-blue-500/30', icon: Network, gradient: 'from-blue-500/20 to-indigo-500/20' },
-  Trading: { label: 'Trading', color: 'text-amber-400 bg-amber-500/15 border-amber-500/30', icon: TrendingUp, gradient: 'from-amber-500/20 to-orange-500/20' },
-  Bitcoin: { label: 'Bitcoin', color: 'text-orange-400 bg-orange-500/15 border-orange-500/30', icon: Coins, gradient: 'from-orange-500/20 to-yellow-500/20' },
-  'AI/Tech': { label: 'AI/Tech', color: 'text-emerald-400 bg-emerald-500/15 border-emerald-500/30', icon: Sparkles, gradient: 'from-emerald-500/20 to-teal-500/20' },
-  Infrastructure: { label: 'Infra', color: 'text-slate-400 bg-slate-500/15 border-slate-500/30', icon: Server, gradient: 'from-slate-500/20 to-gray-500/20' },
+  VC: { label: 'VC', color: 'text-accent-bright bg-accent-core/15 border-accent-core/30', icon: Briefcase, gradient: 'grad-surface' },
+  DeFi: { label: 'DeFi', color: 'text-accent-bright bg-accent-core/15 border-accent-core/30', icon: Layers, gradient: 'grad-surface' },
+  'L1/L2': { label: 'L1/L2', color: 'text-accent-bright bg-accent-core/15 border-accent-core/30', icon: Network, gradient: 'grad-surface' },
+  Trading: { label: 'Trading', color: 'text-warn bg-warn/15 border-warn/30', icon: TrendingUp, gradient: 'grad-surface' },
+  Bitcoin: { label: 'Bitcoin', color: 'text-warn bg-warn/15 border-warn/30', icon: Coins, gradient: 'grad-surface' },
+  'AI/Tech': { label: 'AI/Tech', color: 'text-gain bg-gain/15 border-gain/30', icon: Sparkles, gradient: 'grad-surface' },
+  Infrastructure: { label: 'Infra', color: 'text-secondary bg-ink-raised border-ink-edge', icon: Server, gradient: 'grad-surface' },
 };
 
 const tradingStyleConfig: Record<string, { label: string; color: string }> = {
-  aggressive: { label: 'Aggressive', color: 'text-red-400 bg-red-500/15 border-red-500/30' },
-  moderate: { label: 'Moderate', color: 'text-amber-400 bg-amber-500/15 border-amber-500/30' },
-  conservative: { label: 'Conservative', color: 'text-blue-400 bg-blue-500/15 border-blue-500/30' },
+  aggressive: { label: 'Aggressive', color: 'text-loss bg-loss/15 border-loss/30' },
+  moderate: { label: 'Moderate', color: 'text-warn bg-warn/15 border-warn/30' },
+  conservative: { label: 'Conservative', color: 'text-accent-bright bg-accent-core/15 border-accent-core/30' },
 };
 
 function getCategory(c: string) {
@@ -52,8 +53,8 @@ function AvatarImage({ src, fallbackEmoji, size = 'md', className = '' }: { src?
 
   if (!src || imgError) {
     return (
-      <div className={`${sizeClasses[size]} rounded-full bg-slate-800/80 border border-slate-700/50 flex items-center justify-center ${textSizes[size]} ${className}`}>
-        {fallbackEmoji || <User className="w-1/2 h-1/2 text-slate-500" />}
+      <div className={`${sizeClasses[size]} rounded-full bg-ink-raised border border-ink-edge flex items-center justify-center ${textSizes[size]} ${className}`}>
+        {fallbackEmoji || <User className="w-1/2 h-1/2 text-secondary" />}
       </div>
     );
   }
@@ -62,7 +63,7 @@ function AvatarImage({ src, fallbackEmoji, size = 'md', className = '' }: { src?
     <img
       src={src}
       alt="avatar"
-      className={`${sizeClasses[size]} rounded-full object-cover border-2 border-slate-700/50 ${className}`}
+      className={`${sizeClasses[size]} rounded-full object-cover border-2 border-ink-edge ${className}`}
       onError={() => setImgError(true)}
     />
   );
@@ -76,7 +77,7 @@ function MiniSparkline({ values, positive }: { values: number[]; positive: boole
   const w = 80;
   const h = 28;
   const pts = values.map((v, i) => `${(i / (values.length - 1)) * w},${h - ((v - min) / range) * h}`).join(' ');
-  const color = positive ? '#10b981' : '#ef4444';
+  const color = positive ? '#3DD68C' : '#FF7B7B';
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="inline-block">
       <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -87,9 +88,9 @@ function MiniSparkline({ values, positive }: { values: number[]; positive: boole
 function PerformanceChart({ snapshots }: { snapshots: any[] }) {
   if (!snapshots || snapshots.length < 2) {
     return (
-      <div className="h-[200px] flex items-center justify-center text-slate-500 text-sm">
+      <div className="h-[200px] flex items-center justify-center text-muted text-sm">
         <div className="text-center">
-          <BarChart3 className="w-8 h-8 mx-auto mb-2 text-slate-600" />
+          <BarChart3 className="w-8 h-8 mx-auto mb-2 text-muted" />
           <p>Performance data will appear after trades execute</p>
         </div>
       </div>
@@ -114,7 +115,7 @@ function PerformanceChart({ snapshots }: { snapshots: any[] }) {
   const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
   const areaPath = `${linePath} L${points[points.length - 1].x},${padding.top + chartH} L${points[0].x},${padding.top + chartH} Z`;
   const isPositive = values[values.length - 1] >= values[0];
-  const color = isPositive ? '#10b981' : '#ef4444';
+  const color = isPositive ? '#3DD68C' : '#FF7B7B';
 
   const yTicks = 5;
   const yLabels = Array.from({ length: yTicks }, (_, i) => minVal + (range / (yTicks - 1)) * i);
@@ -131,15 +132,15 @@ function PerformanceChart({ snapshots }: { snapshots: any[] }) {
         const y = padding.top + chartH - ((val - minVal) / range) * chartH;
         return (
           <g key={i}>
-            <line x1={padding.left} y1={y} x2={width - padding.right} y2={y} stroke="#334155" strokeWidth="0.5" />
-            <text x={padding.left - 5} y={y + 3} textAnchor="end" fill="#64748b" fontSize="10">{val.toFixed(1)}%</text>
+            <line x1={padding.left} y1={y} x2={width - padding.right} y2={y} stroke="#232B45" strokeWidth="0.5" />
+            <text x={padding.left - 5} y={y + 3} textAnchor="end" fill="#9BA3B7" fontSize="10">{val.toFixed(1)}%</text>
           </g>
         );
       })}
       <path d={areaPath} fill="url(#perfChartGrad)" />
       <path d={linePath} fill="none" stroke={color} strokeWidth="2" />
       {points.length > 0 && (
-        <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="4" fill={color} stroke="#0f172a" strokeWidth="2" />
+         <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="4" fill={color} stroke="#080B14" strokeWidth="2" />
       )}
     </svg>
   );
@@ -165,9 +166,7 @@ function BotCard({ bot, onSelect, rank }: { bot: any; onSelect: () => void; rank
       className="cursor-pointer group"
       onClick={onSelect}
     >
-      <div className="relative bg-slate-900/60 backdrop-blur-xl border border-slate-700/40 rounded-2xl p-5 hover:border-cyan-500/40 transition-all duration-300 overflow-hidden">
-        <div className={`absolute inset-0 bg-gradient-to-br ${config.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="relative bg-ink-surface/60 backdrop-blur-xl border border-ink-edge/40 rounded-2xl p-5 hover:border-accent-core/500/40 transition-all duration-300 overflow-hidden">
 
         <div className="relative z-10">
           <div className="flex items-start justify-between mb-4">
@@ -176,15 +175,15 @@ function BotCard({ bot, onSelect, rank }: { bot: any; onSelect: () => void; rank
                 <AvatarImage src={bot.imageUrl} fallbackEmoji={bot.personaEmoji} />
                 {rank <= 3 && (
                   <div className={`absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold ${
-                    rank === 1 ? 'bg-amber-500 text-black' : rank === 2 ? 'bg-slate-300 text-black' : 'bg-amber-700 text-white'
+                    rank === 1 ? 'bg-warn text-ink-page' : rank === 2 ? 'bg-secondary text-ink-page' : 'bg-warn text-primary'
                   }`}>
                     #{rank}
                   </div>
                 )}
               </div>
               <div>
-                <h3 className="text-white font-semibold text-sm">{bot.name}</h3>
-                {bot.handle && <p className="text-[11px] text-slate-500">@{bot.handle}</p>}
+                <h3 className="text-primary font-semibold text-sm">{bot.name}</h3>
+                {bot.handle && <p className="text-[11px] text-muted">@{bot.handle}</p>}
                 <div className="flex items-center gap-1.5 mt-1">
                   <Badge variant="outline" className={`text-[10px] ${config.color}`}>
                     <Icon className="w-2.5 h-2.5 mr-1" />
@@ -197,22 +196,22 @@ function BotCard({ bot, onSelect, rank }: { bot: any; onSelect: () => void; rank
               </div>
             </div>
             <div className="text-right">
-              <div className={`flex items-center gap-1 text-lg font-bold ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
+              <div className={`flex items-center gap-1 text-lg font-bold ${isPositive ? 'text-gain' : 'text-loss'}`}>
                 {isPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
                 {roi.toFixed(1)}%
               </div>
-              <span className="text-[10px] text-slate-500">ROI</span>
+              <span className="text-[10px] text-muted">ROI</span>
             </div>
           </div>
 
           <div className="mb-3">
             <div className="flex justify-between text-xs mb-1.5">
-              <span className="text-slate-400">Win Rate</span>
-              <span className="text-cyan-400 font-medium">{winRate.toFixed(0)}%</span>
+              <span className="text-secondary">Win Rate</span>
+              <span className="text-accent-bright font-medium">{winRate.toFixed(0)}%</span>
             </div>
-            <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-ink-raised rounded-full overflow-hidden">
               <motion.div
-                className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-cyan-400"
+                className="h-full rounded-full bg-accent-core"
                 initial={{ width: 0 }}
                 animate={{ width: `${Math.min(winRate, 100)}%` }}
                 transition={{ duration: 1, delay: rank * 0.05 }}
@@ -221,26 +220,26 @@ function BotCard({ bot, onSelect, rank }: { bot: any; onSelect: () => void; rank
           </div>
 
           <div className="grid grid-cols-3 gap-2">
-            <div className="bg-slate-800/40 rounded-lg p-2 text-center border border-slate-700/30">
-              <p className="text-[10px] text-slate-500">Staked</p>
-              <p className="text-xs font-semibold text-white">{totalStaked >= 1000 ? `${(totalStaked / 1000).toFixed(0)}k` : totalStaked}</p>
+            <div className="bg-ink-raised/40 rounded-xl p-2 text-center border border-ink-edge/30">
+              <p className="text-[10px] text-muted">Staked</p>
+              <p className="text-xs font-semibold text-primary">{totalStaked >= 1000 ? `${(totalStaked / 1000).toFixed(0)}k` : totalStaked}</p>
             </div>
-            <div className="bg-slate-800/40 rounded-lg p-2 text-center border border-slate-700/30">
-              <p className="text-[10px] text-slate-500">Backers</p>
-              <p className="text-xs font-semibold text-purple-400">{backers}</p>
+            <div className="bg-ink-raised/40 rounded-xl p-2 text-center border border-ink-edge/30">
+              <p className="text-[10px] text-muted">Backers</p>
+              <p className="text-xs font-semibold text-accent-bright">{backers}</p>
             </div>
-            <div className="bg-slate-800/40 rounded-lg p-2 text-center border border-slate-700/30">
-              <p className="text-[10px] text-slate-500">Trades</p>
-              <p className="text-xs font-semibold text-amber-400">{trades}</p>
+            <div className="bg-ink-raised/40 rounded-xl p-2 text-center border border-ink-edge/30">
+              <p className="text-[10px] text-muted">Trades</p>
+              <p className="text-xs font-semibold text-warn">{trades}</p>
             </div>
           </div>
 
-          <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-700/30">
-            <div className="flex items-center gap-2 text-xs text-slate-500">
+          <div className="flex items-center justify-between mt-4 pt-3 border-t border-ink-edge/30">
+            <div className="flex items-center gap-2 text-xs text-muted">
               <Shield className="w-3 h-3" />
-              <span>Risk: <span className="text-slate-300 capitalize">{bot.riskTolerance || 'medium'}</span></span>
+              <span>Risk: <span className="text-body capitalize">{bot.riskTolerance || 'medium'}</span></span>
             </div>
-            <div className="flex items-center gap-1 text-xs text-cyan-400 group-hover:text-cyan-300 transition-colors">
+            <div className="flex items-center gap-1 text-xs text-accent-bright group-hover:text-accent-bright transition-colors">
               View <ChevronRight className="w-3 h-3" />
             </div>
           </div>
@@ -326,25 +325,25 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="bg-slate-900/95 backdrop-blur-2xl border-slate-700/50 max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto p-0">
+      <DialogContent className="bg-ink-surface/95 backdrop-blur-2xl border-ink-edge/50 max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto p-0">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <div className="relative">
-              <div className="w-12 h-12 border-2 border-cyan-500/30 rounded-full animate-spin border-t-cyan-500" />
-              <Sparkles className="w-5 h-5 text-cyan-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+              <div className="w-12 h-12 border-2 border-accent-core/30 rounded-full animate-spin border-t-cyan-500" />
+              <Sparkles className="w-5 h-5 text-accent-bright absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
             </div>
           </div>
         ) : bot ? (
           <>
-            <div className={`relative bg-gradient-to-br ${config.gradient} p-6 pb-4`}>
-              <div className="absolute inset-0 bg-slate-900/40" />
+            <div className={`relative grad-surface p-6 pb-4`}>
+              <div className="absolute inset-0 bg-ink-surface/40" />
               <div className="relative z-10">
                 <DialogHeader>
-                  <DialogTitle className="flex items-center gap-4 text-white">
+                  <DialogTitle className="flex items-center gap-4 text-primary">
                     <AvatarImage src={bot.imageUrl} fallbackEmoji={bot.personaEmoji} size="lg" className="shadow-lg" />
                     <div>
                       <h2 className="text-xl font-bold">{bot.name}</h2>
-                      {bot.handle && <p className="text-sm text-slate-400 font-normal">@{bot.handle}</p>}
+                      {bot.handle && <p className="text-sm text-secondary font-normal">@{bot.handle}</p>}
                       <div className="flex items-center gap-2 mt-1.5">
                         <Badge variant="outline" className={`text-[10px] ${config.color}`}>
                           <CatIcon className="w-2.5 h-2.5 mr-1" />
@@ -353,7 +352,7 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
                         <Badge variant="outline" className={`text-[10px] ${style.color}`}>
                           {style.label}
                         </Badge>
-                        <Badge variant="outline" className="text-[10px] text-slate-400 border-slate-600">
+                        <Badge variant="outline" className="text-[10px] text-secondary border-ink-edge">
                           Risk: {bot.riskTolerance}
                         </Badge>
                       </div>
@@ -362,7 +361,7 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
                 </DialogHeader>
 
                 {bot.description && (
-                  <p className="text-sm text-slate-300/80 mt-3 leading-relaxed">{bot.description}</p>
+                  <p className="text-sm text-body/80 mt-3 leading-relaxed">{bot.description}</p>
                 )}
               </div>
             </div>
@@ -370,39 +369,39 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
             <div className="p-6 space-y-5">
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                 {[
-                  { label: 'ROI', value: `${(bot.avgTradeRoi ?? 0).toFixed(1)}%`, color: (bot.avgTradeRoi ?? 0) >= 0 ? 'text-emerald-400' : 'text-red-400' },
-                  { label: 'Win Rate', value: `${(bot.winRate ?? 0).toFixed(0)}%`, color: 'text-cyan-400' },
-                  { label: 'Trades', value: bot.totalTrades ?? 0, color: 'text-white' },
-                  { label: 'Influence', value: bot.influenceScore ?? 0, color: 'text-amber-400' },
-                  { label: 'Backers', value: stakeStats?.backerCount ?? bot.backerCount ?? 0, color: 'text-purple-400' },
-                  { label: 'Staked', value: `${(Number(stakeStats?.totalStaked ?? bot.totalStaked ?? 0) / 1000).toFixed(0)}k`, color: 'text-cyan-400' },
+                  { label: 'ROI', value: `${(bot.avgTradeRoi ?? 0).toFixed(1)}%`, color: (bot.avgTradeRoi ?? 0) >= 0 ? 'text-gain' : 'text-loss' },
+                  { label: 'Win Rate', value: `${(bot.winRate ?? 0).toFixed(0)}%`, color: 'text-accent-bright' },
+                  { label: 'Trades', value: bot.totalTrades ?? 0, color: 'text-primary' },
+                  { label: 'Influence', value: bot.influenceScore ?? 0, color: 'text-warn' },
+                  { label: 'Backers', value: stakeStats?.backerCount ?? bot.backerCount ?? 0, color: 'text-accent-bright' },
+                  { label: 'Staked', value: `${(Number(stakeStats?.totalStaked ?? bot.totalStaked ?? 0) / 1000).toFixed(0)}k`, color: 'text-accent-bright' },
                 ].map((stat, i) => (
-                  <div key={i} className="bg-slate-800/50 rounded-xl p-2.5 text-center border border-slate-700/30">
-                    <p className="text-[9px] text-slate-500 uppercase tracking-wider">{stat.label}</p>
+                  <div key={i} className="bg-ink-raised/50 rounded-xl p-2.5 text-center border border-ink-edge/30">
+                    <p className="text-[9px] text-muted uppercase tracking-wider">{stat.label}</p>
                     <p className={`text-sm font-bold mt-0.5 ${stat.color}`}>{stat.value}</p>
                   </div>
                 ))}
               </div>
 
               <div>
-                <h3 className="text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4 text-cyan-400" /> Performance History
+                <h3 className="text-sm font-medium text-body mb-2 flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-accent-bright" /> Performance History
                 </h3>
-                <div className="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3">
+                <div className="bg-ink-raised/30 rounded-xl border border-ink-edge/30 p-3">
                   <PerformanceChart snapshots={snapshots} />
                 </div>
               </div>
 
               {trades.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-cyan-400" /> Recent Trades
+                  <h3 className="text-sm font-medium text-body mb-2 flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-accent-bright" /> Recent Trades
                   </h3>
-                  <div className="bg-slate-800/30 rounded-xl border border-slate-700/30 overflow-hidden">
+                  <div className="bg-ink-raised/30 rounded-xl border border-ink-edge/30 overflow-hidden">
                     <div className="overflow-x-auto">
                       <table className="w-full text-xs">
                         <thead>
-                          <tr className="border-b border-slate-700/50 text-slate-500">
+                          <tr className="border-b border-ink-edge/50 text-muted">
                             <th className="text-left p-2.5">Asset</th>
                             <th className="text-left p-2.5">Direction</th>
                             <th className="text-right p-2.5">Entry</th>
@@ -416,20 +415,20 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
                             const pnl = trade.pnl ?? trade.totalPnl ?? 0;
                             const isLong = trade.direction === 'long';
                             return (
-                              <tr key={i} className="border-b border-slate-700/20 hover:bg-slate-800/50 transition-colors">
-                                <td className="p-2.5 text-white font-medium">{trade.asset || trade.symbol || '-'}</td>
+                              <tr key={i} className="border-b border-ink-edge/20 hover:bg-ink-raised/50 transition-colors">
+                                <td className="p-2.5 text-primary font-medium">{trade.asset || trade.symbol || '-'}</td>
                                 <td className="p-2.5">
-                                  <Badge variant="outline" className={`text-[10px] ${isLong ? 'text-emerald-400 border-emerald-500/30' : 'text-red-400 border-red-500/30'}`}>
+                                  <Badge variant="outline" className={`text-[10px] ${isLong ? 'text-gain border-gain/500/30' : 'text-loss border-loss/500/30'}`}>
                                     {isLong ? '↑ Long' : '↓ Short'}
                                   </Badge>
                                 </td>
-                                <td className="p-2.5 text-right text-slate-300">${Number(trade.entryPrice ?? 0).toFixed(2)}</td>
-                                <td className="p-2.5 text-right text-slate-300">{trade.exitPrice ? `$${Number(trade.exitPrice).toFixed(2)}` : '—'}</td>
-                                <td className={`p-2.5 text-right font-medium ${pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                <td className="p-2.5 text-right text-body">${Number(trade.entryPrice ?? 0).toFixed(2)}</td>
+                                <td className="p-2.5 text-right text-body">{trade.exitPrice ? `$${Number(trade.exitPrice).toFixed(2)}` : '—'}</td>
+                                <td className={`p-2.5 text-right font-medium ${pnl >= 0 ? 'text-gain' : 'text-loss'}`}>
                                   {pnl >= 0 ? '+' : ''}{Number(pnl).toFixed(2)}
                                 </td>
                                 <td className="p-2.5">
-                                  <Badge variant="outline" className={`text-[10px] ${trade.status === 'open' ? 'text-amber-400 border-amber-500/30' : 'text-slate-400 border-slate-600'}`}>
+                                  <Badge variant="outline" className={`text-[10px] ${trade.status === 'open' ? 'text-warn border-warn/500/30' : 'text-secondary border-ink-edge'}`}>
                                     {trade.status || 'closed'}
                                   </Badge>
                                 </td>
@@ -445,23 +444,23 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
 
               {bot.personaPhilosophy && (
                 <div>
-                  <h3 className="text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
-                    <Brain className="w-4 h-4 text-purple-400" /> Trading Philosophy
+                  <h3 className="text-sm font-medium text-body mb-2 flex items-center gap-2">
+                    <Brain className="w-4 h-4 text-accent-bright" /> Trading Philosophy
                   </h3>
-                  <div className="bg-slate-800/30 rounded-xl border border-purple-500/20 p-4">
-                    <p className="text-xs text-slate-300/80 leading-relaxed italic">{bot.personaPhilosophy}</p>
+                  <div className="bg-ink-raised/30 rounded-xl border border-accent-core/500/20 p-4">
+                    <p className="text-xs text-body/80 leading-relaxed italic">{bot.personaPhilosophy}</p>
                   </div>
                 </div>
               )}
 
               {preferredAssets.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
-                    <Target className="w-4 h-4 text-amber-400" /> Preferred Assets
+                  <h3 className="text-sm font-medium text-body mb-2 flex items-center gap-2">
+                    <Target className="w-4 h-4 text-warn" /> Preferred Assets
                   </h3>
                   <div className="flex flex-wrap gap-1.5">
                     {preferredAssets.map((a: any, i: number) => (
-                      <Badge key={i} variant="outline" className="text-[10px] text-amber-400 border-amber-500/30 bg-amber-500/5">
+                      <Badge key={i} variant="outline" className="text-[10px] text-warn border-warn/500/30 bg-warn/500/5">
                         {a.name || a.symbol} ({a.type})
                       </Badge>
                     ))}
@@ -471,25 +470,25 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
 
               {openPositions.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
-                    <Package className="w-4 h-4 text-cyan-400" /> Open Positions
+                  <h3 className="text-sm font-medium text-body mb-2 flex items-center gap-2">
+                    <Package className="w-4 h-4 text-accent-bright" /> Open Positions
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {openPositions.slice(0, 6).map((pos: any, i: number) => {
                       const isLong = pos.direction === 'long';
                       return (
-                        <div key={i} className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/30">
+                        <div key={i} className="bg-ink-raised/50 rounded-xl p-3 border border-ink-edge/30">
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs text-white font-semibold">{pos.asset}</span>
-                            <Badge variant="outline" className={`text-[9px] ${isLong ? 'text-emerald-400 border-emerald-500/30' : 'text-red-400 border-red-500/30'}`}>
+                            <span className="text-xs text-primary font-semibold">{pos.asset}</span>
+                            <Badge variant="outline" className={`text-[9px] ${isLong ? 'text-gain border-gain/500/30' : 'text-loss border-loss/500/30'}`}>
                               {isLong ? '↑ Long' : '↓ Short'}
                             </Badge>
                           </div>
-                          <div className="text-[10px] text-slate-500">
-                            Entry: <span className="text-slate-300">${Number(pos.entryPrice ?? 0).toFixed(2)}</span>
+                          <div className="text-[10px] text-muted">
+                            Entry: <span className="text-body">${Number(pos.entryPrice ?? 0).toFixed(2)}</span>
                           </div>
-                          <div className="text-[10px] text-slate-500">
-                            Qty: <span className="text-slate-300">{Number(pos.quantity ?? 0).toFixed(4)}</span>
+                          <div className="text-[10px] text-muted">
+                            Qty: <span className="text-body">{Number(pos.quantity ?? 0).toFixed(4)}</span>
                           </div>
                         </div>
                       );
@@ -500,26 +499,26 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
 
               {portfolio.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
-                    <BarChart2 className="w-4 h-4 text-cyan-400" /> Portfolio Breakdown
+                  <h3 className="text-sm font-medium text-body mb-2 flex items-center gap-2">
+                    <BarChart2 className="w-4 h-4 text-accent-bright" /> Portfolio Breakdown
                   </h3>
-                  <div className="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3 space-y-2">
+                  <div className="bg-ink-raised/30 rounded-xl border border-ink-edge/30 p-3 space-y-2">
                     {(() => {
                       const maxValue = Math.max(...portfolio.map((p: any) => Math.abs(p.currentValue || p.quantity * p.entryPrice)));
-                      const colors = ['bg-cyan-500', 'bg-purple-500', 'bg-emerald-500', 'bg-amber-500', 'bg-pink-500', 'bg-blue-500'];
+                      const colors = ['bg-accent-core/500', 'bg-accent-core/500', 'bg-gain/500', 'bg-warn/500', 'bg-pink-500', 'bg-blue-500'];
                       return portfolio.map((p: any, i: number) => {
                         const value = Math.abs(p.currentValue || p.quantity * p.entryPrice);
                         const pct = maxValue > 0 ? (value / maxValue) * 100 : 0;
                         return (
                           <div key={i} className="flex items-center gap-3">
-                            <span className="text-xs text-white font-medium w-16 truncate">{p.asset}</span>
-                            <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
+                            <span className="text-xs text-primary font-medium w-16 truncate">{p.asset}</span>
+                            <div className="flex-1 h-2 bg-ink-raised rounded-full overflow-hidden">
                               <div
                                 className={`h-full rounded-full ${colors[i % colors.length]}`}
                                 style={{ width: `${pct}%` }}
                               />
                             </div>
-                            <span className="text-[10px] text-slate-400 w-20 text-right">${value.toFixed(0)}</span>
+                            <span className="text-[10px] text-secondary w-20 text-right">${value.toFixed(0)}</span>
                           </div>
                         );
                       });
@@ -530,22 +529,22 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
 
               {recentReasonings.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
-                    <MessageSquareQuote className="w-4 h-4 text-purple-400" /> Trading Insights
+                  <h3 className="text-sm font-medium text-body mb-2 flex items-center gap-2">
+                    <MessageSquareQuote className="w-4 h-4 text-accent-bright" /> Trading Insights
                   </h3>
                   <div className="space-y-2">
                     {recentReasonings.map((r: any, i: number) => (
-                      <div key={i} className="bg-slate-800/40 rounded-xl p-3 border border-slate-700/30 relative">
+                      <div key={i} className="bg-ink-raised/40 rounded-xl p-3 border border-ink-edge/30 relative">
                         <div className="flex items-start gap-2">
                           <span className="text-lg shrink-0">{bot.emoji}</span>
                           <div>
                             <div className="flex items-center gap-2 mb-1">
-                              <Badge variant="outline" className="text-[9px] text-cyan-400 border-cyan-500/30">{r.asset}</Badge>
-                              <Badge variant="outline" className={`text-[9px] ${r.direction === 'long' ? 'text-emerald-400 border-emerald-500/30' : 'text-red-400 border-red-500/30'}`}>
+                              <Badge variant="outline" className="text-[9px] text-accent-bright border-accent-core/30">{r.asset}</Badge>
+                              <Badge variant="outline" className={`text-[9px] ${r.direction === 'long' ? 'text-gain border-gain/500/30' : 'text-loss border-loss/500/30'}`}>
                                 {r.direction === 'long' ? '↑ Long' : '↓ Short'}
                               </Badge>
                             </div>
-                            <p className="text-[11px] text-slate-300/80 leading-relaxed italic">
+                            <p className="text-[11px] text-body/80 leading-relaxed italic">
                               &ldquo;{(r.reasoning || '').split(' | ')[0]}&rdquo;
                             </p>
                           </div>
@@ -556,29 +555,29 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
                 </div>
               )}
 
-              <div className="bg-gradient-to-br from-slate-800/50 to-slate-800/30 rounded-xl border border-cyan-500/20 p-5">
-                <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-                  <Coins className="w-4 h-4 text-cyan-400" /> Stake STREAM Points
+              <div className="bg-ink-raised rounded-xl border border-accent-core/20 p-5">
+                <h3 className="text-sm font-semibold text-primary mb-3 flex items-center gap-2">
+                  <Coins className="w-4 h-4 text-accent-bright" /> Stake STREAM Points
                 </h3>
 
                 {userStake ? (
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-slate-900/60 rounded-lg p-3 border border-slate-700/30">
-                        <p className="text-[10px] text-slate-500 uppercase">Your Stake</p>
-                        <p className="text-lg font-bold text-white">{Number(userStake.amount ?? 0).toLocaleString()}</p>
+                      <div className="bg-ink-surface/60 rounded-xl p-3 border border-ink-edge/30">
+                        <p className="text-[10px] text-muted uppercase">Your Stake</p>
+                        <p className="text-lg font-bold text-primary">{Number(userStake.amount ?? 0).toLocaleString()}</p>
                       </div>
-                      <div className="bg-slate-900/60 rounded-lg p-3 border border-slate-700/30">
-                        <p className="text-[10px] text-slate-500 uppercase">Current Value</p>
-                        <p className="text-lg font-bold text-cyan-400">{Number(userStake.currentValue ?? 0).toLocaleString()}</p>
+                      <div className="bg-ink-surface/60 rounded-xl p-3 border border-ink-edge/30">
+                        <p className="text-[10px] text-muted uppercase">Current Value</p>
+                        <p className="text-lg font-bold text-accent-bright">{Number(userStake.currentValue ?? 0).toLocaleString()}</p>
                       </div>
                     </div>
-                    <div className={`text-center p-2.5 rounded-lg font-medium text-sm ${(userStake.totalPnl ?? 0) >= 0 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                    <div className={`text-center p-2.5 rounded-xl font-medium text-sm ${(userStake.totalPnl ?? 0) >= 0 ? 'bg-gain/500/10 text-gain border border-gain/500/20' : 'bg-loss/500/10 text-loss border border-loss/500/20'}`}>
                       P&L: {(userStake.totalPnl ?? 0) >= 0 ? '+' : ''}{Number(userStake.totalPnl ?? 0).toFixed(2)} ({Number(userStake.totalPnlPercent ?? 0).toFixed(1)}%)
                     </div>
                     <Button
                       variant="outline"
-                      className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50"
+                      className="w-full border-loss/500/30 text-loss hover:bg-loss/500/10 hover:border-loss/500/50"
                       onClick={() => withdrawMutation.mutate(userStake.id)}
                       disabled={withdrawMutation.isPending}
                     >
@@ -588,8 +587,8 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
                 ) : (
                   <div className="space-y-3">
                     {isAuthenticated && (
-                      <p className="text-xs text-slate-400">
-                        Balance: <span className="text-cyan-400 font-semibold">{((user?.streamPoints as number) ?? 0).toLocaleString()} STREAM</span>
+                      <p className="text-xs text-secondary">
+                        Balance: <span className="text-accent-bright font-semibold">{((user?.streamPoints as number) ?? 0).toLocaleString()} STREAM</span>
                       </p>
                     )}
                     <div className="flex gap-2">
@@ -598,12 +597,12 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
                         placeholder="Amount to stake"
                         value={stakeAmount}
                         onChange={(e) => setStakeAmount(e.target.value)}
-                        className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+                        className="bg-ink-raised/50 border-ink-edge text-primary placeholder:text-muted"
                       />
                       <Button
                         onClick={handleStake}
                         disabled={stakeMutation.isPending}
-                        className="bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-semibold whitespace-nowrap shadow-lg shadow-cyan-500/20"
+                        className="grad-accent glow-accent text-primary font-semibold whitespace-nowrap rounded-xl"
                       >
                         {!isAuthenticated ? (
                           <><LogIn className="w-4 h-4 mr-1" /> Sign In</>
@@ -614,7 +613,7 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
                         )}
                       </Button>
                     </div>
-                    <div className="flex items-start gap-2 text-[11px] text-slate-500">
+                    <div className="flex items-start gap-2 text-[11px] text-muted">
                       <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" />
                       <span>Stakes are simulated. Avatar performance is based on real market data but trades are paper-traded.</span>
                     </div>
@@ -624,7 +623,7 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
             </div>
           </>
         ) : (
-          <div className="text-center py-10 text-slate-500">Avatar not found</div>
+          <div className="text-center py-10 text-muted">Avatar not found</div>
         )}
       </DialogContent>
     </Dialog>
@@ -633,18 +632,18 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
 
 function SkeletonCard() {
   return (
-    <div className="bg-slate-900/60 border border-slate-700/40 rounded-2xl p-5 animate-pulse">
+    <div className="bg-ink-surface/60 border border-ink-edge/40 rounded-2xl p-5 animate-pulse">
       <div className="flex items-start gap-3 mb-4">
-        <div className="w-12 h-12 rounded-full bg-slate-800" />
+        <div className="w-12 h-12 rounded-full bg-ink-raised" />
         <div className="flex-1">
-          <div className="w-24 h-4 bg-slate-800 rounded mb-2" />
-          <div className="w-16 h-4 bg-slate-800 rounded" />
+          <div className="w-24 h-4 bg-ink-raised rounded mb-2" />
+          <div className="w-16 h-4 bg-ink-raised rounded" />
         </div>
-        <div className="w-16 h-6 bg-slate-800 rounded" />
+        <div className="w-16 h-6 bg-ink-raised rounded" />
       </div>
-      <div className="w-full h-1.5 bg-slate-800 rounded-full mb-3" />
+      <div className="w-full h-1.5 bg-ink-raised rounded-full mb-3" />
       <div className="grid grid-cols-3 gap-2">
-        {[...Array(3)].map((_, i) => <div key={i} className="h-12 bg-slate-800/40 rounded-lg" />)}
+        {[...Array(3)].map((_, i) => <div key={i} className="h-12 bg-ink-raised/40 rounded-xl" />)}
       </div>
     </div>
   );
@@ -666,10 +665,10 @@ function LiveTradeFeed() {
       className="mb-8"
     >
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-        <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wider">Live Trade Feed</h3>
+        <div className="w-2 h-2 rounded-full bg-gain/400 animate-pulse" />
+        <h3 className="text-xs font-medium text-secondary uppercase tracking-wider">Live Trade Feed</h3>
       </div>
-      <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/40 rounded-2xl p-3 overflow-hidden">
+      <div className="bg-ink-surface/60 backdrop-blur-xl border border-ink-edge/40 rounded-2xl p-3 overflow-hidden">
         <div className="relative overflow-hidden">
           <motion.div
             className="flex gap-3"
@@ -685,28 +684,28 @@ function LiveTradeFeed() {
               return (
                 <div
                   key={`${trade.id}-${i}`}
-                  className="flex-shrink-0 bg-slate-800/50 border border-slate-700/30 rounded-xl p-3 min-w-[220px] sm:min-w-[260px] max-w-[280px] hover:border-cyan-500/30 transition-colors"
+                  className="flex-shrink-0 bg-ink-raised/50 border border-ink-edge/30 rounded-xl p-3 min-w-[220px] sm:min-w-[260px] max-w-[280px] hover:border-accent-core/30 transition-colors"
                 >
                   <div className="flex items-center gap-2 mb-1.5">
                     <AvatarImage src={trade.avatarImageUrl} size="sm" className="!w-7 !h-7" />
-                    <span className="text-xs text-white font-medium truncate">{trade.avatarName}</span>
-                    <Badge variant="outline" className={`text-[9px] ml-auto ${isLong ? 'text-emerald-400 border-emerald-500/30' : 'text-red-400 border-red-500/30'}`}>
+                    <span className="text-xs text-primary font-medium truncate">{trade.avatarName}</span>
+                    <Badge variant="outline" className={`text-[9px] ml-auto ${isLong ? 'text-gain border-gain/500/30' : 'text-loss border-loss/500/30'}`}>
                       {isLong ? '↑ Long' : '↓ Short'}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-cyan-400 font-semibold">{trade.asset}</span>
+                    <span className="text-xs text-accent-bright font-semibold">{trade.asset}</span>
                     {trade.status === 'closed' && (
-                      <span className={`text-xs font-bold ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
+                      <span className={`text-xs font-bold ${isPositive ? 'text-gain' : 'text-loss'}`}>
                         {isPositive ? '+' : ''}{pnl.toFixed(2)}
                       </span>
                     )}
                     {trade.status === 'open' && (
-                      <Badge variant="outline" className="text-[9px] text-amber-400 border-amber-500/30">Open</Badge>
+                      <Badge variant="outline" className="text-[9px] text-warn border-warn/500/30">Open</Badge>
                     )}
                   </div>
                   {reasoning && (
-                    <p className="text-[10px] text-slate-500 mt-1.5 leading-tight italic truncate">&ldquo;{reasoning}&rdquo;</p>
+                    <p className="text-[10px] text-muted mt-1.5 leading-tight italic truncate">&ldquo;{reasoning}&rdquo;</p>
                   )}
                 </div>
               );
@@ -725,7 +724,7 @@ function LeaderboardContent() {
   });
   const leaderboard = Array.isArray(leaderboardData) ? leaderboardData : [];
 
-  const crownColors = ['text-amber-400', 'text-slate-300', 'text-amber-700'];
+  const crownColors = ['text-warn', 'text-body', 'text-amber-700'];
 
   return (
     <div>
@@ -741,8 +740,8 @@ function LeaderboardContent() {
             size="sm"
             className={`text-xs h-8 ${
               period === p.value
-                ? 'bg-cyan-600/20 border-cyan-500/50 text-cyan-400'
-                : 'border-slate-700/50 text-slate-400 hover:text-white hover:border-cyan-500/50'
+                ? 'bg-accent-core/600/20 border-accent-core/500/50 text-accent-bright'
+                : 'border-ink-edge/50 text-secondary hover:text-primary hover:border-accent-core/500/50'
             }`}
             onClick={() => setPeriod(p.value)}
           >
@@ -754,21 +753,21 @@ function LeaderboardContent() {
       {isLoading ? (
         <div className="space-y-3">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="bg-slate-900/40 border border-slate-700/40 rounded-xl h-16 animate-pulse" />
+            <div key={i} className="bg-ink-surface/40 border border-ink-edge/40 rounded-xl h-16 animate-pulse" />
           ))}
         </div>
       ) : leaderboard.length === 0 ? (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 bg-slate-900/40 backdrop-blur-xl border border-slate-700/40 rounded-2xl">
-          <Trophy className="w-14 h-14 text-slate-600 mx-auto mb-4" />
-          <p className="text-slate-400 text-lg font-medium mb-1">No leaderboard data yet</p>
-          <p className="text-slate-500 text-sm">Trades need to be executed first</p>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 bg-ink-surface/40 backdrop-blur-xl border border-ink-edge/40 rounded-2xl">
+          <Trophy className="w-14 h-14 text-muted mx-auto mb-4" />
+          <p className="text-secondary text-lg font-medium mb-1">No leaderboard data yet</p>
+          <p className="text-muted text-sm">Trades need to be executed first</p>
         </motion.div>
       ) : (
-        <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/40 rounded-2xl overflow-hidden">
+        <div className="bg-ink-surface/60 backdrop-blur-xl border border-ink-edge/40 rounded-2xl overflow-hidden">
           <div className="table-scroller relative w-full overflow-x-auto overscroll-x-contain">
             <table className="w-full text-xs min-w-[600px]">
               <thead>
-                <tr className="border-b border-slate-700/50 text-slate-500">
+                <tr className="border-b border-ink-edge/50 text-muted">
                   <th className="text-left p-3 w-12">#</th>
                   <th className="text-left p-3">Avatar</th>
                   <th className="text-left p-3">Category</th>
@@ -791,21 +790,21 @@ function LeaderboardContent() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: i * 0.03 }}
-                        className="border-b border-slate-700/20 hover:bg-slate-800/50 transition-colors"
+                        className="border-b border-ink-edge/20 hover:bg-ink-raised/50 transition-colors"
                       >
                         <td className="p-3">
                           {entry.rank <= 3 ? (
                             <Crown className={`w-5 h-5 ${crownColors[entry.rank - 1]}`} />
                           ) : (
-                            <span className="text-slate-500 font-medium pl-0.5">{entry.rank}</span>
+                            <span className="text-muted font-medium pl-0.5">{entry.rank}</span>
                           )}
                         </td>
                         <td className="p-3">
                           <div className="flex items-center gap-2.5">
                             <AvatarImage src={entry.imageUrl} size="sm" className="!w-8 !h-8" />
                             <div>
-                              <p className="text-white font-medium text-sm">{entry.name}</p>
-                              <p className="text-[10px] text-slate-500">@{entry.handle}</p>
+                              <p className="text-primary font-medium text-sm">{entry.name}</p>
+                              <p className="text-[10px] text-muted">@{entry.handle}</p>
                             </div>
                           </div>
                         </td>
@@ -814,22 +813,22 @@ function LeaderboardContent() {
                             {catConfig.label}
                           </Badge>
                         </td>
-                        <td className="p-3 text-center text-slate-300">{entry.totalTrades}</td>
+                        <td className="p-3 text-center text-body">{entry.totalTrades}</td>
                         <td className="p-3">
                           <div className="flex items-center gap-2">
-                            <div className="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                            <div className="w-16 h-1.5 bg-ink-raised rounded-full overflow-hidden">
                               <div
-                                className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-cyan-400"
+                                className="h-full rounded-full bg-accent-core"
                                 style={{ width: `${Math.min(entry.winRate, 100)}%` }}
                               />
                             </div>
-                            <span className="text-cyan-400 font-medium">{entry.winRate.toFixed(0)}%</span>
+                            <span className="text-accent-bright font-medium">{entry.winRate.toFixed(0)}%</span>
                           </div>
                         </td>
-                        <td className={`p-3 text-right font-bold ${isPositiveRoi ? 'text-emerald-400' : 'text-red-400'}`}>
+                        <td className={`p-3 text-right font-bold ${isPositiveRoi ? 'text-gain' : 'text-loss'}`}>
                           {isPositiveRoi ? '+' : ''}{entry.avgRoi.toFixed(1)}%
                         </td>
-                        <td className={`p-3 text-right font-bold ${isPositivePnl ? 'text-emerald-400' : 'text-red-400'}`}>
+                        <td className={`p-3 text-right font-bold ${isPositivePnl ? 'text-gain' : 'text-loss'}`}>
                           {isPositivePnl ? '+' : ''}${entry.totalPnl.toFixed(0)}
                         </td>
                       </motion.tr>
@@ -903,9 +902,8 @@ export default function BotTradingPage() {
   const totalPnlPct = totalInvested > 0 ? (totalPnl / totalInvested) * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="min-h-screen bg-ink-page text-primary">
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-900/20 via-slate-900 to-slate-950" />
         <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 25px 25px, rgba(6,182,212,0.04) 1.5px, transparent 1.5px)', backgroundSize: '50px 50px' }} />
         {[...Array(20)].map((_, i) => (
           <motion.div
@@ -934,7 +932,7 @@ export default function BotTradingPage() {
             <Button
               variant="outline"
               size="sm"
-              className="bg-slate-900/60 backdrop-blur-xl border-slate-700/50 hover:border-cyan-500/50 hover:bg-cyan-500/5 text-slate-400 hover:text-cyan-400 transition-all duration-300 rounded-xl"
+              className="bg-ink-surface/60 backdrop-blur-xl border-ink-edge/50 hover:border-accent-core/500/50 hover:bg-accent-core/500/5 text-secondary hover:text-accent-bright transition-all duration-300 rounded-xl"
             >
               <Home className="w-4 h-4 mr-2" />
               Back to Home
@@ -945,17 +943,17 @@ export default function BotTradingPage() {
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <motion.div
-              className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/20 via-purple-500/20 to-emerald-500/20 flex items-center justify-center border border-cyan-500/30 shadow-lg shadow-cyan-500/10"
+              className="w-14 h-14 rounded-2xl bg-accent-core/10 flex items-center justify-center border border-accent-core/30 shadow-lg shadow-cyan-500/10"
               animate={{ boxShadow: ['0 0 20px rgba(6,182,212,0.1)', '0 0 40px rgba(6,182,212,0.2)', '0 0 20px rgba(6,182,212,0.1)'] }}
               transition={{ duration: 3, repeat: Infinity }}
             >
-              <Sparkles className="w-7 h-7 text-cyan-400" />
+              <Sparkles className="w-7 h-7 text-accent-bright" />
             </motion.div>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent mb-2">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary mb-2">
             Avatar Trading Simulator
           </h1>
-          <p className="text-slate-400 text-sm max-w-md mx-auto">
+          <p className="text-secondary text-sm max-w-md mx-auto">
             Stake STREAM points on legendary investors & traders and watch them trade real markets with simulated capital
           </p>
         </motion.div>
@@ -967,25 +965,25 @@ export default function BotTradingPage() {
           className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8"
         >
           {[
-            { icon: Coins, label: 'Total Staked', value: stats?.totalStaked ? `${(Number(stats.totalStaked) / 1000).toFixed(0)}k` : '0', sub: 'STREAM', iconBg: 'bg-cyan-500/10', iconBorder: 'border-cyan-500/20', iconColor: 'text-cyan-400', subColor: 'text-cyan-400/70', hoverBorder: 'hover:border-cyan-500/40', glow: 'shadow-cyan-500/10' },
-            { icon: Users, label: 'Active Traders', value: stats?.activeTraders ?? '0', sub: 'staking now', iconBg: 'bg-purple-500/10', iconBorder: 'border-purple-500/20', iconColor: 'text-purple-400', subColor: 'text-purple-400/70', hoverBorder: 'hover:border-purple-500/40', glow: 'shadow-purple-500/10' },
-            { icon: Trophy, label: 'Top Avatar', value: stats?.topBot?.name ?? '—', sub: stats?.topBot ? `${(stats.topBot.avgTradeRoi ?? 0).toFixed(1)}% ROI` : '', iconBg: 'bg-emerald-500/10', iconBorder: 'border-emerald-500/20', iconColor: 'text-emerald-400', subColor: 'text-emerald-400/70', hoverBorder: 'hover:border-emerald-500/40', glow: 'shadow-emerald-500/10', imageUrl: stats?.topBot?.imageUrl },
-            { icon: Activity, label: 'Total Trades', value: stats?.totalTrades ?? '0', sub: 'executed', iconBg: 'bg-amber-500/10', iconBorder: 'border-amber-500/20', iconColor: 'text-amber-400', subColor: 'text-amber-400/70', hoverBorder: 'hover:border-amber-500/40', glow: 'shadow-amber-500/10' },
+            { icon: Coins, label: 'Total Staked', value: stats?.totalStaked ? `${(Number(stats.totalStaked) / 1000).toFixed(0)}k` : '0', sub: 'STREAM', iconBg: 'bg-accent-core/500/10', iconBorder: 'border-accent-core/500/20', iconColor: 'text-accent-bright', subColor: 'text-accent-bright/70', hoverBorder: 'hover:border-accent-core/500/40', glow: 'shadow-cyan-500/10' },
+            { icon: Users, label: 'Active Traders', value: stats?.activeTraders ?? '0', sub: 'staking now', iconBg: 'bg-accent-core/500/10', iconBorder: 'border-accent-core/500/20', iconColor: 'text-accent-bright', subColor: 'text-accent-bright/70', hoverBorder: 'hover:border-accent-core/500/40', glow: 'shadow-purple-500/10' },
+            { icon: Trophy, label: 'Top Avatar', value: stats?.topBot?.name ?? '—', sub: stats?.topBot ? `${(stats.topBot.avgTradeRoi ?? 0).toFixed(1)}% ROI` : '', iconBg: 'bg-gain/500/10', iconBorder: 'border-gain/500/20', iconColor: 'text-gain', subColor: 'text-gain/70', hoverBorder: 'hover:border-gain/500/40', glow: 'shadow-emerald-500/10', imageUrl: stats?.topBot?.imageUrl },
+            { icon: Activity, label: 'Total Trades', value: stats?.totalTrades ?? '0', sub: 'executed', iconBg: 'bg-warn/500/10', iconBorder: 'border-warn/500/20', iconColor: 'text-warn', subColor: 'text-warn/70', hoverBorder: 'hover:border-warn/500/40', glow: 'shadow-amber-500/10' },
           ].map((item, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 + i * 0.05 }}
-              className={`bg-slate-900/60 backdrop-blur-xl border border-slate-700/40 rounded-2xl p-4 ${item.hoverBorder} transition-all shadow-lg ${item.glow}`}
+              className={`bg-ink-surface/60 backdrop-blur-xl border border-ink-edge/40 rounded-2xl p-4 ${item.hoverBorder} transition-all shadow-lg ${item.glow}`}
             >
               <div className="flex items-start gap-3">
                 <div className={`w-10 h-10 rounded-xl ${item.iconBg} border ${item.iconBorder} flex items-center justify-center shrink-0`}>
                   <item.icon className={`w-5 h-5 ${item.iconColor}`} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider">{item.label}</p>
-                  <p className="text-base sm:text-lg font-bold text-white truncate">{item.value}</p>
+                  <p className="text-[10px] text-muted uppercase tracking-wider">{item.label}</p>
+                  <p className="text-base sm:text-lg font-bold text-primary truncate">{item.value}</p>
                   {item.sub && <p className={`text-[10px] ${item.subColor}`}>{item.sub}</p>}
                 </div>
               </div>
@@ -997,16 +995,16 @@ export default function BotTradingPage() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <TabsList className="bg-slate-900/60 border border-slate-700/40 p-1 w-full sm:w-auto overflow-x-auto">
-              <TabsTrigger value="all" className="data-[state=active]:bg-cyan-600/20 data-[state=active]:text-cyan-400 data-[state=active]:shadow-sm px-3 sm:px-5">
+            <TabsList className="bg-ink-surface/60 border border-ink-edge/40 p-1 w-full sm:w-auto overflow-x-auto">
+              <TabsTrigger value="all" className="data-[state=active]:bg-accent-core/600/20 data-[state=active]:text-accent-bright data-[state=active]:shadow-sm px-3 sm:px-5">
                 <Sparkles className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">All Avatars</span><span className="sm:hidden">All</span>
-                <Badge variant="outline" className="ml-1.5 sm:ml-2 text-[10px] border-slate-600 text-slate-400">{totalBots}</Badge>
+                <Badge variant="outline" className="ml-1.5 sm:ml-2 text-[10px] border-ink-edge text-secondary">{totalBots}</Badge>
               </TabsTrigger>
-              <TabsTrigger value="my" className="data-[state=active]:bg-purple-600/20 data-[state=active]:text-purple-400 data-[state=active]:shadow-sm px-3 sm:px-5">
+              <TabsTrigger value="my" className="data-[state=active]:bg-accent-core/600/20 data-[state=active]:text-accent-bright data-[state=active]:shadow-sm px-3 sm:px-5">
                 <Wallet className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">My Stakes</span><span className="sm:hidden">Stakes</span>
-                {stakes.length > 0 && <Badge variant="outline" className="ml-1.5 sm:ml-2 text-[10px] border-purple-500/30 text-purple-400">{stakes.length}</Badge>}
+                {stakes.length > 0 && <Badge variant="outline" className="ml-1.5 sm:ml-2 text-[10px] border-accent-core/30 text-accent-bright">{stakes.length}</Badge>}
               </TabsTrigger>
-              <TabsTrigger value="leaderboard" className="data-[state=active]:bg-amber-600/20 data-[state=active]:text-amber-400 data-[state=active]:shadow-sm px-3 sm:px-5">
+              <TabsTrigger value="leaderboard" className="data-[state=active]:bg-warn/600/20 data-[state=active]:text-warn data-[state=active]:shadow-sm px-3 sm:px-5">
                 <Trophy className="w-4 h-4 sm:mr-1.5" /> <span className="hidden sm:inline">Leaderboard</span><span className="sm:hidden">Board</span>
               </TabsTrigger>
             </TabsList>
@@ -1014,10 +1012,10 @@ export default function BotTradingPage() {
             {activeTab === 'all' && (
               <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 <Select value={category} onValueChange={(v) => { setCategory(v); setPage(1); }}>
-                  <SelectTrigger className="w-full sm:w-[150px] bg-slate-900/60 border-slate-700/50 text-white text-sm h-9">
+                  <SelectTrigger className="w-full sm:w-[150px] bg-ink-surface/60 border-ink-edge/50 text-primary text-sm h-9">
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900 border-slate-700">
+                  <SelectContent className="bg-ink-surface border-ink-edge">
                     <SelectItem value="all">All Categories</SelectItem>
                     {categories.filter(c => c !== 'all').map(c => {
                       const cfg = getCategory(c);
@@ -1035,10 +1033,10 @@ export default function BotTradingPage() {
                 </Select>
 
                 <Select value={sort} onValueChange={(v) => { setSort(v); setPage(1); }}>
-                  <SelectTrigger className="w-full sm:w-[140px] bg-slate-900/60 border-slate-700/50 text-white text-sm h-9">
+                  <SelectTrigger className="w-full sm:w-[140px] bg-ink-surface/60 border-ink-edge/50 text-primary text-sm h-9">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900 border-slate-700">
+                  <SelectContent className="bg-ink-surface border-ink-edge">
                     <SelectItem value="roi">ROI</SelectItem>
                     <SelectItem value="winRate">Win Rate</SelectItem>
                     <SelectItem value="backers">Backers</SelectItem>
@@ -1055,10 +1053,10 @@ export default function BotTradingPage() {
                 {[...Array(9)].map((_, i) => <SkeletonCard key={i} />)}
               </div>
             ) : bots.length === 0 ? (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 bg-slate-900/40 backdrop-blur-xl border border-slate-700/40 rounded-2xl">
-                <Sparkles className="w-14 h-14 text-slate-600 mx-auto mb-4" />
-                <p className="text-slate-400 text-lg font-medium mb-1">No avatars found</p>
-                <p className="text-slate-500 text-sm">Try adjusting your filters</p>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 bg-ink-surface/40 backdrop-blur-xl border border-ink-edge/40 rounded-2xl">
+                <Sparkles className="w-14 h-14 text-muted mx-auto mb-4" />
+                <p className="text-secondary text-lg font-medium mb-1">No avatars found</p>
+                <p className="text-muted text-sm">Try adjusting your filters</p>
               </motion.div>
             ) : (
               <>
@@ -1073,7 +1071,7 @@ export default function BotTradingPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="border-slate-700/50 text-slate-400 hover:text-white hover:border-cyan-500/50 disabled:opacity-30"
+                      className="border-ink-edge/50 text-secondary hover:text-primary hover:border-accent-core/500/50 disabled:opacity-30"
                       onClick={() => setPage(p => Math.max(1, p - 1))}
                       disabled={page <= 1}
                     >
@@ -1087,8 +1085,8 @@ export default function BotTradingPage() {
                         size="sm"
                         className={`w-9 h-9 ${
                           p === page
-                            ? 'bg-cyan-600/20 border-cyan-500/50 text-cyan-400'
-                            : 'border-slate-700/50 text-slate-400 hover:text-white hover:border-cyan-500/50'
+                            ? 'bg-accent-core/600/20 border-accent-core/500/50 text-accent-bright'
+                            : 'border-ink-edge/50 text-secondary hover:text-primary hover:border-accent-core/500/50'
                         }`}
                         onClick={() => setPage(p)}
                       >
@@ -1099,14 +1097,14 @@ export default function BotTradingPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="border-slate-700/50 text-slate-400 hover:text-white hover:border-cyan-500/50 disabled:opacity-30"
+                      className="border-ink-edge/50 text-secondary hover:text-primary hover:border-accent-core/500/50 disabled:opacity-30"
                       onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                       disabled={page >= totalPages}
                     >
                       <ChevronRight className="w-4 h-4" />
                     </Button>
 
-                    <span className="text-xs text-slate-500 ml-3">
+                    <span className="text-xs text-muted ml-3">
                       {(page - 1) * BOTS_PER_PAGE + 1}-{Math.min(page * BOTS_PER_PAGE, totalBots)} of {totalBots}
                     </span>
                   </div>
@@ -1117,12 +1115,12 @@ export default function BotTradingPage() {
 
           <TabsContent value="my">
             {!isAuthenticated ? (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 bg-slate-900/40 backdrop-blur-xl border border-slate-700/40 rounded-2xl">
-                <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-4">
-                  <LogIn className="w-8 h-8 text-purple-400" />
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 bg-ink-surface/40 backdrop-blur-xl border border-ink-edge/40 rounded-2xl">
+                <div className="w-16 h-16 rounded-2xl bg-accent-core/500/10 border border-accent-core/500/20 flex items-center justify-center mx-auto mb-4">
+                  <LogIn className="w-8 h-8 text-accent-bright" />
                 </div>
-                <p className="text-slate-300 text-lg font-medium mb-1">Sign in to view your stakes</p>
-                <p className="text-slate-500 text-sm">Track your avatar investments and P&L</p>
+                <p className="text-body text-lg font-medium mb-1">Sign in to view your stakes</p>
+                <p className="text-muted text-sm">Track your avatar investments and P&L</p>
               </motion.div>
             ) : (
               <>
@@ -1132,15 +1130,15 @@ export default function BotTradingPage() {
                   className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6"
                 >
                   {[
-                    { label: 'Invested', value: `${totalInvested.toLocaleString()}`, icon: Coins, color: 'text-white' },
-                    { label: 'Current Value', value: `${totalCurrentValue.toLocaleString()}`, icon: DollarSign, color: 'text-cyan-400' },
-                    { label: 'Total P&L', value: `${totalPnl >= 0 ? '+' : ''}${totalPnl.toFixed(0)}`, icon: TrendingUp, color: totalPnl >= 0 ? 'text-emerald-400' : 'text-red-400' },
-                    { label: 'P&L %', value: `${totalPnlPct >= 0 ? '+' : ''}${totalPnlPct.toFixed(1)}%`, icon: BarChart3, color: totalPnlPct >= 0 ? 'text-emerald-400' : 'text-red-400' },
+                    { label: 'Invested', value: `${totalInvested.toLocaleString()}`, icon: Coins, color: 'text-primary' },
+                    { label: 'Current Value', value: `${totalCurrentValue.toLocaleString()}`, icon: DollarSign, color: 'text-accent-bright' },
+                    { label: 'Total P&L', value: `${totalPnl >= 0 ? '+' : ''}${totalPnl.toFixed(0)}`, icon: TrendingUp, color: totalPnl >= 0 ? 'text-gain' : 'text-loss' },
+                    { label: 'P&L %', value: `${totalPnlPct >= 0 ? '+' : ''}${totalPnlPct.toFixed(1)}%`, icon: BarChart3, color: totalPnlPct >= 0 ? 'text-gain' : 'text-loss' },
                   ].map((item, i) => (
-                    <div key={i} className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/40 rounded-xl p-4">
+                    <div key={i} className="bg-ink-surface/60 backdrop-blur-xl border border-ink-edge/40 rounded-xl p-4">
                       <div className="flex items-center gap-2 mb-1">
-                        <item.icon className="w-3.5 h-3.5 text-slate-500" />
-                        <p className="text-[10px] text-slate-500 uppercase tracking-wider">{item.label}</p>
+                        <item.icon className="w-3.5 h-3.5 text-muted" />
+                        <p className="text-[10px] text-muted uppercase tracking-wider">{item.label}</p>
                       </div>
                       <p className={`text-xl font-bold ${item.color}`}>{item.value}</p>
                     </div>
@@ -1149,17 +1147,17 @@ export default function BotTradingPage() {
 
                 {stakesLoading ? (
                   <div className="space-y-3">
-                    {[...Array(3)].map((_, i) => <div key={i} className="bg-slate-900/40 border border-slate-700/40 rounded-xl h-20 animate-pulse" />)}
+                    {[...Array(3)].map((_, i) => <div key={i} className="bg-ink-surface/40 border border-ink-edge/40 rounded-xl h-20 animate-pulse" />)}
                   </div>
                 ) : stakes.length === 0 ? (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16 bg-slate-900/40 backdrop-blur-xl border border-slate-700/40 rounded-2xl">
-                    <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mx-auto mb-4">
-                      <Sparkles className="w-8 h-8 text-cyan-400" />
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16 bg-ink-surface/40 backdrop-blur-xl border border-ink-edge/40 rounded-2xl">
+                    <div className="w-16 h-16 rounded-2xl bg-accent-core/500/10 border border-accent-core/500/20 flex items-center justify-center mx-auto mb-4">
+                      <Sparkles className="w-8 h-8 text-accent-bright" />
                     </div>
-                    <p className="text-slate-300 font-medium mb-1">No active stakes yet</p>
-                    <p className="text-slate-500 text-sm mb-5">Browse avatars and stake STREAM points to get started</p>
+                    <p className="text-body font-medium mb-1">No active stakes yet</p>
+                    <p className="text-muted text-sm mb-5">Browse avatars and stake STREAM points to get started</p>
                     <Button
-                      className="bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white shadow-lg shadow-cyan-500/20"
+                      className="grad-accent glow-accent text-primary rounded-xl"
                       onClick={() => setActiveTab('all')}
                     >
                       <Sparkles className="w-4 h-4 mr-2" />
@@ -1184,7 +1182,7 @@ export default function BotTradingPage() {
                             exit={{ opacity: 0, x: 20 }}
                             transition={{ delay: i * 0.05 }}
                           >
-                            <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/40 rounded-xl p-4 hover:border-cyan-500/30 transition-all">
+                            <div className="bg-ink-surface/60 backdrop-blur-xl border border-ink-edge/40 rounded-xl p-4 hover:border-accent-core/30 transition-all">
                               <div className="flex items-center gap-4">
                                 <div
                                   className="cursor-pointer hover:opacity-80 transition-opacity shrink-0"
@@ -1196,28 +1194,28 @@ export default function BotTradingPage() {
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2">
                                     <h4
-                                      className="text-white font-medium text-sm truncate cursor-pointer hover:text-cyan-400 transition-colors"
+                                      className="text-primary font-medium text-sm truncate cursor-pointer hover:text-accent-bright transition-colors"
                                       onClick={() => setSelectedBotId(stake.avatarId)}
                                     >
                                       {stake.botName}
                                     </h4>
-                                    {stake.botHandle && <span className="text-[10px] text-slate-500">@{stake.botHandle}</span>}
+                                    {stake.botHandle && <span className="text-[10px] text-muted">@{stake.botHandle}</span>}
                                     <Badge variant="outline" className={`text-[9px] ${stakeCategory.color}`}>
                                       {stakeCategory.label}
                                     </Badge>
                                   </div>
                                   <div className="flex items-center gap-4 mt-1 text-xs">
-                                    <span className="text-slate-500">Staked: <span className="text-white font-medium">{Number(stake.amount ?? 0).toLocaleString()}</span></span>
-                                    <span className="text-slate-500">Value: <span className="text-cyan-400 font-medium">{Number(stake.currentValue ?? 0).toLocaleString()}</span></span>
+                                    <span className="text-muted">Staked: <span className="text-primary font-medium">{Number(stake.amount ?? 0).toLocaleString()}</span></span>
+                                    <span className="text-muted">Value: <span className="text-accent-bright font-medium">{Number(stake.currentValue ?? 0).toLocaleString()}</span></span>
                                   </div>
                                 </div>
 
                                 <div className="text-right shrink-0">
-                                  <div className={`flex items-center gap-1 text-sm font-bold ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
+                                  <div className={`flex items-center gap-1 text-sm font-bold ${isPositive ? 'text-gain' : 'text-loss'}`}>
                                     {isPositive ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
                                     {isPositive ? '+' : ''}{Number(pnl).toFixed(0)}
                                   </div>
-                                  <p className={`text-[10px] ${isPositive ? 'text-emerald-400/70' : 'text-red-400/70'}`}>
+                                  <p className={`text-[10px] ${isPositive ? 'text-gain/70' : 'text-loss/70'}`}>
                                     {isPositive ? '+' : ''}{Number(pnlPct).toFixed(1)}%
                                   </p>
                                 </div>
@@ -1225,7 +1223,7 @@ export default function BotTradingPage() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 shrink-0"
+                                  className="border-loss/500/30 text-loss hover:bg-loss/500/10 hover:border-loss/500/50 shrink-0"
                                   onClick={() => withdrawMutation.mutate(stake.id)}
                                   disabled={withdrawMutation.isPending}
                                 >
