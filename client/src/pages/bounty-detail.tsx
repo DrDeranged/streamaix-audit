@@ -43,6 +43,9 @@ import { format, formatDistanceToNow } from 'date-fns';
 import type { Bounty } from '@shared/schema';
 import { SuggestedMarketsCard } from '@/components/prediction/SuggestedMarketsCard';
 import { CommentSection } from '@/components/comments/CommentSection';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
+import StatValue from '@/components/ds/StatValue';
 
 interface AnalysisAnswer {
   questionId: string;
@@ -415,28 +418,28 @@ export default function BountyDetail() {
   });
 
   const statusColors: Record<string, string> = {
-    open: 'border-purple-500/50 bg-purple-500/10 text-purple-400',
-    claimed: 'border-fuchsia-500/50 bg-fuchsia-500/10 text-fuchsia-400',
-    in_progress: 'border-cyan-500/50 bg-cyan-500/10 text-cyan-400',
-    completed: 'border-purple-500/50 bg-purple-500/10 text-purple-400',
-    expired: 'border-fuchsia-500/50 bg-fuchsia-500/10 text-fuchsia-400',
+    open: 'border-accent-core/50 bg-accent-core/10 text-accent-bright',
+    claimed: 'border-warn/50 bg-warn/10 text-warn',
+    in_progress: 'border-accent-core/50 bg-accent-core/10 text-accent-bright',
+    completed: 'border-gain/50 bg-gain/10 text-gain',
+    expired: 'border-loss/50 bg-loss/10 text-loss',
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center">
-        <div className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 text-xl">Loading bounty...</div>
+      <div className="min-h-screen bg-ink-page flex items-center justify-center">
+        <div className="text-primary text-xl">Loading bounty...</div>
       </div>
     );
   }
 
   if (!bounty) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-ink-page flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl text-white mb-4">Bounty not found</h2>
+          <h2 className="text-2xl text-primary mb-4">Bounty not found</h2>
           <Link href="/#bounties">
-            <Button variant="outline" className="border-purple-500/30">
+            <Button variant="outline" className="border-ink-edge text-secondary rounded-xl">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Bounties
             </Button>
@@ -447,19 +450,19 @@ export default function BountyDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
+    <div className="min-h-screen bg-ink-page">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Header */}
-            <Card className="surface-2 border-purple-500/30 p-6">
+            <Surface className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h1 className="text-3xl font-bold text-white mb-3" data-testid="bounty-detail-title">
+                  <SectionTitle as="h1" className="mb-3 text-3xl font-bold" data-testid="bounty-detail-title">
                     {bounty.title}
-                  </h1>
-                  <div className="flex items-center gap-4 text-sm text-gray-400">
+                  </SectionTitle>
+                  <div className="flex items-center gap-4 text-sm text-secondary">
                     <div className="flex items-center gap-2">
                       <User className="w-4 h-4" />
                       <span>{bounty.creatorWallet?.slice(0, 6)}...{bounty.creatorWallet?.slice(-4)}</span>
@@ -481,7 +484,7 @@ export default function BountyDetail() {
                     <Badge
                       key={index}
                       variant="outline"
-                      className="border-purple-500/30 text-purple-300"
+                       className="border-accent-core/30 text-accent-bright rounded-xl"
                     >
                       <Tag className="w-3 h-3 mr-1" />
                       {tag}
@@ -492,18 +495,18 @@ export default function BountyDetail() {
 
               {/* Description */}
               <div className="prose prose-invert max-w-none">
-                <p className="text-gray-300 whitespace-pre-wrap">{bounty.description}</p>
+                <p className="text-body whitespace-pre-wrap">{bounty.description}</p>
               </div>
 
               {/* Content URL */}
               {bounty.contentUrl && (
-                <div className="mt-4 p-4 surface-1 rounded-lg">
-                  <p className="text-sm text-gray-400 mb-2">Content to Summarize:</p>
+                <div className="mt-4 p-4 bg-ink-raised rounded-xl">
+                  <p className="text-sm text-muted mb-2">Content to Summarize:</p>
                   <a
                     href={bounty.contentUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400 hover:from-purple-300 hover:to-fuchsia-300 flex items-center gap-2"
+                    className="text-accent-bright hover:text-primary flex items-center gap-2"
                   >
                     {bounty.contentUrl}
                     <ExternalLink className="w-4 h-4" />
@@ -513,10 +516,10 @@ export default function BountyDetail() {
 
               {/* Engagement */}
               {engagementData && (
-                <div className="flex items-center gap-6 mt-4 pt-4 border-t border-gray-700">
+                <div className="flex items-center gap-6 mt-4 pt-4 border-t border-ink-divider">
                   <button
                     onClick={() => trackLike.mutate()}
-                    className="flex items-center gap-2 text-gray-400 hover:text-pink-400 transition-colors"
+                    className="flex items-center gap-2 text-secondary hover:text-loss transition-colors"
                     data-testid="button-like-bounty"
                   >
                     <Heart className="w-4 h-4" />
@@ -524,39 +527,39 @@ export default function BountyDetail() {
                   </button>
                   <button
                     onClick={() => trackShare.mutate()}
-                    className="flex items-center gap-2 text-gray-400 hover:text-cyan-400 transition-colors"
+                    className="flex items-center gap-2 text-secondary hover:text-accent-bright transition-colors"
                     data-testid="button-share-bounty"
                   >
                     <Share2 className="w-4 h-4" />
                     <span>{engagementData.shares || 0}</span>
                   </button>
-                  <div className="flex items-center gap-2 text-gray-400">
+                  <div className="flex items-center gap-2 text-secondary">
                     <Eye className="w-4 h-4" />
                     <span>{engagementData.views || 0}</span>
                   </div>
                 </div>
               )}
-            </Card>
+            </Surface>
 
             {/* Submission Form (for claimers) */}
             {canSubmit && (
-              <Card className={`bg-slate-900/50 border-${tierInfo.color}-500/30 backdrop-blur-sm p-6`}>
+              <Surface className="p-6">
                 {/* Tier Badge */}
                 <div className="mb-6">
                   <Badge className={`border-${tierInfo.color}-500/50 bg-${tierInfo.color}-500/10 text-${tierInfo.color}-400 text-sm px-3 py-1`} data-testid="badge-engagement-tier">
                     <TierIcon className="w-4 h-4 mr-2" />
                     {tierInfo.title}
                   </Badge>
-                  <p className="text-sm text-gray-400 mt-2">{tierInfo.description}</p>
+                  <p className="text-sm text-secondary mt-2">{tierInfo.description}</p>
                 </div>
 
                 {/* Info Box */}
-                <div className={`mb-6 p-4 bg-${tierInfo.color}-500/10 border border-${tierInfo.color}-500/30 rounded-lg`} data-testid="info-tier-requirements">
+                <div className="mb-6 p-4 bg-ink-raised border border-ink-edge rounded-xl" data-testid="info-tier-requirements">
                   <div className="flex items-start gap-3">
-                    <Info className={`w-5 h-5 text-${tierInfo.color}-400 flex-shrink-0 mt-0.5`} />
+                    <Info className="w-5 h-5 text-accent-bright flex-shrink-0 mt-0.5" />
                     <div>
-                      <h3 className="font-semibold text-white mb-2">Requirements for {tierInfo.title}</h3>
-                      <ul className="text-sm text-gray-300 space-y-1">
+                      <h3 className="font-semibold text-primary mb-2">Requirements for {tierInfo.title}</h3>
+                      <ul className="text-sm text-body space-y-1">
                         <li>• Content URL (required)</li>
                         {(tier === 'analysis' || tier === 'prediction') && (
                           <li>• Answer all {questions.length} analysis questions</li>
@@ -569,20 +572,20 @@ export default function BountyDetail() {
                   </div>
                 </div>
 
-                <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                  <Upload className={`w-5 h-5 text-${tierInfo.color}-400`} />
+                <SectionTitle as="h2" className="mb-4 flex items-center gap-2 text-xl font-bold">
+                  <Upload className="w-5 h-5 text-accent-bright" />
                   Submit Your Work
-                </h2>
+                </SectionTitle>
 
                 <div className="space-y-6">
                   {/* Content URL */}
                   <div>
-                    <label className="text-sm text-gray-400 mb-2 block">Content URL *</label>
+                    <label className="text-sm text-muted mb-2 block">Content URL *</label>
                     <Input
                       value={submissionUrl}
                       onChange={(e) => setSubmissionUrl(e.target.value)}
                       placeholder="https://youtube.com/watch?v=... or link to your content"
-                      className={`bg-slate-800 border-${tierInfo.color}-500/30 text-white`}
+                      className="bg-ink-raised border-ink-edge text-primary rounded-xl"
                       data-testid="input-submission-url"
                     />
                   </div>
@@ -591,26 +594,26 @@ export default function BountyDetail() {
                   {(tier === 'analysis' || tier === 'prediction') && questions.length > 0 && (
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                          <Brain className="w-5 h-5 text-purple-400" />
+                        <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
+                          <Brain className="w-5 h-5 text-accent-bright" />
                           Analysis Questions
                         </h3>
-                        <Badge variant="outline" className="text-purple-400 border-purple-500/30" data-testid="text-question-counter">
+                        <Badge variant="outline" className="text-accent-bright border-accent-core/30 rounded-xl" data-testid="text-question-counter">
                           {answeredCount} of {questions.length} answered
                         </Badge>
                       </div>
                       {questions.map((q: any, index: number) => {
                         const answer = analysisAnswers.find(a => a.questionId === q.id)?.answer || '';
                         return (
-                          <div key={q.id || index} className="p-4 surface-1 rounded-lg border border-purple-500/20">
-                            <label className="text-sm font-medium text-gray-300 mb-2 block">
+                          <div key={q.id || index} className="p-4 bg-ink-raised rounded-xl border border-ink-edge">
+                            <label className="text-sm font-medium text-body mb-2 block">
                               Question {index + 1}: {q.question}
                             </label>
                             <Textarea
                               value={answer}
                               onChange={(e) => updateAnalysisAnswer(q.id || `q-${index}`, e.target.value)}
                               placeholder="Enter your detailed answer..."
-                              className="bg-slate-800 border-purple-500/30 text-white min-h-[100px]"
+                              className="bg-ink-surface border-ink-edge text-primary rounded-xl min-h-[100px]"
                               data-testid={`textarea-analysis-answer-${index}`}
                             />
                           </div>
@@ -623,25 +626,25 @@ export default function BountyDetail() {
                   {tier === 'prediction' && (
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                          <Target className="w-5 h-5 text-cyan-400" />
+                        <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
+                          <Target className="w-5 h-5 text-accent-bright" />
                           Your Predictions
                         </h3>
-                        <Badge variant="outline" className="text-cyan-400 border-cyan-500/30" data-testid="text-prediction-counter">
+                        <Badge variant="outline" className="text-accent-bright border-accent-core/30 rounded-xl" data-testid="text-prediction-counter">
                           {userPredictions.length} of 5 predictions
                         </Badge>
                       </div>
 
                       {/* Prediction List */}
                       {userPredictions.map((prediction, index) => (
-                        <Card key={prediction.id} className="surface-1 border-cyan-500/20 p-4" data-testid={`card-prediction-${index}`}>
+                        <Surface variant="raised" key={prediction.id} className="border border-ink-edge p-4" data-testid={`card-prediction-${index}`}>
                           <div className="flex items-start justify-between mb-3">
-                            <span className="text-sm font-medium text-cyan-400">Prediction {index + 1}</span>
+                            <span className="text-sm font-medium text-accent-bright">Prediction {index + 1}</span>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => removePrediction(prediction.id)}
-                              className="text-red-400 hover:text-red-300 h-6 w-6 p-0"
+                              className="text-loss hover:text-primary h-6 w-6 p-0"
                               data-testid={`button-delete-prediction-${index}`}
                             >
                               <Trash2 className="w-4 h-4" />
@@ -650,18 +653,18 @@ export default function BountyDetail() {
 
                           <div className="space-y-3">
                             <div>
-                              <label className="text-sm text-gray-400 mb-1 block">Question/Statement *</label>
+                              <label className="text-sm text-muted mb-1 block">Question/Statement *</label>
                               <Input
                                 value={prediction.question}
                                 onChange={(e) => updatePrediction(prediction.id, 'question', e.target.value)}
                                 placeholder="e.g., Will Bitcoin hit $100k by EOY?"
-                                className="bg-slate-800 border-cyan-500/30 text-white"
+                                className="bg-ink-surface border-ink-edge text-primary rounded-xl"
                                 data-testid={`input-prediction-question-${index}`}
                               />
                             </div>
 
                             <div>
-                              <label className="text-sm text-gray-400 mb-2 block">Your Stance *</label>
+                              <label className="text-sm text-muted mb-2 block">Your Stance *</label>
                               <RadioGroup
                                 value={prediction.prediction}
                                 onValueChange={(value: 'yes' | 'no') => updatePrediction(prediction.id, 'prediction', value)}
@@ -670,13 +673,13 @@ export default function BountyDetail() {
                               >
                                 <div className="flex items-center space-x-2">
                                   <RadioGroupItem value="yes" id={`${prediction.id}-yes`} />
-                                  <label htmlFor={`${prediction.id}-yes`} className="text-sm text-white cursor-pointer">
+                                  <label htmlFor={`${prediction.id}-yes`} className="text-sm text-primary cursor-pointer">
                                     YES
                                   </label>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                   <RadioGroupItem value="no" id={`${prediction.id}-no`} />
-                                  <label htmlFor={`${prediction.id}-no`} className="text-sm text-white cursor-pointer">
+                                  <label htmlFor={`${prediction.id}-no`} className="text-sm text-primary cursor-pointer">
                                     NO
                                   </label>
                                 </div>
@@ -684,7 +687,7 @@ export default function BountyDetail() {
                             </div>
 
                             <div>
-                              <label className="text-sm text-gray-400 mb-2 block">
+                              <label className="text-sm text-muted mb-2 block">
                                 Confidence: {prediction.confidence}%
                               </label>
                               <Slider
@@ -699,17 +702,17 @@ export default function BountyDetail() {
                             </div>
 
                             <div>
-                              <label className="text-sm text-gray-400 mb-1 block">Rationale (Optional)</label>
+                              <label className="text-sm text-muted mb-1 block">Rationale (Optional)</label>
                               <Textarea
                                 value={prediction.rationale}
                                 onChange={(e) => updatePrediction(prediction.id, 'rationale', e.target.value)}
                                 placeholder="Explain why you believe this..."
-                                className="bg-slate-800 border-cyan-500/30 text-white min-h-[80px]"
+                                className="bg-ink-surface border-ink-edge text-primary rounded-xl min-h-[80px]"
                                 data-testid={`textarea-prediction-rationale-${index}`}
                               />
                             </div>
                           </div>
-                        </Card>
+                        </Surface>
                       ))}
 
                       {/* Add Prediction Button */}
@@ -717,7 +720,7 @@ export default function BountyDetail() {
                         <Button
                           onClick={addPrediction}
                           variant="outline"
-                          className="w-full border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+                          className="w-full border-accent-core/30 text-accent-bright hover:bg-accent-core/10 rounded-xl"
                           data-testid="button-add-prediction"
                         >
                           <Plus className="w-4 h-4 mr-2" />
@@ -729,12 +732,12 @@ export default function BountyDetail() {
 
                   {/* Additional Notes */}
                   <div>
-                    <label className="text-sm text-gray-400 mb-2 block">Additional Notes (Optional)</label>
+                    <label className="text-sm text-muted mb-2 block">Additional Notes (Optional)</label>
                     <Textarea
                       value={submissionNotes}
                       onChange={(e) => setSubmissionNotes(e.target.value)}
                       placeholder="Any additional context or highlights..."
-                      className={`bg-slate-800 border-${tierInfo.color}-500/30 text-white min-h-[100px]`}
+                      className="bg-ink-surface border-ink-edge text-primary rounded-xl min-h-[100px]"
                       data-testid="textarea-submission-notes"
                     />
                   </div>
@@ -743,7 +746,7 @@ export default function BountyDetail() {
                   <Button
                     onClick={handleSubmit}
                     disabled={isSubmitting || !submissionUrl.trim()}
-                    className={`w-full bg-gradient-to-r from-${tierInfo.color}-500 to-${tierInfo.color === 'yellow' ? 'orange' : tierInfo.color}-600 hover:from-${tierInfo.color}-600 hover:to-${tierInfo.color === 'yellow' ? 'orange' : tierInfo.color}-700`}
+                    className="w-full grad-accent glow-accent rounded-xl"
                     data-testid="button-submit-work"
                   >
                     <CheckCircle className="w-5 h-5 mr-2" />
@@ -756,32 +759,32 @@ export default function BountyDetail() {
                       : 'Submit for Review'}
                   </Button>
                 </div>
-              </Card>
+              </Surface>
             )}
 
             {/* Review Interface (for creators) */}
             {canReview && (
-              <Card className="surface-2 border-purple-500/30 p-6">
-                <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                  <Award className="w-5 h-5 text-purple-400" />
+              <Surface className="p-6">
+                <SectionTitle as="h2" className="mb-4 flex items-center gap-2 text-xl font-bold">
+                  <Award className="w-5 h-5 text-accent-bright" />
                   Review Submission
-                </h2>
+                </SectionTitle>
                 <div className="space-y-4">
-                  <div className="p-4 surface-1 rounded-lg">
-                    <p className="text-sm text-gray-400 mb-2">Submission ID:</p>
+                  <div className="p-4 bg-ink-raised rounded-xl">
+                    <p className="text-sm text-muted mb-2">Submission ID:</p>
                     <Link href={`/summaries/${bounty.summaryId}`}>
-                      <a className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400 hover:from-purple-300 hover:to-fuchsia-300 flex items-center gap-2">
+                      <span className="text-accent-bright hover:text-primary flex items-center gap-2">
                         View Summary
                         <ExternalLink className="w-4 h-4" />
-                      </a>
+                      </span>
                     </Link>
                   </div>
                   {qualityData && (
-                    <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-                      <p className="text-sm text-gray-400 mb-2">AI Quality Score:</p>
-                      <p className="text-3xl font-bold text-purple-400">{qualityData.score}/100</p>
+                    <div className="p-4 bg-ink-raised border border-ink-edge rounded-xl">
+                      <p className="text-sm text-muted mb-2">AI Quality Score:</p>
+                      <p className="text-3xl font-bold text-accent-bright tabular">{qualityData.score}/100</p>
                       {qualityData.feedback && (
-                        <p className="text-sm text-gray-300 mt-2">{qualityData.feedback}</p>
+                        <p className="text-sm text-body mt-2">{qualityData.feedback}</p>
                       )}
                     </div>
                   )}
@@ -789,7 +792,7 @@ export default function BountyDetail() {
                     <Button
                       onClick={() => handleApprove.mutate()}
                       disabled={handleApprove.isPending}
-                      className="flex-1 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600"
+                      className="flex-1 grad-accent glow-accent rounded-xl"
                       data-testid="button-approve-submission"
                     >
                       <CheckCircle className="w-5 h-5 mr-2" />
@@ -797,66 +800,66 @@ export default function BountyDetail() {
                     </Button>
                   </div>
                 </div>
-              </Card>
+              </Surface>
             )}
 
             {/* Quality Score (for completed) */}
             {bounty.status === 'completed' && qualityData && (
-              <Card className="surface-2 border-purple-500/30 p-6">
-                <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-purple-400" />
+              <Surface className="p-6">
+                <SectionTitle as="h2" className="mb-4 flex items-center gap-2 text-xl font-bold">
+                  <TrendingUp className="w-5 h-5 text-accent-bright" />
                   Quality Analysis
-                </h2>
+                </SectionTitle>
                 <div className="text-center mb-6">
-                  <p className="text-5xl font-bold text-purple-400 mb-2">{qualityData.score}/100</p>
-                  <p className="text-gray-400">Overall Quality Score</p>
+                  <p className="text-5xl font-bold text-accent-bright mb-2 tabular">{qualityData.score}/100</p>
+                  <p className="text-secondary">Overall Quality Score</p>
                 </div>
                 {qualityData.breakdown && (
                   <div className="grid grid-cols-2 gap-4">
                     {Object.entries(qualityData.breakdown).map(([key, value]: [string, any]) => (
-                      <div key={key} className="p-3 bg-slate-800/50 rounded-lg">
-                        <p className="text-sm text-gray-400 capitalize">{key.replace(/_/g, ' ')}</p>
-                        <p className="text-lg font-semibold text-white">{value}/100</p>
+                      <div key={key} className="p-3 bg-ink-raised rounded-xl">
+                        <p className="text-sm text-muted capitalize">{key.replace(/_/g, ' ')}</p>
+                        <p className="text-lg font-semibold text-primary tabular">{value}/100</p>
                       </div>
                     ))}
                   </div>
                 )}
-              </Card>
+              </Surface>
             )}
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Reward Info */}
-            <Card className="surface-2 border-purple-500/30 p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Reward</h3>
+            <Surface className="p-6">
+              <SectionTitle as="h3" className="mb-4 text-lg font-semibold">Reward</SectionTitle>
               <div className="space-y-4">
-                <div className="p-4 bg-gradient-to-r from-purple-500/10 to-fuchsia-500/10 rounded-lg border border-purple-500/30">
+                <div className="p-4 bg-ink-raised rounded-xl border border-ink-edge">
                   <div className="flex items-center gap-3 mb-2">
-                    <Trophy className="w-6 h-6 text-purple-400" />
+                    <Trophy className="w-6 h-6 text-accent-bright" />
                     <div>
-                      <p className="text-sm text-gray-400">Base Reward</p>
-                      <p className="text-2xl font-bold text-white">{Number(bounty.reward || 0).toLocaleString()} STREAM</p>
+                      <p className="text-sm text-muted">Base Reward</p>
+                      <p className="text-2xl font-bold text-primary tabular">{Number(bounty.reward || 0).toLocaleString()} STREAM</p>
                     </div>
                   </div>
                 </div>
 
                 {(bounty.tipPool ?? 0) > 0 && (
-                  <div className="p-4 bg-fuchsia-500/10 rounded-lg border border-fuchsia-500/30">
+                  <div className="p-4 bg-ink-raised rounded-xl border border-ink-edge">
                     <div className="flex items-center gap-3">
-                      <DollarSign className="w-6 h-6 text-fuchsia-400" />
+                      <DollarSign className="w-6 h-6 text-accent-bright" />
                       <div>
-                        <p className="text-sm text-gray-400">Tip Pool</p>
-                        <p className="text-xl font-bold text-white">{Number(bounty.tipPool || 0).toLocaleString()} STREAM</p>
+                        <p className="text-sm text-muted">Tip Pool</p>
+                        <p className="text-xl font-bold text-primary tabular">{Number(bounty.tipPool || 0).toLocaleString()} STREAM</p>
                       </div>
                     </div>
                   </div>
                 )}
 
-                <div className="pt-4 border-t border-gray-700">
+                <div className="pt-4 border-t border-ink-divider">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-400">Total Reward:</span>
-                    <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400">
+                    <span className="text-secondary">Total Reward:</span>
+                    <span className="text-2xl font-bold text-accent-bright tabular">
                       {((bounty.reward || 0) + (bounty.tipPool || 0)).toLocaleString()} STREAM
                     </span>
                   </div>
@@ -864,22 +867,22 @@ export default function BountyDetail() {
 
                 {/* Add Tip */}
                 {isConnected && !isOwner && (
-                  <div className="pt-4 border-t border-gray-700">
-                    <p className="text-sm text-gray-400 mb-3">Add to tip pool:</p>
+                  <div className="pt-4 border-t border-ink-divider">
+                    <p className="text-sm text-muted mb-3">Add to tip pool:</p>
                     <div className="flex gap-2">
                       <Input
                         type="number"
                         value={tipAmount}
                         onChange={(e) => setTipAmount(e.target.value)}
                         placeholder="Amount"
-                        className="bg-slate-800 border-purple-500/30 text-white"
+                        className="bg-ink-raised border-ink-edge text-primary rounded-xl"
                         data-testid="input-tip-amount"
                       />
                       <Button
                         onClick={handleAddTip}
                         disabled={addTip.isPending || !tipAmount}
                         variant="outline"
-                        className="border-purple-500/50"
+                        className="border-accent-core/50 text-accent-bright rounded-xl"
                         data-testid="button-add-tip"
                       >
                         Tip
@@ -888,18 +891,18 @@ export default function BountyDetail() {
                   </div>
                 )}
               </div>
-            </Card>
+            </Surface>
 
             {/* Deadline & Details */}
-            <Card className="surface-2 border-purple-500/30 p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Details</h3>
+            <Surface className="p-6">
+              <SectionTitle as="h3" className="mb-4 text-lg font-semibold">Details</SectionTitle>
               <div className="space-y-3">
                 {bounty.deadline && (
                   <div className="flex items-center gap-3">
-                    <Clock className={`w-5 h-5 ${isExpired ? 'text-fuchsia-400' : 'text-purple-400'}`} />
+                    <Clock className={`w-5 h-5 ${isExpired ? 'text-warn' : 'text-accent-bright'}`} />
                     <div>
-                      <p className="text-sm text-gray-400">Deadline</p>
-                      <p className={`font-medium ${isExpired ? 'text-fuchsia-400' : 'text-white'}`}>
+                      <p className="text-sm text-secondary">Deadline</p>
+                      <p className={`font-medium ${isExpired ? 'text-warn' : 'text-primary'}`}>
                         {isExpired ? 'Expired' : formatDistanceToNow(new Date(bounty.deadline), { addSuffix: true })}
                       </p>
                     </div>
@@ -908,37 +911,37 @@ export default function BountyDetail() {
 
                 {bounty.difficulty && (
                   <div className="flex items-center gap-3">
-                    <AlertCircle className="w-5 h-5 text-purple-400" />
+                    <AlertCircle className="w-5 h-5 text-accent-bright" />
                     <div>
-                      <p className="text-sm text-gray-400">Difficulty</p>
-                      <p className="font-medium text-white capitalize">{bounty.difficulty}</p>
+                      <p className="text-sm text-secondary">Difficulty</p>
+                      <p className="font-medium text-primary capitalize">{bounty.difficulty}</p>
                     </div>
                   </div>
                 )}
 
                 {bounty.category && (
                   <div className="flex items-center gap-3">
-                    <Tag className="w-5 h-5 text-fuchsia-400" />
+                    <Tag className="w-5 h-5 text-warn" />
                     <div>
-                      <p className="text-sm text-gray-400">Category</p>
-                      <p className="font-medium text-white">{bounty.category}</p>
+                      <p className="text-sm text-secondary">Category</p>
+                      <p className="font-medium text-primary">{bounty.category}</p>
                     </div>
                   </div>
                 )}
 
                 {bounty.claimerWallet && (
                   <div className="flex items-center gap-3">
-                    <User className="w-5 h-5 text-cyan-400" />
+                    <User className="w-5 h-5 text-accent-bright" />
                     <div>
-                      <p className="text-sm text-gray-400">Claimed by</p>
-                      <p className="font-medium text-white font-mono text-sm">
+                      <p className="text-sm text-secondary">Claimed by</p>
+                      <p className="font-medium text-primary font-mono text-sm">
                         {bounty.claimerWallet.slice(0, 6)}...{bounty.claimerWallet.slice(-4)}
                       </p>
                     </div>
                   </div>
                 )}
               </div>
-            </Card>
+            </Surface>
 
             {/* AI-Suggested Markets (show when bounty is completed and summary has markets) */}
             {bounty.status === 'completed' && summaryData?.summary?.suggestedMarkets && summaryData.summary.suggestedMarkets.length > 0 && (
@@ -954,7 +957,7 @@ export default function BountyDetail() {
               <Button
                 onClick={handleClaim}
                 disabled={claimBounty.isPending}
-                className="w-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 text-lg py-6"
+                className="w-full grad-accent glow-accent rounded-xl text-lg py-6"
                 data-testid="button-claim-bounty"
               >
                 <Trophy className="w-5 h-5 mr-2" />
@@ -963,15 +966,15 @@ export default function BountyDetail() {
             )}
 
             {isClaimer && bounty.status === 'claimed' && (
-              <div className="p-4 bg-fuchsia-500/10 border border-fuchsia-500/30 rounded-lg">
-                <p className="text-fuchsia-400 text-sm font-medium">You've claimed this bounty!</p>
-                <p className="text-gray-400 text-xs mt-1">Submit your work using the form above.</p>
+              <div className="p-4 bg-ink-raised border border-ink-edge rounded-xl">
+                <p className="text-warn text-sm font-medium">You've claimed this bounty!</p>
+                <p className="text-secondary text-xs mt-1">Submit your work using the form above.</p>
               </div>
             )}
 
             {!isConnected && canClaim && (
-              <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-                <p className="text-purple-400 text-sm">Connect your wallet to claim this bounty</p>
+              <div className="p-4 bg-ink-raised border border-ink-edge rounded-xl">
+                <p className="text-accent-bright text-sm">Connect your wallet to claim this bounty</p>
               </div>
             )}
 

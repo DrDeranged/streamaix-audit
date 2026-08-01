@@ -4,6 +4,8 @@ import { useRoute, Link } from 'wouter';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
@@ -279,7 +281,7 @@ export default function SummaryView() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-ink-page flex items-center justify-center">
         <motion.div
           className="text-center"
           initial={{ opacity: 0 }}
@@ -290,10 +292,10 @@ export default function SummaryView() {
             transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
             className="mb-4"
           >
-            <Brain className="h-16 w-16 text-purple-400 mx-auto" />
+            <Brain className="h-16 w-16 text-accent-bright mx-auto" />
           </motion.div>
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-2">Loading AI Results</h2>
-          <p className="text-gray-400">Processing your content intelligence...</p>
+          <SectionTitle as="h2" className="mb-2">Loading AI Results</SectionTitle>
+          <p className="text-secondary">Processing your content intelligence...</p>
         </motion.div>
       </div>
     );
@@ -301,12 +303,12 @@ export default function SummaryView() {
 
   if (error || !summary) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-ink-page flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-4">Content Not Found</h2>
-          <p className="text-gray-400 mb-4">Summary ID: {summaryId}</p>
+          <SectionTitle as="h2" className="mb-4">Content Not Found</SectionTitle>
+          <p className="text-secondary mb-4">Summary ID: {summaryId}</p>
           <Link href="/#ai-processor">
-            <Button className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600">
+            <Button className="grad-accent glow-accent rounded-xl">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Dashboard
             </Button>
@@ -321,15 +323,15 @@ export default function SummaryView() {
 
   if (!canView) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-ink-page flex items-center justify-center">
         <div className="text-center">
-          <Globe className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-2">Private Summary</h2>
-          <p className="text-gray-300 mb-4">
+          <Globe className="h-12 w-12 text-accent-bright mx-auto mb-4" />
+          <SectionTitle as="h2" className="mb-2">Private Summary</SectionTitle>
+          <p className="text-body mb-4">
             This summary is private and can only be viewed by its creator.
           </p>
           <Link href="/dashboard">
-            <Button className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600">Go Home</Button>
+            <Button className="grad-accent glow-accent rounded-xl">Go Home</Button>
           </Link>
         </div>
       </div>
@@ -340,9 +342,9 @@ export default function SummaryView() {
   const isFailed = summary.processingStatus === 'failed';
 
   return (
-    <div className="min-h-screen bg-slate-900 text-gray-900 dark:text-white" style={{backgroundColor: '#0f172a', color: '#ffffff'}}>
+    <div className="min-h-screen bg-ink-page text-body">
       {/* Mobile-Optimized Navigation Header */}
-      <div className="border-b border-white/10 backdrop-blur-sm bg-slate-900/80 sticky top-0 z-50">
+      <div className="border-b border-ink-divider backdrop-blur-sm bg-ink-page/90 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-3 py-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -350,18 +352,18 @@ export default function SummaryView() {
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  className="text-white bg-white/5 border border-white/20 backdrop-blur-lg hover:bg-white/10 px-2 py-1.5"
+                  className="text-primary bg-ink-surface border border-ink-edge backdrop-blur-lg hover:bg-ink-raised px-2 py-1.5 rounded-xl"
                 >
                   <ArrowLeft className="h-4 w-4 sm:mr-2" />
                   <span className="hidden sm:inline">Back to Dashboard</span>
                 </Button>
               </Link>
               <div className="flex items-center gap-1.5">
-                <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-xs">
+                <Badge className="bg-gain/15 text-gain border-gain/30 text-xs">
                   <CheckCircle2 className="h-3 w-3 mr-1" />
                   Completed
                 </Badge>
-                <Badge variant="outline" className="border-purple-500/30 text-purple-300 text-xs hidden sm:inline-flex">
+                <Badge variant="outline" className="border-accent-core/30 text-accent-bright text-xs hidden sm:inline-flex">
                   {summary.accuracy || 0}% Accuracy
                 </Badge>
               </div>
@@ -371,7 +373,7 @@ export default function SummaryView() {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="border-purple-500/30 text-purple-300 hover:bg-purple-500/10 backdrop-blur-lg bg-purple-500/5 px-2 border"
+                className="border-accent-core/30 text-accent-bright hover:bg-accent-core/10 backdrop-blur-lg bg-accent-core/5 px-2 border rounded-xl"
                 onClick={() => shareMutation.mutate('farcaster')}
                 disabled={shareMutation.isPending}
                 data-testid="button-share-farcaster"
@@ -386,7 +388,7 @@ export default function SummaryView() {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5 px-2"
+                className="border-ink-edge text-primary hover:bg-ink-raised backdrop-blur-lg bg-ink-surface px-2 rounded-xl"
                 onClick={() => handleCopy(summary.summary || '', 'summary')}
               >
                 <Download className="h-4 w-4 sm:mr-2" />
@@ -405,14 +407,14 @@ export default function SummaryView() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 text-white leading-tight">
+          <SectionTitle as="h1" className="mb-3">
             {summary.title}
-          </h1>
+          </SectionTitle>
           
           {/* Compact Metadata Bar */}
-          <div className="flex flex-wrap items-center gap-2 mb-3 text-sm text-gray-300">
+          <div className="flex flex-wrap items-center gap-2 mb-3 text-sm text-secondary">
             <div className="flex items-center gap-1">
-              <Clock className="w-4 h-4 text-indigo-400" />
+              <Clock className="w-4 h-4 text-accent-bright" />
               <span>
                 {summary.originalDuration ? 
                   `${Math.floor(summary.originalDuration / 60)}:${(summary.originalDuration % 60).toString().padStart(2, '0')}` : 
@@ -421,17 +423,17 @@ export default function SummaryView() {
               </span>
             </div>
             <div className="flex items-center gap-1">
-              <Sparkles className="w-4 h-4 text-purple-400" />
+              <Sparkles className="w-4 h-4 text-accent-bright" />
               <span>{summary.platform}</span>
             </div>
             <div className="flex items-center gap-1">
-              <Zap className="w-4 h-4 text-cyan-400" />
+              <Zap className="w-4 h-4 text-accent-bright" />
               <span>{new Date(summary.createdAt).toLocaleDateString()}</span>
             </div>
             <Button 
               variant="outline" 
               size="sm"
-              className="border-white/20 text-white hover:bg-white/10 backdrop-blur-lg bg-white/5 px-3 py-1.5"
+              className="border-ink-edge text-primary hover:bg-ink-raised backdrop-blur-lg bg-ink-surface px-3 py-1.5 rounded-xl"
               asChild
             >
               <a href={summary.originalUrl} target="_blank" rel="noopener noreferrer">
@@ -457,23 +459,23 @@ export default function SummaryView() {
                 transition={{ duration: 0.5, delay: 0.3 }}
                 className="mb-4"
               >
-                <Card className="bg-gradient-to-br from-violet-900/30 via-purple-900/30 to-indigo-900/30 border-violet-500/30 backdrop-blur-sm overflow-hidden">
+                <Surface className="p-0 overflow-hidden">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-violet-500/20 rounded-lg">
-                          <Sparkles className="w-5 h-5 text-violet-300" />
+                        <div className="p-2 bg-accent-core/15 rounded-xl">
+                          <Sparkles className="w-5 h-5 text-accent-bright" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-bold text-violet-200">Trade on AI Predictions</h3>
-                          <p className="text-sm text-violet-300/70">AI extracted {summary.suggestedMarkets.length} tradeable prediction{summary.suggestedMarkets.length > 1 ? 's' : ''} from this content</p>
+                          <h3 className="text-lg font-bold text-primary">Trade on AI Predictions</h3>
+                          <p className="text-sm text-secondary">AI extracted {summary.suggestedMarkets.length} tradeable prediction{summary.suggestedMarkets.length > 1 ? 's' : ''} from this content</p>
                         </div>
                       </div>
                       <Link href="/markets">
                         <Button
                           variant="outline"
                           size="sm"
-                          className="border-violet-400/30 text-violet-300 hover:bg-violet-500/20"
+                           className="border-accent-core/30 text-accent-bright hover:bg-accent-core/10 rounded-xl"
                           data-testid="button-view-all-markets"
                         >
                           <TrendingUp className="w-4 h-4 mr-2" />
@@ -491,35 +493,35 @@ export default function SummaryView() {
                       />
                     </div>
                   </CardContent>
-                </Card>
+                </Surface>
               </motion.div>
             )}
 
             {/* Summary content */}
-            <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+            <Card className="bg-ink-raised border-ink-divider backdrop-blur-sm">
               <CardContent className="p-4">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 bg-slate-800/30 border border-slate-600/30 h-auto p-1 gap-1 rounded-lg backdrop-blur-sm">
-                    <TabsTrigger value="summary" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-indigo-500/20 data-[state=active]:border-blue-400/30 data-[state=active]:text-blue-200 hover:bg-white/5 transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-md border border-transparent">
+                  <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 bg-ink-raised border border-ink-edge h-auto p-1 gap-1 rounded-xl backdrop-blur-sm">
+                    <TabsTrigger value="summary" className="data-[state=active]:bg-accent-core data-[state=active]:text-primary data-[state=active]:border-accent-core hover:bg-ink-surface transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-xl border border-transparent">
                       Summary
                     </TabsTrigger>
-                    <TabsTrigger value="insights" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:border-purple-400/30 data-[state=active]:text-purple-200 hover:bg-white/5 transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-md border border-transparent">
+                    <TabsTrigger value="insights" className="data-[state=active]:bg-accent-core data-[state=active]:text-primary data-[state=active]:border-accent-core hover:bg-ink-surface transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-xl border border-transparent">
                       Insights
                     </TabsTrigger>
-                    <TabsTrigger value="markets" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500/20 data-[state=active]:to-purple-500/20 data-[state=active]:border-violet-400/30 data-[state=active]:text-violet-200 hover:bg-white/5 transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-md border border-transparent gap-1">
+                    <TabsTrigger value="markets" className="data-[state=active]:bg-accent-core data-[state=active]:text-primary data-[state=active]:border-accent-core hover:bg-ink-surface transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-xl border border-transparent gap-1">
                       <Sparkles className="w-3 h-3" />
                       Markets
                     </TabsTrigger>
-                    <TabsTrigger value="market" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500/20 data-[state=active]:to-emerald-500/20 data-[state=active]:border-green-400/30 data-[state=active]:text-green-200 hover:bg-white/5 transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-md border border-transparent col-span-2 sm:col-span-1">
+                    <TabsTrigger value="market" className="data-[state=active]:bg-accent-core data-[state=active]:text-primary data-[state=active]:border-accent-core hover:bg-ink-surface transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-xl border border-transparent col-span-2 sm:col-span-1">
                       Market Intel
                     </TabsTrigger>
-                    <TabsTrigger value="structure" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/20 data-[state=active]:to-orange-500/20 data-[state=active]:border-amber-400/30 data-[state=active]:text-amber-200 hover:bg-white/5 transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-md border border-transparent">
+                    <TabsTrigger value="structure" className="data-[state=active]:bg-accent-core data-[state=active]:text-primary data-[state=active]:border-accent-core hover:bg-ink-surface transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-xl border border-transparent">
                       Structure
                     </TabsTrigger>
-                    <TabsTrigger value="technical" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500/20 data-[state=active]:to-rose-500/20 data-[state=active]:border-red-400/30 data-[state=active]:text-red-200 hover:bg-white/5 transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-md border border-transparent">
+                    <TabsTrigger value="technical" className="data-[state=active]:bg-accent-core data-[state=active]:text-primary data-[state=active]:border-accent-core hover:bg-ink-surface transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-xl border border-transparent">
                       Technical
                     </TabsTrigger>
-                    <TabsTrigger value="notes" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-teal-500/20 data-[state=active]:border-cyan-400/30 data-[state=active]:text-cyan-200 hover:bg-white/5 transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-md border border-transparent gap-1">
+                    <TabsTrigger value="notes" className="data-[state=active]:bg-accent-core data-[state=active]:text-primary data-[state=active]:border-accent-core hover:bg-ink-surface transition-all text-xs sm:text-sm py-3 px-3 min-h-[48px] flex items-center justify-center rounded-xl border border-transparent gap-1">
                       <StickyNote className="w-3 h-3" />
                       Notes
                     </TabsTrigger>
@@ -528,46 +530,46 @@ export default function SummaryView() {
                   {/* SUMMARY TAB */}
                   <TabsContent value="summary" className="space-y-4 mt-4">
                     {/* Video Details Header */}
-                    <div className="bg-gradient-to-r from-slate-800/50 to-gray-800/50 rounded-xl p-4 border border-slate-600">
+                    <Surface variant="raised" className="p-4">
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                         <div>
-                          <div className="text-lg font-bold text-slate-300">
+                          <div className="tabular text-lg font-bold text-primary">
                             {summary.originalDuration ? `${Math.floor(summary.originalDuration / 60)}:${(summary.originalDuration % 60).toString().padStart(2, '0')}` : 'N/A'}
                           </div>
-                          <div className="text-xs text-muted-foreground">Duration</div>
+                          <div className="text-xs text-muted">Duration</div>
                         </div>
                         <div>
-                          <div className="text-lg font-bold text-slate-300">
+                          <div className="text-lg font-bold text-primary">
                             {summary.platform || 'Platform'}
                           </div>
-                          <div className="text-xs text-muted-foreground">Platform</div>
+                          <div className="text-xs text-muted">Platform</div>
                         </div>
                         <div>
-                          <div className="text-lg font-bold text-slate-300">
+                          <div className="text-lg font-bold text-primary">
                             {summary.tags?.[0] || 'General'}
                           </div>
-                          <div className="text-xs text-muted-foreground">Category</div>
+                          <div className="text-xs text-muted">Category</div>
                         </div>
                         <div>
-                          <div className="text-lg font-bold text-slate-300">
+                          <div className="text-lg font-bold text-primary">
                             {new Date(summary.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                           </div>
-                          <div className="text-xs text-muted-foreground">Published</div>
+                          <div className="text-xs text-muted">Published</div>
                         </div>
                       </div>
-                    </div>
+                    </Surface>
 
                     {/* Main AI Summary */}
-                    <div className="bg-gradient-to-r from-indigo-900/30 to-purple-900/30 rounded-xl p-6 border border-indigo-700">
-                      <h4 className="font-bold text-indigo-300 mb-4 flex items-center gap-2">
+                    <Surface className="p-6">
+                      <h4 className="font-bold text-accent-bright mb-4 flex items-center gap-2">
                         <Brain className="w-5 h-5" />
                         AI-Generated Summary
                       </h4>
                       
                       {/* Executive Summary */}
                       <div className="mb-6">
-                        <h5 className="text-lg font-semibold text-indigo-400 mb-3">Executive Summary</h5>
-                        <div className="text-gray-300 leading-relaxed">
+                        <h5 className="text-lg font-semibold text-accent-bright mb-3">Executive Summary</h5>
+                        <div className="text-body leading-relaxed">
                           <div dangerouslySetInnerHTML={{ __html: summary.executiveSummary || summary.summary || '' }} />
                         </div>
                       </div>
@@ -575,89 +577,89 @@ export default function SummaryView() {
                       {/* Blog Post Content */}
                       {summary.blogPost && summary.blogPost !== summary.executiveSummary && (
                         <div className="mb-6">
-                          <h5 className="text-lg font-semibold text-purple-400 mb-3">Blog Post Analysis</h5>
-                          <div className="text-gray-300 leading-relaxed bg-white/5 rounded-lg p-4">
+                          <h5 className="text-lg font-semibold text-accent-bright mb-3">Blog Post Analysis</h5>
+                          <div className="text-body leading-relaxed bg-ink-raised rounded-xl p-4">
                             <div dangerouslySetInnerHTML={{ __html: summary.blogPost }} />
                           </div>
                         </div>
                       )}
-                    </div>
+                    </Surface>
                   </TabsContent>
 
                   {/* INSIGHTS TAB */}
                   <TabsContent value="insights" className="space-y-4 mt-4">
                     {/* Key Insights */}
                     {((summary.keyInsights && summary.keyInsights.length > 0) || (summary.bulletPoints && summary.bulletPoints.length > 0)) && (
-                      <div className="bg-gradient-to-r from-blue-900/20 to-cyan-900/20 rounded-xl p-4 border border-blue-700">
-                        <h5 className="font-bold mb-3 text-blue-300 flex items-center gap-2">
+                      <Surface className="p-4">
+                        <h5 className="font-bold mb-3 text-accent-bright flex items-center gap-2">
                           <TrendingUp className="w-4 h-4" />
                           Key Insights
                         </h5>
                         <div className="space-y-2">
                           {summary.keyInsights && summary.keyInsights.map((insight: any, idx: number) => (
-                            <div key={idx} className="flex items-start gap-2 p-3 bg-white/5 rounded-md">
-                              <span className="font-medium text-blue-400 text-xs mt-0.5">•</span>
+                            <div key={idx} className="flex items-start gap-2 p-3 bg-ink-raised rounded-xl">
+                              <span className="font-medium text-accent-bright text-xs mt-0.5">•</span>
                               <div className="flex-1">
-                                <span className="text-sm text-gray-300">
+                                <span className="text-sm text-body">
                                   {typeof insight === 'object' ? insight.insight || insight.content : insight}
                                 </span>
                                 {typeof insight === 'object' && insight.importance && (
                                   <Badge variant="outline" className={`text-xs ml-2 ${
-                                    insight.importance === 'high' ? 'text-red-400 border-red-500/30' :
-                                    insight.importance === 'medium' ? 'text-yellow-400 border-yellow-500/30' :
-                                    'text-gray-400 border-gray-500/30'
+                                    insight.importance === 'high' ? 'text-loss border-loss/30' :
+                                    insight.importance === 'medium' ? 'text-warn border-warn/30' :
+                                    'text-secondary border-ink-edge'
                                   }`}>
                                     {insight.importance}
                                   </Badge>
                                 )}
                                 {typeof insight === 'object' && insight.timestamp && (
-                                  <span className="text-xs text-gray-500 ml-2">@{insight.timestamp}</span>
+                                  <span className="text-xs text-muted ml-2">@{insight.timestamp}</span>
                                 )}
                               </div>
                             </div>
                           ))}
                           {(!summary.keyInsights || summary.keyInsights.length === 0) && summary.bulletPoints && summary.bulletPoints.map((point: any, idx: number) => (
-                            <div key={idx} className="flex items-start gap-2 p-3 bg-white/5 rounded-md">
-                              <span className="font-medium text-blue-400 text-xs mt-0.5">•</span>
-                              <span className="text-sm text-gray-300">{point}</span>
+                            <div key={idx} className="flex items-start gap-2 p-3 bg-ink-raised rounded-xl">
+                              <span className="font-medium text-accent-bright text-xs mt-0.5">•</span>
+                              <span className="text-sm text-body">{point}</span>
                             </div>
                           ))}
                         </div>
-                      </div>
+                      </Surface>
                     )}
 
                     {/* Key Quotes */}
                     {summary.keyQuotes && summary.keyQuotes.length > 0 && (
-                      <div className="bg-gradient-to-r from-amber-900/20 to-orange-900/20 rounded-xl p-4 border border-amber-700">
-                        <h5 className="font-bold mb-3 text-amber-300 flex items-center gap-2">
+                      <Surface className="p-4">
+                        <h5 className="font-bold mb-3 text-warn flex items-center gap-2">
                           <MessageSquare className="w-4 h-4" />
                           Key Quotes
                         </h5>
                         <div className="space-y-3">
                           {summary.keyQuotes.map((quote: any, idx: number) => (
-                            <div key={idx} className="p-3 bg-white/5 rounded-md border-l-2 border-amber-400">
-                              <blockquote className="text-sm text-gray-300 italic mb-2">
+                            <div key={idx} className="p-3 bg-ink-raised rounded-xl border-l-2 border-warn">
+                              <blockquote className="text-sm text-body italic mb-2">
                                 "{quote.quote}"
                               </blockquote>
-                              <div className="flex items-center justify-between text-xs text-gray-400">
+                              <div className="flex items-center justify-between text-xs text-secondary">
                                 <span>— {quote.speaker}</span>
                                 <span>{quote.timestamp}</span>
                               </div>
                             </div>
                           ))}
                         </div>
-                      </div>
+                      </Surface>
                     )}
                   </TabsContent>
 
                   {/* PREDICTION MARKETS TAB */}
                   <TabsContent value="markets" className="space-y-4 mt-4">
-                    <div className="bg-gradient-to-br from-violet-900/20 via-purple-900/20 to-indigo-900/20 rounded-xl p-8 border border-violet-500/30 text-center">
-                      <div className="p-3 bg-violet-500/20 rounded-full w-fit mx-auto mb-4">
-                        <Sparkles className="w-8 h-8 text-violet-300" />
+                    <Surface className="p-8 text-center">
+                      <div className="p-3 bg-accent-core/15 rounded-xl w-fit mx-auto mb-4">
+                        <Sparkles className="w-8 h-8 text-accent-bright" />
                       </div>
-                      <h4 className="text-xl font-bold text-violet-200 mb-2">AI Predictions Displayed Above</h4>
-                      <p className="text-violet-300/70 mb-6">
+                      <h4 className="text-xl font-bold text-primary mb-2">AI Predictions Displayed Above</h4>
+                      <p className="text-secondary mb-6">
                         {summary.suggestedMarkets && summary.suggestedMarkets.length > 0 
                           ? `The AI found ${summary.suggestedMarkets.length} tradeable prediction${summary.suggestedMarkets.length > 1 ? 's' : ''} from this content. Scroll up to see them!`
                           : 'No AI-suggested markets available for this content. The AI analyzes content to find verifiable predictions.'
@@ -666,7 +668,7 @@ export default function SummaryView() {
                       {summary.suggestedMarkets && summary.suggestedMarkets.length > 0 && (
                         <Button
                           variant="outline"
-                          className="border-violet-400/30 text-violet-300 hover:bg-violet-500/20"
+                          className="border-accent-core/30 text-accent-bright hover:bg-accent-core/10 rounded-xl"
                           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                           data-testid="button-scroll-to-markets"
                         >
@@ -674,7 +676,7 @@ export default function SummaryView() {
                           Scroll to Markets
                         </Button>
                       )}
-                    </div>
+                    </Surface>
                     {/* Old MarketSuggestions component for extraction - keeping for now */}
                     {/* <MarketSuggestions 
                       summaryId={summaryId!}
@@ -698,14 +700,14 @@ export default function SummaryView() {
                   <TabsContent value="market" className="space-y-4 mt-4">
                     {/* Market Sentiment & Credibility */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                      <div className="text-center p-4 bg-gradient-to-br from-green-900/20 to-emerald-900/20 rounded-xl border border-green-700">
-                        <div className="text-2xl font-bold mb-1 text-green-400">
+                      <div className="text-center p-4 bg-ink-surface rounded-xl border border-gain/40">
+                        <div className="text-2xl font-bold mb-1 text-gain">
                           {summary.marketSentiment || 'BULLISH'}
                         </div>
                         <div className="text-xs text-muted-foreground">Market Sentiment</div>
                       </div>
-                      <div className="text-center p-4 bg-gradient-to-br from-purple-900/20 to-indigo-900/20 rounded-xl border border-purple-700">
-                        <div className="text-2xl font-bold text-purple-400 mb-1">
+                      <div className="text-center p-4 bg-ink-surface rounded-xl border border-accent-core/40">
+                        <div className="text-2xl font-bold text-accent-bright mb-1">
                           {summary.sourceCredibility || 'High'}
                         </div>
                         <div className="text-xs text-muted-foreground">Source Credibility</div>
@@ -714,8 +716,8 @@ export default function SummaryView() {
 
                     {/* Market Analysis */}
                     {summary.marketAnalysis && (
-                      <div className="bg-gradient-to-r from-orange-900/20 to-red-900/20 rounded-xl p-4 md:p-6 border border-orange-700 space-y-4">
-                        <h5 className="font-bold mb-3 text-orange-300 text-lg">Market Analysis</h5>
+                      <div className="bg-ink-surface rounded-xl p-4 md:p-6 border border-warn/40 space-y-4">
+                        <h5 className="font-bold mb-3 text-warn text-lg">Market Analysis</h5>
                         
                         {(() => {
                           try {
@@ -725,16 +727,16 @@ export default function SummaryView() {
                               <div className="space-y-6">
                                 {/* Key Insights from Bullet Points */}
                                 {analysis.bulletPoints && analysis.bulletPoints.length > 0 && (
-                                  <div className="bg-blue-900/20 rounded-lg p-4 border border-blue-700">
-                                    <h6 className="font-semibold text-blue-300 mb-3 flex items-center gap-2">
+                                  <div className="bg-ink-raised rounded-xl p-4 border border-accent-core/40">
+                                    <h6 className="font-semibold text-accent-bright mb-3 flex items-center gap-2">
                                       <Target className="w-4 h-4" />
                                       Key Strategic Insights
                                     </h6>
                                     <div className="space-y-3">
                                       {analysis.bulletPoints.slice(0, 6).map((point: string, idx: number) => (
-                                        <div key={idx} className="flex items-start gap-3 p-2 bg-gray-800/50 rounded-md">
-                                          <span className="font-medium text-blue-400 text-sm mt-1">•</span>
-                                          <span className="text-sm text-gray-300 leading-relaxed">{point}</span>
+                                        <div key={idx} className="flex items-start gap-3 p-2 bg-ink-raised rounded-xl">
+                                          <span className="font-medium text-accent-bright text-sm mt-1">•</span>
+                                          <span className="text-sm text-body leading-relaxed">{point}</span>
                                         </div>
                                       ))}
                                     </div>
@@ -743,25 +745,25 @@ export default function SummaryView() {
 
                                 {/* Market Trends */}
                                 {analysis.trends && analysis.trends.length > 0 && (
-                                  <div className="bg-emerald-900/20 rounded-lg p-4 border border-emerald-700">
-                                    <h6 className="font-semibold text-emerald-300 mb-3 flex items-center gap-2">
+                                  <div className="bg-ink-raised rounded-xl p-4 border border-gain/40">
+                                    <h6 className="font-semibold text-gain mb-3 flex items-center gap-2">
                                       <TrendingUp className="w-4 h-4" />
                                       Market Trends
                                     </h6>
                                     <div className="grid gap-3">
                                       {analysis.trends.slice(0, 4).map((trend: any, idx: number) => (
-                                        <div key={idx} className="p-3 bg-gray-800/50 rounded-md">
+                                        <div key={idx} className="p-3 bg-ink-raised rounded-xl">
                                           <div className="flex items-center justify-between mb-2">
-                                            <span className="font-medium text-sm text-emerald-300">{trend.trend}</span>
+                                            <span className="font-medium text-sm text-gain">{trend.trend}</span>
                                             <Badge variant="outline" className={`text-xs ${
-                                              trend.strength === 'strong' ? 'text-green-400 border-green-500/30' :
-                                              trend.strength === 'moderate' ? 'text-yellow-400 border-yellow-500/30' :
-                                              'text-gray-400 border-gray-500/30'
+                                              trend.strength === 'strong' ? 'text-gain border-gain/30' :
+                                              trend.strength === 'moderate' ? 'text-warn border-yellow-500/30' :
+                                              'text-secondary border-ink-edge'
                                             }`}>
                                               {trend.strength}
                                             </Badge>
                                           </div>
-                                          <p className="text-xs text-gray-400 leading-relaxed">{trend.evidence}</p>
+                                          <p className="text-xs text-secondary leading-relaxed">{trend.evidence}</p>
                                         </div>
                                       ))}
                                     </div>
@@ -772,7 +774,7 @@ export default function SummaryView() {
                           } catch (error) {
                             // Fallback to basic text display if JSON parsing fails
                             return (
-                              <div className="text-sm text-gray-300 leading-relaxed">
+                              <div className="text-sm text-body leading-relaxed">
                                 <p>{summary.marketAnalysis}</p>
                               </div>
                             );
@@ -791,8 +793,8 @@ export default function SummaryView() {
                         return summary.financialTrends && Array.isArray(summary.financialTrends) && summary.financialTrends.length > 0;
                       }
                     })() && (
-                      <div className="p-4 md:p-6 bg-cyan-900/10 rounded-lg border border-cyan-700 space-y-4">
-                        <h5 className="font-semibold mb-4 text-cyan-400 flex items-center gap-2 text-lg">
+                      <div className="p-4 md:p-6 bg-ink-raised rounded-xl border border-accent-core/40 space-y-4">
+                        <h5 className="font-semibold mb-4 text-accent-bright flex items-center gap-2 text-lg">
                           <BarChart3 className="w-5 h-5" />
                           Investment Opportunities
                         </h5>
@@ -805,22 +807,22 @@ export default function SummaryView() {
                               return summary.financialTrends || [];
                             }
                           })().map((financial: any, idx: number) => (
-                            <div key={idx} className="p-4 bg-gray-800/50 rounded-lg border-l-4 border-cyan-400">
+                            <div key={idx} className="p-4 bg-ink-raised rounded-xl border-l-4 border-cyan-400">
                               {/* Header with symbol and company */}
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
                                 <div className="flex flex-wrap items-center gap-2">
                                   <Badge variant="secondary" className="text-xs">
                                     {financial.category}
                                   </Badge>
-                                  <span className="font-mono text-lg font-bold text-cyan-400">
+                                  <span className="font-mono text-lg font-bold text-accent-bright">
                                     ${financial.symbol}
                                   </span>
-                                  <span className="text-sm font-medium text-gray-200">{financial.company}</span>
+                                  <span className="text-sm font-medium text-body">{financial.company}</span>
                                 </div>
                                 <Badge variant="outline" className={`text-sm px-3 py-1 ${
-                                  financial.impact === 'bullish' ? 'text-green-400 border-green-500/50 bg-green-900/20' :
-                                  financial.impact === 'bearish' ? 'text-red-400 border-red-500/50 bg-red-900/20' :
-                                  'text-gray-400 border-gray-500/50 bg-gray-900/20'
+                                  financial.impact === 'bullish' ? 'text-gain border-gain/40 bg-gain/15' :
+                                  financial.impact === 'bearish' ? 'text-loss border-red-500/50 bg-ink-raised' :
+                                  'text-secondary border-ink-edge bg-ink-surface'
                                 }`}>
                                   {financial.impact?.toUpperCase()}
                                 </Badge>
@@ -828,35 +830,35 @@ export default function SummaryView() {
                               
                               {/* Live Data */}
                               {financial.liveData && (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3 p-3 bg-gray-900/50 rounded-md">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3 p-3 bg-ink-surface rounded-xl">
                                   <div className="text-center sm:text-left">
-                                    <div className="text-lg font-bold text-cyan-400">
+                                    <div className="text-lg font-bold text-accent-bright">
                                       ${financial.liveData.price?.toLocaleString() || 'N/A'}
                                     </div>
-                                    <div className="text-xs text-gray-400">Price</div>
+                                    <div className="text-xs text-secondary">Price</div>
                                   </div>
                                   <div className="text-center sm:text-left">
                                     <div className={`text-lg font-bold whitespace-nowrap ${
-                                      financial.liveData.percentChange24h > 0 ? 'text-green-400' : 'text-red-400'
+                                      financial.liveData.percentChange24h > 0 ? 'text-gain' : 'text-loss'
                                     }`}>
                                       {financial.liveData.percentChange24h > 0 ? '+' : ''}{financial.liveData.percentChange24h?.toFixed(2) || 'N/A'}%
                                     </div>
-                                    <div className="text-xs text-gray-400">24h Change</div>
+                                    <div className="text-xs text-secondary">24h Change</div>
                                   </div>
                                   {financial.liveData.marketCap && (
                                     <div className="text-center">
-                                      <div className="text-sm font-semibold text-gray-300">
+                                      <div className="text-sm font-semibold text-body">
                                         ${(financial.liveData.marketCap / 1e9).toFixed(1)}B
                                       </div>
-                                      <div className="text-xs text-gray-400">Market Cap</div>
+                                      <div className="text-xs text-secondary">Market Cap</div>
                                     </div>
                                   )}
                                   {financial.liveData.volume24h && (
                                     <div className="text-center">
-                                      <div className="text-sm font-semibold text-gray-300">
+                                      <div className="text-sm font-semibold text-body">
                                         ${(financial.liveData.volume24h / 1e6).toFixed(1)}M
                                       </div>
-                                      <div className="text-xs text-gray-400">24h Volume</div>
+                                      <div className="text-xs text-secondary">24h Volume</div>
                                     </div>
                                   )}
                                 </div>
@@ -864,30 +866,30 @@ export default function SummaryView() {
                               
                               {/* Analysis */}
                               <div className="space-y-3">
-                                <div className="bg-gray-900/30 rounded-md p-3">
-                                  <h6 className="text-sm font-semibold text-cyan-300 mb-2">Market Relevance</h6>
-                                  <p className="text-sm text-gray-300 leading-relaxed">{financial.relevance}</p>
+                                <div className="bg-ink-surface rounded-xl p-3">
+                                  <h6 className="text-sm font-semibold text-accent-bright mb-2">Market Relevance</h6>
+                                  <p className="text-sm text-body leading-relaxed">{financial.relevance}</p>
                                 </div>
                                 
-                                <div className="bg-gray-900/30 rounded-md p-3">
-                                  <h6 className="text-sm font-semibold text-cyan-300 mb-2">Investment Thesis</h6>
-                                  <p className="text-sm text-gray-300 leading-relaxed">{financial.reasoning}</p>
+                                <div className="bg-ink-surface rounded-xl p-3">
+                                  <h6 className="text-sm font-semibold text-accent-bright mb-2">Investment Thesis</h6>
+                                  <p className="text-sm text-body leading-relaxed">{financial.reasoning}</p>
                                 </div>
                                 
                                 {/* Risk & Time Horizon */}
                                 <div className="flex flex-wrap gap-2 mt-3">
                                   {financial.timeHorizon && (
-                                    <Badge variant="outline" className="text-xs px-2 py-1 text-yellow-400 border-yellow-500/30 bg-yellow-900/10">
+                                    <Badge variant="outline" className="text-xs px-2 py-1 text-warn border-yellow-500/30 bg-ink-raised">
                                       {financial.timeHorizon}
                                     </Badge>
                                   )}
                                   {financial.riskLevel && (
-                                    <Badge variant="outline" className="text-xs px-2 py-1 text-orange-400 border-orange-500/30 bg-orange-900/10">
+                                    <Badge variant="outline" className="text-xs px-2 py-1 text-orange-400 border-orange-500/30 bg-ink-raised">
                                       Risk: {financial.riskLevel}
                                     </Badge>
                                   )}
                                   {financial.analystSource && (
-                                    <Badge variant="outline" className="text-xs px-2 py-1 text-purple-400 border-purple-500/30 bg-purple-900/10">
+                                    <Badge variant="outline" className="text-xs px-2 py-1 text-accent-bright border-purple-500/30 bg-ink-raised">
                                       Source: {financial.analystSource}
                                     </Badge>
                                   )}
@@ -903,8 +905,8 @@ export default function SummaryView() {
                   {/* STRUCTURE TAB */}
                   <TabsContent value="structure" className="space-y-4 mt-4">
                     {/* Chapters */}
-                    <div className="bg-gradient-to-r from-blue-900/20 to-indigo-900/20 rounded-xl p-4 border border-blue-700">
-                      <h5 className="font-bold mb-3 text-blue-300 flex items-center gap-2">
+                    <div className="bg-ink-surface rounded-xl p-4 border border-accent-core/40">
+                      <h5 className="font-bold mb-3 text-accent-bright flex items-center gap-2">
                         <Clock className="w-4 h-4" />
                         Content Structure ({summary.chapters?.length || 0} chapters)
                       </h5>
@@ -913,19 +915,19 @@ export default function SummaryView() {
                       {summary.chapters && summary.chapters.length > 0 ? (
                         <div className="space-y-3">
                           {summary.chapters.map((chapter: any, index: number) => (
-                            <div key={index} className="p-3 bg-white/5 rounded-md border-l-2 border-blue-400">
+                            <div key={index} className="p-3 bg-ink-raised rounded-xl border-l-2 border-blue-400">
                               <div className="flex items-center justify-between mb-2">
-                                <h4 className="font-semibold text-blue-300 flex items-center gap-2">
-                                  <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-xs">
+                                <h4 className="font-semibold text-accent-bright flex items-center gap-2">
+                                  <span className="w-6 h-6 bg-blue-500/20 rounded-xl flex items-center justify-center text-xs">
                                     {index + 1}
                                   </span>
                                   {chapter.title}
                                 </h4>
-                                <span className="text-xs text-gray-400 font-mono bg-black/20 px-2 py-1 rounded">
+                                <span className="text-xs text-secondary font-mono bg-ink-raised px-2 py-1 rounded">
                                   {chapter.startTime || '0:00'} - {chapter.endTime || '0:00'}
                                 </span>
                               </div>
-                              <p className="text-gray-300 text-sm leading-relaxed pl-8">
+                              <p className="text-body text-sm leading-relaxed pl-8">
                                 {chapter.summary || chapter.content || 'Chapter summary not available'}
                               </p>
                             </div>
@@ -933,9 +935,9 @@ export default function SummaryView() {
                         </div>
                       ) : (
                         <div className="text-center py-8">
-                          <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                          <h4 className="text-lg font-semibold text-gray-400 mb-2">No Chapter Structure Available</h4>
-                          <p className="text-gray-500 text-sm">
+                          <Clock className="h-12 w-12 text-secondary mx-auto mb-4" />
+                          <h4 className="text-lg font-semibold text-secondary mb-2">No Chapter Structure Available</h4>
+                          <p className="text-muted text-sm">
                             This content hasn't been broken down into chapters yet. Chapter detection is processed automatically during AI analysis.
                           </p>
                         </div>
@@ -943,24 +945,24 @@ export default function SummaryView() {
                     </div>
 
                     {/* Content Storyline & Narrative Arc */}
-                    <div className="bg-gradient-to-r from-violet-900/20 to-purple-900/20 rounded-xl p-5 border border-violet-700">
-                      <h5 className="font-bold mb-4 text-violet-300 flex items-center gap-2">
+                    <div className="bg-ink-surface rounded-xl p-5 border border-accent-core/40">
+                      <h5 className="font-bold mb-4 text-accent-bright flex items-center gap-2">
                         <MessageSquare className="w-4 h-4" />
                         Content Storyline & Narrative Arc
                       </h5>
                       <div className="grid md:grid-cols-3 gap-4">
-                        <div className="p-3 bg-white/5 rounded-lg">
-                          <div className="text-xs text-violet-400 font-medium mb-1">OPENING (0-25%)</div>
+                        <div className="p-3 bg-ink-raised rounded-xl">
+                          <div className="text-xs text-accent-bright font-medium mb-1">OPENING (0-25%)</div>
                           <h6 className="font-medium text-sm mb-1">Problem Statement</h6>
                           <p className="text-xs text-muted-foreground">Introduces current market challenges and sets context for discussion</p>
                         </div>
-                        <div className="p-3 bg-white/5 rounded-lg">
-                          <div className="text-xs text-violet-400 font-medium mb-1">DEVELOPMENT (25-75%)</div>
+                        <div className="p-3 bg-ink-raised rounded-xl">
+                          <div className="text-xs text-accent-bright font-medium mb-1">DEVELOPMENT (25-75%)</div>
                           <h6 className="font-medium text-sm mb-1">Solution Framework</h6>
                           <p className="text-xs text-muted-foreground">Explores strategies, presents data, and builds argument for proposed approach</p>
                         </div>
-                        <div className="p-3 bg-white/5 rounded-lg">
-                          <div className="text-xs text-violet-400 font-medium mb-1">CONCLUSION (75-100%)</div>
+                        <div className="p-3 bg-ink-raised rounded-xl">
+                          <div className="text-xs text-accent-bright font-medium mb-1">CONCLUSION (75-100%)</div>
                           <h6 className="font-medium text-sm mb-1">Action Items</h6>
                           <p className="text-xs text-muted-foreground">Summarizes key takeaways and provides clear next steps</p>
                         </div>
@@ -972,20 +974,20 @@ export default function SummaryView() {
                   <TabsContent value="technical" className="space-y-4 mt-4">
                     {/* Processing Stats */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      <div className="text-center p-3 bg-gradient-to-br from-indigo-900/40 to-indigo-800/40 rounded-xl border border-indigo-700">
-                        <div className="text-lg font-bold text-indigo-400 mb-1">
+                      <div className="text-center p-3 bg-ink-surface rounded-xl border border-accent-core/40">
+                        <div className="text-lg font-bold text-accent-bright mb-1">
                           {summary.originalDuration ? `${Math.floor(summary.originalDuration / 60)}min` : 'N/A'}
                         </div>
                         <div className="text-xs text-muted-foreground">Duration</div>
                       </div>
-                      <div className="text-center p-3 bg-gradient-to-br from-green-900/40 to-green-800/40 rounded-xl border border-green-700">
-                        <div className="text-lg font-bold text-green-400 mb-1">
+                      <div className="text-center p-3 bg-ink-surface rounded-xl border border-gain/40">
+                        <div className="text-lg font-bold text-gain mb-1">
                           {summary.accuracy || '0'}%
                         </div>
                         <div className="text-xs text-muted-foreground">AI Accuracy</div>
                       </div>
-                      <div className="text-center p-3 bg-gradient-to-br from-purple-900/40 to-purple-800/40 rounded-xl border border-purple-700">
-                        <div className="text-lg font-bold text-purple-400 mb-1">
+                      <div className="text-center p-3 bg-ink-surface rounded-xl border border-accent-core/40">
+                        <div className="text-lg font-bold text-accent-bright mb-1">
                           {(() => {
                             try {
                               if (Array.isArray(summary.keyInsights)) return summary.keyInsights.length;
@@ -996,8 +998,8 @@ export default function SummaryView() {
                         </div>
                         <div className="text-xs text-muted-foreground">Data Points</div>
                       </div>
-                      <div className="text-center p-3 bg-gradient-to-br from-blue-900/40 to-blue-800/40 rounded-xl border border-blue-700">
-                        <div className="text-lg font-bold text-blue-400 mb-1">
+                      <div className="text-center p-3 bg-ink-surface rounded-xl border border-accent-core/40">
+                        <div className="text-lg font-bold text-accent-bright mb-1">
                           Advanced
                         </div>
                         <div className="text-xs text-muted-foreground">AI Engine</div>
@@ -1005,8 +1007,8 @@ export default function SummaryView() {
                     </div>
 
                     {/* Performance Metrics */}
-                    <div className="bg-gradient-to-r from-gray-900/20 to-slate-900/20 rounded-xl p-4 border border-gray-700">
-                      <h5 className="font-bold mb-3 text-gray-300 flex items-center gap-2">
+                    <div className="bg-ink-surface rounded-xl p-4 border border-ink-edge">
+                      <h5 className="font-bold mb-3 text-body flex items-center gap-2">
                         <BarChart3 className="w-4 h-4" />
                         Processing Performance
                       </h5>
@@ -1014,52 +1016,52 @@ export default function SummaryView() {
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">Processing Speed:</span>
-                            <span className="font-semibold text-green-400">Real-time analysis</span>
+                            <span className="font-semibold text-gain">Real-time analysis</span>
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">Quality Score:</span>
-                            <span className="font-semibold text-blue-400">{summary.accuracy || 0}% accuracy</span>
+                            <span className="font-semibold text-accent-bright">{summary.accuracy || 0}% accuracy</span>
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">Status:</span>
-                            <span className="font-semibold text-purple-400">Completed</span>
+                            <span className="font-semibold text-accent-bright">Completed</span>
                           </div>
                         </div>
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">Content Type:</span>
-                            <span className="font-semibold text-cyan-400">{summary.platform}</span>
+                            <span className="font-semibold text-accent-bright">{summary.platform}</span>
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">Processed:</span>
-                            <span className="font-semibold text-pink-400">{new Date(summary.createdAt).toLocaleDateString()}</span>
+                            <span className="font-semibold text-accent-bright">{new Date(summary.createdAt).toLocaleDateString()}</span>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Decentralized Storage */}
-                    <div className="bg-gradient-to-r from-emerald-900/20 to-teal-900/20 rounded-xl p-4 border border-emerald-700">
-                      <h5 className="font-bold mb-3 text-emerald-300 flex items-center gap-2">
+                    <div className="bg-ink-surface rounded-xl p-4 border border-gain/40">
+                      <h5 className="font-bold mb-3 text-gain flex items-center gap-2">
                         <Database className="w-4 h-4" />
                         Decentralized Storage
                       </h5>
                       <div className="grid md:grid-cols-2 gap-4">
-                        <div className="p-3 bg-white/5 rounded-lg">
+                        <div className="p-3 bg-ink-raised rounded-xl">
                           <div className="flex items-center gap-2 mb-2">
-                            <Shield className="w-4 h-4 text-blue-400" />
+                            <Shield className="w-4 h-4 text-accent-bright" />
                             <span className="font-medium text-sm">IPFS Hash</span>
                           </div>
-                          <code className="text-xs font-mono text-blue-300 break-all">
+                          <code className="text-xs font-mono text-accent-bright break-all">
                             {summary.ipfsHash || 'QmX7Yz2kqGjmK9YcZ3pLrF5Bw8VnA1CqE4RtY6UdP2sOmN'}
                           </code>
                         </div>
-                        <div className="p-3 bg-white/5 rounded-lg">
+                        <div className="p-3 bg-ink-raised rounded-xl">
                           <div className="flex items-center gap-2 mb-2">
-                            <Star className="w-4 h-4 text-amber-400" />
+                            <Star className="w-4 h-4 text-warn" />
                             <span className="font-medium text-sm">Arweave ID</span>
                           </div>
-                          <code className="text-xs font-mono text-amber-300 break-all">
+                          <code className="text-xs font-mono text-warn break-all">
                             {summary.arweaveId || 'XZ9aBc8dEf7GhI2jKlM3nOpQ4rStU5vWx6YzA1bC7dE8fG'}
                           </code>
                         </div>
@@ -1072,9 +1074,9 @@ export default function SummaryView() {
                   <TabsContent value="notes" className="space-y-4 mt-4">
                     {!isAuthenticated ? (
                       <div className="text-center py-8">
-                        <StickyNote className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                        <h4 className="text-lg font-semibold text-gray-400 mb-2">Sign in to add notes</h4>
-                        <p className="text-gray-500 text-sm">
+                        <StickyNote className="h-12 w-12 text-secondary mx-auto mb-4" />
+                        <h4 className="text-lg font-semibold text-secondary mb-2">Sign in to add notes</h4>
+                        <p className="text-muted text-sm">
                           Personal notes allow you to save insights and thoughts about this content.
                         </p>
                       </div>
@@ -1083,36 +1085,36 @@ export default function SummaryView() {
                         {/* Existing Notes */}
                         {notes.length > 0 && (
                           <div className="space-y-3">
-                            <h5 className="font-bold text-cyan-400 flex items-center gap-2">
+                            <h5 className="font-bold text-accent-bright flex items-center gap-2">
                               <StickyNote className="w-4 h-4" />
                               My Notes ({notes.length})
                             </h5>
                             {notes.map((note: UserNote) => (
-                              <div key={note.id} className="bg-gradient-to-r from-slate-800/50 to-gray-800/50 rounded-xl p-4 border border-slate-600">
+                              <div key={note.id} className="bg-ink-surface rounded-xl p-4 border border-ink-edge">
                                 <div className="flex items-center justify-between mb-3">
                                   <div className="flex items-center gap-2">
                                     <Badge variant="outline" className={`text-xs ${
-                                      note.noteType === 'analysis' ? 'text-blue-400 border-blue-500/30' :
-                                      note.noteType === 'insight' ? 'text-purple-400 border-purple-500/30' :
-                                      'text-gray-400 border-gray-500/30'
+                                      note.noteType === 'analysis' ? 'text-accent-bright border-blue-500/30' :
+                                      note.noteType === 'insight' ? 'text-accent-bright border-purple-500/30' :
+                                      'text-secondary border-ink-edge'
                                     }`}>
                                       {note.noteType}
                                     </Badge>
                                     <Badge variant="outline" className={`text-xs ${
-                                      note.isPrivate ? 'text-amber-400 border-amber-500/30' : 'text-green-400 border-green-500/30'
+                                      note.isPrivate ? 'text-warn border-amber-500/30' : 'text-gain border-gain/30'
                                     }`}>
                                       {note.isPrivate ? '🔒 Private' : '🌐 Public'}
                                     </Badge>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs text-gray-400">
+                                    <span className="text-xs text-secondary">
                                       {new Date(note.createdAt).toLocaleDateString()}
                                     </span>
                                     <Button
                                       variant="ghost"
                                       size="sm"
                                       onClick={() => setEditingNoteId(note.id)}
-                                      className="text-gray-400 hover:text-blue-400 p-1"
+                                      className="text-secondary hover:text-accent-bright p-1"
                                     >
                                       <Edit3 className="h-3 w-3" />
                                     </Button>
@@ -1120,7 +1122,7 @@ export default function SummaryView() {
                                       variant="ghost"
                                       size="sm"
                                       onClick={() => deleteNoteMutation.mutate(note.id)}
-                                      className="text-gray-400 hover:text-red-400 p-1"
+                                      className="text-secondary hover:text-loss p-1"
                                     >
                                       <Trash2 className="h-3 w-3" />
                                     </Button>
@@ -1132,7 +1134,7 @@ export default function SummaryView() {
                                     <Textarea
                                       defaultValue={note.noteText}
                                       placeholder="Edit your note..."
-                                      className="bg-gray-900/50 border-gray-600 text-white resize-none"
+                                      className="bg-ink-surface border-ink-edge text-primary resize-none"
                                       rows={4}
                                       id={`edit-note-${note.id}`}
                                     />
@@ -1144,7 +1146,7 @@ export default function SummaryView() {
                                           updateNoteMutation.mutate({ id: note.id, noteText: textarea.value });
                                         }}
                                         disabled={updateNoteMutation.isPending}
-                                        className="bg-green-600 hover:bg-green-700"
+                                        className="bg-gain hover:bg-gain"
                                       >
                                         <Save className="h-3 w-3 mr-1" />
                                         Save
@@ -1153,7 +1155,7 @@ export default function SummaryView() {
                                         variant="outline"
                                         size="sm"
                                         onClick={() => setEditingNoteId(null)}
-                                        className="border-gray-600"
+                                        className="border-ink-edge"
                                       >
                                         <X className="h-3 w-3 mr-1" />
                                         Cancel
@@ -1161,7 +1163,7 @@ export default function SummaryView() {
                                     </div>
                                   </div>
                                 ) : (
-                                  <div className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
+                                  <div className="text-sm text-body leading-relaxed whitespace-pre-wrap">
                                     {note.noteText}
                                   </div>
                                 )}
@@ -1171,25 +1173,25 @@ export default function SummaryView() {
                         )}
 
                         {/* Add New Note Section */}
-                        <div className="bg-gradient-to-r from-indigo-900/20 to-purple-900/20 rounded-xl p-4 border border-indigo-700">
+                        <div className="bg-ink-surface rounded-xl p-4 border border-accent-core/40">
                           {!showNewNoteForm ? (
                             <Button
                               onClick={() => setShowNewNoteForm(true)}
-                              className="w-full bg-indigo-600 hover:bg-indigo-700"
+                              className="w-full bg-accent-core hover:bg-accent-deep"
                             >
                               <Plus className="h-4 w-4 mr-2" />
                               Add Note
                             </Button>
                           ) : (
                             <div className="space-y-4">
-                              <h5 className="font-bold text-indigo-300 flex items-center gap-2">
+                              <h5 className="font-bold text-accent-bright flex items-center gap-2">
                                 <Plus className="w-4 h-4" />
                                 Add New Note
                               </h5>
                               
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <Select value={newNoteType} onValueChange={(value: 'footnote' | 'analysis' | 'insight') => setNewNoteType(value)}>
-                                  <SelectTrigger className="bg-gray-900/50 border-gray-600">
+                                  <SelectTrigger className="bg-ink-surface border-ink-edge">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -1200,7 +1202,7 @@ export default function SummaryView() {
                                 </Select>
                                 
                                 <Select value={isPrivate ? 'private' : 'public'} onValueChange={(value) => setIsPrivate(value === 'private')}>
-                                  <SelectTrigger className="bg-gray-900/50 border-gray-600">
+                                  <SelectTrigger className="bg-ink-surface border-ink-edge">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -1214,7 +1216,7 @@ export default function SummaryView() {
                                 value={newNoteText}
                                 onChange={(e) => setNewNoteText(e.target.value)}
                                 placeholder="Write your note here..."
-                                className="bg-gray-900/50 border-gray-600 text-white resize-none"
+                                className="bg-ink-surface border-ink-edge text-primary resize-none"
                                 rows={4}
                               />
                               
@@ -1226,7 +1228,7 @@ export default function SummaryView() {
                                     isPrivate,
                                   })}
                                   disabled={!newNoteText.trim() || createNoteMutation.isPending}
-                                  className="bg-green-600 hover:bg-green-700"
+                                  className="bg-gain hover:bg-gain"
                                 >
                                   <Save className="h-4 w-4 mr-2" />
                                   {createNoteMutation.isPending ? 'Saving...' : 'Save Note'}
@@ -1237,7 +1239,7 @@ export default function SummaryView() {
                                     setShowNewNoteForm(false);
                                     setNewNoteText('');
                                   }}
-                                  className="border-gray-600"
+                                  className="border-ink-edge"
                                 >
                                   <X className="h-4 w-4 mr-2" />
                                   Cancel
@@ -1250,9 +1252,9 @@ export default function SummaryView() {
                         {/* Empty State */}
                         {notes.length === 0 && !showNewNoteForm && (
                           <div className="text-center py-8">
-                            <StickyNote className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                            <h4 className="text-lg font-semibold text-gray-400 mb-2">No notes yet</h4>
-                            <p className="text-gray-500 text-sm mb-4">
+                            <StickyNote className="h-12 w-12 text-secondary mx-auto mb-4" />
+                            <h4 className="text-lg font-semibold text-secondary mb-2">No notes yet</h4>
+                            <p className="text-muted text-sm mb-4">
                               Add personal notes to remember key insights and thoughts about this content.
                             </p>
                           </div>
@@ -1266,21 +1268,21 @@ export default function SummaryView() {
 
             {/* Thumbnail Info Card */}
             {summary.rawData?.thumbnail && (
-              <Card className="mt-4 bg-white/5 border-white/10 backdrop-blur-sm">
+              <Card className="mt-4 bg-ink-raised border-ink-divider backdrop-blur-sm">
                 <CardContent className="p-3">
                   <div className="flex gap-4">
                     <img 
                       src={summary.rawData.thumbnail}
                       alt={summary.title}
-                      className="w-20 h-16 sm:w-32 sm:h-24 object-cover rounded-lg flex-shrink-0"
+                      className="w-20 h-16 sm:w-32 sm:h-24 object-cover rounded-xl flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-gray-300 mb-2">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-body mb-2">
                         {summary.rawData?.channel && <span>📺 {summary.rawData.channel}</span>}
                         {summary.rawData?.views && <span>👁️ {summary.rawData.views} views</span>}
                       </div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
+                        <Badge className="bg-gain/15 text-gain border-gain/30 text-xs">
                           <CheckCircle2 className="h-3 w-3 mr-1" />
                           Completed
                         </Badge>

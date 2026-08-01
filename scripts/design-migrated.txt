@@ -45,3 +45,6 @@ client/src/pages/wallet-dashboard.tsx
 client/src/pages/knowledge-avatar-profile.tsx
 client/src/pages/create-summary.tsx
 client/src/pages/processing-results.tsx
+client/src/pages/bounty-detail.tsx
+client/src/pages/summary-view.tsx
+client/src/pages/newsletter-admin.tsx
