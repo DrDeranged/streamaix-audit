@@ -4,9 +4,10 @@ import { PageHeader } from '@/components/PageHeader';
 import { useLocation } from 'wouter';
 import { motion } from 'framer-motion';
 import { Trophy, Medal, Star, TrendingUp, Target, Zap, Award, Crown } from 'lucide-react';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 import {
   Select,
   SelectContent,
@@ -30,30 +31,30 @@ interface BountyHunter {
 }
 
 const LEVEL_COLORS = [
-  'text-gray-400',
-  'text-green-400',
-  'text-blue-400',
-  'text-purple-400',
-  'text-pink-400',
-  'text-orange-400',
-  'text-red-400',
-  'text-yellow-400',
-  'text-cyan-400',
-  'text-emerald-400',
+  'text-muted',
+  'text-gain',
+  'text-accent-bright',
+  'text-accent-bright',
+  'text-accent-bright',
+  'text-warn',
+  'text-loss',
+  'text-warn',
+  'text-accent-bright',
+  'text-gain',
 ];
 
 const BADGE_ICONS: Record<string, { icon: any; color: string }> = {
-  first_bounty: { icon: Star, color: 'text-yellow-400' },
-  speed_demon: { icon: Zap, color: 'text-orange-400' },
-  quality_master: { icon: Award, color: 'text-purple-400' },
-  streak_3: { icon: Target, color: 'text-cyan-400' },
-  streak_7: { icon: Target, color: 'text-blue-400' },
-  streak_30: { icon: Target, color: 'text-purple-400' },
-  specialist_crypto: { icon: TrendingUp, color: 'text-green-400' },
-  specialist_tech: { icon: TrendingUp, color: 'text-blue-400' },
-  specialist_business: { icon: TrendingUp, color: 'text-orange-400' },
-  century_club: { icon: Crown, color: 'text-yellow-400' },
-  consistent_hunter: { icon: Medal, color: 'text-pink-400' },
+  first_bounty: { icon: Star, color: 'text-warn' },
+  speed_demon: { icon: Zap, color: 'text-warn' },
+  quality_master: { icon: Award, color: 'text-accent-bright' },
+  streak_3: { icon: Target, color: 'text-accent-bright' },
+  streak_7: { icon: Target, color: 'text-accent-bright' },
+  streak_30: { icon: Target, color: 'text-accent-bright' },
+  specialist_crypto: { icon: TrendingUp, color: 'text-gain' },
+  specialist_tech: { icon: TrendingUp, color: 'text-accent-bright' },
+  specialist_business: { icon: TrendingUp, color: 'text-warn' },
+  century_club: { icon: Crown, color: 'text-warn' },
+  consistent_hunter: { icon: Medal, color: 'text-accent-bright' },
 };
 
 export default function Leaderboard() {
@@ -72,14 +73,14 @@ export default function Leaderboard() {
   const hunters = data?.hunters || [];
 
   const getPodiumPlace = (index: number) => {
-    if (index === 0) return { icon: Crown, color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/30' };
-    if (index === 1) return { icon: Medal, color: 'text-gray-300', bg: 'bg-gray-500/10', border: 'border-gray-500/30' };
-    if (index === 2) return { icon: Medal, color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/30' };
+    if (index === 0) return { icon: Crown, color: 'text-warn', bg: 'bg-accent-core/10', border: 'border-accent-core/30' };
+    if (index === 1) return { icon: Medal, color: 'text-secondary', bg: 'bg-ink-raised', border: 'border-ink-edge' };
+    if (index === 2) return { icon: Medal, color: 'text-warn', bg: 'bg-accent-core/10', border: 'border-accent-core/30' };
     return null;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 tnums-scope">
+    <div className="min-h-screen bg-ink-page tnums-scope">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <motion.div
@@ -94,7 +95,7 @@ export default function Leaderboard() {
             subtitle="Top performers earning rewards and building reputation."
             actions={
               <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[200px] bg-slate-900/50 border-purple-500/30" data-testid="select-sort">
+              <SelectTrigger className="w-[200px] rounded-xl border border-ink-edge bg-ink-surface text-body" data-testid="select-sort">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -123,34 +124,34 @@ export default function Leaderboard() {
                 transition={{ delay: 0.2 }}
                 className="md:order-1"
               >
-                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-fuchsia-500/30 backdrop-blur-sm p-6 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-fuchsia-500/10 rounded-full blur-3xl" />
+                <Surface className="relative overflow-hidden p-6">
+                  <div className="absolute right-0 top-0 h-32 w-32 rounded-xl bg-accent-core/10 blur-3xl" />
                   <div className="relative">
                     <div className="flex items-center justify-between mb-4">
-                      <Badge variant="outline" className="border-fuchsia-500/50 text-fuchsia-300">
+                      <Badge variant="outline" className="border-accent-core/50 text-accent-bright">
                         #2
                       </Badge>
-                      <Medal className="w-8 h-8 text-fuchsia-300" />
+                      <Medal className="h-8 w-8 text-accent-bright" />
                     </div>
                     <div className="text-center mb-4">
-                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-fuchsia-400 to-fuchsia-600 mx-auto mb-3 flex items-center justify-center text-2xl font-bold text-white">
+                      <div className="mx-auto mb-3 flex h-20 w-20 items-center justify-center rounded-xl bg-accent-deep text-2xl font-bold text-primary">
                         {hunters[1]?.userId || 'U'}
                       </div>
-                      <p className="text-xl font-bold text-white mb-1">User #{hunters[1]?.userId}</p>
-                      <p className="text-sm text-gray-400">Level {hunters[1]?.level}</p>
+                      <p className="mb-1 text-xl font-bold text-primary">User #{hunters[1]?.userId}</p>
+                      <p className="text-sm text-secondary">Level {hunters[1]?.level}</p>
                     </div>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Reputation:</span>
-                        <span className="text-white font-semibold numeric">{hunters[1]?.reputation.toLocaleString()}</span>
+                         <span className="text-secondary">Reputation:</span>
+                         <span className="numeric font-semibold tabular text-primary">{hunters[1]?.reputation.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Earnings:</span>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400">{formatPoints(Number(hunters[1]?.totalEarnings || 0))} STREAM</span>
+                         <span className="text-secondary">Earnings:</span>
+                         <span className="tabular text-gain">{formatPoints(Number(hunters[1]?.totalEarnings || 0))} STREAM</span>
                       </div>
                     </div>
                   </div>
-                </Card>
+                </Surface>
               </motion.div>
 
               {/* 1st Place */}
@@ -160,38 +161,38 @@ export default function Leaderboard() {
                 transition={{ delay: 0.15 }}
                 className="md:order-2 md:-mt-4"
               >
-                <Card className="bg-gradient-to-br from-purple-900/50 to-purple-800/30 border-purple-500/50 backdrop-blur-sm p-6 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl" />
+                <Surface className="relative overflow-hidden p-6">
+                  <div className="absolute right-0 top-0 h-40 w-40 rounded-xl bg-accent-core/20 blur-3xl" />
                   <div className="relative">
                     <div className="flex items-center justify-between mb-4">
-                      <Badge variant="outline" className="border-purple-500/50 text-purple-400">
+                      <Badge variant="outline" className="border-accent-core/50 text-accent-bright">
                         👑 Champion
                       </Badge>
-                      <Crown className="w-10 h-10 text-purple-400" />
+                      <Crown className="h-10 w-10 text-accent-bright" />
                     </div>
                     <div className="text-center mb-4">
-                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-400 via-fuchsia-400 to-cyan-400 mx-auto mb-3 flex items-center justify-center text-3xl font-bold text-white ring-4 ring-purple-400/50">
+                      <div className="mx-auto mb-3 flex h-24 w-24 items-center justify-center rounded-xl bg-accent-core text-3xl font-bold text-primary ring-4 ring-accent-core/50">
                         {hunters[0]?.userId || 'U'}
                       </div>
-                      <p className="text-2xl font-bold text-white mb-1">User #{hunters[0]?.userId}</p>
-                      <p className="text-sm text-purple-400">Level {hunters[0]?.level}</p>
+                      <p className="mb-1 text-2xl font-bold text-primary">User #{hunters[0]?.userId}</p>
+                      <p className="text-sm text-accent-bright">Level {hunters[0]?.level}</p>
                     </div>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-gray-300">Reputation:</span>
-                        <span className="text-white font-bold numeric">{hunters[0]?.reputation.toLocaleString()}</span>
+                         <span className="text-body">Reputation:</span>
+                         <span className="numeric font-bold tabular text-primary">{hunters[0]?.reputation.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-300">Earnings:</span>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 font-bold">{formatPoints(Number(hunters[0]?.totalEarnings || 0))} STREAM</span>
+                         <span className="text-body">Earnings:</span>
+                         <span className="tabular font-bold text-gain">{formatPoints(Number(hunters[0]?.totalEarnings || 0))} STREAM</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-300">Quality:</span>
-                        <span className="text-purple-400">{hunters[0]?.averageQuality?.toFixed(1) || 0}/100</span>
+                         <span className="text-body">Quality:</span>
+                         <span className="tabular text-accent-bright">{hunters[0]?.averageQuality?.toFixed(1) || 0}/100</span>
                       </div>
                     </div>
                   </div>
-                </Card>
+                </Surface>
               </motion.div>
 
               {/* 3rd Place */}
@@ -201,34 +202,34 @@ export default function Leaderboard() {
                 transition={{ delay: 0.25 }}
                 className="md:order-3"
               >
-                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-cyan-500/30 backdrop-blur-sm p-6 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl" />
+                <Surface className="relative overflow-hidden p-6">
+                  <div className="absolute right-0 top-0 h-32 w-32 rounded-xl bg-accent-core/10 blur-3xl" />
                   <div className="relative">
                     <div className="flex items-center justify-between mb-4">
-                      <Badge variant="outline" className="border-cyan-500/50 text-cyan-400">
+                      <Badge variant="outline" className="border-accent-core/50 text-accent-bright">
                         #3
                       </Badge>
-                      <Medal className="w-8 h-8 text-cyan-400" />
+                      <Medal className="h-8 w-8 text-accent-bright" />
                     </div>
                     <div className="text-center mb-4">
-                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-cyan-400 to-cyan-600 mx-auto mb-3 flex items-center justify-center text-2xl font-bold text-white">
+                      <div className="mx-auto mb-3 flex h-20 w-20 items-center justify-center rounded-xl bg-accent-deep text-2xl font-bold text-primary">
                         {hunters[2]?.userId || 'U'}
                       </div>
-                      <p className="text-xl font-bold text-white mb-1">User #{hunters[2]?.userId}</p>
-                      <p className="text-sm text-gray-400">Level {hunters[2]?.level}</p>
+                      <p className="mb-1 text-xl font-bold text-primary">User #{hunters[2]?.userId}</p>
+                      <p className="text-sm text-secondary">Level {hunters[2]?.level}</p>
                     </div>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Reputation:</span>
-                        <span className="text-white font-semibold numeric">{hunters[2]?.reputation.toLocaleString()}</span>
+                         <span className="text-secondary">Reputation:</span>
+                         <span className="numeric font-semibold tabular text-primary">{hunters[2]?.reputation.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Earnings:</span>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">{formatPoints(Number(hunters[2]?.totalEarnings || 0))} STREAM</span>
+                         <span className="text-secondary">Earnings:</span>
+                         <span className="tabular text-gain">{formatPoints(Number(hunters[2]?.totalEarnings || 0))} STREAM</span>
                       </div>
                     </div>
                   </div>
-                </Card>
+                </Surface>
               </motion.div>
             </div>
           </motion.div>
@@ -240,26 +241,24 @@ export default function Leaderboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-sm overflow-hidden">
-            <div className="p-6 border-b border-purple-500/20">
-              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400">
-                All Hunters
-              </h2>
+          <Surface className="overflow-hidden">
+            <div className="border-b border-ink-divider p-6">
+              <SectionTitle as="h2">All Hunters</SectionTitle>
             </div>
             
             {isLoading ? (
               <div className="p-6 space-y-4">
                 {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="h-20 bg-slate-800/50 rounded-lg animate-pulse" />
+                   <div key={i} className="h-20 animate-pulse rounded-xl bg-ink-raised" />
                 ))}
               </div>
             ) : hunters.length === 0 ? (
               <div className="p-12 text-center">
-                <Trophy className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-400">No hunters yet. Be the first to complete a bounty!</p>
+                 <Trophy className="mx-auto mb-4 h-16 w-16 text-muted" />
+                 <p className="text-secondary">No hunters yet. Be the first to complete a bounty!</p>
               </div>
             ) : (
-              <div className="divide-y divide-purple-500/10">
+               <div className="divide-y divide-ink-divider">
                 {hunters.map((hunter, index) => {
                   const podium = getPodiumPlace(index);
                   const levelColor = LEVEL_COLORS[Math.min(hunter.level - 1, LEVEL_COLORS.length - 1)];
@@ -270,12 +269,12 @@ export default function Leaderboard() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.3 + index * 0.03 }}
-                      className={`p-4 hover:bg-slate-800/30 transition-colors ${podium ? podium.bg : ''}`}
+                       className={`p-4 transition-colors hover:bg-ink-raised ${podium ? podium.bg : ''}`}
                       data-testid={`hunter-${hunter.id}`}
                     >
                       <div className="flex items-center gap-4">
                         {/* Rank */}
-                        <div className={`w-12 text-center ${podium ? podium.color : 'text-gray-400'}`}>
+                         <div className={`w-12 text-center ${podium ? podium.color : 'text-muted'}`}>
                           {podium ? (
                             <podium.icon className="w-6 h-6 mx-auto" />
                           ) : (
@@ -284,19 +283,19 @@ export default function Leaderboard() {
                         </div>
 
                         {/* Avatar */}
-                        <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center text-white font-bold ${podium ? 'ring-2 ' + podium.border : ''}`}>
+                         <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-accent-deep font-bold text-primary ${podium ? 'ring-2 ' + podium.border : ''}`}>
                           {hunter.userId}
                         </div>
 
                         {/* Info */}
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <p className="font-semibold text-white">User #{hunter.userId}</p>
+                             <p className="font-semibold text-primary">User #{hunter.userId}</p>
                             <Badge variant="outline" className={`text-xs ${levelColor}`}>
                               Level {hunter.level}
                             </Badge>
                             {hunter.currentStreak > 0 && (
-                              <Badge variant="outline" className="text-xs text-fuchsia-400 border-fuchsia-500/50">
+                               <Badge variant="outline" className="border-accent-core/50 text-xs text-accent-bright">
                                 🔥 {hunter.currentStreak} day streak
                               </Badge>
                             )}
@@ -315,7 +314,7 @@ export default function Leaderboard() {
                               );
                             })}
                             {hunter.badges?.length > 5 && (
-                              <span className="text-xs text-gray-500">+{hunter.badges.length - 5}</span>
+                               <span className="text-xs text-muted">+{hunter.badges.length - 5}</span>
                             )}
                           </div>
                         </div>
@@ -323,20 +322,20 @@ export default function Leaderboard() {
                         {/* Stats */}
                         <div className="hidden md:flex items-center gap-6 text-sm">
                           <div className="text-center">
-                            <p className="text-gray-400 text-xs mb-1">Reputation</p>
-                            <p className="font-bold text-purple-400 numeric">{hunter.reputation.toLocaleString()}</p>
+                             <p className="mb-1 text-xs text-muted">Reputation</p>
+                             <p className="numeric tabular font-bold text-accent-bright">{hunter.reputation.toLocaleString()}</p>
                           </div>
                           <div className="text-center">
-                            <p className="text-gray-400 text-xs mb-1">Earnings</p>
-                            <p className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400">{formatPoints(Number(hunter.totalEarnings || 0))} STREAM</p>
+                             <p className="mb-1 text-xs text-muted">Earnings</p>
+                             <p className="tabular font-bold text-gain">{formatPoints(Number(hunter.totalEarnings || 0))} STREAM</p>
                           </div>
                           <div className="text-center">
-                            <p className="text-gray-400 text-xs mb-1">Completed</p>
-                            <p className="font-bold text-cyan-400">{hunter.bountiesCompleted}</p>
+                             <p className="mb-1 text-xs text-muted">Completed</p>
+                             <p className="tabular font-bold text-accent-bright">{hunter.bountiesCompleted}</p>
                           </div>
                           <div className="text-center">
-                            <p className="text-gray-400 text-xs mb-1">Quality</p>
-                            <p className="font-bold text-fuchsia-400">{hunter.averageQuality?.toFixed(1) || 0}</p>
+                             <p className="mb-1 text-xs text-muted">Quality</p>
+                             <p className="tabular font-bold text-accent-bright">{hunter.averageQuality?.toFixed(1) || 0}</p>
                           </div>
                         </div>
 
@@ -344,7 +343,7 @@ export default function Leaderboard() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="border-purple-500/30 hover:bg-purple-500/10"
+                           className="rounded-xl border border-ink-edge text-body hover:bg-ink-raised"
                           onClick={() => setLocation(`/hunter/${hunter.id}`)}
                           data-testid={`button-view-profile-${hunter.id}`}
                         >
@@ -356,7 +355,7 @@ export default function Leaderboard() {
                 })}
               </div>
             )}
-          </Card>
+          </Surface>
         </motion.div>
       </div>
     </div>

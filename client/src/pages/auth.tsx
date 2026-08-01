@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { Separator } from '@/components/ui/separator';
 import { useAuth, useLogin, useRegister, useWalletLogin, useTwitterLogin } from '@/hooks/useAuth';
 import { WalletConnector } from '@/components/wallet/WalletConnector';
 import { Loader2, Wallet, Mail, User, Lock, Shield, ArrowLeft } from 'lucide-react';
 import { FaTwitter } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
@@ -71,11 +71,11 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-950 via-fuchsia-950 to-indigo-950 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Vibrant animated background orbs */}
-      <div className="absolute inset-0 opacity-40">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-purple-500 via-fuchsia-500 to-pink-500 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-500 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+    <div className="min-h-[100dvh] bg-ink-page flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Quiet atmospheric accents keep the auth surface grounded in the ledger palette. */}
+      <div className="absolute inset-0 pointer-events-none opacity-20">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent-core/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent-deep/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
       <div className="relative z-10 w-full flex items-center justify-center p-4">
       <motion.div
@@ -87,7 +87,7 @@ export default function AuthPage() {
         {/* Back to Home Button */}
         <Button
           variant="outline"
-          className="mb-6 bg-white/10 border-white/20 hover:bg-white/20 text-white"
+           className="mb-6 rounded-xl border border-ink-edge bg-ink-surface text-body hover:bg-ink-raised hover:text-primary"
           onClick={() => setLocation('/')}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -95,26 +95,26 @@ export default function AuthPage() {
         </Button>
 
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
-            StreamAiX
-          </h1>
-          <p className="text-slate-400 mt-2">Join the future of content curation</p>
+           <h1 className="font-display text-3xl text-primary">
+             StreamAiX
+           </h1>
+           <p className="text-secondary mt-2">Join the future of content curation</p>
         </div>
 
-        <Card className="backdrop-blur-lg bg-white/10 border-white/20 shadow-2xl">
-          <CardHeader>
-            <CardTitle className="text-gray-900 dark:text-white">Get Started</CardTitle>
-            <CardDescription className="text-slate-300">
+         <Surface className="p-0 shadow-2xl">
+           <div className="p-6 pb-3">
+             <SectionTitle as="h2">Get Started</SectionTitle>
+             <p className="mt-2 text-sm text-secondary">
               Sign in to your account or create a new one
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+             </p>
+           </div>
+           <div className="p-6 pt-3">
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-white/10">
-                <TabsTrigger value="login" className="data-[state=active]:bg-white/20">
+               <TabsList className="grid w-full grid-cols-2 rounded-xl border border-ink-edge bg-ink-raised p-1">
+                 <TabsTrigger value="login" className="rounded-xl text-secondary data-[state=active]:bg-accent-core data-[state=active]:text-white data-[state=active]:glow-accent">
                   Sign In
                 </TabsTrigger>
-                <TabsTrigger value="register" className="data-[state=active]:bg-white/20">
+                 <TabsTrigger value="register" className="rounded-xl text-secondary data-[state=active]:bg-accent-core data-[state=active]:text-white data-[state=active]:glow-accent">
                   Sign Up
                 </TabsTrigger>
               </TabsList>
@@ -122,7 +122,7 @@ export default function AuthPage() {
               <TabsContent value="login" className="space-y-4">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-username" className="text-gray-900 dark:text-white">
+                     <Label htmlFor="login-username" className="text-body">
                       <User className="w-4 h-4 inline mr-2" />
                       Username
                     </Label>
@@ -133,11 +133,11 @@ export default function AuthPage() {
                       value={loginData.username}
                       onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
                       required
-                      className="bg-white/10 border-white/20 text-gray-900 dark:text-white placeholder:text-slate-400"
+                       className="rounded-xl border border-ink-edge bg-ink-raised text-primary placeholder:text-muted"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="login-password" className="text-gray-900 dark:text-white">
+                     <Label htmlFor="login-password" className="text-body">
                       <Lock className="w-4 h-4 inline mr-2" />
                       Password
                     </Label>
@@ -148,12 +148,12 @@ export default function AuthPage() {
                       value={loginData.password}
                       onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                       required
-                      className="bg-white/10 border-white/20 text-gray-900 dark:text-white placeholder:text-slate-400"
+                       className="rounded-xl border border-ink-edge bg-ink-raised text-primary placeholder:text-muted"
                     />
                   </div>
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600"
+                     className="w-full rounded-xl grad-accent text-primary glow-accent hover:bg-accent-deep"
                     disabled={loginMutation.isPending}
                   >
                     {loginMutation.isPending ? (
@@ -165,10 +165,10 @@ export default function AuthPage() {
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-white/20" />
+                     <span className="w-full border-t border-ink-divider" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-slate-900 px-2 text-slate-400">Or continue with</span>
+                     <span className="bg-ink-surface px-2 text-muted">Or continue with</span>
                   </div>
                 </div>
 
@@ -176,7 +176,7 @@ export default function AuthPage() {
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full bg-[#1da1f2]/10 border-[#1da1f2]/20 hover:bg-[#1da1f2]/20 text-white"
+                     className="w-full rounded-xl border border-ink-edge bg-ink-raised text-body hover:bg-accent-core/10 hover:text-primary"
                     onClick={initiateTwitterLogin}
                   >
                     <FaTwitter className="w-4 h-4 mr-2" />
@@ -189,8 +189,8 @@ export default function AuthPage() {
                     showNetwork={false}
                   >
                     <div className="text-center">
-                      <Shield className="h-8 w-8 text-purple-400 mx-auto mb-2" />
-                      <p className="text-sm text-gray-300">
+                       <Shield className="h-8 w-8 text-accent-bright mx-auto mb-2" />
+                       <p className="text-sm text-body">
                         Connect your Web3 wallet to access premium features and earn rewards
                       </p>
                     </div>
@@ -202,7 +202,7 @@ export default function AuthPage() {
                 <form onSubmit={handleRegister} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="register-username" className="text-gray-900 dark:text-white">
+                       <Label htmlFor="register-username" className="text-body">
                         <User className="w-4 h-4 inline mr-2" />
                         Username
                       </Label>
@@ -213,11 +213,11 @@ export default function AuthPage() {
                         value={registerData.username}
                         onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
                         required
-                        className="bg-white/10 border-white/20 text-gray-900 dark:text-white placeholder:text-slate-400"
+                         className="rounded-xl border border-ink-edge bg-ink-raised text-primary placeholder:text-muted"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="register-email" className="text-gray-900 dark:text-white">
+                       <Label htmlFor="register-email" className="text-body">
                         <Mail className="w-4 h-4 inline mr-2" />
                         Email
                       </Label>
@@ -227,14 +227,14 @@ export default function AuthPage() {
                         placeholder="your@email.com"
                         value={registerData.email}
                         onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                        className="bg-white/10 border-white/20 text-gray-900 dark:text-white placeholder:text-slate-400"
+                         className="rounded-xl border border-ink-edge bg-ink-raised text-primary placeholder:text-muted"
                       />
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="register-password" className="text-gray-900 dark:text-white">
+                       <Label htmlFor="register-password" className="text-body">
                         <Lock className="w-4 h-4 inline mr-2" />
                         Password
                       </Label>
@@ -245,11 +245,11 @@ export default function AuthPage() {
                         value={registerData.password}
                         onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
                         required
-                        className="bg-white/10 border-white/20 text-gray-900 dark:text-white placeholder:text-slate-400"
+                         className="rounded-xl border border-ink-edge bg-ink-raised text-primary placeholder:text-muted"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="register-confirm-password" className="text-gray-900 dark:text-white">
+                       <Label htmlFor="register-confirm-password" className="text-body">
                         <Lock className="w-4 h-4 inline mr-2" />
                         Confirm
                       </Label>
@@ -260,13 +260,13 @@ export default function AuthPage() {
                         value={registerData.confirmPassword}
                         onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
                         required
-                        className="bg-white/10 border-white/20 text-gray-900 dark:text-white placeholder:text-slate-400"
+                         className="rounded-xl border border-ink-edge bg-ink-raised text-primary placeholder:text-muted"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="register-bio" className="text-gray-900 dark:text-white">
+                     <Label htmlFor="register-bio" className="text-body">
                       Bio (Optional)
                     </Label>
                     <Textarea
@@ -274,14 +274,14 @@ export default function AuthPage() {
                       placeholder="Tell us about yourself..."
                       value={registerData.bio}
                       onChange={(e) => setRegisterData({ ...registerData, bio: e.target.value })}
-                      className="bg-white/10 border-white/20 text-gray-900 dark:text-white placeholder:text-slate-400 resize-none"
+                       className="rounded-xl border border-ink-edge bg-ink-raised text-primary placeholder:text-muted resize-none"
                       rows={3}
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="register-wallet" className="text-gray-900 dark:text-white">
+                       <Label htmlFor="register-wallet" className="text-body">
                         <Wallet className="w-4 h-4 inline mr-2" />
                         Wallet (Optional)
                       </Label>
@@ -291,11 +291,11 @@ export default function AuthPage() {
                         placeholder="0x..."
                         value={registerData.walletAddress}
                         onChange={(e) => setRegisterData({ ...registerData, walletAddress: e.target.value })}
-                        className="bg-white/10 border-white/20 text-gray-900 dark:text-white placeholder:text-slate-400"
+                         className="rounded-xl border border-ink-edge bg-ink-raised text-primary placeholder:text-muted"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="register-ens" className="text-gray-900 dark:text-white">
+                       <Label htmlFor="register-ens" className="text-body">
                         ENS Name (Optional)
                       </Label>
                       <Input
@@ -304,14 +304,14 @@ export default function AuthPage() {
                         placeholder="yourname.eth"
                         value={registerData.ensName}
                         onChange={(e) => setRegisterData({ ...registerData, ensName: e.target.value })}
-                        className="bg-white/10 border-white/20 text-gray-900 dark:text-white placeholder:text-slate-400"
+                         className="rounded-xl border border-ink-edge bg-ink-raised text-primary placeholder:text-muted"
                       />
                     </div>
                   </div>
 
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600"
+                     className="w-full rounded-xl grad-accent text-primary glow-accent hover:bg-accent-deep"
                     disabled={registerMutation.isPending}
                   >
                     {registerMutation.isPending ? (
@@ -323,10 +323,10 @@ export default function AuthPage() {
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-white/20" />
+                     <span className="w-full border-t border-ink-divider" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-slate-900 px-2 text-slate-400">Or continue with</span>
+                     <span className="bg-ink-surface px-2 text-muted">Or continue with</span>
                   </div>
                 </div>
 
@@ -334,7 +334,7 @@ export default function AuthPage() {
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full bg-[#1da1f2]/10 border-[#1da1f2]/20 hover:bg-[#1da1f2]/20 text-white"
+                     className="w-full rounded-xl border border-ink-edge bg-ink-raised text-body hover:bg-accent-core/10 hover:text-primary"
                     onClick={initiateTwitterLogin}
                   >
                     <FaTwitter className="w-4 h-4 mr-2" />
@@ -347,8 +347,8 @@ export default function AuthPage() {
                     showNetwork={false}
                   >
                     <div className="text-center">
-                      <Shield className="h-8 w-8 text-purple-400 mx-auto mb-2" />
-                      <p className="text-sm text-gray-300">
+                       <Shield className="h-8 w-8 text-accent-bright mx-auto mb-2" />
+                       <p className="text-sm text-body">
                         Connect your Web3 wallet to access premium features and earn rewards
                       </p>
                     </div>
@@ -356,8 +356,8 @@ export default function AuthPage() {
                 </div>
               </TabsContent>
             </Tabs>
-          </CardContent>
-        </Card>
+           </div>
+         </Surface>
       </motion.div>
       </div>
     </div>

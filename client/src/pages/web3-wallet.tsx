@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import Surface from '@/components/ds/Surface';
+import StatValue from '@/components/ds/StatValue';
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { WalletConnector } from '@/components/wallet/WalletConnector';
@@ -23,14 +24,12 @@ import {
   Zap,
   Shield,
   Globe,
-  Settings,
-  Copy,
   Eye
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Web3WalletPage() {
-  const { wallet, isConnected, formatAddress, formatBalance, getNetworkInfo } = useWeb3();
+  const { wallet, isConnected, formatBalance, getNetworkInfo } = useWeb3();
   const { isAuthenticated } = useAuth();
   const [sendAmount, setSendAmount] = useState('');
   const [sendAddress, setSendAddress] = useState('');
@@ -52,26 +51,26 @@ export default function Web3WalletPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
+      <div className="min-h-[100dvh] bg-ink-page">
         <Navigation />
         <div className="max-w-2xl mx-auto p-6 flex items-center justify-center min-h-[80vh]">
-          <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
+          <Surface className="rounded-xl">
             <CardContent className="p-8 text-center">
-              <Wallet className="h-16 w-16 text-purple-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Authentication Required</h2>
-              <p className="text-gray-300 mb-6">Please sign in to access your Web3 wallet features.</p>
-              <Button className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600">
+               <Wallet className="h-16 w-16 text-accent-bright mx-auto mb-4" />
+               <h2 className="text-2xl font-bold text-primary mb-2">Authentication Required</h2>
+               <p className="text-body mb-6">Please sign in to access your Web3 wallet features.</p>
+               <Button className="grad-accent glow-accent rounded-xl">
                 Sign In
               </Button>
             </CardContent>
-          </Card>
+          </Surface>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
+    <div className="min-h-[100dvh] bg-ink-page">
       <Navigation />
       
       <div className="max-w-6xl mx-auto p-6">
@@ -101,17 +100,17 @@ export default function Web3WalletPage() {
           >
             {isConnected && (
               <div className="mt-4">
-                <p className="text-sm text-gray-300 mb-2">Web3 Features Available:</p>
+                <p className="text-sm text-body mb-2">Web3 Features Available:</p>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline" className="border-purple-500/30 text-purple-300">
+                  <Badge variant="outline" className="border-accent-core/30 text-accent-bright">
                     <Shield className="h-3 w-3 mr-1" />
                     Secure Transactions
                   </Badge>
-                  <Badge variant="outline" className="border-fuchsia-500/30 text-fuchsia-300">
+                  <Badge variant="outline" className="border-accent-core/30 text-accent-bright">
                     <Globe className="h-3 w-3 mr-1" />
                     Decentralized Storage
                   </Badge>
-                  <Badge variant="outline" className="border-cyan-500/30 text-cyan-300">
+                  <Badge variant="outline" className="border-accent-core/30 text-accent-bright">
                     <Zap className="h-3 w-3 mr-1" />
                     Instant Rewards
                   </Badge>
@@ -130,58 +129,52 @@ export default function Web3WalletPage() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
             >
-              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
+              <Surface className="p-0">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Network</CardTitle>
+                  <CardTitle className="text-primary text-sm font-medium">Network</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
-                        {networkInfo?.name || 'Unknown'}
-                      </p>
-                      <p className="text-gray-400 text-sm">Chain ID: {wallet.chainId}</p>
+                      <StatValue label="Network" value={networkInfo?.name || 'Unknown'} valueClassName="text-accent-bright" />
+                      <p className="text-secondary text-sm">Chain ID: {wallet.chainId}</p>
                     </div>
-                    <Globe className="h-8 w-8 text-cyan-400" />
+                     <Globe className="h-8 w-8 text-accent-bright" />
                   </div>
                 </CardContent>
-              </Card>
+              </Surface>
 
-              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
+              <Surface className="p-0">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">Balance</CardTitle>
+                  <CardTitle className="text-primary text-sm font-medium">Balance</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
-                        {wallet.balance ? formatBalance(wallet.balance) : '0.0000'}
-                      </p>
-                      <p className="text-gray-400 text-sm">
+                      <StatValue label="Balance" value={wallet.balance ? formatBalance(wallet.balance) : '0.0000'} valueClassName="text-accent-bright" />
+                      <p className="text-secondary text-sm">
                         {networkInfo?.nativeCurrency.symbol || 'ETH'}
                       </p>
                     </div>
-                    <Coins className="h-8 w-8 text-fuchsia-400" />
+                     <Coins className="h-8 w-8 text-accent-bright" />
                   </div>
                 </CardContent>
-              </Card>
+              </Surface>
 
-              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
+              <Surface className="p-0">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-gray-900 dark:text-white text-sm font-medium">ENS Name</CardTitle>
+                  <CardTitle className="text-primary text-sm font-medium">ENS Name</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
-                        {wallet.ensName || 'None'}
-                      </p>
-                      <p className="text-gray-400 text-sm">Domain name</p>
+                      <StatValue label="ENS Name" value={wallet.ensName || 'None'} valueClassName="text-accent-bright" />
+                      <p className="text-secondary text-sm">Domain name</p>
                     </div>
-                    <Shield className="h-8 w-8 text-purple-400" />
+                     <Shield className="h-8 w-8 text-accent-bright" />
                   </div>
                 </CardContent>
-              </Card>
+              </Surface>
             </motion.div>
 
             {/* Main Content Tabs */}
@@ -191,16 +184,16 @@ export default function Web3WalletPage() {
               transition={{ duration: 0.5, delay: 0.3 }}
             >
               <Tabs defaultValue="tokens" className="space-y-6">
-                <TabsList className="bg-white/10 border border-white/20">
-                  <TabsTrigger value="tokens" className="text-gray-900 dark:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:via-fuchsia-500 data-[state=active]:to-cyan-500">
+                <TabsList className="bg-ink-surface border border-ink-edge rounded-xl">
+                  <TabsTrigger value="tokens" className="text-primary data-[state=active]:bg-accent-core data-[state=active]:text-white glow-accent rounded-xl">
                     <Coins className="h-4 w-4 mr-2" />
                     Tokens
                   </TabsTrigger>
-                  <TabsTrigger value="transactions" className="text-gray-900 dark:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:via-fuchsia-500 data-[state=active]:to-cyan-500">
+                  <TabsTrigger value="transactions" className="text-primary data-[state=active]:bg-accent-core data-[state=active]:text-white glow-accent rounded-xl">
                     <Receipt className="h-4 w-4 mr-2" />
                     Transactions
                   </TabsTrigger>
-                  <TabsTrigger value="send" className="text-gray-900 dark:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:via-fuchsia-500 data-[state=active]:to-cyan-500">
+                  <TabsTrigger value="send" className="text-primary data-[state=active]:bg-accent-core data-[state=active]:text-white glow-accent rounded-xl">
                     <Send className="h-4 w-4 mr-2" />
                     Send
                   </TabsTrigger>
@@ -209,21 +202,21 @@ export default function Web3WalletPage() {
                 <TabsContent value="tokens" className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Native Token */}
-                    <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
+                    <Surface className="p-0">
                       <CardHeader className="pb-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 rounded-full flex items-center justify-center">
-                              <span className="text-gray-900 dark:text-white font-bold">ETH</span>
+                              <div className="w-10 h-10 bg-accent-core rounded-xl flex items-center justify-center">
+                               <span className="text-primary font-bold">ETH</span>
                             </div>
                             <div>
-                              <CardTitle className="text-gray-900 dark:text-white">
+                                <CardTitle className="text-primary">
                                 {networkInfo?.nativeCurrency.symbol || 'ETH'}
                               </CardTitle>
-                              <p className="text-gray-400 text-sm">{networkInfo?.name || 'Ethereum'}</p>
+                               <p className="text-secondary text-sm">{networkInfo?.name || 'Ethereum'}</p>
                             </div>
                           </div>
-                          <Badge variant="outline" className="border-fuchsia-500/30 text-fuchsia-300">
+                           <Badge variant="outline" className="border-gain/30 text-gain">
                             <TrendingUp className="h-3 w-3 mr-1" />
                             +2.1%
                           </Badge>
@@ -232,35 +225,35 @@ export default function Web3WalletPage() {
                       <CardContent>
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-xl font-bold text-gray-900 dark:text-white">
+                             <p className="tabular text-xl font-bold text-primary">
                               {wallet.balance ? formatBalance(wallet.balance) : '0.0000'}
                             </p>
-                            <p className="text-gray-400 text-sm">~$0.00</p>
+                             <p className="text-secondary text-sm">~$0.00</p>
                           </div>
-                          <Button variant="outline" size="sm" className="border-white/20">
+                           <Button variant="outline" size="sm" className="border-ink-edge rounded-xl">
                             <Eye className="h-4 w-4" />
                           </Button>
                         </div>
                       </CardContent>
-                    </Card>
+                    </Surface>
 
                     {/* Mock Tokens */}
                     {mockTokens.map((token, index) => (
-                      <Card key={token.symbol} className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
+                      <Surface key={token.symbol} className="p-0">
                         <CardHeader className="pb-4">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <div className="text-2xl">{token.icon}</div>
                               <div>
-                                <CardTitle className="text-gray-900 dark:text-white">{token.symbol}</CardTitle>
-                                <p className="text-gray-400 text-sm">StreamAiX Token</p>
+                                <CardTitle className="text-primary">{token.symbol}</CardTitle>
+                                <p className="text-secondary text-sm">StreamAiX Token</p>
                               </div>
                             </div>
                             <Badge 
                               variant="outline" 
                               className={token.change.includes('+') 
-                                ? "border-green-500/30 text-green-300" 
-                                : "border-red-500/30 text-red-300"
+                                 ? "border-gain/30 text-gain"
+                                 : "border-loss/30 text-loss"
                               }
                             >
                               {token.change.includes('+') ? <TrendingUp className="h-3 w-3 mr-1" /> : <ArrowDownRight className="h-3 w-3 mr-1" />}
@@ -271,45 +264,45 @@ export default function Web3WalletPage() {
                         <CardContent>
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-xl font-bold text-gray-900 dark:text-white">{token.amount}</p>
-                              <p className="text-gray-400 text-sm">{token.value}</p>
+                              <p className="tabular text-xl font-bold text-primary">{token.amount}</p>
+                              <p className="text-secondary text-sm">{token.value}</p>
                             </div>
-                            <Button variant="outline" size="sm" className="border-white/20">
+                             <Button variant="outline" size="sm" className="border-ink-edge rounded-xl">
                               <Eye className="h-4 w-4" />
                             </Button>
                           </div>
                         </CardContent>
-                      </Card>
+                      </Surface>
                     ))}
                   </div>
                 </TabsContent>
 
                 <TabsContent value="transactions" className="space-y-4">
-                  <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
+                   <Surface className="p-0">
                     <CardHeader>
-                      <CardTitle className="text-gray-900 dark:text-white">Recent Transactions</CardTitle>
+                       <CardTitle className="text-primary">Recent Transactions</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         {mockTransactions.map((tx) => (
-                          <div key={tx.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                           <div key={tx.id} className="flex items-center justify-between p-4 bg-ink-raised rounded-xl border border-ink-divider">
                             <div className="flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                tx.type === 'received' ? 'bg-fuchsia-500/20' : 'bg-purple-500/20'
+                             <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                                 tx.type === 'received' ? 'bg-gain/20' : 'bg-accent-core/20'
                               }`}>
                                 {tx.type === 'received' ? (
-                                  <ArrowDownRight className="h-4 w-4 text-fuchsia-400" />
+                                   <ArrowDownRight className="h-4 w-4 text-gain" />
                                 ) : (
-                                  <ArrowUpRight className="h-4 w-4 text-purple-400" />
+                                   <ArrowUpRight className="h-4 w-4 text-accent-bright" />
                                 )}
                               </div>
                               <div>
-                                <p className="text-gray-900 dark:text-white font-medium">{tx.amount}</p>
-                                <p className="text-gray-400 text-sm">{tx.from || tx.to}</p>
+                                 <p className="text-primary font-medium tabular">{tx.amount}</p>
+                                 <p className="text-secondary text-sm">{tx.from || tx.to}</p>
                               </div>
                             </div>
                             <div className="text-right">
-                              <p className="text-gray-400 text-sm">{tx.time}</p>
+                               <p className="text-secondary text-sm">{tx.time}</p>
                               <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
                                 <ExternalLink className="h-3 w-3" />
                               </Button>
@@ -318,46 +311,46 @@ export default function Web3WalletPage() {
                         ))}
                       </div>
                     </CardContent>
-                  </Card>
+                   </Surface>
                 </TabsContent>
 
                 <TabsContent value="send" className="space-y-4">
-                  <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
+                   <Surface className="p-0">
                     <CardHeader>
-                      <CardTitle className="text-gray-900 dark:text-white">Send Tokens</CardTitle>
-                      <p className="text-gray-400 text-sm">Send tokens to another wallet address</p>
+                       <CardTitle className="text-primary">Send Tokens</CardTitle>
+                       <p className="text-secondary text-sm">Send tokens to another wallet address</p>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
-                        <Label className="text-gray-900 dark:text-white">Recipient Address</Label>
+                         <Label className="text-primary">Recipient Address</Label>
                         <Input
                           placeholder="0x..."
                           value={sendAddress}
                           onChange={(e) => setSendAddress(e.target.value)}
-                          className="bg-white/10 border-white/20 text-gray-900 dark:text-white placeholder:text-gray-400"
+                           className="bg-ink-raised border-ink-edge text-primary placeholder:text-muted rounded-xl"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-gray-900 dark:text-white">Amount</Label>
+                         <Label className="text-primary">Amount</Label>
                         <Input
                           placeholder="0.0"
                           value={sendAmount}
                           onChange={(e) => setSendAmount(e.target.value)}
-                          className="bg-white/10 border-white/20 text-gray-900 dark:text-white placeholder:text-gray-400"
+                           className="bg-ink-raised border-ink-edge text-primary placeholder:text-muted rounded-xl"
                         />
                       </div>
                       <Button 
-                        className="w-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600"
+                         className="w-full grad-accent glow-accent rounded-xl"
                         disabled={!sendAddress || !sendAmount}
                       >
                         <Send className="h-4 w-4 mr-2" />
                         Send Transaction
                       </Button>
-                      <p className="text-yellow-300 text-sm text-center">
+                       <p className="text-warn text-sm text-center">
                         ⚠️ This is a demo interface. Real transactions require additional security measures.
                       </p>
                     </CardContent>
-                  </Card>
+                   </Surface>
                 </TabsContent>
               </Tabs>
             </motion.div>
@@ -371,21 +364,21 @@ export default function Web3WalletPage() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-center py-12"
           >
-            <Card className="bg-white/10 border-white/20 backdrop-blur-lg max-w-md mx-auto">
+            <Surface className="max-w-md mx-auto">
               <CardContent className="p-8">
-                <Wallet className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No Wallet Connected</h3>
-                <p className="text-gray-400 mb-6">
+                <Wallet className="h-16 w-16 text-muted mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-primary mb-2">No Wallet Connected</h3>
+                <p className="text-secondary mb-6">
                   Connect your Web3 wallet to access decentralized features, manage tokens, and interact with the blockchain.
                 </p>
-                <div className="space-y-2 text-sm text-gray-400">
+                <div className="space-y-2 text-sm text-secondary">
                   <p>✓ Secure wallet connection</p>
                   <p>✓ Real-time balance updates</p>
                   <p>✓ Transaction history</p>
                   <p>✓ Multi-network support</p>
                 </div>
               </CardContent>
-            </Card>
+            </Surface>
           </motion.div>
         )}
       </div>

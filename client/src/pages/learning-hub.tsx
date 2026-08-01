@@ -1,20 +1,20 @@
 import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { PageHeader } from '@/components/PageHeader';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'wouter';
 import {
   GraduationCap, BookOpen, Brain, Target, Trophy,
-  ChevronRight, ChevronLeft, Clock, Star, Zap,
-  CheckCircle2, Lock, Play, Award, Sparkles,
-  ArrowLeft, BarChart3, Users, Lightbulb
+  ChevronRight, Clock, Zap, CheckCircle2, Play, Award,
+  BarChart3, Lightbulb
 } from 'lucide-react';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import Surface from '@/components/ds/Surface';
+import StatValue from '@/components/ds/StatValue';
+import SectionTitle from '@/components/ds/SectionTitle';
 import { useAuth } from '@/hooks/useAuth';
-import { apiRequest, queryClient } from '@/lib/queryClient';
 import { cn } from '@/lib/utils';
 
 interface LearningModule {
@@ -74,18 +74,18 @@ const categoryIcons: Record<string, any> = {
 };
 
 const categoryColors: Record<string, { from: string; to: string; border: string }> = {
-  web3_basics: { from: 'from-purple-600', to: 'to-fuchsia-500', border: 'border-purple-500/30' },
-  defi: { from: 'from-cyan-500', to: 'to-blue-600', border: 'border-cyan-500/30' },
-  ai_trading: { from: 'from-emerald-500', to: 'to-teal-500', border: 'border-emerald-500/30' },
-  prediction_markets: { from: 'from-amber-500', to: 'to-orange-500', border: 'border-amber-500/30' },
-  macro_economics: { from: 'from-rose-500', to: 'to-pink-500', border: 'border-rose-500/30' },
-  tech_stocks: { from: 'from-indigo-500', to: 'to-violet-500', border: 'border-indigo-500/30' },
+  web3_basics: { from: 'bg-accent-core', to: 'bg-accent-deep', border: 'border-accent-core/30' },
+  defi: { from: 'bg-accent-bright', to: 'bg-accent-core', border: 'border-accent-core/30' },
+  ai_trading: { from: 'bg-gain', to: 'bg-accent-core', border: 'border-gain/30' },
+  prediction_markets: { from: 'bg-warn', to: 'bg-accent-deep', border: 'border-warn/30' },
+  macro_economics: { from: 'bg-loss', to: 'bg-accent-deep', border: 'border-loss/30' },
+  tech_stocks: { from: 'bg-accent-deep', to: 'bg-accent-core', border: 'border-accent-core/30' },
 };
 
 const difficultyBadge: Record<string, { color: string; label: string }> = {
-  beginner: { color: 'bg-green-500/20 text-green-400 border-green-500/30', label: 'Beginner' },
-  intermediate: { color: 'bg-amber-500/20 text-amber-400 border-amber-500/30', label: 'Intermediate' },
-  advanced: { color: 'bg-rose-500/20 text-rose-400 border-rose-500/30', label: 'Advanced' },
+  beginner: { color: 'bg-gain/15 text-gain border-gain/30', label: 'Beginner' },
+  intermediate: { color: 'bg-warn/15 text-warn border-warn/30', label: 'Intermediate' },
+  advanced: { color: 'bg-loss/15 text-loss border-loss/30', label: 'Advanced' },
 };
 
 function ModuleCard({ 
@@ -112,28 +112,21 @@ function ModuleCard({
       whileHover={{ y: -4, scale: 1.01 }}
       transition={{ duration: 0.2 }}
     >
-      <Card className={cn(
-        "relative overflow-hidden bg-gradient-to-br from-slate-900/90 via-slate-800/50 to-slate-900/90",
-        "border transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/10",
+      <Surface className={cn(
+        "relative overflow-hidden transition-all duration-300 hover:border-accent-core/50",
         colors.border
       )}>
-        <div className={cn(
-          "absolute inset-0 opacity-10 bg-gradient-to-br",
-          colors.from, colors.to
-        )} />
+        <div className={cn("absolute inset-0 opacity-[0.08]", colors.from)} />
         
         <div className="relative p-6">
           <div className="flex items-start justify-between mb-4">
-            <div className={cn(
-              "p-3 rounded-xl bg-gradient-to-br shadow-lg",
-              colors.from, colors.to
-            )}>
+            <div className={cn("p-3 rounded-xl shadow-lg", colors.from)}>
               <Icon className="w-6 h-6 text-white" />
             </div>
             
             <div className="flex items-center gap-2">
               {isCompleted && (
-                <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+                  <Badge className="bg-gain/15 text-gain border-gain/30">
                   <CheckCircle2 className="w-3 h-3 mr-1" />
                   Complete
                 </Badge>
@@ -144,10 +137,10 @@ function ModuleCard({
             </div>
           </div>
           
-          <h3 className="text-xl font-bold text-white mb-2">{module.title}</h3>
-          <p className="text-gray-400 text-sm mb-4 line-clamp-2">{module.description}</p>
+           <h3 className="text-xl font-bold text-primary mb-2">{module.title}</h3>
+           <p className="text-secondary text-sm mb-4 line-clamp-2">{module.description}</p>
           
-          <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
+          <div className="flex items-center gap-4 text-xs text-muted mb-4">
             <div className="flex items-center gap-1">
               <Clock className="w-3 h-3" />
               {module.estimatedMinutes} min
@@ -157,30 +150,30 @@ function ModuleCard({
               {module.lessonCount} lessons
             </div>
             <div className="flex items-center gap-1">
-              <Zap className="w-3 h-3 text-amber-400" />
+              <Zap className="w-3 h-3 text-warn" />
               {module.xpReward} STREAM
             </div>
           </div>
           
           {isStarted && !isCompleted && (
             <div className="mb-4">
-              <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
+               <div className="flex items-center justify-between text-xs text-secondary mb-1">
                 <span>Progress</span>
                 <span>{progressPercent}%</span>
               </div>
-              <Progress value={progressPercent} className="h-2 bg-slate-700" />
+               <Progress value={progressPercent} className="h-2 bg-ink-raised" />
             </div>
           )}
           
           <Link href={`/learn/${module.id}`}>
             <Button 
               className={cn(
-                "w-full group",
+                 "w-full group rounded-xl",
                 isCompleted 
-                  ? "bg-slate-700 hover:bg-slate-600"
+                   ? "bg-ink-raised hover:bg-ink-edge text-primary"
                   : isStarted
-                    ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400"
-                    : `bg-gradient-to-r ${colors.from} ${colors.to}`
+                     ? "bg-warn hover:bg-warn/85 text-ink-page"
+                     : "grad-accent glow-accent hover:bg-accent-deep"
               )}
               data-testid={`start-module-${module.id}`}
             >
@@ -194,7 +187,7 @@ function ModuleCard({
             </Button>
           </Link>
         </div>
-      </Card>
+     </Surface>
     </motion.div>
   );
 }
@@ -203,21 +196,18 @@ function StatsCard({ icon: Icon, label, value, gradient }: {
   icon: any; 
   label: string; 
   value: string | number; 
-  gradient: string;
+    gradient: string;
 }) {
   return (
-    <Card className="relative overflow-hidden bg-slate-900/80 border-slate-700/50 p-4">
-      <div className={cn("absolute inset-0 opacity-10 bg-gradient-to-br", gradient)} />
+    <Surface className="relative overflow-hidden p-4">
+      <div className={cn("absolute inset-0 opacity-[0.08]", gradient)} />
       <div className="relative flex items-center gap-3">
-        <div className={cn("p-2 rounded-lg bg-gradient-to-br", gradient)}>
+        <div className={cn("p-2 rounded-xl", gradient)}>
           <Icon className="w-5 h-5 text-white" />
         </div>
-        <div>
-          <p className="text-2xl font-bold text-white">{value}</p>
-          <p className="text-xs text-gray-400">{label}</p>
-        </div>
+        <StatValue label={label} value={value} valueClassName="text-2xl font-bold" />
       </div>
-    </Card>
+    </Surface>
   );
 }
 
@@ -272,7 +262,7 @@ export default function LearningHub() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 pt-20 pb-12 px-4">
+    <div className="min-h-[100dvh] bg-ink-page pt-20 pb-12 px-4">
       <div className="max-w-7xl mx-auto">
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
@@ -292,25 +282,25 @@ export default function LearningHub() {
             icon={BookOpen} 
             label="Courses Available" 
             value={modules.length}
-            gradient="from-purple-500 to-fuchsia-500"
+             gradient="bg-accent-core"
           />
           <StatsCard 
             icon={CheckCircle2} 
             label="Completed" 
             value={completedCount}
-            gradient="from-emerald-500 to-teal-500"
+             gradient="bg-gain"
           />
           <StatsCard 
             icon={Zap} 
             label="STREAM Earned" 
             value={totalXp.toLocaleString()}
-            gradient="from-amber-500 to-orange-500"
+             gradient="bg-warn"
           />
           <StatsCard 
             icon={Trophy} 
             label="Leaderboard Rank" 
             value={user ? (leaderboard.findIndex((l: any) => l.id === user.id) + 1 || '-') : '-'}
-            gradient="from-cyan-500 to-blue-500"
+             gradient="bg-accent-deep"
           />
         </div>
 
@@ -322,9 +312,9 @@ export default function LearningHub() {
               size="sm"
               onClick={() => setSelectedCategory(cat.id)}
               className={cn(
-                selectedCategory === cat.id 
-                  ? "bg-gradient-to-r from-purple-500 to-fuchsia-500 border-0"
-                  : "border-slate-600 text-gray-300 hover:bg-slate-800"
+                 selectedCategory === cat.id
+                   ? "bg-accent-core text-white border-accent-core glow-accent"
+                   : "border-ink-edge text-secondary hover:bg-ink-raised"
               )}
               data-testid={`filter-${cat.id}`}
             >
@@ -336,7 +326,7 @@ export default function LearningHub() {
         {modulesLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1,2,3,4,5,6].map(i => (
-              <Card key={i} className="h-72 bg-slate-800/50 animate-pulse" />
+              <Surface key={i} className="h-72 bg-ink-raised animate-pulse" />
             ))}
           </div>
         ) : (
@@ -364,12 +354,12 @@ export default function LearningHub() {
             transition={{ delay: 0.3 }}
             className="mt-12"
           >
-            <Card className="bg-gradient-to-br from-slate-900/90 to-slate-800/50 border-purple-500/30 p-6">
+            <Surface className="p-6">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500">
+                <div className="p-2 rounded-xl bg-warn">
                   <Trophy className="w-5 h-5 text-white" />
                 </div>
-                <h2 className="text-xl font-bold text-white">Top Learners</h2>
+                <SectionTitle as="h2">Top Learners</SectionTitle>
               </div>
               
               <div className="space-y-3">
@@ -377,34 +367,34 @@ export default function LearningHub() {
                   <div 
                     key={learner.id}
                     className={cn(
-                      "flex items-center gap-4 p-3 rounded-lg",
-                      index === 0 ? "bg-amber-500/10 border border-amber-500/30" :
-                      index === 1 ? "bg-slate-500/10 border border-slate-500/30" :
-                      index === 2 ? "bg-orange-500/10 border border-orange-500/30" :
-                      "bg-slate-800/50"
+                       "flex items-center gap-4 p-3 rounded-xl border border-ink-divider",
+                       index === 0 ? "bg-warn/10 border-warn/30" :
+                       index === 1 ? "bg-ink-raised" :
+                       index === 2 ? "bg-loss/10 border-loss/30" :
+                       "bg-ink-raised/50"
                     )}
                   >
                     <div className={cn(
-                      "w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm",
-                      index === 0 ? "bg-amber-500 text-white" :
-                      index === 1 ? "bg-slate-400 text-white" :
-                      index === 2 ? "bg-orange-600 text-white" :
-                      "bg-slate-700 text-gray-300"
+                       "w-8 h-8 rounded-xl flex items-center justify-center font-bold text-sm",
+                       index === 0 ? "bg-warn text-ink-page" :
+                       index === 1 ? "bg-ink-edge text-primary" :
+                       index === 2 ? "bg-loss text-primary" :
+                       "bg-ink-edge text-secondary"
                     )}>
                       {learner.rank}
                     </div>
                     <div className="flex-1">
-                      <p className="text-white font-medium">{learner.username}</p>
-                      <p className="text-xs text-gray-400">{learner.completedModules} modules completed</p>
+                       <p className="text-primary font-medium">{learner.username}</p>
+                       <p className="text-xs text-secondary">{learner.completedModules} modules completed</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-amber-400 font-bold">{learner.totalXp?.toLocaleString() || 0}</p>
-                      <p className="text-xs text-gray-500">STREAM</p>
+                       <p className="text-warn font-bold tabular">{learner.totalXp?.toLocaleString() || 0}</p>
+                       <p className="text-xs text-muted">STREAM</p>
                     </div>
                   </div>
                 ))}
               </div>
-            </Card>
+             </Surface>
           </motion.div>
         )}
       </div>

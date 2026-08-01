@@ -7,31 +7,27 @@ import {
   Rss, 
   Users, 
   Tag, 
-  ChevronRight, 
   Sparkles, 
   Bell,
-  Filter,
   Grid3X3,
   List,
   UserPlus,
   Hash,
   TrendingUp,
   Clock,
-  Trophy,
   Bot,
   ArrowRight,
-  Heart,
   Loader2
 } from 'lucide-react';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Surface from '@/components/ds/Surface';
+import StatValue from '@/components/ds/StatValue';
+import SectionTitle from '@/components/ds/SectionTitle';
 import BountyCard from '@/components/bounty/BountyCard';
 import { FollowUserButton, FollowCategoryButton } from '@/components/FollowButton';
 import { useAuth } from '@/hooks/useAuth';
-import { formatDistanceToNow } from 'date-fns';
 
 interface FollowReason {
   isFromFollowedUser: boolean;
@@ -79,22 +75,22 @@ export default function FollowingFeed() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 pt-20 pb-10">
+      <div className="min-h-screen bg-ink-page pt-20 pb-10">
         <div className="container mx-auto px-4">
-          <Card className="max-w-2xl mx-auto p-8 text-center bg-gradient-to-br from-purple-900/30 to-slate-900/50 border-purple-500/30">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 flex items-center justify-center">
-              <Rss className="w-8 h-8 text-white" />
+          <Surface className="mx-auto max-w-2xl p-8 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-accent-core text-primary">
+              <Rss className="w-8 h-8 text-primary" />
             </div>
-            <h2 className="text-2xl font-bold text-white mb-2">Your Personal Feed</h2>
-            <p className="text-gray-400 mb-6">
+            <SectionTitle as="h2" className="mb-2">Your Personal Feed</SectionTitle>
+            <p className="mb-6 text-body">
               Follow bounty creators and categories to get personalized updates tailored just for you.
             </p>
             <Link href="/login">
-              <Button className="bg-gradient-to-r from-cyan-500 to-purple-500">
+              <Button className="grad-accent glow-accent rounded-xl text-primary">
                 Sign in to Get Started
               </Button>
             </Link>
-          </Card>
+          </Surface>
         </div>
       </div>
     );
@@ -115,7 +111,7 @@ export default function FollowingFeed() {
   const hasNoFollows = users.length === 0 && categories.length === 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 pt-20 pb-10">
+    <div className="min-h-screen bg-ink-page pt-20 pb-10">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -128,7 +124,7 @@ export default function FollowingFeed() {
             icon={<Rss className="h-5 w-5" />}
             subtitle="Bounties from creators and categories you follow."
             actions={
-              <Badge className="bg-gradient-to-r from-cyan-500 to-purple-500 text-white">
+              <Badge className="bg-accent-core text-primary">
                 <Sparkles className="w-3 h-3 mr-1" />
                 Personalized
               </Badge>
@@ -138,55 +134,50 @@ export default function FollowingFeed() {
 
         {/* Stats Bar */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card className="p-4 bg-gradient-to-br from-cyan-900/30 to-slate-900/50 border-cyan-500/30">
+          <Surface className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-cyan-500/20">
-                <Users className="w-5 h-5 text-cyan-400" />
+              <div className="rounded-xl bg-accent-core/15 p-2">
+                <Users className="w-5 h-5 text-accent-bright" />
               </div>
-              <div>
-                <p className="text-2xl font-bold text-white">{users.length}</p>
-                <p className="text-xs text-gray-400">Following</p>
-              </div>
+              <StatValue label="Following" value={users.length} />
             </div>
-          </Card>
+          </Surface>
           
-          <Card className="p-4 bg-gradient-to-br from-purple-900/30 to-slate-900/50 border-purple-500/30">
+          <Surface className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-purple-500/20">
-                <Hash className="w-5 h-5 text-purple-400" />
+              <div className="rounded-xl bg-accent-core/15 p-2">
+                <Hash className="w-5 h-5 text-accent-bright" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-white">{categories.length}</p>
-                <p className="text-xs text-gray-400">Categories</p>
+                <StatValue label="Categories" value={categories.length} />
               </div>
             </div>
-          </Card>
+          </Surface>
           
-          <Card className="p-4 bg-gradient-to-br from-emerald-900/30 to-slate-900/50 border-emerald-500/30">
+          <Surface className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-emerald-500/20">
-                <TrendingUp className="w-5 h-5 text-emerald-400" />
+              <div className="rounded-xl bg-gain/15 p-2">
+                <TrendingUp className="w-5 h-5 text-gain" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-white">{bounties.length}</p>
-                <p className="text-xs text-gray-400">In Feed</p>
+                <StatValue label="In Feed" value={bounties.length} />
               </div>
             </div>
-          </Card>
+          </Surface>
           
-          <Card className="p-4 bg-gradient-to-br from-amber-900/30 to-slate-900/50 border-amber-500/30">
+          <Surface className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-amber-500/20">
-                <Bell className="w-5 h-5 text-amber-400" />
+              <div className="rounded-xl bg-warn/15 p-2">
+                <Bell className="w-5 h-5 text-warn" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-white">
-                  {bounties.filter(b => new Date(b.createdAt) > new Date(Date.now() - 24*60*60*1000)).length}
-                </p>
-                <p className="text-xs text-gray-400">New Today</p>
+                <StatValue
+                  label="New Today"
+                  value={bounties.filter(b => new Date(b.createdAt) > new Date(Date.now() - 24*60*60*1000)).length}
+                />
               </div>
             </div>
-          </Card>
+          </Surface>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -195,16 +186,16 @@ export default function FollowingFeed() {
             {/* Controls */}
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
               <Tabs value={filterBy} onValueChange={(v) => setFilterBy(v as any)}>
-                <TabsList className="bg-slate-800/50">
-                  <TabsTrigger value="all" className="gap-2">
+                <TabsList className="rounded-xl border border-ink-edge bg-ink-surface">
+                  <TabsTrigger value="all" className="gap-2 data-[state=active]:bg-accent-core data-[state=active]:text-white">
                     <Grid3X3 className="w-4 h-4" />
                     All
                   </TabsTrigger>
-                  <TabsTrigger value="users" className="gap-2">
+                  <TabsTrigger value="users" className="gap-2 data-[state=active]:bg-accent-core data-[state=active]:text-white">
                     <Users className="w-4 h-4" />
                     From Users
                   </TabsTrigger>
-                  <TabsTrigger value="categories" className="gap-2">
+                  <TabsTrigger value="categories" className="gap-2 data-[state=active]:bg-accent-core data-[state=active]:text-white">
                     <Tag className="w-4 h-4" />
                     By Category
                   </TabsTrigger>
@@ -232,15 +223,15 @@ export default function FollowingFeed() {
             {/* Feed Content */}
             {feedLoading ? (
               <div className="flex items-center justify-center py-20">
-                <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
+                  <Loader2 className="w-8 h-8 animate-spin text-accent-bright" />
               </div>
             ) : hasNoFollows ? (
-              <Card className="p-8 text-center bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-700/50">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500/20 to-cyan-500/20 flex items-center justify-center">
-                  <UserPlus className="w-8 h-8 text-purple-400" />
+              <Surface className="p-8 text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-accent-core/15">
+                  <UserPlus className="w-8 h-8 text-accent-bright" />
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-2">Start Following</h3>
-                <p className="text-gray-400 mb-6 max-w-md mx-auto">
+                <SectionTitle as="h3" className="mb-2">Start Following</SectionTitle>
+                <p className="mx-auto mb-6 max-w-md text-body">
                   Follow bounty creators and categories to see their latest bounties here. 
                   Your personalized feed will update automatically.
                 </p>
@@ -259,20 +250,20 @@ export default function FollowingFeed() {
                     <ArrowRight className="w-4 h-4" />
                   </Button>
                 </Link>
-              </Card>
+              </Surface>
             ) : filteredBounties.length === 0 ? (
-              <Card className="p-8 text-center bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-700/50">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center">
-                  <Clock className="w-8 h-8 text-amber-400" />
+              <Surface className="p-8 text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-warn/15">
+                  <Clock className="w-8 h-8 text-warn" />
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-2">No Bounties Yet</h3>
-                <p className="text-gray-400 mb-4">
+                <SectionTitle as="h3" className="mb-2">No Bounties Yet</SectionTitle>
+                <p className="mb-4 text-body">
                   The creators and categories you follow haven't posted any bounties matching your filter.
                 </p>
                 <Button variant="outline" onClick={() => setFilterBy('all')}>
                   Show All Feed
                 </Button>
-              </Card>
+              </Surface>
             ) : (
               <AnimatePresence mode="popLayout">
                 <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-4'}>
@@ -291,8 +282,8 @@ export default function FollowingFeed() {
                             <Badge 
                               className={
                                 bounty.followReason.isFromFollowedUser 
-                                  ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40" 
-                                  : "bg-purple-500/20 text-purple-300 border-purple-500/40"
+                                  ? "bg-accent-core/15 text-accent-bright border-accent-core/40" 
+                                  : "bg-accent-core/15 text-accent-bright border-accent-core/40"
                               }
                             >
                               {bounty.followReason.isFromFollowedUser ? (
@@ -321,17 +312,17 @@ export default function FollowingFeed() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Following Users */}
-            <Card className="p-4 bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-700/50">
+              <Surface className="p-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-white flex items-center gap-2">
-                  <Users className="w-4 h-4 text-cyan-400" />
+                <SectionTitle as="h3" className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-accent-bright" />
                   Following
-                </h3>
-                <span className="text-xs text-gray-400">{users.length} users</span>
+                </SectionTitle>
+                <span className="text-xs text-secondary">{users.length} users</span>
               </div>
               
               {users.length === 0 ? (
-                <p className="text-sm text-gray-500 text-center py-4">
+                <p className="py-4 text-center text-sm text-muted">
                   Not following anyone yet
                 </p>
               ) : (
@@ -342,11 +333,11 @@ export default function FollowingFeed() {
                         <img
                           src={u.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.username}`}
                           alt={u.username}
-                          className="w-8 h-8 rounded-full ring-1 ring-cyan-500/30"
+                          className="h-8 w-8 rounded-xl ring-1 ring-accent-core/30"
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-white truncate flex items-center gap-1">
-                            {u.isAiAgent && <Bot className="w-3 h-3 text-amber-400" />}
+                          <p className="flex items-center gap-1 truncate text-sm font-medium text-primary">
+                            {u.isAiAgent && <Bot className="w-3 h-3 text-warn" />}
                             {u.username}
                           </p>
                         </div>
@@ -355,26 +346,26 @@ export default function FollowingFeed() {
                     </div>
                   ))}
                   {users.length > 5 && (
-                    <Link href="/settings/following" className="block text-center text-sm text-cyan-400 hover:text-cyan-300">
+                    <Link href="/settings/following" className="block text-center text-sm text-accent-bright hover:text-primary">
                       View all {users.length}
                     </Link>
                   )}
                 </div>
               )}
-            </Card>
+              </Surface>
 
             {/* Following Categories */}
-            <Card className="p-4 bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-700/50">
+              <Surface className="p-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-white flex items-center gap-2">
-                  <Tag className="w-4 h-4 text-purple-400" />
+                <SectionTitle as="h3" className="flex items-center gap-2">
+                  <Tag className="w-4 h-4 text-accent-bright" />
                   Categories
-                </h3>
-                <span className="text-xs text-gray-400">{categories.length} followed</span>
+                </SectionTitle>
+                <span className="text-xs text-secondary">{categories.length} followed</span>
               </div>
               
               {categories.length === 0 ? (
-                <p className="text-sm text-gray-500 text-center py-4">
+                <p className="py-4 text-center text-sm text-muted">
                   No categories followed yet
                 </p>
               ) : (
@@ -384,23 +375,23 @@ export default function FollowingFeed() {
                   ))}
                 </div>
               )}
-            </Card>
+              </Surface>
 
             {/* Suggested Categories */}
-            <Card className="p-4 bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-700/50">
-              <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-400" />
+              <Surface className="p-4">
+              <SectionTitle as="h3" className="mb-4 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-warn" />
                 Discover Categories
-              </h3>
+              </SectionTitle>
               <div className="space-y-2">
                 {allCategories
                   .filter((cat: any) => !categories.includes(cat.name))
                   .slice(0, 5)
                   .map((cat: any) => (
-                    <div key={cat.name} className="flex items-center justify-between gap-2 py-2 border-b border-slate-700/50 last:border-0">
+                    <div key={cat.name} className="flex items-center justify-between gap-2 border-b border-ink-divider py-2 last:border-0">
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-white">{cat.name}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-sm font-medium text-primary">{cat.name}</p>
+                        <p className="text-xs text-muted">
                           {cat.bountyCount} bounties • {cat.followersCount} followers
                         </p>
                       </div>
@@ -408,7 +399,7 @@ export default function FollowingFeed() {
                     </div>
                   ))}
               </div>
-            </Card>
+            </Surface>
           </div>
         </div>
       </div>

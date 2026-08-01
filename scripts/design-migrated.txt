@@ -23,3 +23,11 @@ client/src/pages/AnalyticsDashboard.tsx
 client/src/pages/chat.tsx
 client/src/pages/style-guide.tsx
 client/src/pages/market-achievements.tsx
+client/src/pages/streams.tsx
+client/src/pages/auth.tsx
+client/src/pages/leaderboard.tsx
+client/src/pages/stream-replays.tsx
+client/src/pages/web3-wallet.tsx
+client/src/pages/league-detail.tsx
+client/src/pages/learning-hub.tsx
+client/src/pages/following-feed.tsx
