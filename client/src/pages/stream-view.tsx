@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef, useCallback, memo, useMemo } from 'react';
 import { useRoute, useLocation, Link } from 'wouter';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { 
-  ArrowLeft, 
-  Users, 
-  MessageCircle, 
-  Coins, 
-  Share2, 
+import {
+  ArrowLeft,
+  Users,
+  MessageCircle,
+  Coins,
+  Share2,
   Heart,
   Send,
   Video,
@@ -58,7 +58,7 @@ import {
   MicOff
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import Surface from '@/components/ds/Surface';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -77,9 +77,9 @@ import { ViewerPresence } from '@/components/streaming/MobileStreamViewer';
 import { StreamReactions, QuickReactButtons } from '@/components/streaming/StreamReactions';
 import { StreamPoll, CreatePollForm } from '@/components/streaming/StreamPoll';
 import { BroadcasterView } from '@/components/streaming/BroadcasterView';
-import { 
-  ViewerLeaderboard, 
-  WatchTimeRewards, 
+import {
+  ViewerLeaderboard,
+  WatchTimeRewards,
   StreamAchievementsPanel,
   ChatCommandsHelp,
   CreateClipButton,
@@ -155,10 +155,10 @@ interface ChatMessage {
 }
 
 const streamTypeConfig: Record<string, { icon: any; label: string; color: string; bgColor: string; gradient: string }> = {
-  broadcast: { icon: Video, label: 'Broadcast', color: 'text-purple-400', bgColor: 'bg-purple-500/20', gradient: 'from-purple-500 to-fuchsia-500' },
-  trading_room: { icon: TrendingUp, label: 'Trading Room', color: 'text-emerald-400', bgColor: 'bg-emerald-500/20', gradient: 'from-emerald-500 to-cyan-500' },
-  audio_space: { icon: Headphones, label: 'Audio Space', color: 'text-cyan-400', bgColor: 'bg-cyan-500/20', gradient: 'from-cyan-500 to-blue-500' },
-  live_bounty: { icon: Target, label: 'Live Bounty', color: 'text-amber-400', bgColor: 'bg-amber-500/20', gradient: 'from-amber-500 to-orange-500' },
+  broadcast: { icon: Video, label: 'Broadcast', color: 'text-accent-bright', bgColor: 'bg-accent-core/20', gradient: 'bg-accent-core' },
+  trading_room: { icon: TrendingUp, label: 'Trading Room', color: 'text-gain', bgColor: 'bg-gain/20', gradient: ' ' },
+  audio_space: { icon: Headphones, label: 'Audio Space', color: 'text-accent-bright', bgColor: 'bg-accent-core/20', gradient: 'bg-accent-core' },
+  live_bounty: { icon: Target, label: 'Live Bounty', color: 'text-warn', bgColor: 'bg-warn/20', gradient: 'bg-warn' },
 };
 
 const formatViewers = (count: number) => {
@@ -184,9 +184,9 @@ const TipAlertAnimation = memo(function TipAlertAnimation({ tip, onComplete }: {
   }, [onComplete, tip.tier]);
 
   const tierConfig = {
-    basic: { bg: 'from-amber-500/90 to-orange-500/90', border: 'border-amber-400/50', shadow: 'shadow-amber-500/30' },
-    super: { bg: 'from-purple-500/90 to-pink-500/90', border: 'border-purple-400/50', shadow: 'shadow-purple-500/30' },
-    mega: { bg: 'from-cyan-500/90 via-purple-500/90 to-pink-500/90', border: 'border-cyan-400/50', shadow: 'shadow-cyan-500/30' },
+    basic: { bg: 'bg-warn/90', border: 'border-warn/50', shadow: 'shadow-warn/30' },
+    super: { bg: 'bg-accent-core/90', border: 'border-accent-core/50', shadow: 'shadow-accent-core/30' },
+    mega: { bg: 'bg-accent-core/90', border: 'border-accent-core/50', shadow: 'shadow-accent-core/30' },
   };
   const config = tierConfig[tip.tier];
 
@@ -197,30 +197,30 @@ const TipAlertAnimation = memo(function TipAlertAnimation({ tip, onComplete }: {
     )}>
       <div className="relative">
         <div className={cn(
-          "bg-gradient-to-br backdrop-blur-xl rounded-2xl p-6 border-2 shadow-2xl",
+          "bg-ink-raised backdrop-blur-xl rounded-2xl p-6 border-2 border-ink-edge shadow-2xl",
           config.bg, config.border, config.shadow,
           tip.tier === 'mega' && "animate-pulse"
         )}>
           <div className="flex items-center gap-3 mb-2">
             <div className={cn(
               "p-2 rounded-full",
-              tip.tier === 'mega' ? "bg-gradient-to-r from-cyan-400 to-purple-400" : "bg-white/20"
+              tip.tier === 'mega' ? "bg-accent-core" : "bg-ink-surface"
             )}>
-              {tip.tier === 'mega' ? <Crown className="w-6 h-6 text-white" /> : <Coins className="w-6 h-6 text-yellow-200" />}
+              {tip.tier === 'mega' ? <Crown className="w-6 h-6 text-primary" /> : <Coins className="w-6 h-6 text-yellow-200" />}
             </div>
             <div>
-              <p className="text-lg font-bold text-white">@{tip.username}</p>
-              <p className="text-sm text-white/80">sent a {tip.tier} tip!</p>
+              <p className="text-lg font-bold text-primary">@{tip.username}</p>
+              <p className="text-sm text-primary/80">sent a {tip.tier} tip!</p>
             </div>
           </div>
           <p className={cn(
-            "text-3xl font-bold text-center text-white font-orbitron",
+            "text-3xl font-bold text-center text-primary font-orbitron",
             tip.tier === 'mega' && "text-4xl"
           )}>
             {tip.amount.toLocaleString()} STREAM
           </p>
           {tip.message && (
-            <p className="text-sm text-white/90 mt-3 text-center italic bg-black/20 rounded-lg p-2">
+            <p className="text-sm text-secondary mt-3 text-center italic bg-ink-page rounded-xl p-2">
               "{tip.message}"
             </p>
           )}
@@ -254,13 +254,13 @@ const MarketPriceOverlay = memo(function MarketPriceOverlay({ streamId }: { stre
       {data.marketData.map((coin) => (
         <div
           key={coin.symbol}
-          className="bg-slate-900/80 backdrop-blur-sm rounded-lg px-2.5 py-1 border border-slate-700/50 flex items-center gap-1.5 animate-fade-in"
+          className="bg-ink-surface/90 backdrop-blur-sm rounded-xl px-2.5 py-1 border border-ink-edge flex items-center gap-1.5 animate-fade-in"
         >
-          <span className="text-[10px] font-bold text-white">{coin.symbol}</span>
-          <span className="text-[10px] text-slate-300">${coin.price.toLocaleString()}</span>
+          <span className="text-[10px] font-bold text-primary">{coin.symbol}</span>
+          <span className="text-[10px] text-body">${coin.price.toLocaleString()}</span>
           <span className={cn(
             "text-[9px] font-medium",
-            coin.change24h >= 0 ? "text-emerald-400" : "text-red-400"
+            coin.change24h >= 0 ? "text-gain" : "text-loss"
           )}>
             {coin.change24h >= 0 ? '+' : ''}{coin.change24h.toFixed(2)}%
           </span>
@@ -284,21 +284,21 @@ const CoHostsDisplay = memo(function CoHostsDisplay({ streamId }: { streamId: st
     <div className="absolute bottom-3 left-3 z-10 hidden sm:flex gap-2">
       {data.coHosts.map((coHost) => (
         <div key={coHost.id} className="relative animate-scale-in">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 flex items-center justify-center border-2 border-cyan-400/50 overflow-hidden">
+          <div className="w-10 h-10 rounded-full bg-accent-core flex items-center justify-center border-2 border-accent-core/50 overflow-hidden">
             {coHost.avatar ? (
               <img src={coHost.avatar} alt="" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-xs font-bold text-white">{coHost.username?.[0]?.toUpperCase()}</span>
+              <span className="text-xs font-bold text-primary">{coHost.username?.[0]?.toUpperCase()}</span>
             )}
           </div>
           {coHost.isScreenSharing && (
-            <div className="absolute -top-1 -right-1 bg-emerald-500 rounded-full p-0.5">
-              <Monitor className="w-2.5 h-2.5 text-white" />
+            <div className="absolute -top-1 -right-1 bg-gain rounded-full p-0.5">
+              <Monitor className="w-2.5 h-2.5 text-primary" />
             </div>
           )}
           {coHost.isMuted && (
-            <div className="absolute -bottom-1 -right-1 bg-red-500 rounded-full p-0.5">
-              <MicOff className="w-2.5 h-2.5 text-white" />
+            <div className="absolute -bottom-1 -right-1 bg-loss rounded-full p-0.5">
+              <MicOff className="w-2.5 h-2.5 text-primary" />
             </div>
           )}
         </div>
@@ -309,62 +309,62 @@ const CoHostsDisplay = memo(function CoHostsDisplay({ streamId }: { streamId: st
 
 const ChatMessage = memo(function ChatMessageComponent({ msg }: { msg: ChatMessage }) {
   return (
-    <div className="group flex items-start gap-3 py-2.5 px-3 rounded-lg hover:bg-slate-800/40 transition-all duration-200 border-b border-slate-700/20 last:border-b-0">
+    <div className="group flex items-start gap-3 py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 border-b border-ink-divider last:border-b-0">
       <div className={cn(
         "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold shadow-md transition-transform duration-200 group-hover:scale-105",
-        msg.isAiAgent ? "bg-gradient-to-br from-cyan-500 to-blue-500 shadow-cyan-500/30" : 
-        msg.isModerator ? "bg-gradient-to-br from-emerald-500 to-green-500 shadow-emerald-500/30" :
-        msg.isSubscriber ? "bg-gradient-to-br from-purple-500 to-fuchsia-500 shadow-purple-500/30" :
-        "bg-slate-700"
+        msg.isAiAgent ? "bg-ink-raised shadow-cyan-500/30" :
+        msg.isModerator ? "bg-ink-raised shadow-emerald-500/30" :
+        msg.isSubscriber ? "bg-ink-raised shadow-purple-500/30" :
+        "bg-ink-raised"
       )}>
-        {msg.isAiAgent ? <Bot className="w-4 h-4 text-white" /> : msg.username[0]?.toUpperCase()}
+        {msg.isAiAgent ? <Bot className="w-4 h-4 text-primary" /> : msg.username[0]?.toUpperCase()}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap mb-1">
           {msg.isAiAgent && (
-            <Badge className="bg-cyan-500/20 text-cyan-400 text-[9px] px-1.5 py-0.5 h-auto font-semibold">AI</Badge>
+            <Badge className="bg-accent-core/20 text-accent-bright text-[9px] px-1.5 py-0.5 h-auto font-semibold">AI</Badge>
           )}
           {msg.isModerator && (
-            <Badge className="bg-emerald-500/20 text-emerald-400 text-[9px] px-1.5 py-0.5 h-auto font-semibold">MOD</Badge>
+            <Badge className="bg-gain/20 text-gain text-[9px] px-1.5 py-0.5 h-auto font-semibold">MOD</Badge>
           )}
           {msg.isSubscriber && (
-            <Badge className="bg-purple-500/20 text-purple-400 text-[9px] px-1.5 py-0.5 h-auto">
+            <Badge className="bg-accent-core/20 text-accent-bright text-[9px] px-1.5 py-0.5 h-auto">
               <Crown className="w-2.5 h-2.5" />
             </Badge>
           )}
           <span className={cn(
             "text-sm font-semibold",
-            msg.isAiAgent ? "text-cyan-400" : 
-            msg.isModerator ? "text-emerald-400" : 
-            msg.isSubscriber ? "text-purple-400" : "text-slate-300"
+            msg.isAiAgent ? "text-accent-bright" :
+            msg.isModerator ? "text-gain" :
+            msg.isSubscriber ? "text-accent-bright" : "text-body"
           )}>
             {msg.username}
           </span>
         </div>
-        <p className="text-sm text-slate-200 break-words leading-relaxed">{msg.content}</p>
+        <p className="text-sm text-body break-words leading-relaxed">{msg.content}</p>
       </div>
     </div>
   );
 });
 
-const SuperChatCard = memo(function SuperChatCard({ 
-  amount, 
-  username, 
+const SuperChatCard = memo(function SuperChatCard({
+  amount,
+  username,
   message,
-  tier 
-}: { 
-  amount: number; 
-  username: string; 
+  tier
+}: {
+  amount: number;
+  username: string;
   message?: string;
   tier: 'super' | 'mega';
 }) {
-  const config = tier === 'mega' 
-    ? { bg: 'from-cyan-500/20 to-purple-500/20', border: 'border-cyan-500/40', text: 'text-cyan-400' }
-    : { bg: 'from-purple-500/20 to-pink-500/20', border: 'border-purple-500/40', text: 'text-purple-400' };
+  const config = tier === 'mega'
+    ? { bg: ' ', border: 'border-accent-core/40', text: 'text-accent-bright' }
+    : { bg: ' ', border: 'border-accent-core/40', text: 'text-accent-bright' };
 
   return (
     <div className={cn(
-      "p-3 rounded-xl border bg-gradient-to-r mb-2",
+      "p-3 rounded-xl border mb-2",
       config.bg, config.border
     )}>
       <div className="flex items-center justify-between mb-1">
@@ -373,7 +373,7 @@ const SuperChatCard = memo(function SuperChatCard({
           {amount.toLocaleString()} STREAM
         </Badge>
       </div>
-      {message && <p className="text-sm text-slate-300">{message}</p>}
+      {message && <p className="text-sm text-body">{message}</p>}
     </div>
   );
 });
@@ -382,11 +382,11 @@ const StreamerCard = memo(function StreamerCard({ stream, isFollowing }: { strea
   const config = streamTypeConfig[stream.streamType] || streamTypeConfig.broadcast;
 
   return (
-    <Card className="p-4 bg-slate-900/60 border border-slate-700/40">
+    <Surface className="p-4">
       <div className="flex items-start gap-3">
         <div className="relative">
           <div className={cn(
-            "w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg bg-gradient-to-br ring-2",
+            "w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg bg-accent-core ring-2",
             config.gradient,
             "ring-purple-500/30"
           )}>
@@ -397,20 +397,20 @@ const StreamerCard = memo(function StreamerCard({ stream, isFollowing }: { strea
             )}
           </div>
           {stream.status === 'live' && (
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-slate-900" />
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gain rounded-full border-2 border-ink-surface" />
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-white text-lg">{stream.hostUsername || 'Anonymous'}</h3>
-          <p className="text-sm text-slate-400 line-clamp-2 mb-2">{stream.title}</p>
-          <div className="flex items-center gap-4 text-xs text-slate-500">
+          <h3 className="font-bold text-primary text-lg">{stream.hostUsername || 'Anonymous'}</h3>
+          <p className="text-sm text-secondary line-clamp-2 mb-2">{stream.title}</p>
+          <div className="flex items-center gap-4 text-xs text-muted">
             <span className="flex items-center gap-1">
               <Users className="w-3.5 h-3.5" />
               {formatViewers(stream.currentViewers)} watching
             </span>
             {stream.totalTipsReceived > 0 && (
               <span className="flex items-center gap-1">
-                <Coins className="w-3.5 h-3.5 text-amber-400" />
+                <Coins className="w-3.5 h-3.5 text-warn" />
                 {stream.totalTipsReceived.toLocaleString()}
               </span>
             )}
@@ -418,24 +418,24 @@ const StreamerCard = memo(function StreamerCard({ stream, isFollowing }: { strea
         </div>
       </div>
       <div className="flex gap-2 mt-4">
-        <Button 
+        <Button
           className={cn(
             "flex-1",
-            isFollowing 
-              ? "bg-slate-700 hover:bg-slate-600" 
-              : "bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500"
+            isFollowing
+              ? "bg-ink-raised hover:bg-ink-edge"
+              : "bg-ink-raised hover: hover:"
           )}
           data-testid="button-follow-streamer"
         >
           <Heart className={cn("w-4 h-4 mr-2", isFollowing && "fill-current")} />
           {isFollowing ? 'Following' : 'Follow'}
         </Button>
-        <Button variant="outline" className="border-slate-600 text-slate-300" data-testid="button-subscribe-streamer">
-          <Crown className="w-4 h-4 mr-2 text-amber-400" />
+        <Button variant="outline" className="border-ink-edge text-body" data-testid="button-subscribe-streamer">
+          <Crown className="w-4 h-4 mr-2 text-warn" />
           Subscribe
         </Button>
       </div>
-    </Card>
+    </Surface>
   );
 });
 
@@ -444,7 +444,7 @@ export default function StreamViewPage() {
   const [, setLocation] = useLocation();
   const { isAuthenticated, user } = useAuth();
   const { toast } = useToast();
-  
+
   const [message, setMessage] = useState('');
   const [tipAmount, setTipAmount] = useState('');
   const [tipMessage, setTipMessage] = useState('');
@@ -475,29 +475,29 @@ export default function StreamViewPage() {
   const [pinnedMessages, setPinnedMessages] = useState<{ id: string; username: string; content: string; pinnedAt: string; isAlpha: boolean }[]>([]);
   const [isImmersiveMode, setIsImmersiveMode] = useState(false);
   const [hasAutoEnteredImmersive, setHasAutoEnteredImmersive] = useState(false);
-  
+
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const viewerVideoRef = useRef<HTMLVideoElement>(null);
   const streamContainerRef = useRef<HTMLDivElement>(null);
   const streamId = params?.id || null;
   const watchTimeRef = useRef<number>(0);
   const lastPointsAwardedRef = useRef<number>(0);
-  
+
   const { isConnected, viewerCount, messages, recentJoins, sendMessage, onAvatarAudio } = useStreamSocket(streamId);
-  
+
   const awardStreamWatch = useAwardStreamWatch();
   const awardVoiceConversation = useAwardVoiceConversation();
-  
+
   const { data: streamData, isLoading } = useQuery<{ stream: LiveStream }>({
     queryKey: ['/api/streams', streamId],
     enabled: !!streamId,
     refetchInterval: 30000, // Reduced from 10s to 30s for performance
     staleTime: 15000,
   });
-  
+
   const stream = streamData?.stream;
   const isAvatarStream = stream?.isKnowledgeAvatar === true;
-  
+
   const {
     isReceivingVideo,
     remoteStream,
@@ -505,7 +505,7 @@ export default function StreamViewPage() {
     error: videoError,
     retryConnection: retryVideoConnection,
   } = useViewerStream(streamId, false);
-  
+
   const {
     isConnected: liveKitConnected,
     connectionState: liveKitConnectionState,
@@ -518,15 +518,15 @@ export default function StreamViewPage() {
     disconnect: disconnectLiveKit,
     participantCount: liveKitParticipants,
   } = useLiveKitStream(streamId);
-  
+
   const hasLiveKitVideo = !!remoteVideoTrack || (isLiveKitHost && !!localVideoTrack);
-  
+
   const { data: pinnedData } = useQuery<{ messages: { id: string; username: string; content: string; pinnedAt: string; isAlpha: boolean }[] }>({
     queryKey: ['/api/streams', streamId, 'messages', 'pinned'],
     enabled: !!streamId,
     refetchInterval: 15000,
   });
-  
+
   useEffect(() => {
     if (streamId && isAuthenticated) {
       apiRequest(`/api/streams/${streamId}/join`, { method: 'POST' })
@@ -538,9 +538,9 @@ export default function StreamViewPage() {
         });
     }
   }, [streamId, isAuthenticated]);
-  
+
   const [hasAttemptedLiveKitConnect, setHasAttemptedLiveKitConnect] = useState(false);
-  
+
   useEffect(() => {
     if (stream?.status === 'live' && !stream?.isKnowledgeAvatar && isAuthenticated && !liveKitConnected && !hasAttemptedLiveKitConnect && !liveKitError) {
       console.log('[StreamView] Auto-connecting to LiveKit for live stream');
@@ -548,7 +548,7 @@ export default function StreamViewPage() {
       connectLiveKit();
     }
   }, [stream?.status, stream?.isKnowledgeAvatar, isAuthenticated, liveKitConnected, hasAttemptedLiveKitConnect, liveKitError, connectLiveKit]);
-  
+
   useEffect(() => {
     return () => {
       if (liveKitConnected) {
@@ -556,7 +556,7 @@ export default function StreamViewPage() {
       }
     };
   }, [liveKitConnected, disconnectLiveKit]);
-  
+
   const config = stream ? streamTypeConfig[stream.streamType] || streamTypeConfig.broadcast : streamTypeConfig.broadcast;
   const Icon = config.icon;
   const isHost = user?.id === stream?.hostId;
@@ -567,7 +567,7 @@ export default function StreamViewPage() {
       console.log('[StreamView] Auto-entering immersive fullscreen mode for host');
       setIsImmersiveMode(true);
       setHasAutoEnteredImmersive(true);
-      
+
       toast({
         title: "You're Live!",
         description: "Swipe down or press ESC to exit fullscreen",
@@ -637,12 +637,12 @@ export default function StreamViewPage() {
 
   useEffect(() => {
     if (!streamId || !isAuthenticated || !stream?.status) return;
-    
+
     const POINTS_INTERVAL_MS = 5 * 60 * 1000;
-    
+
     const interval = setInterval(() => {
       watchTimeRef.current += 5;
-      
+
       if (watchTimeRef.current >= 5 && watchTimeRef.current > lastPointsAwardedRef.current) {
         const minutesToAward = watchTimeRef.current - lastPointsAwardedRef.current;
         if (minutesToAward >= 5) {
@@ -652,7 +652,7 @@ export default function StreamViewPage() {
         }
       }
     }, POINTS_INTERVAL_MS);
-    
+
     return () => {
       clearInterval(interval);
       watchTimeRef.current = 0;
@@ -813,7 +813,7 @@ export default function StreamViewPage() {
       if (!prev) return prev;
       return {
         ...prev,
-        options: prev.options.map(opt => 
+        options: prev.options.map(opt =>
           opt.id === optionId ? { ...opt, votes: opt.votes + 1 } : opt
         ),
         totalVotes: prev.totalVotes + 1,
@@ -874,37 +874,37 @@ export default function StreamViewPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-[100dvh] bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950 safe-area-inset">
+      <div className="min-h-[100dvh] bg-ink-page safe-area-inset">
         <div className="flex flex-col lg:flex-row h-screen">
           <div className="flex-1 flex flex-col">
-            <div className="h-14 bg-slate-900/80 border-b border-purple-500/20 animate-pulse" />
-            <div className="flex-1 relative bg-slate-900/60 m-4 rounded-2xl animate-pulse">
+            <div className="h-14 bg-ink-surface border-b border-ink-divider animate-pulse" />
+            <div className="flex-1 relative bg-ink-surface m-4 rounded-2xl animate-pulse">
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-purple-500/30 to-cyan-500/30 flex items-center justify-center">
-                    <Radio className="w-10 h-10 text-purple-400 animate-pulse" />
+                  <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent-core/20 flex items-center justify-center">
+                    <Radio className="w-10 h-10 text-accent-bright animate-pulse" />
                   </div>
-                  <div className="h-4 w-32 mx-auto bg-slate-700/50 rounded-full mb-3" />
-                  <div className="h-3 w-24 mx-auto bg-slate-700/30 rounded-full" />
+                  <div className="h-4 w-32 mx-auto bg-ink-raised rounded-xl mb-3" />
+                  <div className="h-3 w-24 mx-auto bg-ink-raised rounded-xl" />
                 </div>
               </div>
             </div>
             <div className="p-4 space-y-3">
-              <div className="h-6 w-3/4 bg-slate-700/50 rounded animate-pulse" />
-              <div className="h-4 w-1/2 bg-slate-700/30 rounded animate-pulse" />
+              <div className="h-6 w-3/4 bg-ink-raised rounded-xl animate-pulse" />
+              <div className="h-4 w-1/2 bg-ink-raised rounded-xl animate-pulse" />
             </div>
           </div>
-          <div className="hidden lg:block w-[380px] border-l border-purple-500/20 bg-slate-900/40">
-            <div className="p-4 border-b border-slate-700/40">
-              <div className="h-10 bg-slate-700/30 rounded animate-pulse" />
+          <div className="hidden lg:block w-[380px] border-l border-accent-core/20 bg-ink-surface/40">
+            <div className="p-4 border-b border-ink-edge/40">
+              <div className="h-10 bg-ink-raised/30 rounded animate-pulse" />
             </div>
             <div className="p-4 space-y-4">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="flex gap-3 animate-pulse" style={{ animationDelay: `${i * 100}ms` }}>
-                  <div className="w-8 h-8 rounded-full bg-slate-700/50" />
+                  <div className="w-8 h-8 rounded-full bg-ink-raised/50" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-3 w-20 bg-slate-700/40 rounded" />
-                    <div className="h-3 w-full bg-slate-700/30 rounded" />
+                    <div className="h-3 w-20 bg-ink-raised/40 rounded" />
+                    <div className="h-3 w-full bg-ink-raised/30 rounded" />
                   </div>
                 </div>
               ))}
@@ -917,14 +917,14 @@ export default function StreamViewPage() {
 
   if (!stream) {
     return (
-      <div className="min-h-[100dvh] bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950 flex flex-col items-center justify-center gap-4 px-4 safe-area-inset">
-        <div className="w-20 h-20 rounded-full bg-slate-800/60 flex items-center justify-center mb-2">
+      <div className="min-h-[100dvh] bg-ink-raised flex flex-col items-center justify-center gap-4 px-4 safe-area-inset">
+        <div className="w-20 h-20 rounded-full bg-ink-raised/60 flex items-center justify-center mb-2">
           <Video className="w-10 h-10 text-slate-600" />
         </div>
-        <h1 className="text-xl font-bold text-white">Stream not found</h1>
-        <p className="text-slate-400 text-center max-w-md">This stream may have ended or doesn't exist.</p>
+        <h1 className="text-xl font-bold text-primary">Stream not found</h1>
+        <p className="text-secondary text-center max-w-md">This stream may have ended or doesn't exist.</p>
         <Link href="/streams">
-          <Button className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 mt-2">
+          <Button className="bg-ink-raised hover: hover: mt-2">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Browse Streams
           </Button>
@@ -940,112 +940,112 @@ export default function StreamViewPage() {
 
   // Determine effective connection state - prioritize LiveKit over WebRTC
   const effectiveLiveKitConnected = liveKitConnected && (!!remoteVideoTrack || (isLiveKitHost && !!localVideoTrack));
-  const effectiveConnectionState = effectiveLiveKitConnected 
-    ? 'connected' 
-    : liveKitConnectionState === 'connected' 
+  const effectiveConnectionState = effectiveLiveKitConnected
+    ? 'connected'
+    : liveKitConnectionState === 'connected'
       ? 'connected'
-      : liveKitConnectionState === 'connecting' 
-        ? 'connecting' 
-        : videoConnectionState === 'disconnected' 
-          ? 'failed' 
+      : liveKitConnectionState === 'connecting'
+        ? 'connecting'
+        : videoConnectionState === 'disconnected'
+          ? 'failed'
           : videoConnectionState;
-  
+
   // Get the effective video track (prioritize host's local track if they're the host, otherwise remote)
   const effectiveVideoTrack = isLiveKitHost ? localVideoTrack : remoteVideoTrack;
 
   // Handle ended streams - show replay interface
   if (isEnded) {
     return (
-      <div className="min-h-[100dvh] bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950 safe-area-inset">
+      <div className="min-h-[100dvh] bg-ink-raised safe-area-inset">
         <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
           {/* Header */}
           <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => window.history.back()}
-              className="text-slate-400 hover:text-white hover:bg-purple-500/20 shrink-0" 
+              className="text-secondary hover:text-primary hover:bg-accent-core/20 shrink-0"
               data-testid="button-back"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div className="min-w-0 flex-1">
-              <Badge className="bg-amber-500/20 text-amber-400 border border-amber-500/30 mb-2">
+              <Badge className="bg-warn/20 text-warn border border-warn/30 mb-2">
                 <Video className="w-3 h-3 mr-1" />
                 Replay
               </Badge>
-              <h1 className="text-lg sm:text-xl font-bold text-white truncate">{stream.title}</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-primary truncate">{stream.title}</h1>
             </div>
           </div>
 
           {/* Combined Host & Audio Player Card */}
-          <Card className="overflow-hidden bg-gradient-to-br from-slate-900/95 via-slate-800/50 to-slate-900/95 border border-slate-700/50 mb-6 sm:mb-8">
+          <Surface className="overflow-hidden bg-ink-raised border border-ink-edge/50 mb-6 sm:mb-8">
             {/* Avatar Hero Section */}
-            <div className="relative bg-gradient-to-br from-slate-800 via-purple-900/30 to-slate-900 p-6 sm:p-8">
+            <div className="relative bg-ink-raised p-6 sm:p-8">
               {/* Subtle pattern overlay */}
               <div className="absolute inset-0 opacity-5" style={{
                 backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)',
                 backgroundSize: '24px 24px'
               }} />
-              
+
               <div className="relative flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
                 {/* Large centered avatar */}
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/50 to-cyan-500/50 rounded-full blur-2xl scale-150" />
-                  <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-purple-600 via-fuchsia-500 to-cyan-500 border-4 border-white/20 flex items-center justify-center overflow-hidden shadow-2xl">
+                  <div className="absolute inset-0 bg-ink-raised rounded-full blur-2xl scale-150" />
+                  <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-ink-raised border-4 border-white/20 flex items-center justify-center overflow-hidden shadow-2xl">
                     {stream.hostAvatar && (
-                      <img 
-                        src={stream.hostAvatar} 
-                        alt={stream.hostUsername} 
+                      <img
+                        src={stream.hostAvatar}
+                        alt={stream.hostUsername}
                         className="w-full h-full object-cover absolute inset-0"
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = 'none';
                         }}
                       />
                     )}
-                    <span className="text-4xl sm:text-5xl font-bold text-white drop-shadow-lg select-none">
+                    <span className="text-4xl sm:text-5xl font-bold text-primary drop-shadow-lg select-none">
                       {(stream.hostUsername || 'A')[0]?.toUpperCase()}
                     </span>
                   </div>
                 </div>
-                
+
                 {/* Host info */}
                 <div className="text-center sm:text-left flex-1 min-w-0">
-                  <p className="font-bold text-xl sm:text-2xl text-white mb-1">{stream.hostUsername || 'Anonymous'}</p>
+                  <p className="font-bold text-xl sm:text-2xl text-primary mb-1">{stream.hostUsername || 'Anonymous'}</p>
                   <div className="flex items-center justify-center sm:justify-start gap-2 mb-3">
-                    <Badge className="bg-purple-500/20 text-purple-400 border border-purple-500/30 text-xs">
+                    <Badge className="bg-accent-core/20 text-accent-bright border border-accent-core/30 text-xs">
                       <Bot className="w-3 h-3 mr-1" />
                       Knowledge Avatar
                     </Badge>
                   </div>
                   {stream.description && (
-                    <p className="text-sm text-slate-400 line-clamp-3 max-w-lg">{stream.description}</p>
+                    <p className="text-sm text-secondary line-clamp-3 max-w-lg">{stream.description}</p>
                   )}
                 </div>
               </div>
             </div>
-            
+
             {/* Audio Player Section */}
-            <div className="p-4 sm:p-6 border-t border-slate-700/50 bg-gradient-to-b from-slate-800/30 to-transparent">
+            <div className="p-4 sm:p-6 border-t border-ink-edge/50 bg-ink-raised">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 flex items-center justify-center">
-                  <Volume2 className="w-5 h-5 text-cyan-400" />
+                <div className="w-10 h-10 rounded-full bg-ink-raised border border-accent-core/30 flex items-center justify-center">
+                  <Volume2 className="w-5 h-5 text-accent-bright" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Listen to Market Update</h3>
-                  <p className="text-xs text-slate-500">AI-generated audio commentary</p>
+                  <h3 className="text-sm font-semibold text-primary">Listen to Market Update</h3>
+                  <p className="text-xs text-muted">AI-generated audio commentary</p>
                 </div>
               </div>
-              <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
-                <audio 
-                  controls 
+              <div className="bg-ink-raised/50 rounded-xl p-3 border border-ink-edge/50">
+                <audio
+                  controls
                   className="w-full h-10"
                   style={{ colorScheme: 'dark' }}
                   src={`/api/streams/${stream.id}/audio`}
                   onError={(e) => {
                     const parent = (e.target as HTMLAudioElement).parentElement;
                     if (parent) {
-                      parent.innerHTML = '<p class="text-center text-slate-500 text-sm py-2">Audio not available for this replay</p>';
+                      parent.innerHTML = '<p class="text-center text-muted text-sm py-2">Audio not available for this replay</p>';
                     }
                   }}
                 >
@@ -1053,12 +1053,12 @@ export default function StreamViewPage() {
                 </audio>
               </div>
             </div>
-          </Card>
+          </Surface>
 
           {/* Back to streams button */}
           <div className="flex justify-center">
             <Link href="/replays">
-              <Button className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500">
+              <Button className="bg-ink-raised hover: hover:">
                 <Video className="w-4 h-4 mr-2" />
                 Browse More Replays
               </Button>
@@ -1120,66 +1120,66 @@ export default function StreamViewPage() {
 
   return (
     <div className={cn(
-      "min-h-[100dvh] bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950 safe-area-inset flex flex-col",
+      "min-h-[100dvh] bg-ink-raised safe-area-inset flex flex-col",
       isTheaterMode && "bg-black"
     )}>
       <div className={cn(
-        "border-b border-purple-500/20 bg-slate-900/80 backdrop-blur-xl sticky top-0 z-50",
+        "border-b border-accent-core/20 bg-ink-surface/80 backdrop-blur-xl sticky top-0 z-50",
         isTheaterMode && "bg-black/90"
       )}>
         <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-4">
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => window.history.back()}
-              className="text-slate-400 hover:text-white h-9 w-9 sm:w-auto p-0 sm:px-3 hover:bg-purple-500/20" 
+              className="text-secondary hover:text-primary h-9 w-9 sm:w-auto p-0 sm:px-3 hover:bg-accent-core/20"
               data-testid="button-back"
             >
               <ArrowLeft className="w-5 h-5 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline ml-2">Back</span>
             </Button>
-            
+
             <div className="hidden sm:flex items-center gap-2">
-              <div className={cn("p-1.5 rounded-lg", config.bgColor)}>
+              <div className={cn("p-1.5 rounded-xl", config.bgColor)}>
                 <Icon className={cn("w-4 h-4", config.color)} />
               </div>
-              <Badge variant="outline" className={cn("border-purple-500/30 text-xs", config.color)}>
+              <Badge variant="outline" className={cn("border-accent-core/30 text-xs", config.color)}>
                 {config.label}
               </Badge>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             {isLive && (
               <>
-                <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-[10px] sm:text-xs px-2">
+                <Badge className="bg-loss/20 text-loss border-loss/30 text-[10px] sm:text-xs px-2">
                   <span className="relative flex h-2 w-2 mr-1.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-loss"></span>
                   </span>
                   LIVE
                 </Badge>
-                <Badge variant="outline" className="border-slate-600 text-slate-300 text-[10px] sm:text-xs hidden sm:flex">
+                <Badge variant="outline" className="border-ink-edge text-body text-[10px] sm:text-xs hidden sm:flex">
                   <Clock className="w-3 h-3 mr-1" />
                   {formatDuration(streamDuration)}
                 </Badge>
               </>
             )}
-            
-            <Badge 
-              variant="outline" 
+
+            <Badge
+              variant="outline"
               className={cn(
                 "text-[10px] sm:text-xs px-2",
-                isConnected 
-                  ? "border-emerald-500/30 text-emerald-400" 
-                  : "border-orange-500/30 text-orange-400"
+                isConnected
+                  ? "border-gain/30 text-gain"
+                  : "border-warn/30 text-warn"
               )}
             >
               {isConnected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
             </Badge>
-            
-            <Badge variant="outline" className="border-cyan-500/30 text-cyan-400 text-[10px] sm:text-xs">
+
+            <Badge variant="outline" className="border-accent-core/30 text-accent-bright text-[10px] sm:text-xs">
               <Eye className="w-3 h-3 mr-1" />
               {formatViewers(displayViewerCount)}
             </Badge>
@@ -1189,7 +1189,7 @@ export default function StreamViewPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsMuted(!isMuted)}
-                className="text-slate-400 hover:text-white h-8 w-8 p-0"
+                className="text-secondary hover:text-primary h-8 w-8 p-0"
                 data-testid="button-toggle-mute"
               >
                 {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
@@ -1198,7 +1198,7 @@ export default function StreamViewPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsTheaterMode(!isTheaterMode)}
-                className="text-slate-400 hover:text-white h-8 w-8 p-0"
+                className="text-secondary hover:text-primary h-8 w-8 p-0"
                 data-testid="button-theater-mode"
               >
                 {isTheaterMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -1208,7 +1208,7 @@ export default function StreamViewPage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsImmersiveMode(true)}
-                  className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/20 h-8 px-2 gap-1"
+                  className="text-accent-bright hover:text-purple-300 hover:bg-accent-core/20 h-8 px-2 gap-1"
                   data-testid="button-immersive-mode"
                 >
                   <Sparkles className="w-4 h-4" />
@@ -1228,21 +1228,21 @@ export default function StreamViewPage() {
           "flex-1 p-3 sm:p-4 lg:p-6 space-y-4",
           isTheaterMode && "p-0 sm:p-0 lg:p-0"
         )}>
-          <Card className={cn(
-            "relative overflow-hidden border border-purple-500/20",
-            isTheaterMode 
-              ? "aspect-auto h-[60dvh] sm:h-[70dvh] lg:h-[80dvh] rounded-none border-0 bg-black" 
-              : "aspect-video bg-gradient-to-br from-slate-900/90 via-purple-900/20 to-slate-900/90"
+          <Surface className={cn(
+            "relative overflow-hidden border border-accent-core/20",
+            isTheaterMode
+              ? "aspect-auto h-[60dvh] sm:h-[70dvh] lg:h-[80dvh] rounded-none border-0 bg-black"
+              : "aspect-video bg-ink-raised"
           )}>
             {isLive && streamId && <MarketPriceOverlay streamId={streamId} />}
             {isLive && streamId && <CoHostsDisplay streamId={streamId} />}
-            
+
             {isLive && recentJoins.length > 0 && (
               <div className="absolute left-3 top-16 z-20 space-y-1">
                 <ViewerPresence recentJoins={recentJoins} />
               </div>
             )}
-            
+
             {activeTipAlerts.map((tip) => (
               <TipAlertAnimation
                 key={tip.id}
@@ -1250,7 +1250,7 @@ export default function StreamViewPage() {
                 onComplete={() => removeTipAlert(tip.id)}
               />
             ))}
-            
+
             {isLive && isHost && !stream.isKnowledgeAvatar ? (
               <BroadcasterView
                 streamId={stream.id}
@@ -1272,21 +1272,21 @@ export default function StreamViewPage() {
               />
             ) : isLive && liveKitConnected && hasLiveKitVideo ? (
               <div className="absolute inset-0">
-                <LiveKitVideo 
+                <LiveKitVideo
                   track={isLiveKitHost ? localVideoTrack : remoteVideoTrack}
                   className="w-full h-full object-cover"
                   muted={isMuted}
                   mirror={isLiveKitHost}
                 />
                 <div className="absolute top-3 left-3 z-10">
-                  <Badge className="backdrop-blur-sm text-xs px-2.5 py-1 bg-emerald-500/80 text-white">
+                  <Badge className="backdrop-blur-sm text-xs px-2.5 py-1 bg-gain/80 text-primary">
                     <Wifi className="w-3 h-3 mr-1.5" />
                     Live via LiveKit
                   </Badge>
                 </div>
                 {liveKitParticipants > 1 && (
                   <div className="absolute top-3 right-3 z-10">
-                    <Badge className="backdrop-blur-sm text-xs px-2.5 py-1 bg-purple-500/80 text-white">
+                    <Badge className="backdrop-blur-sm text-xs px-2.5 py-1 bg-accent-core/80 text-primary">
                       <Users className="w-3 h-3 mr-1.5" />
                       {liveKitParticipants}
                     </Badge>
@@ -1305,10 +1305,10 @@ export default function StreamViewPage() {
                 <div className="absolute top-3 left-3 z-10">
                   <Badge className={cn(
                     "backdrop-blur-sm text-xs px-2.5 py-1",
-                    videoConnectionState === 'connected' ? "bg-emerald-500/80 text-white" :
-                    videoConnectionState === 'connecting' ? "bg-cyan-500/80 text-white" :
-                    videoConnectionState === 'reconnecting' ? "bg-amber-500/80 text-white" :
-                    "bg-red-500/80 text-white"
+                    videoConnectionState === 'connected' ? "bg-gain/80 text-primary" :
+                    videoConnectionState === 'connecting' ? "bg-accent-core/80 text-primary" :
+                    videoConnectionState === 'reconnecting' ? "bg-warn/80 text-primary" :
+                    "bg-loss/80 text-primary"
                   )}>
                     {videoConnectionState === 'connected' ? <Wifi className="w-3 h-3 mr-1.5" /> :
                      videoConnectionState === 'connecting' ? <Radio className="w-3 h-3 mr-1.5 animate-pulse" /> :
@@ -1320,46 +1320,46 @@ export default function StreamViewPage() {
                 </div>
               </div>
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10">
+              <div className="absolute inset-0 flex items-center justify-center bg-ink-raised">
                 {isLive ? (
                   <div className="text-center px-4">
                     <div className={cn(
-                      "p-6 rounded-full bg-gradient-to-br border mb-4 inline-block",
+                      "p-6 rounded-full bg-ink-raised border mb-4 inline-block",
                       config.gradient,
                       "border-white/20"
                     )}>
                       {liveKitConnectionState === 'connecting' ? (
-                        <Radio className="w-12 h-12 text-white animate-pulse" />
+                        <Radio className="w-12 h-12 text-primary animate-pulse" />
                       ) : liveKitError ? (
-                        <WifiOff className="w-12 h-12 text-white" />
+                        <WifiOff className="w-12 h-12 text-primary" />
                       ) : (
-                        <Icon className="w-12 h-12 text-white" />
+                        <Icon className="w-12 h-12 text-primary" />
                       )}
                     </div>
-                    <p className="text-lg font-bold text-white mb-2 font-orbitron">
-                      {liveKitConnectionState === 'connecting' ? 'Connecting to Stream...' : 
-                       liveKitError ? 'Connection Failed' : 
+                    <p className="text-lg font-bold text-primary mb-2 font-orbitron">
+                      {liveKitConnectionState === 'connecting' ? 'Connecting to Stream...' :
+                       liveKitError ? 'Connection Failed' :
                        liveKitConnected && !hasLiveKitVideo ? 'Waiting for Video...' : 'Stream is Live'}
                     </p>
-                    <p className="text-sm text-slate-400 flex items-center justify-center gap-2 mb-3">
+                    <p className="text-sm text-secondary flex items-center justify-center gap-2 mb-3">
                       {liveKitConnectionState === 'connecting' ? (
                         <>
-                          <Radio className="w-4 h-4 text-cyan-400 animate-pulse" />
+                          <Radio className="w-4 h-4 text-accent-bright animate-pulse" />
                           Establishing video connection...
                         </>
                       ) : liveKitError ? (
                         <>
-                          <WifiOff className="w-4 h-4 text-red-400" />
+                          <WifiOff className="w-4 h-4 text-loss" />
                           {liveKitError}
                         </>
                       ) : liveKitConnected && !hasLiveKitVideo ? (
                         <>
-                          <Radio className="w-4 h-4 text-purple-400 animate-pulse" />
+                          <Radio className="w-4 h-4 text-accent-bright animate-pulse" />
                           Waiting for broadcaster to start video...
                         </>
                       ) : (
                         <>
-                          <Sparkles className="w-4 h-4 text-purple-400" />
+                          <Sparkles className="w-4 h-4 text-accent-bright" />
                           Waiting for broadcaster...
                         </>
                       )}
@@ -1370,7 +1370,7 @@ export default function StreamViewPage() {
                           setHasAttemptedLiveKitConnect(false);
                           connectLiveKit();
                         }}
-                        className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white"
+                        className="bg-ink-raised hover: hover: text-primary"
                         data-testid="button-retry-video"
                       >
                         <Radio className="w-4 h-4 mr-2" />
@@ -1380,41 +1380,41 @@ export default function StreamViewPage() {
                   </div>
                 ) : isScheduled ? (
                   <div className="text-center px-4">
-                    <div className="p-6 rounded-full bg-amber-500/20 border border-amber-500/30 mb-4 inline-block">
-                      <Clock className="w-12 h-12 text-amber-400" />
+                    <div className="p-6 rounded-full bg-warn/20 border border-warn/30 mb-4 inline-block">
+                      <Clock className="w-12 h-12 text-warn" />
                     </div>
-                    <p className="text-lg font-bold text-white mb-2">Stream Scheduled</p>
-                    <p className="text-sm text-slate-400">
-                      {stream.scheduledStart 
+                    <p className="text-lg font-bold text-primary mb-2">Stream Scheduled</p>
+                    <p className="text-sm text-secondary">
+                      {stream.scheduledStart
                         ? new Date(stream.scheduledStart).toLocaleString()
                         : 'Time TBD'}
                     </p>
-                    <Button className="mt-4 bg-amber-500 hover:bg-amber-400">
+                    <Button className="mt-4 bg-warn hover:bg-warn">
                       <Bell className="w-4 h-4 mr-2" />
                       Remind Me
                     </Button>
                   </div>
                 ) : (
                   <div className="text-center px-4">
-                    <div className="p-6 rounded-full bg-slate-800 border border-slate-700 mb-4 inline-block">
-                      <Video className="w-12 h-12 text-slate-500" />
+                    <div className="p-6 rounded-full bg-ink-raised border border-ink-edge mb-4 inline-block">
+                      <Video className="w-12 h-12 text-muted" />
                     </div>
-                    <p className="text-lg font-bold text-slate-400">Stream Ended</p>
-                    <p className="text-sm text-slate-500 mt-1">Check back for replays!</p>
+                    <p className="text-lg font-bold text-secondary">Stream Ended</p>
+                    <p className="text-sm text-muted mt-1">Check back for replays!</p>
                   </div>
                 )}
               </div>
             )}
-            
+
             {isLive && isAuthenticated && !isHost && (
               <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 z-10 flex items-center gap-1.5 sm:gap-2">
-                <CreateClipButton 
-                  streamId={streamId || ''} 
+                <CreateClipButton
+                  streamId={streamId || ''}
                   currentTime={streamDuration}
                 />
                 <Button
                   onClick={() => setShowPredictionPanel(true)}
-                  className="bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 border-0 h-8 sm:h-10 min-h-0 sm:min-h-[44px] px-2 sm:px-4 text-xs sm:text-sm font-medium shadow-lg shadow-fuchsia-500/25 transition-all duration-200 hover:scale-105 active:scale-95"
+                  className="bg-ink-raised hover: hover: border-0 h-8 sm:h-10 min-h-0 sm:min-h-[44px] px-2 sm:px-4 text-xs sm:text-sm font-medium shadow-lg shadow-fuchsia-500/25 transition-all duration-200 hover:scale-105 active:scale-95"
                   data-testid="button-create-prediction"
                 >
                   <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-2" />
@@ -1422,7 +1422,7 @@ export default function StreamViewPage() {
                 </Button>
                 <Button
                   onClick={() => setShowTipPanel(true)}
-                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 border-0 h-8 sm:h-10 min-h-0 sm:min-h-[44px] px-2 sm:px-4 text-xs sm:text-sm font-medium shadow-lg shadow-amber-500/25 transition-all duration-200 hover:scale-105 active:scale-95"
+                  className="bg-ink-raised hover: hover: border-0 h-8 sm:h-10 min-h-0 sm:min-h-[44px] px-2 sm:px-4 text-xs sm:text-sm font-medium shadow-lg shadow-amber-500/25 transition-all duration-200 hover:scale-105 active:scale-95"
                   data-testid="button-open-tip-panel"
                 >
                   <Gift className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-2" />
@@ -1436,79 +1436,79 @@ export default function StreamViewPage() {
                 onClick={() => setIsFloatingChat(!isFloatingChat)}
                 variant="ghost"
                 size="sm"
-                className="absolute bottom-3 left-3 z-10 bg-slate-900/60 hover:bg-slate-800/80"
+                className="absolute bottom-3 left-3 z-10 bg-ink-surface/60 hover:bg-ink-raised/80"
               >
                 <MessageCircle className="w-4 h-4 mr-2" />
                 {isFloatingChat ? 'Hide' : 'Show'} Chat
               </Button>
             )}
-          </Card>
+          </Surface>
 
           {!isTheaterMode && (
             <>
-              <Card className="p-3 sm:p-4 bg-slate-900/60 border border-slate-700/40">
+              <Surface className="p-3 sm:p-4 bg-ink-surface/60 border border-ink-edge/40">
                 <div className="flex items-start justify-between gap-2 sm:gap-4 mb-2 sm:mb-3">
-                  <h1 className="text-base sm:text-xl font-bold text-white font-orbitron line-clamp-2 flex-1">{stream.title}</h1>
+                  <h1 className="text-base sm:text-xl font-bold text-primary font-orbitron line-clamp-2 flex-1">{stream.title}</h1>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={handleCopyLink}
-                      className="border-slate-600/80 text-slate-300 h-10 min-h-[44px] w-10 min-w-[44px] p-0 hover:bg-slate-700/50 hover:border-slate-500 transition-all duration-200"
+                      className="border-ink-edge/80 text-body h-10 min-h-[44px] w-10 min-w-[44px] p-0 hover:bg-ink-raised/50 hover:border-ink-edge transition-all duration-200"
                       data-testid="button-copy-link"
                     >
-                      {isCopied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                      {isCopied ? <Check className="w-4 h-4 text-gain" /> : <Copy className="w-4 h-4" />}
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="border-slate-600/80 text-slate-300 h-10 min-h-[44px] w-10 min-w-[44px] p-0 hover:bg-slate-700/50 hover:border-slate-500 transition-all duration-200"
+                      className="border-ink-edge/80 text-body h-10 min-h-[44px] w-10 min-w-[44px] p-0 hover:bg-ink-raised/50 hover:border-ink-edge transition-all duration-200"
                       data-testid="button-share-stream"
                     >
                       <Share2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
-                
+
                 <StreamerCard stream={stream} isFollowing={false} />
-                
+
                 {stream.description && (
-                  <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-slate-700/40">
-                    <p className="text-xs sm:text-sm text-slate-400 line-clamp-2 sm:line-clamp-none">{stream.description}</p>
+                  <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-ink-edge/40">
+                    <p className="text-xs sm:text-sm text-secondary line-clamp-2 sm:line-clamp-none">{stream.description}</p>
                   </div>
                 )}
-                
+
                 {stream.tags && stream.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-3 sm:mt-4">
                     {stream.tags.slice(0, 4).map((tag, i) => (
-                      <Badge key={i} variant="outline" className="border-purple-500/20 text-purple-400 text-[10px] sm:text-xs px-1.5 sm:px-2">
+                      <Badge key={i} variant="outline" className="border-accent-core/20 text-accent-bright text-[10px] sm:text-xs px-1.5 sm:px-2">
                         #{tag}
                       </Badge>
                     ))}
                     {stream.tags.length > 4 && (
                       <>
                         {stream.tags.slice(4).map((tag, i) => (
-                          <Badge key={i + 4} variant="outline" className="border-purple-500/20 text-purple-400 text-[10px] sm:text-xs px-1.5 sm:px-2 hidden sm:inline-flex">
+                          <Badge key={i + 4} variant="outline" className="border-accent-core/20 text-accent-bright text-[10px] sm:text-xs px-1.5 sm:px-2 hidden sm:inline-flex">
                             #{tag}
                           </Badge>
                         ))}
-                        <Badge variant="outline" className="border-slate-500/20 text-slate-400 text-[10px] px-1.5 sm:hidden">
+                        <Badge variant="outline" className="border-ink-edge/20 text-secondary text-[10px] px-1.5 sm:hidden">
                           +{stream.tags.length - 4}
                         </Badge>
                       </>
                     )}
                   </div>
                 )}
-              </Card>
+              </Surface>
 
               {isLive && (
-                <Card className="p-3 sm:p-4 bg-slate-900/60 border border-slate-700/40">
+                <Surface className="p-3 sm:p-4 bg-ink-surface/60 border border-ink-edge/40">
                   <div className="flex items-center justify-between gap-2 sm:gap-3 mb-2 sm:mb-3">
-                    <h3 className="text-xs sm:text-sm font-semibold text-white flex items-center gap-1.5 sm:gap-2">
-                      <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-fuchsia-400" />
+                    <h3 className="text-xs sm:text-sm font-semibold text-primary flex items-center gap-1.5 sm:gap-2">
+                      <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-accent-bright" />
                       Engage
                     </h3>
-                    
+
                     {isHost && (
                       <div className="flex items-center gap-2">
                         {isRecording ? (
@@ -1516,7 +1516,7 @@ export default function StreamViewPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => setIsRecording(false)}
-                            className="border-red-500/30 text-red-400 hover:bg-red-500/10 h-8 text-xs"
+                            className="border-loss/30 text-loss hover:bg-loss/10 h-8 text-xs"
                           >
                             <Circle className="w-3 h-3 mr-1 fill-red-500 text-red-500 animate-pulse" />
                             {formatDuration(recordingDuration)}
@@ -1526,19 +1526,19 @@ export default function StreamViewPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => { setIsRecording(true); setRecordingDuration(0); }}
-                            className="border-red-500/30 text-red-400 hover:bg-red-500/10 h-8 text-xs"
+                            className="border-loss/30 text-loss hover:bg-loss/10 h-8 text-xs"
                           >
                             <Circle className="w-3 h-3 mr-1" />
                             Record
                           </Button>
                         )}
-                        
+
                         {!activePoll && (
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => setShowPollCreator(true)}
-                            className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10 h-8 text-xs"
+                            className="border-accent-core/30 text-accent-bright hover:bg-accent-core/10 h-8 text-xs"
                           >
                             <BarChart3 className="w-3 h-3 mr-1" />
                             Poll
@@ -1547,12 +1547,12 @@ export default function StreamViewPage() {
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <QuickReactButtons onReact={handleReaction} />
                     <StreamReactions streamId={streamId || ''} onReact={handleReaction} />
                   </div>
-                  
+
                   {activePoll && (
                     <div className="mt-4">
                       <StreamPoll
@@ -1564,7 +1564,7 @@ export default function StreamViewPage() {
                       />
                     </div>
                   )}
-                  
+
                   {showPollCreator && (
                     <div className="mt-4">
                       <CreatePollForm
@@ -1573,22 +1573,22 @@ export default function StreamViewPage() {
                       />
                     </div>
                   )}
-                </Card>
+                </Surface>
               )}
             </>
           )}
         </div>
 
         <div className={cn(
-          "w-full lg:w-[380px] xl:w-[420px] flex flex-col border-t lg:border-t-0 lg:border-l border-purple-500/30",
+          "w-full lg:w-[380px] xl:w-[420px] flex flex-col border-t lg:border-t-0 lg:border-l border-accent-core/30",
           "lg:overflow-hidden",
           isTheaterMode && !isFloatingChat && "hidden",
-          isTheaterMode && isFloatingChat && "fixed bottom-4 right-4 w-[360px] h-[500px] rounded-xl border shadow-2xl z-50 bg-slate-900",
-          !isTheaterMode && "bg-gradient-to-b from-slate-900/60 to-slate-900/80 lg:h-[calc(100vh-56px)] lg:sticky lg:top-14"
+          isTheaterMode && isFloatingChat && "fixed bottom-4 right-4 w-[360px] h-[500px] rounded-xl border shadow-2xl z-50 bg-ink-surface",
+          !isTheaterMode && "bg-ink-raised lg:h-[calc(100vh-56px)] lg:sticky lg:top-14"
         )}>
           {isTheaterMode && isFloatingChat && (
-            <div className="flex items-center justify-between p-3 border-b border-slate-700/50">
-              <span className="text-sm font-semibold text-white">Live Chat</span>
+            <div className="flex items-center justify-between p-3 border-b border-ink-edge/50">
+              <span className="text-sm font-semibold text-primary">Live Chat</span>
               <Button
                 variant="ghost"
                 size="sm"
@@ -1602,24 +1602,24 @@ export default function StreamViewPage() {
 
           <button
             onClick={() => setIsChatExpanded(!isChatExpanded)}
-            className="lg:hidden flex items-center justify-between p-4 bg-gradient-to-r from-slate-900/80 to-purple-900/20 min-h-[56px] active:bg-slate-800/60 transition-colors"
+            className="lg:hidden flex items-center justify-between p-4 bg-ink-raised min-h-[56px] active:bg-ink-raised/60 transition-colors"
           >
-            <span className="text-base font-semibold text-white flex items-center gap-3">
-              <div className="p-1.5 rounded-lg bg-purple-500/20">
-                <MessageCircle className="w-5 h-5 text-purple-400" />
+            <span className="text-base font-semibold text-primary flex items-center gap-3">
+              <div className="p-1.5 rounded-xl bg-accent-core/20">
+                <MessageCircle className="w-5 h-5 text-accent-bright" />
               </div>
               Live Chat
               {messages.length > 0 && (
-                <Badge className="bg-purple-500/30 text-purple-300 text-xs px-2 py-0.5">
+                <Badge className="bg-accent-core/30 text-purple-300 text-xs px-2 py-0.5">
                   {messages.length}
                 </Badge>
               )}
             </span>
-            <div className="p-2 rounded-lg bg-slate-800/50">
+            <div className="p-2 rounded-xl bg-ink-raised/50">
               {isChatExpanded ? (
-                <ChevronDown className="w-5 h-5 text-slate-300" />
+                <ChevronDown className="w-5 h-5 text-body" />
               ) : (
-                <ChevronUp className="w-5 h-5 text-slate-300" />
+                <ChevronUp className="w-5 h-5 text-body" />
               )}
             </div>
           </button>
@@ -1629,70 +1629,70 @@ export default function StreamViewPage() {
             isChatExpanded ? "min-h-[60dvh] sm:min-h-[55dvh] lg:min-h-0 lg:flex-1" : "h-0 lg:flex-1"
           )}>
             <Tabs value={chatTab} onValueChange={(v) => setChatTab(v as 'chat' | 'tips' | 'subscribe' | 'costream' | 'converse' | 'replay' | 'clips' | 'points' | 'tools')} className="flex flex-col h-full">
-              <div className="hidden lg:block border-b border-slate-700/40">
+              <div className="hidden lg:block border-b border-ink-edge/40">
                 <TabsList className="bg-transparent w-full justify-start rounded-none h-11 p-0">
-                  <TabsTrigger 
-                    value="chat" 
-                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-purple-500 data-[state=active]:bg-transparent text-xs"
+                  <TabsTrigger
+                    value="chat"
+                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-accent-core data-[state=active]:bg-transparent text-xs"
                   >
                     <MessageCircle className="w-3.5 h-3.5 mr-1" />
                     Chat
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="tips" 
-                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent text-xs"
+                  <TabsTrigger
+                    value="tips"
+                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-warn data-[state=active]:bg-transparent text-xs"
                   >
-                    <Coins className="w-3.5 h-3.5 mr-1 text-amber-400" />
+                    <Coins className="w-3.5 h-3.5 mr-1 text-warn" />
                     Tips
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="subscribe" 
-                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-fuchsia-500 data-[state=active]:bg-transparent text-xs"
+                  <TabsTrigger
+                    value="subscribe"
+                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-accent-core data-[state=active]:bg-transparent text-xs"
                   >
-                    <Crown className="w-3.5 h-3.5 mr-1 text-fuchsia-400" />
+                    <Crown className="w-3.5 h-3.5 mr-1 text-accent-bright" />
                     Sub
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="costream" 
-                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-cyan-500 data-[state=active]:bg-transparent text-xs"
+                  <TabsTrigger
+                    value="costream"
+                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-accent-core data-[state=active]:bg-transparent text-xs"
                   >
-                    <Radio className="w-3.5 h-3.5 mr-1 text-cyan-400" />
+                    <Radio className="w-3.5 h-3.5 mr-1 text-accent-bright" />
                     Co-Stream
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="converse" 
-                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-transparent text-xs"
+                  <TabsTrigger
+                    value="converse"
+                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-gain data-[state=active]:bg-transparent text-xs"
                   >
-                    <Mic className="w-3.5 h-3.5 mr-1 text-emerald-400" />
+                    <Mic className="w-3.5 h-3.5 mr-1 text-gain" />
                     Voice
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="replay" 
+                  <TabsTrigger
+                    value="replay"
                     className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-slate-400 data-[state=active]:bg-transparent text-xs"
                   >
-                    <Clock className="w-3.5 h-3.5 mr-1 text-slate-400" />
+                    <Clock className="w-3.5 h-3.5 mr-1 text-secondary" />
                     History
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="clips" 
+                  <TabsTrigger
+                    value="clips"
                     className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-pink-500 data-[state=active]:bg-transparent text-xs"
                   >
                     <Scissors className="w-3.5 h-3.5 mr-1 text-pink-400" />
                     Clips
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="points" 
+                  <TabsTrigger
+                    value="points"
                     className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-yellow-500 data-[state=active]:bg-transparent text-xs"
                   >
                     <Sparkles className="w-3.5 h-3.5 mr-1 text-yellow-400" />
                     Points
                   </TabsTrigger>
                   {isHost && (
-                    <TabsTrigger 
-                      value="tools" 
-                      className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-red-500 data-[state=active]:bg-transparent text-xs"
+                    <TabsTrigger
+                      value="tools"
+                      className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-loss data-[state=active]:bg-transparent text-xs"
                     >
-                      <Settings className="w-3.5 h-3.5 mr-1 text-red-400" />
+                      <Settings className="w-3.5 h-3.5 mr-1 text-loss" />
                       Host Tools
                     </TabsTrigger>
                   )}
@@ -1701,21 +1701,21 @@ export default function StreamViewPage() {
 
               <TabsContent value="chat" className="flex-1 flex flex-col m-0 overflow-hidden">
                 {pinnedData?.messages && pinnedData.messages.length > 0 && (
-                  <div className="p-2 border-b border-slate-700/40">
-                    <PinnedMessagesBar 
+                  <div className="p-2 border-b border-ink-edge/40">
+                    <PinnedMessagesBar
                       messages={pinnedData.messages}
                       onUnpin={undefined}
                     />
                   </div>
                 )}
-                
+
                 {superChats.length > 0 && (
-                  <div className="p-3 border-b border-slate-700/40 max-h-[150px] overflow-y-auto">
+                  <div className="p-3 border-b border-ink-edge/40 max-h-[150px] overflow-y-auto">
                     {superChats.map((sc) => sc && (
-                      <SuperChatCard 
-                        key={sc.id} 
-                        amount={sc.amount} 
-                        username={sc.username} 
+                      <SuperChatCard
+                        key={sc.id}
+                        amount={sc.amount}
+                        username={sc.username}
                         message={sc.message}
                         tier={sc.tier}
                       />
@@ -1723,17 +1723,17 @@ export default function StreamViewPage() {
                   </div>
                 )}
 
-                <div 
+                <div
                   ref={chatContainerRef}
                   className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5 scrollbar-thin"
                 >
                   {messages.length === 0 ? (
-                    <div className="text-center py-12 text-slate-500 animate-fade-in">
-                      <div className="p-4 rounded-full bg-slate-800/50 inline-block mb-4">
-                        <MessageSquare className="w-10 h-10 text-slate-500" />
+                    <div className="text-center py-12 text-muted animate-fade-in">
+                      <div className="p-4 rounded-full bg-ink-raised/50 inline-block mb-4">
+                        <MessageSquare className="w-10 h-10 text-muted" />
                       </div>
-                      <p className="text-sm font-medium text-slate-400">No messages yet</p>
-                      <p className="text-xs text-slate-500 mt-1">Start the conversation!</p>
+                      <p className="text-sm font-medium text-secondary">No messages yet</p>
+                      <p className="text-xs text-muted mt-1">Start the conversation!</p>
                     </div>
                   ) : (
                     messages.map((msg) => (
@@ -1741,8 +1741,8 @@ export default function StreamViewPage() {
                     ))
                   )}
                 </div>
-                
-                <div className="p-4 border-t border-slate-700/50 bg-gradient-to-t from-slate-900 to-slate-900/80 relative">
+
+                <div className="p-4 border-t border-ink-edge/50 bg-ink-raised relative">
                   {showCommandsHelp && (
                     <ChatCommandsHelp onClose={() => setShowCommandsHelp(false)} />
                   )}
@@ -1752,7 +1752,7 @@ export default function StreamViewPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => setShowCommandsHelp(!showCommandsHelp)}
-                        className="h-12 w-12 min-w-[48px] min-h-[48px] p-0 text-slate-400 hover:text-purple-400 hover:bg-purple-500/10 flex-shrink-0 rounded-xl transition-all duration-200"
+                        className="h-12 w-12 min-w-[48px] min-h-[48px] p-0 text-secondary hover:text-accent-bright hover:bg-accent-core/10 flex-shrink-0 rounded-xl transition-all duration-200"
                         data-testid="button-commands-help"
                       >
                         <Zap className="w-5 h-5" />
@@ -1763,16 +1763,16 @@ export default function StreamViewPage() {
                           value={message}
                           onChange={(e) => setMessage(e.target.value)}
                           onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                          className="bg-slate-800/70 border-2 border-slate-700/80 text-white text-sm h-12 rounded-xl pl-4 pr-4 focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/20 transition-all duration-200"
+                          className="bg-ink-raised/70 border-2 border-ink-edge/80 text-primary text-sm h-12 rounded-xl pl-4 pr-4 focus:border-accent-core/60 focus:ring-2 focus:ring-purple-500/20 transition-all duration-200"
                           disabled={!isConnected}
                           data-testid="input-chat-message"
                         />
                       </div>
-                      <Button 
+                      <Button
                         size="icon"
                         onClick={handleSendMessage}
                         disabled={!isConnected || !message.trim()}
-                        className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 h-12 w-12 min-w-[48px] min-h-[48px] flex-shrink-0 rounded-xl shadow-lg shadow-purple-500/25 transition-all duration-200 disabled:opacity-50 disabled:shadow-none"
+                        className="bg-ink-raised hover: hover: h-12 w-12 min-w-[48px] min-h-[48px] flex-shrink-0 rounded-xl shadow-lg shadow-purple-500/25 transition-all duration-200 disabled:opacity-50 disabled:shadow-none"
                         data-testid="button-send-message"
                       >
                         <Send className="w-5 h-5" />
@@ -1780,7 +1780,7 @@ export default function StreamViewPage() {
                     </div>
                   ) : (
                     <Link href="/auth">
-                      <Button className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 h-12 rounded-xl shadow-lg shadow-purple-500/25 font-semibold">
+                      <Button className="w-full bg-ink-raised hover: hover: h-12 rounded-xl shadow-lg shadow-purple-500/25 font-semibold">
                         Sign in to Chat
                       </Button>
                     </Link>
@@ -1798,8 +1798,8 @@ export default function StreamViewPage() {
                         onClick={() => handleTip(amount)}
                         disabled={!isAuthenticated || tipMutation.isPending}
                         className={cn(
-                          "border-amber-500/30 text-amber-400 hover:bg-amber-500/10 h-12",
-                          amount >= 100 && "border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+                          "border-warn/30 text-warn hover:bg-warn/10 h-12",
+                          amount >= 100 && "border-accent-core/30 text-accent-bright hover:bg-accent-core/10"
                         )}
                         data-testid={`quick-tip-${amount}`}
                       >
@@ -1807,14 +1807,14 @@ export default function StreamViewPage() {
                       </Button>
                     ))}
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Input
                       type="number"
                       placeholder="Custom amount"
                       value={tipAmount}
                       onChange={(e) => setTipAmount(e.target.value)}
-                      className="bg-slate-800/50 border-slate-700 text-white h-11"
+                      className="bg-ink-raised/50 border-ink-edge text-primary h-11"
                       min="1"
                       data-testid="input-tip-amount"
                     />
@@ -1822,29 +1822,29 @@ export default function StreamViewPage() {
                       placeholder="Add a message (optional)"
                       value={tipMessage}
                       onChange={(e) => setTipMessage(e.target.value)}
-                      className="bg-slate-800/50 border-slate-700 text-white resize-none h-20"
+                      className="bg-ink-raised/50 border-ink-edge text-primary resize-none h-20"
                       data-testid="input-tip-message"
                     />
-                    <Button 
+                    <Button
                       onClick={() => handleTip()}
                       disabled={!isAuthenticated || !tipAmount || tipMutation.isPending}
-                      className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 h-11"
+                      className="w-full bg-ink-raised hover: hover: h-11"
                       data-testid="button-send-tip"
                     >
                       <Gift className="w-4 h-4 mr-2" />
                       {tipMutation.isPending ? 'Sending...' : `Send ${tipAmount || '0'} STREAM`}
                     </Button>
                   </div>
-                  
+
                   {stream.totalTipsReceived > 0 && (
-                    <div className="pt-4 border-t border-slate-700/40 text-center">
-                      <p className="text-2xl font-bold text-amber-400 font-orbitron">
+                    <div className="pt-4 border-t border-ink-edge/40 text-center">
+                      <p className="text-2xl font-bold text-warn font-orbitron">
                         {stream.totalTipsReceived.toLocaleString()}
                       </p>
-                      <p className="text-xs text-slate-500">STREAM received this stream</p>
+                      <p className="text-xs text-muted">STREAM received this stream</p>
                     </div>
                   )}
-                  
+
                   <div className="pt-4 space-y-4">
                     <ViewerLeaderboard streamId={streamId || ''} />
                     {isAuthenticated && user && (
@@ -1857,31 +1857,31 @@ export default function StreamViewPage() {
               <TabsContent value="subscribe" className="flex-1 flex flex-col m-0 p-4 overflow-y-auto">
                 <div className="space-y-3">
                   <div className="text-center mb-4">
-                    <h3 className="text-lg font-bold text-white mb-1">Subscribe to {stream.hostUsername || 'this streamer'}</h3>
-                    <p className="text-xs text-slate-400">Get exclusive perks and support your favorite creator</p>
+                    <h3 className="text-lg font-bold text-primary mb-1">Subscribe to {stream.hostUsername || 'this streamer'}</h3>
+                    <p className="text-xs text-secondary">Get exclusive perks and support your favorite creator</p>
                   </div>
 
-                  <div className="p-4 rounded-xl border border-slate-700/50 bg-slate-800/30 hover:border-slate-600/60 transition-colors cursor-pointer group"
+                  <div className="p-4 rounded-xl border border-ink-edge/50 bg-ink-raised/30 hover:border-ink-edge/60 transition-colors cursor-pointer group"
                        onClick={() => toast({ title: 'Free Tier', description: 'You already have access to free content!' })}
                        data-testid="subscription-tier-free"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
-                          <Users className="w-4 h-4 text-slate-400" />
+                        <div className="w-8 h-8 rounded-full bg-ink-raised flex items-center justify-center">
+                          <Users className="w-4 h-4 text-secondary" />
                         </div>
-                        <span className="font-semibold text-white">Free</span>
+                        <span className="font-semibold text-primary">Free</span>
                       </div>
-                      <Badge variant="outline" className="border-slate-600 text-slate-400 text-[10px]">Current</Badge>
+                      <Badge variant="outline" className="border-ink-edge text-secondary text-[10px]">Current</Badge>
                     </div>
-                    <ul className="text-xs text-slate-400 space-y-1.5">
-                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-emerald-400" /> Watch all public streams</li>
-                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-emerald-400" /> Chat during live streams</li>
-                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-emerald-400" /> Basic emotes</li>
+                    <ul className="text-xs text-secondary space-y-1.5">
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-gain" /> Watch all public streams</li>
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-gain" /> Chat during live streams</li>
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-gain" /> Basic emotes</li>
                     </ul>
                   </div>
 
-                  <div className="p-4 rounded-xl border-2 border-purple-500/50 bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10 hover:border-purple-400/70 transition-all cursor-pointer group"
+                  <div className="p-4 rounded-xl border-2 border-accent-core/50 bg-ink-raised hover:border-accent-core/70 transition-all cursor-pointer group"
                        onClick={() => {
                          if (!isAuthenticated) {
                            toast({ title: 'Sign in required', description: 'Please sign in to subscribe.' });
@@ -1893,28 +1893,28 @@ export default function StreamViewPage() {
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center">
-                          <Crown className="w-4 h-4 text-white" />
+                        <div className="w-8 h-8 rounded-full bg-ink-raised flex items-center justify-center">
+                          <Crown className="w-4 h-4 text-primary" />
                         </div>
-                        <span className="font-semibold text-white">Silver</span>
+                        <span className="font-semibold text-primary">Silver</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-lg font-bold text-purple-400">100</span>
-                        <span className="text-xs text-slate-400 ml-1">STREAM/mo</span>
+                        <span className="text-lg font-bold text-accent-bright">100</span>
+                        <span className="text-xs text-secondary ml-1">STREAM/mo</span>
                       </div>
                     </div>
-                    <ul className="text-xs text-slate-300 space-y-1.5 mb-3">
-                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-purple-400" /> All Free tier perks</li>
-                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-purple-400" /> Subscriber badge in chat</li>
-                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-purple-400" /> Custom emotes (10+)</li>
-                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-purple-400" /> Ad-free viewing</li>
+                    <ul className="text-xs text-body space-y-1.5 mb-3">
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-accent-bright" /> All Free tier perks</li>
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-accent-bright" /> Subscriber badge in chat</li>
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-accent-bright" /> Custom emotes (10+)</li>
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-accent-bright" /> Ad-free viewing</li>
                     </ul>
-                    <Button className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 h-9 text-sm">
+                    <Button className="w-full bg-ink-raised hover: hover: h-9 text-sm">
                       Subscribe - 100 STREAM
                     </Button>
                   </div>
 
-                  <div className="p-4 rounded-xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-500/10 to-orange-500/10 hover:border-amber-400/70 transition-all cursor-pointer group relative overflow-hidden"
+                  <div className="p-4 rounded-xl border-2 border-warn/50 bg-ink-raised hover:border-warn/70 transition-all cursor-pointer group relative overflow-hidden"
                        onClick={() => {
                          if (!isAuthenticated) {
                            toast({ title: 'Sign in required', description: 'Please sign in to subscribe.' });
@@ -1924,37 +1924,37 @@ export default function StreamViewPage() {
                        }}
                        data-testid="subscription-tier-gold"
                   >
-                    <div className="absolute top-0 right-0 px-2 py-0.5 bg-amber-500 text-[10px] font-bold text-black">
+                    <div className="absolute top-0 right-0 px-2 py-0.5 bg-warn text-[10px] font-bold text-primary">
                       BEST VALUE
                     </div>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center animate-pulse-slow">
-                          <Trophy className="w-4 h-4 text-white" />
+                        <div className="w-8 h-8 rounded-full bg-ink-raised flex items-center justify-center animate-pulse-slow">
+                          <Trophy className="w-4 h-4 text-primary" />
                         </div>
-                        <span className="font-semibold text-white">Gold</span>
+                        <span className="font-semibold text-primary">Gold</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-lg font-bold text-amber-400">500</span>
-                        <span className="text-xs text-slate-400 ml-1">STREAM/mo</span>
+                        <span className="text-lg font-bold text-warn">500</span>
+                        <span className="text-xs text-secondary ml-1">STREAM/mo</span>
                       </div>
                     </div>
-                    <ul className="text-xs text-slate-300 space-y-1.5 mb-3">
-                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-amber-400" /> All Silver tier perks</li>
-                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-amber-400" /> Priority chat messages</li>
-                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-amber-400" /> Access subscriber-only streams</li>
-                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-amber-400" /> Exclusive Discord role</li>
-                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-amber-400" /> Monthly shoutout on stream</li>
+                    <ul className="text-xs text-body space-y-1.5 mb-3">
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-warn" /> All Silver tier perks</li>
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-warn" /> Priority chat messages</li>
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-warn" /> Access subscriber-only streams</li>
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-warn" /> Exclusive Discord role</li>
+                      <li className="flex items-center gap-2"><Check className="w-3 h-3 text-warn" /> Monthly shoutout on stream</li>
                     </ul>
-                    <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 h-9 text-sm text-black font-semibold">
+                    <Button className="w-full bg-ink-raised hover: hover: h-9 text-sm text-primary font-semibold">
                       Subscribe - 500 STREAM
                     </Button>
                   </div>
 
-                  <p className="text-[10px] text-slate-500 text-center pt-2">
+                  <p className="text-[10px] text-muted text-center pt-2">
                     Subscriptions renew monthly. Cancel anytime.
                   </p>
-                  
+
                   <div className="pt-4">
                     <StreamAchievementsPanel userId={user?.id} />
                   </div>
@@ -1962,8 +1962,8 @@ export default function StreamViewPage() {
               </TabsContent>
 
               <TabsContent value="costream" className="flex-1 flex flex-col m-0 p-4 overflow-y-auto">
-                <CoStreamPanel 
-                  sessionId={streamId || ''} 
+                <CoStreamPanel
+                  sessionId={streamId || ''}
                   avatars={[]}
                 />
               </TabsContent>
@@ -1978,14 +1978,14 @@ export default function StreamViewPage() {
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full p-6 text-center">
-                    <Mic className="w-12 h-12 text-emerald-400/50 mb-4" />
-                    <h3 className="text-lg font-semibold text-white mb-2">Voice Conversation</h3>
-                    <p className="text-sm text-slate-400 mb-4">
+                    <Mic className="w-12 h-12 text-gain/50 mb-4" />
+                    <h3 className="text-lg font-semibold text-primary mb-2">Voice Conversation</h3>
+                    <p className="text-sm text-secondary mb-4">
                       Join the live voice conversation with the host and other viewers
                     </p>
                     {!isAuthenticated && (
                       <Link href="/auth">
-                        <Button className="bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500">
+                        <Button className="bg-ink-raised hover: hover:">
                           Sign in to Join
                         </Button>
                       </Link>
@@ -2004,9 +2004,9 @@ export default function StreamViewPage() {
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full p-6 text-center">
-                    <Clock className="w-12 h-12 text-slate-400/50 mb-4" />
-                    <h3 className="text-lg font-semibold text-white mb-2">Conversation History</h3>
-                    <p className="text-sm text-slate-400">
+                    <Clock className="w-12 h-12 text-secondary/50 mb-4" />
+                    <h3 className="text-lg font-semibold text-primary mb-2">Conversation History</h3>
+                    <p className="text-sm text-secondary">
                       View past voice conversations from this stream
                     </p>
                   </div>
@@ -2032,14 +2032,14 @@ export default function StreamViewPage() {
                 <TabsContent value="tools" className="flex-1 flex flex-col m-0 overflow-y-auto">
                   {streamId && (
                     <div className="space-y-4 p-4">
-                      <RaidPanel 
-                        streamId={streamId} 
-                        isHost={isHost} 
-                        currentViewers={stream?.currentViewers || 0} 
+                      <RaidPanel
+                        streamId={streamId}
+                        isHost={isHost}
+                        currentViewers={stream?.currentViewers || 0}
                       />
-                      <ChatModerationPanel 
-                        streamId={streamId} 
-                        isHost={true} 
+                      <ChatModerationPanel
+                        streamId={streamId}
+                        isHost={true}
                       />
                       <StreamAnalyticsPanel streamId={streamId} />
                     </div>
@@ -2052,24 +2052,24 @@ export default function StreamViewPage() {
       </div>
 
       {showTipPanel && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center"
           onClick={() => setShowTipPanel(false)}
         >
-          <div 
-            className="bg-slate-900 border border-slate-700 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-6 space-y-4"
+          <div
+            className="bg-ink-surface border border-ink-edge rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-6 space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Gift className="w-5 h-5 text-amber-400" />
+              <h3 className="text-lg font-bold text-primary flex items-center gap-2">
+                <Gift className="w-5 h-5 text-warn" />
                 Send a Tip
               </h3>
               <Button variant="ghost" size="sm" onClick={() => setShowTipPanel(false)} className="h-8 w-8 p-0">
                 <X className="w-4 h-4" />
               </Button>
             </div>
-            
+
             <div className="grid grid-cols-4 gap-2">
               {[10, 50, 100, 500].map((amount) => (
                 <Button
@@ -2078,36 +2078,36 @@ export default function StreamViewPage() {
                   onClick={() => { setTipAmount(amount.toString()); }}
                   className={cn(
                     "h-14",
-                    parseInt(tipAmount) === amount 
-                      ? "bg-amber-500/20 border-amber-500 text-amber-400" 
-                      : "border-slate-600 text-slate-300"
+                    parseInt(tipAmount) === amount
+                      ? "bg-warn/20 border-warn text-warn"
+                      : "border-ink-edge text-body"
                   )}
                 >
                   {amount}
                 </Button>
               ))}
             </div>
-            
+
             <Input
               type="number"
               placeholder="Custom amount"
               value={tipAmount}
               onChange={(e) => setTipAmount(e.target.value)}
-              className="bg-slate-800/50 border-slate-700 text-white h-12"
+              className="bg-ink-raised/50 border-ink-edge text-primary h-12"
               min="1"
             />
-            
+
             <Textarea
               placeholder="Add a message (shows on stream if 100+ STREAM)"
               value={tipMessage}
               onChange={(e) => setTipMessage(e.target.value)}
-              className="bg-slate-800/50 border-slate-700 text-white resize-none h-24"
+              className="bg-ink-raised/50 border-ink-edge text-primary resize-none h-24"
             />
-            
-            <Button 
+
+            <Button
               onClick={() => handleTip()}
               disabled={!tipAmount || tipMutation.isPending}
-              className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 h-12 text-lg"
+              className="w-full bg-ink-raised hover: hover: h-12 text-lg"
             >
               {tipMutation.isPending ? 'Sending...' : `Send ${tipAmount || '0'} STREAM`}
             </Button>
@@ -2116,39 +2116,39 @@ export default function StreamViewPage() {
       )}
 
       {showPredictionPanel && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center"
           onClick={() => setShowPredictionPanel(false)}
         >
-          <div 
-            className="bg-slate-900 border border-slate-700 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-6 space-y-4"
+          <div
+            className="bg-ink-surface border border-ink-edge rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-6 space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-fuchsia-400" />
+              <h3 className="text-lg font-bold text-primary flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-accent-bright" />
                 Make a Prediction
               </h3>
               <Button variant="ghost" size="sm" onClick={() => setShowPredictionPanel(false)} className="h-8 w-8 p-0">
                 <X className="w-4 h-4" />
               </Button>
             </div>
-            
-            <p className="text-sm text-slate-400">
+
+            <p className="text-sm text-secondary">
               Share your market prediction. If the community likes it, it might become a prediction market!
             </p>
-            
+
             <Textarea
               placeholder="e.g., BTC will reach $100k by end of Q1 2025"
               value={predictionText}
               onChange={(e) => setPredictionText(e.target.value)}
-              className="bg-slate-800/50 border-slate-700 text-white resize-none h-28"
+              className="bg-ink-raised/50 border-ink-edge text-primary resize-none h-28"
             />
-            
-            <Button 
+
+            <Button
               onClick={handleCreatePrediction}
               disabled={!predictionText.trim() || predictionMutation.isPending}
-              className="w-full bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 h-12"
+              className="w-full bg-ink-raised hover: hover: h-12"
             >
               {predictionMutation.isPending ? 'Creating...' : 'Share Prediction'}
             </Button>

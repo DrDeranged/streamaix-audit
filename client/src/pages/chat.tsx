@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Sparkles, Loader2, Bot, User, ArrowLeft, Trash2, Download, Copy, Check } from 'lucide-react';
+import { Send, Sparkles, Loader2, Bot, User, ArrowLeft, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -12,6 +12,8 @@ import { getAuthToken } from '@/lib/auth';
 import { useLocation } from 'wouter';
 import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground';
 import { Navigation } from '@/components/ui/navigation';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 
 interface ChatMessage {
   id: string;
@@ -104,7 +106,7 @@ export default function ChatPage() {
   ];
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
+    <div className="relative min-h-[100dvh] bg-ink-page">
       <NeuralNetworkBackground />
       
       <div className="relative z-10">
@@ -121,7 +123,7 @@ export default function ChatPage() {
               <Button
                 variant="ghost"
                 onClick={() => setLocation('/')}
-                className="neural-glass hover:bg-white/10"
+                className="rounded-xl border border-ink-edge bg-ink-surface text-secondary hover:bg-ink-raised hover:text-primary"
                 data-testid="button-back"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -143,13 +145,13 @@ export default function ChatPage() {
           </motion.div>
 
           {/* Chat Container */}
-          <div className="neural-glass rounded-3xl shadow-2xl overflow-hidden iridescent-border min-h-[600px] flex flex-col">
+          <Surface className="min-h-[600px] flex flex-col overflow-hidden">
             {/* Messages Area */}
             <ScrollArea className="flex-1 p-6">
               <div className="space-y-6">
                 {isLoading ? (
                   <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
+                    <Loader2 className="h-8 w-8 animate-spin text-accent-bright" />
                   </div>
                 ) : messages.length === 0 ? (
                   /* Empty State */
@@ -162,13 +164,13 @@ export default function ChatPage() {
                       <motion.div
                         animate={{ y: [0, -10, 0] }}
                         transition={{ duration: 2, repeat: Infinity }}
-                        className="inline-block p-6 bg-gradient-to-br from-purple-500/20 via-fuchsia-500/20 to-cyan-500/20 rounded-3xl"
+                        className="inline-block rounded-xl border border-accent-core/30 bg-accent-core/10 p-6"
                       >
-                        <Sparkles className="h-16 w-16 text-purple-400" />
+                        <Sparkles className="h-16 w-16 text-accent-bright" />
                       </motion.div>
                     </div>
-                    <h3 className="text-2xl font-bold text-white mb-2">Welcome to AI Assistant</h3>
-                    <p className="text-gray-400 mb-8 max-w-md mx-auto">
+                    <SectionTitle as="h3" className="mb-2">Welcome to AI Assistant</SectionTitle>
+                    <p className="mx-auto mb-8 max-w-md text-body">
                       Ask me anything about platform features, market trends, or get personalized investment insights.
                     </p>
                     
@@ -181,10 +183,10 @@ export default function ChatPage() {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: index * 0.1 }}
                           onClick={() => setInputMessage(prompt)}
-                          className="neural-glass p-4 rounded-xl text-left hover:bg-white/5 transition-all group border border-purple-500/20 hover:border-purple-400/40"
+                          className="group rounded-xl border border-ink-edge bg-ink-raised p-4 text-left transition-all hover:border-accent-core/50 hover:bg-ink-surface"
                           data-testid={`button-suggested-${index}`}
                         >
-                          <p className="text-sm text-gray-300 group-hover:text-white transition-colors">
+                          <p className="text-sm text-body transition-colors group-hover:text-primary">
                             {prompt}
                           </p>
                         </motion.button>
@@ -203,28 +205,28 @@ export default function ChatPage() {
                         className={`flex gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                       >
                         {msg.role === 'assistant' && (
-                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center shadow-lg">
-                            <Bot className="h-5 w-5 text-white" />
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-accent-core/40 bg-accent-core/10">
+                            <Bot className="h-5 w-5 text-accent-bright" />
                           </div>
                         )}
                         
                         <div className={`flex-1 max-w-[80%] ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
                           <div
-                            className={`inline-block p-4 rounded-2xl ${
+                            className={`inline-block rounded-xl border p-4 ${
                               msg.role === 'user'
-                                ? 'bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 text-white'
-                                : 'neural-glass border border-purple-500/20'
+                                ? 'border-accent-core bg-accent-core text-primary'
+                                : 'border-ink-edge bg-ink-raised'
                             }`}
                           >
-                            <p className={`text-sm leading-relaxed whitespace-pre-wrap ${msg.role === 'assistant' ? 'text-gray-100' : ''}`}>
+                            <p className="whitespace-pre-wrap text-sm leading-relaxed text-primary">
                               {msg.message}
                             </p>
                             
                             {msg.role === 'assistant' && (
-                              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/10">
+                              <div className="mt-3 flex items-center gap-2 border-t border-ink-divider pt-3">
                                 <button
                                   onClick={() => handleCopyMessage(msg.message, msg.id)}
-                                  className="text-xs text-gray-400 hover:text-white transition-colors flex items-center gap-1"
+                                  className="flex items-center gap-1 text-xs text-secondary transition-colors hover:text-primary"
                                   data-testid={`button-copy-${msg.id}`}
                                 >
                                   {copiedId === msg.id ? (
@@ -243,14 +245,14 @@ export default function ChatPage() {
                             )}
                           </div>
                           
-                          <p className="text-xs text-gray-500 mt-2 px-2">
+                          <p className="mt-2 px-2 text-xs text-muted">
                             {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </p>
                         </div>
                         
                         {msg.role === 'user' && (
-                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg">
-                            <User className="h-5 w-5 text-white" />
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-accent-core/40 bg-accent-core/10">
+                            <User className="h-5 w-5 text-accent-bright" />
                           </div>
                         )}
                       </motion.div>
@@ -262,13 +264,13 @@ export default function ChatPage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="flex gap-4 justify-start"
                       >
-                        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center shadow-lg">
-                          <Bot className="h-5 w-5 text-white" />
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-accent-core/40 bg-accent-core/10">
+                          <Bot className="h-5 w-5 text-accent-bright" />
                         </div>
-                        <div className="neural-glass border border-purple-500/20 p-4 rounded-2xl">
+                        <div className="rounded-xl border border-ink-edge bg-ink-raised p-4">
                           <div className="flex items-center gap-2">
-                            <Loader2 className="h-4 w-4 animate-spin text-purple-400" />
-                            <p className="text-sm text-gray-400">Thinking...</p>
+                            <Loader2 className="h-4 w-4 animate-spin text-accent-bright" />
+                            <p className="text-sm text-secondary">Thinking...</p>
                           </div>
                         </div>
                       </motion.div>
@@ -281,9 +283,9 @@ export default function ChatPage() {
             </ScrollArea>
 
             {/* Input Area */}
-            <div className="border-t border-white/10 p-6 bg-black/20">
+            <div className="border-t border-ink-divider bg-ink-page p-6">
               <div className="relative">
-                <div className="neural-glass rounded-2xl p-4 iridescent-border">
+                <Surface variant="raised" className="border border-ink-edge p-4">
                   <Textarea
                     ref={textareaRef}
                     value={inputMessage}
@@ -291,12 +293,12 @@ export default function ChatPage() {
                     onKeyDown={handleKeyPress}
                     placeholder={isAuthenticated ? "Ask me anything..." : "Please log in to use the chat"}
                     disabled={!isAuthenticated || sendMessageMutation.isPending}
-                    className="min-h-[60px] max-h-[200px] resize-none bg-transparent border-none focus:ring-0 text-white placeholder:text-gray-500 text-base"
+                    className="min-h-[60px] max-h-[200px] resize-none border-none bg-transparent text-base text-primary placeholder:text-muted focus:ring-0"
                     data-testid="input-chat-message"
                   />
                   
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
-                    <p className="text-xs text-gray-500">
+                  <div className="mt-3 flex items-center justify-between border-t border-ink-divider pt-3">
+                    <p className="text-xs text-muted">
                       {isAuthenticated ? 'Press Enter to send, Shift+Enter for new line' : 'Authentication required'}
                     </p>
                     
@@ -304,7 +306,7 @@ export default function ChatPage() {
                       onClick={handleSendMessage}
                       disabled={!inputMessage.trim() || sendMessageMutation.isPending || !isAuthenticated}
                       size="sm"
-                      className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:opacity-90 text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                       className="grad-accent glow-accent rounded-xl text-primary hover:bg-accent-deep disabled:cursor-not-allowed disabled:opacity-50"
                       data-testid="button-send-message"
                     >
                       {sendMessageMutation.isPending ? (
@@ -317,10 +319,10 @@ export default function ChatPage() {
                       )}
                     </Button>
                   </div>
-                </div>
+                </Surface>
               </div>
             </div>
-          </div>
+          </Surface>
 
           {/* Footer Info */}
           <motion.div
@@ -329,7 +331,7 @@ export default function ChatPage() {
             transition={{ delay: 0.5 }}
             className="mt-6 text-center"
           >
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted">
               AI responses may not always be accurate. Always verify important information.
             </p>
           </motion.div>

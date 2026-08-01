@@ -1,25 +1,25 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/PageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Navigation } from '@/components/landing/navigation';
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Users, 
-  DollarSign, 
+import Surface from '@/components/ds/Surface';
+import StatValue from '@/components/ds/StatValue';
+import SectionTitle from '@/components/ds/SectionTitle';
+import {
+  BarChart3,
+  TrendingUp,
+  Users,
+  DollarSign,
   Target,
   Activity,
-  Award,
   Zap,
   Eye,
-  Heart,
   MessageSquare,
   ArrowUpRight,
   ArrowDownRight,
-  Trophy
+  Trophy,
 } from 'lucide-react';
 import {
   LineChart,
@@ -34,7 +34,7 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell
+  Cell,
 } from 'recharts';
 
 export default function AnalyticsDashboard() {
@@ -55,8 +55,8 @@ export default function AnalyticsDashboard() {
   const bounties = bountiesData?.bounties || [];
   const summaries = summariesData?.summaries || [];
   const stats = statsData?.stats || {};
-  
-  const COLORS = ['#a78bfa', '#e879f9', '#22d3ee', '#c084fc', '#d946ef'];
+
+  const COLORS = ['#8B7CF6', '#3DD68C', '#FF7B7B', '#FFB454', '#A99DF8'];
 
   // Use real activity data from API, or fallback to empty
   const activityData = stats.activityData || [
@@ -73,7 +73,7 @@ export default function AnalyticsDashboard() {
   const categoryData = (stats.categoryDistribution || []).map((cat: any, idx: number) => ({
     name: cat.name,
     value: cat.value,
-    color: COLORS[idx % COLORS.length]
+    color: COLORS[idx % COLORS.length],
   }));
 
   const rewardDistribution = [
@@ -92,9 +92,9 @@ export default function AnalyticsDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
+    <div className="min-h-[100dvh] bg-ink-page">
       <Navigation />
-      <div className="max-w-7xl mx-auto space-y-8 px-4 sm:px-6 lg:px-8 pt-24 pb-8">
+      <div className="mx-auto max-w-7xl space-y-8 px-4 pb-8 pt-24 sm:px-6 lg:px-8">
         <PageHeader
           eyebrow="Performance · engagement"
           title="Analytics Dashboard"
@@ -102,233 +102,148 @@ export default function AnalyticsDashboard() {
           subtitle="Track platform performance and user engagement metrics."
         />
 
-        <div className="grid md:grid-cols-4 gap-6">
-          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
-                <Target className="h-4 w-4 text-purple-400" />
-                Active Bounties
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">{stats.activeBounties || 0}</div>
-              <div className={`flex items-center gap-1 text-xs mt-1 ${(stats.changes?.bounties || 0) >= 0 ? 'text-cyan-400' : 'text-red-400'}`}>
-                {(stats.changes?.bounties || 0) >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                <span>{(stats.changes?.bounties || 0) >= 0 ? '+' : ''}{stats.changes?.bounties || 0}% this week</span>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid gap-4 md:grid-cols-4">
+          <Surface className="p-5">
+            <StatValue
+              label={<span className="flex items-center gap-2"><Target className="h-4 w-4 text-accent-bright" />Active Bounties</span>}
+              value={stats.activeBounties || 0}
+              delta={stats.changes?.bounties || 0}
+              deltaSuffix="% this week"
+            />
+          </Surface>
 
-          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-fuchsia-400" />
-                Total Rewards
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold bg-gradient-to-r from-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
-                {(stats.totalRewards || 0).toLocaleString()} STREAM
-              </div>
-              <div className={`flex items-center gap-1 text-xs mt-1 ${(stats.changes?.rewards || 0) >= 0 ? 'text-purple-400' : 'text-red-400'}`}>
-                {(stats.changes?.rewards || 0) >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                <span>{(stats.changes?.rewards || 0) >= 0 ? '+' : ''}{stats.changes?.rewards || 0}% this week</span>
-              </div>
-            </CardContent>
-          </Card>
+          <Surface className="p-5">
+            <StatValue
+              label={<span className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-accent-bright" />Total Rewards</span>}
+              value={`${(stats.totalRewards || 0).toLocaleString()} STREAM`}
+              delta={stats.changes?.rewards || 0}
+              deltaSuffix="% this week"
+            />
+          </Surface>
 
-          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
-                <Users className="h-4 w-4 text-cyan-400" />
-                Active Users
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                {stats.activeUsers || 0}
-              </div>
-              <div className={`flex items-center gap-1 text-xs mt-1 ${(stats.changes?.users || 0) >= 0 ? 'text-fuchsia-400' : 'text-red-400'}`}>
-                {(stats.changes?.users || 0) >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                <span>{(stats.changes?.users || 0) >= 0 ? '+' : ''}{stats.changes?.users || 0}% this week</span>
-              </div>
-            </CardContent>
-          </Card>
+          <Surface className="p-5">
+            <StatValue
+              label={<span className="flex items-center gap-2"><Users className="h-4 w-4 text-accent-bright" />Active Users</span>}
+              value={stats.activeUsers || 0}
+              delta={stats.changes?.users || 0}
+              deltaSuffix="% this week"
+            />
+          </Surface>
 
-          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
-                <Trophy className="h-4 w-4 text-purple-400" />
-                Completed
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
-                {stats.completedBounties || 0}
-              </div>
-              <div className={`flex items-center gap-1 text-xs mt-1 ${(stats.changes?.completed || 0) >= 0 ? 'text-cyan-400' : 'text-red-400'}`}>
-                {(stats.changes?.completed || 0) >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                <span>{(stats.changes?.completed || 0) >= 0 ? '+' : ''}{stats.changes?.completed || 0}% this week</span>
-              </div>
-            </CardContent>
-          </Card>
+          <Surface className="p-5">
+            <StatValue
+              label={<span className="flex items-center gap-2"><Trophy className="h-4 w-4 text-accent-bright" />Completed</span>}
+              value={stats.completedBounties || 0}
+              delta={stats.changes?.completed || 0}
+              deltaSuffix="% this week"
+            />
+          </Surface>
         </div>
 
         <Tabs value={timeframe} onValueChange={setTimeframe} className="w-full">
-          <TabsList className="bg-purple-900/20 border border-purple-500/30">
-            <TabsTrigger value="7d" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white" data-testid="tab-7d">
+          <TabsList className="border border-ink-edge bg-ink-surface">
+            <TabsTrigger value="7d" className="data-[state=active]:bg-accent-core data-[state=active]:text-white" data-testid="tab-7d">
               7 Days
             </TabsTrigger>
-            <TabsTrigger value="30d" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white" data-testid="tab-30d">
+            <TabsTrigger value="30d" className="data-[state=active]:bg-accent-core data-[state=active]:text-white" data-testid="tab-30d">
               30 Days
             </TabsTrigger>
-            <TabsTrigger value="90d" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white" data-testid="tab-90d">
+            <TabsTrigger value="90d" className="data-[state=active]:bg-accent-core data-[state=active]:text-white" data-testid="tab-90d">
               90 Days
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value={timeframe} className="mt-6 space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
-                <CardHeader>
-                  <CardTitle className="bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-purple-400" />
+            <div className="grid gap-4 md:grid-cols-2">
+              <Surface className="p-5">
+                <div className="mb-5">
+                  <SectionTitle as="h2" className="flex items-center gap-2">
+                    <Activity className="h-5 w-5 text-accent-bright" />
                     Activity Trends
-                  </CardTitle>
-                  <CardDescription className="text-gray-400">
-                    Daily bounties, summaries, and tips over time
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={activityData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                      <XAxis dataKey="date" stroke="#9ca3af" />
-                      <YAxis stroke="#9ca3af" />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#1f2937', 
-                          border: '1px solid #a78bfa',
-                          borderRadius: '8px'
-                        }}
-                      />
-                      <Legend />
-                      <Line type="monotone" dataKey="bounties" stroke="#a78bfa" strokeWidth={2} />
-                      <Line type="monotone" dataKey="summaries" stroke="#e879f9" strokeWidth={2} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
+                  </SectionTitle>
+                  <p className="mt-1 text-sm text-secondary">Daily bounties, summaries, and tips over time</p>
+                </div>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={activityData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#232B45" />
+                    <XAxis dataKey="date" stroke="#9BA3B7" />
+                    <YAxis stroke="#9BA3B7" />
+                    <Tooltip contentStyle={{ backgroundColor: '#10162A', border: '1px solid #232B45', borderRadius: '12px', color: '#C9CEDC' }} />
+                    <Legend />
+                    <Line type="monotone" dataKey="bounties" stroke="#8B7CF6" strokeWidth={2} />
+                    <Line type="monotone" dataKey="summaries" stroke="#3DD68C" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </Surface>
 
-              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
-                <CardHeader>
-                  <CardTitle className="bg-gradient-to-r from-fuchsia-400 to-cyan-400 bg-clip-text text-transparent flex items-center gap-2">
-                    <Target className="h-5 w-5 text-fuchsia-400" />
+              <Surface className="p-5">
+                <div className="mb-5">
+                  <SectionTitle as="h2" className="flex items-center gap-2">
+                    <Target className="h-5 w-5 text-accent-bright" />
                     Category Distribution
-                  </CardTitle>
-                  <CardDescription className="text-gray-400">
-                    Bounty categories breakdown
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={categoryData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {categoryData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#1f2937', 
-                          border: '1px solid #e879f9',
-                          borderRadius: '8px'
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
+                  </SectionTitle>
+                  <p className="mt-1 text-sm text-secondary">Bounty categories breakdown</p>
+                </div>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie data={categoryData} cx="50%" cy="50%" labelLine={false} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} outerRadius={100} fill="#8B7CF6" dataKey="value">
+                      {categoryData.map((entry: unknown, index: number) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{ backgroundColor: '#10162A', border: '1px solid #232B45', borderRadius: '12px', color: '#C9CEDC' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </Surface>
 
-              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
-                <CardHeader>
-                  <CardTitle className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent flex items-center gap-2">
-                    <DollarSign className="h-5 w-5 text-cyan-400" />
+              <Surface className="p-5">
+                <div className="mb-5">
+                  <SectionTitle as="h2" className="flex items-center gap-2">
+                    <DollarSign className="h-5 w-5 text-accent-bright" />
                     Reward Distribution
-                  </CardTitle>
-                  <CardDescription className="text-gray-400">
-                    Bounty rewards by range
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={rewardDistribution}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                      <XAxis dataKey="range" stroke="#9ca3af" />
-                      <YAxis stroke="#9ca3af" />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#1f2937', 
-                          border: '1px solid #22d3ee',
-                          borderRadius: '8px'
-                        }}
-                      />
-                      <Bar dataKey="count" fill="url(#purpleGradient)" />
-                      <defs>
-                        <linearGradient id="purpleGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#a78bfa" />
-                          <stop offset="100%" stopColor="#e879f9" />
-                        </linearGradient>
-                      </defs>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
+                  </SectionTitle>
+                  <p className="mt-1 text-sm text-secondary">Bounty rewards by range</p>
+                </div>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={rewardDistribution}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#232B45" />
+                    <XAxis dataKey="range" stroke="#9BA3B7" />
+                    <YAxis stroke="#9BA3B7" />
+                    <Tooltip contentStyle={{ backgroundColor: '#10162A', border: '1px solid #232B45', borderRadius: '12px', color: '#C9CEDC' }} />
+                    <Bar dataKey="count" fill="#8B7CF6" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </Surface>
 
-              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
-                <CardHeader>
-                  <CardTitle className="bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-fuchsia-400" />
+              <Surface className="p-5">
+                <div className="mb-5">
+                  <SectionTitle as="h2" className="flex items-center gap-2">
+                    <Zap className="h-5 w-5 text-accent-bright" />
                     Engagement Metrics
-                  </CardTitle>
-                  <CardDescription className="text-gray-400">
-                    Platform engagement statistics
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
+                  </SectionTitle>
+                  <p className="mt-1 text-sm text-secondary">Platform engagement statistics</p>
+                </div>
+                <div className="space-y-2">
                   {engagementData.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-purple-900/20 rounded-lg border border-purple-500/20">
+                    <div key={index} className="flex items-center justify-between rounded-xl border border-ink-divider bg-ink-raised p-3">
                       <div className="flex items-center gap-3">
-                        {item.metric === 'Views' && <Eye className="h-5 w-5 text-purple-400" />}
-                        {item.metric === 'Tips' && <DollarSign className="h-5 w-5 text-fuchsia-400" />}
-                        {item.metric === 'Comments' && <MessageSquare className="h-5 w-5 text-cyan-400" />}
-                        {item.metric === 'Shares' && <TrendingUp className="h-5 w-5 text-purple-400" />}
+                        {item.metric === 'Views' && <Eye className="h-5 w-5 text-accent-bright" />}
+                        {item.metric === 'Tips' && <DollarSign className="h-5 w-5 text-gain" />}
+                        {item.metric === 'Comments' && <MessageSquare className="h-5 w-5 text-accent-bright" />}
+                        {item.metric === 'Shares' && <TrendingUp className="h-5 w-5 text-accent-bright" />}
                         <div>
-                          <div className="text-sm text-gray-400">{item.metric}</div>
-                          <div className="text-xl font-bold bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">{item.value.toLocaleString()}</div>
+                          <div className="text-sm text-secondary">{item.metric}</div>
+                          <div className="tabular text-xl font-semibold text-primary">{item.value.toLocaleString()}</div>
                         </div>
                       </div>
-                      <Badge className={item.change > 0 ? 'bg-purple-500/20 text-purple-400 border-purple-400/30' : 'bg-fuchsia-500/20 text-fuchsia-400 border-fuchsia-400/30'}>
-                        {item.change > 0 ? (
-                          <ArrowUpRight className="h-3 w-3 mr-1" />
-                        ) : (
-                          <ArrowDownRight className="h-3 w-3 mr-1" />
-                        )}
-                        {Math.abs(item.change)}%
+                      <Badge className={item.change > 0 ? 'border border-gain/30 bg-gain/10 text-gain' : 'border border-loss/30 bg-loss/10 text-loss'}>
+                        {item.change > 0 ? <ArrowUpRight className="mr-1 h-3 w-3" /> : <ArrowDownRight className="mr-1 h-3 w-3" />}
+                        {item.change >= 0 ? '+' : ''}{item.change.toFixed(2)}%
                       </Badge>
                     </div>
                   ))}
-                </CardContent>
-              </Card>
+                </div>
+              </Surface>
             </div>
           </TabsContent>
         </Tabs>

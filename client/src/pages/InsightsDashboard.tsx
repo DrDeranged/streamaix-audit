@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/PageHeader';
 import { StatGrid } from '@/components/StatGrid';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Navigation } from '@/components/landing/navigation';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
+import StatValue from '@/components/ds/StatValue';
 import {
   TrendingUp,
   TrendingDown,
@@ -58,13 +60,13 @@ interface SmartInsightsResponse {
 }
 
 const CATEGORY_META: Record<Category, { label: string; Icon: typeof Brain; iconClass: string }> = {
-  regime_shift: { label: 'Regime Shift', Icon: Layers, iconClass: 'text-fuchsia-400' },
-  divergence: { label: 'Divergence', Icon: GitBranch, iconClass: 'text-cyan-400' },
-  contrarian: { label: 'Contrarian', Icon: Sparkles, iconClass: 'text-purple-400' },
-  cross_asset: { label: 'Cross-Asset', Icon: Activity, iconClass: 'text-cyan-400' },
-  conditional: { label: 'If → Then', Icon: ArrowRight, iconClass: 'text-fuchsia-400' },
-  opportunity: { label: 'Opportunity', Icon: Lightbulb, iconClass: 'text-cyan-400' },
-  risk: { label: 'Risk', Icon: Shield, iconClass: 'text-fuchsia-400' },
+  regime_shift: { label: 'Regime Shift', Icon: Layers, iconClass: 'text-accent-bright' },
+  divergence: { label: 'Divergence', Icon: GitBranch, iconClass: 'text-accent-bright' },
+  contrarian: { label: 'Contrarian', Icon: Sparkles, iconClass: 'text-accent-bright' },
+  cross_asset: { label: 'Cross-Asset', Icon: Activity, iconClass: 'text-accent-bright' },
+  conditional: { label: 'If → Then', Icon: ArrowRight, iconClass: 'text-accent-bright' },
+  opportunity: { label: 'Opportunity', Icon: Lightbulb, iconClass: 'text-accent-bright' },
+  risk: { label: 'Risk', Icon: Shield, iconClass: 'text-warn' },
 };
 
 const TAB_FILTERS: Array<{ value: string; label: string; predicate: (i: ReasoningInsight) => boolean }> = [
@@ -79,24 +81,24 @@ const TAB_FILTERS: Array<{ value: string; label: string; predicate: (i: Reasonin
 function getSentimentIcon(sentiment: string) {
   switch (sentiment) {
     case 'bullish':
-      return <TrendingUp className="h-4 w-4 text-cyan-400" />;
+      return <TrendingUp className="h-4 w-4 text-gain" />;
     case 'bearish':
-      return <TrendingDown className="h-4 w-4 text-fuchsia-400" />;
+      return <TrendingDown className="h-4 w-4 text-loss" />;
     case 'caution':
-      return <AlertCircle className="h-4 w-4 text-amber-400" />;
+      return <AlertCircle className="h-4 w-4 text-warn" />;
     default:
-      return <Activity className="h-4 w-4 text-purple-400" />;
+      return <Activity className="h-4 w-4 text-accent-bright" />;
   }
 }
 
 function getImpactColor(impact: string) {
   switch (impact) {
     case 'high':
-      return 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-400/30';
+      return 'bg-loss/10 text-loss border-loss/30';
     case 'medium':
-      return 'bg-purple-500/20 text-purple-300 border-purple-400/30';
+      return 'bg-accent-core/10 text-accent-bright border-accent-core/30';
     default:
-      return 'bg-cyan-500/20 text-cyan-300 border-cyan-400/30';
+      return 'bg-gain/10 text-gain border-gain/30';
   }
 }
 
@@ -121,7 +123,7 @@ export default function InsightsDashboard() {
   const riskAlerts = insights.filter(i => i.category === 'risk').length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
+    <div className="min-h-[100dvh] bg-ink-page">
       <Navigation />
       <div className="section-container section-stack pt-24">
         <PageHeader
@@ -131,12 +133,12 @@ export default function InsightsDashboard() {
           subtitle={
             <>
               Reasoning-chain market intelligence — regime shifts, divergences, contrarian setups, and
-              <span className="text-purple-300"> if-then sequences</span>.
+               <span className="text-accent-bright"> if-then sequences</span>.
               {data && (
-                <span className="block mt-1 text-xs text-muted-foreground" data-testid="insights-meta">
+                 <span className="mt-1 block text-xs text-muted" data-testid="insights-meta">
                   Generated {new Date(data.generatedAt).toLocaleTimeString()} · model{' '}
-                  <span className="text-purple-400">{data.modelUsed}</span>
-                  {data.fromCache && <span className="ml-2 text-cyan-400">(cached)</span>}
+                   <span className="text-accent-bright">{data.modelUsed}</span>
+                   {data.fromCache && <span className="ml-2 text-gain">(cached)</span>}
                 </span>
               )}
             </>
@@ -146,7 +148,7 @@ export default function InsightsDashboard() {
               type="button"
               onClick={() => refetch()}
               disabled={isRefetching}
-              className="px-4 py-2 rounded-lg surface-1 surface-interactive border border-purple-500/40 text-purple-200 hover:border-neon-purple/60 transition flex items-center gap-2 text-sm disabled:opacity-50 min-h-[44px]"
+               className="min-h-[44px] rounded-xl border border-accent-core/40 bg-ink-surface px-4 py-2 text-sm text-accent-bright transition hover:border-accent-core hover:bg-ink-raised disabled:opacity-50 flex items-center gap-2"
               data-testid="button-refresh-insights"
             >
               <RefreshCw className={`h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`} />
@@ -155,56 +157,48 @@ export default function InsightsDashboard() {
           }
         />
 
-        {data?.marketRegime && (
-          <Card className="surface-2 border-fuchsia-500/30" data-testid="card-market-regime">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Layers className="h-5 w-5 text-fuchsia-400" />
-                <CardTitle className="text-fuchsia-200">Current Market Regime</CardTitle>
-                <Badge variant="outline" className="ml-auto border-fuchsia-400/30 text-fuchsia-200">
+         {data?.marketRegime && (
+           <Surface className="grad-surface p-5" data-testid="card-market-regime">
+             <div className="mb-4 flex items-center gap-2">
+                 <Layers className="h-5 w-5 text-accent-bright" />
+                 <SectionTitle as="h2">Current Market Regime</SectionTitle>
+                 <Badge variant="outline" className="ml-auto border-accent-core/30 text-accent-bright">
                   ~{data.marketRegime.durabilityHours}h durability
                 </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-semibold bg-gradient-to-r from-fuchsia-400 to-purple-300 bg-clip-text text-transparent mb-2">
+             </div>
+             <div>
+               <div className="mb-2 text-2xl font-semibold text-primary">
                 {data.marketRegime.label}
               </div>
-              <p className="text-gray-300 leading-relaxed">{data.marketRegime.description}</p>
-            </CardContent>
-          </Card>
+               <p className="leading-relaxed text-body">{data.marketRegime.description}</p>
+             </div>
+           </Surface>
         )}
 
         <StatGrid>
           {[
-            { label: 'Active Insights', value: insights.length, Icon: Zap, tint: 'from-purple-400 to-fuchsia-400' },
-            { label: 'Avg Confidence', value: `${avgConfidence}%`, Icon: CheckCircle2, tint: 'from-fuchsia-400 to-cyan-400' },
-            { label: 'Opportunities', value: opportunities, Icon: Lightbulb, tint: 'from-cyan-400 to-purple-400' },
-            { label: 'Risk Alerts', value: riskAlerts, Icon: AlertCircle, tint: 'from-purple-400 via-fuchsia-400 to-cyan-400' },
+             { label: 'Active Insights', value: insights.length, Icon: Zap },
+             { label: 'Avg Confidence', value: `+${avgConfidence.toFixed(2)}%`, Icon: CheckCircle2 },
+             { label: 'Opportunities', value: opportunities, Icon: Lightbulb },
+             { label: 'Risk Alerts', value: riskAlerts, Icon: AlertCircle },
           ].map(stat => (
-            <Card key={stat.label} className="surface-2 border-purple-500/30">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
+             <Surface key={stat.label} className="p-4">
+               <div className="mb-3 flex items-center gap-2 text-sm font-medium text-secondary">
                   <stat.Icon className="h-4 w-4" />
                   {stat.label}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className={`text-3xl font-bold bg-gradient-to-r ${stat.tint} bg-clip-text text-transparent`}>
-                  {stat.value}
-                </div>
-              </CardContent>
-            </Card>
+               </div>
+               <StatValue label="" value={stat.value} valueClassName="text-3xl font-bold" />
+             </Surface>
           ))}
         </StatGrid>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="surface-1 border border-purple-500/30 flex-wrap h-auto">
+           <TabsList className="flex h-auto flex-wrap border border-ink-edge bg-ink-surface">
             {TAB_FILTERS.map(t => (
               <TabsTrigger
                 key={t.value}
                 value={t.value}
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-fuchsia-600 data-[state=active]:text-white"
+                 className="data-[state=active]:bg-accent-core data-[state=active]:text-white data-[state=active]:glow-accent"
                 data-testid={`tab-${t.value}`}
               >
                 {t.label}
@@ -216,47 +210,47 @@ export default function InsightsDashboard() {
             {isLoading && (
               <>
                 {[0, 1, 2].map(i => (
-                  <Card key={i} className="surface-1 border-purple-500/20">
-                    <CardHeader>
+                   <Surface key={i} className="p-4">
+                     <div>
                       <Skeleton className="h-6 w-2/3" />
                       <Skeleton className="h-4 w-1/3 mt-2" />
-                    </CardHeader>
-                    <CardContent className="space-y-2">
+                     </div>
+                     <div className="mt-4 space-y-2">
                       <Skeleton className="h-4 w-full" />
                       <Skeleton className="h-4 w-5/6" />
                       <Skeleton className="h-4 w-4/6" />
-                    </CardContent>
-                  </Card>
+                     </div>
+                   </Surface>
                 ))}
               </>
             )}
 
             {isError && !isLoading && (
-              <Card className="bg-red-900/10 border-red-500/30">
-                <CardContent className="pt-6 text-red-300">
+               <Surface className="p-4 text-loss">
+                 <div className="pt-2">
                   Failed to load reasoning insights. Click Refresh to try again.
-                </CardContent>
-              </Card>
+                 </div>
+               </Surface>
             )}
 
             {!isLoading && !isError && filteredInsights.length === 0 && (
-              <Card className="surface-1 border-purple-500/30">
-                <CardContent className="pt-6 text-gray-400">
+               <Surface className="p-4 text-secondary">
+                 <div className="pt-2">
                   No insights match this filter right now. Try a different category.
-                </CardContent>
-              </Card>
+                 </div>
+               </Surface>
             )}
 
             {filteredInsights.map(insight => {
               const meta = CATEGORY_META[insight.category] ?? CATEGORY_META.opportunity;
               const Icon = meta.Icon;
               return (
-                <Card
+                 <Surface
                   key={insight.id}
-                  className="surface-2 border-purple-500/30 hover:border-fuchsia-500/50 transition-all"
+                   className="p-4 transition hover:border-accent-core"
                   data-testid={`insight-${insight.id}`}
                 >
-                  <CardHeader>
+                   <div>
                     <div className="flex items-start gap-3">
                       <div className="mt-1">
                         <Icon className={`h-5 w-5 ${meta.iconClass}`} />
@@ -264,35 +258,35 @@ export default function InsightsDashboard() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
                           <Badge className={getImpactColor(insight.impact)}>{insight.impact} impact</Badge>
-                          <Badge variant="outline" className="border-purple-400/30 text-purple-200">
+                           <Badge variant="outline" className="border-accent-core/30 text-accent-bright">
                             {meta.label}
                           </Badge>
                           {insight.assets.slice(0, 3).map(a => (
-                            <Badge key={a} variant="outline" className="border-cyan-400/30 text-cyan-200">
+                             <Badge key={a} variant="outline" className="border-accent-core/30 text-accent-bright">
                               {a}
                             </Badge>
                           ))}
                           <div className="flex items-center gap-1 ml-auto">
                             {getSentimentIcon(insight.sentiment)}
-                            <span className="text-xs text-gray-400 capitalize">{insight.sentiment}</span>
+                             <span className="text-xs text-secondary capitalize">{insight.sentiment}</span>
                           </div>
                         </div>
-                        <CardTitle className="bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent text-lg">
+                         <SectionTitle as="h3" className="text-lg">
                           {insight.headline}
-                        </CardTitle>
+                         </SectionTitle>
                       </div>
                     </div>
-                  </CardHeader>
+                   </div>
 
-                  <CardContent className="space-y-4">
+                   <div className="mt-4 space-y-4">
                     <div>
-                      <div className="text-xs uppercase tracking-wide text-gray-500 mb-2 flex items-center gap-2">
+                       <div className="mb-2 flex items-center gap-2 text-xs uppercase tracking-wide text-muted">
                         <Brain className="h-3 w-3" /> Reasoning chain
                       </div>
                       <ol className="space-y-1.5">
                         {insight.reasoning.map((step, idx) => (
-                          <li key={idx} className="flex gap-3 text-sm text-gray-300">
-                            <span className="text-purple-400 font-mono text-xs mt-0.5">{idx + 1}.</span>
+                           <li key={idx} className="flex gap-3 text-sm text-body">
+                             <span className="mt-0.5 font-mono text-xs text-accent-bright">{idx + 1}.</span>
                             <span className="leading-relaxed">{step}</span>
                           </li>
                         ))}
@@ -300,33 +294,34 @@ export default function InsightsDashboard() {
                     </div>
 
                     {insight.conditional && (
-                      <div className="rounded-lg border border-fuchsia-500/30 bg-fuchsia-900/10 p-3 text-sm">
-                        <div className="flex items-center gap-2 text-fuchsia-300 mb-1">
+                       <Surface variant="raised" className="border border-accent-core/30 p-3 text-sm">
+                         <div className="mb-1 flex items-center gap-2 text-accent-bright">
                           <ArrowRight className="h-4 w-4" />
                           <span className="font-semibold uppercase tracking-wide text-xs">If → Then</span>
                         </div>
-                        <div className="text-gray-300">
-                          <span className="text-fuchsia-200 font-medium">If</span> {insight.conditional.trigger}
-                          <span className="text-fuchsia-200 font-medium"> then</span>{' '}
+                         <div className="text-body">
+                           <span className="font-medium text-accent-bright">If</span> {insight.conditional.trigger}
+                           <span className="font-medium text-accent-bright"> then</span>{' '}
                           {insight.conditional.thenOutcome}
-                        </div>
-                      </div>
-                    )}
+                         </div>
+                       </Surface>
+                     )}
 
-                    <div className="border-t border-purple-500/20 pt-3 flex items-center justify-between gap-3 flex-wrap">
-                      <div className="flex items-start gap-2 text-sm text-gray-200 flex-1 min-w-0">
-                        <Target className="h-4 w-4 text-cyan-400 mt-0.5 shrink-0" />
+                     <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ink-divider pt-3">
+                       <div className="flex min-w-0 flex-1 items-start gap-2 text-sm text-body">
+                         <Target className="mt-0.5 h-4 w-4 shrink-0 text-gain" />
                         <span className="leading-relaxed">{insight.conclusion}</span>
                       </div>
                       <div className="text-sm whitespace-nowrap">
-                        <span className="text-gray-400">Confidence:</span>
-                        <span className="ml-2 font-semibold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-                          {insight.confidence}%
+                         <span className="text-secondary">Confidence:</span>
+                         <span className="tabular ml-2 font-semibold text-accent-bright">
+                           {insight.confidence >= 0 ? '+' : ''}
+                           {insight.confidence.toFixed(2)}%
                         </span>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                   </div>
+                 </Surface>
               );
             })}
           </TabsContent>

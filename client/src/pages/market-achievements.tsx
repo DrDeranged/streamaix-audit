@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/PageHeader";
+import Surface from "@/components/ds/Surface";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Trophy, Award, Target, Zap, TrendingUp, Users, Star, ArrowLeft, Lock, CheckCircle2, Sparkles } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
@@ -62,32 +62,29 @@ export default function MarketAchievements() {
 
   const getTierColor = (tier: string) => {
     switch (tier) {
-      case 'bronze': return 'from-amber-700 via-amber-800 to-amber-900';
-      case 'silver': return 'from-gray-300 via-gray-400 to-gray-500';
-      case 'gold': return 'from-amber-400 via-amber-500 to-amber-600';
-      case 'platinum': return 'from-purple-400 via-purple-500 to-purple-600';
-      default: return 'from-cyan-500/20 via-purple-500/20 to-emerald-500/20';
+      case 'bronze': return 'border-warn/60';
+      case 'silver': return 'border-ink-edge';
+      case 'gold': return 'border-warn';
+      case 'platinum': return 'border-accent-core';
+      default: return 'border-ink-edge';
     }
   };
 
   const getTierGlow = (tier: string) => {
     switch (tier) {
-      case 'bronze': return 'shadow-xl shadow-amber-800/50';
-      case 'silver': return 'shadow-xl shadow-gray-400/50';
-      case 'gold': return 'shadow-xl shadow-amber-500/60';
-      case 'platinum': return 'shadow-2xl shadow-purple-500/70';
-      default: return 'shadow-lg shadow-cyan-500/10';
+      case 'platinum': return 'glow-accent';
+      default: return '';
     }
   };
 
   const getTierIcon = (tier: string, completed: boolean) => {
     const iconClass = completed ? "" : "opacity-30";
     switch (tier) {
-      case 'bronze': return <Award className={`w-8 h-8 text-amber-700 ${iconClass} drop-shadow-[0_0_8px_rgba(180,83,9,0.5)]`} />;
-      case 'silver': return <Award className={`w-8 h-8 text-gray-300 ${iconClass} drop-shadow-[0_0_8px_rgba(209,213,219,0.5)]`} />;
-      case 'gold': return <Trophy className={`w-8 h-8 text-amber-400 ${iconClass} drop-shadow-[0_0_10px_rgba(251,191,36,0.6)]`} />;
-      case 'platinum': return <Star className={`w-8 h-8 text-purple-400 ${iconClass} drop-shadow-[0_0_12px_rgba(192,132,252,0.7)]`} />;
-      default: return <Award className={`w-8 h-8 text-cyan-400 ${iconClass}`} />;
+      case 'bronze': return <Award className={`w-8 h-8 text-warn ${iconClass}`} />;
+      case 'silver': return <Award className={`w-8 h-8 text-secondary ${iconClass}`} />;
+      case 'gold': return <Trophy className={`w-8 h-8 text-warn ${iconClass}`} />;
+      case 'platinum': return <Star className={`w-8 h-8 text-accent-bright ${iconClass}`} />;
+      default: return <Award className={`w-8 h-8 text-accent-bright ${iconClass}`} />;
     }
   };
 
@@ -133,12 +130,11 @@ export default function MarketAchievements() {
   const completionPercentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 relative overflow-hidden">
+    <div className="min-h-screen bg-ink-page relative overflow-hidden">
       {/* Animated background effects */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 right-1/2 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
+        <div className="absolute top-0 right-1/4 h-96 w-96 rounded-full bg-accent-core/10 blur-3xl" />
+        <div className="absolute bottom-0 left-1/4 h-96 w-96 rounded-full bg-warn/10 blur-3xl" />
       </div>
 
       <div className="relative z-10 p-6">
@@ -151,7 +147,7 @@ export default function MarketAchievements() {
             className="text-center space-y-4"
           >
             <Link href="/#prediction-markets">
-              <Button variant="ghost" className="mb-4 text-slate-400 hover:text-white">
+              <Button variant="ghost" className="mb-4 rounded-xl text-secondary hover:bg-ink-raised hover:text-primary">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Markets
               </Button>
@@ -162,7 +158,7 @@ export default function MarketAchievements() {
                 animate={{ rotate: [0, -10, 10, 0], scale: [1, 1.1, 1] }}
                 transition={{ duration: 3, repeat: Infinity }}
               >
-                <Trophy className="w-16 h-16 text-purple-400 drop-shadow-[0_0_20px_rgba(192,132,252,0.7)]" />
+                <Trophy className="h-16 w-16 text-accent-bright" />
               </motion.div>
               <PageHeader
                 align="center"
@@ -180,23 +176,23 @@ export default function MarketAchievements() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="max-w-md mx-auto"
             >
-              <Card className="bg-gradient-to-br from-slate-900/90 to-slate-800/90 border border-purple-500/30 backdrop-blur-xl p-4">
+              <Surface className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-300 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-purple-400" />
+                   <span className="flex items-center gap-2 text-sm text-body">
+                     <Sparkles className="h-4 w-4 text-accent-bright" />
                     Overall Progress
                   </span>
                   <span className="text-sm font-bold">
-                    <span className="text-purple-400" data-testid="completed-count">
+                     <span className="tabular text-accent-bright" data-testid="completed-count">
                       <AnimatedCounter value={completedCount} />
                     </span>
-                    <span className="text-slate-500"> / {totalCount}</span>
+                     <span className="tabular text-muted"> / {totalCount}</span>
                   </span>
                 </div>
-                <Progress value={completionPercentage} className="h-3 bg-slate-800">
-                  <div className="h-full bg-gradient-to-r from-purple-500 via-amber-500 to-cyan-500 rounded-full transition-all duration-500" style={{ width: `${completionPercentage}%` }} />
+                 <Progress value={completionPercentage} className="h-3 rounded-xl bg-ink-raised">
+                   <div className="h-full rounded-xl bg-accent-core transition-all duration-500" style={{ width: `${completionPercentage}%` }} />
                 </Progress>
-              </Card>
+              </Surface>
             </motion.div>
           </motion.div>
 
@@ -206,12 +202,12 @@ export default function MarketAchievements() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <Card className="bg-gradient-to-br from-slate-900/90 via-slate-800/90 to-slate-900/90 border border-purple-500/20 backdrop-blur-xl shadow-2xl shadow-purple-500/10 p-6 space-y-6">
+             <Surface className="space-y-6 p-6">
               <Tabs value={activeCategory} onValueChange={(v) => setActiveCategory(v as any)}>
-                <TabsList className="grid grid-cols-5 w-full bg-slate-900/50 border border-purple-500/30 p-1 rounded-xl">
+                 <TabsList className="grid w-full grid-cols-5 rounded-xl border border-ink-edge bg-ink-raised p-1">
                   <TabsTrigger 
                     value="all" 
-                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/30 data-[state=active]:to-pink-500/30 data-[state=active]:text-purple-300 rounded-lg transition-all duration-300"
+                     className="rounded-xl transition-all duration-300 data-[state=active]:bg-accent-core data-[state=active]:text-white"
                     data-testid="tab-all"
                   >
                     <Award className="w-4 h-4 mr-2" />
@@ -219,7 +215,7 @@ export default function MarketAchievements() {
                   </TabsTrigger>
                   <TabsTrigger 
                     value="trading"
-                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/30 data-[state=active]:to-orange-500/30 data-[state=active]:text-amber-300 rounded-lg transition-all duration-300"
+                     className="rounded-xl transition-all duration-300 data-[state=active]:bg-accent-core data-[state=active]:text-white"
                     data-testid="tab-trading"
                   >
                     <TrendingUp className="w-4 h-4 mr-2" />
@@ -227,7 +223,7 @@ export default function MarketAchievements() {
                   </TabsTrigger>
                   <TabsTrigger 
                     value="prediction"
-                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/30 data-[state=active]:to-blue-500/30 data-[state=active]:text-cyan-300 rounded-lg transition-all duration-300"
+                     className="rounded-xl transition-all duration-300 data-[state=active]:bg-accent-core data-[state=active]:text-white"
                     data-testid="tab-prediction"
                   >
                     <Target className="w-4 h-4 mr-2" />
@@ -235,7 +231,7 @@ export default function MarketAchievements() {
                   </TabsTrigger>
                   <TabsTrigger 
                     value="social"
-                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500/30 data-[state=active]:to-green-500/30 data-[state=active]:text-emerald-300 rounded-lg transition-all duration-300"
+                     className="rounded-xl transition-all duration-300 data-[state=active]:bg-accent-core data-[state=active]:text-white"
                     data-testid="tab-social"
                   >
                     <Users className="w-4 h-4 mr-2" />
@@ -243,7 +239,7 @@ export default function MarketAchievements() {
                   </TabsTrigger>
                   <TabsTrigger 
                     value="milestone"
-                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/30 data-[state=active]:to-purple-500/30 data-[state=active]:text-pink-300 rounded-lg transition-all duration-300"
+                     className="rounded-xl transition-all duration-300 data-[state=active]:bg-accent-core data-[state=active]:text-white"
                     data-testid="tab-milestone"
                   >
                     <Zap className="w-4 h-4 mr-2" />
@@ -255,7 +251,7 @@ export default function MarketAchievements() {
                   {isLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" data-testid="loading-skeleton">
                       {[...Array(9)].map((_, i) => (
-                        <div key={i} className="h-48 rounded-lg bg-gradient-to-r from-slate-800/30 to-slate-700/30 animate-pulse" />
+                        <div key={i} className="h-48 rounded-xl border border-ink-edge bg-ink-raised animate-pulse" />
                       ))}
                     </div>
                   ) : (
@@ -269,10 +265,10 @@ export default function MarketAchievements() {
                           whileHover={{ scale: 1.05, y: -4 }}
                           data-testid={`achievement-${index}`}
                         >
-                          <Card
-                            className={`h-full bg-gradient-to-r ${getTierColor(achievement.tier)} p-[2px] ${achievement.completed ? getTierGlow(achievement.tier) : 'opacity-60'} transition-all duration-300`}
+                          <Surface
+                            className={`h-full border-2 p-5 ${getTierColor(achievement.tier)} ${achievement.completed ? getTierGlow(achievement.tier) : 'opacity-60'} transition-all duration-300`}
                           >
-                            <div className="h-full bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl rounded-lg p-5 flex flex-col">
+                            <div className="flex h-full flex-col">
                               {/* Header */}
                               <div className="flex items-start justify-between mb-3">
                                 <div className="flex items-center gap-2">
@@ -283,14 +279,14 @@ export default function MarketAchievements() {
                                       animate={{ scale: 1 }}
                                       transition={{ type: "spring", stiffness: 200 }}
                                     >
-                                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                                      <CheckCircle2 className="h-5 w-5 text-gain" />
                                     </motion.div>
                                   )}
                                   {!achievement.completed && (
-                                    <Lock className="w-5 h-5 text-slate-600" />
+                                    <Lock className="h-5 w-5 text-muted" />
                                   )}
                                 </div>
-                                <div className={`px-2 py-1 rounded-lg text-xs flex items-center gap-1 bg-slate-800/50 border ${achievement.completed ? 'border-emerald-500/30 text-emerald-300' : 'border-slate-700/50 text-slate-500'}`}>
+                                 <div className={`flex items-center gap-1 rounded-xl border px-2 py-1 text-xs ${achievement.completed ? 'border-gain/30 text-gain' : 'border-ink-edge text-muted'}`}>
                                   {getCategoryIcon(achievement.category)}
                                   <span className="capitalize">{achievement.category}</span>
                                 </div>
@@ -298,10 +294,10 @@ export default function MarketAchievements() {
 
                               {/* Content */}
                               <div className="flex-1">
-                                <h3 className={`font-bold mb-2 ${achievement.completed ? 'text-white' : 'text-slate-500'}`}>
+                                 <h3 className={`mb-2 font-bold ${achievement.completed ? 'text-primary' : 'text-muted'}`}>
                                   {achievement.name}
                                 </h3>
-                                <p className={`text-sm mb-3 ${achievement.completed ? 'text-slate-400' : 'text-slate-600'}`}>
+                                 <p className={`mb-3 text-sm ${achievement.completed ? 'text-secondary' : 'text-muted'}`}>
                                   {achievement.description}
                                 </p>
 
@@ -309,42 +305,42 @@ export default function MarketAchievements() {
                                 {!achievement.completed && achievement.progress !== undefined && (
                                   <div className="space-y-1 mb-3">
                                     <div className="flex items-center justify-between text-xs">
-                                      <span className="text-slate-500">Progress</span>
-                                      <span className="text-slate-400">
+                                       <span className="text-muted">Progress</span>
+                                       <span className="tabular text-secondary">
                                         <AnimatedCounter value={achievement.progress || 0} formatValue={(v) => v.toFixed(0)} /> / {formatNumber(achievement.requirement?.value)}
                                       </span>
                                     </div>
                                     <Progress 
                                       value={achievement.requirement?.value ? ((achievement.progress || 0) / achievement.requirement.value) * 100 : 0} 
-                                      className="h-2 bg-slate-800"
+                                       className="h-2 rounded-xl bg-ink-raised"
                                     />
                                   </div>
                                 )}
                               </div>
 
                               {/* Footer */}
-                              <div className="flex items-center justify-between pt-3 border-t border-slate-700/50">
+                               <div className="flex items-center justify-between border-t border-ink-divider pt-3">
                                 <div className="flex items-center gap-1 text-xs">
-                                  <span className="text-slate-500">Reward:</span>
-                                  <span className={`font-bold ${achievement.completed ? 'text-amber-400' : 'text-slate-600'}`}>
+                                   <span className="text-muted">Reward:</span>
+                                   <span className={`tabular font-bold ${achievement.completed ? 'text-warn' : 'text-muted'}`}>
                                     <AnimatedCounter value={achievement.reward} formatValue={(v) => formatNumber(v)} /> STREAM
                                   </span>
                                 </div>
                                 {achievement.unlockedAt && (
-                                  <span className="text-xs text-emerald-400">
+                                   <span className="text-xs text-gain">
                                     Unlocked {new Date(achievement.unlockedAt).toLocaleDateString()}
                                   </span>
                                 )}
                               </div>
                             </div>
-                          </Card>
+                          </Surface>
                         </motion.div>
                       ))}
                     </div>
                   )}
                 </TabsContent>
               </Tabs>
-            </Card>
+             </Surface>
           </motion.div>
         </div>
       </div>

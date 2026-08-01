@@ -15,3 +15,11 @@ client/src/pages/not-found.tsx
 client/src/pages/points.tsx
 client/src/pages/summaries.tsx
 client/src/pages/market-leaderboard.tsx
+client/src/pages/stream-view.tsx
+client/src/pages/hunter-profile.tsx
+client/src/pages/farcaster-activity.tsx
+client/src/pages/InsightsDashboard.tsx
+client/src/pages/AnalyticsDashboard.tsx
+client/src/pages/chat.tsx
+client/src/pages/style-guide.tsx
+client/src/pages/market-achievements.tsx

@@ -2,14 +2,15 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { PageHeader } from '@/components/PageHeader';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
+import StatValue from '@/components/ds/StatValue';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Users, MessageCircle, Repeat2, Heart, Search, TrendingUp, Calendar, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { getAuthHeaders } from '@/lib/auth';
 
 export default function FarcasterActivity() {
   const [fid, setFid] = useState<string>('');
@@ -59,7 +60,7 @@ export default function FarcasterActivity() {
   const casts = (castsData as any)?.casts || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
+    <div className="min-h-[100dvh] bg-ink-page">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <motion.div
@@ -84,13 +85,13 @@ export default function FarcasterActivity() {
               placeholder="Enter Farcaster ID (fid)"
               value={fid}
               onChange={(e) => setFid(e.target.value)}
-              className="bg-purple-900/20 border-purple-500/30 text-white placeholder-white/50"
+              className="rounded-xl border border-ink-edge bg-ink-surface text-primary placeholder:text-muted"
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
             />
             <Button 
               data-testid="button-search"
               onClick={handleSearch} 
-              className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:opacity-90"
+               className="rounded-xl grad-accent text-primary hover:opacity-90 glow-accent"
             >
               <Search className="w-4 h-4 mr-2" />
               Search
@@ -102,9 +103,9 @@ export default function FarcasterActivity() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6 text-center"
+            className="mb-6 rounded-xl border border-loss/50 bg-loss/10 p-4 text-center"
           >
-            <p className="text-red-200">
+            <p className="text-loss">
               Failed to load Farcaster activity. Please try again with a valid FID.
             </p>
           </motion.div>
@@ -118,19 +119,19 @@ export default function FarcasterActivity() {
             className="space-y-6"
           >
             {/* Profile Card */}
-            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Users className="w-5 h-5 text-fuchsia-400" />
+            <Surface className="p-6">
+              <div className="mb-5">
+                <SectionTitle as="h2" className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-accent-bright" />
                   User Profile
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+                </SectionTitle>
+              </div>
+              <div>
                 {activityLoading ? (
                   <div className="space-y-3">
-                    <Skeleton className="h-4 w-1/2 bg-purple-500/20" />
-                    <Skeleton className="h-4 w-1/3 bg-purple-500/20" />
-                    <Skeleton className="h-20 w-full bg-purple-500/20" />
+                    <Skeleton className="h-4 w-1/2 bg-ink-raised" />
+                    <Skeleton className="h-4 w-1/3 bg-ink-raised" />
+                    <Skeleton className="h-20 w-full bg-ink-raised" />
                   </div>
                 ) : profile ? (
                   <div className="flex items-start gap-4">
@@ -138,27 +139,27 @@ export default function FarcasterActivity() {
                       <img
                         src={profile.pfp_url}
                         alt={`${profile.username} avatar`}
-                        className="w-16 h-16 rounded-full border-2 border-fuchsia-400"
+                        className="h-16 w-16 rounded-full border-2 border-accent-core"
                       />
                     )}
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-xl font-bold text-white">
+                        <h3 className="text-xl font-bold text-primary">
                           {profile.display_name || profile.username}
                         </h3>
-                        <Badge variant="secondary" className="bg-purple-500/20 text-purple-300 border-purple-500/30">
+                        <Badge variant="secondary" className="border border-accent-core/30 bg-accent-core/10 text-accent-bright">
                           @{profile.username}
                         </Badge>
                         {profile.power_badge && (
-                          <Badge className="bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30">
+                          <Badge className="border border-accent-core/30 bg-accent-core/10 text-accent-bright">
                             Power User
                           </Badge>
                         )}
                       </div>
                       {profile.profile?.bio?.text && (
-                        <p className="text-gray-300 mb-2">{profile.profile.bio.text}</p>
+                        <p className="mb-2 text-body">{profile.profile.bio.text}</p>
                       )}
-                      <div className="flex items-center gap-4 text-sm text-gray-400">
+                      <div className="flex items-center gap-4 text-sm text-secondary">
                         <span>FID: {profile.fid}</span>
                         {profile.follower_count && (
                           <span>{profile.follower_count.toLocaleString()} followers</span>
@@ -170,74 +171,54 @@ export default function FarcasterActivity() {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-gray-300">No profile data available</p>
+                    <p className="text-body">No profile data available</p>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
-                <CardContent className="p-6 text-center">
+              <Surface className="p-6 text-center">
                   {activityLoading ? (
-                    <Skeleton className="h-12 w-12 rounded-full mx-auto mb-2 bg-purple-500/20" />
+                    <Skeleton className="mx-auto mb-2 h-12 w-12 rounded-full bg-ink-raised" />
                   ) : (
-                    <MessageCircle className="w-12 h-12 mx-auto mb-2 text-fuchsia-400" />
+                    <MessageCircle className="mx-auto mb-2 h-12 w-12 text-accent-bright" />
                   )}
-                  <p className="text-2xl font-bold text-white">
-                    {activityLoading ? '...' : stats?.totalCasts || '0'}
-                  </p>
-                  <p className="text-gray-300">Total Casts</p>
-                </CardContent>
-              </Card>
+                  <StatValue label="Total Casts" value={activityLoading ? '...' : stats?.totalCasts || '0'} />
+              </Surface>
 
-              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
-                <CardContent className="p-6 text-center">
-                  <Users className="w-12 h-12 mx-auto mb-2 text-cyan-400" />
-                  <p className="text-2xl font-bold text-white">
-                    {activityLoading ? '...' : stats?.followerCount || '0'}
-                  </p>
-                  <p className="text-gray-300">Followers</p>
-                </CardContent>
-              </Card>
+              <Surface className="p-6 text-center">
+                <Users className="mx-auto mb-2 h-12 w-12 text-accent-bright" />
+                <StatValue label="Followers" value={activityLoading ? '...' : stats?.followerCount || '0'} />
+              </Surface>
 
-              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
-                <CardContent className="p-6 text-center">
-                  <TrendingUp className="w-12 h-12 mx-auto mb-2 text-purple-400" />
-                  <p className="text-2xl font-bold text-white">
-                    {activityLoading ? '...' : Math.round(stats?.avgEngagementRate || 0)}
-                  </p>
-                  <p className="text-gray-300">Avg Engagement</p>
-                </CardContent>
-              </Card>
+              <Surface className="p-6 text-center">
+                <TrendingUp className="mx-auto mb-2 h-12 w-12 text-accent-bright" />
+                <StatValue label="Avg Engagement" value={activityLoading ? '...' : Math.round(stats?.avgEngagementRate || 0)} />
+              </Surface>
 
-              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
-                <CardContent className="p-6 text-center">
-                  <Users className="w-12 h-12 mx-auto mb-2 text-fuchsia-400" />
-                  <p className="text-2xl font-bold text-white">
-                    {activityLoading ? '...' : stats?.followingCount || '0'}
-                  </p>
-                  <p className="text-gray-300">Following</p>
-                </CardContent>
-              </Card>
+              <Surface className="p-6 text-center">
+                <Users className="mx-auto mb-2 h-12 w-12 text-accent-bright" />
+                <StatValue label="Following" value={activityLoading ? '...' : stats?.followingCount || '0'} />
+              </Surface>
             </div>
 
             {/* Recent Casts */}
-            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 backdrop-blur-lg">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <MessageCircle className="w-5 h-5 text-fuchsia-400" />
+            <Surface className="p-6">
+              <div className="mb-5">
+                <SectionTitle as="h2" className="flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5 text-accent-bright" />
                   Recent Activity
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+                </SectionTitle>
+              </div>
+              <div>
                 {castsLoading ? (
                   <div className="space-y-4">
                     {[...Array(3)].map((_, i) => (
                       <div key={i} className="space-y-2">
-                        <Skeleton className="h-4 w-full bg-purple-500/20" />
-                        <Skeleton className="h-4 w-3/4 bg-purple-500/20" />
-                        <Skeleton className="h-6 w-1/4 bg-purple-500/20" />
+                        <Skeleton className="h-4 w-full bg-ink-raised" />
+                        <Skeleton className="h-4 w-3/4 bg-ink-raised" />
+                        <Skeleton className="h-6 w-1/4 bg-ink-raised" />
                       </div>
                     ))}
                   </div>
@@ -249,12 +230,12 @@ export default function FarcasterActivity() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className="border-b border-white/10 pb-4 last:border-b-0"
+                        className="border-b border-ink-divider pb-4 last:border-b-0"
                       >
                         <div className="flex items-start gap-3">
                           <div className="flex-1">
-                            <p className="text-white mb-2">{cast.text}</p>
-                            <div className="flex items-center gap-4 text-sm text-gray-400">
+                            <p className="mb-2 text-body">{cast.text}</p>
+                            <div className="flex items-center gap-4 text-sm text-secondary">
                               <span className="flex items-center gap-1">
                                 <Calendar className="w-3 h-3" />
                                 {formatDate(cast.timestamp)}
@@ -276,7 +257,7 @@ export default function FarcasterActivity() {
                                   href={`https://warpcast.com/~/conversations/${cast.hash}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="flex items-center gap-1 text-fuchsia-400 hover:text-fuchsia-300"
+                                   className="flex items-center gap-1 text-accent-bright hover:text-primary"
                                 >
                                   <ExternalLink className="w-3 h-3" />
                                   View
@@ -289,12 +270,12 @@ export default function FarcasterActivity() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-300 text-center py-8">
+                    <p className="py-8 text-center text-body">
                     No recent activity found for this user
                   </p>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
           </motion.div>
         )}
 
@@ -303,9 +284,9 @@ export default function FarcasterActivity() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-center text-gray-300 mt-12"
+            className="mt-12 text-center text-body"
           >
-            <MessageCircle className="w-16 h-16 mx-auto mb-4 text-gray-500" />
+            <MessageCircle className="mx-auto mb-4 h-16 w-16 text-muted" />
             <p className="text-xl">Enter a Farcaster ID to view real activity data</p>
             <p className="text-sm mt-2">
               Try popular FIDs like 3 (dwr.eth), 5650 (vitalik.eth), or 1 (farcaster)
