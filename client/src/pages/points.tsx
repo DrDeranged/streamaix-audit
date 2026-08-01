@@ -2,7 +2,9 @@ import { usePointsHistory, usePointsWebSocket, formatPoints, getSourceIcon, getS
 import { Navigation } from '@/components/landing/navigation';
 import { motion } from 'framer-motion';
 import { Coins, TrendingUp, TrendingDown, Calendar, Flame, Award, ArrowUpRight, ArrowDownRight, Loader2, Wifi, WifiOff } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import Surface from '@/components/ds/Surface';
+import StatValue from '@/components/ds/StatValue';
+import SectionTitle from '@/components/ds/SectionTitle';
 import { Badge } from '@/components/ui/badge';
 import { NeuralNetworkBackground } from '@/components/NeuralNetworkBackground';
 import { cn } from '@/lib/utils';
@@ -22,11 +24,11 @@ export default function PointsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="min-h-[100dvh] bg-ink-page text-primary">
       <NeuralNetworkBackground />
       <Navigation />
       
-      <main className="relative z-10 pt-24 pb-12 px-4">
+      <main className="relative z-10 px-4 pb-12 pt-24">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -34,20 +36,18 @@ export default function PointsPage() {
             className="mb-8"
           >
             <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 shadow-lg shadow-emerald-500/30">
-                <Coins className="w-8 h-8 text-white" />
+              <div className="rounded-xl border border-accent-core/40 bg-accent-core/15 p-3 text-accent-bright">
+                <Coins className="h-8 w-8" />
               </div>
               <div>
-                <h1 className="text-3xl font-orbitron font-bold bg-gradient-to-r from-white via-emerald-200 to-cyan-200 bg-clip-text text-transparent">
-                  STREAM Points
-                </h1>
+                <SectionTitle as="h1">STREAM Points</SectionTitle>
                 <div className="flex items-center gap-2">
-                  <p className="text-slate-400">Track your earnings and spending</p>
+                  <p className="text-secondary">Track your earnings and spending</p>
                   <div className={cn(
-                    "flex items-center gap-1 px-2 py-0.5 rounded-full text-xs",
+                    "flex items-center gap-1 rounded-xl border px-2 py-0.5 text-xs",
                     isConnected 
-                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" 
-                      : "bg-slate-700/50 text-slate-500 border border-slate-600/30"
+                      ? "border-gain/30 bg-gain/10 text-gain"
+                      : "border-ink-edge bg-ink-raised text-muted"
                   )}>
                     {isConnected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
                     {isConnected ? 'Live' : 'Offline'}
@@ -59,7 +59,7 @@ export default function PointsPage() {
 
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
+              <Loader2 className="h-8 w-8 animate-spin text-accent-bright" />
             </div>
           ) : (
             <>
@@ -69,17 +69,12 @@ export default function PointsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
                 >
-                  <Card className="bg-slate-900/60 border-emerald-500/30 backdrop-blur-xl">
-                    <CardContent className="p-6">
+                  <Surface className="p-6">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-slate-400 text-sm">Current Balance</span>
-                        <Coins className="w-5 h-5 text-emerald-400" />
+                        <StatValue label="Current Balance" value={formatPoints(data?.balance || 0)} valueClassName="text-gain" />
+                        <Coins className="h-5 w-5 text-gain" />
                       </div>
-                      <p className="text-3xl font-bold text-emerald-400">
-                        {formatPoints(data?.balance || 0)}
-                      </p>
-                    </CardContent>
-                  </Card>
+                  </Surface>
                 </motion.div>
 
                 <motion.div
@@ -87,17 +82,12 @@ export default function PointsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <Card className="bg-slate-900/60 border-cyan-500/30 backdrop-blur-xl">
-                    <CardContent className="p-6">
+                  <Surface className="p-6">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-slate-400 text-sm">Total Earned</span>
-                        <TrendingUp className="w-5 h-5 text-cyan-400" />
+                        <StatValue label="Total Earned" value={formatPoints(data?.totalEarned || 0)} valueClassName="text-gain" />
+                        <TrendingUp className="h-5 w-5 text-gain" />
                       </div>
-                      <p className="text-3xl font-bold text-cyan-400">
-                        {formatPoints(data?.totalEarned || 0)}
-                      </p>
-                    </CardContent>
-                  </Card>
+                  </Surface>
                 </motion.div>
 
                 <motion.div
@@ -105,59 +95,54 @@ export default function PointsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <Card className="bg-slate-900/60 border-violet-500/30 backdrop-blur-xl">
-                    <CardContent className="p-6">
+                  <Surface className="p-6">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-slate-400 text-sm">Total Spent</span>
-                        <TrendingDown className="w-5 h-5 text-violet-400" />
+                        <StatValue label="Total Spent" value={formatPoints(data?.totalSpent || 0)} valueClassName="text-accent-bright" />
+                        <TrendingDown className="h-5 w-5 text-accent-bright" />
                       </div>
-                      <p className="text-3xl font-bold text-violet-400">
-                        {formatPoints(data?.totalSpent || 0)}
-                      </p>
-                    </CardContent>
-                  </Card>
+                  </Surface>
                 </motion.div>
               </div>
 
-              <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
-                <CardHeader className="border-b border-slate-700/50">
-                  <CardTitle className="flex items-center gap-2 text-white">
-                    <Calendar className="w-5 h-5 text-emerald-400" />
+              <Surface>
+                <div className="border-b border-ink-divider p-6">
+                  <SectionTitle as="h2" className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-accent-bright" />
                     Transaction History
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
+                  </SectionTitle>
+                </div>
+                <div className="p-0">
                   {!data?.transactions?.length ? (
                     <div className="flex flex-col items-center justify-center py-16 text-center">
-                      <Award className="w-12 h-12 text-slate-600 mb-4" />
-                      <p className="text-slate-400 mb-2">No transactions yet</p>
-                      <p className="text-sm text-slate-500">Start earning STREAM points by engaging with the platform!</p>
+                      <Award className="mb-4 h-12 w-12 text-muted" />
+                      <p className="mb-2 text-secondary">No transactions yet</p>
+                      <p className="text-sm text-muted">Start earning STREAM points by engaging with the platform!</p>
                     </div>
                   ) : (
-                    <div className="divide-y divide-slate-700/50">
+                    <div className="divide-y divide-ink-divider">
                       {data.transactions.map((tx, index) => (
                         <motion.div
                           key={tx.id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.03 }}
-                          className="flex items-center justify-between p-4 hover:bg-slate-800/30 transition-colors"
+                          className="flex items-center justify-between p-4 transition-colors hover:bg-ink-raised"
                           data-testid={`transaction-${tx.id}`}
                         >
                           <div className="flex items-center gap-4">
                             <div className={cn(
                               "w-10 h-10 rounded-xl flex items-center justify-center text-lg",
                               tx.amount > 0 
-                                ? "bg-emerald-500/10 border border-emerald-500/30" 
-                                : "bg-red-500/10 border border-red-500/30"
+                                ? "border border-gain/30 bg-gain/10"
+                                : "border border-loss/30 bg-loss/10"
                             )}>
                               {getSourceIcon(tx.source)}
                             </div>
                             <div>
-                              <p className="font-medium text-white">
+                              <p className="font-medium text-primary">
                                 {getSourceLabel(tx.source)}
                               </p>
-                              <p className="text-xs text-slate-400">
+                              <p className="text-xs text-secondary">
                                 {tx.description || formatDate(tx.createdAt)}
                               </p>
                             </div>
@@ -167,7 +152,7 @@ export default function PointsPage() {
                             <div className="text-right">
                               <p className={cn(
                                 "font-semibold flex items-center gap-1",
-                                tx.amount > 0 ? "text-emerald-400" : "text-red-400"
+                                tx.amount > 0 ? "text-gain" : "text-loss"
                               )}>
                                 {tx.amount > 0 ? (
                                   <ArrowUpRight className="w-4 h-4" />
@@ -176,15 +161,15 @@ export default function PointsPage() {
                                 )}
                                 {tx.amount > 0 ? '+' : ''}{formatPoints(Math.abs(tx.amount))}
                               </p>
-                              <p className="text-xs text-slate-500">
+                              <p className="text-xs text-muted">
                                 Balance: {formatPoints(tx.balanceAfter)}
                               </p>
                             </div>
                             <Badge variant="outline" className={cn(
                               "text-xs",
-                              tx.type === 'bonus' && "border-amber-500/50 text-amber-400",
-                              tx.type === 'earn' && "border-emerald-500/50 text-emerald-400",
-                              tx.type === 'spend' && "border-red-500/50 text-red-400",
+                              tx.type === 'bonus' && "border-warn/50 text-warn",
+                              tx.type === 'earn' && "border-gain/50 text-gain",
+                              tx.type === 'spend' && "border-loss/50 text-loss",
                             )}>
                               {tx.type}
                             </Badge>
@@ -193,37 +178,39 @@ export default function PointsPage() {
                       ))}
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </Surface>
 
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="mt-8 p-6 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-cyan-500/10 to-emerald-500/10 border border-emerald-500/20"
+                className="mt-8"
               >
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <Flame className="w-5 h-5 text-amber-400" />
-                  How to Earn STREAM Points
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {[
-                    { label: 'Sign Up', points: '2,500', icon: '🎉' },
-                    { label: 'Daily Login', points: '50-150', icon: '📅' },
-                    { label: 'Watch Streams', points: '10/5min', icon: '📺' },
-                    { label: 'Voice Chat', points: '50', icon: '🎤' },
-                    { label: 'Submit Bounty', points: '100-500', icon: '📝' },
-                    { label: 'Bounty Accepted', points: '1,000', icon: '✅' },
-                    { label: 'Prediction Win', points: '1.5x stake', icon: '🎯' },
-                    { label: 'Refer Friend', points: '500', icon: '👥' },
-                  ].map((item) => (
-                    <div key={item.label} className="p-3 rounded-xl bg-slate-800/40 border border-slate-700/30">
-                      <div className="text-2xl mb-1">{item.icon}</div>
-                      <p className="text-sm font-medium text-white">{item.label}</p>
-                      <p className="text-xs text-emerald-400">+{item.points}</p>
-                    </div>
-                  ))}
-                </div>
+                <Surface className="border-accent-core/20 bg-ink-surface p-6">
+                  <SectionTitle as="h3" className="mb-4 flex items-center gap-2">
+                    <Flame className="h-5 w-5 text-warn" />
+                    How to Earn STREAM Points
+                  </SectionTitle>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {[
+                      { label: 'Sign Up', points: '2,500', icon: '🎉' },
+                      { label: 'Daily Login', points: '50-150', icon: '📅' },
+                      { label: 'Watch Streams', points: '10/5min', icon: '📺' },
+                      { label: 'Voice Chat', points: '50', icon: '🎤' },
+                      { label: 'Submit Bounty', points: '100-500', icon: '📝' },
+                      { label: 'Bounty Accepted', points: '1,000', icon: '✅' },
+                      { label: 'Prediction Win', points: '1.5x stake', icon: '🎯' },
+                      { label: 'Refer Friend', points: '500', icon: '👥' },
+                    ].map((item) => (
+                      <div key={item.label} className="rounded-xl border border-ink-edge bg-ink-raised p-3">
+                        <div className="text-2xl mb-1">{item.icon}</div>
+                        <p className="text-sm font-medium text-primary">{item.label}</p>
+                        <p className="text-xs text-gain">+{item.points}</p>
+                      </div>
+                    ))}
+                  </div>
+                </Surface>
               </motion.div>
             </>
           )}

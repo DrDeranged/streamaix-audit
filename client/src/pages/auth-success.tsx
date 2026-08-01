@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 import { useLocation } from 'wouter';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 
 export default function AuthSuccess() {
   const [, setLocation] = useLocation();
@@ -22,11 +24,15 @@ export default function AuthSuccess() {
   }, [setLocation]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-white mb-4">Processing login...</h1>
-        <p className="text-slate-300">Please wait while we complete your authentication.</p>
-      </div>
+    <div className="flex min-h-[100dvh] items-center justify-center bg-ink-page p-4">
+      <Surface className="w-full max-w-md p-8 text-center sm:p-10">
+        <SectionTitle as="h1" className="mb-4 text-2xl sm:text-3xl">
+          Processing login...
+        </SectionTitle>
+        <p className="text-sm text-secondary sm:text-base">
+          Please wait while we complete your authentication.
+        </p>
+      </Surface>
     </div>
   );
 }

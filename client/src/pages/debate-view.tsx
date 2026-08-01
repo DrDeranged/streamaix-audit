@@ -2,6 +2,7 @@ import { useParams } from 'wouter';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PodcastConversation } from '@/components/streaming/PodcastConversation';
+import SectionTitle from '@/components/ds/SectionTitle';
 
 export default function DebateViewPage() {
   const params = useParams<{ id: string }>();
@@ -13,26 +14,28 @@ export default function DebateViewPage() {
 
   if (!debateId) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
-        <p className="text-slate-400">Conversation not found</p>
+      <div className="min-h-[100dvh] bg-ink-page flex items-center justify-center">
+        <p className="text-secondary">Conversation not found</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-purple-950/20 to-slate-950 safe-area-inset">
-      <div className="border-b border-purple-500/20 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-50">
+    <div className="min-h-[100dvh] bg-ink-page safe-area-inset">
+      <div className="sticky top-0 z-50 border-b border-ink-divider bg-ink-surface/95 backdrop-blur-xl">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
           <Button 
             variant="ghost" 
             size="icon" 
-            className="text-slate-400 hover:text-white h-10 w-10"
+            className="h-10 w-10 rounded-xl text-secondary hover:bg-ink-raised hover:text-primary"
             onClick={handleBack}
             data-testid="button-back"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-lg font-bold text-white font-orbitron">Avatar Conversation</h1>
+          <SectionTitle as="h1" className="text-lg font-semibold">
+            Avatar Conversation
+          </SectionTitle>
         </div>
       </div>
 

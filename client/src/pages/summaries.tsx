@@ -2,7 +2,9 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Navigation } from "@/components/landing/navigation";
 import { PageHeader } from "@/components/PageHeader";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import Surface from "@/components/ds/Surface";
+import SectionTitle from "@/components/ds/SectionTitle";
+import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,15 +56,15 @@ export default function Summaries() {
 
   const getStatusColor = (status: string) => {
     switch(status) {
-      case 'completed': return 'bg-green-500/20 text-green-300 border-green-500/30';
-      case 'processing': return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
-      case 'failed': return 'bg-red-500/20 text-red-300 border-red-500/30';
-      default: return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
+      case 'completed': return 'bg-gain/15 text-gain border-gain/30';
+      case 'processing': return 'bg-warn/15 text-warn border-warn/30';
+      case 'failed': return 'bg-loss/15 text-loss border-loss/30';
+      default: return 'bg-ink-raised text-secondary border-ink-edge';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
+    <div className="min-h-[100dvh] bg-ink-page">
       <Navigation />
       
       <div className="container mx-auto px-4 pt-24 pb-16">
@@ -80,19 +82,19 @@ export default function Summaries() {
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Search */}
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
               <Input
                 placeholder="Search summaries..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 neural-glass"
+                 className="rounded-xl border-ink-edge bg-ink-surface pl-10 text-body placeholder:text-muted focus-visible:ring-accent-core"
                 data-testid="input-search-summaries"
               />
             </div>
 
             {/* Content Type Filter */}
             <Select value={contentTypeFilter} onValueChange={setContentTypeFilter}>
-              <SelectTrigger className="w-full sm:w-48 neural-glass" data-testid="select-content-type">
+               <SelectTrigger className="w-full rounded-xl border-ink-edge bg-ink-surface text-body sm:w-48" data-testid="select-content-type">
                 <Filter className="w-4 h-4 mr-2" />
                 <SelectValue placeholder="Content Type" />
               </SelectTrigger>
@@ -106,7 +108,7 @@ export default function Summaries() {
 
             {/* Status Filter */}
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-48 neural-glass" data-testid="select-status">
+               <SelectTrigger className="w-full rounded-xl border-ink-edge bg-ink-surface text-body sm:w-48" data-testid="select-status">
                 <Filter className="w-4 h-4 mr-2" />
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
@@ -122,11 +124,11 @@ export default function Summaries() {
 
           {/* Results Count */}
           <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-400">
+             <p className="text-sm text-secondary">
               Showing {filteredSummaries.length} of {(summaries as any[]).length} summaries
             </p>
             <Link href="/create-summary">
-              <Button variant="outline" className="gap-2" data-testid="button-create-new">
+               <Button variant="outline" className="rounded-xl border-ink-edge bg-ink-surface text-body hover:bg-ink-raised hover:text-primary gap-2" data-testid="button-create-new">
                 <Sparkles className="w-4 h-4" />
                 Create New
               </Button>
@@ -136,25 +138,25 @@ export default function Summaries() {
 
         {/* Summaries Grid */}
         {isLoading ? (
-          <div className="text-center py-12 text-gray-400">
+           <div className="text-center py-12 text-secondary">
             <div className="animate-pulse">Loading summaries...</div>
           </div>
         ) : filteredSummaries.length === 0 ? (
-          <div className="text-center py-12">
-            <FileText className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">
+           <div className="text-center py-12">
+             <FileText className="mx-auto mb-4 h-16 w-16 text-muted" />
+             <SectionTitle as="h3" className="mb-2 text-xl font-semibold">
               {searchTerm || contentTypeFilter !== "all" || statusFilter !== "all" 
                 ? "No summaries match your filters" 
                 : "No summaries yet"}
-            </h3>
-            <p className="text-gray-400 mb-6">
+             </SectionTitle>
+             <p className="mb-6 text-secondary">
               {searchTerm || contentTypeFilter !== "all" || statusFilter !== "all"
                 ? "Try adjusting your search or filters"
                 : "Create your first AI-processed summary"}
             </p>
             {!searchTerm && contentTypeFilter === "all" && statusFilter === "all" && (
-              <Link href="/create-summary">
-                <Button data-testid="button-create-first">
+             <Link href="/create-summary">
+                 <Button className="rounded-xl bg-accent-core text-primary hover:bg-accent-deep glow-accent" data-testid="button-create-first">
                   <Sparkles className="w-4 h-4 mr-2" />
                   Create First Summary
                 </Button>
@@ -164,9 +166,9 @@ export default function Summaries() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredSummaries.map((summary: any) => (
-              <Card 
+              <Surface 
                 key={summary.id} 
-                className="neural-glass hover:scale-[1.02] transition-transform cursor-pointer group"
+                className="group cursor-pointer transition-transform hover:scale-[1.02]"
                 data-testid={`card-summary-${summary.id}`}
               >
                 <Link href={`/summary/${summary.id}`}>
@@ -174,7 +176,7 @@ export default function Summaries() {
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <Badge 
                         variant="outline" 
-                        className="bg-purple-500/20 text-purple-300 border-purple-500/30"
+                         className="border-accent-core/30 bg-accent-core/15 text-accent-bright"
                       >
                         <span className="flex items-center gap-1">
                           {getContentIcon(summary.contentType)}
@@ -188,10 +190,10 @@ export default function Summaries() {
                         {summary.processingStatus || 'pending'}
                       </Badge>
                     </div>
-                    <CardTitle className="text-lg line-clamp-2 text-white group-hover:text-cyan-400 transition-colors">
+                     <CardTitle className="line-clamp-2 text-lg text-primary transition-colors group-hover:text-accent-bright">
                       {summary.title}
                     </CardTitle>
-                    <CardDescription className="line-clamp-3">
+                     <CardDescription className="line-clamp-3 text-secondary">
                       {summary.description || summary.tldrSummary || summary.executiveSummary || 'AI-processed content'}
                     </CardDescription>
                   </CardHeader>
@@ -201,12 +203,12 @@ export default function Summaries() {
                       {summary.tags && summary.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {summary.tags.slice(0, 3).map((tag: string) => (
-                            <Badge key={tag} variant="secondary" className="text-xs">
+                           <Badge key={tag} variant="secondary" className="rounded-xl border-ink-edge bg-ink-raised text-xs text-secondary">
                               {tag}
                             </Badge>
                           ))}
                           {summary.tags.length > 3 && (
-                            <Badge variant="secondary" className="text-xs">
+                             <Badge variant="secondary" className="rounded-xl border-ink-edge bg-ink-raised text-xs text-secondary">
                               +{summary.tags.length - 3}
                             </Badge>
                           )}
@@ -214,17 +216,17 @@ export default function Summaries() {
                       )}
 
                       {/* Footer */}
-                      <div className="flex items-center justify-between pt-2 border-t border-gray-800">
-                        <div className="flex items-center gap-2 text-sm text-gray-400">
+                       <div className="flex items-center justify-between border-t border-ink-divider pt-2">
+                         <div className="flex items-center gap-2 text-sm text-secondary">
                           <Calendar className="w-4 h-4" />
                           <span>{format(new Date(summary.createdAt), 'MMM d, yyyy')}</span>
                         </div>
-                        <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all" />
+                         <ArrowRight className="h-4 w-4 text-muted transition-all group-hover:translate-x-1 group-hover:text-accent-bright" />
                       </div>
                     </div>
                   </CardContent>
                 </Link>
-              </Card>
+              </Surface>
             ))}
           </div>
         )}

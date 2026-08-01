@@ -7,3 +7,11 @@ client/src/pages/avatar-feed.tsx
 client/src/pages/portfolio-dashboard.tsx
 client/src/pages/dashboard.tsx
 client/src/pages/markets.tsx
+client/src/pages/discover.tsx
+client/src/pages/auth-success.tsx
+client/src/pages/debates.tsx
+client/src/pages/debate-view.tsx
+client/src/pages/not-found.tsx
+client/src/pages/points.tsx
+client/src/pages/summaries.tsx
+client/src/pages/market-leaderboard.tsx
