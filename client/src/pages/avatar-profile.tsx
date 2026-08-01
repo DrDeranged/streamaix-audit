@@ -3,13 +3,14 @@ import { useLocation, useParams, Link } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { PageHeader } from '@/components/PageHeader';
+import Surface from '@/components/ds/Surface';
 import { 
   User,
   Heart,
@@ -221,18 +222,18 @@ function AvatarTradingSection({ avatarId, avatarName }: { avatarId: string; avat
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <Card className="bg-white/5 border-white/10">
+        <Surface className="p-0">
           <CardContent className="p-6">
             <div className="animate-pulse space-y-4">
-              <div className="h-6 bg-white/10 rounded w-1/3"></div>
+              <div className="h-6 bg-ink-raised rounded w-1/3"></div>
               <div className="grid grid-cols-4 gap-4">
                 {[...Array(4)].map((_, i) => (
-                  <div key={i} className="h-20 bg-white/10 rounded"></div>
+                  <div key={i} className="h-20 bg-ink-raised rounded"></div>
                 ))}
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Surface>
       </div>
     );
   }
@@ -242,16 +243,16 @@ function AvatarTradingSection({ avatarId, avatarName }: { avatarId: string; avat
 
   if (!hasTraded) {
     return (
-      <Card className="bg-white/5 border-white/10">
+      <Surface>
         <CardContent className="p-8 text-center">
-          <BarChart3 className="w-12 h-12 mx-auto mb-4 text-purple-400 opacity-50" />
-          <h3 className="text-lg font-semibold text-white mb-2">No Trading Activity Yet</h3>
-          <p className="text-white/60 text-sm max-w-md mx-auto">
+          <BarChart3 className="w-12 h-12 mx-auto mb-4 text-accent-bright opacity-50" />
+          <h3 className="text-lg font-semibold text-primary mb-2">No Trading Activity Yet</h3>
+          <p className="text-secondary text-sm max-w-md mx-auto">
             {avatarName} hasn't participated in prediction markets yet. 
             Avatar trading cycles run periodically based on their expertise domains.
           </p>
         </CardContent>
-      </Card>
+      </Surface>
     );
   }
 
@@ -261,81 +262,81 @@ function AvatarTradingSection({ avatarId, avatarName }: { avatarId: string; avat
 
   const getStyleColor = (style: string) => {
     const colors: Record<string, string> = {
-      swing_trader: 'border-cyan-500/30 text-cyan-300',
-      dip_buyer: 'border-emerald-500/30 text-emerald-300',
-      momentum: 'border-orange-500/30 text-orange-300',
-      contrarian: 'border-purple-500/30 text-purple-300',
-      value: 'border-blue-500/30 text-blue-300',
-      growth: 'border-fuchsia-500/30 text-fuchsia-300',
+      swing_trader: 'border-accent-core/30 text-accent-bright',
+      dip_buyer: 'border-gain/30 text-gain',
+      momentum: 'border-warn/30 text-warn',
+      contrarian: 'border-accent-core/30 text-accent-bright',
+      value: 'border-accent-core/30 text-accent-bright',
+      growth: 'border-accent-core/30 text-accent-bright',
     };
-    return colors[style] || 'border-white/30 text-white';
+    return colors[style] || 'border-ink-edge text-primary';
   };
 
   const getRiskColor = (risk: string) => {
     const colors: Record<string, string> = {
-      conservative: 'text-emerald-400',
-      moderate: 'text-amber-400',
-      aggressive: 'text-rose-400',
+      conservative: 'text-gain',
+      moderate: 'text-warn',
+      aggressive: 'text-loss',
     };
-    return colors[risk] || 'text-white';
+    return colors[risk] || 'text-primary';
   };
 
   return (
     <div className="space-y-4 md:space-y-6">
       {/* Trading Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        <Card className="bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10 border-purple-500/30">
+        <Surface>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <BarChart3 className="w-4 h-4 text-purple-400" />
-              <span className="text-xs text-white/60">Total Trades</span>
+              <BarChart3 className="w-4 h-4 text-accent-bright" />
+              <span className="text-xs text-muted">Total Trades</span>
             </div>
-            <div className="text-2xl font-bold text-white">{stats?.totalTrades || 0}</div>
+            <div className="tabular text-2xl font-bold text-primary">{stats?.totalTrades || 0}</div>
           </CardContent>
-        </Card>
+        </Surface>
         
-        <Card className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border-cyan-500/30">
+        <Surface>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <DollarSign className="w-4 h-4 text-cyan-400" />
-              <span className="text-xs text-white/60">Volume</span>
+              <DollarSign className="w-4 h-4 text-accent-bright" />
+              <span className="text-xs text-muted">Volume</span>
             </div>
-            <div className="text-2xl font-bold text-white">
+            <div className="tabular text-2xl font-bold text-primary">
               {((stats?.totalVolume || 0) / 1000).toFixed(1)}K
             </div>
-            <div className="text-xs text-white/40">STREAM</div>
+            <div className="text-xs text-muted">STREAM</div>
           </CardContent>
-        </Card>
+        </Surface>
         
-        <Card className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 border-emerald-500/30">
+        <Surface>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs text-white/60">Win Rate</span>
+              <TrendingUp className="w-4 h-4 text-gain" />
+              <span className="text-xs text-muted">Win Rate</span>
             </div>
-            <div className="text-2xl font-bold text-emerald-400">
+            <div className="tabular text-2xl font-bold text-gain">
               {((stats?.winRate || 0) * 100).toFixed(0)}%
             </div>
           </CardContent>
-        </Card>
+        </Surface>
         
-        <Card className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/30">
+        <Surface>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <PieChart className="w-4 h-4 text-amber-400" />
-              <span className="text-xs text-white/60">Active Positions</span>
+              <PieChart className="w-4 h-4 text-warn" />
+              <span className="text-xs text-muted">Active Positions</span>
             </div>
-            <div className="text-2xl font-bold text-white">{stats?.activePositions || 0}</div>
+            <div className="tabular text-2xl font-bold text-primary">{stats?.activePositions || 0}</div>
           </CardContent>
-        </Card>
+        </Surface>
       </div>
 
       {/* Trading Persona */}
       {tradingPersona && (
-        <Card className="bg-white/5 border-white/10">
+        <Surface className="p-0">
           <CardHeader className="pb-3">
-            <CardTitle className="text-white flex items-center gap-2 text-base">
-              <Brain className="w-5 h-5 text-purple-400" />
+            <CardTitle className="text-primary flex items-center gap-2 text-base">
+              <Brain className="w-5 h-5 text-accent-bright" />
               Trading Persona
             </CardTitle>
           </CardHeader>
@@ -344,32 +345,32 @@ function AvatarTradingSection({ avatarId, avatarName }: { avatarId: string; avat
               <Badge variant="outline" className={getStyleColor(tradingPersona.tradingStyle)}>
                 {tradingPersona.tradingStyle?.replace('_', ' ').toUpperCase()}
               </Badge>
-              <Badge variant="outline" className={`border-white/20 ${getRiskColor(tradingPersona.riskTolerance)}`}>
+              <Badge variant="outline" className={`border-ink-edge ${getRiskColor(tradingPersona.riskTolerance)}`}>
                 {tradingPersona.riskTolerance?.toUpperCase()} RISK
               </Badge>
-              <Badge variant="outline" className="border-white/20 text-white/70">
+              <Badge variant="outline" className="border-ink-edge text-secondary">
                 {tradingPersona.decisionBias?.replace('_', ' ')}
               </Badge>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {tradingPersona.expertiseDomains?.map((domain, i) => (
-                <Badge key={i} variant="outline" className="border-purple-400/30 text-purple-300 text-xs">
+                <Badge key={i} variant="outline" className="border-purple-400/30 text-accent-bright text-xs">
                   {domain}
                 </Badge>
               ))}
             </div>
           </CardContent>
-        </Card>
+        </Surface>
       )}
 
       {/* Active Positions */}
       {positions.length > 0 && (
-        <Card className="bg-white/5 border-white/10">
+      <Surface className="p-0">
           <CardHeader className="pb-3">
-            <CardTitle className="text-white flex items-center gap-2 text-base">
-              <Target className="w-5 h-5 text-cyan-400" />
+            <CardTitle className="text-primary flex items-center gap-2 text-base">
+              <Target className="w-5 h-5 text-accent-bright" />
               Active Positions
-              <Badge variant="outline" className="ml-auto border-cyan-500/30 text-cyan-300 text-xs">
+              <Badge variant="outline" className="ml-auto border-cyan-500/30 text-accent-bright text-xs">
                 {positions.length} markets
               </Badge>
             </CardTitle>
@@ -380,7 +381,7 @@ function AvatarTradingSection({ avatarId, avatarName }: { avatarId: string; avat
                 <Link key={i} href={`/markets/${pos.marketId}`}>
                   <motion.div
                     whileHover={{ scale: 1.01 }}
-                    className={`p-3 rounded-lg cursor-pointer transition-all ${
+                    className={`p-3 rounded-xl cursor-pointer transition-all ${
                       pos.outcome === 'YES' 
                         ? 'bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-400/40' 
                         : 'bg-rose-500/10 border border-rose-500/20 hover:border-rose-400/40'
@@ -388,25 +389,25 @@ function AvatarTradingSection({ avatarId, avatarName }: { avatarId: string; avat
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-white/90 line-clamp-1 mb-1">{pos.marketQuestion}</p>
+                        <p className="text-sm text-body line-clamp-1 mb-1">{pos.marketQuestion}</p>
                         <div className="flex items-center gap-2">
                           <Badge className={`text-xs ${
                             pos.outcome === 'YES' 
-                              ? 'bg-emerald-500/20 text-emerald-300' 
-                              : 'bg-rose-500/20 text-rose-300'
+                              ? 'bg-emerald-500/20 text-gain' 
+                              : 'bg-rose-500/20 text-loss'
                           }`}>
                             {pos.outcome}
                           </Badge>
-                          <span className="text-xs text-white/50">
+                          <span className="text-xs text-muted">
                             {pos.shares.toLocaleString()} shares
                           </span>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className={`text-sm font-bold ${pos.outcome === 'YES' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        <div className={`text-sm font-bold ${pos.outcome === 'YES' ? 'text-gain' : 'text-loss'}`}>
                           {(pos.invested / 1000).toFixed(1)}K
                         </div>
-                        <div className="text-xs text-white/40">STREAM</div>
+                        <div className="text-xs text-muted">STREAM</div>
                       </div>
                     </div>
                   </motion.div>
@@ -414,15 +415,15 @@ function AvatarTradingSection({ avatarId, avatarName }: { avatarId: string; avat
               ))}
             </div>
           </CardContent>
-        </Card>
+        </Surface>
       )}
 
       {/* Recent Trades */}
       {recentTrades.length > 0 && (
-        <Card className="bg-white/5 border-white/10">
+        <Surface>
           <CardHeader className="pb-3">
-            <CardTitle className="text-white flex items-center gap-2 text-base">
-              <Zap className="w-5 h-5 text-amber-400" />
+            <CardTitle className="text-primary flex items-center gap-2 text-base">
+              <Zap className="w-5 h-5 text-warn" />
               Recent Trades
             </CardTitle>
           </CardHeader>
@@ -432,22 +433,22 @@ function AvatarTradingSection({ avatarId, avatarName }: { avatarId: string; avat
                 <Link key={i} href={`/markets/${trade.marketId}`}>
                   <motion.div
                     whileHover={{ scale: 1.01 }}
-                    className="p-3 bg-white/5 rounded-lg border border-white/10 hover:border-purple-400/30 cursor-pointer transition-all"
+                    className="p-3 bg-ink-raised rounded-xl border border-ink-edge hover:border-purple-400/30 cursor-pointer transition-all"
                   >
                     <div className="flex items-start justify-between gap-3 mb-2">
-                      <p className="text-sm text-white/90 line-clamp-1 flex-1">{trade.marketQuestion}</p>
+                      <p className="text-sm text-body line-clamp-1 flex-1">{trade.marketQuestion}</p>
                       <Badge className={`text-xs shrink-0 ${
                         trade.outcome === 'YES' 
-                          ? 'bg-emerald-500/20 text-emerald-300' 
-                          : 'bg-rose-500/20 text-rose-300'
+                          ? 'bg-emerald-500/20 text-gain' 
+                          : 'bg-rose-500/20 text-loss'
                       }`}>
                         {trade.outcome}
                       </Badge>
                     </div>
                     {trade.reasoning && (
-                      <p className="text-xs text-white/50 line-clamp-2 mb-2 italic">"{trade.reasoning}"</p>
+                      <p className="text-xs text-muted line-clamp-2 mb-2 italic">"{trade.reasoning}"</p>
                     )}
-                    <div className="flex items-center justify-between text-xs text-white/40">
+                    <div className="flex items-center justify-between text-xs text-muted">
                       <span>{trade.shares.toLocaleString()} shares @ {(trade.entryPrice / 100).toFixed(0)}%</span>
                       <span>{new Date(trade.createdAt).toLocaleDateString()}</span>
                     </div>
@@ -456,20 +457,20 @@ function AvatarTradingSection({ avatarId, avatarName }: { avatarId: string; avat
               ))}
             </div>
           </CardContent>
-        </Card>
+        </Surface>
       )}
     </div>
   );
 }
 
 // Helper functions for data transformation - Bloomberg Terminal-style intelligence
-const getAvatarGradient = (name: string) => {
+  const getAvatarGradient = (name: string) => {
   const gradients: Record<string, string> = {
-    'Naval Ravikant': 'from-blue-600 via-purple-600 to-blue-800',
-    'Vitalik Buterin': 'from-purple-600 via-blue-600 to-purple-800', 
-    'Michael Saylor': 'from-orange-600 via-red-600 to-orange-800'
+    'Naval Ravikant': 'bg-accent-deep',
+    'Vitalik Buterin': 'bg-accent-deep', 
+    'Michael Saylor': 'bg-accent-deep'
   };
-  return gradients[name] || 'from-gray-600 via-gray-700 to-gray-800';
+  return gradients[name] || 'bg-ink-raised';
 };
 
 const getAvatarRole = (expertise: string) => {
@@ -482,11 +483,11 @@ const getAvatarRole = (expertise: string) => {
 };
 
 const getDefaultAvatar = (name: string) => {
-  return 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face';
+    return '/api/placeholder/128/128';
 };
 
 const getAvatarBanner = (name: string) => {
-  return 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=400&fit=crop';
+    return '';
 };
 
 const transformInvestments = (investments: string[] | undefined) => {
@@ -761,16 +762,16 @@ export default function AvatarProfile() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
-        <div className="text-white text-xl">Loading avatar profile...</div>
+      <div className="min-h-screen bg-ink-page flex items-center justify-center">
+        <div className="text-primary text-xl">Loading avatar profile...</div>
       </div>
     );
   }
 
   if (!avatar) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
-        <div className="text-white text-xl">Avatar not found</div>
+      <div className="min-h-screen bg-ink-page flex items-center justify-center">
+        <div className="text-primary text-xl">Avatar not found</div>
       </div>
     );
   }
@@ -785,12 +786,12 @@ export default function AvatarProfile() {
   const highlightedInsights = insights.filter(insight => insight.is_highlighted).slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
+    <div className="min-h-screen bg-ink-page">
       {/* Header Section */}
       <div className="relative">
         {/* Banner */}
-        <div className="h-40 sm:h-48 md:h-64 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 relative overflow-hidden">
-          <div className="absolute inset-0 bg-black/20" />
+        <div className="h-40 sm:h-48 md:h-64 grad-surface relative overflow-hidden">
+          <div className="absolute inset-0 bg-ink-page/20" />
         </div>
 
         {/* Profile Info */}
@@ -800,36 +801,36 @@ export default function AvatarProfile() {
               <img 
                 src={avatar.image_url || '/api/placeholder/128/128'} 
                 alt={`${avatar.name} avatar`}
-                className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 border-white object-cover shadow-xl"
+                className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-xl border-4 border-white object-cover shadow-xl"
               />
               {avatar.verification_status === 'verified' && (
-                <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 bg-blue-500 rounded-full p-1 sm:p-1.5 md:p-2">
-                  <CheckCircle2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4 text-white" />
+                <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 bg-blue-500 rounded-xl p-1 sm:p-1.5 md:p-2">
+                  <CheckCircle2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4 text-primary" />
                 </div>
               )}
             </div>
 
-            <div className="flex-1 text-white w-full">
+            <div className="flex-1 text-primary w-full">
               <PageHeader
                 eyebrow={
-                  <span className="text-white/80">{avatar.handle} · {avatar.expertise}</span>
+                  <span className="text-secondary">{avatar.handle} · {avatar.expertise}</span>
                 }
                 title={avatar.name}
                 subtitle={avatar.bio}
                 actions={
                   <>
                     {avatar.twitter_handle && (
-                      <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 h-8 w-8 p-0">
+                      <Button variant="outline" size="sm" className="border-ink-edge text-primary hover:bg-ink-raised h-8 w-8 p-0">
                         <Twitter className="h-3 w-3 md:h-4 md:w-4" />
                       </Button>
                     )}
                     {avatar.linkedin_url && (
-                      <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 h-8 w-8 p-0">
+                      <Button variant="outline" size="sm" className="border-ink-edge text-primary hover:bg-ink-raised h-8 w-8 p-0">
                         <Linkedin className="h-3 w-3 md:h-4 md:w-4" />
                       </Button>
                     )}
                     {avatar.website_url && (
-                      <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 h-8 w-8 p-0">
+                      <Button variant="outline" size="sm" className="border-ink-edge text-primary hover:bg-ink-raised h-8 w-8 p-0">
                         <Globe className="h-3 w-3 md:h-4 md:w-4" />
                       </Button>
                     )}
@@ -839,8 +840,8 @@ export default function AvatarProfile() {
                       size="sm"
                       className={`${
                         isFollowing
-                          ? 'bg-purple-900/20 text-white border-purple-500/30'
-                          : 'bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 text-white'
+                          ? 'bg-accent-deep/20 text-primary border-accent-core/30'
+                          : 'bg-ink-surface    text-primary'
                       } hover:opacity-90 text-xs sm:text-sm h-8`}
                       data-testid="button-follow-avatar"
                     >
@@ -852,7 +853,7 @@ export default function AvatarProfile() {
                         variant="outline"
                         size="sm"
                         onClick={() => setNotificationsEnabled(!notificationsEnabled)}
-                        className="border-purple-500/30 text-white hover:bg-purple-900/20 h-8 w-8 p-0"
+                        className="border-accent-core/30 text-primary hover:bg-accent-deep/20 h-8 w-8 p-0"
                         data-testid="button-notifications-toggle"
                       >
                         {notificationsEnabled ? <Bell className="h-3 w-3 md:h-4 md:w-4" /> : <BellOff className="h-3 w-3 md:h-4 md:w-4" />}
@@ -866,19 +867,19 @@ export default function AvatarProfile() {
               <div className="flex gap-3 sm:gap-5 md:gap-8 mt-3 md:mt-6 overflow-x-auto pb-2">
                 <div className="text-center min-w-[60px]">
                   <div className="text-base sm:text-xl md:text-2xl font-bold">{avatar.follower_count.toLocaleString()}</div>
-                  <div className="text-[10px] sm:text-xs md:text-sm text-white/60">Followers</div>
+                  <div className="text-[10px] sm:text-xs md:text-sm text-secondary">Followers</div>
                 </div>
                 <div className="text-center min-w-[60px]">
                   <div className="text-base sm:text-xl md:text-2xl font-bold">{avatar.keyMetrics?.contentCount || 150}</div>
-                  <div className="text-[10px] sm:text-xs md:text-sm text-white/60">Content</div>
+                  <div className="text-[10px] sm:text-xs md:text-sm text-secondary">Content</div>
                 </div>
                 <div className="text-center min-w-[60px]">
                   <div className="text-base sm:text-xl md:text-2xl font-bold">{avatar.keyMetrics?.credibilityScore || 95}%</div>
-                  <div className="text-[10px] sm:text-xs md:text-sm text-white/60">Credibility</div>
+                  <div className="text-[10px] sm:text-xs md:text-sm text-secondary">Credibility</div>
                 </div>
                 <div className="text-center min-w-[60px]">
                   <div className="text-base sm:text-xl md:text-2xl font-bold">{avatar.keyMetrics?.engagementRate?.toFixed(1) || '4.2'}%</div>
-                  <div className="text-[10px] sm:text-xs md:text-sm text-white/60">Engagement</div>
+                  <div className="text-[10px] sm:text-xs md:text-sm text-secondary">Engagement</div>
                 </div>
               </div>
             </div>
@@ -890,16 +891,16 @@ export default function AvatarProfile() {
       <div className="container mx-auto px-3 sm:px-4 md:px-6 pb-12 md:pb-20">
         <Tabs defaultValue="overview" className="w-full">
           <div className="overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6 px-3 sm:px-4 md:px-6 mb-4 md:mb-8">
-            <TabsList className="grid w-full min-w-[700px] md:min-w-0 grid-cols-9 bg-white/5 border-white/10">
-              <TabsTrigger value="overview" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Overview</TabsTrigger>
-              <TabsTrigger value="trading" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Trading</TabsTrigger>
-              <TabsTrigger value="investments" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Invest</TabsTrigger>
-              <TabsTrigger value="companies" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Co's</TabsTrigger>
-              <TabsTrigger value="podcasts" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Pods</TabsTrigger>
-              <TabsTrigger value="content" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Content</TabsTrigger>
-              <TabsTrigger value="routines" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Routine</TabsTrigger>
-              <TabsTrigger value="ai-insights" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">AI</TabsTrigger>
-              <TabsTrigger value="network" className="text-white data-[state=active]:bg-white/10 text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Network</TabsTrigger>
+            <TabsList className="grid w-full min-w-[700px] md:min-w-0 grid-cols-9 bg-ink-raised border-ink-edge">
+              <TabsTrigger value="overview" className="text-primary data-[state=active]:bg-accent-core data-[state=active]:text-primary text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Overview</TabsTrigger>
+              <TabsTrigger value="trading" className="text-primary data-[state=active]:bg-accent-core data-[state=active]:text-primary text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Trading</TabsTrigger>
+              <TabsTrigger value="investments" className="text-primary data-[state=active]:bg-accent-core data-[state=active]:text-primary text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Invest</TabsTrigger>
+              <TabsTrigger value="companies" className="text-primary data-[state=active]:bg-ink-raised text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Co's</TabsTrigger>
+              <TabsTrigger value="podcasts" className="text-primary data-[state=active]:bg-ink-raised text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Pods</TabsTrigger>
+              <TabsTrigger value="content" className="text-primary data-[state=active]:bg-ink-raised text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Content</TabsTrigger>
+              <TabsTrigger value="routines" className="text-primary data-[state=active]:bg-ink-raised text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Routine</TabsTrigger>
+              <TabsTrigger value="ai-insights" className="text-primary data-[state=active]:bg-ink-raised text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">AI</TabsTrigger>
+              <TabsTrigger value="network" className="text-primary data-[state=active]:bg-ink-raised text-[10px] sm:text-xs md:text-sm px-1 sm:px-2">Network</TabsTrigger>
             </TabsList>
           </div>
 
@@ -907,9 +908,9 @@ export default function AvatarProfile() {
           <TabsContent value="overview" className="space-y-4 md:space-y-6">
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
               {/* Primary Focus */}
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <Surface>
                 <CardHeader className="pb-3 md:pb-6">
-                  <CardTitle className="text-white flex items-center gap-2 text-sm md:text-base">
+                  <CardTitle className="text-primary flex items-center gap-2 text-sm md:text-base">
                     <Target className="h-4 w-4 md:h-5 md:w-5" />
                     Primary Focus
                   </CardTitle>
@@ -917,18 +918,18 @@ export default function AvatarProfile() {
                 <CardContent className="pt-0">
                   <div className="flex flex-wrap gap-1.5 md:gap-2">
                     {avatar.primary_interests?.map((focus: string, index: number) => (
-                      <Badge key={index} variant="outline" className="border-purple-400/30 text-purple-300 text-[10px] md:text-xs px-2 py-0.5">
+                      <Badge key={index} variant="outline" className="border-purple-400/30 text-accent-bright text-[10px] md:text-xs px-2 py-0.5">
                         {focus}
                       </Badge>
                     ))}
                   </div>
                 </CardContent>
-              </Card>
+              </Surface>
 
               {/* Expertise */}
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <Surface>
                 <CardHeader className="pb-3 md:pb-6">
-                  <CardTitle className="text-white flex items-center gap-2 text-sm md:text-base">
+                  <CardTitle className="text-primary flex items-center gap-2 text-sm md:text-base">
                     <Award className="h-4 w-4 md:h-5 md:w-5" />
                     Expertise
                   </CardTitle>
@@ -936,44 +937,44 @@ export default function AvatarProfile() {
                 <CardContent className="pt-0">
                   <div className="flex flex-wrap gap-1.5 md:gap-2">
                     {[avatar.expertise].map((skill: string, index: number) => (
-                      <Badge key={index} variant="outline" className="border-blue-400/30 text-blue-300 text-[10px] md:text-xs px-2 py-0.5">
+                      <Badge key={index} variant="outline" className="border-blue-400/30 text-accent-bright text-[10px] md:text-xs px-2 py-0.5">
                         {skill}
                       </Badge>
                     ))}
                   </div>
                 </CardContent>
-              </Card>
+              </Surface>
 
               {/* Investment Performance */}
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm sm:col-span-2 lg:col-span-1">
+              <Surface className="sm:col-span-2 lg:col-span-1">
                 <CardHeader className="pb-3 md:pb-6">
-                  <CardTitle className="text-white flex items-center gap-2 text-sm md:text-base">
+                  <CardTitle className="text-primary flex items-center gap-2 text-sm md:text-base">
                     <TrendingUp className="h-4 w-4 md:h-5 md:w-5" />
                     Performance
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 md:space-y-3 pt-0">
                   <div className="flex justify-between text-xs md:text-sm">
-                    <span className="text-gray-300">Total Return</span>
-                    <span className="text-green-400 font-bold">{avatar.investmentReturns?.totalReturn || 'N/A'}</span>
+                    <span className="text-body">Total Return</span>
+                    <span className="text-gain font-bold">{avatar.investmentReturns?.totalReturn || 'N/A'}</span>
                   </div>
                   <div className="flex justify-between text-xs md:text-sm">
-                    <span className="text-gray-300">Annual Return</span>
-                    <span className="text-green-400 font-bold">{avatar.investmentReturns?.annualizedReturn || 'N/A'}</span>
+                    <span className="text-body">Annual Return</span>
+                    <span className="text-gain font-bold">{avatar.investmentReturns?.annualizedReturn || 'N/A'}</span>
                   </div>
                   <div className="flex justify-between text-xs md:text-sm">
-                    <span className="text-gray-300">Portfolio Value</span>
-                    <span className="text-white font-bold">{avatar.investmentReturns?.portfolioValue || 'N/A'}</span>
+                    <span className="text-body">Portfolio Value</span>
+                    <span className="text-primary font-bold">{avatar.investmentReturns?.portfolioValue || 'N/A'}</span>
                   </div>
                 </CardContent>
-              </Card>
+              </Surface>
             </div>
 
             {/* Highlighted Insights */}
             {highlightedInsights.length > 0 && (
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <Surface>
                 <CardHeader className="pb-3 md:pb-6">
-                  <CardTitle className="text-white flex items-center gap-2 text-sm md:text-base">
+                  <CardTitle className="text-primary flex items-center gap-2 text-sm md:text-base">
                     <Zap className="h-4 w-4 md:h-5 md:w-5" />
                     Featured Insights
                   </CardTitle>
@@ -983,23 +984,23 @@ export default function AvatarProfile() {
                     {highlightedInsights.map((insight) => (
                       <motion.div
                         key={insight.id}
-                        className="p-3 md:p-4 bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-lg border border-purple-400/20"
+                        className="p-3 md:p-4 bg-ink-surface   rounded-xl border border-purple-400/20"
                         whileHover={{ scale: 1.02 }}
                         data-testid={`insight-${insight.id}`}
                       >
                         <div className="flex items-center gap-1.5 md:gap-2 mb-1.5 md:mb-2">
-                          <Badge variant="outline" className="text-[10px] md:text-xs border-purple-400/30 text-purple-300 px-1.5 py-0.5">
+                          <Badge variant="outline" className="text-[10px] md:text-xs border-purple-400/30 text-accent-bright px-1.5 py-0.5">
                             {insight.category}
                           </Badge>
-                          <span className="text-[10px] md:text-xs text-gray-400">{insight.confidence}% confidence</span>
+                          <span className="text-[10px] md:text-xs text-secondary">{insight.confidence}% confidence</span>
                         </div>
-                        <h4 className="text-white font-semibold mb-1.5 md:mb-2 text-xs md:text-sm">{insight.title}</h4>
-                        <p className="text-gray-300 text-[11px] md:text-sm line-clamp-3">{insight.content}</p>
+                        <h4 className="text-primary font-semibold mb-1.5 md:mb-2 text-xs md:text-sm">{insight.title}</h4>
+                        <p className="text-body text-[11px] md:text-sm line-clamp-3">{insight.content}</p>
                       </motion.div>
                     ))}
                   </div>
                 </CardContent>
-              </Card>
+              </Surface>
             )}
           </TabsContent>
 
@@ -1012,59 +1013,59 @@ export default function AvatarProfile() {
           <TabsContent value="investments" className="space-y-6">
             <div className="grid lg:grid-cols-2 gap-6">
               {/* Investment Philosophy */}
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <Surface>
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
+                  <CardTitle className="text-primary flex items-center gap-2">
                     <Brain className="h-5 w-5" />
                     Investment Philosophy
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-300 leading-relaxed">{avatar.investmentPhilosophy}</p>
+                  <p className="text-body leading-relaxed">{avatar.investmentPhilosophy}</p>
                   <div className="mt-4">
-                    <h4 className="text-white font-semibold mb-2">Portfolio Focus</h4>
+                    <h4 className="text-primary font-semibold mb-2">Portfolio Focus</h4>
                     <div className="flex flex-wrap gap-2">
                       {avatar.investment_focus?.map((focus: string, index: number) => (
-                        <Badge key={index} variant="outline" className="border-green-400/30 text-green-300">
+                        <Badge key={index} variant="outline" className="border-green-400/30 text-gain">
                           {focus}
                         </Badge>
                       ))}
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </Surface>
 
               {/* Investment Performance Details */}
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <Surface>
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
+                  <CardTitle className="text-primary flex items-center gap-2">
                     <BarChart3 className="h-5 w-5" />
                     Performance Metrics
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="p-3 bg-green-500/10 rounded-lg border border-green-400/20">
-                    <div className="text-green-400 font-semibold">Best Investment</div>
-                    <div className="text-white">{avatar.investmentReturns?.bestInvestment || 'N/A'}</div>
+                  <div className="p-3 bg-green-500/10 rounded-xl border border-green-400/20">
+                    <div className="text-gain font-semibold">Best Investment</div>
+                    <div className="text-primary">{avatar.investmentReturns?.bestInvestment || 'N/A'}</div>
                   </div>
                   <div className="grid grid-cols-2 gap-4 text-center">
                     <div>
-                      <div className="text-2xl font-bold text-green-400">{avatar.investmentReturns?.totalReturn || 'N/A'}</div>
-                      <div className="text-sm text-gray-400">Total Return</div>
+                      <div className="text-2xl font-bold text-gain">{avatar.investmentReturns?.totalReturn || 'N/A'}</div>
+                      <div className="text-sm text-secondary">Total Return</div>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-blue-400">{avatar.investmentReturns?.annualizedReturn || 'N/A'}</div>
-                      <div className="text-sm text-gray-400">Annualized</div>
+                      <div className="text-2xl font-bold text-accent-bright">{avatar.investmentReturns?.annualizedReturn || 'N/A'}</div>
+                      <div className="text-sm text-secondary">Annualized</div>
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </Surface>
             </div>
 
             {/* Public Investments */}
-            <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+            <Surface>
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
+                <CardTitle className="text-primary flex items-center gap-2">
                   <PieChart className="h-5 w-5" />
                   Public Investments
                 </CardTitle>
@@ -1074,44 +1075,44 @@ export default function AvatarProfile() {
                   {(avatar.publicInvestments || []).map((investment, index) => (
                     <motion.div
                       key={index}
-                      className="p-4 bg-white/5 rounded-lg border border-white/10"
+                      className="p-4 bg-ink-raised rounded-xl border border-ink-edge"
                       whileHover={{ scale: 1.02 }}
                       data-testid={`investment-${index}`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-white font-semibold">{investment.name}</h4>
+                        <h4 className="text-primary font-semibold">{investment.name}</h4>
                         <Badge 
                           variant="outline" 
                           className={`${
-                            investment.status === 'active' ? 'border-green-400/30 text-green-300' :
-                            investment.status === 'exited' ? 'border-blue-400/30 text-blue-300' :
-                            'border-purple-400/30 text-purple-300'
+                            investment.status === 'active' ? 'border-green-400/30 text-gain' :
+                            investment.status === 'exited' ? 'border-blue-400/30 text-accent-bright' :
+                            'border-purple-400/30 text-accent-bright'
                           }`}
                         >
                           {investment.status}
                         </Badge>
                       </div>
-                      <div className="text-gray-400 text-sm mb-2">{investment.category}</div>
+                      <div className="text-secondary text-sm mb-2">{investment.category}</div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-300">Invested: {investment.date}</span>
+                        <span className="text-body">Invested: {investment.date}</span>
                         {investment.returns && (
-                          <span className="text-green-400 font-semibold">{investment.returns}</span>
+                          <span className="text-gain font-semibold">{investment.returns}</span>
                         )}
                       </div>
                     </motion.div>
                   ))}
                 </div>
               </CardContent>
-            </Card>
+            </Surface>
           </TabsContent>
 
           {/* Mindset Tab */}
           <TabsContent value="mindset" className="space-y-6">
             <div className="grid lg:grid-cols-2 gap-6">
               {/* Core Beliefs */}
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <Surface>
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
+                  <CardTitle className="text-primary flex items-center gap-2">
                     <Star className="h-5 w-5" />
                     Core Beliefs
                   </CardTitle>
@@ -1119,19 +1120,19 @@ export default function AvatarProfile() {
                 <CardContent>
                   <div className="space-y-3">
                     {(avatar.coreBeliefs || []).map((belief, index) => (
-                      <div key={index} className="flex items-start gap-3 p-3 bg-white/5 rounded-lg">
-                        <Quote className="h-4 w-4 text-purple-400 mt-0.5 flex-shrink-0" />
-                        <p className="text-gray-300">{belief}</p>
+                      <div key={index} className="flex items-start gap-3 p-3 bg-ink-raised rounded-xl">
+                        <Quote className="h-4 w-4 text-accent-bright mt-0.5 flex-shrink-0" />
+                        <p className="text-body">{belief}</p>
                       </div>
                     ))}
                   </div>
                 </CardContent>
-              </Card>
+              </Surface>
 
               {/* Mental Models */}
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <Surface>
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
+                  <CardTitle className="text-primary flex items-center gap-2">
                     <Brain className="h-5 w-5" />
                     Mental Models
                   </CardTitle>
@@ -1140,30 +1141,30 @@ export default function AvatarProfile() {
                   <div className="space-y-2">
                     {(avatar.mentalModels || []).map((model, index) => (
                       <div key={index} className="p-2 bg-blue-500/10 rounded border border-blue-400/20">
-                        <span className="text-blue-300">{model}</span>
+                        <span className="text-accent-bright">{model}</span>
                       </div>
                     ))}
                   </div>
                 </CardContent>
-              </Card>
+              </Surface>
 
               {/* Decision Framework */}
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm lg:col-span-2">
+              <Surface className="lg:col-span-2">
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
+                  <CardTitle className="text-primary flex items-center gap-2">
                     <Target className="h-5 w-5" />
                     Decision Framework
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-300 leading-relaxed">{avatar.decisionFramework}</p>
+                  <p className="text-body leading-relaxed">{avatar.decisionFramework}</p>
                 </CardContent>
-              </Card>
+              </Surface>
 
               {/* Personal Principles */}
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm lg:col-span-2">
+              <Surface className="lg:col-span-2">
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
+                  <CardTitle className="text-primary flex items-center gap-2">
                     <Lightbulb className="h-5 w-5" />
                     Personal Principles
                   </CardTitle>
@@ -1171,16 +1172,16 @@ export default function AvatarProfile() {
                 <CardContent>
                   <div className="grid lg:grid-cols-2 gap-3">
                     {(avatar.personalPrinciples || []).map((principle, index) => (
-                      <div key={index} className="flex items-start gap-3 p-3 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-lg border border-purple-400/20">
-                        <div className="w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-purple-300 text-sm font-semibold">{index + 1}</span>
+                      <div key={index} className="flex items-start gap-3 p-3 bg-ink-surface   rounded-xl border border-purple-400/20">
+                        <div className="w-6 h-6 bg-accent-core/20 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-accent-bright text-sm font-semibold">{index + 1}</span>
                         </div>
-                        <p className="text-gray-300">{principle}</p>
+                        <p className="text-body">{principle}</p>
                       </div>
                     ))}
                   </div>
                 </CardContent>
-              </Card>
+              </Surface>
             </div>
           </TabsContent>
 
@@ -1188,9 +1189,9 @@ export default function AvatarProfile() {
           <TabsContent value="opinions" className="space-y-6">
             <div className="grid lg:grid-cols-2 gap-6">
               {/* Current Opinions */}
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <Surface>
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
+                  <CardTitle className="text-primary flex items-center gap-2">
                     <MessageSquare className="h-5 w-5" />
                     Current Opinions
                   </CardTitle>
@@ -1200,35 +1201,35 @@ export default function AvatarProfile() {
                     {(avatar.currentOpinions || []).map((opinion, index) => (
                       <motion.div
                         key={index}
-                        className="p-4 bg-white/5 rounded-lg border border-white/10"
+                        className="p-4 bg-ink-raised rounded-xl border border-ink-edge"
                         whileHover={{ scale: 1.02 }}
                         data-testid={`opinion-${index}`}
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <Badge variant="outline" className="border-blue-400/30 text-blue-300">
+                          <Badge variant="outline" className="border-blue-400/30 text-accent-bright">
                             {opinion.topic}
                           </Badge>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs text-gray-400">{opinion.confidence}% confident</span>
-                            <div className={`w-2 h-2 rounded-full ${
+                            <span className="text-xs text-secondary">{opinion.confidence}% confident</span>
+                            <div className={`w-2 h-2 rounded-xl ${
                               opinion.confidence >= 80 ? 'bg-green-400' :
                               opinion.confidence >= 60 ? 'bg-yellow-400' :
                               'bg-red-400'
                             }`} />
                           </div>
                         </div>
-                        <p className="text-gray-300 mb-2">{opinion.opinion}</p>
-                        <div className="text-xs text-gray-400">{opinion.date}</div>
+                        <p className="text-body mb-2">{opinion.opinion}</p>
+                        <div className="text-xs text-secondary">{opinion.date}</div>
                       </motion.div>
                     ))}
                   </div>
                 </CardContent>
-              </Card>
+              </Surface>
 
               {/* Predictions */}
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <Surface>
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
+                  <CardTitle className="text-primary flex items-center gap-2">
                     <Eye className="h-5 w-5" />
                     Predictions
                   </CardTitle>
@@ -1238,22 +1239,22 @@ export default function AvatarProfile() {
                     {(avatar.predictions || []).map((prediction, index) => (
                       <motion.div
                         key={index}
-                        className="p-4 bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-lg border border-green-400/20"
+                        className="p-4 bg-ink-surface   rounded-xl border border-green-400/20"
                         whileHover={{ scale: 1.02 }}
                         data-testid={`prediction-${index}`}
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <Badge variant="outline" className="border-green-400/30 text-green-300">
+                          <Badge variant="outline" className="border-green-400/30 text-gain">
                             {prediction.category}
                           </Badge>
-                          <span className="text-xs text-gray-400">{prediction.timeframe}</span>
+                          <span className="text-xs text-secondary">{prediction.timeframe}</span>
                         </div>
-                        <p className="text-gray-300 mb-2">{prediction.prediction}</p>
+                        <p className="text-body mb-2">{prediction.prediction}</p>
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-400">{prediction.date}</span>
+                          <span className="text-xs text-secondary">{prediction.date}</span>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs text-gray-400">{prediction.confidence}% confident</span>
-                            <div className={`w-2 h-2 rounded-full ${
+                            <span className="text-xs text-secondary">{prediction.confidence}% confident</span>
+                            <div className={`w-2 h-2 rounded-xl ${
                               prediction.confidence >= 80 ? 'bg-green-400' :
                               prediction.confidence >= 60 ? 'bg-yellow-400' :
                               'bg-red-400'
@@ -1264,13 +1265,13 @@ export default function AvatarProfile() {
                     ))}
                   </div>
                 </CardContent>
-              </Card>
+              </Surface>
             </div>
 
             {/* Controversial Takes */}
-            <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+            <Surface>
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
+                <CardTitle className="text-primary flex items-center gap-2">
                   <Zap className="h-5 w-5" />
                   Controversial Takes
                 </CardTitle>
@@ -1278,23 +1279,23 @@ export default function AvatarProfile() {
               <CardContent>
                 <div className="grid lg:grid-cols-2 gap-4">
                   {(avatar.controversialTakes || []).map((take, index) => (
-                    <div key={index} className="p-4 bg-red-500/10 rounded-lg border border-red-400/20">
-                      <Quote className="h-4 w-4 text-red-400 mb-2" />
-                      <p className="text-gray-300">{take}</p>
+                    <div key={index} className="p-4 bg-red-500/10 rounded-xl border border-red-400/20">
+                      <Quote className="h-4 w-4 text-loss mb-2" />
+                      <p className="text-body">{take}</p>
                     </div>
                   ))}
                 </div>
               </CardContent>
-            </Card>
+            </Surface>
           </TabsContent>
 
           {/* Content Tab */}
           <TabsContent value="content" className="space-y-6">
             <div className="grid lg:grid-cols-2 gap-6">
               {/* Recent Content */}
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <Surface>
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
+                  <CardTitle className="text-primary flex items-center gap-2">
                     <Clock className="h-5 w-5" />
                     Recent Content
                   </CardTitle>
@@ -1304,37 +1305,37 @@ export default function AvatarProfile() {
                     {(avatar.recentContent || []).map((content, index) => (
                       <motion.div
                         key={index}
-                        className="p-4 bg-white/5 rounded-lg border border-white/10"
+                        className="p-4 bg-ink-raised rounded-xl border border-ink-edge"
                         whileHover={{ scale: 1.02 }}
                         data-testid={`content-${index}`}
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <Badge variant="outline" className="border-purple-400/30 text-purple-300">
+                          <Badge variant="outline" className="border-purple-400/30 text-accent-bright">
                             {content.type}
                           </Badge>
-                          <span className="text-xs text-gray-400">{content.date}</span>
+                          <span className="text-xs text-secondary">{content.date}</span>
                         </div>
-                        <h4 className="text-white font-semibold mb-2">{content.title}</h4>
-                        <p className="text-gray-300 text-sm mb-2 line-clamp-2">{content.content}</p>
+                        <h4 className="text-primary font-semibold mb-2">{content.title}</h4>
+                        <p className="text-body text-sm mb-2 line-clamp-2">{content.content}</p>
                         <div className="flex items-center justify-between">
                           {content.url && (
-                            <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300 p-0 h-auto">
+                            <Button variant="ghost" size="sm" className="text-accent-bright hover:text-accent-bright p-0 h-auto">
                               <ExternalLink className="h-3 w-3 mr-1" />
                               View
                             </Button>
                           )}
-                          <span className="text-xs text-gray-400">{content.engagement} engagement</span>
+                          <span className="text-xs text-secondary">{content.engagement} engagement</span>
                         </div>
                       </motion.div>
                     ))}
                   </div>
                 </CardContent>
-              </Card>
+              </Surface>
 
               {/* Key Content */}
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <Surface>
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
+                  <CardTitle className="text-primary flex items-center gap-2">
                     <BookOpen className="h-5 w-5" />
                     Essential Content
                   </CardTitle>
@@ -1344,7 +1345,7 @@ export default function AvatarProfile() {
                     {(avatar.keyContent || []).map((content, index) => (
                       <motion.div
                         key={index}
-                        className="p-4 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-lg border border-yellow-400/20"
+                        className="p-4 bg-ink-surface   rounded-xl border border-yellow-400/20"
                         whileHover={{ scale: 1.02 }}
                         data-testid={`key-content-${index}`}
                       >
@@ -1358,9 +1359,9 @@ export default function AvatarProfile() {
                             ))}
                           </div>
                         </div>
-                        <h4 className="text-white font-semibold mb-2">{content.title}</h4>
-                        <p className="text-gray-300 text-sm mb-2">{content.description}</p>
-                        <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300 p-0 h-auto">
+                        <h4 className="text-primary font-semibold mb-2">{content.title}</h4>
+                        <p className="text-body text-sm mb-2">{content.description}</p>
+                        <Button variant="ghost" size="sm" className="text-accent-bright hover:text-accent-bright p-0 h-auto">
                           <ExternalLink className="h-3 w-3 mr-1" />
                           Read More
                         </Button>
@@ -1368,13 +1369,13 @@ export default function AvatarProfile() {
                     ))}
                   </div>
                 </CardContent>
-              </Card>
+              </Surface>
             </div>
 
             {/* Book Recommendations */}
-            <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+            <Surface>
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
+                <CardTitle className="text-primary flex items-center gap-2">
                   <BookOpen className="h-5 w-5" />
                   Book Recommendations
                 </CardTitle>
@@ -1384,29 +1385,29 @@ export default function AvatarProfile() {
                   {(avatar.bookRecommendations || []).map((book, index) => (
                     <motion.div
                       key={index}
-                      className="p-4 bg-white/5 rounded-lg border border-white/10"
+                      className="p-4 bg-ink-raised rounded-xl border border-ink-edge"
                       whileHover={{ scale: 1.05 }}
                       data-testid={`book-${index}`}
                     >
-                      <Badge variant="outline" className="border-green-400/30 text-green-300 mb-2">
+                      <Badge variant="outline" className="border-green-400/30 text-gain mb-2">
                         {book.category}
                       </Badge>
-                      <h4 className="text-white font-semibold mb-1">{book.title}</h4>
-                      <p className="text-gray-400 text-sm mb-2">by {book.author}</p>
-                      <p className="text-gray-300 text-sm">{book.reason}</p>
+                      <h4 className="text-primary font-semibold mb-1">{book.title}</h4>
+                      <p className="text-secondary text-sm mb-2">by {book.author}</p>
+                      <p className="text-body text-sm">{book.reason}</p>
                     </motion.div>
                   ))}
                 </div>
               </CardContent>
-            </Card>
+            </Surface>
           </TabsContent>
 
           {/* AI Insights Tab */}
           <TabsContent value="insights" className="space-y-6">
             {Object.entries(categoryInsights).map(([category, categoryInsights]) => (
-              <Card key={category} className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <Surface key={category}>
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2 capitalize">
+                  <CardTitle className="text-primary flex items-center gap-2 capitalize">
                     <Brain className="h-5 w-5" />
                     {category} Insights
                   </CardTitle>
@@ -1416,29 +1417,29 @@ export default function AvatarProfile() {
                     {categoryInsights.map((insight) => (
                       <motion.div
                         key={insight.id}
-                        className="p-4 bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-lg border border-purple-400/20"
+                        className="p-4 bg-ink-surface   rounded-xl border border-purple-400/20"
                         whileHover={{ scale: 1.02 }}
                         data-testid={`category-insight-${insight.id}`}
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <Badge variant="outline" className="text-xs border-purple-400/30 text-purple-300">
+                          <Badge variant="outline" className="text-xs border-purple-400/30 text-accent-bright">
                             {insight.insight_type}
                           </Badge>
-                          <span className="text-xs text-gray-400">{insight.confidence}% confidence</span>
+                          <span className="text-xs text-secondary">{insight.confidence}% confidence</span>
                         </div>
-                        <h4 className="text-white font-semibold mb-2">{insight.title}</h4>
-                        <p className="text-gray-300 text-sm mb-3">{insight.content}</p>
+                        <h4 className="text-primary font-semibold mb-2">{insight.title}</h4>
+                        <p className="text-body text-sm mb-3">{insight.content}</p>
                         <div className="flex flex-wrap gap-1 mb-2">
                           {insight.tags.map((tag, tagIndex) => (
-                            <Badge key={tagIndex} variant="outline" className="text-xs border-gray-600 text-gray-400">
+                            <Badge key={tagIndex} variant="outline" className="text-xs border-gray-600 text-secondary">
                               {tag}
                             </Badge>
                           ))}
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-400">{new Date(insight.published_at).toLocaleDateString()}</span>
+                          <span className="text-xs text-secondary">{new Date(insight.published_at).toLocaleDateString()}</span>
                           {insight.source_url && (
-                            <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300 p-0 h-auto">
+                            <Button variant="ghost" size="sm" className="text-accent-bright hover:text-accent-bright p-0 h-auto">
                               <ExternalLink className="h-3 w-3 mr-1" />
                               Source
                             </Button>
@@ -1448,7 +1449,7 @@ export default function AvatarProfile() {
                     ))}
                   </div>
                 </CardContent>
-              </Card>
+              </Surface>
             ))}
           </TabsContent>
         </Tabs>

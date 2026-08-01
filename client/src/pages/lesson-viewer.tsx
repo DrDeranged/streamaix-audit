@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Link, useParams, useLocation } from 'wouter';
 import {
-  BookOpen, ChevronRight, ChevronLeft, Clock, Zap,
-  CheckCircle2, XCircle, Play, ArrowLeft, Trophy,
-  Sparkles, Brain, Target, Award
+  ChevronRight, ChevronLeft, Clock, Zap,
+  CheckCircle2, XCircle, ArrowLeft, Trophy,
+  Sparkles, Brain, Target
 } from 'lucide-react';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest, queryClient, getQueryFn } from '@/lib/queryClient';
 import { cn } from '@/lib/utils';
@@ -81,13 +82,13 @@ function QuizCard({
   };
 
   return (
-    <Card className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-purple-500/30 p-6 mt-6">
+    <Surface className="p-6 mt-6">
       <div className="flex items-center gap-2 mb-4">
-        <Brain className="w-5 h-5 text-purple-400" />
-        <h3 className="text-lg font-bold text-white">Knowledge Check</h3>
+        <Brain className="w-5 h-5 text-accent-bright" />
+        <SectionTitle as="h3">Knowledge Check</SectionTitle>
       </div>
       
-      <p className="text-white mb-4">{quiz.question}</p>
+      <p className="text-body mb-4">{quiz.question}</p>
       
       <div className="space-y-3 mb-6">
         {quiz.options.map((option) => {
@@ -102,23 +103,23 @@ function QuizCard({
               onClick={() => !result && setSelectedAnswer(option.id)}
               disabled={!!result}
               className={cn(
-                "w-full text-left p-4 rounded-lg border transition-all",
+                "w-full text-left p-4 rounded-xl border border-ink-edge transition-all",
                 result 
                   ? isCorrectOption
-                    ? "bg-emerald-500/20 border-emerald-500 text-emerald-300"
+                    ? "bg-ink-raised border-gain text-gain"
                     : isWrongSelected
-                      ? "bg-rose-500/20 border-rose-500 text-rose-300"
-                      : "bg-slate-700/50 border-slate-600 text-gray-400"
+                      ? "bg-ink-raised border-loss text-loss"
+                      : "bg-ink-raised text-muted"
                   : isSelected
-                    ? "bg-purple-500/20 border-purple-500 text-white"
-                    : "bg-slate-700/50 border-slate-600 text-gray-300 hover:border-purple-500/50"
+                    ? "bg-accent-core/20 border-accent-core text-primary glow-accent"
+                    : "bg-ink-raised text-body hover:border-accent-core/50"
               )}
               data-testid={`quiz-option-${option.id}`}
             >
               <div className="flex items-center justify-between">
                 <span>{option.text}</span>
-                {showResult && isCorrectOption && <CheckCircle2 className="w-5 h-5 text-emerald-400" />}
-                {showResult && isWrongSelected && <XCircle className="w-5 h-5 text-rose-400" />}
+                {showResult && isCorrectOption && <CheckCircle2 className="w-5 h-5 text-gain" />}
+                {showResult && isWrongSelected && <XCircle className="w-5 h-5 text-loss" />}
               </div>
             </button>
           );
@@ -130,36 +131,36 @@ function QuizCard({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className={cn(
-            "p-4 rounded-lg mb-4",
-            result.isCorrect ? "bg-emerald-500/20 border border-emerald-500/30" : "bg-amber-500/20 border border-amber-500/30"
+            "p-4 rounded-xl mb-4 border",
+            result.isCorrect ? "bg-ink-raised border-gain/30" : "bg-ink-raised border-warn/30"
           )}
         >
           <div className="flex items-center gap-2 mb-2">
             {result.isCorrect ? (
               <>
-                <Sparkles className="w-5 h-5 text-emerald-400" />
-                <span className="text-emerald-400 font-bold">Correct! +{result.xpEarned} STREAM</span>
+                <Sparkles className="w-5 h-5 text-gain" />
+                <span className="text-gain font-bold">Correct! +{result.xpEarned} STREAM</span>
               </>
             ) : (
               <>
-                <Target className="w-5 h-5 text-amber-400" />
-                <span className="text-amber-400 font-bold">Not quite right</span>
+                <Target className="w-5 h-5 text-warn" />
+                <span className="text-warn font-bold">Not quite right</span>
               </>
             )}
           </div>
-          <p className="text-gray-300 text-sm">{result.explanation}</p>
+          <p className="text-body text-sm">{result.explanation}</p>
         </motion.div>
       ) : (
         <Button
           onClick={handleSubmit}
           disabled={!selectedAnswer || isSubmitting}
-          className="w-full bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-400 hover:to-fuchsia-400"
+           className="w-full grad-accent glow-accent rounded-xl"
           data-testid="submit-quiz"
         >
           Submit Answer
         </Button>
       )}
-    </Card>
+    </Surface>
   );
 }
 
@@ -318,16 +319,16 @@ export default function LessonViewer() {
 
   if (moduleLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 pt-20 flex items-center justify-center">
-        <div className="animate-pulse text-gray-400">Loading course...</div>
+      <div className="min-h-screen bg-ink-page pt-20 flex items-center justify-center">
+        <div className="animate-pulse text-secondary">Loading course...</div>
       </div>
     );
   }
 
   if (!courseModule && !moduleLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 pt-20 flex flex-col items-center justify-center gap-4">
-        <p className="text-gray-400">{moduleError ? 'Failed to load course. Please try again.' : 'Course not found'}</p>
+      <div className="min-h-screen bg-ink-page pt-20 flex flex-col items-center justify-center gap-4">
+        <p className="text-secondary">{moduleError ? 'Failed to load course. Please try again.' : 'Course not found'}</p>
         <Link href="/learn">
           <Button variant="outline">Back to Learning Hub</Button>
         </Link>
@@ -336,35 +337,35 @@ export default function LessonViewer() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 pt-20 pb-12">
+    <div className="min-h-screen bg-ink-page pt-20 pb-12">
       <div className="max-w-4xl mx-auto px-4">
         <div className="flex items-center gap-2 mb-6">
           <Link href="/#learn">
-            <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
+            <Button variant="ghost" size="sm" className="text-secondary hover:text-primary">
               <ArrowLeft className="w-4 h-4 mr-1" />
               Back to Courses
             </Button>
           </Link>
         </div>
 
-        <Card className="bg-gradient-to-br from-slate-900/90 to-slate-800/50 border-purple-500/30 p-4 mb-6">
+        <Surface className="p-4 mb-6 grad-surface">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <Badge variant="outline" className="mb-2 border-purple-500/30 text-purple-400">
+              <Badge variant="outline" className="mb-2 border-accent-core/30 text-accent-bright">
                 {courseModule?.title || 'Course'}
               </Badge>
-              <h1 className="text-xl font-bold text-white">{currentLesson?.title || 'Loading...'}</h1>
+              <SectionTitle as="h1">{currentLesson?.title || 'Loading...'}</SectionTitle>
             </div>
             <div className="text-right">
-              <p className="text-sm text-gray-400">Lesson {currentLessonIndex + 1} of {lessons.length}</p>
-              <div className="flex items-center gap-1 text-amber-400">
+              <p className="text-sm text-secondary">Lesson {currentLessonIndex + 1} of {lessons.length}</p>
+              <div className="flex items-center gap-1 text-warn tabular">
                 <Zap className="w-4 h-4" />
                 <span className="font-bold">{currentLesson?.xpReward || 0} STREAM</span>
               </div>
             </div>
           </div>
-          <Progress value={progressPercent} className="h-2 bg-slate-700" />
-        </Card>
+          <Progress value={progressPercent} className="h-2 bg-ink-raised" />
+        </Surface>
 
         {currentLesson && (
           <motion.div
@@ -374,22 +375,22 @@ export default function LessonViewer() {
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <Card className="bg-gradient-to-br from-slate-900/90 to-slate-800/50 border-slate-700/50 p-6 mb-6">
-              <div className="prose prose-invert prose-purple max-w-none">
+            <Surface className="p-6 mb-6">
+              <div className="prose max-w-none">
                 <div 
-                  className="text-gray-300 leading-relaxed whitespace-pre-wrap"
+                  className="text-body leading-relaxed whitespace-pre-wrap"
                   dangerouslySetInnerHTML={{ 
                     __html: currentLesson.content
-                      .replace(/^## (.*$)/gm, '<h2 class="text-2xl font-bold text-white mt-6 mb-3">$1</h2>')
-                      .replace(/^### (.*$)/gm, '<h3 class="text-lg font-semibold text-purple-300 mt-4 mb-2">$1</h3>')
-                      .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
-                      .replace(/^- (.*$)/gm, '<li class="ml-4 text-gray-300">$1</li>')
-                      .replace(/^(\d+)\. (.*$)/gm, '<li class="ml-4 text-gray-300">$2</li>')
-                      .replace(/```([\s\S]*?)```/g, '<pre class="bg-slate-800 p-4 rounded-lg overflow-x-auto"><code class="text-emerald-400">$1</code></pre>')
+                       .replace(/^## (.*$)/gm, '<h2 class="text-2xl font-bold text-primary mt-6 mb-3">$1</h2>')
+                       .replace(/^### (.*$)/gm, '<h3 class="text-lg font-semibold text-accent-bright mt-4 mb-2">$1</h3>')
+                       .replace(/\*\*(.*?)\*\*/g, '<strong class="text-primary">$1</strong>')
+                       .replace(/^- (.*$)/gm, '<li class="ml-4 text-body">$1</li>')
+                       .replace(/^(\d+)\. (.*$)/gm, '<li class="ml-4 text-body">$2</li>')
+                       .replace(/```([\s\S]*?)```/g, '<pre class="bg-ink-raised p-4 rounded-xl overflow-x-auto"><code class="text-gain">$1</code></pre>')
                   }}
                 />
               </div>
-            </Card>
+            </Surface>
 
             {quizzes.map((quiz) => (
               <QuizCard
@@ -407,7 +408,7 @@ export default function LessonViewer() {
             variant="outline"
             onClick={goToPrevLesson}
             disabled={currentLessonIndex === 0}
-            className="border-slate-600"
+            className="border-ink-edge rounded-xl"
             data-testid="prev-lesson"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
@@ -417,7 +418,7 @@ export default function LessonViewer() {
           {currentLessonIndex < lessons.length - 1 ? (
             <Button
               onClick={goToNextLesson}
-              className="bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-400 hover:to-fuchsia-400"
+              className="grad-accent glow-accent rounded-xl"
               data-testid="next-lesson"
             >
               Next Lesson
@@ -431,7 +432,7 @@ export default function LessonViewer() {
                 }
                 setLocation('/learn');
               }}
-              className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400"
+              className="bg-accent-deep hover:bg-accent-core rounded-xl"
               data-testid="complete-course"
             >
               <Trophy className="w-4 h-4 mr-1" />
@@ -441,43 +442,43 @@ export default function LessonViewer() {
         </div>
 
         {lessons.length > 0 && (
-          <Card className="bg-slate-900/80 border-slate-700/50 p-4 mt-8">
-            <h3 className="text-sm font-semibold text-gray-400 mb-3">Course Outline</h3>
+          <Surface className="p-4 mt-8">
+            <SectionTitle as="h3" className="mb-3">Course Outline</SectionTitle>
             <div className="space-y-2">
               {lessons.map((lesson, idx) => (
                 <button
                   key={lesson.id}
                   onClick={() => setCurrentLessonIndex(idx)}
                   className={cn(
-                    "w-full flex items-center gap-3 p-2 rounded-lg transition-all text-left",
+                    "w-full flex items-center gap-3 p-2 rounded-xl transition-all text-left",
                     idx === currentLessonIndex
-                      ? "bg-purple-500/20 border border-purple-500/30"
-                      : "hover:bg-slate-800"
+                      ? "bg-accent-core/20 border border-accent-core/30 glow-accent"
+                      : "hover:bg-ink-raised"
                   )}
                   data-testid={`lesson-nav-${idx}`}
                 >
                   <div className={cn(
-                    "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold",
-                    idx < currentLessonIndex ? "bg-emerald-500 text-white" :
-                    idx === currentLessonIndex ? "bg-purple-500 text-white" :
-                    "bg-slate-700 text-gray-400"
+                    "w-6 h-6 rounded-xl flex items-center justify-center text-xs font-bold",
+                    idx < currentLessonIndex ? "bg-gain text-primary" :
+                    idx === currentLessonIndex ? "bg-accent-core text-primary" :
+                    "bg-ink-raised text-muted"
                   )}>
                     {idx < currentLessonIndex ? <CheckCircle2 className="w-4 h-4" /> : idx + 1}
                   </div>
                   <span className={cn(
                     "flex-1 text-sm",
-                    idx === currentLessonIndex ? "text-white" : "text-gray-400"
+                    idx === currentLessonIndex ? "text-primary" : "text-secondary"
                   )}>
                     {lesson.title}
                   </span>
-                  <span className="text-xs text-gray-500 flex items-center gap-1">
+                  <span className="text-xs text-muted flex items-center gap-1">
                     <Clock className="w-3 h-3" />
                     {lesson.estimatedMinutes}m
                   </span>
                 </button>
               ))}
             </div>
-          </Card>
+          </Surface>
         )}
       </div>
     </div>

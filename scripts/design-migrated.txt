@@ -31,3 +31,10 @@ client/src/pages/web3-wallet.tsx
 client/src/pages/league-detail.tsx
 client/src/pages/learning-hub.tsx
 client/src/pages/following-feed.tsx
+client/src/pages/avatar-profile.tsx
+client/src/pages/market-portfolio.tsx
+client/src/pages/lesson-viewer.tsx
+client/src/pages/nft-gallery.tsx
+client/src/pages/notification-settings.tsx
+client/src/pages/leagues.tsx
+client/src/pages/bounty-board.tsx

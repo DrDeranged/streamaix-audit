@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Plus, Trophy, DollarSign, CheckCircle, Clock, Filter, TrendingUp, Flame, AlertCircle, Home, LayoutDashboard, Bot, Rss, Users, Heart, MessageCircle, Gift, Star, Award, Zap, ArrowLeft } from 'lucide-react';
+import { Plus, Trophy, DollarSign, CheckCircle, Clock, Filter, TrendingUp, Flame, AlertCircle, LayoutDashboard, Rss, Award, Zap, ArrowLeft } from 'lucide-react';
 import { Link } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/PageHeader';
+import Surface from '@/components/ds/Surface';
+import StatValue from '@/components/ds/StatValue';
+import SectionTitle from '@/components/ds/SectionTitle';
 import {
   Select,
   SelectContent,
@@ -12,9 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useWeb3 } from '@/hooks/useWeb3';
 import type { Bounty } from '@shared/schema';
@@ -147,7 +149,7 @@ export default function BountyBoard() {
   const currentBounties = activeTab === 'active' ? activeBounties : activeTab === 'completed' ? completedBounties : myBounties;
 
   return (
-    <div className="min-h-screen bg-transparent dark:bg-transparent">
+    <div className="min-h-[100dvh] bg-ink-page">
       <div className="container mx-auto px-6 py-12 max-w-7xl">
         {/* Header */}
         <div className="mb-12 animate-fade-in">
@@ -156,7 +158,7 @@ export default function BountyBoard() {
             <Link href="/#bounties">
               <Button
                 variant="outline"
-                className="border-purple-500/30 hover:border-purple-500/50 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300"
+                className="rounded-xl border border-ink-edge bg-ink-surface text-secondary hover:border-accent-core/50 hover:bg-ink-raised"
                 data-testid="button-back"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
@@ -166,7 +168,7 @@ export default function BountyBoard() {
             <Button
               asChild
               variant="outline"
-              className="border-cyan-500/30 hover:border-cyan-500/50 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300"
+              className="rounded-xl border border-ink-edge bg-ink-surface text-secondary hover:border-accent-core/50 hover:bg-ink-raised"
               data-testid="button-back-dashboard"
             >
               <Link href="/dashboard">
@@ -177,7 +179,7 @@ export default function BountyBoard() {
             <Button
               asChild
               variant="outline"
-              className="border-emerald-500/30 hover:border-emerald-500/50 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300"
+              className="rounded-xl border border-ink-edge bg-ink-surface text-secondary hover:border-accent-core/50 hover:bg-ink-raised"
               data-testid="button-following-feed"
             >
               <Link href="/following">
@@ -204,8 +206,8 @@ export default function BountyBoard() {
                     setCreateModalOpen(true);
                   }
                 }}
-                variant="gradient-glow"
-                className="min-h-[44px]"
+                 variant="gradient-glow"
+                 className="min-h-[44px] rounded-xl grad-accent glow-accent"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 Create Bounty
@@ -215,7 +217,7 @@ export default function BountyBoard() {
 
           {/* Wallet Connection Modal */}
           <Dialog open={walletModalOpen} onOpenChange={setWalletModalOpen}>
-            <DialogContent className="max-w-lg">
+             <DialogContent className="max-w-lg rounded-2xl border-ink-edge bg-ink-surface">
               <WalletConnector>
                 <p className="text-sm">
                   Connect your wallet to create bounties
@@ -226,7 +228,7 @@ export default function BountyBoard() {
 
           {/* Create Bounty Modal */}
           <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border-ink-edge bg-ink-surface">
               <CreateBountyModal onSuccess={() => setCreateModalOpen(false)} />
             </DialogContent>
           </Dialog>
@@ -244,61 +246,49 @@ export default function BountyBoard() {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12 animate-fade-in">
-          <Card className="surface-2 border-purple-500/40 p-6">
+           <Surface className="p-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-lg bg-purple-500/10">
-                <Trophy className="w-6 h-6 text-purple-400" />
+               <div className="rounded-xl bg-accent-core/10 p-3">
+                 <Trophy className="w-6 h-6 text-accent-bright" />
               </div>
               <div>
-                <p className="text-sm text-gray-400">Active Bounties</p>
-                <p className="text-2xl font-bold text-white" data-testid="stat-active-bounties">
-                  {stats?.activeBounties || 0}
-                </p>
+                 <StatValue label="Active Bounties" value={stats?.activeBounties || 0} data-testid="stat-active-bounties" />
               </div>
             </div>
-          </Card>
+           </Surface>
 
-          <Card className="surface-2 border-purple-500/40 p-6">
+           <Surface className="p-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-lg bg-fuchsia-500/10">
-                <DollarSign className="w-6 h-6 text-fuchsia-400" />
+               <div className="rounded-xl bg-accent-core/10 p-3">
+                 <DollarSign className="w-6 h-6 text-accent-bright" />
               </div>
               <div>
-                <p className="text-sm text-gray-400">Total Rewards</p>
-                <p className="text-2xl font-bold text-white" data-testid="stat-total-rewards">
-                  {stats?.totalRewards ? `${stats.totalRewards.toLocaleString()} STREAM` : '0 STREAM'}
-                </p>
+                 <StatValue label="Total Rewards" value={stats?.totalRewards ? `${stats.totalRewards.toLocaleString()} STREAM` : '0 STREAM'} data-testid="stat-total-rewards" />
               </div>
             </div>
-          </Card>
+           </Surface>
 
-          <Card className="surface-2 border-purple-500/40 p-6">
+           <Surface className="p-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-lg bg-cyan-500/10">
-                <CheckCircle className="w-6 h-6 text-cyan-400" />
+               <div className="rounded-xl bg-accent-core/10 p-3">
+                 <CheckCircle className="w-6 h-6 text-gain" />
               </div>
               <div>
-                <p className="text-sm text-gray-400">Summaries Created</p>
-                <p className="text-2xl font-bold text-white" data-testid="stat-summaries-created">
-                  {stats?.summariesCreated || 0}
-                </p>
+                 <StatValue label="Summaries Created" value={stats?.summariesCreated || 0} data-testid="stat-summaries-created" />
               </div>
             </div>
-          </Card>
+           </Surface>
 
-          <Card className="surface-2 border-purple-500/40 p-6">
+           <Surface className="p-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-lg bg-purple-500/10">
-                <Clock className="w-6 h-6 text-purple-400" />
+               <div className="rounded-xl bg-accent-core/10 p-3">
+                 <Clock className="w-6 h-6 text-accent-bright" />
               </div>
               <div>
-                <p className="text-sm text-gray-400">Avg Completion</p>
-                <p className="text-2xl font-bold text-white" data-testid="stat-avg-completion">
-                  {stats?.avgCompletionTime || '24h'}
-                </p>
+                 <StatValue label="Avg Completion" value={stats?.avgCompletionTime || '24h'} data-testid="stat-avg-completion" />
               </div>
             </div>
-          </Card>
+           </Surface>
         </div>
 
         {/* AI Agents at Work Section */}
@@ -312,11 +302,11 @@ export default function BountyBoard() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Trending */}
               {trendingBounties.length > 0 && (
-                <Card className="surface-2 border-purple-500/40 p-6">
+                <Surface className="p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <TrendingUp className="w-5 h-5 text-purple-400" />
-                    <h3 className="text-lg font-semibold text-purple-300">Trending</h3>
-                    <Badge variant="outline" className="ml-auto border-purple-500/50 text-purple-400 text-xs">
+                    <TrendingUp className="w-5 h-5 text-accent-bright" />
+                    <h3 className="text-lg font-semibold text-primary">Trending</h3>
+                    <Badge variant="outline" className="ml-auto border-accent-core/50 text-accent-bright text-xs">
                       {trendingBounties.length}
                     </Badge>
                   </div>
@@ -324,28 +314,28 @@ export default function BountyBoard() {
                     {trendingBounties.slice(0, 3).map((bounty) => (
                       <Link key={bounty.id} href={`/bounties/${bounty.id}`}>
                         <div
-                          className="surface-1 surface-interactive rounded-lg p-3 border border-purple-500/20"
+                          className="rounded-xl border border-ink-edge bg-ink-raised p-3"
                           data-testid={`trending-bounty-${bounty.id}`}
                         >
-                          <p className="text-sm font-medium text-white truncate">{bounty.title}</p>
+                          <p className="truncate text-sm font-medium text-primary">{bounty.title}</p>
                           <div className="flex items-center justify-between mt-2">
-                            <span className="text-xs text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400">{formatNumber(bounty.reward)} {bounty.tokenType || 'STREAM'}</span>
-                            <span className="text-xs text-gray-400">{bounty.category || 'General'}</span>
+                            <span className="text-xs text-accent-bright">{formatNumber(bounty.reward)} {bounty.tokenType || 'STREAM'}</span>
+                            <span className="text-xs text-secondary">{bounty.category || 'General'}</span>
                           </div>
                         </div>
                       </Link>
                     ))}
                   </div>
-                </Card>
+                </Surface>
               )}
 
               {/* Hot */}
               {hotBounties.length > 0 && (
-                <Card className="surface-2 border-purple-500/40 p-6">
+                <Surface className="p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <Flame className="w-5 h-5 text-fuchsia-400" />
-                    <h3 className="text-lg font-semibold text-fuchsia-300">Hot</h3>
-                    <Badge variant="outline" className="ml-auto border-fuchsia-500/50 text-fuchsia-400 text-xs">
+                    <Flame className="w-5 h-5 text-warn" />
+                    <h3 className="text-lg font-semibold text-primary">Hot</h3>
+                    <Badge variant="outline" className="ml-auto border-warn/50 text-warn text-xs">
                       {hotBounties.length}
                     </Badge>
                   </div>
@@ -353,28 +343,28 @@ export default function BountyBoard() {
                     {hotBounties.map((bounty) => (
                       <Link key={bounty.id} href={`/bounties/${bounty.id}`}>
                         <div
-                          className="surface-1 surface-interactive rounded-lg p-3 border border-purple-500/20"
+                          className="rounded-xl border border-ink-edge bg-ink-raised p-3"
                           data-testid={`hot-bounty-${bounty.id}`}
                         >
-                          <p className="text-sm font-medium text-white truncate">{bounty.title}</p>
+                          <p className="truncate text-sm font-medium text-primary">{bounty.title}</p>
                           <div className="flex items-center justify-between mt-2">
-                            <span className="text-xs text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400">{formatNumber(bounty.reward)} {bounty.tokenType || 'STREAM'}</span>
-                            <span className="text-xs text-gray-400">{bounty.category || 'General'}</span>
+                            <span className="text-xs text-accent-bright">{formatNumber(bounty.reward)} {bounty.tokenType || 'STREAM'}</span>
+                            <span className="text-xs text-secondary">{bounty.category || 'General'}</span>
                           </div>
                         </div>
                       </Link>
                     ))}
                   </div>
-                </Card>
+                </Surface>
               )}
 
               {/* Urgent */}
               {urgentBounties.length > 0 && (
-                <Card className="surface-2 border-purple-500/40 p-6">
+                <Surface className="p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <AlertCircle className="w-5 h-5 text-cyan-400" />
-                    <h3 className="text-lg font-semibold text-cyan-300">Urgent</h3>
-                    <Badge variant="outline" className="ml-auto border-cyan-500/50 text-cyan-400 text-xs">
+                    <AlertCircle className="w-5 h-5 text-warn" />
+                    <h3 className="text-lg font-semibold text-primary">Urgent</h3>
+                    <Badge variant="outline" className="ml-auto border-warn/50 text-warn text-xs">
                       {urgentBounties.length}
                     </Badge>
                   </div>
@@ -382,19 +372,19 @@ export default function BountyBoard() {
                     {urgentBounties.map((bounty) => (
                       <Link key={bounty.id} href={`/bounties/${bounty.id}`}>
                         <div
-                          className="surface-1 surface-interactive rounded-lg p-3 border border-purple-500/20"
+                          className="rounded-xl border border-ink-edge bg-ink-raised p-3"
                           data-testid={`urgent-bounty-${bounty.id}`}
                         >
-                          <p className="text-sm font-medium text-white truncate">{bounty.title}</p>
+                          <p className="truncate text-sm font-medium text-primary">{bounty.title}</p>
                           <div className="flex items-center justify-between mt-2">
-                            <span className="text-xs text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">{formatNumber(bounty.reward)} {bounty.tokenType || 'STREAM'}</span>
-                            <span className="text-xs text-gray-400">{bounty.deadline ? `${Math.ceil((new Date(bounty.deadline).getTime() - Date.now()) / (1000 * 60 * 60))}h left` : ''}</span>
+                            <span className="text-xs text-accent-bright">{formatNumber(bounty.reward)} {bounty.tokenType || 'STREAM'}</span>
+                            <span className="text-xs text-secondary">{bounty.deadline ? `${Math.ceil((new Date(bounty.deadline).getTime() - Date.now()) / (1000 * 60 * 60))}h left` : ''}</span>
                           </div>
                         </div>
                       </Link>
                     ))}
                   </div>
-                </Card>
+                </Surface>
               )}
             </div>
           </div>
@@ -403,38 +393,38 @@ export default function BountyBoard() {
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <TabsList className="surface-1 border border-purple-500/30 h-auto p-1">
+             <TabsList className="h-auto rounded-xl border border-ink-edge bg-ink-surface p-1">
               <TabsTrigger 
                 value="active" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-fuchsia-500 data-[state=active]:text-white"
+                 className="data-[state=active]:bg-accent-core data-[state=active]:text-white data-[state=active]:glow-accent"
                 data-testid="tab-active-bounties"
               >
                 <Zap className="w-4 h-4 mr-2" />
                 Active
-                <Badge className="ml-2 bg-purple-500/30 text-purple-300 text-xs">
+                 <Badge className="ml-2 bg-accent-core/20 text-accent-bright text-xs">
                   {activeBounties.length}
                 </Badge>
               </TabsTrigger>
               <TabsTrigger 
                 value="completed" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white"
+                 className="data-[state=active]:bg-accent-core data-[state=active]:text-white data-[state=active]:glow-accent"
                 data-testid="tab-completed-bounties"
               >
                 <Award className="w-4 h-4 mr-2" />
                 Completed
-                <Badge className="ml-2 bg-green-500/30 text-green-300 text-xs">
+                 <Badge className="ml-2 bg-gain/15 text-gain text-xs">
                   {completedBounties.length}
                 </Badge>
               </TabsTrigger>
               {(wallet?.address || user?.id) && (
                 <TabsTrigger 
                   value="my" 
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-blue-500 data-[state=active]:text-white"
+                   className="data-[state=active]:bg-accent-core data-[state=active]:text-white data-[state=active]:glow-accent"
                   data-testid="tab-my-bounties"
                 >
                   <Trophy className="w-4 h-4 mr-2" />
                   My Bounties
-                  <Badge className="ml-2 bg-cyan-500/30 text-cyan-300 text-xs">
+                   <Badge className="ml-2 bg-accent-core/20 text-accent-bright text-xs">
                     {myBounties.length}
                   </Badge>
                 </TabsTrigger>
@@ -444,7 +434,7 @@ export default function BountyBoard() {
             {/* Category Filter */}
             <div className="flex items-center gap-3">
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[180px] surface-1 border-purple-500/30" data-testid="select-category-filter">
+                 <SelectTrigger className="w-[180px] rounded-xl border-ink-edge bg-ink-surface" data-testid="select-category-filter">
                   <Filter className="w-4 h-4 mr-2" />
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
@@ -465,30 +455,30 @@ export default function BountyBoard() {
             {activeLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <Card
+                  <Surface
                     key={i}
-                    className="surface-1 border-purple-500/20 h-64 animate-pulse"
+                    className="h-64 animate-pulse"
                   />
                 ))}
               </div>
             ) : activeBounties.length === 0 ? (
-              <Card className="surface-2 border-purple-500/30 p-12 text-center">
-                <Trophy className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">No Active Bounties</h3>
-                <p className="text-gray-400 mb-6">
+               <Surface className="p-12 text-center">
+                 <Trophy className="mx-auto mb-4 h-16 w-16 text-muted" />
+                 <SectionTitle as="h3" className="mb-2 text-xl">No Active Bounties</SectionTitle>
+                 <p className="mb-6 text-secondary">
                   Be the first to create a bounty and start earning!
                 </p>
                 {isConnected && (
                   <Button
                     onClick={() => setCreateModalOpen(true)}
-                    className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+                     className="rounded-xl grad-accent glow-accent transition-transform duration-300 hover:scale-105"
                     data-testid="button-create-first-bounty"
                   >
                     <Plus className="w-5 h-5 mr-2" />
                     Create First Bounty
                   </Button>
                 )}
-              </Card>
+               </Surface>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {activeBounties.map((bounty) => (
@@ -505,20 +495,20 @@ export default function BountyBoard() {
             {completedLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <Card
+                  <Surface
                     key={i}
-                    className="surface-1 border-emerald-500/20 h-64 animate-pulse"
+                    className="h-64 animate-pulse"
                   />
                 ))}
               </div>
             ) : completedBounties.length === 0 ? (
-              <Card className="surface-2 border-emerald-500/30 p-12 text-center">
-                <Award className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">No Completed Bounties Yet</h3>
-                <p className="text-gray-400 mb-6">
+               <Surface className="p-12 text-center">
+                 <Award className="mx-auto mb-4 h-16 w-16 text-muted" />
+                 <SectionTitle as="h3" className="mb-2 text-xl">No Completed Bounties Yet</SectionTitle>
+                 <p className="mb-6 text-secondary">
                   Completed bounties will appear here with likes, comments, and tips.
                 </p>
-              </Card>
+               </Surface>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {completedBounties.map((bounty) => (
@@ -535,30 +525,30 @@ export default function BountyBoard() {
             {myBountiesLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[1, 2, 3].map((i) => (
-                  <Card
+                  <Surface
                     key={i}
-                    className="surface-1 border-cyan-500/20 h-64 animate-pulse"
+                    className="h-64 animate-pulse"
                   />
                 ))}
               </div>
             ) : myBounties.length === 0 ? (
-              <Card className="bg-gradient-to-br from-cyan-900/20 to-blue-800/10 border-cyan-500/30 backdrop-blur-sm p-12 text-center">
-                <Trophy className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">No Bounties Yet</h3>
-                <p className="text-gray-400 mb-6">
+               <Surface className="p-12 text-center">
+                 <Trophy className="mx-auto mb-4 h-16 w-16 text-muted" />
+                 <SectionTitle as="h3" className="mb-2 text-xl">No Bounties Yet</SectionTitle>
+                 <p className="mb-6 text-secondary">
                   Create your first bounty or claim one to get started!
                 </p>
                 {isConnected && (
                   <Button
                     onClick={() => setCreateModalOpen(true)}
-                    className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+                     className="rounded-xl grad-accent glow-accent transition-transform duration-300 hover:scale-105"
                     data-testid="button-create-my-bounty"
                   >
                     <Plus className="w-5 h-5 mr-2" />
                     Create Bounty
                   </Button>
                 )}
-              </Card>
+               </Surface>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {myBounties.map((bounty) => (
