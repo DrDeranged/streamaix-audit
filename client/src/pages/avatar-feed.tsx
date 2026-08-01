@@ -4,11 +4,11 @@ import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, MessageCircle, Send, TrendingUp, ArrowDownRight, Loader2, Radio } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import Surface from "@/components/ds/Surface";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -119,7 +119,7 @@ function PostCard({ post }: { post: AvatarPost }) {
   });
 
   const isYes = post.outcome === "YES";
-  const directionColor = isYes ? "text-emerald-400" : "text-rose-400";
+  const directionColor = isYes ? "text-gain" : "text-loss";
   const directionIcon = isYes ? <TrendingUp className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />;
   const meta = post.metadata;
   const ACTION_LABELS: Record<string, string> = {
@@ -140,37 +140,32 @@ function PostCard({ post }: { post: AvatarPost }) {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.25 }}
     >
-      <Card className="surface-1 surface-interactive hover:border-neon-cyan/50">
-        <CardContent className="p-4">
+      <Surface className="surface-interactive border-ink-edge p-4 transition-colors hover:border-accent-core/50">
           <div className="flex gap-3">
-            <Link href={`/knowledge-avatars/${post.avatarId}`}>
-              <a className="shrink-0">
+            <Link href={`/knowledge-avatars/${post.avatarId}`} className="shrink-0">
                 {post.avatarImageUrl ? (
                   <img
                     src={post.avatarImageUrl}
                     alt={post.avatarName}
-                    className="w-11 h-11 rounded-full object-cover ring-2 ring-cyan-500/30"
+                    className="h-11 w-11 rounded-full object-cover ring-2 ring-accent-core/30"
                   />
                 ) : (
-                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-accent-deep font-semibold text-primary">
                     {post.avatarName.slice(0, 1)}
                   </div>
                 )}
-              </a>
             </Link>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <Link href={`/knowledge-avatars/${post.avatarId}`}>
-                  <a className="font-semibold text-white hover:text-cyan-400 transition">
+                <Link href={`/knowledge-avatars/${post.avatarId}`} className="font-semibold text-primary transition hover:text-accent-bright">
                     {post.avatarName}
-                  </a>
                 </Link>
                 {post.avatarHandle && (
-                  <span className="text-xs text-slate-500">@{post.avatarHandle}</span>
+                  <span className="text-xs text-muted">@{post.avatarHandle}</span>
                 )}
-                <span className="text-xs text-slate-600">·</span>
-                <span className="text-xs text-slate-500">{formatRelative(post.createdAt)}</span>
-                <Badge variant="secondary" className="text-[10px] py-0 px-1.5 bg-muted/60 text-muted-foreground border-border">
+                <span className="text-xs text-muted">·</span>
+                <span className="text-xs text-muted">{formatRelative(post.createdAt)}</span>
+                <Badge variant="secondary" className="border-ink-edge bg-ink-raised px-1.5 py-0 text-[10px] text-secondary">
                   {actionLabel}
                 </Badge>
                 {post.outcome && (
@@ -180,20 +175,18 @@ function PostCard({ post }: { post: AvatarPost }) {
                   </Badge>
                 )}
               </div>
-              <p className="mt-1.5 text-slate-200 text-sm leading-relaxed whitespace-pre-wrap break-words">
+              <p className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-body">
                 {post.body}
               </p>
               {post.marketQuestion && post.marketId && (
-                <Link href={`/prediction-market/${post.marketId}`}>
-                  <a className="mt-2 block text-xs text-cyan-400/90 hover:text-cyan-300 truncate">
+                <Link href={`/prediction-market/${post.marketId}`} className="mt-2 block truncate text-xs text-accent-bright hover:text-primary">
                     → {post.marketQuestion}
-                  </a>
                 </Link>
               )}
-              <div className="mt-3 flex items-center gap-4 text-xs text-slate-400">
+              <div className="mt-3 flex items-center gap-4 text-xs text-secondary">
                 <button
                   onClick={() => isAuthenticated ? likeMut.mutate() : toast({ title: "Sign in to like" })}
-                  className={`tap-target inline-flex items-center gap-1 px-1 hover:text-rose-400 transition ${liked ? "text-rose-400" : ""}`}
+                   className={`tap-target inline-flex items-center gap-1 px-1 transition hover:text-loss ${liked ? "text-loss" : ""}`}
                   data-testid={`like-${post.id}`}
                 >
                   <Heart className={`w-3.5 h-3.5 ${liked ? "fill-current" : ""}`} />
@@ -201,7 +194,7 @@ function PostCard({ post }: { post: AvatarPost }) {
                 </button>
                 <button
                   onClick={() => setShowReplies((v) => !v)}
-                  className="tap-target inline-flex items-center gap-1 px-1 hover:text-cyan-400 transition"
+                   className="tap-target inline-flex items-center gap-1 px-1 transition hover:text-accent-bright"
                   data-testid={`replies-toggle-${post.id}`}
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
@@ -210,19 +203,19 @@ function PostCard({ post }: { post: AvatarPost }) {
               </div>
 
               {showReplies && (
-                <div className="mt-3 pl-4 border-l border-border space-y-2">
+                <div className="mt-3 space-y-2 border-l border-ink-edge pl-4">
                   {repliesQuery.isLoading && (
-                    <div className="text-xs text-slate-500 flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-xs text-muted">
                       <Loader2 className="w-3 h-3 animate-spin" /> Loading replies…
                     </div>
                   )}
                   {repliesQuery.data?.replies?.map((r) => (
-                    <div key={r.id} className="text-sm">
-                      <span className={`font-medium ${r.authorType === "user" ? "text-slate-300" : "text-cyan-400"}`}>
+                      <div key={r.id} className="text-sm">
+                       <span className={`font-medium ${r.authorType === "user" ? "text-body" : "text-accent-bright"}`}>
                         {r.authorType === "user" ? "User" : post.avatarName}
                       </span>
-                      <span className="text-slate-500 text-xs ml-2">{formatRelative(r.createdAt)}</span>
-                      <p className="text-slate-300 text-sm mt-0.5 whitespace-pre-wrap">{r.body}</p>
+                       <span className="ml-2 text-xs text-muted">{formatRelative(r.createdAt)}</span>
+                       <p className="mt-0.5 whitespace-pre-wrap text-sm text-body">{r.body}</p>
                     </div>
                   ))}
                   {isAuthenticated ? (
@@ -237,7 +230,7 @@ function PostCard({ post }: { post: AvatarPost }) {
                         placeholder={`Reply to ${post.avatarName}…`}
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
-                        className="h-8 text-sm surface-1 border-border"
+                         className="h-8 rounded-xl border-ink-edge bg-ink-raised text-sm text-body"
                         data-testid={`reply-input-${post.id}`}
                       />
                       <Button
@@ -250,14 +243,13 @@ function PostCard({ post }: { post: AvatarPost }) {
                       </Button>
                     </form>
                   ) : (
-                    <p className="text-xs text-slate-500 pt-1">Sign in to reply.</p>
+                    <p className="pt-1 text-xs text-muted">Sign in to reply.</p>
                   )}
                 </div>
               )}
             </div>
           </div>
-        </CardContent>
-      </Card>
+      </Surface>
     </motion.div>
   );
 }
@@ -375,7 +367,7 @@ export default function AvatarFeedPage() {
   }, [livePosts, feed.data]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <div className="min-h-[100dvh] bg-ink-page">
       <div className="section-container max-w-2xl">
         <PageHeader
           eyebrow="Knowledge Avatars · live"
@@ -385,7 +377,7 @@ export default function AvatarFeedPage() {
           className="mb-6"
         />
         {feed.isLoading && (
-          <div className="text-slate-500 flex items-center gap-2">
+          <div className="flex items-center gap-2 text-secondary">
             <Loader2 className="w-4 h-4 animate-spin" /> Loading the floor…
           </div>
         )}
@@ -397,16 +389,16 @@ export default function AvatarFeedPage() {
               ))}
             </AnimatePresence>
             {!feed.isLoading && merged.length === 0 && (
-              <p className="text-slate-500 text-sm">
+               <p className="text-sm text-secondary">
                 No avatar posts yet. They'll appear here the moment an avatar opens a position.
               </p>
             )}
             <div ref={sentinelRef} className="h-8 flex items-center justify-center">
               {feed.isFetchingNextPage && (
-                <Loader2 className="w-4 h-4 animate-spin text-slate-600" />
+                 <Loader2 className="h-4 w-4 animate-spin text-muted" />
               )}
               {!feed.hasNextPage && merged.length > 0 && (
-                <span className="text-xs text-slate-600">You've reached the end.</span>
+                 <span className="text-xs text-muted">You've reached the end.</span>
               )}
             </div>
           </div>

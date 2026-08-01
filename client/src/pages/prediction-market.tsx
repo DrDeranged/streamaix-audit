@@ -21,7 +21,8 @@ import {
   Wallet,
   Loader2
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Surface from "@/components/ds/Surface";
+import SectionTitle from "@/components/ds/SectionTitle";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -67,10 +68,10 @@ function MarketTradesTab({ marketId }: { marketId: string }) {
     return (
       <div className="space-y-3">
         {[...Array(3)].map((_, i) => (
-          <Card key={i} className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 p-4 animate-pulse">
-            <div className="h-4 bg-purple-500/20 rounded w-3/4 mb-2"></div>
-            <div className="h-3 bg-purple-500/20 rounded w-1/2"></div>
-          </Card>
+          <Surface variant="raised" key={i} className="p-4 animate-pulse">
+            <div className="h-4 bg-accent-core/20 rounded-xl w-3/4 mb-2"></div>
+            <div className="h-3 bg-accent-core/20 rounded-xl w-1/2"></div>
+          </Surface>
         ))}
       </div>
     );
@@ -78,13 +79,11 @@ function MarketTradesTab({ marketId }: { marketId: string }) {
 
   if (trades.length === 0) {
     return (
-      <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
-        <CardContent className="p-8 text-center">
-          <Bot className="w-12 h-12 mx-auto mb-3 text-purple-400 opacity-50" />
-          <p className="text-slate-400">No AI trades yet on this market.</p>
-          <p className="text-slate-500 text-sm mt-1">Trading bots cycle every 15-30 minutes</p>
-        </CardContent>
-      </Card>
+      <Surface className="p-8 text-center">
+          <Bot className="w-12 h-12 mx-auto mb-3 text-accent-bright opacity-50" />
+          <p className="text-secondary">No AI trades yet on this market.</p>
+          <p className="text-muted text-sm mt-1">Trading bots cycle every 15-30 minutes</p>
+      </Surface>
     );
   }
 
@@ -102,40 +101,39 @@ function MarketTradesTab({ marketId }: { marketId: string }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 hover:border-purple-400/50 transition-all">
-              <CardContent className="p-4">
+            <Surface variant="raised" className="p-4 transition-all">
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 border border-purple-500/30 flex items-center justify-center">
-                      <Bot className="w-4 h-4 text-purple-300" />
+                    <div className="w-8 h-8 rounded-full bg-accent-core/10 border border-ink-edge flex items-center justify-center">
+                      <Bot className="w-4 h-4 text-accent-bright" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-white text-sm">{agent?.name || "AI Agent"}</span>
-                        <Badge variant="outline" className="text-xs px-1.5 py-0 border-purple-500/30 text-purple-300">
+                        <span className="font-semibold text-primary text-sm">{agent?.name || "AI Agent"}</span>
+                        <Badge variant="outline" className="text-xs px-1.5 py-0 border-ink-edge text-accent-bright">
                           {agent?.personality || "unknown"}
                         </Badge>
                       </div>
-                      <div className="text-xs text-slate-400">
+                      <div className="text-xs text-secondary">
                         {formatDistanceToNow(new Date(t.createdAt), { addSuffix: true })}
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <Badge className={`${isYes ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border-rose-500/30'} border font-bold`}>
+                    <Badge className={`${isYes ? 'bg-gain/20 text-gain border-ink-edge' : 'bg-loss/20 text-loss border-ink-edge'} border font-bold`}>
                       {t.outcome}
                     </Badge>
-                    <div className="text-xs text-slate-400 mt-1">
+                    <div className="text-xs text-secondary mt-1">
                       {Math.floor(t.shares).toLocaleString()} shares
                     </div>
                   </div>
                 </div>
 
                 {t.reasoning && (
-                  <div className="bg-slate-900/50 rounded-lg p-3 mb-3 border border-slate-700/50">
+                  <div className="bg-ink-raised rounded-xl p-3 mb-3 border border-ink-edge">
                     <div className="flex items-start gap-2">
-                      <Zap className="w-3 h-3 text-cyan-400 mt-0.5 flex-shrink-0" />
-                      <p className="text-xs text-slate-300 leading-relaxed">{t.reasoning}</p>
+                      <Zap className="w-3 h-3 text-accent-bright mt-0.5 flex-shrink-0" />
+                      <p className="text-xs text-body leading-relaxed">{t.reasoning}</p>
                     </div>
                   </div>
                 )}
@@ -143,23 +141,22 @@ function MarketTradesTab({ marketId }: { marketId: string }) {
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-4">
                     <div>
-                      <span className="text-slate-400">Amount: </span>
-                      <span className="text-purple-300 font-semibold">{Math.floor(t.streamAmount).toLocaleString()} STREAM</span>
+                      <span className="text-secondary">Amount: </span>
+                      <span className="text-accent-bright font-semibold">{Math.floor(t.streamAmount).toLocaleString()} STREAM</span>
                     </div>
                     <div>
-                      <span className="text-slate-400">Price: </span>
-                      <span className="text-white">{(t.price / 100).toFixed(1)}%</span>
+                      <span className="text-secondary">Price: </span>
+                      <span className="text-primary">{(t.price / 100).toFixed(1)}%</span>
                     </div>
                   </div>
                   {t.probability && (
                     <div className="flex items-center gap-1">
                       <ConfidenceRing confidence={t.probability} size={20} strokeWidth={2} showPercentage={false} />
-                      <span className="text-slate-400">{t.probability.toFixed(0)}% confidence</span>
+                      <span className="text-secondary">{t.probability.toFixed(0)}% confidence</span>
                     </div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
+            </Surface>
           </motion.div>
         );
       })}
@@ -188,41 +185,37 @@ function AvatarPositionsSection({ marketId }: { marketId: string }) {
 
   if (isLoading) {
     return (
-      <Card className="bg-gradient-to-br from-cyan-900/20 to-cyan-800/10 border-cyan-500/30">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-white flex items-center gap-2 text-lg">
-            <Users className="w-5 h-5 text-cyan-400" />
+      <Surface className="p-4">
+        <SectionTitle className="flex items-center gap-2 text-lg">
+            <Users className="w-5 h-5 text-accent-bright" />
             Knowledge Avatar Positions
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+        </SectionTitle>
+        <div className="pt-4">
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-16 bg-cyan-900/20 rounded-lg animate-pulse" />
+              <div key={i} className="h-16 bg-ink-raised rounded-xl animate-pulse" />
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </Surface>
     );
   }
 
   if (positions.length === 0) {
     return (
-      <Card className="bg-gradient-to-br from-cyan-900/20 to-cyan-800/10 border-cyan-500/30">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-white flex items-center gap-2 text-lg">
-            <Users className="w-5 h-5 text-cyan-400" />
+      <Surface className="p-4">
+        <SectionTitle className="flex items-center gap-2 text-lg">
+            <Users className="w-5 h-5 text-accent-bright" />
             Knowledge Avatar Positions
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+        </SectionTitle>
+        <div className="pt-4">
           <div className="text-center py-8">
-            <Users className="w-12 h-12 mx-auto mb-3 text-cyan-400 opacity-50" />
-            <p className="text-slate-400">No avatars have traded this market yet</p>
-            <p className="text-slate-500 text-sm mt-1">Avatar trading cycles run periodically</p>
+            <Users className="w-12 h-12 mx-auto mb-3 text-accent-bright opacity-50" />
+            <p className="text-secondary">No avatars have traded this market yet</p>
+            <p className="text-muted text-sm mt-1">Avatar trading cycles run periodically</p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </Surface>
     );
   }
 
@@ -230,24 +223,22 @@ function AvatarPositionsSection({ marketId }: { marketId: string }) {
   const noPositions = positions.filter(p => p.outcome === 'NO');
 
   return (
-    <Card className="bg-gradient-to-br from-cyan-900/20 to-cyan-800/10 border-cyan-500/30">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-white flex items-center gap-2 text-lg">
-          <Users className="w-5 h-5 text-cyan-400" />
+    <Surface className="p-4">
+      <SectionTitle className="flex items-center gap-2 text-lg">
+          <Users className="w-5 h-5 text-accent-bright" />
           Knowledge Avatar Positions
-          <Badge variant="outline" className="ml-auto border-cyan-500/30 text-cyan-300">
+          <Badge variant="outline" className="ml-auto border-ink-edge text-accent-bright">
             {positions.length} avatars trading
           </Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+      </SectionTitle>
+      <div className="pt-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* YES Positions */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <TrendingUp className="w-4 h-4 text-emerald-400" />
-              <span className="text-emerald-300 font-semibold text-sm">YES Positions</span>
-              <Badge variant="outline" className="border-emerald-500/30 text-emerald-300 text-xs">
+              <TrendingUp className="w-4 h-4 text-gain" />
+              <span className="text-gain font-semibold text-sm">YES Positions</span>
+              <Badge variant="outline" className="border-ink-edge text-gain text-xs">
                 {yesPositions.length}
               </Badge>
             </div>
@@ -258,31 +249,31 @@ function AvatarPositionsSection({ marketId }: { marketId: string }) {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     whileHover={{ scale: 1.02 }}
-                    className="flex items-center gap-3 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-400/40 transition-all cursor-pointer"
+                    className="flex items-center gap-3 p-3 rounded-xl bg-gain/10 border border-gain/20 hover:border-gain/40 transition-all cursor-pointer"
                   >
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 flex items-center justify-center overflow-hidden">
+                    <div className="w-10 h-10 rounded-full bg-gain/10 border border-ink-edge flex items-center justify-center overflow-hidden">
                       {pos.avatar.imageUrl ? (
                         <img src={pos.avatar.imageUrl} alt={pos.avatar.name} className="w-full h-full object-cover" />
                       ) : (
-                        <Users className="w-5 h-5 text-emerald-300" />
+                        <Users className="w-5 h-5 text-gain" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-white truncate">{pos.avatar.name}</div>
-                      <div className="text-xs text-slate-400">
+                      <div className="text-sm font-medium text-primary truncate">{pos.avatar.name}</div>
+                      <div className="text-xs text-secondary">
                         {pos.shares.toLocaleString()} shares
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm font-bold text-emerald-400">
+                      <div className="text-sm font-bold text-gain">
                         {(pos.invested / 1000).toFixed(1)}K
                       </div>
-                      <div className="text-xs text-slate-500">STREAM</div>
+                      <div className="text-xs text-muted">STREAM</div>
                     </div>
                   </motion.div>
                 </Link>
               )) : (
-                <div className="text-center py-4 text-slate-500 text-sm">No YES positions</div>
+                <div className="text-center py-4 text-muted text-sm">No YES positions</div>
               )}
             </div>
           </div>
@@ -290,9 +281,9 @@ function AvatarPositionsSection({ marketId }: { marketId: string }) {
           {/* NO Positions */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <TrendingDown className="w-4 h-4 text-rose-400" />
-              <span className="text-rose-300 font-semibold text-sm">NO Positions</span>
-              <Badge variant="outline" className="border-rose-500/30 text-rose-300 text-xs">
+              <TrendingDown className="w-4 h-4 text-loss" />
+              <span className="text-loss font-semibold text-sm">NO Positions</span>
+              <Badge variant="outline" className="border-ink-edge text-loss text-xs">
                 {noPositions.length}
               </Badge>
             </div>
@@ -303,37 +294,37 @@ function AvatarPositionsSection({ marketId }: { marketId: string }) {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     whileHover={{ scale: 1.02 }}
-                    className="flex items-center gap-3 p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 hover:border-rose-400/40 transition-all cursor-pointer"
+                    className="flex items-center gap-3 p-3 rounded-xl bg-loss/10 border border-loss/20 hover:border-loss/40 transition-all cursor-pointer"
                   >
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500/20 to-fuchsia-500/20 border border-rose-500/30 flex items-center justify-center overflow-hidden">
+                    <div className="w-10 h-10 rounded-full bg-loss/10 border border-ink-edge flex items-center justify-center overflow-hidden">
                       {pos.avatar.imageUrl ? (
                         <img src={pos.avatar.imageUrl} alt={pos.avatar.name} className="w-full h-full object-cover" />
                       ) : (
-                        <Users className="w-5 h-5 text-rose-300" />
+                        <Users className="w-5 h-5 text-loss" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-white truncate">{pos.avatar.name}</div>
-                      <div className="text-xs text-slate-400">
+                      <div className="text-sm font-medium text-primary truncate">{pos.avatar.name}</div>
+                      <div className="text-xs text-secondary">
                         {pos.shares.toLocaleString()} shares
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm font-bold text-rose-400">
+                      <div className="text-sm font-bold text-loss">
                         {(pos.invested / 1000).toFixed(1)}K
                       </div>
-                      <div className="text-xs text-slate-500">STREAM</div>
+                      <div className="text-xs text-muted">STREAM</div>
                     </div>
                   </motion.div>
                 </Link>
               )) : (
-                <div className="text-center py-4 text-slate-500 text-sm">No NO positions</div>
+                <div className="text-center py-4 text-muted text-sm">No NO positions</div>
               )}
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </Surface>
   );
 }
 
@@ -374,18 +365,18 @@ function VolumeFlowIndicator({ yesVolume, noVolume, totalVolume }: { yesVolume: 
     <div className="relative p-4 rounded-xl neural-glass overflow-hidden">
       <div className="absolute inset-0 opacity-20">
         <div 
-          className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-500 to-transparent transition-all duration-1000"
+          className="absolute inset-y-0 left-0 bg-gain/20 transition-all duration-1000"
           style={{ width: `${yesPercent}%` }}
         />
         <div 
-          className="absolute inset-y-0 right-0 bg-gradient-to-l from-rose-500 to-transparent transition-all duration-1000"
+          className="absolute inset-y-0 right-0 bg-loss/20 transition-all duration-1000"
           style={{ width: `${noPercent}%` }}
         />
       </div>
       
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs text-slate-400 uppercase tracking-wider flex items-center gap-1">
+          <span className="text-xs text-secondary uppercase tracking-wider flex items-center gap-1">
             <Activity className="w-3 h-3" />
             Volume Flow
           </span>
@@ -393,10 +384,10 @@ function VolumeFlowIndicator({ yesVolume, noVolume, totalVolume }: { yesVolume: 
             variant="outline" 
             className={`text-xs ${
               flowDirection === 'yes' 
-                ? 'border-emerald-500/50 text-emerald-300' 
+                ? 'border-gain/50 text-gain' 
                 : flowDirection === 'no' 
-                  ? 'border-rose-500/50 text-rose-300' 
-                  : 'border-slate-500/50 text-slate-300'
+                  ? 'border-loss/50 text-loss' 
+                  : 'border-ink-edge50 text-body'
             }`}
           >
             {flowDirection === 'yes' ? '↑ YES Leading' : flowDirection === 'no' ? '↓ NO Leading' : '⟷ Balanced'}
@@ -406,38 +397,38 @@ function VolumeFlowIndicator({ yesVolume, noVolume, totalVolume }: { yesVolume: 
         <div className="flex items-center gap-4">
           <div className="flex-1">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-emerald-400 font-semibold text-sm flex items-center gap-1">
+              <span className="text-gain font-semibold text-sm flex items-center gap-1">
                 <TrendingUp className="w-3 h-3" />
                 YES
               </span>
-              <span className="text-emerald-300 font-bold">{yesPercent.toFixed(1)}%</span>
+              <span className="text-gain font-bold">{yesPercent.toFixed(1)}%</span>
             </div>
-            <div className="text-xs text-slate-400">{Math.floor(yesVolume).toLocaleString()} STREAM</div>
+            <div className="text-xs text-secondary">{Math.floor(yesVolume).toLocaleString()} STREAM</div>
           </div>
           
-          <div className="w-px h-10 bg-slate-600" />
+          <div className="w-px h-10 bg-ink-edge" />
           
           <div className="flex-1 text-right">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-rose-300 font-bold">{noPercent.toFixed(1)}%</span>
-              <span className="text-rose-400 font-semibold text-sm flex items-center gap-1">
+              <span className="text-loss font-bold">{noPercent.toFixed(1)}%</span>
+              <span className="text-loss font-semibold text-sm flex items-center gap-1">
                 NO
                 <TrendingDown className="w-3 h-3" />
               </span>
             </div>
-            <div className="text-xs text-slate-400">{Math.floor(noVolume).toLocaleString()} STREAM</div>
+            <div className="text-xs text-secondary">{Math.floor(noVolume).toLocaleString()} STREAM</div>
           </div>
         </div>
         
-        <div className="mt-3 h-2 bg-slate-800 rounded-full overflow-hidden flex">
+        <div className="mt-3 h-2 bg-ink-raised rounded-full overflow-hidden flex">
           <motion.div 
-            className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400"
+            className="h-full bg-gain"
             initial={{ width: 0 }}
             animate={{ width: `${yesPercent}%` }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           />
           <motion.div 
-            className="h-full bg-gradient-to-l from-rose-500 to-rose-400"
+            className="h-full bg-loss"
             initial={{ width: 0 }}
             animate={{ width: `${noPercent}%` }}
             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -502,7 +493,7 @@ function LiveTradeFeed({ marketId }: { marketId: string }) {
     return (
       <div className="space-y-2">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="h-12 bg-purple-900/20 rounded animate-pulse" />
+          <div key={i} className="h-12 bg-ink-raised rounded-xl animate-pulse" />
         ))}
       </div>
     );
@@ -510,7 +501,7 @@ function LiveTradeFeed({ marketId }: { marketId: string }) {
 
   if (trades.length === 0) {
     return (
-      <div className="text-center py-6 text-slate-400">
+      <div className="text-center py-6 text-secondary">
         <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
         <p className="text-sm">No trades yet</p>
       </div>
@@ -525,22 +516,22 @@ function LiveTradeFeed({ marketId }: { marketId: string }) {
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: index * 0.05 }}
-          className={`flex items-center justify-between p-2 rounded-lg ${
+          className={`flex items-center justify-between p-2 rounded-xl ${
             trade.outcome === 'YES' 
-              ? 'bg-emerald-500/10 border border-emerald-500/20' 
-              : 'bg-rose-500/10 border border-rose-500/20'
+              ? 'bg-gain/10 border border-gain/20' 
+              : 'bg-loss/10 border border-loss/20'
           }`}
         >
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${
-              trade.outcome === 'YES' ? 'bg-emerald-400' : 'bg-rose-400'
+              trade.outcome === 'YES' ? 'bg-gain' : 'bg-loss'
             } animate-pulse`} />
             <Badge 
               variant="outline" 
               className={`text-xs ${
                 trade.tradeType === 'buy' 
-                  ? 'border-cyan-500/30 text-cyan-300' 
-                  : 'border-orange-500/30 text-orange-300'
+                  ? 'border-ink-edge text-accent-bright' 
+                  : 'border-warn/30 text-warn'
               }`}
             >
               {trade.tradeType.toUpperCase()}
@@ -548,18 +539,18 @@ function LiveTradeFeed({ marketId }: { marketId: string }) {
             <Badge 
               className={`text-xs ${
                 trade.outcome === 'YES' 
-                  ? 'bg-emerald-500/20 text-emerald-300' 
-                  : 'bg-rose-500/20 text-rose-300'
+                  ? 'bg-gain/20 text-gain' 
+                  : 'bg-loss/20 text-loss'
               }`}
             >
               {trade.outcome}
             </Badge>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm font-semibold text-white">
-              {Math.floor(trade.streamAmount).toLocaleString()} <span className="text-purple-400 text-xs">STREAM</span>
+            <span className="text-sm font-semibold text-primary">
+              {Math.floor(trade.streamAmount).toLocaleString()} <span className="text-accent-bright text-xs">STREAM</span>
             </span>
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-muted">
               {formatDistanceToNow(new Date(trade.createdAt), { addSuffix: true })}
             </span>
           </div>
@@ -650,16 +641,16 @@ export default function PredictionMarket() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 py-8">
+      <div className="min-h-screen bg-ink-page py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Skeleton className="h-8 w-32 mb-6 bg-purple-900/20" />
+          <Skeleton className="h-8 w-32 mb-6 bg-ink-raised" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              <Skeleton className="h-64 w-full bg-purple-900/20" />
-              <Skeleton className="h-96 w-full bg-purple-900/20" />
+              <Skeleton className="h-64 w-full bg-ink-raised" />
+              <Skeleton className="h-96 w-full bg-ink-raised" />
             </div>
             <div className="space-y-6">
-              <Skeleton className="h-96 w-full bg-purple-900/20" />
+              <Skeleton className="h-96 w-full bg-ink-raised" />
             </div>
           </div>
         </div>
@@ -669,17 +660,17 @@ export default function PredictionMarket() {
 
   if (!market) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 flex items-center justify-center">
-        <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 p-8 text-center">
-          <h2 className="text-2xl font-bold text-white mb-2">Market Not Found</h2>
-          <p className="text-slate-400 mb-4">The market you're looking for doesn't exist.</p>
+      <div className="min-h-screen bg-ink-page flex items-center justify-center">
+        <Surface className="p-8 text-center">
+          <h2 className="text-2xl font-bold text-primary mb-2">Market Not Found</h2>
+          <p className="text-secondary mb-4">The market you're looking for doesn't exist.</p>
           <Link href="/markets">
-            <Button variant="outline" className="border-purple-500/30 text-purple-300">
+            <Button variant="outline" className="border-ink-edge text-accent-bright">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Markets
             </Button>
           </Link>
-        </Card>
+        </Surface>
       </div>
     );
   }
@@ -692,12 +683,12 @@ export default function PredictionMarket() {
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
-      crypto: "bg-purple-500/20 text-purple-300 border-purple-500/30",
-      defi: "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30",
-      real_world: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
-      community: "bg-gradient-to-r from-purple-500/20 to-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30",
-      tech_stock: "bg-blue-500/20 text-blue-300 border-blue-500/30",
-      macro: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+      crypto: "bg-accent-core/20 text-accent-bright border-ink-edge",
+      defi: "bg-accent-core/20 text-accent-bright border-accent-core/30",
+      real_world: "bg-accent-core/20 text-accent-bright border-ink-edge",
+      community: "bg-accent-core/20 text-accent-bright border-ink-edge",
+      tech_stock: "bg-accent-core/20 text-accent-bright border-ink-edge",
+      macro: "bg-gain/20 text-gain border-ink-edge",
     };
     return colors[category] || colors.community;
   };
@@ -760,13 +751,13 @@ export default function PredictionMarket() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 py-8">
+    <div className="min-h-screen bg-ink-page py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <Link href="/markets">
           <Button 
             variant="ghost" 
-            className="mb-6 text-purple-300 hover:text-white hover:bg-purple-900/30"
+            className="mb-6 text-accent-bright hover:text-primary hover:bg-ink-raised"
             data-testid="button-back-to-markets"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -783,7 +774,7 @@ export default function PredictionMarket() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-            <Card className={`neural-glass iridescent-border ${marketTemp.className} overflow-hidden backdrop-blur-sm relative group`}>
+            <Surface className={`grad-surface ${marketTemp.className} overflow-hidden relative group`}>
               {market.imageUrl && (
                 <div className="h-48 overflow-hidden relative">
                   <img 
@@ -791,94 +782,94 @@ export default function PredictionMarket() {
                     alt={market.question}
                     className="w-full h-full object-cover opacity-70"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-purple-900/50 to-transparent" />
+                  <div className="absolute inset-0 bg-ink-page/70" />
                 </div>
               )}
               
-              <CardContent className="p-6">
+              <div className="p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Badge className={`${getCategoryColor(market.category)} border`}>
                     {market.category.replace('_', ' ').toUpperCase()}
                   </Badge>
-                  <Badge variant="outline" className="border-purple-500/30 text-purple-300">
+                  <Badge variant="outline" className="border-ink-edge text-accent-bright">
                     <Clock className="w-3 h-3 mr-1" />
                     {daysLeft}d {hoursLeft}h left
                   </Badge>
                 </div>
 
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-4">{market.question}</h1>
+                <h1 className="font-display text-3xl font-bold text-primary mb-4">{market.question}</h1>
                 
                 {market.description && (
-                  <p className="text-slate-400 mb-4">{market.description}</p>
+                  <p className="text-secondary mb-4">{market.description}</p>
                 )}
 
                 {market.tags && market.tags.length > 0 && (
                   <div className="flex gap-2 flex-wrap mb-4">
                     {market.tags.map((tag, i) => (
-                      <span key={i} className="px-3 py-1 bg-purple-800/30 text-purple-300 text-sm rounded-full border border-purple-500/30">
+                      <span key={i} className="px-3 py-1 bg-ink-raised text-accent-bright text-sm rounded-full border border-ink-edge">
                         #{tag}
                       </span>
                     ))}
                   </div>
                 )}
 
-                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-700/30">
-                  <div className="relative p-3 rounded-lg neural-glass group hover:scale-105 transition-transform duration-300">
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-ink-divider">
+                  <div className="relative p-3 rounded-xl neural-glass group hover:scale-105 transition-transform duration-300">
                     <div className="absolute inset-0 glow-pulse opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <div className="relative">
-                      <div className="text-xs text-slate-400 mb-1 flex items-center gap-1">
+                      <div className="text-xs text-secondary mb-1 flex items-center gap-1">
                         <Activity className="w-3 h-3" />
                         Total Volume
                       </div>
                       <AnimatedCounter 
                         value={Math.floor(market.totalVolume / 1000)} 
                         formatValue={(v) => `${v}K`}
-                        className="text-lg font-bold text-slate-100"
+                        className="text-lg font-bold text-primary"
                         trend="up"
                         trendValue="+8.5%"
                       />
                     </div>
                   </div>
-                  <div className="relative p-3 rounded-lg neural-glass group hover:scale-105 transition-transform duration-300">
+                  <div className="relative p-3 rounded-xl neural-glass group hover:scale-105 transition-transform duration-300">
                     <div className="absolute inset-0 glow-pulse opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <div className="relative">
-                      <div className="text-xs text-slate-400 mb-1 flex items-center gap-1">
+                      <div className="text-xs text-secondary mb-1 flex items-center gap-1">
                         <DollarSign className="w-3 h-3" />
                         Total Trades
                       </div>
                       <AnimatedCounter 
                         value={market.totalTrades} 
-                        className="text-lg font-bold text-slate-100"
+                        className="text-lg font-bold text-primary"
                         trend="up"
                         trendValue="+12%"
                       />
                     </div>
                   </div>
-                  <div className="relative p-3 rounded-lg neural-glass group hover:scale-105 transition-transform duration-300">
+                  <div className="relative p-3 rounded-xl neural-glass group hover:scale-105 transition-transform duration-300">
                     <div className="absolute inset-0 glow-pulse opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <div className="relative">
-                      <div className="text-xs text-slate-400 mb-1 flex items-center gap-1">
+                      <div className="text-xs text-secondary mb-1 flex items-center gap-1">
                         <TrendingUp className="w-3 h-3" />
                         Liquidity
                       </div>
                       <AnimatedCounter 
                         value={Math.floor((market.yesLiquidity + market.noLiquidity) / 1000)} 
                         formatValue={(v) => `${v}K`}
-                        className="text-lg font-bold text-slate-100"
+                        className="text-lg font-bold text-primary"
                         trend="neutral"
                       />
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
             </motion.div>
 
             {market.status === "resolved" && <HowThisResolved marketId={market.id} />}
 
             {/* Market Details */}
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="bg-purple-900/20 border-b border-purple-500/30">
+              <TabsList className="bg-ink-raised border-b border-ink-edge">
                 <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
                 <TabsTrigger value="ai-predictions" data-testid="tab-ai-predictions">AI Predictions</TabsTrigger>
                 <TabsTrigger value="trades" data-testid="tab-trades">Recent Trades</TabsTrigger>
@@ -896,29 +887,29 @@ export default function PredictionMarket() {
                 )}
 
                 {/* 24h Volume Stats Card */}
-                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-white flex items-center gap-2 text-lg">
-                      <Activity className="w-5 h-5 text-cyan-400" />
+                <Surface className="p-4">
+                  <div className="pb-2">
+                    <SectionTitle className="flex items-center gap-2 text-lg">
+                      <Activity className="w-5 h-5 text-accent-bright" />
                       Live Trade Activity
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
+                    </SectionTitle>
+                  </div>
+                  <div>
                     <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30">
-                        <div className="text-xs text-slate-400 mb-1">24h Volume</div>
+                      <div className="p-3 rounded-xl bg-ink-raised border border-ink-divider">
+                        <div className="text-xs text-secondary mb-1">24h Volume</div>
                         <div className="flex items-baseline gap-2">
-                          <span className="text-xl font-bold text-white">
+                          <span className="text-xl font-bold text-primary">
                             {volumeStats ? Math.floor(volumeStats.volume24h).toLocaleString() : '0'}
                           </span>
-                          <span className="text-xs text-purple-400">STREAM</span>
+                          <span className="text-xs text-accent-bright">STREAM</span>
                           {volumeStats && volumeStats.volumeChange24h !== 0 && (
                             <Badge 
                               variant="outline" 
                               className={`text-xs ${
                                 volumeStats.volumeChange24h > 0 
-                                  ? 'border-emerald-500/30 text-emerald-300' 
-                                  : 'border-rose-500/30 text-rose-300'
+                                  ? 'border-ink-edge text-gain' 
+                                  : 'border-ink-edge text-loss'
                               }`}
                             >
                               {volumeStats.volumeChange24h > 0 ? '+' : ''}{volumeStats.volumeChange24h.toFixed(1)}%
@@ -926,38 +917,38 @@ export default function PredictionMarket() {
                           )}
                         </div>
                       </div>
-                      <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30">
-                        <div className="text-xs text-slate-400 mb-1">Recent Trades</div>
+                      <div className="p-3 rounded-xl bg-ink-raised border border-ink-divider">
+                        <div className="text-xs text-secondary mb-1">Recent Trades</div>
                         <div className="flex items-baseline gap-2">
-                          <span className="text-xl font-bold text-white">
+                          <span className="text-xl font-bold text-primary">
                             {volumeStats?.recentTrades?.length || 0}
                           </span>
-                          <span className="text-xs text-slate-500">in feed</span>
+                          <span className="text-xs text-muted">in feed</span>
                         </div>
                       </div>
                     </div>
                     <LiveTradeFeed marketId={market.id} />
-                  </CardContent>
-                </Card>
+                  </div>
+                </Surface>
 
                 <PriceChart marketId={market.id} hours={24} />
                 
-                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
-                  <CardHeader>
-                    <CardTitle className="text-white flex items-center gap-2">
-                      <Info className="w-5 h-5 text-purple-400" />
+                <Surface className="p-4">
+                  <div>
+                    <SectionTitle className="flex items-center gap-2">
+                      <Info className="w-5 h-5 text-accent-bright" />
                       Market Information
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
+                    </SectionTitle>
+                  </div>
+                  <div className="space-y-4">
                     {market.sourceSummary && (
-                      <div className="mb-4 p-4 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-500/20 rounded-lg">
+                      <div className="mb-4 p-4 bg-ink-raised border border-accent-core/20 rounded-xl">
                         <div className="flex items-start gap-3">
-                          <Sparkles className="w-5 h-5 text-cyan-400 mt-0.5 flex-shrink-0" />
+                          <Sparkles className="w-5 h-5 text-accent-bright mt-0.5 flex-shrink-0" />
                           <div className="flex-1">
-                            <div className="text-sm text-cyan-300 font-medium mb-1">AI-Generated from Content</div>
+                            <div className="text-sm text-accent-bright font-medium mb-1">AI-Generated from Content</div>
                             <Link href={`/summary/${market.sourceContentId}`}>
-                              <div className="flex items-center gap-2 text-sm text-slate-300 hover:text-cyan-400 transition-colors group">
+                              <div className="flex items-center gap-2 text-sm text-body hover:text-accent-bright transition-colors group">
                                 <span className="line-clamp-1">{market.sourceSummary.title}</span>
                                 <ExternalLink className="w-3 h-3 flex-shrink-0 group-hover:translate-x-0.5 transition-transform" />
                               </div>
@@ -966,26 +957,26 @@ export default function PredictionMarket() {
                         </div>
                       </div>
                     )}
-                    <div className="flex justify-between items-center py-3 border-b border-purple-500/20">
-                      <span className="text-slate-400">Resolution Source</span>
-                      <span className="text-white font-medium capitalize">{market.resolutionSource}</span>
+                    <div className="flex justify-between items-center py-3 border-b border-ink-divider">
+                      <span className="text-secondary">Resolution Source</span>
+                      <span className="text-primary font-medium capitalize">{market.resolutionSource}</span>
                     </div>
-                    <div className="flex justify-between items-center py-3 border-b border-purple-500/20">
-                      <span className="text-slate-400">Creator</span>
-                      <span className="text-white font-mono text-sm">{market.creatorWallet ? `${market.creatorWallet.slice(0, 6)}...${market.creatorWallet.slice(-4)}` : 'Unknown'}</span>
+                    <div className="flex justify-between items-center py-3 border-b border-ink-divider">
+                      <span className="text-secondary">Creator</span>
+                      <span className="text-primary font-mono text-sm">{market.creatorWallet ? `${market.creatorWallet.slice(0, 6)}...${market.creatorWallet.slice(-4)}` : 'Unknown'}</span>
                     </div>
-                    <div className="flex justify-between items-center py-3 border-b border-purple-500/20">
-                      <span className="text-slate-400">Status</span>
-                      <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 border">
+                    <div className="flex justify-between items-center py-3 border-b border-ink-divider">
+                      <span className="text-secondary">Status</span>
+                      <Badge className="bg-accent-core/20 text-accent-bright border-ink-edge border">
                         {market.status.toUpperCase()}
                       </Badge>
                     </div>
                     <div className="flex justify-between items-center py-3">
-                      <span className="text-slate-400">Deadline</span>
-                      <span className="text-white">{new Date(market.deadline).toLocaleDateString()}</span>
+                      <span className="text-secondary">Deadline</span>
+                      <span className="text-primary">{new Date(market.deadline).toLocaleDateString()}</span>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </Surface>
               </TabsContent>
 
               <TabsContent value="ai-predictions" className="mt-6 space-y-6">
@@ -999,42 +990,42 @@ export default function PredictionMarket() {
 
               <TabsContent value="positions" className="mt-6 space-y-6">
                 {/* Your Position */}
-                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
-                  <CardHeader>
-                    <CardTitle className="text-white flex items-center gap-2">
-                      <Wallet className="w-5 h-5 text-purple-400" />
+                <Surface className="p-4">
+                  <div>
+                    <SectionTitle className="flex items-center gap-2">
+                      <Wallet className="w-5 h-5 text-accent-bright" />
                       Your Position
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
+                    </SectionTitle>
+                  </div>
+                  <div>
                     {userPosition ? (
                       <div className="space-y-4">
                         {/* Position Summary */}
                         <div className="grid grid-cols-2 gap-4">
                           {(userPosition.yesShares || 0) > 0 && (
-                            <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/30">
-                              <div className="text-xs text-emerald-300 font-medium mb-1 flex items-center gap-1">
+                            <div className="p-4 rounded-xl bg-ink-raised border border-ink-edge">
+                              <div className="text-xs text-gain font-medium mb-1 flex items-center gap-1">
                                 <TrendingUp className="w-3 h-3" />
                                 YES Shares
                               </div>
-                              <div className="text-2xl font-bold text-emerald-400">
+                              <div className="text-2xl font-bold text-gain">
                                 {userPosition.yesShares.toFixed(2)}
                               </div>
-                              <div className="text-xs text-slate-400 mt-1">
+                              <div className="text-xs text-secondary mt-1">
                                 Value: {Math.round(userPosition.currentYesValue || 0).toLocaleString()} STREAM
                               </div>
                             </div>
                           )}
                           {(userPosition.noShares || 0) > 0 && (
-                            <div className="p-4 rounded-xl bg-gradient-to-br from-rose-500/10 to-rose-600/5 border border-rose-500/30">
-                              <div className="text-xs text-rose-300 font-medium mb-1 flex items-center gap-1">
+                            <div className="p-4 rounded-xl bg-ink-raised border border-ink-edge">
+                              <div className="text-xs text-loss font-medium mb-1 flex items-center gap-1">
                                 <TrendingDown className="w-3 h-3" />
                                 NO Shares
                               </div>
-                              <div className="text-2xl font-bold text-rose-400">
+                              <div className="text-2xl font-bold text-loss">
                                 {userPosition.noShares.toFixed(2)}
                               </div>
-                              <div className="text-xs text-slate-400 mt-1">
+                              <div className="text-xs text-secondary mt-1">
                                 Value: {Math.round(userPosition.currentNoValue || 0).toLocaleString()} STREAM
                               </div>
                             </div>
@@ -1042,18 +1033,18 @@ export default function PredictionMarket() {
                         </div>
 
                         {/* P&L Summary */}
-                        <div className="p-4 bg-purple-900/30 rounded-lg border border-purple-500/20">
+                        <div className="p-4 bg-ink-raised rounded-xl border border-ink-divider">
                           <div className="flex justify-between items-center mb-2">
-                            <span className="text-slate-400">Total Value</span>
-                            <span className="text-white font-bold">{Math.round(userPosition.totalValue || 0).toLocaleString()} STREAM</span>
+                            <span className="text-secondary">Total Value</span>
+                            <span className="text-primary font-bold">{Math.round(userPosition.totalValue || 0).toLocaleString()} STREAM</span>
                           </div>
                           <div className="flex justify-between items-center mb-2">
-                            <span className="text-slate-400">Cost Basis</span>
-                            <span className="text-white">{Math.round(userPosition.totalCost || 0).toLocaleString()} STREAM</span>
+                            <span className="text-secondary">Cost Basis</span>
+                            <span className="text-primary">{Math.round(userPosition.totalCost || 0).toLocaleString()} STREAM</span>
                           </div>
-                          <div className="flex justify-between items-center pt-2 border-t border-purple-500/20">
-                            <span className="text-slate-400">Unrealized P&L</span>
-                            <span className={`font-bold ${(userPosition.unrealizedPnL || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                          <div className="flex justify-between items-center pt-2 border-t border-ink-divider">
+                            <span className="text-secondary">Unrealized P&L</span>
+                            <span className={`font-bold ${(userPosition.unrealizedPnL || 0) >= 0 ? 'text-gain' : 'text-loss'}`}>
                               {(userPosition.unrealizedPnL || 0) >= 0 ? '+' : ''}{Math.round(userPosition.unrealizedPnL || 0).toLocaleString()} STREAM
                               <span className="text-xs ml-1">
                                 ({(userPosition.percentChange || 0) >= 0 ? '+' : ''}{userPosition.percentChange?.toFixed(1) || '0'}%)
@@ -1064,23 +1055,23 @@ export default function PredictionMarket() {
                       </div>
                     ) : (
                       <div className="text-center py-8">
-                        <Wallet className="w-12 h-12 mx-auto mb-3 text-purple-400 opacity-50" />
-                        <p className="text-slate-400">No position in this market yet</p>
-                        <p className="text-slate-500 text-sm mt-1">Buy YES or NO shares to get started</p>
+                        <Wallet className="w-12 h-12 mx-auto mb-3 text-accent-bright opacity-50" />
+                        <p className="text-secondary">No position in this market yet</p>
+                        <p className="text-muted text-sm mt-1">Buy YES or NO shares to get started</p>
                       </div>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
+                </Surface>
 
                 {/* Trade History */}
-                <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30">
-                  <CardHeader>
-                    <CardTitle className="text-white flex items-center gap-2">
-                      <Activity className="w-5 h-5 text-fuchsia-400" />
+                <Surface className="p-4">
+                  <div>
+                    <SectionTitle className="flex items-center gap-2">
+                      <Activity className="w-5 h-5 text-accent-bright" />
                       Your Trade History
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
+                    </SectionTitle>
+                  </div>
+                  <div>
                     {userTrades.length > 0 ? (
                       <div className="space-y-3">
                         {userTrades.map((trade) => {
@@ -1089,26 +1080,26 @@ export default function PredictionMarket() {
                           return (
                             <div 
                               key={trade.id}
-                              className="p-3 bg-purple-900/30 rounded-lg border border-purple-500/20"
+                              className="p-3 bg-ink-raised rounded-xl border border-ink-divider"
                             >
                               <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2">
-                                  <Badge className={`${isBuy ? 'bg-purple-500/20 text-purple-300 border-purple-500/30' : 'bg-orange-500/20 text-orange-300 border-orange-500/30'} border`}>
+                                  <Badge className={`${isBuy ? 'bg-accent-core/20 text-accent-bright border-ink-edge' : 'bg-warn/20 text-warn border-ink-edge'} border`}>
                                     {isBuy ? 'BUY' : 'SELL'}
                                   </Badge>
-                                  <Badge className={`${isYes ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border-rose-500/30'} border font-bold`}>
+                                  <Badge className={`${isYes ? 'bg-gain/20 text-gain border-ink-edge' : 'bg-loss/20 text-loss border-ink-edge'} border font-bold`}>
                                     {trade.outcome}
                                   </Badge>
                                 </div>
-                                <span className="text-xs text-slate-400">
+                                <span className="text-xs text-secondary">
                                   {formatDistanceToNow(new Date(trade.createdAt), { addSuffix: true })}
                                 </span>
                               </div>
                               <div className="flex justify-between text-sm">
-                                <span className="text-slate-400">
+                                <span className="text-secondary">
                                   {trade.shares.toFixed(2)} shares @ {(trade.price / 100).toFixed(1)}%
                                 </span>
-                                <span className="text-white font-medium">
+                                <span className="text-primary font-medium">
                                   {trade.streamAmount.toLocaleString()} STREAM
                                 </span>
                               </div>
@@ -1118,13 +1109,13 @@ export default function PredictionMarket() {
                       </div>
                     ) : (
                       <div className="text-center py-8">
-                        <Activity className="w-12 h-12 mx-auto mb-3 text-fuchsia-400 opacity-50" />
-                        <p className="text-slate-400">No trades yet</p>
-                        <p className="text-slate-500 text-sm mt-1">Your trade history will appear here</p>
+                        <Activity className="w-12 h-12 mx-auto mb-3 text-accent-bright opacity-50" />
+                        <p className="text-secondary">No trades yet</p>
+                        <p className="text-muted text-sm mt-1">Your trade history will appear here</p>
                       </div>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
+                </Surface>
 
                 {/* Avatar Positions */}
                 <AvatarPositionsSection marketId={market.id} />
@@ -1140,21 +1131,21 @@ export default function PredictionMarket() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
-            <Card className="neural-glass iridescent-border backdrop-blur-sm relative overflow-hidden">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <DollarSign className="w-5 h-5 text-purple-400" />
+            <Surface className="p-4 relative overflow-hidden">
+              <div>
+                <SectionTitle className="flex items-center gap-2">
+                  <DollarSign className="w-5 h-5 text-accent-bright" />
                   Trade
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+                </SectionTitle>
+              </div>
+              <div className="space-y-4">
                 {/* Trade Type Toggle */}
                 <div className="flex gap-2">
                   <Button
                     variant={tradeType === "buy" ? "default" : "outline"}
                     className={tradeType === "buy" 
-                      ? "flex-1 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 border-0" 
-                      : "flex-1 border-purple-500/30 text-purple-300"
+                      ? "flex-1 grad-accent border-0" 
+                      : "flex-1 border-ink-edge text-accent-bright"
                     }
                     onClick={() => setTradeType("buy")}
                     data-testid="button-buy"
@@ -1164,8 +1155,8 @@ export default function PredictionMarket() {
                   <Button
                     variant={tradeType === "sell" ? "default" : "outline"}
                     className={tradeType === "sell" 
-                      ? "flex-1 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 border-0" 
-                      : "flex-1 border-purple-500/30 text-purple-300"
+                      ? "flex-1 grad-accent border-0" 
+                      : "flex-1 border-ink-edge text-accent-bright"
                     }
                     onClick={() => setTradeType("sell")}
                     data-testid="button-sell"
@@ -1176,13 +1167,13 @@ export default function PredictionMarket() {
 
                 {/* Outcome Selection */}
                 <div className="space-y-2">
-                  <Label className="text-slate-300">Outcome</Label>
+                  <Label className="text-body">Outcome</Label>
                   <div className="flex gap-2">
                     <Button
                       variant={outcome === "yes" ? "default" : "outline"}
                       className={outcome === "yes" 
-                        ? "flex-1 bg-emerald-500/30 text-emerald-300 border-emerald-500/50 hover:bg-emerald-500/40" 
-                        : "flex-1 border-purple-500/30 text-purple-300 hover:border-emerald-500/50"
+                        ? "flex-1 bg-gain/30 text-gain border-gain/50 hover:bg-gain/40" 
+                        : "flex-1 border-ink-edge text-accent-bright hover:border-gain/50"
                       }
                       onClick={() => setOutcome("yes")}
                       data-testid="button-outcome-yes"
@@ -1192,8 +1183,8 @@ export default function PredictionMarket() {
                     <Button
                       variant={outcome === "no" ? "default" : "outline"}
                       className={outcome === "no" 
-                        ? "flex-1 bg-rose-500/30 text-rose-300 border-rose-500/50 hover:bg-rose-500/40" 
-                        : "flex-1 border-purple-500/30 text-purple-300 hover:border-rose-500/50"
+                        ? "flex-1 bg-loss/30 text-loss border-loss/50 hover:bg-loss/40" 
+                        : "flex-1 border-ink-edge text-accent-bright hover:border-loss/50"
                       }
                       onClick={() => setOutcome("no")}
                       data-testid="button-outcome-no"
@@ -1205,32 +1196,32 @@ export default function PredictionMarket() {
 
                 {/* Amount Input */}
                 <div className="space-y-2">
-                  <Label htmlFor="amount" className="text-slate-300">Amount (STREAM)</Label>
+                  <Label htmlFor="amount" className="text-body">Amount (STREAM)</Label>
                   <Input
                     id="amount"
                     type="number"
                     placeholder="0.00"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    className="bg-purple-900/20 border-purple-500/30 text-white"
+                    className="bg-ink-raised border-ink-edge text-primary"
                     data-testid="input-amount"
                   />
                 </div>
 
                 {/* Quote Display */}
                 {amount && parseFloat(amount) > 0 && quote && (
-                  <div className="bg-purple-900/30 rounded-lg p-3 space-y-2 border border-purple-500/20">
+                  <div className="bg-ink-raised rounded-xl p-3 space-y-2 border border-ink-divider">
                     <div className="flex justify-between text-sm">
-                      <span className="text-slate-400">You'll receive</span>
-                      <span className="text-white font-medium">{quote.tokensOut.toFixed(2)} shares</span>
+                      <span className="text-secondary">You'll receive</span>
+                      <span className="text-primary font-medium">{quote.tokensOut.toFixed(2)} shares</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-slate-400">Price impact</span>
-                      <span className="text-white">{quote.priceImpact.toFixed(2)}%</span>
+                      <span className="text-secondary">Price impact</span>
+                      <span className="text-primary">{quote.priceImpact.toFixed(2)}%</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-slate-400">Fee</span>
-                      <span className="text-white">{quote.fee} STREAM</span>
+                      <span className="text-secondary">Fee</span>
+                      <span className="text-primary">{quote.fee} STREAM</span>
                     </div>
                   </div>
                 )}
@@ -1238,7 +1229,7 @@ export default function PredictionMarket() {
                 {/* Advanced Options */}
                 <Button
                   variant="ghost"
-                  className="w-full text-purple-300 hover:text-white hover:bg-purple-900/30"
+                  className="w-full text-accent-bright hover:text-primary hover:bg-ink-raised"
                   onClick={() => setShowAdvanced(!showAdvanced)}
                   data-testid="button-advanced-options"
                 >
@@ -1247,23 +1238,23 @@ export default function PredictionMarket() {
                 </Button>
 
                 {showAdvanced && (
-                  <div className="space-y-2 pt-2 border-t border-purple-500/20">
+                  <div className="space-y-2 pt-2 border-t border-ink-divider">
                     <div className="flex justify-between text-sm">
-                      <span className="text-slate-400">Slippage Tolerance</span>
-                      <span className="text-white">1%</span>
+                      <span className="text-secondary">Slippage Tolerance</span>
+                      <span className="text-primary">1%</span>
                     </div>
                   </div>
                 )}
 
                 {/* User Balance Display */}
-                <div className="flex justify-between items-center text-sm py-2 px-3 bg-purple-900/20 rounded-lg border border-purple-500/20">
-                  <span className="text-slate-400">Your Balance</span>
-                  <span className="text-white font-medium">{userBalance.toLocaleString()} STREAM</span>
+                <div className="flex justify-between items-center text-sm py-2 px-3 bg-ink-raised rounded-xl border border-ink-divider">
+                  <span className="text-secondary">Your Balance</span>
+                  <span className="text-primary font-medium">{userBalance.toLocaleString()} STREAM</span>
                 </div>
 
                 {/* Trade Button */}
                 <Button
-                  className="w-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 text-white border-0 hover:shadow-lg hover:shadow-purple-500/50"
+                  className="w-full grad-accent text-primary border-0 hover:shadow-lg hover:shadow-purple-500/50"
                   onClick={handleTrade}
                   disabled={!amount || parseFloat(amount) <= 0 || tradeMutation.isPending}
                   data-testid="button-place-trade"
@@ -1283,20 +1274,20 @@ export default function PredictionMarket() {
 
                 {/* Position Quick View */}
                 {userPosition && ((userPosition.yesShares || 0) > 0 || (userPosition.noShares || 0) > 0) && (
-                  <div className="text-xs text-slate-400 text-center space-y-1 pt-2 border-t border-purple-500/20">
+                  <div className="text-xs text-secondary text-center space-y-1 pt-2 border-t border-ink-divider">
                     <p>Your position:</p>
                     <div className="flex justify-center gap-3">
                       {(userPosition.yesShares || 0) > 0 && (
-                        <span className="text-emerald-400">{userPosition.yesShares.toFixed(1)} YES</span>
+                        <span className="text-gain">{userPosition.yesShares.toFixed(1)} YES</span>
                       )}
                       {(userPosition.noShares || 0) > 0 && (
-                        <span className="text-rose-400">{userPosition.noShares.toFixed(1)} NO</span>
+                        <span className="text-loss">{userPosition.noShares.toFixed(1)} NO</span>
                       )}
                     </div>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
             </motion.div>
 
             {/* Leaderboard Preview */}
@@ -1305,20 +1296,20 @@ export default function PredictionMarket() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
             >
-            <Card className="neural-glass iridescent-border backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Award className="w-5 h-5 text-fuchsia-400" />
+            <Surface className="p-4">
+              <div>
+                <SectionTitle className="flex items-center gap-2">
+                  <Award className="w-5 h-5 text-accent-bright" />
                   Top Predictors
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center text-slate-400 py-4">
-                  <Users className="w-12 h-12 mx-auto mb-2 text-purple-600" />
+                </SectionTitle>
+              </div>
+              <div>
+                <div className="text-center text-secondary py-4">
+                  <Users className="w-12 h-12 mx-auto mb-2 text-accent-deep" />
                   <p className="text-sm">No leaderboard data yet</p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
             </motion.div>
           </div>
         </div>

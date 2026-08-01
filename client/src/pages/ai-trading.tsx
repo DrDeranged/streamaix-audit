@@ -3,7 +3,6 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createChart, ColorType, LineSeries, AreaSeries, Time } from 'lightweight-charts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -16,6 +15,8 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { PageHeader } from '@/components/PageHeader';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 import { ReasoningFeed } from '@/components/prediction/ReasoningFeed';
 import { 
   TrendingUp, 
@@ -55,7 +56,7 @@ import {
 function NeuralBackground() {
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-900/20 via-slate-900 to-slate-950" />
+      <div className="absolute inset-0 bg-ink-page" />
       <div className="absolute inset-0 opacity-40" style={{ backgroundImage: 'radial-gradient(circle at 25px 25px, rgba(6,182,212,0.03) 2px, transparent 2px)', backgroundSize: '50px 50px' }} />
       
       {[...Array(20)].map((_, i) => (
@@ -114,7 +115,7 @@ function NeuralBackground() {
 function ScanningLine() {
   return (
     <motion.div
-      className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"
+      className="absolute inset-x-0 h-[2px] bg-accent-core/30"
       animate={{ y: [0, 600, 0] }}
       transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
     />
@@ -154,43 +155,43 @@ function GlowingStatCard({ icon: Icon, label, value, subValue, color, delay = 0 
 }) {
   const colorClasses = {
     cyan: {
-      bg: 'from-cyan-500/10 to-cyan-600/5',
+      bg: ' ',
       border: 'border-cyan-500/30 hover:border-cyan-400/50',
       glow: 'shadow-cyan-500/20 hover:shadow-cyan-500/40',
-      icon: 'from-cyan-500/20 to-cyan-600/30 text-cyan-400',
-      text: 'text-cyan-400',
+      icon: '  text-accent-bright',
+      text: 'text-accent-bright',
       pulse: 'bg-cyan-400',
     },
     emerald: {
-      bg: 'from-emerald-500/10 to-emerald-600/5',
+      bg: ' ',
       border: 'border-emerald-500/30 hover:border-emerald-400/50',
       glow: 'shadow-emerald-500/20 hover:shadow-emerald-500/40',
-      icon: 'from-emerald-500/20 to-emerald-600/30 text-emerald-400',
-      text: 'text-emerald-400',
+      icon: '  text-gain',
+      text: 'text-gain',
       pulse: 'bg-emerald-400',
     },
     red: {
-      bg: 'from-red-500/10 to-red-600/5',
+      bg: ' ',
       border: 'border-red-500/30 hover:border-red-400/50',
       glow: 'shadow-red-500/20 hover:shadow-red-500/40',
-      icon: 'from-red-500/20 to-red-600/30 text-red-400',
-      text: 'text-red-400',
+      icon: '  text-loss',
+      text: 'text-loss',
       pulse: 'bg-red-400',
     },
     purple: {
-      bg: 'from-purple-500/10 to-purple-600/5',
+      bg: ' ',
       border: 'border-purple-500/30 hover:border-purple-400/50',
       glow: 'shadow-purple-500/20 hover:shadow-purple-500/40',
-      icon: 'from-purple-500/20 to-purple-600/30 text-purple-400',
-      text: 'text-purple-400',
-      pulse: 'bg-purple-400',
+      icon: '  text-accent-bright',
+      text: 'text-accent-bright',
+      pulse: 'bg-accent-bright',
     },
     amber: {
-      bg: 'from-amber-500/10 to-amber-600/5',
+      bg: ' ',
       border: 'border-amber-500/30 hover:border-amber-400/50',
       glow: 'shadow-amber-500/20 hover:shadow-amber-500/40',
-      icon: 'from-amber-500/20 to-amber-600/30 text-amber-400',
-      text: 'text-amber-400',
+      icon: '  text-warn',
+      text: 'text-warn',
       pulse: 'bg-amber-400',
     },
   };
@@ -203,13 +204,13 @@ function GlowingStatCard({ icon: Icon, label, value, subValue, color, delay = 0 
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.5, delay }}
       whileHover={{ scale: 1.02, y: -2 }}
-      className={`relative group overflow-hidden rounded-2xl border ${c.border} bg-gradient-to-br ${c.bg} backdrop-blur-xl shadow-lg ${c.glow} transition-all duration-300`}
+      className="relative group overflow-hidden rounded-xl border border-ink-edge bg-ink-surface transition-all duration-300"
     >
-      <div className="absolute inset-0 bg-slate-900/40" />
-      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+      <div className="absolute inset-0 bg-ink-page/40" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-ink-edge" />
       
       <div className="relative p-4 flex items-center gap-4">
-        <div className={`relative w-12 h-12 rounded-xl bg-gradient-to-br ${c.icon} flex items-center justify-center`}>
+        <div className="relative w-12 h-12 rounded-xl bg-ink-raised flex items-center justify-center text-accent-bright">
           <Icon className="w-6 h-6" />
           <motion.div
             className={`absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ${c.pulse}`}
@@ -219,11 +220,11 @@ function GlowingStatCard({ icon: Icon, label, value, subValue, color, delay = 0 
         </div>
         
         <div className="flex-1">
-          <p className="text-xs text-slate-400 uppercase tracking-wider font-medium">{label}</p>
-          <p className={`text-2xl font-bold ${c.text} mt-0.5`}>
+          <p className="text-xs text-muted uppercase tracking-wider font-medium">{label}</p>
+          <p className="text-2xl font-bold text-primary tabular mt-0.5">
             {typeof value === 'number' ? <AnimatedCounter value={value} /> : value}
           </p>
-          {subValue && <p className="text-[10px] text-slate-500 mt-0.5">{subValue}</p>}
+          {subValue && <p className="text-[10px] text-muted mt-0.5">{subValue}</p>}
         </div>
       </div>
       
@@ -252,14 +253,14 @@ function PremiumNavButton({ active, onClick, icon: Icon, label, color, dataTestI
       whileTap={{ scale: 0.98 }}
       className={`relative flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all duration-300 overflow-hidden ${
         active 
-          ? `bg-gradient-to-r ${color} text-white shadow-lg` 
-          : 'bg-slate-800/50 text-slate-400 hover:text-white hover:bg-slate-700/50 border border-slate-700/50'
+          ? 'bg-accent-core text-primary glow-accent' 
+          : 'bg-ink-raised text-secondary hover:text-primary border border-ink-edge'
       }`}
       data-testid={dataTestId}
     >
       {active && (
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0"
+          className="absolute inset-0 bg-accent-bright/10"
           animate={{ x: ['-100%', '100%'] }}
           transition={{ duration: 2, repeat: Infinity }}
         />
@@ -392,16 +393,16 @@ function ConfidenceRing({ value, size = 60 }: { value: number; size?: number }) 
   const strokeDashoffset = circumference - (value / 100) * circumference;
   
   const getColor = () => {
-    if (value >= 80) return 'text-emerald-400';
-    if (value >= 70) return 'text-cyan-400';
-    if (value >= 60) return 'text-amber-400';
-    return 'text-red-400';
+    if (value >= 80) return 'text-gain';
+    if (value >= 70) return 'text-accent-bright';
+    if (value >= 60) return 'text-warn';
+    return 'text-loss';
   };
 
   return (
     <div className="relative flex flex-col items-center" style={{ width: size, height: size }}>
       <svg className="transform -rotate-90" width={size} height={size}>
-        <circle cx={size / 2} cy={size / 2} r={radius} stroke="currentColor" strokeWidth="4" fill="transparent" className="text-slate-700" />
+        <circle cx={size / 2} cy={size / 2} r={radius} stroke="currentColor" strokeWidth="4" fill="transparent" className="text-muted" />
         <circle cx={size / 2} cy={size / 2} r={radius} stroke="currentColor" strokeWidth="4" fill="transparent" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round" className={`${getColor()} transition-all duration-1000`} />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
@@ -421,8 +422,8 @@ function RSIGauge({ value, signal }: { value: number; signal: string }) {
   const position = (value / 100) * 100;
   
   return (
-    <div className="relative h-6 bg-gradient-to-r from-emerald-500/30 via-slate-700/50 to-red-500/30 rounded-full overflow-hidden">
-      <div className="absolute inset-0 flex items-center justify-between px-2 text-[9px] text-slate-400">
+    <div className="relative h-6     rounded-full overflow-hidden">
+      <div className="absolute inset-0 flex items-center justify-between px-2 text-[9px] text-secondary">
         <span>30</span><span>50</span><span>70</span>
       </div>
       <motion.div className={`absolute top-1 w-4 h-4 ${getColor()} rounded-full shadow-lg`} style={{ left: `calc(${position}% - 8px)` }} initial={{ scale: 0 }} animate={{ scale: 1 }} />
@@ -432,23 +433,23 @@ function RSIGauge({ value, signal }: { value: number; signal: string }) {
 
 function FearGreedMeter({ value, classification }: { value: number; classification: string }) {
   const getColor = () => {
-    if (value < 25) return 'from-red-500 to-orange-500';
-    if (value < 45) return 'from-orange-500 to-amber-500';
-    if (value < 55) return 'from-amber-500 to-yellow-500';
-    if (value < 75) return 'from-yellow-500 to-lime-500';
-    return 'from-lime-500 to-emerald-500';
+    if (value < 25) return ' ';
+    if (value < 45) return ' ';
+    if (value < 55) return ' ';
+    if (value < 75) return ' ';
+    return ' ';
   };
   
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-center">
-        <span className="text-xs text-slate-400">Fear & Greed</span>
-        <span className={`text-xs font-bold ${value < 45 ? 'text-red-400' : value > 55 ? 'text-emerald-400' : 'text-amber-400'}`}>{classification}</span>
+        <span className="text-xs text-secondary">Fear & Greed</span>
+        <span className={`text-xs font-bold ${value < 45 ? 'text-loss' : value > 55 ? 'text-gain' : 'text-warn'}`}>{classification}</span>
       </div>
-      <div className="relative h-3 bg-slate-800 rounded-full overflow-hidden">
-        <div className={`h-full bg-gradient-to-r ${getColor()} rounded-full transition-all duration-500`} style={{ width: `${value}%` }} />
+      <div className="relative h-3 bg-ink-raised rounded-full overflow-hidden">
+        <div className={`h-full  ${getColor()} rounded-full transition-all duration-500`} style={{ width: `${value}%` }} />
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-[10px] font-bold text-white drop-shadow-md">{value}</span>
+          <span className="text-[10px] font-bold text-primary drop-shadow-md">{value}</span>
         </div>
       </div>
     </div>
@@ -459,10 +460,10 @@ function ConfluenceBar({ label, value, color }: { label: string; value: number; 
   return (
     <div className="space-y-1">
       <div className="flex justify-between text-xs">
-        <span className="text-slate-400">{label}</span>
-        <span className={`font-medium ${value > 60 ? 'text-emerald-400' : value < 40 ? 'text-red-400' : 'text-amber-400'}`}>{value}%</span>
+        <span className="text-secondary">{label}</span>
+        <span className={`font-medium ${value > 60 ? 'text-gain' : value < 40 ? 'text-loss' : 'text-warn'}`}>{value}%</span>
       </div>
-      <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+      <div className="h-2 bg-ink-raised rounded-full overflow-hidden">
         <motion.div className={`h-full ${color} rounded-full`} initial={{ width: 0 }} animate={{ width: `${value}%` }} transition={{ duration: 0.8, delay: 0.2 }} />
       </div>
     </div>
@@ -562,23 +563,23 @@ function CorrelationHeatmap({ signals }: { signals: TradingSignal[] }) {
       >
         <div />
         {assets.map((a, i) => (
-          <div key={i} className="text-center text-xs sm:text-sm text-slate-400 font-medium py-2 truncate">{a}</div>
+          <div key={i} className="text-center text-xs sm:text-sm text-secondary font-medium py-2 truncate">{a}</div>
         ))}
         {assets.map((asset, i) => (
           <>
-            <div key={`label-${i}`} className="text-xs sm:text-sm text-slate-400 font-medium py-3 truncate">{asset}</div>
+            <div key={`label-${i}`} className="text-xs sm:text-sm text-secondary font-medium py-3 truncate">{asset}</div>
             {correlations[i].map((corr, j) => (
               <div 
                 key={`${i}-${j}`} 
-                className={`flex items-center justify-center ${getColor(corr)} bg-opacity-30 rounded-md py-3 sm:py-4 transition-all hover:bg-opacity-50 cursor-pointer`}
+                className={`flex items-center justify-center ${getColor(corr)} bg-opacity-30 rounded-xl py-3 sm:py-4 transition-all hover:bg-opacity-50 cursor-pointer`}
               >
-                <span className="text-xs sm:text-sm text-white font-medium">{corr.toFixed(2)}</span>
+                <span className="text-xs sm:text-sm text-primary font-medium">{corr.toFixed(2)}</span>
               </div>
             ))}
           </>
         ))}
       </div>
-      <div className="flex items-center justify-center gap-6 mt-6 text-xs text-slate-400">
+      <div className="flex items-center justify-center gap-6 mt-6 text-xs text-secondary">
         <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-emerald-500 bg-opacity-30" /> High (0.7+)</div>
         <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-cyan-500 bg-opacity-30" /> Medium (0.4-0.7)</div>
         <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-amber-500 bg-opacity-30" /> Low (0-0.4)</div>
@@ -601,18 +602,18 @@ function PriceAlertDialog({ signal }: { signal: TradingSignal }) {
   };
 
   return (
-    <DialogContent className="bg-slate-900 border-slate-700">
+    <DialogContent className="bg-ink-page border-ink-edge">
       <DialogHeader>
-        <DialogTitle className="text-white flex items-center gap-2">
-          <BellPlus className="w-5 h-5 text-amber-400" />
+        <DialogTitle className="text-primary flex items-center gap-2">
+          <BellPlus className="w-5 h-5 text-warn" />
           Set Price Alert - {signal.asset.symbol}
         </DialogTitle>
       </DialogHeader>
       
       <div className="space-y-4 pt-4">
         <div className="text-center">
-          <p className="text-2xl font-bold text-white">${signal.currentPrice.toFixed(2)}</p>
-          <p className="text-xs text-slate-400">Current Price</p>
+          <p className="text-2xl font-bold text-primary">${signal.currentPrice.toFixed(2)}</p>
+          <p className="text-xs text-secondary">Current Price</p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -633,12 +634,12 @@ function PriceAlertDialog({ signal }: { signal: TradingSignal }) {
         </div>
 
         <div className="space-y-2">
-          <Label className="text-xs text-slate-400">Alert Price</Label>
+          <Label className="text-xs text-secondary">Alert Price</Label>
           <Input 
             type="number" 
             value={alertPrice} 
             onChange={(e) => setAlertPrice(Number(e.target.value))}
-            className="bg-slate-800 border-slate-700"
+            className="bg-ink-raised border-ink-edge"
           />
         </div>
 
@@ -664,46 +665,46 @@ function NewsCard() {
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.3 }}
     >
-      <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-700/30 backdrop-blur-xl overflow-hidden relative">
-        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-purple-500/20 flex items-center justify-center">
-              <Newspaper className="w-3.5 h-3.5 text-purple-400" />
+      <Surface className="overflow-hidden relative">
+        <div className="absolute top-0 left-0 right-0 h-[1px]    " />
+        <div className="pb-2">
+          <SectionTitle as="h3" className="text-sm flex items-center gap-2">
+            <div className="w-7 h-7 rounded-xl bg-accent-core/20 flex items-center justify-center">
+              <Newspaper className="w-3.5 h-3.5 text-accent-bright" />
             </div>
             <span>AI-Scored News</span>
             <motion.div
-              className="w-1.5 h-1.5 rounded-full bg-purple-400 ml-auto"
+              className="w-1.5 h-1.5 rounded-full bg-accent-bright ml-auto"
               animate={{ opacity: [1, 0.4, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
             />
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
+          </SectionTitle>
+        </div>
+        <div className="space-y-2">
           {newsItems.map((item, i) => (
             <motion.div 
               key={i} 
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="flex items-start gap-3 p-2.5 bg-slate-800/30 rounded-xl border border-slate-700/30 hover:border-slate-600/50 transition-all group cursor-pointer"
+              className="flex items-start gap-3 p-2.5 bg-ink-raised/60 rounded-xl border border-ink-edge hover:border-ink-edge transition-all group cursor-pointer"
             >
               <motion.div 
                 className={`w-2.5 h-2.5 rounded-full mt-1 ${
                   item.sentiment === 'positive' ? 'bg-emerald-500' : 
-                  item.sentiment === 'negative' ? 'bg-red-500' : 'bg-slate-500'
+                  item.sentiment === 'negative' ? 'bg-red-500' : 'bg-ink-raised'
                 }`}
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 2, repeat: Infinity, delay: i * 0.5 }}
               />
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-slate-200 group-hover:text-white transition-colors truncate">{item.title}</p>
-                <p className="text-[10px] text-slate-500 mt-0.5">{item.time}</p>
+                <p className="text-xs text-body group-hover:text-primary transition-colors truncate">{item.title}</p>
+                <p className="text-[10px] text-muted mt-0.5">{item.time}</p>
               </div>
             </motion.div>
           ))}
-        </CardContent>
-      </Card>
+        </div>
+      </Surface>
     </motion.div>
   );
 }
@@ -721,11 +722,11 @@ function WhaleAlertCard() {
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.4 }}
     >
-      <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-700/30 backdrop-blur-xl overflow-hidden relative">
-        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-orange-500/50 to-transparent" />
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-orange-500/20 flex items-center justify-center">
+      <Surface className="overflow-hidden relative">
+        <div className="absolute top-0 left-0 right-0 h-[1px]    " />
+        <div className="pb-2">
+          <SectionTitle as="h3" className="text-sm flex items-center gap-2">
+            <div className="w-7 h-7 rounded-xl bg-orange-500/20 flex items-center justify-center">
               <Flame className="w-3.5 h-3.5 text-orange-400" />
             </div>
             <span>Whale Alerts</span>
@@ -734,37 +735,37 @@ function WhaleAlertCard() {
               animate={{ opacity: [1, 0.4, 1] }}
               transition={{ duration: 1.5, repeat: Infinity }}
             />
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
+          </SectionTitle>
+        </div>
+        <div className="space-y-2">
           {alerts.map((alert, i) => (
             <motion.div 
               key={i}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="flex items-center justify-between p-2.5 bg-slate-800/30 rounded-xl border border-slate-700/30 hover:border-slate-600/50 transition-all group cursor-pointer"
+              className="flex items-center justify-between p-2.5 bg-ink-raised/60 rounded-xl border border-ink-edge hover:border-ink-edge transition-all group cursor-pointer"
             >
               <div className="flex items-center gap-3">
-                <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+                <div className={`w-7 h-7 rounded-xl flex items-center justify-center ${
                   alert.direction === 'out' ? 'bg-emerald-500/20' : 'bg-red-500/20'
                 }`}>
                   {alert.direction === 'out' ? (
-                    <ArrowUpRight className="w-4 h-4 text-emerald-400" />
+                    <ArrowUpRight className="w-4 h-4 text-gain" />
                   ) : (
-                    <ArrowDownRight className="w-4 h-4 text-red-400" />
+                    <ArrowDownRight className="w-4 h-4 text-loss" />
                   )}
                 </div>
                 <div>
-                  <p className="text-xs text-white font-medium font-mono">{alert.amount}</p>
-                  <p className="text-[10px] text-slate-500">{alert.direction === 'out' ? 'Withdrawn from' : 'Deposited to'} {alert.exchange}</p>
+                  <p className="text-xs text-primary font-medium font-mono">{alert.amount}</p>
+                  <p className="text-[10px] text-muted">{alert.direction === 'out' ? 'Withdrawn from' : 'Deposited to'} {alert.exchange}</p>
                 </div>
               </div>
-              <span className="text-[10px] text-slate-400 font-mono">{alert.time}</span>
+              <span className="text-[10px] text-secondary font-mono">{alert.time}</span>
             </motion.div>
           ))}
-        </CardContent>
-      </Card>
+        </div>
+      </Surface>
     </motion.div>
   );
 }
@@ -774,25 +775,25 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
   const [activeTab, setActiveTab] = useState('overview');
   
   const getDirectionIcon = () => {
-    if (signal.direction === 'bullish') return <ArrowUpRight className="w-5 h-5 text-emerald-400" />;
-    if (signal.direction === 'bearish') return <ArrowDownRight className="w-5 h-5 text-red-400" />;
-    return <Minus className="w-5 h-5 text-slate-400" />;
+    if (signal.direction === 'bullish') return <ArrowUpRight className="w-5 h-5 text-gain" />;
+    if (signal.direction === 'bearish') return <ArrowDownRight className="w-5 h-5 text-loss" />;
+    return <Minus className="w-5 h-5 text-secondary" />;
   };
 
   const getDirectionColor = () => {
-    if (signal.direction === 'bullish') return 'from-emerald-500/20 to-cyan-500/20 border-emerald-500/30';
-    if (signal.direction === 'bearish') return 'from-red-500/20 to-orange-500/20 border-red-500/30';
-    return 'from-slate-500/20 to-slate-600/20 border-slate-500/30';
+    if (signal.direction === 'bullish') return '  border-emerald-500/30';
+    if (signal.direction === 'bearish') return '  border-red-500/30';
+    return '  border-slate-500/30';
   };
 
   const getSignalTypeBadge = () => {
     const colors: Record<string, string> = {
-      'breakout': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-      'bounce': 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
-      'flush': 'bg-red-500/20 text-red-400 border-red-500/30',
-      'consolidation': 'bg-slate-500/20 text-slate-400 border-slate-500/30',
-      'trend_continuation': 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-      'reversal': 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+      'breakout': 'bg-emerald-500/20 text-gain border-emerald-500/30',
+      'bounce': 'bg-cyan-500/20 text-accent-bright border-cyan-500/30',
+      'flush': 'bg-red-500/20 text-loss border-red-500/30',
+      'consolidation': 'bg-ink-raised text-secondary border-slate-500/30',
+      'trend_continuation': 'bg-accent-core/20 text-accent-bright border-purple-500/30',
+      'reversal': 'bg-amber-500/20 text-warn border-amber-500/30',
       'accumulation': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
       'distribution': 'bg-orange-500/20 text-orange-400 border-orange-500/30',
     };
@@ -801,9 +802,9 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
 
   const getPriorityBadge = () => {
     const colors: Record<string, string> = {
-      'high': 'bg-red-500/20 text-red-400 border-red-500/30',
-      'medium': 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-      'low': 'bg-slate-500/20 text-slate-400 border-slate-500/30',
+      'high': 'bg-red-500/20 text-loss border-red-500/30',
+      'medium': 'bg-amber-500/20 text-warn border-amber-500/30',
+      'low': 'bg-ink-raised text-secondary border-slate-500/30',
     };
     return colors[signal.alertPriority] || colors['low'];
   };
@@ -826,33 +827,33 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
   const sentiment = signal.sentiment;
 
   return (
-    <motion.div layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={`relative overflow-hidden rounded-xl border bg-gradient-to-br ${getDirectionColor()} backdrop-blur-xl`}>
-      <div className="absolute inset-0 bg-slate-900/60" />
+    <motion.div layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={`relative overflow-hidden rounded-xl border  ${getDirectionColor()} backdrop-blur-xl`}>
+      <div className="absolute inset-0 bg-ink-page/60" />
       
       <div className="relative p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${signal.asset.type === 'crypto' ? 'bg-gradient-to-br from-amber-500/30 to-orange-500/30' : 'bg-gradient-to-br from-blue-500/30 to-indigo-500/30'}`}>
-              {signal.asset.type === 'crypto' ? <Coins className="w-6 h-6 text-amber-400" /> : <Building2 className="w-6 h-6 text-blue-400" />}
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${signal.asset.type === 'crypto' ? '  ' : '  '}`}>
+              {signal.asset.type === 'crypto' ? <Coins className="w-6 h-6 text-warn" /> : <Building2 className="w-6 h-6 text-blue-400" />}
             </div>
             <div>
-              <h3 className="font-bold text-white text-lg flex items-center gap-2">
+              <h3 className="font-bold text-primary text-lg flex items-center gap-2">
                 {signal.asset.symbol}
                 {getDirectionIcon()}
                 <Badge className={`${getPriorityBadge()} text-[10px] ml-1`}>{signal.alertPriority.toUpperCase()}</Badge>
               </h3>
-              <p className="text-sm text-slate-400">{signal.asset.name}</p>
+              <p className="text-sm text-secondary">{signal.asset.name}</p>
             </div>
           </div>
           
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={onWatchlistToggle} className="h-8 w-8 p-0" data-testid={`btn-watchlist-${signal.asset.symbol}`}>
-              {isWatchlisted ? <Star className="w-4 h-4 text-amber-400 fill-amber-400" /> : <StarOff className="w-4 h-4 text-slate-400" />}
+              {isWatchlisted ? <Star className="w-4 h-4 text-warn fill-amber-400" /> : <StarOff className="w-4 h-4 text-secondary" />}
             </Button>
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-testid={`btn-alert-${signal.asset.symbol}`}>
-                  <BellPlus className="w-4 h-4 text-slate-400" />
+                  <BellPlus className="w-4 h-4 text-secondary" />
                 </Button>
               </DialogTrigger>
               <PriceAlertDialog signal={signal} />
@@ -864,59 +865,59 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
         <MiniChart symbol={signal.asset.symbol} currentPrice={signal.currentPrice} priceChange24h={signal.priceChange24h} />
 
         <div className="grid grid-cols-3 gap-2 my-3">
-          <div className="bg-slate-800/50 rounded-lg p-2 text-center">
-            <p className="text-[10px] text-slate-400 mb-0.5">Price</p>
-            <p className="text-base font-bold text-white">{formatPrice(signal.currentPrice)}</p>
-            <p className={`text-[10px] font-medium ${signal.priceChange24h >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+          <div className="bg-ink-raised rounded-xl p-2 text-center">
+            <p className="text-[10px] text-secondary mb-0.5">Price</p>
+            <p className="text-base font-bold text-primary">{formatPrice(signal.currentPrice)}</p>
+            <p className={`text-[10px] font-medium ${signal.priceChange24h >= 0 ? 'text-gain' : 'text-loss'}`}>
               {signal.priceChange24h >= 0 ? '+' : ''}{signal.priceChange24h.toFixed(2)}%
             </p>
           </div>
-          <div className="bg-slate-800/50 rounded-lg p-2 text-center">
-            <p className="text-[10px] text-slate-400 mb-0.5">7D</p>
-            <p className={`text-base font-bold ${(signal.priceChange7d || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+          <div className="bg-ink-raised rounded-xl p-2 text-center">
+            <p className="text-[10px] text-secondary mb-0.5">7D</p>
+            <p className={`text-base font-bold ${(signal.priceChange7d || 0) >= 0 ? 'text-gain' : 'text-loss'}`}>
               {(signal.priceChange7d || 0) >= 0 ? '+' : ''}{(signal.priceChange7d || 0).toFixed(2)}%
             </p>
           </div>
-          <div className="bg-slate-800/50 rounded-lg p-2 text-center">
-            <p className="text-[10px] text-slate-400 mb-0.5">Volume</p>
-            <p className="text-base font-bold text-white">{formatLargeNumber(signal.volume24h || 0)}</p>
+          <div className="bg-ink-raised rounded-xl p-2 text-center">
+            <p className="text-[10px] text-secondary mb-0.5">Volume</p>
+            <p className="text-base font-bold text-primary">{formatLargeNumber(signal.volume24h || 0)}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 mb-3 flex-wrap">
           <Badge className={`${getSignalTypeBadge()} text-xs`}>{signal.signalType.replace('_', ' ').toUpperCase()}</Badge>
-          <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">{signal.marketRegime?.type?.replace('_', ' ').toUpperCase() || 'RANGING'}</Badge>
-          <Badge className="bg-slate-500/20 text-slate-300 border-slate-500/30 text-xs">{signal.timeframe}</Badge>
+          <Badge className="bg-accent-core/20 text-accent-bright border-purple-500/30 text-xs">{signal.marketRegime?.type?.replace('_', ' ').toUpperCase() || 'RANGING'}</Badge>
+          <Badge className="bg-ink-raised text-body border-slate-500/30 text-xs">{signal.timeframe}</Badge>
         </div>
 
-        <div className="bg-slate-800/30 rounded-lg p-3 mb-3">
+        <div className="bg-ink-raised/60 rounded-xl p-3 mb-3">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-slate-300 flex items-center gap-1"><Signal className="w-3 h-3" /> Confluence</span>
-            <span className={`text-lg font-bold ${signal.confluence?.overall > 60 ? 'text-emerald-400' : signal.confluence?.overall < 40 ? 'text-red-400' : 'text-amber-400'}`}>{signal.confluence?.overall || 50}/100</span>
+            <span className="text-xs font-medium text-body flex items-center gap-1"><Signal className="w-3 h-3" /> Confluence</span>
+            <span className={`text-lg font-bold ${signal.confluence?.overall > 60 ? 'text-gain' : signal.confluence?.overall < 40 ? 'text-loss' : 'text-warn'}`}>{signal.confluence?.overall || 50}/100</span>
           </div>
           <div className="grid grid-cols-3 gap-2">
             <ConfluenceBar label="Tech" value={signal.confluence?.technical || 50} color="bg-cyan-500" />
-            <ConfluenceBar label="Chain" value={signal.confluence?.onChain || 50} color="bg-purple-500" />
+            <ConfluenceBar label="Chain" value={signal.confluence?.onChain || 50} color="bg-accent-core" />
             <ConfluenceBar label="Sent" value={signal.confluence?.sentiment || 50} color="bg-amber-500" />
           </div>
         </div>
 
         <div className="grid grid-cols-3 gap-2 mb-3">
-          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-2 text-center">
-            <p className="text-[10px] text-emerald-400 uppercase font-medium">Entry</p>
-            <p className="text-xs font-bold text-white">{formatPrice(signal.entry.low)}</p>
+          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-2 text-center">
+            <p className="text-[10px] text-gain uppercase font-medium">Entry</p>
+            <p className="text-xs font-bold text-primary">{formatPrice(signal.entry.low)}</p>
           </div>
-          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-2 text-center">
-            <p className="text-[10px] text-red-400 uppercase font-medium">Stop</p>
-            <p className="text-xs font-bold text-white">{formatPrice(signal.stopLoss)}</p>
+          <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-2 text-center">
+            <p className="text-[10px] text-loss uppercase font-medium">Stop</p>
+            <p className="text-xs font-bold text-primary">{formatPrice(signal.stopLoss)}</p>
           </div>
-          <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-lg p-2 text-center">
-            <p className="text-[10px] text-cyan-400 uppercase font-medium">R:R</p>
-            <p className="text-xs font-bold text-white">{signal.riskReward}</p>
+          <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-xl p-2 text-center">
+            <p className="text-[10px] text-accent-bright uppercase font-medium">R:R</p>
+            <p className="text-xs font-bold text-primary">{signal.riskReward}</p>
           </div>
         </div>
 
-        <Button variant="ghost" className="w-full text-slate-400 hover:text-white hover:bg-slate-800/50" onClick={() => setExpanded(!expanded)} data-testid={`btn-expand-${signal.asset.symbol}`}>
+        <Button variant="ghost" className="w-full text-secondary hover:text-primary hover:bg-ink-raised" onClick={() => setExpanded(!expanded)} data-testid={`btn-expand-${signal.asset.symbol}`}>
           {expanded ? 'Hide Details' : 'Show Details'}
           {expanded ? <ChevronUp className="w-4 h-4 ml-2" /> : <ChevronDown className="w-4 h-4 ml-2" />}
         </Button>
@@ -924,10 +925,10 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
         <AnimatePresence>
           {expanded && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-              <div className="pt-4 space-y-4 border-t border-slate-700/50 mt-4">
+              <div className="pt-4 space-y-4 border-t border-ink-edge mt-4">
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList className="bg-slate-800/50 border border-slate-700/50 w-full grid grid-cols-4">
-                    <TabsTrigger value="overview" className="text-[10px] data-[state=active]:bg-purple-500/30">AI</TabsTrigger>
+                  <TabsList className="bg-ink-raised border border-ink-edge w-full grid grid-cols-4">
+                    <TabsTrigger value="overview" className="text-[10px] data-[state=active]:bg-accent-core/20">AI</TabsTrigger>
                     <TabsTrigger value="technical" className="text-[10px] data-[state=active]:bg-cyan-500/30">Tech</TabsTrigger>
                     <TabsTrigger value="onchain" className="text-[10px] data-[state=active]:bg-emerald-500/30">Chain</TabsTrigger>
                     <TabsTrigger value="sentiment" className="text-[10px] data-[state=active]:bg-amber-500/30">Sent</TabsTrigger>
@@ -935,19 +936,19 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
 
                   <TabsContent value="overview" className="mt-3 space-y-3">
                     <div>
-                      <p className="text-xs text-slate-400 uppercase font-medium mb-2 flex items-center gap-1"><Brain className="w-3 h-3" /> AI Analysis</p>
-                      <p className="text-sm text-slate-300 bg-slate-800/30 rounded-lg p-3">{signal.reasoning}</p>
+                      <p className="text-xs text-secondary uppercase font-medium mb-2 flex items-center gap-1"><Brain className="w-3 h-3" /> AI Analysis</p>
+                      <p className="text-sm text-body bg-ink-raised/60 rounded-xl p-3">{signal.reasoning}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-400 uppercase font-medium mb-2 flex items-center gap-1"><Target className="w-3 h-3" /> Targets</p>
+                      <p className="text-xs text-secondary uppercase font-medium mb-2 flex items-center gap-1"><Target className="w-3 h-3" /> Targets</p>
                       <div className="space-y-2">
                         {signal.targets.map((target, i) => (
-                          <div key={i} className="flex items-center justify-between bg-slate-800/30 rounded-lg px-3 py-2">
+                          <div key={i} className="flex items-center justify-between bg-ink-raised/60 rounded-xl px-3 py-2">
                             <div className="flex items-center gap-2">
-                              <span className="text-xs text-cyan-400 font-medium">{target.label}</span>
-                              <span className="text-[10px] text-slate-500">({target.probability}%)</span>
+                              <span className="text-xs text-accent-bright font-medium">{target.label}</span>
+                              <span className="text-[10px] text-muted">({target.probability}%)</span>
                             </div>
-                            <span className="text-sm font-bold text-white">{formatPrice(target.price)}</span>
+                            <span className="text-sm font-bold text-primary">{formatPrice(target.price)}</span>
                           </div>
                         ))}
                       </div>
@@ -957,31 +958,31 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
                   <TabsContent value="technical" className="mt-3 space-y-3">
                     <div>
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs text-slate-400 flex items-center gap-1"><Gauge className="w-3 h-3" /> RSI</span>
-                        <Badge className={`text-[10px] ${ti?.rsiSignal === 'oversold' ? 'bg-emerald-500/20 text-emerald-400' : ti?.rsiSignal === 'overbought' ? 'bg-red-500/20 text-red-400' : 'bg-slate-500/20 text-slate-400'}`}>
+                        <span className="text-xs text-secondary flex items-center gap-1"><Gauge className="w-3 h-3" /> RSI</span>
+                        <Badge className={`text-[10px] ${ti?.rsiSignal === 'oversold' ? 'bg-emerald-500/20 text-gain' : ti?.rsiSignal === 'overbought' ? 'bg-red-500/20 text-loss' : 'bg-ink-raised text-secondary'}`}>
                           {ti?.rsiSignal?.toUpperCase()} ({ti?.rsi?.toFixed(1)})
                         </Badge>
                       </div>
                       <RSIGauge value={ti?.rsi || 50} signal={ti?.rsiSignal || 'neutral'} />
                     </div>
-                    <div className="bg-slate-800/30 rounded-lg p-3">
+                    <div className="bg-ink-raised/60 rounded-xl p-3">
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs text-slate-400">MACD</span>
-                        <Badge className={`text-[10px] ${ti?.macd?.trend === 'bullish' ? 'bg-emerald-500/20 text-emerald-400' : ti?.macd?.trend === 'bearish' ? 'bg-red-500/20 text-red-400' : 'bg-slate-500/20 text-slate-400'}`}>
+                        <span className="text-xs text-secondary">MACD</span>
+                        <Badge className={`text-[10px] ${ti?.macd?.trend === 'bullish' ? 'bg-emerald-500/20 text-gain' : ti?.macd?.trend === 'bearish' ? 'bg-red-500/20 text-loss' : 'bg-ink-raised text-secondary'}`}>
                           {ti?.macd?.trend?.toUpperCase()}
                         </Badge>
                       </div>
                       <div className="grid grid-cols-3 gap-2 text-center text-[10px]">
-                        <div><p className="text-slate-500">Value</p><p className="text-white">{ti?.macd?.value?.toFixed(3)}</p></div>
-                        <div><p className="text-slate-500">Signal</p><p className="text-white">{ti?.macd?.signal?.toFixed(3)}</p></div>
-                        <div><p className="text-slate-500">Hist</p><p className={`${(ti?.macd?.histogram || 0) > 0 ? 'text-emerald-400' : 'text-red-400'}`}>{ti?.macd?.histogram?.toFixed(3)}</p></div>
+                        <div><p className="text-muted">Value</p><p className="text-primary">{ti?.macd?.value?.toFixed(3)}</p></div>
+                        <div><p className="text-muted">Signal</p><p className="text-primary">{ti?.macd?.signal?.toFixed(3)}</p></div>
+                        <div><p className="text-muted">Hist</p><p className={`${(ti?.macd?.histogram || 0) > 0 ? 'text-gain' : 'text-loss'}`}>{ti?.macd?.histogram?.toFixed(3)}</p></div>
                       </div>
                     </div>
-                    <div className="bg-slate-800/30 rounded-lg p-3">
+                    <div className="bg-ink-raised/60 rounded-xl p-3">
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs text-slate-400">Moving Averages</span>
-                        {ti?.movingAverages?.goldenCross && <Badge className="bg-emerald-500/20 text-emerald-400 text-[9px]">GOLDEN CROSS</Badge>}
-                        {ti?.movingAverages?.deathCross && <Badge className="bg-red-500/20 text-red-400 text-[9px]">DEATH CROSS</Badge>}
+                        <span className="text-xs text-secondary">Moving Averages</span>
+                        {ti?.movingAverages?.goldenCross && <Badge className="bg-emerald-500/20 text-gain text-[9px]">GOLDEN CROSS</Badge>}
+                        {ti?.movingAverages?.deathCross && <Badge className="bg-red-500/20 text-loss text-[9px]">DEATH CROSS</Badge>}
                       </div>
                       <div className="space-y-1">
                         {[{ label: 'SMA 20', value: ti?.movingAverages?.sma20, pos: ti?.movingAverages?.priceVsSma20 },
@@ -989,10 +990,10 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
                           { label: 'SMA 200', value: ti?.movingAverages?.sma200, pos: ti?.movingAverages?.priceVsSma200 }
                         ].map((ma, i) => (
                           <div key={i} className="flex justify-between items-center text-[10px]">
-                            <span className="text-slate-500">{ma.label}</span>
+                            <span className="text-muted">{ma.label}</span>
                             <div className="flex items-center gap-2">
-                              <span className="text-white">{formatPrice(ma.value || 0)}</span>
-                              <Badge className={`text-[8px] ${ma.pos === 'above' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>{ma.pos?.toUpperCase()}</Badge>
+                              <span className="text-primary">{formatPrice(ma.value || 0)}</span>
+                              <Badge className={`text-[8px] ${ma.pos === 'above' ? 'bg-emerald-500/20 text-gain' : 'bg-red-500/20 text-loss'}`}>{ma.pos?.toUpperCase()}</Badge>
                             </div>
                           </div>
                         ))}
@@ -1002,77 +1003,77 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
 
                   <TabsContent value="onchain" className="mt-3 space-y-3">
                     {signal.asset.type === 'stock' ? (
-                      <div className="text-center py-8 text-slate-500">
+                      <div className="text-center py-8 text-muted">
                         <Building2 className="w-8 h-8 mx-auto mb-2 opacity-50" />
                         <p className="text-sm">On-chain data N/A for stocks</p>
                       </div>
                     ) : onChain ? (
                       <>
-                        <div className="bg-slate-800/30 rounded-lg p-3">
+                        <div className="bg-ink-raised/60 rounded-xl p-3">
                           <div className="flex justify-between items-center mb-2">
-                            <span className="text-xs text-slate-400 flex items-center gap-1"><Flame className="w-3 h-3" /> Whales</span>
-                            <Badge className={`text-[10px] ${onChain.whaleActivity.signal === 'accumulating' ? 'bg-emerald-500/20 text-emerald-400' : onChain.whaleActivity.signal === 'distributing' ? 'bg-red-500/20 text-red-400' : 'bg-slate-500/20 text-slate-400'}`}>
+                            <span className="text-xs text-secondary flex items-center gap-1"><Flame className="w-3 h-3" /> Whales</span>
+                            <Badge className={`text-[10px] ${onChain.whaleActivity.signal === 'accumulating' ? 'bg-emerald-500/20 text-gain' : onChain.whaleActivity.signal === 'distributing' ? 'bg-red-500/20 text-loss' : 'bg-ink-raised text-secondary'}`}>
                               {onChain.whaleActivity.signal.toUpperCase()}
                             </Badge>
                           </div>
                           <div className="grid grid-cols-2 gap-2 text-center text-xs">
-                            <div><p className="text-[10px] text-slate-500">Net Flow</p><p className={`font-medium ${onChain.whaleActivity.netFlow24h > 0 ? 'text-emerald-400' : 'text-red-400'}`}>{formatLargeNumber(Math.abs(onChain.whaleActivity.netFlow24h))}</p></div>
-                            <div><p className="text-[10px] text-slate-500">Large Txs</p><p className="text-white font-medium">{onChain.whaleActivity.largeTransactions}</p></div>
+                            <div><p className="text-[10px] text-muted">Net Flow</p><p className={`font-medium ${onChain.whaleActivity.netFlow24h > 0 ? 'text-gain' : 'text-loss'}`}>{formatLargeNumber(Math.abs(onChain.whaleActivity.netFlow24h))}</p></div>
+                            <div><p className="text-[10px] text-muted">Large Txs</p><p className="text-primary font-medium">{onChain.whaleActivity.largeTransactions}</p></div>
                           </div>
                         </div>
-                        <div className="bg-slate-800/30 rounded-lg p-3">
+                        <div className="bg-ink-raised/60 rounded-xl p-3">
                           <div className="flex justify-between items-center mb-2">
-                            <span className="text-xs text-slate-400">Exchange Flow</span>
-                            <Badge className={`text-[10px] ${onChain.exchangeFlows.signal === 'bullish' ? 'bg-emerald-500/20 text-emerald-400' : onChain.exchangeFlows.signal === 'bearish' ? 'bg-red-500/20 text-red-400' : 'bg-slate-500/20 text-slate-400'}`}>
+                            <span className="text-xs text-secondary">Exchange Flow</span>
+                            <Badge className={`text-[10px] ${onChain.exchangeFlows.signal === 'bullish' ? 'bg-emerald-500/20 text-gain' : onChain.exchangeFlows.signal === 'bearish' ? 'bg-red-500/20 text-loss' : 'bg-ink-raised text-secondary'}`}>
                               {onChain.exchangeFlows.signal.toUpperCase()}
                             </Badge>
                           </div>
-                          <p className={`text-lg font-bold text-center ${onChain.exchangeFlows.netFlow24h < 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          <p className={`text-lg font-bold text-center ${onChain.exchangeFlows.netFlow24h < 0 ? 'text-gain' : 'text-loss'}`}>
                             {onChain.exchangeFlows.netFlow24h < 0 ? 'Net Outflow' : 'Net Inflow'}
                           </p>
                         </div>
-                        <div className="bg-slate-800/30 rounded-lg p-3 text-center">
-                          <span className="text-xs text-slate-400">Funding Rate</span>
-                          <p className={`text-xl font-bold ${onChain.fundingRate.current > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                        <div className="bg-ink-raised/60 rounded-xl p-3 text-center">
+                          <span className="text-xs text-secondary">Funding Rate</span>
+                          <p className={`text-xl font-bold ${onChain.fundingRate.current > 0 ? 'text-gain' : 'text-loss'}`}>
                             {(onChain.fundingRate.current * 100).toFixed(4)}%
                           </p>
                         </div>
                       </>
                     ) : (
-                      <div className="text-center py-8 text-slate-500"><Activity className="w-8 h-8 mx-auto mb-2 opacity-50" /><p className="text-sm">Loading...</p></div>
+                      <div className="text-center py-8 text-muted"><Activity className="w-8 h-8 mx-auto mb-2 opacity-50" /><p className="text-sm">Loading...</p></div>
                     )}
                   </TabsContent>
 
                   <TabsContent value="sentiment" className="mt-3 space-y-3">
-                    <div className="bg-slate-800/30 rounded-lg p-3">
+                    <div className="bg-ink-raised/60 rounded-xl p-3">
                       <FearGreedMeter value={sentiment?.fearGreedIndex?.value || 50} classification={sentiment?.fearGreedIndex?.classification || 'Neutral'} />
                     </div>
-                    <div className="bg-slate-800/30 rounded-lg p-3">
+                    <div className="bg-ink-raised/60 rounded-xl p-3">
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs text-slate-400">Social</span>
-                        <Badge className={`text-[10px] ${sentiment?.socialSentiment?.trend === 'rising' ? 'bg-emerald-500/20 text-emerald-400' : sentiment?.socialSentiment?.trend === 'falling' ? 'bg-red-500/20 text-red-400' : 'bg-slate-500/20 text-slate-400'}`}>
+                        <span className="text-xs text-secondary">Social</span>
+                        <Badge className={`text-[10px] ${sentiment?.socialSentiment?.trend === 'rising' ? 'bg-emerald-500/20 text-gain' : sentiment?.socialSentiment?.trend === 'falling' ? 'bg-red-500/20 text-loss' : 'bg-ink-raised text-secondary'}`}>
                           {sentiment?.socialSentiment?.trend?.toUpperCase()}
                         </Badge>
                       </div>
                       <div className="grid grid-cols-2 gap-3 text-center">
                         <div>
-                          <p className={`text-xl font-bold ${(sentiment?.socialSentiment?.score || 50) > 60 ? 'text-emerald-400' : (sentiment?.socialSentiment?.score || 50) < 40 ? 'text-red-400' : 'text-amber-400'}`}>
+                          <p className={`text-xl font-bold ${(sentiment?.socialSentiment?.score || 50) > 60 ? 'text-gain' : (sentiment?.socialSentiment?.score || 50) < 40 ? 'text-loss' : 'text-warn'}`}>
                             {sentiment?.socialSentiment?.score?.toFixed(0) || 50}
                           </p>
-                          <p className="text-[10px] text-slate-500">Score</p>
+                          <p className="text-[10px] text-muted">Score</p>
                         </div>
                         <div>
-                          <p className="text-xl font-bold text-white">{(sentiment?.socialSentiment?.mentions24h || 0).toLocaleString()}</p>
-                          <p className="text-[10px] text-slate-500">Mentions</p>
+                          <p className="text-xl font-bold text-primary">{(sentiment?.socialSentiment?.mentions24h || 0).toLocaleString()}</p>
+                          <p className="text-[10px] text-muted">Mentions</p>
                         </div>
                       </div>
                     </div>
                     {signal.confluence?.factors && (
-                      <div className="bg-slate-800/30 rounded-lg p-3">
-                        <p className="text-xs text-slate-400 mb-2">Confluence Factors</p>
+                      <div className="bg-ink-raised/60 rounded-xl p-3">
+                        <p className="text-xs text-secondary mb-2">Confluence Factors</p>
                         <div className="flex flex-wrap gap-1">
                           {signal.confluence.factors.slice(0, 6).map((f, i) => (
-                            <Badge key={i} className={`text-[9px] ${f.impact === 'bullish' ? 'bg-emerald-500/20 text-emerald-400' : f.impact === 'bearish' ? 'bg-red-500/20 text-red-400' : 'bg-slate-500/20 text-slate-400'}`}>
+                            <Badge key={i} className={`text-[9px] ${f.impact === 'bullish' ? 'bg-emerald-500/20 text-gain' : f.impact === 'bearish' ? 'bg-red-500/20 text-loss' : 'bg-ink-raised text-secondary'}`}>
                               {f.name}
                             </Badge>
                           ))}
@@ -1083,7 +1084,7 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
 
                 </Tabs>
 
-                <p className="text-[10px] text-slate-500 text-center">{new Date(signal.generatedAt).toLocaleString()}</p>
+                <p className="text-[10px] text-muted text-center">{new Date(signal.generatedAt).toLocaleString()}</p>
               </div>
             </motion.div>
           )}
@@ -1254,29 +1255,29 @@ function MyWatchlistSection() {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/30">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
+      <Surface className="overflow-hidden">
+        <div className="pb-3">
+          <SectionTitle as="h3" className="text-lg flex items-center gap-2">
             <Star className="w-5 h-5 text-pink-400" />
             My Custom Watchlist
             <Badge variant="secondary" className="ml-2 bg-pink-500/20 text-pink-300">{watchlistItems.length}/5</Badge>
-          </CardTitle>
-          <p className="text-sm text-slate-400">Add up to 5 stocks or crypto for personalized AI analysis with full confluence scoring</p>
-        </CardHeader>
-        <CardContent>
+          </SectionTitle>
+          <p className="text-sm text-secondary">Add up to 5 stocks or crypto for personalized AI analysis with full confluence scoring</p>
+        </div>
+        <div>
           <div className="relative mb-4">
             <Input
               placeholder="Search for stocks (TSLA, AAPL) or crypto..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-slate-900/50 border-slate-700 pl-10"
+              className="bg-ink-page/50 border-ink-edge pl-10"
               data-testid="input-asset-search"
             />
-            <Activity className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            {isSearching && <RefreshCw className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 animate-spin" />}
+            <Activity className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary" />
+            {isSearching && <RefreshCw className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary animate-spin" />}
 
             {hasResults && (
-              <div className="absolute left-0 right-0 top-full z-50 bg-slate-900 border border-slate-700 rounded-lg shadow-xl mt-1 max-h-80 overflow-y-auto">
+              <div className="absolute left-0 right-0 top-full z-50 bg-ink-page border border-ink-edge rounded-xl shadow-xl mt-1 max-h-80 overflow-y-auto">
               {stockResults.length > 0 && (
                 <>
                   <div className="px-3 py-2 bg-blue-500/20 text-xs text-blue-300 font-medium flex items-center gap-2">
@@ -1287,15 +1288,15 @@ function MyWatchlistSection() {
                       key={result.symbol}
                       onClick={() => addStockMutation.mutate(result)}
                       disabled={addStockMutation.isPending || watchlistItems.length >= 5 || watchlistItems.some(w => w.symbol === result.symbol)}
-                      className="w-full flex items-center gap-3 p-3 hover:bg-slate-800/50 text-left disabled:opacity-50"
+                      className="w-full flex items-center gap-3 p-3 hover:bg-ink-raised text-left disabled:opacity-50"
                       data-testid={`btn-add-stock-${result.symbol}`}
                     >
                       <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center">
                         <Building2 className="w-3 h-3 text-blue-400" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-white">{result.symbol}</p>
-                        <p className="text-xs text-slate-400">{result.name}</p>
+                        <p className="text-sm font-medium text-primary">{result.symbol}</p>
+                        <p className="text-xs text-secondary">{result.name}</p>
                       </div>
                       <Badge variant="outline" className="text-xs">{result.exchange}</Badge>
                     </button>
@@ -1312,13 +1313,13 @@ function MyWatchlistSection() {
                       key={result.id}
                       onClick={() => addCryptoMutation.mutate(result)}
                       disabled={addCryptoMutation.isPending || watchlistItems.length >= 5 || watchlistItems.some(w => w.symbol.toLowerCase() === result.symbol.toLowerCase())}
-                      className="w-full flex items-center gap-3 p-3 hover:bg-slate-800/50 text-left disabled:opacity-50"
+                      className="w-full flex items-center gap-3 p-3 hover:bg-ink-raised text-left disabled:opacity-50"
                       data-testid={`btn-add-crypto-${result.symbol}`}
                     >
                       <img src={result.thumb} alt={result.symbol} className="w-6 h-6 rounded-full" />
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-white">{result.symbol}</p>
-                        <p className="text-xs text-slate-400">{result.name}</p>
+                        <p className="text-sm font-medium text-primary">{result.symbol}</p>
+                        <p className="text-xs text-secondary">{result.name}</p>
                       </div>
                       {result.marketCapRank && (
                         <Badge variant="outline" className="text-xs">#{result.marketCapRank}</Badge>
@@ -1332,7 +1333,7 @@ function MyWatchlistSection() {
           </div>
 
           {watchlistItems.length === 0 ? (
-            <div className="text-center py-8 text-slate-400">
+            <div className="text-center py-8 text-secondary">
               <Star className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p>No assets in your watchlist yet</p>
               <p className="text-sm mt-1">Search and add any cryptocurrency above</p>
@@ -1340,11 +1341,11 @@ function MyWatchlistSection() {
           ) : (
             <div className="flex flex-wrap gap-2 mb-4">
               {watchlistItems.map((item) => (
-                <Badge key={item.id} className="bg-slate-800 text-white px-3 py-1 flex items-center gap-2">
+                <Badge key={item.id} className="bg-ink-raised text-primary px-3 py-1 flex items-center gap-2">
                   {item.symbol}
                   <button
                     onClick={() => removeMutation.mutate(item.id)}
-                    className="hover:text-red-400"
+                    className="hover:text-loss"
                     data-testid={`btn-remove-${item.symbol}`}
                   >
                     <StarOff className="w-3 h-3" />
@@ -1353,12 +1354,12 @@ function MyWatchlistSection() {
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </Surface>
 
       {signalsLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[...Array(2)].map((_, i) => (<div key={i} className="h-96 bg-slate-800/30 rounded-xl animate-pulse" />))}
+          {[...Array(2)].map((_, i) => (<div key={i} className="h-96 bg-ink-raised/60 rounded-xl animate-pulse" />))}
         </div>
       ) : watchlistSignals.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1375,15 +1376,15 @@ function MyWatchlistSection() {
           ))}
         </div>
       ) : watchlistItems.length > 0 ? (
-        <Card className="bg-slate-800/50 border-slate-700/50">
-          <CardContent className="p-8 text-center">
-            <RefreshCw className="w-8 h-8 text-slate-600 mx-auto mb-3 animate-spin" />
-            <p className="text-slate-400">Generating AI analysis for your assets...</p>
+        <Surface>
+          <div className="p-8 text-center">
+            <RefreshCw className="w-8 h-8 text-muted mx-auto mb-3 animate-spin" />
+            <p className="text-secondary">Generating AI analysis for your assets...</p>
             <Button onClick={() => refetchSignals()} className="mt-4" variant="outline" data-testid="btn-retry-signals">
               Retry
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </Surface>
       ) : null}
     </div>
   );
@@ -1431,7 +1432,7 @@ export default function AITrading() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-[100dvh] bg-ink-page relative overflow-hidden">
       <NeuralBackground />
       
       <div className="relative z-10 container mx-auto px-4 py-8 pt-20">
@@ -1445,7 +1446,7 @@ export default function AITrading() {
             eyebrow={
               <span className="inline-flex items-center gap-2">
                 Multi-factor confluence
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 text-emerald-400">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 text-gain">
                   <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" /> LIVE
                 </span>
               </span>
@@ -1455,9 +1456,9 @@ export default function AITrading() {
             icon={<Brain className="h-5 w-5" />}
             actions={
               <>
-                <div className="flex items-center gap-2 rounded-xl border border-slate-700/50 bg-slate-800/60 px-3 py-2">
-                  <Radio className="w-4 h-4 text-cyan-400" />
-                  <span className="text-xs text-slate-400 font-medium">Auto</span>
+                <div className="flex items-center gap-2 rounded-xl border border-ink-edge bg-ink-raised px-3 py-2">
+                  <Radio className="w-4 h-4 text-accent-bright" />
+                  <span className="text-xs text-secondary font-medium">Auto</span>
                   <Switch checked={liveMode} onCheckedChange={setLiveMode} data-testid="switch-live-mode" />
                 </div>
                 <Button
@@ -1473,7 +1474,7 @@ export default function AITrading() {
                   size="sm"
                   onClick={() => refetch()}
                   disabled={isFetching}
-                  className="bg-gradient-to-r from-cyan-500/30 to-purple-500/30 border border-cyan-500/30 text-cyan-200 hover:text-white"
+                  className="   border border-cyan-500/30 text-cyan-200 hover:text-primary"
                   data-testid="btn-refresh-signals"
                 >
                   <RefreshCw className={`w-4 h-4 mr-1.5 ${isFetching ? 'animate-spin' : ''}`} />
@@ -1492,13 +1493,13 @@ export default function AITrading() {
           <GlowingStatCard icon={Zap} label="High Priority" value={highPriorityCount} subValue="Urgent alerts" color="amber" delay={0.4} />
         </div>
 
-        <div className="flex gap-2 mb-8 p-1 bg-slate-800/30 backdrop-blur-xl rounded-2xl border border-slate-700/50">
+        <div className="flex gap-2 mb-8 p-1 bg-ink-raised/60 backdrop-blur-xl rounded-xl border border-ink-edge">
           <PremiumNavButton 
             active={mainView === 'signals'} 
             onClick={() => setMainView('signals')} 
             icon={BarChart3} 
             label="Signals"
-            color="from-purple-500 to-fuchsia-500"
+            color=" "
             dataTestId="btn-view-signals"
           />
           <PremiumNavButton 
@@ -1506,7 +1507,7 @@ export default function AITrading() {
             onClick={() => setMainView('mywatchlist')} 
             icon={Star} 
             label="My Watchlist"
-            color="from-pink-500 to-rose-500"
+            color=" "
             dataTestId="btn-view-mywatchlist"
           />
           <PremiumNavButton 
@@ -1514,7 +1515,7 @@ export default function AITrading() {
             onClick={() => setMainView('analytics')} 
             icon={PieChart} 
             label="Analytics"
-            color="from-cyan-500 to-blue-500"
+            color=" "
             dataTestId="btn-view-analytics"
           />
           <PremiumNavButton 
@@ -1522,7 +1523,7 @@ export default function AITrading() {
             onClick={() => setMainView('correlation')} 
             icon={BarChart2} 
             label="Correlation"
-            color="from-amber-500 to-orange-500"
+            color=" "
             dataTestId="btn-view-correlation"
           />
         </div>
@@ -1530,18 +1531,18 @@ export default function AITrading() {
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="relative overflow-hidden rounded-2xl border border-amber-500/20 bg-gradient-to-r from-amber-500/5 via-orange-500/5 to-amber-500/5 backdrop-blur-xl mb-8"
+          className="relative overflow-hidden rounded-xl border border-amber-500/20     backdrop-blur-xl mb-8"
         >
           <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22%23f59e0b%22%20fill-opacity%3D%220.03%22%20fill-rule%3D%22evenodd%22%3E%3Ccircle%20cx%3D%223%22%20cy%3D%223%22%20r%3D%223%22%2F%3E%3Ccircle%20cx%3D%2213%22%20cy%3D%2213%22%20r%3D%223%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-50" />
           <div className="relative p-4 flex items-center gap-4">
             <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
-              <AlertTriangle className="w-5 h-5 text-amber-400" />
+              <AlertTriangle className="w-5 h-5 text-warn" />
             </div>
             <div className="flex-1">
               <p className="text-sm text-amber-200 font-semibold">Risk Disclaimer</p>
               <p className="text-xs text-amber-300/70 mt-0.5">AI signals are for informational purposes only. Always DYOR and never invest more than you can afford to lose.</p>
             </div>
-            <Sparkles className="w-5 h-5 text-amber-400/50" />
+            <Sparkles className="w-5 h-5 text-warn/50" />
           </div>
         </motion.div>
 
@@ -1558,17 +1559,17 @@ export default function AITrading() {
             >
               <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
-                  <TabsList className="bg-slate-800/30 backdrop-blur-xl border border-slate-700/50 rounded-xl inline-flex w-auto min-w-full md:min-w-0 p-1">
-                    <TabsTrigger value="all" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/30 data-[state=active]:to-fuchsia-500/30 data-[state=active]:text-white rounded-lg flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-all">
-                      <span className="flex items-center gap-1.5">All <Badge variant="secondary" className="bg-slate-700/50 text-xs">{signals.length}</Badge></span>
+                  <TabsList className="bg-ink-raised/60 backdrop-blur-xl border border-ink-edge rounded-xl inline-flex w-auto min-w-full md:min-w-0 p-1">
+                    <TabsTrigger value="all" className="data-[state=active]: data-[state=active]: data-[state=active]: data-[state=active]:text-primary rounded-xl flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-all">
+                      <span className="flex items-center gap-1.5">All <Badge variant="secondary" className="bg-ink-raised text-xs">{signals.length}</Badge></span>
                     </TabsTrigger>
-                    <TabsTrigger value="crypto" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/30 data-[state=active]:to-orange-500/30 data-[state=active]:text-white rounded-lg flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-crypto">
+                    <TabsTrigger value="crypto" className="data-[state=active]: data-[state=active]: data-[state=active]: data-[state=active]:text-primary rounded-xl flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-crypto">
                       <span className="flex items-center gap-1.5"><Coins className="w-3 h-3 sm:w-4 sm:h-4" />Crypto <Badge variant="secondary" className="bg-amber-500/20 text-amber-300 text-xs">{cryptoSignals.length}</Badge></span>
                     </TabsTrigger>
-                    <TabsTrigger value="stocks" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/30 data-[state=active]:to-indigo-500/30 data-[state=active]:text-white rounded-lg flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-stocks">
+                    <TabsTrigger value="stocks" className="data-[state=active]: data-[state=active]: data-[state=active]: data-[state=active]:text-primary rounded-xl flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-stocks">
                       <span className="flex items-center gap-1.5"><Building2 className="w-3 h-3 sm:w-4 sm:h-4" />Stocks <Badge variant="secondary" className="bg-blue-500/20 text-blue-300 text-xs">{stockSignals.length}</Badge></span>
                     </TabsTrigger>
-                    <TabsTrigger value="watchlist" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500/30 data-[state=active]:to-rose-500/30 data-[state=active]:text-white rounded-lg flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-watchlist">
+                    <TabsTrigger value="watchlist" className="data-[state=active]: data-[state=active]: data-[state=active]: data-[state=active]:text-primary rounded-xl flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-watchlist">
                       <span className="flex items-center gap-1.5"><Star className="w-3 h-3 sm:w-4 sm:h-4" />Favorites <Badge variant="secondary" className="bg-pink-500/20 text-pink-300 text-xs">{watchlist.size}</Badge></span>
                     </TabsTrigger>
                   </TabsList>
@@ -1588,10 +1589,10 @@ export default function AITrading() {
                       className="grid grid-cols-1 md:grid-cols-2 gap-6"
                     >
                       {[...Array(4)].map((_, i) => (
-                        <div key={i} className="h-96 bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl animate-pulse border border-slate-700/30 overflow-hidden relative">
+                        <div key={i} className="h-96    rounded-xl animate-pulse border border-ink-edge overflow-hidden relative">
                           <div className="absolute inset-0">
                             <motion.div
-                              className="absolute inset-x-0 h-full bg-gradient-to-b from-transparent via-white/5 to-transparent"
+                              className="absolute inset-x-0 h-full    "
                               animate={{ y: ['-100%', '100%'] }}
                               transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.2 }}
                             />
@@ -1606,23 +1607,23 @@ export default function AITrading() {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                     >
-                      <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-700/30 backdrop-blur-xl overflow-hidden">
-                        <CardContent className="p-16 text-center relative">
-                          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-purple-500/5" />
+                      <Surface className="overflow-hidden">
+                        <div className="p-16 text-center relative">
+                          <div className="absolute inset-0    " />
                           <motion.div
                             animate={{ y: [0, -10, 0] }}
                             transition={{ duration: 3, repeat: Infinity }}
                           >
-                            <Brain className="w-16 h-16 text-slate-600 mx-auto mb-6" />
+                            <Brain className="w-16 h-16 text-muted mx-auto mb-6" />
                           </motion.div>
-                          <p className="text-lg text-slate-300 font-medium mb-2">
+                          <p className="text-lg text-body font-medium mb-2">
                             {activeTab === 'watchlist' ? 'No favorites yet' : 'No signals available'}
                           </p>
-                          <p className="text-sm text-slate-500">
+                          <p className="text-sm text-muted">
                             {activeTab === 'watchlist' ? 'Star assets from the signals to track them here' : 'Click refresh to fetch the latest AI analysis'}
                           </p>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </Surface>
                     </motion.div>
                   ) : (
                     <motion.div 
@@ -1661,22 +1662,22 @@ export default function AITrading() {
             animate={{ opacity: 1 }}
             className="grid grid-cols-1 md:grid-cols-2 gap-6"
           >
-            <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-700/30 backdrop-blur-xl overflow-hidden relative">
-              <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
-              <CardHeader>
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                    <PieChart className="w-4 h-4 text-purple-400" />
+            <Surface className="overflow-hidden relative">
+              <div className="absolute top-0 left-0 right-0 h-[1px]    " />
+              <div>
+                <SectionTitle as="h3" className="text-sm flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-accent-core/20 flex items-center justify-center">
+                    <PieChart className="w-4 h-4 text-accent-bright" />
                   </div>
                   Signal Distribution
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+                </SectionTitle>
+              </div>
+              <div>
                 <div className="space-y-4">
                   {['breakout', 'bounce', 'trend_continuation', 'reversal', 'consolidation'].map((type, i) => {
                     const count = signals.filter(s => s.signalType === type).length;
                     const pct = signals.length > 0 ? (count / signals.length) * 100 : 0;
-                    const colors = ['from-emerald-500 to-cyan-500', 'from-cyan-500 to-blue-500', 'from-purple-500 to-fuchsia-500', 'from-amber-500 to-orange-500', 'from-slate-500 to-slate-600'];
+                    const colors = [' ', ' ', ' ', ' ', ' '];
                     return (
                       <motion.div 
                         key={type}
@@ -1685,12 +1686,12 @@ export default function AITrading() {
                         transition={{ delay: i * 0.1 }}
                       >
                         <div className="flex justify-between text-xs mb-2">
-                          <span className="text-slate-300 capitalize font-medium">{type.replace('_', ' ')}</span>
-                          <span className="text-white font-mono">{count} <span className="text-slate-500">({pct.toFixed(0)}%)</span></span>
+                          <span className="text-body capitalize font-medium">{type.replace('_', ' ')}</span>
+                          <span className="text-primary font-mono">{count} <span className="text-muted">({pct.toFixed(0)}%)</span></span>
                         </div>
-                        <div className="h-2 bg-slate-800/80 rounded-full overflow-hidden">
+                        <div className="h-2 bg-ink-raised rounded-full overflow-hidden">
                           <motion.div 
-                            className={`h-full bg-gradient-to-r ${colors[i]} rounded-full`}
+                            className={`h-full  ${colors[i]} rounded-full`}
                             initial={{ width: 0 }}
                             animate={{ width: `${pct}%` }}
                             transition={{ duration: 0.8, delay: i * 0.1 }}
@@ -1700,20 +1701,20 @@ export default function AITrading() {
                     );
                   })}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
 
-            <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-700/30 backdrop-blur-xl overflow-hidden relative">
-              <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
-              <CardHeader>
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center">
-                    <History className="w-4 h-4 text-cyan-400" />
+            <Surface className="overflow-hidden relative">
+              <div className="absolute top-0 left-0 right-0 h-[1px]    " />
+              <div>
+                <SectionTitle as="h3" className="text-sm flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-cyan-500/20 flex items-center justify-center">
+                    <History className="w-4 h-4 text-accent-bright" />
                   </div>
                   Performance Metrics
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+                </SectionTitle>
+              </div>
+              <div>
                 <div className="grid grid-cols-2 gap-4">
                   {[
                     { label: 'Win Rate', value: '--', color: 'emerald' },
@@ -1726,20 +1727,20 @@ export default function AITrading() {
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: i * 0.1 }}
-                      className={`text-center p-4 bg-gradient-to-br from-${metric.color}-500/10 to-${metric.color}-600/5 rounded-xl border border-${metric.color}-500/20`}
+                      className={`text-center p-4    rounded-xl border border-${metric.color}-500/20`}
                     >
                       <p className={`text-2xl font-bold text-${metric.color}-400 font-mono`}>{metric.value}</p>
-                      <p className="text-xs text-slate-400 mt-1">{metric.label}</p>
+                      <p className="text-xs text-secondary mt-1">{metric.label}</p>
                     </motion.div>
                   ))}
                 </div>
-                <div className="mt-6 p-3 rounded-xl bg-slate-800/30 border border-slate-700/30 text-center">
-                  <p className="text-xs text-slate-500 flex items-center justify-center gap-2">
+                <div className="mt-6 p-3 rounded-xl bg-ink-raised/60 border border-ink-edge text-center">
+                  <p className="text-xs text-muted flex items-center justify-center gap-2">
                     <Sparkles className="w-3 h-3" /> Historical performance tracking coming soon
                   </p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
           </motion.div>
         )}
 
@@ -1751,28 +1752,28 @@ export default function AITrading() {
 
         {mainView === 'correlation' && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-700/30 backdrop-blur-xl overflow-hidden relative">
-              <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
-              <CardHeader>
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                    <BarChart2 className="w-4 h-4 text-amber-400" />
+            <Surface className="overflow-hidden relative">
+              <div className="absolute top-0 left-0 right-0 h-[1px]    " />
+              <div>
+                <SectionTitle as="h3" className="text-sm flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                    <BarChart2 className="w-4 h-4 text-warn" />
                   </div>
                   Asset Correlation Heatmap
-                  <Badge variant="outline" className="ml-2 text-xs border-amber-500/30 text-amber-400">30-Day</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+                  <Badge variant="outline" className="ml-2 text-xs border-amber-500/30 text-warn">30-Day</Badge>
+                </SectionTitle>
+              </div>
+              <div>
                 <CorrelationHeatmap signals={signals} />
-                <div className="mt-6 p-3 rounded-xl bg-slate-800/30 border border-slate-700/30 text-center">
-                  <p className="text-xs text-slate-500">Correlation coefficients based on 30-day price movements</p>
+                <div className="mt-6 p-3 rounded-xl bg-ink-raised/60 border border-ink-edge text-center">
+                  <p className="text-xs text-muted">Correlation coefficients based on 30-day price movements</p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
           </motion.div>
         )}
 
-        <div className="mt-12 text-center text-xs text-slate-500 space-y-1">
+        <div className="mt-12 text-center text-xs text-muted space-y-1">
           <p className="flex items-center justify-center gap-2">
             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
             Signals refresh every 30s (live mode) | 15min cache TTL | Multi-factor confluence
