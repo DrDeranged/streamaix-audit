@@ -5,3 +5,4 @@
 - [Typecheck incremental cache trap](typecheck-cache-trap.md) — `npm run check` can falsely pass via tsc incremental cache; delete tsbuildinfo for an authoritative run; many latent server errors exist.
 - [AI provider split](ai-provider-split.md) — text AI = Anthropic via modelGateway only; OpenAI = audio (whisper/tts) only; pause flags are provider-scoped.
 - [Replit lockfile proxy contamination](lockfile-proxy-contamination.md) — every npm install rewrites lockfile URLs to the firewall proxy; run `npm run lockfile:scrub` after each install.
+- [Design system migration](design-system-migration.md) — DESIGN.md contract, accent-core naming deviation, tsc 370-error baseline diffing, and the delegated-restyle className-corruption check.
