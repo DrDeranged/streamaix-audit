@@ -29,13 +29,13 @@ export interface PageHeaderProps {
 }
 
 const toneRing: Record<MetricTone, string> = {
-  default: "border-slate-300/60 text-slate-900 dark:border-white/10 dark:text-white/90",
-  purple: "border-neon-purple/40 text-neon-purple",
-  cyan: "border-neon-cyan/40 text-neon-cyan",
-  fuchsia: "border-neon-fuchsia/40 text-neon-fuchsia",
-  amber: "border-neon-amber/40 text-neon-amber",
-  emerald: "border-neon-emerald/40 text-neon-emerald",
-  rose: "border-neon-rose/40 text-neon-rose",
+  default: "border-ink-edge text-primary",
+  purple: "border-accent-core/40 text-accent-bright",
+  cyan: "border-accent-core/40 text-accent-bright",
+  fuchsia: "border-accent-core/40 text-accent-bright",
+  amber: "border-warn/40 text-warn",
+  emerald: "border-gain/40 text-gain",
+  rose: "border-loss/40 text-loss",
 };
 
 export function PageHeader({
@@ -83,7 +83,7 @@ export function PageHeader({
           >
             {icon && (
               <span
-                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-neon-purple/35 bg-neon-purple/10 text-neon-purple sm:h-11 sm:w-11"
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-accent-core/35 bg-accent-core/10 text-accent-bright sm:h-11 sm:w-11"
                 aria-hidden="true"
               >
                 {icon}
@@ -91,10 +91,7 @@ export function PageHeader({
             )}
             <h1
               className={cn(
-                "text-display min-w-0 break-words text-2xl leading-tight sm:text-3xl lg:text-4xl",
-                "bg-gradient-to-r bg-clip-text text-transparent",
-                "from-slate-900 via-purple-700 to-cyan-700",
-                "dark:from-white dark:via-purple-200 dark:to-cyan-200",
+                "min-w-0 break-words font-display text-2xl leading-tight text-primary sm:text-3xl lg:text-4xl",
               )}
               data-testid="page-header-title"
             >
@@ -104,7 +101,7 @@ export function PageHeader({
           {subtitle && (
             <p
               className={cn(
-                "text-sm text-muted-foreground sm:text-base",
+                "text-sm text-secondary sm:text-base",
                 isCenter ? "mx-auto max-w-2xl" : "max-w-3xl",
               )}
               data-testid="page-header-subtitle"
@@ -139,16 +136,16 @@ export function PageHeader({
             <div
               key={`${m.label}-${i}`}
               className={cn(
-                "surface-1 flex min-w-0 flex-col gap-1 rounded-lg px-3 py-2",
+                "flex min-w-0 flex-col gap-1 rounded-xl bg-ink-surface px-3 py-2",
                 "border",
                 toneRing[m.tone ?? "default"],
               )}
               data-testid={m.testId}
             >
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <div className="text-[10px] font-semibold uppercase tracking-widest text-muted">
                 {m.label}
               </div>
-              <div className="numeric truncate text-base font-semibold text-foreground sm:text-lg">
+              <div className="tabular truncate text-base font-semibold sm:text-lg">
                 {m.value}
               </div>
             </div>

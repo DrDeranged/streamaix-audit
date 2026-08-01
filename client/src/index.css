@@ -1919,3 +1919,50 @@
     transform: scale(0.5);
   }
 }
+
+/* ============================================================
+   StreamAiX Design System — "The AI trading ledger"
+   Tokens per DESIGN.md. Additive; shadcn vars remain untouched.
+   ============================================================ */
+:root {
+  --ink-page: #080B14;      /* app background */
+  --ink-surface: #10162A;   /* cards, panels */
+  --ink-raised: #181F38;    /* hover states, nested surfaces */
+  --ink-edge: #232B45;      /* borders */
+  --ink-divider: #1A2138;   /* row separators */
+  --text-primary: #F2F4FA;
+  --text-body: #C9CEDC;
+  --text-secondary: #9BA3B7;
+  --text-muted: #7A8299;
+  --accent-core: #8B7CF6;   /* buttons, active states */
+  --accent-bright: #A99DF8; /* links, highlights on dark */
+  --accent-deep: #6D5BE0;   /* pressed states */
+  --gain: #3DD68C;
+  --loss: #FF7B7B;
+  --warn: #FFB454;
+}
+
+/* Tabular numerals for all data contexts */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The ONLY two sanctioned gradients */
+.grad-accent {
+  background-image: linear-gradient(135deg, #8B7CF6 0%, #6D5BE0 100%);
+}
+.grad-surface {
+  background-image: linear-gradient(180deg, #10162A 0%, #0C1122 100%);
+}
+
+/* The ONLY glow token — primary CTAs and active states */
+.glow-accent {
+  box-shadow: 0 0 24px rgba(139, 124, 246, 0.25);
+}
+
+/* Text token classes. Declared un-layered after Tailwind's utilities so
+   they win over the legacy shadcn-generated text-primary/secondary/muted. */
+.text-primary { color: var(--text-primary); }
+.text-body { color: var(--text-body); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }

@@ -11,7 +11,8 @@
     "db:push": "drizzle-kit push",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lockfile:scrub": "bash scripts/scrub-lockfile.sh"
+    "lockfile:scrub": "bash scripts/scrub-lockfile.sh",
+    "design:lint": "bash scripts/design-lint.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.113.0",

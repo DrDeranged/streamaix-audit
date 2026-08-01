@@ -35,6 +35,7 @@ Stack: Node.js/Express + TypeScript, Vite, PostgreSQL (Neon) with Drizzle ORM, O
 6. **Run `npm run check` and `npm test`** before declaring any task complete.
 7. **After any npm install, run `npm run lockfile:scrub` before committing** — Replit's proxy contaminates resolved URLs and breaks builds outside Replit.
 8. **After committing, always push to origin main and verify with git ls-remote origin main** — commits left unpushed are invisible to external audits and backups.
+9. **All UI work must follow DESIGN.md.** Banned classes list is enforced by `npm run design:lint`.
 
 ## Current Phase Tracker
 

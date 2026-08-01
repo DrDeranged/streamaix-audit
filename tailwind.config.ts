@@ -11,10 +11,21 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        display: ["Orbitron", "ui-monospace", "monospace"],
+        display: ["Georgia", "Times New Roman", "ui-serif", "serif"],
         sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       colors: {
+        ink: {
+          page: "var(--ink-page)",
+          surface: "var(--ink-surface)",
+          raised: "var(--ink-raised)",
+          edge: "var(--ink-edge)",
+          divider: "var(--ink-divider)",
+        },
+        gain: "var(--gain)",
+        loss: "var(--loss)",
+        warn: "var(--warn)",
+        body: "var(--text-body)",
         neon: {
           purple: "hsl(258, 84%, 62%)",
           cyan: "hsl(195, 95%, 55%)",
@@ -48,6 +59,9 @@ export default {
         accent: {
           DEFAULT: "var(--accent)",
           foreground: "var(--accent-foreground)",
+          core: "var(--accent-core)",
+          bright: "var(--accent-bright)",
+          deep: "var(--accent-deep)",
         },
         destructive: {
           DEFAULT: "var(--destructive)",
