@@ -1,1 +1,2 @@
 # Files migrated to the design system (enforced by scripts/design-lint.sh)
+client/src/components/OnboardingTour.tsx
