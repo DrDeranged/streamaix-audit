@@ -1560,16 +1560,16 @@ export default function AITrading() {
               <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
                   <TabsList className="bg-ink-raised/60 backdrop-blur-xl border border-ink-edge rounded-xl inline-flex w-auto min-w-full md:min-w-0 p-1">
-                    <TabsTrigger value="all" className="data-[state=active]: data-[state=active]: data-[state=active]: data-[state=active]:text-primary rounded-xl flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-all">
+                    <TabsTrigger value="all" className="data-[state=active]:bg-accent-core data-[state=active]:text-white rounded-xl flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-all">
                       <span className="flex items-center gap-1.5">All <Badge variant="secondary" className="bg-ink-raised text-xs">{signals.length}</Badge></span>
                     </TabsTrigger>
-                    <TabsTrigger value="crypto" className="data-[state=active]: data-[state=active]: data-[state=active]: data-[state=active]:text-primary rounded-xl flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-crypto">
+                    <TabsTrigger value="crypto" className="data-[state=active]:bg-accent-core data-[state=active]:text-white rounded-xl flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-crypto">
                       <span className="flex items-center gap-1.5"><Coins className="w-3 h-3 sm:w-4 sm:h-4" />Crypto <Badge variant="secondary" className="bg-amber-500/20 text-amber-300 text-xs">{cryptoSignals.length}</Badge></span>
                     </TabsTrigger>
-                    <TabsTrigger value="stocks" className="data-[state=active]: data-[state=active]: data-[state=active]: data-[state=active]:text-primary rounded-xl flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-stocks">
+                    <TabsTrigger value="stocks" className="data-[state=active]:bg-accent-core data-[state=active]:text-white rounded-xl flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-stocks">
                       <span className="flex items-center gap-1.5"><Building2 className="w-3 h-3 sm:w-4 sm:h-4" />Stocks <Badge variant="secondary" className="bg-blue-500/20 text-blue-300 text-xs">{stockSignals.length}</Badge></span>
                     </TabsTrigger>
-                    <TabsTrigger value="watchlist" className="data-[state=active]: data-[state=active]: data-[state=active]: data-[state=active]:text-primary rounded-xl flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-watchlist">
+                    <TabsTrigger value="watchlist" className="data-[state=active]:bg-accent-core data-[state=active]:text-white rounded-xl flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-watchlist">
                       <span className="flex items-center gap-1.5"><Star className="w-3 h-3 sm:w-4 sm:h-4" />Favorites <Badge variant="secondary" className="bg-pink-500/20 text-pink-300 text-xs">{watchlist.size}</Badge></span>
                     </TabsTrigger>
                   </TabsList>

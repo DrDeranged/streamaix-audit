@@ -387,7 +387,7 @@ function VolumeFlowIndicator({ yesVolume, noVolume, totalVolume }: { yesVolume: 
                 ? 'border-gain/50 text-gain' 
                 : flowDirection === 'no' 
                   ? 'border-loss/50 text-loss' 
-                  : 'border-ink-edge50 text-body'
+                  : 'border-ink-edge/50 text-body'
             }`}
           >
             {flowDirection === 'yes' ? '↑ YES Leading' : flowDirection === 'no' ? '↓ NO Leading' : '⟷ Balanced'}

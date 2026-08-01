@@ -5,3 +5,5 @@ client/src/pages/prediction-market.tsx
 client/src/pages/ai-trading.tsx
 client/src/pages/avatar-feed.tsx
 client/src/pages/portfolio-dashboard.tsx
+client/src/pages/dashboard.tsx
+client/src/pages/markets.tsx

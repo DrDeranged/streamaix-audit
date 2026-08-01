@@ -313,14 +313,24 @@ export function OnboardingTour() {
                     <SectionTitle as="h2" eyebrow={currentStepData.eyebrow}>
                       {currentStepData.title}
                     </SectionTitle>
-                    <button
-                      onClick={handleSkip}
-                      className="-mr-1 -mt-1 rounded-xl p-2.5 text-muted transition-colors hover:bg-ink-raised hover:text-primary"
-                      data-testid="button-skip-onboarding"
-                      aria-label="Close tour"
-                    >
-                      <X className="h-5 w-5" />
-                    </button>
+                    <div className="-mr-1 -mt-1 flex items-center gap-1">
+                      <button
+                        onClick={toggleMinimize}
+                        className="rounded-xl p-2.5 text-muted transition-colors hover:bg-ink-raised hover:text-primary"
+                        data-testid="button-minimize-tour"
+                        aria-label="Minimize tour"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={handleSkip}
+                        className="rounded-xl p-2.5 text-muted transition-colors hover:bg-ink-raised hover:text-primary"
+                        data-testid="button-skip-onboarding"
+                        aria-label="Close tour"
+                      >
+                        <X className="h-5 w-5" />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="max-h-[55vh] overflow-y-auto px-5 pb-2 pt-3 sm:max-h-[60vh]">
