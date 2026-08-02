@@ -840,7 +840,7 @@ export function UnifiedStreamViewer({
               "rounded-full border-2 min-h-[44px] px-4",
               isMuted 
                 ? "border-loss/50 bg-loss/10 text-loss" 
-                : "border-purple-500/50 bg-accent-core/10 text-accent-bright"
+                : "border-accent-core/50 bg-accent-core/10 text-accent-bright"
             )}
             data-testid="button-toggle-audio"
           >

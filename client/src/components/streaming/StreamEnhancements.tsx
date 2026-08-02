@@ -526,7 +526,7 @@ export const MarketPredictionCard = memo(function MarketPredictionCard({
 
       <div className="mb-3">
         <div className="flex items-center justify-between text-xs mb-1">
-          <span className="text-slate-400">Confidence</span>
+          <span className="text-muted">Confidence</span>
         <span className={cn(color, "tabular")}>{prediction.confidence}%</span>
         </div>
         <Progress value={prediction.confidence} className="h-1.5" />

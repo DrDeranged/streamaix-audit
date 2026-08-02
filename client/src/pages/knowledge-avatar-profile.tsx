@@ -385,7 +385,7 @@ export default function KnowledgeAvatarProfile() {
             {/* Avatar and Info */}
             <div className="absolute bottom-0 left-6 transform translate-y-1/2 flex items-end gap-6">
               <div className="relative">
-                <Avatar className="w-28 h-28 md:w-36 md:h-36 ring-4 ring-purple-500/40 border-4 border-slate-950 shadow-2xl">
+                <Avatar className="w-28 h-28 md:w-36 md:h-36 ring-4 ring-purple-500/40 border-4 border-ink-edge shadow-2xl">
                   <AvatarImage 
                     src={avatar.imageUrl || undefined}
                     alt={avatar.name}

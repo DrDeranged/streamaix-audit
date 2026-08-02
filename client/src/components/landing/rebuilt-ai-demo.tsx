@@ -348,7 +348,7 @@ export function AIProcessor() {
                   placeholder="https://youtube.com/watch?v=..."
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
-                  className="flex-1 h-12 text-base bg-ink-surface bg-ink-raised border-ink-edge border-ink-edge focus:border-purple-500 transition-colors"
+                  className="flex-1 h-12 text-base bg-ink-surface bg-ink-raised border-ink-edge border-ink-edge focus:border-accent-core transition-colors"
                   disabled={isProcessing}
                   data-testid="input-youtube-url"
                 />
@@ -569,7 +569,7 @@ export function AIProcessor() {
                                         <Badge variant="outline" className={`text-xs ${
                                           trend.strength === 'strong' ? 'text-gain border-gain/30' :
                                           trend.strength === 'moderate' ? 'text-warn border-yellow-500/30' :
-                                          'text-muted border-gray-500/30'
+                                          'text-muted border-ink-edge'
                                         }`}>
                                           {trend.strength}
                                         </Badge>
@@ -707,7 +707,7 @@ export function AIProcessor() {
                                         <Badge variant="outline" className={`text-xs self-start sm:self-center ${
                                           financial.impact === 'bullish' ? 'text-gain border-gain/30' :
                                           financial.impact === 'bearish' ? 'text-loss border-red-500/30' :
-                                          'text-muted border-gray-500/30'
+                                          'text-muted border-ink-edge'
                                         }`}>
                                           {financial.impact}
                                         </Badge>

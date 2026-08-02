@@ -47,9 +47,9 @@ export default function AvatarFeedWidget() {
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        {isLoading && <p className="text-xs text-slate-500">Loading commentary…</p>}
+        {isLoading && <p className="text-xs text-muted">Loading commentary…</p>}
         {!isLoading && posts.length === 0 && (
-          <p className="text-xs text-slate-500">Avatars are quiet — new trades will appear here.</p>
+          <p className="text-xs text-muted">Avatars are quiet — new trades will appear here.</p>
         )}
         {posts.map((p) => {
           const isYes = p.outcome === "YES";
@@ -68,11 +68,11 @@ export default function AvatarFeedWidget() {
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 text-xs">
-                      <span className="font-medium text-slate-200 group-hover:text-cyan-400 truncate">
+                      <span className="font-medium text-body group-hover:text-cyan-400 truncate">
                         {p.avatarName}
                       </span>
-                      <span className="text-slate-600">·</span>
-                      <span className="text-slate-500">{relTime(p.createdAt)}</span>
+                      <span className="text-muted">·</span>
+                      <span className="text-muted">{relTime(p.createdAt)}</span>
                       {p.outcome && (
                         <Badge
                           variant="outline"
@@ -83,7 +83,7 @@ export default function AvatarFeedWidget() {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-slate-400 line-clamp-2 mt-0.5">{p.body}</p>
+                    <p className="text-xs text-muted line-clamp-2 mt-0.5">{p.body}</p>
                   </div>
                 </div>
               </a>

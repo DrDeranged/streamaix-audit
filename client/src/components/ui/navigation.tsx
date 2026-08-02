@@ -101,7 +101,7 @@ export function Navigation({ showBackButton = false, title }: NavigationProps) {
               </Avatar>
               <div className="hidden md:block">
                 <p className="text-sm font-medium text-primary">{user?.username}</p>
-                <p className="text-xs text-slate-300">{user?.email}</p>
+                <p className="text-xs text-body">{user?.email}</p>
               </div>
             </div>
             <Button

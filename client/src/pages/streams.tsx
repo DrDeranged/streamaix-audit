@@ -628,7 +628,7 @@ const StreamCard = memo(function StreamCard({
  )}
  </div>
  {isLive && (
- <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 grad-surface bg-gain rounded-full border-2 border-slate-900 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+ <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 grad-surface bg-gain rounded-full border-2 border-ink-edge shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
  )}
  </div>
  
@@ -653,7 +653,7 @@ const StreamCard = memo(function StreamCard({
  <div className="flex items-center gap-1.5 sm:gap-2 mt-2 overflow-x-auto scrollbar-hide">
  <Badge variant="outline" className={cn(
  "text-[10px] capitalize font-medium px-1.5 sm:px-2 py-0.5 flex-shrink-0",
- "bg-ink-raised/60 backdrop-blur-sm border-slate-600/50",
+ "bg-ink-raised/60 backdrop-blur-sm border-ink-edge",
  config.color
  )}>
  <Icon className="w-3 h-3 mr-0.5 sm:mr-1" />
@@ -796,7 +796,7 @@ const PastStreamCard = memo(function PastStreamCard({ stream }: { stream: PastSt
  </div>
  
  <div className="absolute top-2 left-2">
- <Badge className="bg-ink-page/80 backdrop-blur-md text-body text-[10px] px-2 py-0.5 border border-slate-600/50">
+ <Badge className="bg-ink-page/80 backdrop-blur-md text-body text-[10px] px-2 py-0.5 border border-ink-edge">
  <Icon className="w-3 h-3 mr-1" />
  {config.label}
  </Badge>

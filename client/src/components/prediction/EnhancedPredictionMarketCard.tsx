@@ -342,7 +342,7 @@ export function EnhancedPredictionMarketCard({
 
           {/* User Position Indicator */}
           {userPosition && (
-            <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+            <div className="mt-3 pt-3 border-t border-ink-edge flex items-center justify-between">
               <span className="text-xs text-muted">Your Position</span>
               <Badge variant="outline" className="text-xs bg-accent-core/10 text-accent-bright border-accent-core/30">
                 {userPosition.outcome.toUpperCase()} • {userPosition.shares} shares

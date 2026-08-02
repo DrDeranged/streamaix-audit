@@ -176,7 +176,7 @@ export default function UserNotesModal({ isOpen, onClose, summaryId, summaryTitl
             >
               {createNoteMutation.isPending ? (
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-gray-300 border-t-white rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-ink-edge border-t-white rounded-full animate-spin" />
                   Saving...
                 </div>
               ) : (

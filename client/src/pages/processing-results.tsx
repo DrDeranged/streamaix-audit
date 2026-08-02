@@ -617,14 +617,14 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                                   </div>
                                 )}
                                 {(financial.priceTargets || financial.catalysts) && (
-                                  <div className="mt-3 pt-2 border-t border-gray-500/20">
+                                  <div className="mt-3 pt-2 border-t border-ink-edge">
                                     {financial.priceTargets && (
                                       <div className="text-xs text-green-400 mb-1">
                                         <span className="font-medium">Targets:</span> {financial.priceTargets}
                                       </div>
                                     )}
                                     {financial.catalysts && (
-                                      <div className="text-xs text-blue-400">
+                                      <div className="text-xs text-accent-bright">
                                         <span className="font-medium">Catalysts:</span> {financial.catalysts}
                                       </div>
                                     )}
@@ -656,11 +656,11 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
                               </div>
                               <div>
                                 <span className="text-secondary">Source Credibility:</span>
-                                <span className="ml-2 font-medium text-purple-400">{summary.sourceCredibility || 'High'}</span>
+                                <span className="ml-2 font-medium text-accent-bright">{summary.sourceCredibility || 'High'}</span>
                               </div>
                               <div>
                                 <span className="text-secondary">Analysis Accuracy:</span>
-                                <span className="ml-2 font-medium text-blue-400">{summary.accuracy || 95}%</span>
+                                <span className="ml-2 font-medium text-accent-bright">{summary.accuracy || 95}%</span>
                               </div>
                             </div>
                           </div>

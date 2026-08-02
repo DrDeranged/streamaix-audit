@@ -63,7 +63,7 @@ export function MarketSuggestions({ summaryId, onCreateMarket }: MarketSuggestio
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
-      crypto: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+      crypto: 'bg-accent-core/20 text-accent-bright border-accent-core/30',
       defi: 'bg-accent-deep/40 text-accent-bright border-accent-core/30',
       bounty: 'bg-green-500/20 text-green-400 border-green-500/30',
       realworld: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
@@ -83,7 +83,7 @@ export function MarketSuggestions({ summaryId, onCreateMarket }: MarketSuggestio
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h3 className="text-xl font-semibold flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-purple-400" />
+            <Sparkles className="w-5 h-5 text-accent-bright" />
             AI-Powered Market Suggestions
           </h3>
           <p className="text-sm text-muted-foreground">
@@ -112,8 +112,8 @@ export function MarketSuggestions({ summaryId, onCreateMarket }: MarketSuggestio
 
       {summaryInsights && (
         <Alert className="bg-accent-deep/20 border-accent-core/30">
-          <Lightbulb className="h-4 w-4 text-purple-400" />
-          <AlertDescription className="text-purple-300">
+          <Lightbulb className="h-4 w-4 text-accent-bright" />
+          <AlertDescription className="text-accent-bright">
             {summaryInsights}
           </AlertDescription>
         </Alert>

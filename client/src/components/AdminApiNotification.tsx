@@ -51,7 +51,7 @@ export function AdminApiNotification() {
         </Button>
       </AlertTitle>
       <AlertDescription className="mt-2 space-y-3">
-        <p className="text-slate-300 text-sm">
+        <p className="text-body text-sm">
           {highPriorityUpgrades.length} API{highPriorityUpgrades.length > 1 ? 's are' : ' is'} experiencing rate limits. 
           Upgrading will improve data reliability and user experience.
         </p>
@@ -65,7 +65,7 @@ export function AdminApiNotification() {
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <p className="text-sm font-semibold text-amber-200">{upgrade.service}</p>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-muted">
                     {upgrade.currentTier} → {upgrade.recommendedTier}
                   </p>
                 </div>
@@ -73,7 +73,7 @@ export function AdminApiNotification() {
                   <p className="text-sm font-bold text-amber-400">${upgrade.monthlyPrice}/mo</p>
                 </div>
               </div>
-              <ul className="text-xs text-slate-400 space-y-1">
+              <ul className="text-xs text-muted space-y-1">
                 {upgrade.benefits.slice(0, 2).map((benefit, i) => (
                   <li key={i} className="flex items-start gap-1.5">
                     <TrendingUp className="h-3 w-3 text-green-400 mt-0.5 flex-shrink-0" />
@@ -86,7 +86,7 @@ export function AdminApiNotification() {
         </div>
 
         <div className="flex items-center justify-between pt-2 border-t border-amber-500/20">
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-muted">
             Total estimated cost: <span className="text-amber-400 font-semibold">${totalMonthlyCost}/month</span>
           </p>
           <Button 

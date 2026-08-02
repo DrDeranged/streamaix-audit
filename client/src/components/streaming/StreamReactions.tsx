@@ -96,7 +96,7 @@ export function StreamReactions({ streamId, onReact, incomingReactions }: Stream
           data-testid="button-show-reactions"
         >
           <span>🔥</span>
-          <span className="text-slate-400">React</span>
+          <span className="text-muted">React</span>
         </motion.button>
 
         <AnimatePresence>

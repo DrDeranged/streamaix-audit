@@ -354,7 +354,7 @@ function AvatarTradingSection({ avatarId, avatarName }: { avatarId: string; avat
             </div>
             <div className="flex flex-wrap gap-1.5">
               {tradingPersona.expertiseDomains?.map((domain, i) => (
-                <Badge key={i} variant="outline" className="border-purple-400/30 text-accent-bright text-xs">
+                <Badge key={i} variant="outline" className="border-accent-core/30 text-accent-bright text-xs">
                   {domain}
                 </Badge>
               ))}
@@ -433,7 +433,7 @@ function AvatarTradingSection({ avatarId, avatarName }: { avatarId: string; avat
                 <Link key={i} href={`/markets/${trade.marketId}`}>
                   <motion.div
                     whileHover={{ scale: 1.01 }}
-                    className="p-3 bg-ink-raised rounded-xl border border-ink-edge hover:border-purple-400/30 cursor-pointer transition-all"
+                    className="p-3 bg-ink-raised rounded-xl border border-ink-edge hover:border-accent-core/30 cursor-pointer transition-all"
                   >
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <p className="text-sm text-body line-clamp-1 flex-1">{trade.marketQuestion}</p>
@@ -804,7 +804,7 @@ export default function AvatarProfile() {
                 className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-xl border-4 border-white object-cover shadow-xl"
               />
               {avatar.verification_status === 'verified' && (
-                <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 bg-blue-500 rounded-xl p-1 sm:p-1.5 md:p-2">
+                <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 bg-accent-core rounded-xl p-1 sm:p-1.5 md:p-2">
                   <CheckCircle2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4 text-primary" />
                 </div>
               )}
@@ -918,7 +918,7 @@ export default function AvatarProfile() {
                 <CardContent className="pt-0">
                   <div className="flex flex-wrap gap-1.5 md:gap-2">
                     {avatar.primary_interests?.map((focus: string, index: number) => (
-                      <Badge key={index} variant="outline" className="border-purple-400/30 text-accent-bright text-[10px] md:text-xs px-2 py-0.5">
+                      <Badge key={index} variant="outline" className="border-accent-core/30 text-accent-bright text-[10px] md:text-xs px-2 py-0.5">
                         {focus}
                       </Badge>
                     ))}
@@ -937,7 +937,7 @@ export default function AvatarProfile() {
                 <CardContent className="pt-0">
                   <div className="flex flex-wrap gap-1.5 md:gap-2">
                     {[avatar.expertise].map((skill: string, index: number) => (
-                      <Badge key={index} variant="outline" className="border-blue-400/30 text-accent-bright text-[10px] md:text-xs px-2 py-0.5">
+                      <Badge key={index} variant="outline" className="border-accent-core/30 text-accent-bright text-[10px] md:text-xs px-2 py-0.5">
                         {skill}
                       </Badge>
                     ))}
@@ -984,12 +984,12 @@ export default function AvatarProfile() {
                     {highlightedInsights.map((insight) => (
                       <motion.div
                         key={insight.id}
-                        className="p-3 md:p-4 bg-ink-surface   rounded-xl border border-purple-400/20"
+                        className="p-3 md:p-4 bg-ink-surface   rounded-xl border border-accent-core/20"
                         whileHover={{ scale: 1.02 }}
                         data-testid={`insight-${insight.id}`}
                       >
                         <div className="flex items-center gap-1.5 md:gap-2 mb-1.5 md:mb-2">
-                          <Badge variant="outline" className="text-[10px] md:text-xs border-purple-400/30 text-accent-bright px-1.5 py-0.5">
+                          <Badge variant="outline" className="text-[10px] md:text-xs border-accent-core/30 text-accent-bright px-1.5 py-0.5">
                             {insight.category}
                           </Badge>
                           <span className="text-[10px] md:text-xs text-secondary">{insight.confidence}% confidence</span>
@@ -1085,8 +1085,8 @@ export default function AvatarProfile() {
                           variant="outline" 
                           className={`${
                             investment.status === 'active' ? 'border-green-400/30 text-gain' :
-                            investment.status === 'exited' ? 'border-blue-400/30 text-accent-bright' :
-                            'border-purple-400/30 text-accent-bright'
+                            investment.status === 'exited' ? 'border-accent-core/30 text-accent-bright' :
+                            'border-accent-core/30 text-accent-bright'
                           }`}
                         >
                           {investment.status}
@@ -1140,7 +1140,7 @@ export default function AvatarProfile() {
                 <CardContent>
                   <div className="space-y-2">
                     {(avatar.mentalModels || []).map((model, index) => (
-                      <div key={index} className="p-2 bg-blue-500/10 rounded border border-blue-400/20">
+                      <div key={index} className="p-2 bg-accent-core/10 rounded border border-accent-core/20">
                         <span className="text-accent-bright">{model}</span>
                       </div>
                     ))}
@@ -1172,7 +1172,7 @@ export default function AvatarProfile() {
                 <CardContent>
                   <div className="grid lg:grid-cols-2 gap-3">
                     {(avatar.personalPrinciples || []).map((principle, index) => (
-                      <div key={index} className="flex items-start gap-3 p-3 bg-ink-surface   rounded-xl border border-purple-400/20">
+                      <div key={index} className="flex items-start gap-3 p-3 bg-ink-surface   rounded-xl border border-accent-core/20">
                         <div className="w-6 h-6 bg-accent-core/20 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
                           <span className="text-accent-bright text-sm font-semibold">{index + 1}</span>
                         </div>
@@ -1206,7 +1206,7 @@ export default function AvatarProfile() {
                         data-testid={`opinion-${index}`}
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <Badge variant="outline" className="border-blue-400/30 text-accent-bright">
+                          <Badge variant="outline" className="border-accent-core/30 text-accent-bright">
                             {opinion.topic}
                           </Badge>
                           <div className="flex items-center gap-2">
@@ -1310,7 +1310,7 @@ export default function AvatarProfile() {
                         data-testid={`content-${index}`}
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <Badge variant="outline" className="border-purple-400/30 text-accent-bright">
+                          <Badge variant="outline" className="border-accent-core/30 text-accent-bright">
                             {content.type}
                           </Badge>
                           <span className="text-xs text-secondary">{content.date}</span>
@@ -1417,12 +1417,12 @@ export default function AvatarProfile() {
                     {categoryInsights.map((insight) => (
                       <motion.div
                         key={insight.id}
-                        className="p-4 bg-ink-surface   rounded-xl border border-purple-400/20"
+                        className="p-4 bg-ink-surface   rounded-xl border border-accent-core/20"
                         whileHover={{ scale: 1.02 }}
                         data-testid={`category-insight-${insight.id}`}
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <Badge variant="outline" className="text-xs border-purple-400/30 text-accent-bright">
+                          <Badge variant="outline" className="text-xs border-accent-core/30 text-accent-bright">
                             {insight.insight_type}
                           </Badge>
                           <span className="text-xs text-secondary">{insight.confidence}% confidence</span>
@@ -1431,7 +1431,7 @@ export default function AvatarProfile() {
                         <p className="text-body text-sm mb-3">{insight.content}</p>
                         <div className="flex flex-wrap gap-1 mb-2">
                           {insight.tags.map((tag, tagIndex) => (
-                            <Badge key={tagIndex} variant="outline" className="text-xs border-gray-600 text-secondary">
+                            <Badge key={tagIndex} variant="outline" className="text-xs border-ink-edge text-secondary">
                               {tag}
                             </Badge>
                           ))}

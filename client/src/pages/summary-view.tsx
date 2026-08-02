@@ -889,7 +889,7 @@ export default function SummaryView() {
                                     </Badge>
                                   )}
                                   {financial.analystSource && (
-                                    <Badge variant="outline" className="text-xs px-2 py-1 text-accent-bright border-purple-500/30 bg-ink-raised">
+                                    <Badge variant="outline" className="text-xs px-2 py-1 text-accent-bright border-accent-core/30 bg-ink-raised">
                                       Source: {financial.analystSource}
                                     </Badge>
                                   )}
@@ -918,7 +918,7 @@ export default function SummaryView() {
                             <div key={index} className="p-3 bg-ink-raised rounded-xl border-l-2 border-blue-400">
                               <div className="flex items-center justify-between mb-2">
                                 <h4 className="font-semibold text-accent-bright flex items-center gap-2">
-                                  <span className="w-6 h-6 bg-blue-500/20 rounded-xl flex items-center justify-center text-xs">
+                                  <span className="w-6 h-6 bg-accent-core/20 rounded-xl flex items-center justify-center text-xs">
                                     {index + 1}
                                   </span>
                                   {chapter.title}
@@ -1094,8 +1094,8 @@ export default function SummaryView() {
                                 <div className="flex items-center justify-between mb-3">
                                   <div className="flex items-center gap-2">
                                     <Badge variant="outline" className={`text-xs ${
-                                      note.noteType === 'analysis' ? 'text-accent-bright border-blue-500/30' :
-                                      note.noteType === 'insight' ? 'text-accent-bright border-purple-500/30' :
+                                      note.noteType === 'analysis' ? 'text-accent-bright border-accent-core/30' :
+                                      note.noteType === 'insight' ? 'text-accent-bright border-accent-core/30' :
                                       'text-secondary border-ink-edge'
                                     }`}>
                                       {note.noteType}

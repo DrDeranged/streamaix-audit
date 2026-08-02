@@ -3222,7 +3222,7 @@ function AIAdvisorChat({
                   className={cn(
                     "p-2 rounded-xl text-xs",
                     msg.role === "user"
-                      ? "bg-accent-core/20 text-purple-100 ml-8"
+                      ? "bg-accent-core/20 text-body ml-8"
                       : "bg-ink-raised text-foreground mr-8"
                   )}
                 >

@@ -49,7 +49,7 @@ export class ErrorBoundary extends Component<Props, State> {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <p className="text-sm text-slate-400 mb-3">
+            <p className="text-sm text-muted mb-3">
               {this.state.error?.message || 'An unexpected error occurred'}
             </p>
             <Button
@@ -84,7 +84,7 @@ export function SectionErrorFallback({
         <AlertTriangle className="w-4 h-4" />
         <span className="font-medium text-sm">Error loading {section}</span>
       </div>
-      <p className="text-xs text-slate-400 mb-3">
+      <p className="text-xs text-muted mb-3">
         This section encountered an error. Other parts of the page should still work.
       </p>
       {onRetry && (

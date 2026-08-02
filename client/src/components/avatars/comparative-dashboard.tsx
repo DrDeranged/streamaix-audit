@@ -125,7 +125,7 @@ export const ComparativeDashboard = memo(function ComparativeDashboard({ entrepr
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-blue-500" />
+              <TrendingUp className="h-5 w-5 text-accent-bright" />
               Performance Metrics
             </CardTitle>
           </CardHeader>
@@ -155,7 +155,7 @@ export const ComparativeDashboard = memo(function ComparativeDashboard({ entrepr
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <Target className="h-5 w-5 text-purple-500" />
+              <Target className="h-5 w-5 text-accent-bright" />
               Multi-Dimensional Analysis
             </CardTitle>
           </CardHeader>
@@ -257,7 +257,7 @@ export const ComparativeDashboard = memo(function ComparativeDashboard({ entrepr
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5" />
+              <div className="w-2 h-2 rounded-full bg-accent-core mt-1.5" />
               <div>
                 <p className="text-sm font-medium text-foreground">Most Accurate</p>
                 <p className="text-xs text-muted-foreground">

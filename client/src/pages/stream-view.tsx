@@ -919,7 +919,7 @@ export default function StreamViewPage() {
     return (
       <div className="min-h-[100dvh] bg-ink-raised flex flex-col items-center justify-center gap-4 px-4 safe-area-inset">
         <div className="w-20 h-20 rounded-full bg-ink-raised/60 flex items-center justify-center mb-2">
-          <Video className="w-10 h-10 text-slate-600" />
+          <Video className="w-10 h-10 text-muted" />
         </div>
         <h1 className="text-xl font-bold text-primary">Stream not found</h1>
         <p className="text-secondary text-center max-w-md">This stream may have ended or doesn't exist.</p>
@@ -1208,7 +1208,7 @@ export default function StreamViewPage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsImmersiveMode(true)}
-                  className="text-accent-bright hover:text-purple-300 hover:bg-accent-core/20 h-8 px-2 gap-1"
+                  className="text-accent-bright hover:text-accent-bright hover:bg-accent-core/20 h-8 px-2 gap-1"
                   data-testid="button-immersive-mode"
                 >
                   <Sparkles className="w-4 h-4" />
@@ -1610,7 +1610,7 @@ export default function StreamViewPage() {
               </div>
               Live Chat
               {messages.length > 0 && (
-                <Badge className="bg-accent-core/30 text-purple-300 text-xs px-2 py-0.5">
+                <Badge className="bg-accent-core/30 text-accent-bright text-xs px-2 py-0.5">
                   {messages.length}
                 </Badge>
               )}
@@ -1668,7 +1668,7 @@ export default function StreamViewPage() {
                   </TabsTrigger>
                   <TabsTrigger
                     value="replay"
-                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-slate-400 data-[state=active]:bg-transparent text-xs"
+                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-ink-edge data-[state=active]:bg-transparent text-xs"
                   >
                     <Clock className="w-3.5 h-3.5 mr-1 text-secondary" />
                     History

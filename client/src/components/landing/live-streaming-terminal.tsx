@@ -313,20 +313,20 @@ const avatarBrandIcons: Record<string, { icon: any; color: string; bgColor: stri
   'Vitalik Buterin': { icon: SiEthereum, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
   'Gavin Wood': { icon: SiPolkadot, color: 'text-pink-400', bgColor: 'bg-pink-500/20' },
   'Anatoly Yakovenko': { icon: SiSolana, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
-  'Brian Armstrong': { icon: SiCoinbase, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
+  'Brian Armstrong': { icon: SiCoinbase, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
   'Jesse Powell': { icon: Wallet, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
   'Sam Altman': { icon: SiOpenai, color: 'text-emerald-400', bgColor: 'bg-emerald-500/20' },
   'Elon Musk': { icon: SiX, color: 'text-primary', bgColor: 'bg-ink-raised' },
   'Stani Kulechov': { icon: Zap, color: 'text-cyan-400', bgColor: 'bg-cyan-500/20' },
   'Arthur Hayes': { icon: BarChart3, color: 'text-red-400', bgColor: 'bg-red-500/20' },
-  'Andre Cronje': { icon: Rocket, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
-  'Charles Hoskinson': { icon: SiCardano, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
+  'Andre Cronje': { icon: Rocket, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
+  'Charles Hoskinson': { icon: SiCardano, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
   'Justin Sun': { icon: Zap, color: 'text-red-500', bgColor: 'bg-red-500/20' },
   'Marc Andreessen': { icon: Globe, color: 'text-orange-400', bgColor: 'bg-orange-500/20' },
   'Chris Dixon': { icon: Globe, color: 'text-orange-400', bgColor: 'bg-orange-500/20' },
   'Anthony Pompliano': { icon: SiBitcoin, color: 'text-amber-400', bgColor: 'bg-amber-500/20' },
   'Adam Back': { icon: SiBitcoin, color: 'text-amber-400', bgColor: 'bg-amber-500/20' },
-  'Brad Garlinghouse': { icon: Zap, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
+  'Brad Garlinghouse': { icon: Zap, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
   'Katie Haun': { icon: Shield, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
   'Robert Leshner': { icon: BarChart3, color: 'text-green-400', bgColor: 'bg-green-500/20' },
   'Naval Ravikant': { icon: Brain, color: 'text-cyan-400', bgColor: 'bg-cyan-500/20' },
@@ -334,7 +334,7 @@ const avatarBrandIcons: Record<string, { icon: any; color: string; bgColor: stri
   'Tyler Winklevoss': { icon: SiBitcoin, color: 'text-amber-400', bgColor: 'bg-amber-500/20' },
   'Balaji Srinivasan': { icon: Brain, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
   'Cathie Wood': { icon: TrendingUp, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
-  'Jesse Pollak': { icon: SiCoinbase, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
+  'Jesse Pollak': { icon: SiCoinbase, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
   'Paul Graham': { icon: Rocket, color: 'text-orange-400', bgColor: 'bg-orange-500/20' },
   'Michael Saylor': { icon: SiBitcoin, color: 'text-amber-400', bgColor: 'bg-amber-500/20' },
   'Jack Dorsey': { icon: SiX, color: 'text-primary', bgColor: 'bg-ink-raised' },
@@ -484,7 +484,7 @@ function StreamCard({ stream, isFeatured = false }: { stream: LiveStream; isFeat
                 <span className="text-[10px] text-warn/70">earned</span>
               </div>
               {stream.peakViewers && stream.peakViewers > stream.currentViewers && (
-                <div className="flex items-center gap-1 text-[10px] text-slate-500">
+                <div className="flex items-center gap-1 text-[10px] text-muted">
                   <TrendingUp className="w-3 h-3" />
                   Peak: {stream.peakViewers}
                 </div>
@@ -519,20 +519,20 @@ function StreamCard({ stream, isFeatured = false }: { stream: LiveStream; isFeat
                   );
                 })()}
                 {isVerified && (
-                  <div className="absolute -bottom-0.5 -right-0.5 bg-blue-500 rounded-full p-0.5 shadow-lg shadow-blue-500/50">
+                  <div className="absolute -bottom-0.5 -right-0.5 bg-accent-core rounded-full p-0.5 shadow-lg ">
                     <CheckCircle2 className="w-2.5 h-2.5 text-white" />
                   </div>
                 )}
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-1">
-                  <span className="text-xs text-slate-300 font-medium group-hover:text-white transition-colors">@{stream.hostUsername || 'anon'}</span>
+                  <span className="text-xs text-body font-medium group-hover:text-white transition-colors">@{stream.hostUsername || 'anon'}</span>
                   {isVerified && (
-                    <BadgeCheck className="w-3.5 h-3.5 text-blue-400" />
+                    <BadgeCheck className="w-3.5 h-3.5 text-accent-bright" />
                   )}
                 </div>
                 {isFeatured && (
-                  <span className="text-[10px] text-slate-500">Top Creator</span>
+                  <span className="text-[10px] text-muted">Top Creator</span>
                 )}
               </div>
             </div>
@@ -881,7 +881,7 @@ export function LiveStreamingTerminal() {
                           })()}
                         </div>
                       </div>
-                      <p className="relative text-sm text-slate-400 mb-5">No {streamTypeConfig[activeTab].label.toLowerCase()} live right now</p>
+                      <p className="relative text-sm text-muted mb-5">No {streamTypeConfig[activeTab].label.toLowerCase()} live right now</p>
                       <Button 
                         onClick={handleGoLive}
                         data-testid="be-first-button"
@@ -934,19 +934,19 @@ export function LiveStreamingTerminal() {
                             )}>
                               {idx + 1}
                             </span>
-                            <span className="text-slate-300">{earner.username}</span>
+                            <span className="text-body">{earner.username}</span>
                           </div>
                           <span className="text-amber-400 font-semibold">${earner.earnings.toLocaleString()}</span>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-xs text-slate-500 text-center py-4">No earnings data yet</p>
+                    <p className="text-xs text-muted text-center py-4">No earnings data yet</p>
                   )}
                 </Surface>
               </div>
               
-              <div className="flex flex-wrap items-center justify-between gap-4 mt-6 pt-6 border-t border-slate-700/40">
+              <div className="flex flex-wrap items-center justify-between gap-4 mt-6 pt-6 border-t border-ink-edge">
                 <div className="flex flex-wrap items-center gap-3">
                   {[
                     { icon: Mic, label: 'Voice Chat', color: 'fuchsia' },

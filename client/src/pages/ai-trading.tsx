@@ -180,7 +180,7 @@ function GlowingStatCard({ icon: Icon, label, value, subValue, color, delay = 0 
     },
     purple: {
       bg: ' ',
-      border: 'border-purple-500/30 hover:border-purple-400/50',
+      border: 'border-accent-core/30 hover:border-accent-core/50',
       glow: 'shadow-purple-500/20 hover:shadow-purple-500/40',
       icon: '  text-accent-bright',
       text: 'text-accent-bright',
@@ -783,7 +783,7 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
   const getDirectionColor = () => {
     if (signal.direction === 'bullish') return '  border-emerald-500/30';
     if (signal.direction === 'bearish') return '  border-red-500/30';
-    return '  border-slate-500/30';
+    return '  border-ink-edge';
   };
 
   const getSignalTypeBadge = () => {
@@ -791,10 +791,10 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
       'breakout': 'bg-emerald-500/20 text-gain border-emerald-500/30',
       'bounce': 'bg-cyan-500/20 text-accent-bright border-cyan-500/30',
       'flush': 'bg-red-500/20 text-loss border-red-500/30',
-      'consolidation': 'bg-ink-raised text-secondary border-slate-500/30',
-      'trend_continuation': 'bg-accent-core/20 text-accent-bright border-purple-500/30',
+      'consolidation': 'bg-ink-raised text-secondary border-ink-edge',
+      'trend_continuation': 'bg-accent-core/20 text-accent-bright border-accent-core/30',
       'reversal': 'bg-amber-500/20 text-warn border-amber-500/30',
-      'accumulation': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+      'accumulation': 'bg-accent-core/20 text-accent-bright border-accent-core/30',
       'distribution': 'bg-orange-500/20 text-orange-400 border-orange-500/30',
     };
     return colors[signal.signalType] || colors['consolidation'];
@@ -804,7 +804,7 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
     const colors: Record<string, string> = {
       'high': 'bg-red-500/20 text-loss border-red-500/30',
       'medium': 'bg-amber-500/20 text-warn border-amber-500/30',
-      'low': 'bg-ink-raised text-secondary border-slate-500/30',
+      'low': 'bg-ink-raised text-secondary border-ink-edge',
     };
     return colors[signal.alertPriority] || colors['low'];
   };
@@ -834,7 +834,7 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${signal.asset.type === 'crypto' ? '  ' : '  '}`}>
-              {signal.asset.type === 'crypto' ? <Coins className="w-6 h-6 text-warn" /> : <Building2 className="w-6 h-6 text-blue-400" />}
+              {signal.asset.type === 'crypto' ? <Coins className="w-6 h-6 text-warn" /> : <Building2 className="w-6 h-6 text-accent-bright" />}
             </div>
             <div>
               <h3 className="font-bold text-primary text-lg flex items-center gap-2">
@@ -886,8 +886,8 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
 
         <div className="flex items-center gap-2 mb-3 flex-wrap">
           <Badge className={`${getSignalTypeBadge()} text-xs`}>{signal.signalType.replace('_', ' ').toUpperCase()}</Badge>
-          <Badge className="bg-accent-core/20 text-accent-bright border-purple-500/30 text-xs">{signal.marketRegime?.type?.replace('_', ' ').toUpperCase() || 'RANGING'}</Badge>
-          <Badge className="bg-ink-raised text-body border-slate-500/30 text-xs">{signal.timeframe}</Badge>
+          <Badge className="bg-accent-core/20 text-accent-bright border-accent-core/30 text-xs">{signal.marketRegime?.type?.replace('_', ' ').toUpperCase() || 'RANGING'}</Badge>
+          <Badge className="bg-ink-raised text-body border-ink-edge text-xs">{signal.timeframe}</Badge>
         </div>
 
         <div className="bg-ink-raised/60 rounded-xl p-3 mb-3">
@@ -1280,7 +1280,7 @@ function MyWatchlistSection() {
               <div className="absolute left-0 right-0 top-full z-50 bg-ink-page border border-ink-edge rounded-xl shadow-xl mt-1 max-h-80 overflow-y-auto">
               {stockResults.length > 0 && (
                 <>
-                  <div className="px-3 py-2 bg-blue-500/20 text-xs text-blue-300 font-medium flex items-center gap-2">
+                  <div className="px-3 py-2 bg-accent-core/20 text-xs text-accent-bright font-medium flex items-center gap-2">
                     <Building2 className="w-3 h-3" /> Stocks
                   </div>
                   {stockResults.map((result) => (
@@ -1291,8 +1291,8 @@ function MyWatchlistSection() {
                       className="w-full flex items-center gap-3 p-3 hover:bg-ink-raised text-left disabled:opacity-50"
                       data-testid={`btn-add-stock-${result.symbol}`}
                     >
-                      <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center">
-                        <Building2 className="w-3 h-3 text-blue-400" />
+                      <div className="w-6 h-6 rounded-full bg-accent-core/20 flex items-center justify-center">
+                        <Building2 className="w-3 h-3 text-accent-bright" />
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium text-primary">{result.symbol}</p>
@@ -1567,7 +1567,7 @@ export default function AITrading() {
                       <span className="flex items-center gap-1.5"><Coins className="w-3 h-3 sm:w-4 sm:h-4" />Crypto <Badge variant="secondary" className="bg-amber-500/20 text-amber-300 text-xs">{cryptoSignals.length}</Badge></span>
                     </TabsTrigger>
                     <TabsTrigger value="stocks" className="data-[state=active]:bg-accent-core data-[state=active]:text-white rounded-xl flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-stocks">
-                      <span className="flex items-center gap-1.5"><Building2 className="w-3 h-3 sm:w-4 sm:h-4" />Stocks <Badge variant="secondary" className="bg-blue-500/20 text-blue-300 text-xs">{stockSignals.length}</Badge></span>
+                      <span className="flex items-center gap-1.5"><Building2 className="w-3 h-3 sm:w-4 sm:h-4" />Stocks <Badge variant="secondary" className="bg-accent-core/20 text-accent-bright text-xs">{stockSignals.length}</Badge></span>
                     </TabsTrigger>
                     <TabsTrigger value="watchlist" className="data-[state=active]:bg-accent-core data-[state=active]:text-white rounded-xl flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-watchlist">
                       <span className="flex items-center gap-1.5"><Star className="w-3 h-3 sm:w-4 sm:h-4" />Favorites <Badge variant="secondary" className="bg-pink-500/20 text-pink-300 text-xs">{watchlist.size}</Badge></span>

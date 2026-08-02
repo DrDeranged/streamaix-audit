@@ -1437,8 +1437,8 @@ export function ChatModerationPanel({
   return (
     <Surface className="p-4">
       <div className="flex items-center gap-2 mb-4">
-        <div className="p-2 rounded-xl bg-blue-500/20">
-          <AlertCircle className="w-5 h-5 text-blue-400" />
+        <div className="p-2 rounded-xl bg-accent-core/20">
+          <AlertCircle className="w-5 h-5 text-accent-bright" />
         </div>
         <h3 className="font-semibold text-white">Chat Moderation</h3>
       </div>
@@ -1548,7 +1548,7 @@ export function ChatModerationPanel({
           <Button
             size="sm"
             variant="outline"
-            className="text-xs border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
+            className="text-xs border-accent-core/30 text-accent-bright hover:bg-accent-core/10"
             data-testid="button-mod-log"
           >
             Mod Log
@@ -1683,7 +1683,7 @@ export function StreamAnalyticsPanel({ streamId }: { streamId: string }) {
 
   const stats = [
     { label: 'Peak Viewers', value: data?.peakViewers || 0, icon: <TrendingUp className="w-4 h-4 text-green-400" />, color: 'green' },
-    { label: 'Total Views', value: data?.totalViews || 0, icon: <Eye className="w-4 h-4 text-blue-400" />, color: 'blue' },
+    { label: 'Total Views', value: data?.totalViews || 0, icon: <Eye className="w-4 h-4 text-accent-bright" />, color: 'blue' },
     { label: 'Avg Watch Time', value: `${Math.round((data?.averageWatchTime || 0) / 60)}m`, icon: <Clock className="w-4 h-4 text-accent-bright" />, color: 'purple' },
     { label: 'Chat Messages', value: data?.chatMessages || 0, icon: <MessageCircle className="w-4 h-4 text-cyan-400" />, color: 'cyan' },
     { label: 'Tips Received', value: data?.tipsReceived || 0, icon: <Coins className="w-4 h-4 text-amber-400" />, color: 'amber', suffix: 'STREAM' },

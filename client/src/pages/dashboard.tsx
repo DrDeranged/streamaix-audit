@@ -1334,7 +1334,7 @@ export default function Dashboard() {
                   {/* Discover Analytics */}
                   <Link to="/discover">
                     <Button 
-                      className="w-full h-11 bg-blue-500/20 hover:bg-blue-500/30 border border-ink-edge text-accent-bright hover:text-primary backdrop-blur-sm transition-all duration-200 font-medium touch-manipulation text-sm"
+                      className="w-full h-11 bg-accent-core/20 hover:bg-accent-core/30 border border-ink-edge text-accent-bright hover:text-primary backdrop-blur-sm transition-all duration-200 font-medium touch-manipulation text-sm"
                       data-testid="button-discover"
                     >
                       <Compass className="h-4 w-4 mr-2 flex-shrink-0 text-accent-bright" />
@@ -1403,7 +1403,7 @@ export default function Dashboard() {
                               }
                             }}
                             disabled={createNoteMutation.isPending}
-                            className="bg-blue-600 hover:bg-blue-700"
+                            className="bg-accent-core hover:bg-accent-core"
                           >
                             {createNoteMutation.isPending ? "Creating..." : "Create Note"}
                           </Button>
@@ -1454,7 +1454,7 @@ export default function Dashboard() {
                         <div className="flex gap-2">
                           <Button
                             onClick={() => window.open(`https://twitter.com/intent/tweet?text=Check out my StreamAiX profile: ${window.location.origin}/users/${user?.id}`, '_blank')}
-                            className="bg-blue-500 hover:bg-blue-600"
+                            className="bg-accent-core hover:bg-accent-core"
                           >
                             <ExternalLink className="h-4 w-4 mr-2" />
                             Share on Twitter

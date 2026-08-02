@@ -70,7 +70,7 @@ export function CollaborationPanel({ bountyId, userId, username, avatar, isOwner
     <div className="fixed right-4 top-20 z-40 bg-ink-surface border border-ink-edge rounded-xl shadow-lg p-4 w-64">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Users className="h-5 w-5 text-purple-400" />
+          <Users className="h-5 w-5 text-accent-bright" />
           <h3 className="font-semibold text-sm">Collaborators</h3>
           <Badge variant={connected ? 'default' : 'secondary'} className="text-xs">
             {connected ? 'Live' : 'Offline'}
@@ -138,7 +138,7 @@ export function CollaborationPanel({ bountyId, userId, username, avatar, isOwner
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{collab.username}</p>
               {collab.cursor && (
-                <p className="text-xs text-purple-600">Active</p>
+                <p className="text-xs text-accent-bright">Active</p>
               )}
             </div>
           </div>

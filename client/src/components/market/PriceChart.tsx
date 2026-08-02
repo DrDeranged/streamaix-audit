@@ -59,7 +59,7 @@ export function PriceChart({ marketId, hours = 24 }: PriceChartProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-12 text-slate-400">
+          <div className="text-center py-12 text-muted">
             <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-20" />
             <p>No price history yet. Prices are tracked after each trade.</p>
           </div>
@@ -125,11 +125,11 @@ export function PriceChart({ marketId, hours = 24 }: PriceChartProps) {
         <div className="flex items-center justify-center gap-6 mt-4">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-emerald-500" />
-            <span className="text-sm text-slate-300">YES Price</span>
+            <span className="text-sm text-body">YES Price</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-red-500" />
-            <span className="text-sm text-slate-300">NO Price</span>
+            <span className="text-sm text-body">NO Price</span>
           </div>
         </div>
       </CardContent>

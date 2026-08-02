@@ -421,7 +421,7 @@ export default function BountyCard({ bounty }: BountyCardProps) {
                     <Button
                       variant="outline"
                       onClick={() => setShowTipDialog(false)}
-                      className="border-gray-500/50"
+                      className="border-ink-edge"
                       data-testid={`button-cancel-tip-${bounty.id}`}
                     >
                       Cancel

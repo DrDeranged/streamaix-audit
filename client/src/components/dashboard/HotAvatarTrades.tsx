@@ -66,7 +66,7 @@ export function HotAvatarTrades({ limit = 5, className = "" }: HotAvatarTradesPr
           <Flame className="w-5 h-5 text-orange-400" />
           <h3 className="text-lg font-semibold text-white">Hot Avatar Trades</h3>
         </div>
-        <div className="text-center py-6 text-slate-400">
+        <div className="text-center py-6 text-muted">
           <User className="w-8 h-8 mx-auto mb-2 opacity-50" />
           <p className="text-sm">No avatar trades yet</p>
         </div>
@@ -125,7 +125,7 @@ export function HotAvatarTrades({ limit = 5, className = "" }: HotAvatarTradesPr
                         {trade.outcome}
                       </Badge>
                     </div>
-                    <p className="text-xs text-slate-400 truncate mt-0.5">
+                    <p className="text-xs text-muted truncate mt-0.5">
                       {trade.marketQuestion}
                     </p>
                   </div>
@@ -141,7 +141,7 @@ export function HotAvatarTrades({ limit = 5, className = "" }: HotAvatarTradesPr
                         {trade.streamAmount.toLocaleString()}
                       </span>
                     </div>
-                    <span className="text-[10px] text-slate-500">
+                    <span className="text-[10px] text-muted">
                       {formatDistanceToNow(new Date(trade.createdAt), { addSuffix: true })}
                     </span>
                   </div>

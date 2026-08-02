@@ -171,7 +171,7 @@ export function Navigation() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/insights" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                      <Brain className="w-4 h-4 text-blue-400" />
+                      <Brain className="w-4 h-4 text-accent-bright" />
                       <div>
                         <span className="font-medium block">AI Insights</span>
                         <span className="text-xs text-secondary">Smart signals</span>
@@ -270,7 +270,7 @@ export function Navigation() {
                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl bg-ink-raised" />
                     <div className="absolute bottom-0 left-2 right-2 h-px bg-ink-divider opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="relative flex items-center gap-1.5">
-                      <TrendingUp className="w-4 h-4 text-purple-500 group-hover:text-purple-400 transition-colors drop-shadow-sm" />
+                      <TrendingUp className="w-4 h-4 text-accent-bright group-hover:text-accent-bright transition-colors drop-shadow-sm" />
                       <span className="font-medium text-sm">Markets</span>
                       <ChevronDown className="w-3 h-3 opacity-60" />
                     </div>
@@ -279,7 +279,7 @@ export function Navigation() {
                 <DropdownMenuContent className="w-56 bg-ink-surface border border-ink-edge rounded-xl shadow-2xl" align="start">
                   <DropdownMenuItem asChild>
                     <Link href="/markets" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                      <TrendingUp className="w-4 h-4 text-purple-400" />
+                      <TrendingUp className="w-4 h-4 text-accent-bright" />
                       <div>
                         <span className="font-medium block">Prediction Markets</span>
                         <span className="text-xs text-muted">Trade outcomes</span>
@@ -354,7 +354,7 @@ export function Navigation() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/summaries" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                      <FileText className="w-4 h-4 text-purple-400" />
+                      <FileText className="w-4 h-4 text-accent-bright" />
                       <div>
                         <span className="font-medium block">Summaries</span>
                         <span className="text-xs text-muted">AI-generated content</span>
@@ -393,7 +393,7 @@ export function Navigation() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/chat" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                      <MessageCircle className="w-4 h-4 text-blue-400" />
+                      <MessageCircle className="w-4 h-4 text-accent-bright" />
                       <div>
                         <span className="font-medium block">AI Chat</span>
                         <span className="text-xs text-muted">Ask anything</span>
@@ -537,7 +537,7 @@ export function Navigation() {
                     <div className="py-2">
                       <DropdownMenuItem asChild>
                         <Link href="/dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                          <LayoutDashboard className="w-4 h-4 text-purple-400" />
+                          <LayoutDashboard className="w-4 h-4 text-accent-bright" />
                           <span className="font-medium">Dashboard</span>
                         </Link>
                       </DropdownMenuItem>
@@ -565,7 +565,7 @@ export function Navigation() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                        <UserCircle className="w-4 h-4 text-blue-400" />
+                        <UserCircle className="w-4 h-4 text-accent-bright" />
                         <span className="font-medium">Profile</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem 
@@ -628,7 +628,7 @@ export function Navigation() {
                 {theme === "light" ? (
                   <Sun className="w-5 h-5 text-amber-500" />
                 ) : (
-                  <Moon className="w-5 h-5 text-purple-400" />
+                  <Moon className="w-5 h-5 text-accent-bright" />
                 )}
               </Button>
             </motion.div>
@@ -644,7 +644,7 @@ export function Navigation() {
                         <div className="absolute inset-0 bg-ink-raised/40 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                         <div className="relative flex items-center gap-2">
                           <div className="relative">
-                            <Wallet className="w-4 h-4 text-purple-500" />
+                            <Wallet className="w-4 h-4 text-accent-bright" />
                             <motion.div 
                               className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"
                               animate={{ scale: [1, 1.3, 1] }}
@@ -677,7 +677,7 @@ export function Navigation() {
                     <div className="py-2">
                       <DropdownMenuItem asChild>
                         <Link href="/wallet-dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                          <LayoutDashboard className="w-4 h-4 text-purple-400" />
+                          <LayoutDashboard className="w-4 h-4 text-accent-bright" />
                           <span className="font-medium">Dashboard</span>
                         </Link>
                       </DropdownMenuItem>
@@ -717,12 +717,12 @@ export function Navigation() {
                     <div className="absolute inset-0 bg-ink-divider translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                     {isConnecting ? (
                       <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin text-purple-500" />
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin text-accent-bright" />
                         <span className="relative z-10 font-medium">Connecting...</span>
                       </>
                     ) : (
                       <>
-                        <Wallet className="w-4 h-4 mr-2 text-purple-500" />
+                        <Wallet className="w-4 h-4 mr-2 text-accent-bright" />
                         <span className="relative z-10 font-medium">Connect Wallet</span>
                       </>
                     )}
@@ -805,7 +805,7 @@ export function Navigation() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
-                    <Brain className="w-4 h-4 text-blue-400" />
+                    <Brain className="w-4 h-4 text-accent-bright" />
                     AI Insights
                   </button>
                 </Link>
@@ -835,7 +835,7 @@ export function Navigation() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
-                    <TrendingUp className="w-4 h-4 text-purple-400" />
+                    <TrendingUp className="w-4 h-4 text-accent-bright" />
                     Prediction Markets
                   </button>
                 </Link>
@@ -886,7 +886,7 @@ export function Navigation() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
-                    <MessageCircle className="w-4 h-4 text-blue-400" />
+                    <MessageCircle className="w-4 h-4 text-accent-bright" />
                     AI Chat
                   </button>
                 </Link>
@@ -916,7 +916,7 @@ export function Navigation() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
-                    <GraduationCap className="w-4 h-4 text-purple-400" />
+                    <GraduationCap className="w-4 h-4 text-accent-bright" />
                     Learning Hub
                   </button>
                 </Link>

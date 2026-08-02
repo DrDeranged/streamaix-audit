@@ -26,7 +26,7 @@ export function LiveKitVideo({ track, className, muted = false, mirror = false }
   if (!track) {
     return (
       <div className={cn("bg-ink-page flex items-center justify-center", className)}>
-        <div className="text-slate-500 text-sm">No video</div>
+        <div className="text-muted text-sm">No video</div>
       </div>
     );
   }

@@ -31,8 +31,8 @@ export function GridSkeleton({ count = 6 }: { count?: number }) {
 
 export function TableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
-    <div className="rounded-xl border border-slate-700/50 overflow-hidden">
-      <div className="bg-ink-raised px-4 py-3 border-b border-slate-700/50">
+    <div className="rounded-xl border border-ink-edge overflow-hidden">
+      <div className="bg-ink-raised px-4 py-3 border-b border-ink-edge">
         <div className="flex gap-4">
           <Skeleton className="h-4 w-24" />
           <Skeleton className="h-4 w-32" />

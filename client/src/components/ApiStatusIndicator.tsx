@@ -74,10 +74,10 @@ export function ApiStatusIndicator() {
       </TooltipTrigger>
       <TooltipContent className="bg-ink-surface border-ink-edge max-w-xs">
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-slate-300 mb-2">API Services</p>
+          <p className="text-xs font-semibold text-body mb-2">API Services</p>
           {statuses.map((api) => (
             <div key={api.name} className="flex items-center justify-between gap-3">
-              <span className="text-xs text-slate-400">{api.name}</span>
+              <span className="text-xs text-muted">{api.name}</span>
               <Badge className={`${getStatusColor(api.status)} text-xs px-2 py-0.5`}>
                 {getStatusIcon(api.status)}
                 <span className="ml-1 capitalize">{api.status.replace('-', ' ')}</span>

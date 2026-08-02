@@ -454,7 +454,7 @@ export default function NewsletterAdmin() {
 
  {/* Platform Overview Stats - Enhanced Design */}
  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
- <div className="relative group overflow-hidden rounded-xl bg-ink-surface border border-accent-core p-5 hover:border-blue-400/50 transition-all duration-300">
+ <div className="relative group overflow-hidden rounded-xl bg-ink-surface border border-accent-core p-5 hover:border-accent-core/50 transition-all duration-300">
  <div className="absolute inset-0 bg-ink-surface opacity-0 group-hover:opacity-100 transition-opacity" />
  <div className="relative">
  <div className="flex items-center justify-between mb-4">
@@ -476,7 +476,7 @@ export default function NewsletterAdmin() {
  </div>
  </div>
 
- <div className="relative group overflow-hidden rounded-xl bg-ink-surface border border-accent-core p-5 hover:border-purple-400/50 transition-all duration-300">
+ <div className="relative group overflow-hidden rounded-xl bg-ink-surface border border-accent-core p-5 hover:border-accent-core/50 transition-all duration-300">
  <div className="absolute inset-0 bg-ink-surface opacity-0 group-hover:opacity-100 transition-opacity" />
  <div className="relative">
  <div className="flex items-center justify-between mb-4">
@@ -823,7 +823,7 @@ export default function NewsletterAdmin() {
  activity.type === 'bounty' ? Target :
  activity.type === 'market' ? TrendingUp : Activity;
  
- const iconColor = activity.type === 'user' ? 'text-blue-400 bg-blue-500/10 border-blue-500/20' :
+ const iconColor = activity.type === 'user' ? 'text-accent-bright bg-accent-core/10 border-accent-core/20' :
  activity.type === 'summary' ? 'text-accent-bright bg-accent-core/10 border-accent-core/20' :
  activity.type === 'bounty' ? 'text-amber-400 bg-amber-500/10 border-amber-500/20' :
  'text-cyan-400 bg-cyan-500/10 border-cyan-500/20';
@@ -983,7 +983,7 @@ export default function NewsletterAdmin() {
  },
  idle: {
  bg: 'bg-ink-surface',
- border: 'border-slate-500/50',
+ border: 'border-ink-edge',
  badge: 'bg-ink-raised border-ink-edge text-body',
  icon: 'text-secondary',
  glow: 'shadow-slate-500/20'
@@ -1174,7 +1174,7 @@ export default function NewsletterAdmin() {
 
  {/* Morning Send (8am EST) */}
  <div className="relative group">
- <div className="p-4 rounded-xl bg-ink-surface border-2 border-accent-core transition-all duration-300 hover:border-blue-400/70 hover:shadow-lg hover:shadow-blue-500/20">
+ <div className="p-4 rounded-xl bg-ink-surface border-2 border-accent-core transition-all duration-300 hover:border-accent-core/70 hover:shadow-lg hover:shadow-blue-500/20">
  <div className="font-bold text-primary text-base mb-2">
  {status?.nextMorning || 'Loading...'}
  </div>
@@ -1182,7 +1182,7 @@ export default function NewsletterAdmin() {
  <Button
  variant="outline"
  onClick={() => window.open('/api/newsletter/preview', '_blank')}
- className="w-full h-8 text-xs border border-accent-core hover:border-blue-400/60 hover:bg-blue-500/10 text-accent-bright font-semibold rounded-xl transition-all duration-300"
+ className="w-full h-8 text-xs border border-accent-core hover:border-accent-core/60 hover:bg-accent-core/10 text-accent-bright font-semibold rounded-xl transition-all duration-300"
  >
  <Eye className="w-3 h-3 mr-1" />
  Preview
@@ -1236,7 +1236,7 @@ export default function NewsletterAdmin() {
  placeholder="your@email.com"
  value={testEmail}
  onChange={(e) => setTestEmail(e.target.value)}
- className="bg-ink-surface border-2 border-accent-core focus:border-purple-400/60 text-primary placeholder:text-muted h-12 text-base rounded-xl transition-all duration-300"
+ className="bg-ink-surface border-2 border-accent-core focus:border-accent-core/60 text-primary placeholder:text-muted h-12 text-base rounded-xl transition-all duration-300"
  />
  </div>
  </div>

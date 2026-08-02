@@ -63,7 +63,7 @@ export function AvatarChatButton({ avatar, size = "sm", className = "", variant 
             className="relative px-3 text-xs font-mono bg-accent-deep/40 border-0 text-accent-bright hover:bg-accent-deep/60 transition-all duration-300"
             data-testid={`button-chat-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}
           >
-            <Sparkles className="h-3.5 w-3.5 text-purple-500 dark:text-purple-300 mr-1.5" />
+            <Sparkles className="h-3.5 w-3.5 text-accent-bright dark:text-accent-bright mr-1.5" />
             <span className="hidden sm:inline">Chat</span>
           </Button>
         </div>

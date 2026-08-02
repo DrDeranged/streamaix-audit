@@ -82,7 +82,7 @@ export function DiagnosticPanel() {
   return (
     <Card className="w-full border-ink-edge bg-ink-surface">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-purple-400">
+        <CardTitle className="flex items-center gap-2 text-accent-bright">
           <Activity className="h-5 w-5" />
           Production Diagnostics
         </CardTitle>
@@ -190,8 +190,8 @@ export function DiagnosticPanel() {
                 {resp.headers['x-server-version'] && (
                   <div className="bg-ink-raised p-2 rounded-xl text-xs space-y-1">
                     <div className="flex items-center gap-2">
-                      <Server className="h-3 w-3 text-purple-400" />
-                      <span className="text-purple-400 font-semibold">Server Info:</span>
+                      <Server className="h-3 w-3 text-accent-bright" />
+                      <span className="text-accent-bright font-semibold">Server Info:</span>
                     </div>
                     <div className="font-mono text-[10px] space-y-0.5 pl-5">
                       <div>Version: {resp.headers['x-server-version']}</div>
