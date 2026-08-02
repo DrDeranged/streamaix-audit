@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { SectionHeader } from "@/components/ui/section-header";
+import Surface from "@/components/ds/Surface";
+import SectionTitle from "@/components/ds/SectionTitle";
+import StatValue from "@/components/ds/StatValue";
 import { Clock, Coins, TrendingUp, Flame, Zap, Loader2, ArrowRight, Target, Brain, HelpCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "wouter";
@@ -11,28 +12,28 @@ import type { Bounty } from "@shared/schema";
 
 const getCategoryColor = (category?: string) => {
   const colors: Record<string, string> = {
-    crypto: "from-green-500 to-teal-500",
-    tech: "from-purple-500 to-pink-500",
-    business: "from-cyan-500 to-blue-500",
+    crypto: "bg-gain",
+    tech: "bg-accent-core",
+    business: "bg-accent-deep",
   };
-  return colors[category || ""] || "from-purple-500 to-purple-600";
+  return colors[category || ""] || "bg-accent-deep";
 };
 
 const getDifficultyBadge = (difficulty?: string) => {
   const badges: Record<string, { label: string; className: string; icon: JSX.Element }> = {
     easy: { 
       label: "Easy", 
-      className: "bg-green-500/20 text-green-300 border-green-400/30",
+      className: "bg-gain/10 text-gain border-gain/30",
       icon: <Zap className="w-3 h-3" />
     },
     medium: { 
       label: "Medium", 
-      className: "bg-yellow-500/20 text-yellow-300 border-yellow-400/30",
+      className: "bg-warn/10 text-warn border-warn/30",
       icon: <TrendingUp className="w-3 h-3" />
     },
     hard: { 
       label: "Hard", 
-      className: "bg-red-500/20 text-red-300 border-red-400/30",
+      className: "bg-loss/10 text-loss border-loss/30",
       icon: <Flame className="w-3 h-3" />
     },
   };
@@ -67,15 +68,15 @@ const formatTimeLeft = (deadline?: Date | string | null) => {
 };
 
 const getUrgencyColor = (deadline?: Date | string | null) => {
-  if (!deadline) return "text-gray-400";
+  if (!deadline) return "text-muted";
   const deadlineDate = typeof deadline === 'string' ? new Date(deadline) : deadline;
   const now = new Date();
   const hours = (deadlineDate.getTime() - now.getTime()) / (1000 * 60 * 60);
   
-  if (hours < 6) return "text-red-400 animate-pulse";
-  if (hours < 24) return "text-orange-400";
-  if (hours < 72) return "text-yellow-400";
-  return "text-gray-400";
+  if (hours < 6) return "text-loss animate-pulse";
+  if (hours < 24) return "text-warn";
+  if (hours < 72) return "text-warn";
+  return "text-muted";
 };
 
 interface BountyCardProps {
@@ -98,56 +99,50 @@ function BountyCard({ bounty, index }: BountyCardProps) {
       whileHover={{ y: -8, scale: 1.02 }}
       className="h-full"
     >
-      <Card className={`group h-full bg-white dark:bg-slate-900/80 backdrop-blur-xl hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-500 overflow-hidden relative ${
+      <Surface className={`group h-full transition-all duration-500 overflow-hidden relative hover:bg-ink-raised ${
         isKnowledgeQuestion 
-          ? 'border-cyan-400 dark:border-cyan-500/50 hover:border-cyan-400 dark:hover:border-cyan-400' 
-          : 'border-gray-200 dark:border-purple-500/40 hover:border-purple-400 dark:hover:border-fuchsia-400'
+          ? 'border-accent-core/60 hover:border-accent-core' 
+          : 'border-ink-edge hover:border-accent-core/70'
       }`}>
-        {/* Hover gradient effect */}
-        <div className={`absolute inset-0 transition-all duration-500 pointer-events-none ${
-          isKnowledgeQuestion
-            ? 'bg-gradient-to-br from-cyan-500/0 to-cyan-500/0 group-hover:from-cyan-500/10 group-hover:to-blue-500/10'
-            : 'bg-gradient-to-br from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/10 group-hover:to-fuchsia-500/10'
-        }`} />
         
         {/* Knowledge Question Badge */}
         {isKnowledgeQuestion && (
-          <div className="absolute top-0 right-0 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg flex items-center gap-1">
+          <div className="absolute top-0 right-0 bg-accent-core text-primary text-[10px] font-bold px-2 py-1 rounded-bl-xl flex items-center gap-1">
             <Brain className="w-3 h-3" />
             AI Verified Q&A
           </div>
         )}
         
-        <CardContent className="p-6 flex flex-col h-full relative">
+        <div className="p-6 flex flex-col h-full relative">
           {/* Header with reward */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                 isKnowledgeQuestion 
-                  ? 'bg-gradient-to-br from-cyan-500 to-blue-500' 
-                  : 'bg-gradient-to-br from-purple-500 to-cyan-500'
+                   ? 'bg-accent-core' 
+                   : 'bg-accent-deep'
               }`}>
                 {isKnowledgeQuestion ? <HelpCircle className="w-5 h-5 text-white" /> : <Target className="w-5 h-5 text-white" />}
               </div>
               <div>
-                <p className="text-xs text-slate-600 dark:text-gray-400">
+                <p className="text-xs text-muted">
                   {bounty.createdAt ? formatDistanceToNow(new Date(bounty.createdAt), { addSuffix: true }) : "recently"}
                 </p>
               </div>
             </div>
-            <div className={`bg-gradient-to-r ${isKnowledgeQuestion ? 'from-cyan-500 to-blue-500' : rewardColor} text-white px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1 shadow-lg`}>
+            <div className={`${isKnowledgeQuestion ? 'bg-accent-core' : rewardColor} text-primary px-3 py-1.5 rounded-xl text-sm font-bold flex items-center gap-1`}>
               <Coins className="w-4 h-4" />
               {formatReward(bounty.reward, bounty.tokenType)}
             </div>
           </div>
 
           {/* Title */}
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2 line-clamp-2 group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors">
+          <h3 className="text-lg font-semibold text-primary mb-2 line-clamp-2 group-hover:text-accent-bright transition-colors">
             {bounty.title}
           </h3>
 
           {/* Description */}
-          <p className="text-slate-700 dark:text-gray-300 text-sm mb-4 line-clamp-2 flex-grow">
+          <p className="text-body text-sm mb-4 line-clamp-2 flex-grow">
             {bounty.description}
           </p>
 
@@ -159,14 +154,14 @@ function BountyCard({ bounty, index }: BountyCardProps) {
             </Badge>
             
             {bounty.category && (
-              <Badge variant="outline" className="border-purple-300 dark:border-purple-400/30 text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-500/10">
+              <Badge variant="outline" className="border-accent-core/30 text-accent-bright bg-accent-core/10">
                 {bounty.category}
               </Badge>
             )}
           </div>
 
           {/* Footer with time and action */}
-          <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-white/10">
+          <div className="flex items-center justify-between pt-4 border-t border-ink-divider">
             <div className={`flex items-center gap-1 text-sm ${urgencyColor}`}>
               <Clock className="w-4 h-4" />
               {formatTimeLeft(bounty.deadline)}
@@ -174,21 +169,19 @@ function BountyCard({ bounty, index }: BountyCardProps) {
             
             <Link href={`/bounties/${bounty.id}`}>
               <div className="relative group/btn inline-block">
-                <div className="absolute -inset-[1px] rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-fuchsia-500 opacity-70 group-hover/btn:opacity-100 blur-[1px] transition-opacity duration-300" />
                 <Button
                   size="sm"
-                  className="relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border-0 text-slate-800 dark:text-white hover:bg-white/60 dark:hover:bg-slate-900/60 transition-all duration-300 overflow-hidden px-3"
+                  className="relative bg-accent-core text-primary hover:bg-accent-deep glow-accent transition-all duration-300 overflow-hidden px-3 rounded-xl"
                   data-testid={`button-view-bounty-${bounty.id}`}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-500" />
                   <span className="relative z-10 font-medium">View</span>
-                  <ArrowRight className="w-4 h-4 ml-1 text-purple-500 group-hover/btn:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-4 h-4 ml-1 text-primary group-hover/btn:translate-x-1 transition-transform" />
                 </Button>
               </div>
             </Link>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </Surface>
     </motion.div>
   );
 }
@@ -227,7 +220,7 @@ export function BountyFeed() {
 
       {/* Animated gradient orbs */}
       <motion.div
-        className="absolute top-20 left-10 w-64 h-64 bg-gradient-to-br from-purple-500/30 to-purple-600/30 rounded-full blur-3xl"
+        className="absolute top-20 left-10 w-64 h-64 bg-accent-core/10 rounded-xl blur-3xl"
         animate={{
           y: [-20, 40, -20],
           x: [-10, 20, -10],
@@ -236,7 +229,7 @@ export function BountyFeed() {
         transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute bottom-20 right-10 w-80 h-80 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-full blur-3xl"
+        className="absolute bottom-20 right-10 w-80 h-80 bg-accent-deep/10 rounded-xl blur-3xl"
         animate={{
           y: [-30, 30, -30],
           x: [-20, 10, -20],
@@ -254,13 +247,14 @@ export function BountyFeed() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <SectionHeader
-            title="Bounty Feed"
-            subtitle="Earn STREAM points by completing bounties"
-            highlightWord="Bounty"
-            badge="Live Bounties"
-            badgeIcon={<Target className="w-3 h-3" />}
-          />
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 rounded-xl border border-accent-core/30 bg-accent-core/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-accent-bright">
+              <Target className="w-3 h-3" />
+              Live Bounties
+            </div>
+            <SectionTitle as="h2">Bounty Feed</SectionTitle>
+            <p className="text-body">Earn STREAM points by completing bounties</p>
+          </div>
         </motion.div>
 
         {/* Stats Bar */}
@@ -272,41 +266,38 @@ export function BountyFeed() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="flex flex-wrap justify-center gap-6 mb-12"
           >
-            <div className="flex items-center gap-3 px-6 py-3 rounded-lg bg-white/80 dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-sm shadow-sm">
-              <Flame className="w-5 h-5 text-orange-500 dark:text-orange-400" />
+            <Surface className="flex items-center gap-3 px-6 py-3">
+              <Flame className="w-5 h-5 text-warn" />
               <div>
-                <div className="text-2xl font-bold text-slate-900 dark:text-white">{stats.activeBounties}</div>
-                <div className="text-xs text-slate-500 dark:text-gray-400">Active Bounties</div>
+                <StatValue label="Active Bounties" value={stats.activeBounties} />
               </div>
-            </div>
+            </Surface>
             
-            <div className="flex items-center gap-3 px-6 py-3 rounded-lg bg-white/80 dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-sm shadow-sm">
-              <Coins className="w-5 h-5 text-yellow-500 dark:text-yellow-400" />
+            <Surface className="flex items-center gap-3 px-6 py-3">
+              <Coins className="w-5 h-5 text-warn" />
               <div>
-                <div className="text-2xl font-bold text-slate-900 dark:text-white">{stats.totalRewards.toLocaleString()}</div>
-                <div className="text-xs text-slate-500 dark:text-gray-400">Total Rewards</div>
+                <StatValue label="Total Rewards" value={stats.totalRewards.toLocaleString()} />
               </div>
-            </div>
+            </Surface>
             
-            <div className="flex items-center gap-3 px-6 py-3 rounded-lg bg-white/80 dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-sm shadow-sm">
-              <TrendingUp className="w-5 h-5 text-green-500 dark:text-green-400" />
+            <Surface className="flex items-center gap-3 px-6 py-3">
+              <TrendingUp className="w-5 h-5 text-gain" />
               <div>
-                <div className="text-2xl font-bold text-slate-900 dark:text-white">{stats.summariesCreated}</div>
-                <div className="text-xs text-slate-500 dark:text-gray-400">Completed</div>
+                <StatValue label="Completed" value={stats.summariesCreated} />
               </div>
-            </div>
+            </Surface>
           </motion.div>
         )}
 
         {/* Bounties Grid */}
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 className="w-12 h-12 text-purple-400 animate-spin mb-4" />
-            <p className="text-gray-400">Loading bounties...</p>
+            <Loader2 className="w-12 h-12 text-accent-bright animate-spin mb-4" />
+            <p className="text-secondary">Loading bounties...</p>
           </div>
         ) : error ? (
           <div className="text-center py-20">
-            <p className="text-gray-400">Unable to load bounties. Please try again later.</p>
+            <p className="text-secondary">Unable to load bounties. Please try again later.</p>
           </div>
         ) : bounties.length > 0 ? (
           <>
@@ -330,17 +321,13 @@ export function BountyFeed() {
                   whileTap={{ scale: 0.97 }}
                   className="inline-block relative group"
                 >
-                  {/* Animated gradient border */}
-                  <div className="absolute -inset-[2px] rounded-xl bg-gradient-to-r from-cyan-500 via-purple-500 to-fuchsia-500 opacity-80 group-hover:opacity-100 blur-[2px] animate-gradient-x transition-opacity duration-300" />
                   <Button
                     size="lg"
-                    className="relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border-0 text-slate-800 dark:text-white hover:bg-white/60 dark:hover:bg-slate-900/60 transition-all duration-300 overflow-hidden px-6 py-3"
+                    className="relative grad-accent text-primary hover:bg-accent-deep glow-accent transition-all duration-300 overflow-hidden px-6 py-3 rounded-xl"
                     data-testid="button-explore-all-bounties"
                   >
-                    {/* Shimmer effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                     <span className="relative z-10 font-medium">Explore All Bounties</span>
-                    <ArrowRight className="w-5 h-5 ml-2 text-purple-500 dark:text-purple-400 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-5 h-5 ml-2 text-primary group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </motion.div>
               </Link>
@@ -348,12 +335,12 @@ export function BountyFeed() {
           </>
         ) : (
           <div className="text-center py-20">
-            <Target className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400 text-lg">No bounties available yet.</p>
-            <p className="text-gray-500 text-sm mt-2">Be the first to create one!</p>
+            <Target className="w-16 h-16 text-muted mx-auto mb-4" />
+            <p className="text-secondary text-lg">No bounties available yet.</p>
+            <p className="text-muted text-sm mt-2">Be the first to create one!</p>
             <Button
               asChild
-              className="mt-6 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
+              className="mt-6 grad-accent hover:bg-accent-deep rounded-xl"
             >
               <Link href="/bounties">
                 Create Bounty

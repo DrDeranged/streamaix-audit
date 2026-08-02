@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Mail, Brain, TrendingUp, Target, BarChart3, Sparkles, Users, Bot, Radio, LineChart, GraduationCap, Wallet } from "lucide-react";
+import { Brain, TrendingUp, Target, BarChart3, Sparkles, Users, Bot, Radio, LineChart, GraduationCap, Wallet } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { WaitlistModal } from "@/components/WaitlistModal";
+import Surface from "@/components/ds/Surface";
+import SectionTitle from "@/components/ds/SectionTitle";
 
 interface HeroSectionProps {
   onNavigateToSection?: (sectionId: string) => void;
@@ -19,20 +21,11 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
   };
 
   return (
-    <section id="hero" className="min-h-screen flex items-center justify-center relative overflow-hidden pt-20 pb-16 bg-transparent">
-      {/* Subtle grid background */}
-      <div className="absolute inset-0 opacity-[0.03]">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `linear-gradient(rgba(139, 92, 246, 0.3) 1px, transparent 1px),
-                           linear-gradient(90deg, rgba(139, 92, 246, 0.3) 1px, transparent 1px)`,
-          backgroundSize: '60px 60px'
-        }} />
-      </div>
-
+    <section id="hero" className="min-h-screen flex items-center justify-center relative overflow-hidden pt-20 pb-16 bg-ink-page">
       {/* Floating orbs - techy accent */}
-      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-      <div className="absolute top-1/2 right-1/3 w-48 h-48 bg-fuchsia-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-accent-core/10 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-bright/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      <div className="absolute top-1/2 right-1/3 w-48 h-48 bg-accent-deep/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
       
       <div className="container mx-auto px-6 md:px-8 text-center relative z-10">
         <motion.div
@@ -42,22 +35,22 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
           className="max-w-4xl mx-auto"
         >
           {/* Main headline */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-orbitron font-bold mb-6 tracking-tight leading-[1.1]">
-            <span className="bg-gradient-to-r from-purple-400 via-fuchsia-400 to-purple-400 bg-clip-text text-transparent animate-gradient">
+          <SectionTitle as="h1" className="mb-6 text-4xl font-bold tracking-tight leading-[1.1] sm:text-5xl md:text-6xl lg:text-7xl">
+            <span className="text-accent-bright">
               Stream the Noise.
             </span>
             <br />
-            <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
+            <span className="text-primary">
               Capture the Signal.
             </span>
-          </h1>
+          </SectionTitle>
           
           {/* Subtitle - clean and minimal */}
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-base sm:text-lg md:text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed font-light"
+            className="text-base sm:text-lg md:text-xl text-secondary mb-12 max-w-2xl mx-auto leading-relaxed font-light"
           >
             Autonomous intelligence. On-chain rewards.
           </motion.p>
@@ -73,11 +66,11 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
                   variant="outline"
-                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-transparent border border-slate-700/50 hover:border-red-500/50 hover:bg-red-500/5 text-slate-300 hover:text-red-400 transition-all duration-300 rounded-xl backdrop-blur-sm group relative"
+                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-loss/50 hover:bg-ink-raised text-body hover:text-loss transition-all duration-300 rounded-xl backdrop-blur-sm group relative"
                   data-testid="button-live-streams"
                 >
-                  <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                  <Radio className="w-4 h-4 mr-2 text-red-400 group-hover:text-red-300" />
+                  <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-loss animate-pulse" />
+                  <Radio className="w-4 h-4 mr-2 text-loss group-hover:text-loss" />
                   Live Streams
                 </Button>
               </motion.div>
@@ -87,10 +80,10 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
                   variant="outline"
-                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-transparent border border-slate-700/50 hover:border-cyan-500/50 hover:bg-cyan-500/5 text-slate-300 hover:text-cyan-400 transition-all duration-300 rounded-xl backdrop-blur-sm group"
+                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-accent-core/50 hover:bg-ink-raised text-body hover:text-accent-bright transition-all duration-300 rounded-xl backdrop-blur-sm group"
                   data-testid="button-discover"
                 >
-                  <BarChart3 className="w-4 h-4 mr-2 text-cyan-400 group-hover:text-cyan-300" />
+                  <BarChart3 className="w-4 h-4 mr-2 text-accent-bright group-hover:text-primary" />
                   Discover
                 </Button>
               </motion.div>
@@ -100,10 +93,10 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
                   variant="outline"
-                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-transparent border border-slate-700/50 hover:border-purple-500/50 hover:bg-purple-500/5 text-slate-300 hover:text-purple-400 transition-all duration-300 rounded-xl backdrop-blur-sm group"
+                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-accent-core/50 hover:bg-ink-raised text-body hover:text-accent-bright transition-all duration-300 rounded-xl backdrop-blur-sm group"
                   data-testid="button-markets"
                 >
-                  <TrendingUp className="w-4 h-4 mr-2 text-purple-400 group-hover:text-purple-300" />
+                  <TrendingUp className="w-4 h-4 mr-2 text-accent-bright group-hover:text-primary" />
                   Markets
                 </Button>
               </motion.div>
@@ -113,10 +106,10 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
                   variant="outline"
-                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-transparent border border-slate-700/50 hover:border-fuchsia-500/50 hover:bg-fuchsia-500/5 text-slate-300 hover:text-fuchsia-400 transition-all duration-300 rounded-xl backdrop-blur-sm group"
+                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-accent-core/50 hover:bg-ink-raised text-body hover:text-accent-bright transition-all duration-300 rounded-xl backdrop-blur-sm group"
                   data-testid="button-bounties"
                 >
-                  <Target className="w-4 h-4 mr-2 text-fuchsia-400 group-hover:text-fuchsia-300" />
+                  <Target className="w-4 h-4 mr-2 text-accent-bright group-hover:text-primary" />
                   Bounties
                 </Button>
               </motion.div>
@@ -126,10 +119,10 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
               <Button 
                 variant="outline"
                 onClick={() => navigateToSection('ai-processor')}
-                className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-transparent border border-slate-700/50 hover:border-emerald-500/50 hover:bg-emerald-500/5 text-slate-300 hover:text-emerald-400 transition-all duration-300 rounded-xl backdrop-blur-sm group"
+                className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-gain/50 hover:bg-ink-raised text-body hover:text-gain transition-all duration-300 rounded-xl backdrop-blur-sm group"
                 data-testid="button-ai-analysis"
               >
-                <Brain className="w-4 h-4 mr-2 text-emerald-400 group-hover:text-emerald-300" />
+                <Brain className="w-4 h-4 mr-2 text-gain group-hover:text-gain" />
                 AI Analysis
               </Button>
             </motion.div>
@@ -138,10 +131,10 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
                   variant="outline"
-                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-transparent border border-slate-700/50 hover:border-orange-500/50 hover:bg-orange-500/5 text-slate-300 hover:text-orange-400 transition-all duration-300 rounded-xl backdrop-blur-sm group"
+                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-warn/50 hover:bg-ink-raised text-body hover:text-warn transition-all duration-300 rounded-xl backdrop-blur-sm group"
                   data-testid="button-ai-trading"
                 >
-                  <LineChart className="w-4 h-4 mr-2 text-orange-400 group-hover:text-orange-300" />
+                  <LineChart className="w-4 h-4 mr-2 text-warn group-hover:text-warn" />
                   AI Trading
                 </Button>
               </motion.div>
@@ -151,10 +144,10 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
               <Button 
                 variant="outline"
                 onClick={() => navigateToSection('social')}
-                className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-transparent border border-slate-700/50 hover:border-indigo-500/50 hover:bg-indigo-500/5 text-slate-300 hover:text-indigo-400 transition-all duration-300 rounded-xl backdrop-blur-sm group"
+                className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-accent-core/50 hover:bg-ink-raised text-body hover:text-accent-bright transition-all duration-300 rounded-xl backdrop-blur-sm group"
                 data-testid="button-social-feed"
               >
-                <Users className="w-4 h-4 mr-2 text-indigo-400 group-hover:text-indigo-300" />
+                <Users className="w-4 h-4 mr-2 text-accent-bright group-hover:text-primary" />
                 Social Feed
               </Button>
             </motion.div>
@@ -163,10 +156,10 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
               <Button 
                 variant="outline"
                 onClick={() => navigateToSection('avatars')}
-                className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-transparent border border-slate-700/50 hover:border-amber-500/50 hover:bg-amber-500/5 text-slate-300 hover:text-amber-400 transition-all duration-300 rounded-xl backdrop-blur-sm group"
+                className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-warn/50 hover:bg-ink-raised text-body hover:text-warn transition-all duration-300 rounded-xl backdrop-blur-sm group"
                 data-testid="button-knowledge-avatars"
               >
-                <Bot className="w-4 h-4 mr-2 text-amber-400 group-hover:text-amber-300" />
+                <Bot className="w-4 h-4 mr-2 text-warn group-hover:text-warn" />
                 Knowledge Avatars
               </Button>
             </motion.div>
@@ -175,10 +168,10 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
                   variant="outline"
-                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-transparent border border-slate-700/50 hover:border-violet-500/50 hover:bg-violet-500/5 text-slate-300 hover:text-violet-400 transition-all duration-300 rounded-xl backdrop-blur-sm group"
+                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-accent-core/50 hover:bg-ink-raised text-body hover:text-accent-bright transition-all duration-300 rounded-xl backdrop-blur-sm group"
                   data-testid="button-learn"
                 >
-                  <GraduationCap className="w-4 h-4 mr-2 text-violet-400 group-hover:text-violet-300" />
+                  <GraduationCap className="w-4 h-4 mr-2 text-accent-bright group-hover:text-primary" />
                   Learn
                 </Button>
               </motion.div>
@@ -188,10 +181,10 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
                   variant="outline"
-                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-transparent border border-slate-700/50 hover:border-cyan-500/50 hover:bg-cyan-500/5 text-slate-300 hover:text-cyan-400 transition-all duration-300 rounded-xl backdrop-blur-sm group"
+                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-accent-core/50 hover:bg-ink-raised text-body hover:text-accent-bright transition-all duration-300 rounded-xl backdrop-blur-sm group"
                   data-testid="button-bot-trading"
                 >
-                  <Sparkles className="w-4 h-4 mr-2 text-cyan-400 group-hover:text-cyan-300" />
+                  <Sparkles className="w-4 h-4 mr-2 text-accent-bright group-hover:text-primary" />
                   Bot Trading
                 </Button>
               </motion.div>
@@ -201,10 +194,10 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
                   variant="outline"
-                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-transparent border border-slate-700/50 hover:border-pink-500/50 hover:bg-pink-500/5 text-slate-300 hover:text-pink-400 transition-all duration-300 rounded-xl backdrop-blur-sm group"
+                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-accent-core/50 hover:bg-ink-raised text-body hover:text-accent-bright transition-all duration-300 rounded-xl backdrop-blur-sm group"
                   data-testid="button-portfolio"
                 >
-                  <Wallet className="w-4 h-4 mr-2 text-pink-400 group-hover:text-pink-300" />
+                  <Wallet className="w-4 h-4 mr-2 text-accent-bright group-hover:text-primary" />
                   Portfolio
                 </Button>
               </motion.div>
@@ -226,26 +219,19 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
               data-testid="button-join-waitlist"
             >
               {/* Subtle outer glow */}
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-400/50 via-purple-500/50 to-fuchsia-500/50 rounded-lg blur-sm opacity-30 group-hover:opacity-60 transition-all duration-500" />
+              <div className="absolute -inset-0.5 bg-accent-core/30 rounded-xl blur-sm opacity-30 group-hover:opacity-60 transition-all duration-500" />
               
               {/* Thin gradient border */}
-              <div className="absolute -inset-[1px] bg-gradient-to-r from-cyan-400 via-purple-500 to-fuchsia-500 rounded-lg opacity-60 group-hover:opacity-85 transition-opacity duration-300" />
+              <div className="absolute -inset-[1px] bg-accent-core rounded-xl opacity-60 group-hover:opacity-85 transition-opacity duration-300" />
               
               {/* Glass container - ultra compact */}
-              <div 
-                className="relative px-5 py-2.5 rounded-lg overflow-hidden"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.4) 0%, rgba(30, 20, 50, 0.45) 50%, rgba(15, 23, 42, 0.4) 100%)',
-                  backdropFilter: 'blur(16px) saturate(140%)',
-                  WebkitBackdropFilter: 'blur(16px) saturate(140%)',
-                }}
-              >
+              <Surface variant="raised" className="relative px-5 py-2.5 rounded-xl overflow-hidden">
                 {/* Top highlight */}
-                <div className="absolute top-0 left-2 right-2 h-[1px] bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+                <div className="absolute top-0 left-2 right-2 h-[1px] bg-accent-bright/30" />
                 
                 {/* Shimmer on hover */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-600" />
+                  <div className="absolute inset-0 bg-accent-core/10 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-600" />
                 </div>
                 
                 {/* Button content - compact */}
@@ -254,13 +240,13 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
                     animate={{ rotate: [0, 6, -6, 0] }}
                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400/80" />
+                    <Sparkles className="w-3.5 h-3.5 text-warn" />
                   </motion.div>
-                  <span className="text-xs sm:text-sm font-medium text-white/90">
+                  <span className="text-xs sm:text-sm font-medium text-primary">
                     Join the Waitlist
                   </span>
                 </div>
-              </div>
+              </Surface>
             </motion.div>
           </motion.div>
 
@@ -269,9 +255,9 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 1 }}
-            className="mt-16 flex items-center justify-center gap-2 text-slate-500 text-sm"
+            className="mt-16 flex items-center justify-center gap-2 text-muted text-sm"
           >
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-gain animate-pulse" />
             <span>100+ AI agents active on Base</span>
           </motion.div>
         </motion.div>

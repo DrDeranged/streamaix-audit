@@ -1,14 +1,13 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { SectionHeader } from "@/components/ui/section-header";
+import SectionTitle from "@/components/ds/SectionTitle";
+import Surface from "@/components/ds/Surface";
 import { motion } from "framer-motion";
-import { Play, Clock, Zap, ChevronLeft, ChevronRight, Loader2, ExternalLink, Eye, Brain, BarChart3, FileText, Wifi } from "lucide-react";
+import { Play, Clock, ChevronLeft, ChevronRight, Loader2, Eye, Brain } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 
 // Long-form crypto podcasts (60+ minutes) showcasing AI processing utility
 const latestCryptoPodcasts = [
@@ -201,7 +200,7 @@ export function PopularCryptoVideos() {
   };
 
   return (
-    <section className="py-12 bg-background">
+    <section className="bg-ink-page py-12">
 
       <div className="container mx-auto px-4">
         {/* Professional Header */}
@@ -212,10 +211,12 @@ export function PopularCryptoVideos() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <SectionHeader
-            title="Live AI Processing"
-            subtitle="See real AI analysis in action with trending crypto content"
-          />
+          <SectionTitle eyebrow="StreamAiX intelligence" className="text-xl sm:text-2xl">
+            Live AI Processing
+          </SectionTitle>
+          <p className="mt-2 text-sm text-secondary">
+            See real AI analysis in action with trending crypto content
+          </p>
         </motion.div>
         
         <div className="flex items-center justify-between mb-6">
@@ -227,7 +228,7 @@ export function PopularCryptoVideos() {
               variant="outline"
               size="sm"
               onClick={() => handleScroll('left')}
-              className="h-10 w-10 p-0 bg-gradient-to-r from-purple-500/10 to-purple-600/10 border-purple-300/30 hover:from-purple-500/20 hover:to-purple-600/20 transform hover:scale-105 transition-all duration-300"
+              className="h-10 w-10 rounded-xl border border-ink-edge bg-ink-surface p-0 text-secondary transition-colors duration-300 hover:bg-ink-raised hover:text-primary disabled:opacity-40"
               disabled={currentIndex === 0}
               data-testid="button-scroll-left"
             >
@@ -237,7 +238,7 @@ export function PopularCryptoVideos() {
               variant="outline"
               size="sm"
               onClick={() => handleScroll('right')}
-              className="h-10 w-10 p-0 bg-gradient-to-r from-purple-500/10 to-purple-600/10 border-purple-300/30 hover:from-purple-500/20 hover:to-purple-600/20 transform hover:scale-105 transition-all duration-300"
+              className="h-10 w-10 rounded-xl border border-ink-edge bg-ink-surface p-0 text-secondary transition-colors duration-300 hover:bg-ink-raised hover:text-primary disabled:opacity-40"
               disabled={currentIndex >= latestCryptoPodcasts.length - 1}
               data-testid="button-scroll-right"
             >
@@ -267,15 +268,15 @@ export function PopularCryptoVideos() {
                 viewport={{ once: true }}
                 className="flex-none w-80 snap-start"
               >
-                <Card className="group relative overflow-hidden bg-gradient-to-br from-background via-background to-muted/20 border border-purple-200/20 hover:border-purple-400/40 hover:shadow-xl hover:shadow-indigo-500/10 transform hover:scale-[1.02] transition-all duration-500 flex flex-col h-[400px]">
-                  <CardContent className="p-0 flex flex-col flex-1">
+                <Surface className="group relative flex h-[400px] flex-col overflow-hidden border border-ink-edge bg-ink-surface transition-transform duration-500 hover:scale-[1.02] hover:border-accent-core/50">
+                  <div className="flex flex-1 flex-col p-0">
                     {/* Thumbnail Container */}
                     <div className="relative aspect-video overflow-hidden">
                       <img
                         data-video-id={video.id}
                         src={video.thumbnail}
                         alt={video.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                         onError={() => handleImageError(video.id, video.thumbnail, video.fallbackThumbnail)}
                         onLoad={() => console.log(`Thumbnail loaded for video ${video.id}`)}
                         style={{ minHeight: '200px' }}
@@ -284,33 +285,33 @@ export function PopularCryptoVideos() {
                       {/* Fallback gradient */}
                       <div 
                         data-fallback-id={video.id}
-                        className="hidden absolute inset-0 bg-gradient-to-br from-primary/60 to-accent/60 flex items-center justify-center"
+                         className="absolute inset-0 hidden items-center justify-center bg-ink-raised"
                       >
-                        <Play className="w-12 h-12 text-primary-foreground" />
+                         <Play className="h-12 w-12 text-accent-bright" />
                       </div>
                       
                       {/* Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none"></div>
+                       <div className="pointer-events-none absolute inset-0 bg-ink-page/20"></div>
 
                       {/* Live badge */}
                       {video.isLive && (
-                        <div className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 animate-pulse">
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                         <div className="absolute left-2 top-2 flex items-center gap-1 rounded-xl bg-loss px-2 py-1 text-xs text-primary animate-pulse">
+                           <div className="h-2 w-2 rounded-full bg-ink-page"></div>
                           LIVE
                         </div>
                       )}
 
                       {/* Duration Badge */}
-                      <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+                       <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-xl bg-ink-page/90 px-2 py-1 text-xs text-primary">
                         <Clock className="w-3 h-3" />
                         {video.duration}
                       </div>
 
                       {/* Professional Hover Effect */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-purple-600/40 via-purple-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+                       <div className="pointer-events-none absolute inset-0 bg-accent-core/20 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="bg-black/60 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
-                            <span className="text-white font-medium text-sm flex items-center gap-2">
+                           <div className="rounded-xl border border-ink-edge bg-ink-page/90 px-4 py-2">
+                             <span className="flex items-center gap-2 text-sm font-medium text-primary">
                               <Brain className="w-4 h-4" />
                               AI Ready
                             </span>
@@ -320,25 +321,25 @@ export function PopularCryptoVideos() {
                     </div>
 
                     {/* Content */}
-                    <div className="p-4 flex flex-col flex-1">
+                     <div className="flex flex-1 flex-col p-4">
                       {/* Channel and Time */}
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-foreground/80">
+                         <span className="text-sm font-medium text-body">
                           {video.channel}
                         </span>
-                        <span className="text-xs text-muted-foreground/80">
+                         <span className="text-xs text-muted">
                           {video.uploadTime}
                         </span>
                       </div>
 
                       {/* Title */}
-                      <h3 className="font-medium text-foreground mb-3 line-clamp-2 text-sm leading-tight flex-1">
+                       <h3 className="mb-3 flex-1 text-sm font-medium leading-tight text-primary line-clamp-2">
                         {video.title}
                       </h3>
 
                       {/* Stats and Tags */}
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                       <div className="mb-4 flex items-center justify-between">
+                         <span className="flex items-center gap-1 text-xs text-secondary">
                           <Eye className="w-3 h-3" />
                           {video.views}
                         </span>
@@ -347,7 +348,7 @@ export function PopularCryptoVideos() {
                             <Badge 
                               key={tag} 
                               variant="secondary" 
-                              className="text-xs px-1.5 py-0.5"
+                               className="rounded-xl border border-ink-edge bg-ink-raised px-1.5 py-0.5 text-xs text-secondary"
                             >
                               {tag}
                             </Badge>
@@ -359,7 +360,7 @@ export function PopularCryptoVideos() {
                       <Button
                         onClick={() => handleProcessVideo(video)}
                         disabled={processingVideoId === video.id}
-                        className="w-full h-12 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 transform hover:scale-105 active:translate-y-[-2px] transition-all duration-300 font-medium"
+                         className="grad-accent glow-accent h-12 w-full rounded-xl font-medium text-primary transition-transform duration-300 hover:scale-[1.02] active:translate-y-[-2px]"
                         data-testid={`button-process-main-${video.id}`}
                       >
                         {processingVideoId === video.id ? (
@@ -375,8 +376,8 @@ export function PopularCryptoVideos() {
                         )}
                       </Button>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </Surface>
               </motion.div>
             ))}
           </div>
@@ -386,8 +387,8 @@ export function PopularCryptoVideos() {
             {latestCryptoPodcasts.map((_, index) => (
               <button
                 key={index}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  index === currentIndex ? 'bg-primary' : 'bg-muted-foreground/30'
+                 className={`h-2 w-2 rounded-full transition-colors ${
+                   index === currentIndex ? 'bg-accent-core glow-accent' : 'bg-ink-edge'
                 }`}
                 onClick={() => {
                   setCurrentIndex(index);

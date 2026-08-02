@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { SectionHeader } from '@/components/ui/section-header';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 import { SocialPost } from '@/components/social/SocialPost';
 import { PostCreationModal } from '@/components/social/PostCreationModal';
 import { CompactBountyCard, CompactMarketCard, CompactStoryCard, MacroDataCard } from '@/components/social/CompactCards';
@@ -66,7 +67,7 @@ export function DiscoverFeed() {
 
           if (distance < 120) {
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(168, 85, 247, ${0.1 * (1 - distance / 120)})`;
+            ctx.strokeStyle = `rgba(139, 124, 246, ${0.1 * (1 - distance / 120)})`;
             ctx.lineWidth = 0.5;
             ctx.moveTo(node.x, node.y);
             ctx.lineTo(otherNode.x, otherNode.y);
@@ -77,7 +78,7 @@ export function DiscoverFeed() {
         // Draw node
         ctx.beginPath();
         ctx.arc(node.x, node.y, 1.5, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(168, 85, 247, 0.4)';
+        ctx.fillStyle = 'rgba(139, 124, 246, 0.4)';
         ctx.fill();
       });
 
@@ -265,20 +266,20 @@ export function DiscoverFeed() {
           viewport={{ once: true }}
           className="text-center mb-8"
         >
-          <SectionHeader
-            title="Discover"
-            subtitle="Live feed of bounties, predictions, stories, and market data"
-          />
+          <SectionTitle as="h1" eyebrow="Live intelligence">Discover</SectionTitle>
+          <p className="mt-2 text-sm text-secondary">
+            Live feed of bounties, predictions, stories, and market data
+          </p>
         </motion.div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 p-1 bg-white/5 backdrop-blur-md rounded-lg border border-purple-500/20">
+        <div className="flex gap-1 mb-6 p-1 bg-ink-surface rounded-xl border border-ink-edge">
           <button
             onClick={() => setActiveTab('trending')}
             className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all ${
               activeTab === 'trending'
-                ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/20'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                ? 'bg-accent-core text-primary glow-accent'
+                : 'text-secondary hover:text-primary hover:bg-ink-raised'
             }`}
             data-testid="tab-trending"
           >
@@ -289,8 +290,8 @@ export function DiscoverFeed() {
             onClick={() => setActiveTab('forYou')}
             className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all ${
               activeTab === 'forYou'
-                ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/20'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                ? 'bg-accent-core text-primary glow-accent'
+                : 'text-secondary hover:text-primary hover:bg-ink-raised'
             }`}
             data-testid="tab-for-you"
           >
@@ -301,8 +302,8 @@ export function DiscoverFeed() {
             onClick={() => setActiveTab('following')}
             className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all ${
               activeTab === 'following'
-                ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/20'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                ? 'bg-accent-core text-primary glow-accent'
+                : 'text-secondary hover:text-primary hover:bg-ink-raised'
             }`}
             data-testid="tab-following"
           >
@@ -314,20 +315,20 @@ export function DiscoverFeed() {
         {isLoading ? (
           <div className="space-y-3">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-3 animate-pulse">
+              <Surface key={i} className="p-3 animate-pulse">
                 <div className="flex gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-full bg-purple-500/20"></div>
+                  <div className="w-8 h-8 rounded-xl bg-accent-core/20"></div>
                   <div className="flex-1 space-y-1.5">
-                    <div className="h-3 bg-purple-500/20 rounded w-1/3"></div>
-                    <div className="h-2.5 bg-purple-500/10 rounded w-1/4"></div>
+                    <div className="h-3 bg-accent-core/20 rounded-xl w-1/3"></div>
+                    <div className="h-2.5 bg-accent-core/10 rounded-xl w-1/4"></div>
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <div className="h-3 bg-purple-500/20 rounded w-3/4"></div>
-                  <div className="h-2.5 bg-purple-500/10 rounded w-full"></div>
-                  <div className="h-2.5 bg-purple-500/10 rounded w-2/3"></div>
+                  <div className="h-3 bg-accent-core/20 rounded-xl w-3/4"></div>
+                  <div className="h-2.5 bg-accent-core/10 rounded-xl w-full"></div>
+                  <div className="h-2.5 bg-accent-core/10 rounded-xl w-2/3"></div>
                 </div>
-              </div>
+              </Surface>
             ))}
           </div>
         ) : feedItems.length > 0 ? (
@@ -379,22 +380,22 @@ export function DiscoverFeed() {
           </div>
         ) : (
           <div className="text-center py-16">
-            <div className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-8">
-              <Sparkles className="w-16 h-16 text-purple-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">No posts yet</h3>
-              <p className="text-gray-400 mb-4">
+            <Surface className="p-8">
+              <Sparkles className="w-16 h-16 text-accent-bright mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-primary mb-2">No posts yet</h3>
+              <p className="text-secondary mb-4">
                 Be the first to start a conversation!
               </p>
               {isAuthenticated && (
                 <Button
                   onClick={() => setShowCreateModal(true)}
-                  className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700"
+                  className="grad-accent glow-accent hover:bg-accent-deep"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Create Post
                 </Button>
               )}
-            </div>
+            </Surface>
           </div>
         )}
       </div>
@@ -409,7 +410,7 @@ export function DiscoverFeed() {
           <Button
             onClick={() => setShowCreateModal(true)}
             size="lg"
-            className="w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 shadow-lg shadow-purple-500/50 hover:shadow-xl hover:shadow-fuchsia-500/50 transition-all"
+             className="w-14 h-14 rounded-xl grad-accent glow-accent hover:bg-accent-deep transition-all"
             data-testid="button-create-post"
           >
             <Plus className="w-6 h-6" />
