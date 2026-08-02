@@ -55,25 +55,27 @@
 }
 
 .dark {
-  --background: hsl(240, 14%, 4.5%);
+  /* Repointed at the StreamAiX ink token palette (see DESIGN.md) so all
+     shadcn primitives inherit the design system automatically. */
+  --background: #080B14;            /* ink-page */
   --foreground: hsl(0, 0%, 98%);
-  --muted: hsl(240, 6%, 14%);
-  --muted-foreground: hsl(240, 5%, 68%);
-  --popover: hsl(240, 14%, 8%);
+  --muted: #181F38;                 /* ink-raised */
+  --muted-foreground: #9BA3B7;      /* label color */
+  --popover: #10162A;               /* ink-surface */
   --popover-foreground: hsl(0, 0%, 98%);
-  --card: hsl(240, 14%, 8%);
+  --card: #10162A;                  /* ink-surface */
   --card-foreground: hsl(0, 0%, 98%);
-  --border: hsl(258, 22%, 18%);
-  --input: hsl(240, 8%, 14%);
-  --primary: hsl(258, 84%, 62%);
+  --border: #232B45;                /* ink-edge */
+  --input: #232B45;                 /* ink-edge */
+  --primary: #8B7CF6;               /* accent-core */
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(240, 8%, 16%);
+  --secondary: #181F38;             /* ink-raised */
   --secondary-foreground: hsl(0, 0%, 98%);
-  --accent: hsl(258, 30%, 18%);
-  --accent-foreground: hsl(195, 95%, 80%);
-  --destructive: hsl(0, 75%, 55%);
+  --accent: #181F38;                /* ink-raised (subtle hover) */
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: #FF7B7B;           /* loss */
   --destructive-foreground: hsl(0, 0%, 100%);
-  --ring: hsl(195, 95%, 55%);
+  --ring: #8B7CF6;                  /* accent-core */
   --radius: 0.625rem;
   
   /* Enhanced dark mode glass with vibrant tints */

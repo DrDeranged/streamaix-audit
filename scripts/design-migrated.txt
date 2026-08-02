@@ -49,3 +49,11 @@ client/src/pages/bounty-detail.tsx
 client/src/pages/summary-view.tsx
 client/src/pages/newsletter-admin.tsx
 client/src/pages/bot-trading.tsx
+client/src/components/landing/navigation.tsx
+client/src/components/landing/knowledge-avatars.tsx
+client/src/components/landing/ai-capabilities-banner.tsx
+client/src/components/landing/why-blockchain.tsx
+client/src/components/landing/how-it-works.tsx
+client/src/components/landing/social-ecosystem.tsx
+client/src/components/landing/RecentActivity.tsx
+client/src/components/landing/interactive-features.tsx

@@ -1,16 +1,17 @@
 import { MessageCircle, Users, Image, Edit3, Zap, Share2, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
-import { SectionHeader } from "@/components/ui/section-header";
+import SectionTitle from "@/components/ds/SectionTitle";
+import Surface from "@/components/ds/Surface";
 import navalAvatar from "@/assets/naval-avatar.svg";
 import vitalikAvatar from "@/assets/vitalik-avatar.svg";
 
 export function SocialEcosystem() {
   const platforms = [
-    { name: "Farcaster", icon: MessageCircle, color: "from-purple-500 to-pink-600" },
-    { name: "Lens Protocol", icon: Users, color: "from-green-500 to-teal-600" },
-    { name: "Zora", icon: Image, color: "from-blue-500 to-cyan-600" },
-    { name: "Mirror", icon: Edit3, color: "from-orange-500 to-red-600" },
-    { name: "Optimism", icon: Zap, color: "from-red-500 to-pink-600" }
+    { name: "Farcaster", icon: MessageCircle, color: "bg-accent-core" },
+    { name: "Lens Protocol", icon: Users, color: "bg-gain" },
+    { name: "Zora", icon: Image, color: "bg-accent-deep" },
+    { name: "Mirror", icon: Edit3, color: "bg-warn" },
+    { name: "Optimism", icon: Zap, color: "bg-loss" }
   ];
 
   const farcasterFeed = [
@@ -58,10 +59,10 @@ export function SocialEcosystem() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <SectionHeader
-            title="Social + Ecosystem"
-            subtitle="Seamlessly integrated with your favorite Web3 social platforms"
-          />
+          <SectionTitle>Social + Ecosystem</SectionTitle>
+          <p className="mt-2 text-sm text-secondary">
+            Seamlessly integrated with your favorite Web3 social platforms
+          </p>
         </motion.div>
         
         {/* Platform Logos */}
@@ -82,10 +83,10 @@ export function SocialEcosystem() {
                 animationDelay: `${index * 0.5}s`
               }}
             >
-              <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br ${platform.color} rounded-xl flex items-center justify-center`}>
-                <platform.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 ${platform.color} rounded-xl flex items-center justify-center`}>
+                <platform.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
               </div>
-              <span className="text-sm sm:text-lg font-semibold text-slate-900 dark:text-white text-center sm:text-left">{platform.name}</span>
+              <span className="text-sm sm:text-lg font-semibold text-primary text-center sm:text-left">{platform.name}</span>
             </motion.div>
           ))}
         </div>
@@ -98,26 +99,26 @@ export function SocialEcosystem() {
           transition={{ duration: 0.6, delay: 0.3 }}
           viewport={{ once: true }}
         >
-          <div className="inline-flex items-center space-x-2 sm:space-x-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-purple-500/30 backdrop-blur-xl rounded-xl p-3 sm:p-4 mx-4">
+          <Surface className="inline-flex items-center space-x-2 sm:space-x-4 p-3 sm:p-4 mx-4">
             <motion.div 
-              className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center"
+              className="w-8 h-8 sm:w-10 sm:h-10 bg-accent-core rounded-xl flex items-center justify-center glow-accent"
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
-              <Share2 className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              <Share2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
             </motion.div>
             <motion.div
               animate={{ x: [0, 10, 0] }}
               transition={{ duration: 2, repeat: Infinity }}
               className="hidden sm:block"
             >
-              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 dark:text-slate-400" />
+              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-secondary" />
             </motion.div>
             <div className="flex space-x-1 sm:space-x-2">
               {platforms.slice(0, 3).map((platform, index) => (
                 <motion.div 
                   key={platform.name}
-                  className={`w-6 h-6 sm:w-7 sm:h-7 bg-gradient-to-br ${platform.color} rounded-lg`}
+                  className={`w-6 h-6 sm:w-7 sm:h-7 ${platform.color} rounded-xl`}
                   animate={{ y: [-5, 5, -5] }}
                   transition={{ 
                     duration: 2, 
@@ -127,10 +128,10 @@ export function SocialEcosystem() {
                 />
               ))}
             </div>
-            <div className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm text-center sm:text-left">
+            <div className="text-secondary text-xs sm:text-sm text-center sm:text-left">
               One-click sharing across all platforms
             </div>
-          </div>
+          </Surface>
         </motion.div>
       </div>
     </section>

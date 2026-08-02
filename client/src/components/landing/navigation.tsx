@@ -91,24 +91,24 @@ export function Navigation() {
   };
 
   return (
-    <nav className="fixed top-0 w-full z-50 transition-all duration-300">
+      <nav className="fixed top-0 w-full z-50 transition-all duration-300 text-body">
       {/* Glass background layer */}
       <div 
-        className="absolute inset-0"
+        className="absolute inset-0 bg-ink-page/90 border-b border-ink-edge"
         style={{
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+           background: 'rgba(16,22,42,0.88)',
           backdropFilter: 'blur(20px) saturate(180%)',
           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
         }}
       />
       {/* Light mode background */}
-      <div className="absolute inset-0 bg-white/70 dark:bg-transparent" />
+      <div className="absolute inset-0 bg-ink-page/40" />
       {/* Gradient bottom border */}
-      <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/50 to-transparent dark:via-purple-500/40" />
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-ink-edge" />
       {/* Top highlight */}
-      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-white/10" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-accent-core/20" />
       {/* Subtle inner glow */}
-      <div className="absolute inset-0 bg-gradient-to-b from-purple-500/5 via-transparent to-transparent dark:from-purple-500/10 pointer-events-none" />
+      <div className="absolute inset-0 bg-accent-core/5 pointer-events-none" />
       
       <div className="relative container mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
@@ -127,12 +127,12 @@ export function Navigation() {
             }}
           >
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300 animate-pulse" />
-                <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center shadow-lg">
+                <div className="absolute inset-0 bg-accent-core/30 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300 animate-pulse" />
+                <div className="relative w-10 h-10 rounded-full bg-accent-core flex items-center justify-center shadow-lg glow-accent">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
               </div>
-              <div className="font-orbitron font-bold text-xl sm:text-2xl bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent drop-shadow-lg group-hover:drop-shadow-2xl transition-all duration-300">
+              <div className="font-display font-bold text-xl sm:text-2xl text-primary transition-all duration-300">
                 StreamAiX
               </div>
           </motion.div>
@@ -144,64 +144,64 @@ export function Navigation() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <motion.button 
-                    className="group relative px-3.5 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
+                    className="group relative px-3.5 py-2 rounded-xl text-secondary hover:text-primary hover:bg-ink-raised transition-all duration-300 overflow-hidden"
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                   >
                     {/* Glass hover background */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.15) 0%, rgba(6,182,212,0.05) 100%)', backdropFilter: 'blur(8px)' }} />
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl bg-ink-raised" />
                     {/* Bottom highlight on hover */}
-                    <div className="absolute bottom-0 left-2 right-2 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute bottom-0 left-2 right-2 h-px bg-accent-core opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="relative flex items-center gap-1.5">
-                      <Compass className="w-4 h-4 text-cyan-500 dark:text-cyan-400 group-hover:text-cyan-400 dark:group-hover:text-cyan-300 transition-colors drop-shadow-sm" />
+                      <Compass className="w-4 h-4 text-cyan-500 group-hover:text-cyan-400 transition-colors drop-shadow-sm" />
                       <span className="font-medium text-sm">Discover</span>
                       <ChevronDown className="w-3 h-3 opacity-60" />
                     </div>
                   </motion.button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="start">
+                <DropdownMenuContent className="w-56 bg-ink-surface border border-ink-edge rounded-xl shadow-2xl" align="start">
                   <DropdownMenuItem asChild>
-                    <Link href="/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-cyan-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                       <Compass className="w-4 h-4 text-cyan-400" />
                       <div>
                         <span className="font-medium block">Market Intelligence</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Real-time analytics</span>
+                        <span className="text-xs text-secondary">Real-time analytics</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/insights" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-blue-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/insights" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                       <Brain className="w-4 h-4 text-blue-400" />
                       <div>
                         <span className="font-medium block">AI Insights</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Smart signals</span>
+                        <span className="text-xs text-secondary">Smart signals</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/analytics" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-green-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/analytics" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                       <PieChart className="w-4 h-4 text-green-400" />
                       <div>
                         <span className="font-medium block">Platform Stats</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Engagement metrics</span>
+                        <span className="text-xs text-secondary">Engagement metrics</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/ai-trading" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-amber-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/ai-trading" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                       <LineChart className="w-4 h-4 text-amber-400" />
                       <div>
                         <span className="font-medium block">AI Trading Signals</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Crypto & mining stocks</span>
+                        <span className="text-xs text-secondary">Crypto & mining stocks</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/bot-trading" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-cyan-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/bot-trading" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                       <Bot className="w-4 h-4 text-cyan-400" />
                       <div>
                         <span className="font-medium block">Bot Trading Simulator</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Stake on AI bots</span>
+                        <span className="text-xs text-secondary">Stake on AI bots</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
@@ -212,15 +212,15 @@ export function Navigation() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <motion.button 
-                    className="group relative px-3.5 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-red-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
+                    className="group relative px-3.5 py-2 rounded-xl text-secondary hover:text-primary hover:bg-ink-raised transition-all duration-300 overflow-hidden"
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                   >
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.15) 0%, rgba(239,68,68,0.05) 100%)', backdropFilter: 'blur(8px)' }} />
-                    <div className="absolute bottom-0 left-2 right-2 h-[1px] bg-gradient-to-r from-transparent via-red-400/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl bg-ink-raised" />
+                    <div className="absolute bottom-0 left-2 right-2 h-px bg-accent-core opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="relative flex items-center gap-1.5">
                       <div className="relative">
-                        <Radio className="w-4 h-4 text-red-500 dark:text-red-400 group-hover:text-red-400 dark:group-hover:text-red-300 transition-colors drop-shadow-sm" />
+                        <Radio className="w-4 h-4 text-red-500 group-hover:text-red-400 transition-colors drop-shadow-sm" />
                         <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
                       </div>
                       <span className="font-medium text-sm">Streams</span>
@@ -228,31 +228,31 @@ export function Navigation() {
                     </div>
                   </motion.button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-red-500/30 shadow-2xl dark:shadow-red-500/20" align="start">
+                <DropdownMenuContent className="w-56 bg-ink-surface border border-ink-edge rounded-xl shadow-2xl" align="start">
                   <DropdownMenuItem asChild>
-                    <Link href="/streams/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-red-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/streams/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                       <Radio className="w-4 h-4 text-red-400" />
                       <div>
                         <span className="font-medium block">Browse All</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">AI & creators live</span>
+                        <span className="text-xs text-secondary">AI & creators live</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/go-live" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-orange-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/go-live" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                       <Mic className="w-4 h-4 text-orange-400" />
                       <div>
                         <span className="font-medium block">Go Live</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Start streaming</span>
+                        <span className="text-xs text-secondary">Start streaming</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/replays" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-amber-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/replays" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                       <History className="w-4 h-4 text-amber-400" />
                       <div>
                         <span className="font-medium block">Replays</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Past streams</span>
+                        <span className="text-xs text-secondary">Past streams</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
@@ -263,53 +263,53 @@ export function Navigation() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <motion.button 
-                    className="group relative px-3.5 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-purple-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
+                    className="group relative px-3.5 py-2 rounded-xl text-secondary hover:text-primary hover:bg-ink-raised transition-all duration-300 overflow-hidden"
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                   >
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(168,85,247,0.05) 100%)', backdropFilter: 'blur(8px)' }} />
-                    <div className="absolute bottom-0 left-2 right-2 h-[1px] bg-gradient-to-r from-transparent via-purple-400/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl bg-ink-raised" />
+                    <div className="absolute bottom-0 left-2 right-2 h-px bg-ink-divider opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="relative flex items-center gap-1.5">
-                      <TrendingUp className="w-4 h-4 text-purple-500 dark:text-purple-400 group-hover:text-purple-400 dark:group-hover:text-purple-300 transition-colors drop-shadow-sm" />
+                      <TrendingUp className="w-4 h-4 text-purple-500 group-hover:text-purple-400 transition-colors drop-shadow-sm" />
                       <span className="font-medium text-sm">Markets</span>
                       <ChevronDown className="w-3 h-3 opacity-60" />
                     </div>
                   </motion.button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="start">
+                <DropdownMenuContent className="w-56 bg-ink-surface border border-ink-edge rounded-xl shadow-2xl" align="start">
                   <DropdownMenuItem asChild>
-                    <Link href="/markets" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-purple-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/markets" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                       <TrendingUp className="w-4 h-4 text-purple-400" />
                       <div>
                         <span className="font-medium block">Prediction Markets</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Trade outcomes</span>
+                        <span className="text-xs text-muted">Trade outcomes</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/portfolio" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-fuchsia-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/portfolio" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                       <Briefcase className="w-4 h-4 text-fuchsia-400" />
                       <div>
                         <span className="font-medium block">Asset Portfolio</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Track all your assets</span>
+                        <span className="text-xs text-muted">Track all your assets</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/markets/leaderboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-amber-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/markets/leaderboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                       <Trophy className="w-4 h-4 text-amber-400" />
                       <div>
                         <span className="font-medium block">Leaderboard</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Top traders</span>
+                        <span className="text-xs text-muted">Top traders</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/markets/achievements" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-cyan-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/markets/achievements" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                       <Award className="w-4 h-4 text-cyan-400" />
                       <div>
                         <span className="font-medium block">Achievements</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Badges & rewards</span>
+                        <span className="text-xs text-muted">Badges & rewards</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
@@ -320,44 +320,44 @@ export function Navigation() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <motion.button 
-                    className="group relative px-3.5 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-fuchsia-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
+                    className="group relative px-3.5 py-2 rounded-xl text-secondary hover:text-primary hover:bg-ink-raised transition-all duration-300 overflow-hidden"
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                   >
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(217,70,239,0.15) 0%, rgba(217,70,239,0.05) 100%)', backdropFilter: 'blur(8px)' }} />
-                    <div className="absolute bottom-0 left-2 right-2 h-[1px] bg-gradient-to-r from-transparent via-fuchsia-400/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl bg-ink-raised" />
+                    <div className="absolute bottom-0 left-2 right-2 h-[1px] bg-ink-divider opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="relative flex items-center gap-1.5">
-                      <Target className="w-4 h-4 text-fuchsia-500 dark:text-fuchsia-400 group-hover:text-fuchsia-400 dark:group-hover:text-fuchsia-300 transition-colors drop-shadow-sm" />
+                      <Target className="w-4 h-4 text-fuchsia-500 group-hover:text-fuchsia-400 transition-colors drop-shadow-sm" />
                       <span className="font-medium text-sm">Bounties</span>
                       <ChevronDown className="w-3 h-3 opacity-60" />
                     </div>
                   </motion.button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="start">
+                <DropdownMenuContent className="w-56 bg-ink-surface border border-ink-edge rounded-xl shadow-2xl" align="start">
                   <DropdownMenuItem asChild>
-                    <Link href="/bounties" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-fuchsia-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/bounties" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                       <Target className="w-4 h-4 text-fuchsia-400" />
                       <div>
                         <span className="font-medium block">Browse Bounties</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Find opportunities</span>
+                        <span className="text-xs text-muted">Find opportunities</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/leaderboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-yellow-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/leaderboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                       <Trophy className="w-4 h-4 text-yellow-400" />
                       <div>
                         <span className="font-medium block">Hunter Leaderboard</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Top contributors</span>
+                        <span className="text-xs text-muted">Top contributors</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/summaries" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-purple-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/summaries" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                       <FileText className="w-4 h-4 text-purple-400" />
                       <div>
                         <span className="font-medium block">Summaries</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">AI-generated content</span>
+                        <span className="text-xs text-muted">AI-generated content</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
@@ -368,44 +368,44 @@ export function Navigation() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <motion.button 
-                    className="group relative px-3.5 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
+                    className="group relative px-3.5 py-2 rounded-xl text-secondary hover:text-primary hover:bg-ink-raised transition-all duration-300 overflow-hidden"
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                   >
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0.05) 100%)', backdropFilter: 'blur(8px)' }} />
-                    <div className="absolute bottom-0 left-2 right-2 h-[1px] bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl bg-ink-raised" />
+                    <div className="absolute bottom-0 left-2 right-2 h-[1px] bg-ink-divider opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="relative flex items-center gap-1.5">
-                      <Brain className="w-4 h-4 text-emerald-500 dark:text-emerald-400 group-hover:text-emerald-400 dark:group-hover:text-emerald-300 transition-colors drop-shadow-sm" />
+                      <Brain className="w-4 h-4 text-emerald-500 group-hover:text-emerald-400 transition-colors drop-shadow-sm" />
                       <span className="font-medium text-sm">AI</span>
                       <ChevronDown className="w-3 h-3 opacity-60" />
                     </div>
                   </motion.button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="start">
+                <DropdownMenuContent className="w-56 bg-ink-surface border border-ink-edge rounded-xl shadow-2xl" align="start">
                   <DropdownMenuItem asChild>
-                    <Link href="/create-summary" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-emerald-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/create-summary" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                       <Play className="w-4 h-4 text-emerald-400" />
                       <div>
                         <span className="font-medium block">AI Analysis</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Process videos</span>
+                        <span className="text-xs text-muted">Process videos</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/chat" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-blue-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/chat" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                       <MessageCircle className="w-4 h-4 text-blue-400" />
                       <div>
                         <span className="font-medium block">AI Chat</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Ask anything</span>
+                        <span className="text-xs text-muted">Ask anything</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/summaries" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-amber-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/summaries" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                       <Bot className="w-4 h-4 text-amber-400" />
                       <div>
                         <span className="font-medium block">Knowledge Avatars</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">AI personas</span>
+                        <span className="text-xs text-muted">AI personas</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
@@ -416,44 +416,44 @@ export function Navigation() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <motion.button 
-                    className="group relative px-3.5 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
+                    className="group relative px-3.5 py-2 rounded-xl text-secondary hover:text-primary hover:bg-ink-raised transition-all duration-300 overflow-hidden"
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                   >
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(99,102,241,0.05) 100%)', backdropFilter: 'blur(8px)' }} />
-                    <div className="absolute bottom-0 left-2 right-2 h-[1px] bg-gradient-to-r from-transparent via-indigo-400/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl bg-ink-raised" />
+                    <div className="absolute bottom-0 left-2 right-2 h-[1px] bg-ink-divider opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="relative flex items-center gap-1.5">
-                      <Users className="w-4 h-4 text-indigo-500 dark:text-indigo-400 group-hover:text-indigo-400 dark:group-hover:text-indigo-300 transition-colors drop-shadow-sm" />
+                      <Users className="w-4 h-4 text-indigo-500 group-hover:text-indigo-400 transition-colors drop-shadow-sm" />
                       <span className="font-medium text-sm">Community</span>
                       <ChevronDown className="w-3 h-3 opacity-60" />
                     </div>
                   </motion.button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="start">
+                <DropdownMenuContent className="w-56 bg-ink-surface border border-ink-edge rounded-xl shadow-2xl" align="start">
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-indigo-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                       <LayoutDashboard className="w-4 h-4 text-indigo-400" />
                       <div>
                         <span className="font-medium block">Dashboard</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Your activity</span>
+                        <span className="text-xs text-muted">Your activity</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/points" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-emerald-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/points" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                       <Coins className="w-4 h-4 text-emerald-400" />
                       <div>
                         <span className="font-medium block">STREAM Points</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Earn & track rewards</span>
+                        <span className="text-xs text-muted">Earn & track rewards</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/leagues" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-orange-500/20 transition-all duration-200 rounded-md mx-1">
+                    <Link href="/leagues" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                       <Trophy className="w-4 h-4 text-orange-400" />
                       <div>
                         <span className="font-medium block">Leagues</span>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Compete & earn</span>
+                        <span className="text-xs text-muted">Compete & earn</span>
                       </div>
                     </Link>
                   </DropdownMenuItem>
@@ -463,15 +463,15 @@ export function Navigation() {
               {/* Learn - Standalone prominent item */}
               <Link href="/learn">
                 <motion.button 
-                  className="group relative px-3.5 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:text-violet-600 dark:hover:text-white transition-all duration-300 overflow-hidden"
+                  className="group relative px-3.5 py-2 rounded-xl text-secondary hover:text-primary hover:bg-ink-raised transition-all duration-300 overflow-hidden"
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   data-testid="nav-learn"
                 >
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(139,92,246,0.05) 100%)', backdropFilter: 'blur(8px)' }} />
-                  <div className="absolute bottom-0 left-2 right-2 h-[1px] bg-gradient-to-r from-transparent via-violet-400/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(139,92,246,0.05) 100%)', backdropFilter: 'blur(8px)' }} />
+                  <div className="absolute bottom-0 left-2 right-2 h-[1px] bg-ink-divider opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <div className="relative flex items-center gap-1.5">
-                    <GraduationCap className="w-4 h-4 text-violet-500 dark:text-violet-400 group-hover:text-violet-400 dark:group-hover:text-violet-300 transition-colors drop-shadow-sm" />
+                    <GraduationCap className="w-4 h-4 text-violet-500 group-hover:text-violet-400 transition-colors drop-shadow-sm" />
                     <span className="font-medium text-sm">Learn</span>
                   </div>
                 </motion.button>
@@ -481,12 +481,12 @@ export function Navigation() {
               {isAuthenticated && pointsData && (
                 <Link href="/points">
                   <motion.div 
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-emerald-500/30 cursor-pointer hover:border-emerald-400/50 transition-all"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-ink-raised border border-ink-edge cursor-pointer hover:border-accent-core transition-all"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     data-testid="points-balance-nav"
                   >
-                    <div className="p-1 rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500">
+                    <div className="p-1 rounded-xl bg-accent-core">
                       <Coins className="w-3.5 h-3.5 text-white" />
                     </div>
                     <span className="text-sm font-semibold text-emerald-400">
@@ -502,53 +502,53 @@ export function Navigation() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-12 w-12 rounded-full p-0 hover:bg-transparent transition-all duration-200 group">
                       {/* Animated gradient border ring */}
-                      <div className="absolute -inset-[2px] rounded-full bg-gradient-to-r from-cyan-500 via-purple-500 to-fuchsia-500 opacity-70 group-hover:opacity-100 blur-[2px] animate-gradient-x transition-opacity duration-300" />
+                      <div className="absolute -inset-[2px] rounded-full bg-accent-core opacity-70 group-hover:opacity-100 blur-[2px] transition-opacity duration-300" />
                       {/* Glass container */}
-                      <div className="relative h-10 w-10 rounded-full bg-white/20 dark:bg-slate-900/40 backdrop-blur-xl p-[2px]">
+                      <div className="relative h-10 w-10 rounded-full bg-ink-raised backdrop-blur-xl p-[2px]">
                         <Avatar className="h-full w-full">
                           <AvatarImage src={user?.avatar} alt={user?.username} />
-                          <AvatarFallback className="bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 text-white font-semibold text-sm">
+                          <AvatarFallback className="bg-accent-core text-white font-semibold text-sm">
                             {user?.username?.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                       </div>
                       {/* Online indicator */}
                       <motion.div 
-                        className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-emerald-500 border-2 border-white dark:border-slate-950 rounded-full shadow-lg shadow-emerald-500/50"
+                        className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-emerald-500 border-2 border-white rounded-full shadow-lg shadow-emerald-500/50"
                         animate={{ scale: [1, 1.2, 1] }}
                         transition={{ duration: 2, repeat: Infinity }}
                       />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="end" forceMount>
-                    <div className="flex items-center gap-3 p-3 border-b border-gray-200 dark:border-purple-500/20">
+                  <DropdownMenuContent className="w-56 bg-ink-surface border border-ink-edge rounded-xl shadow-2xl" align="end" forceMount>
+                    <div className="flex items-center gap-3 p-3 border-b border-ink-edge">
                       <Avatar className="h-10 w-10 ring-2 ring-purple-500/30">
                         <AvatarImage src={user?.avatar} alt={user?.username} />
-                        <AvatarFallback className="bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white text-sm">
+                        <AvatarFallback className="bg-accent-core text-white text-sm">
                           {user?.username?.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
-                        <p className="text-gray-900 dark:text-white text-sm font-semibold">{user?.username}</p>
-                        <p className="text-gray-600 dark:text-slate-400 text-xs">Premium Member</p>
+                        <p className="text-primary text-sm font-semibold">{user?.username}</p>
+                        <p className="text-muted text-xs">Premium Member</p>
                       </div>
                     </div>
 
                     <div className="py-2">
                       <DropdownMenuItem asChild>
-                        <Link href="/dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-purple-500/20 transition-all duration-200 rounded-md mx-1">
+                        <Link href="/dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                           <LayoutDashboard className="w-4 h-4 text-purple-400" />
                           <span className="font-medium">Dashboard</span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-cyan-500/20 transition-all duration-200 rounded-md mx-1">
+                        <Link href="/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                           <Compass className="w-4 h-4 text-cyan-400" />
                           <span className="font-medium">Discover</span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/points" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-emerald-500/20 transition-all duration-200 rounded-md mx-1">
+                        <Link href="/points" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                           <Coins className="w-4 h-4 text-emerald-400" />
                           <div className="flex items-center gap-2">
                             <span className="font-medium">STREAM Points</span>
@@ -559,17 +559,17 @@ export function Navigation() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/wallet-dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-fuchsia-500/20 transition-all duration-200 rounded-md mx-1">
+                        <Link href="/wallet-dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                           <Wallet className="w-4 h-4 text-fuchsia-400" />
                           <span className="font-medium">Wallet</span>
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-blue-500/20 transition-all duration-200 rounded-md mx-1">
+                      <DropdownMenuItem className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                         <UserCircle className="w-4 h-4 text-blue-400" />
                         <span className="font-medium">Profile</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem 
-                        className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-amber-500/20 transition-all duration-200 rounded-md mx-1"
+                        className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1"
                         onClick={() => setNotificationsOpen(true)}
                       >
                         <Bell className="w-4 h-4 text-amber-400" />
@@ -577,11 +577,11 @@ export function Navigation() {
                       </DropdownMenuItem>
                     </div>
 
-                    <DropdownMenuSeparator className="bg-purple-500/20" />
+                    <DropdownMenuSeparator className="bg-accent-core/15" />
 
                     <div className="py-1">
                       <DropdownMenuItem 
-                        className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/20 transition-all duration-200 rounded-md mx-1"
+                        className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1"
                         onClick={() => logoutMutation.mutate()}
                       >
                         <LogOut className="w-4 h-4" />
@@ -592,7 +592,7 @@ export function Navigation() {
                 </DropdownMenu>
               ) : (
                 <Link href="/auth">
-                  <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/10">
+                  <Button variant="ghost" className="text-body hover:text-primary hover:bg-ink-raised">
                     Sign In
                   </Button>
                 </Link>
@@ -618,12 +618,12 @@ export function Navigation() {
 
             {/* Theme Toggle - Glassmorphism */}
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="relative group">
-              <div className="absolute -inset-[1px] rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-fuchsia-500 opacity-70 group-hover:opacity-100 blur-[1px] transition-opacity duration-300" />
+              <div className="absolute -inset-[1px] rounded-xl bg-accent-core opacity-70 group-hover:opacity-100 blur-[1px] transition-opacity duration-300" />
               <Button
                 variant="outline"
                 size="icon"
                 onClick={toggleTheme}
-                className="relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border-0 hover:bg-white/60 dark:hover:bg-slate-900/60 transition-all duration-300"
+                className="relative bg-ink-surface backdrop-blur-xl border-0 hover:bg-ink-raised transition-all duration-300"
               >
                 {theme === "light" ? (
                   <Sun className="w-5 h-5 text-amber-500" />
@@ -639,27 +639,27 @@ export function Navigation() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <motion.div whileHover={{ scale: 1.02 }} className="relative group">
-                      <div className="absolute -inset-[1px] rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-fuchsia-500 opacity-70 group-hover:opacity-100 blur-[1px] transition-opacity duration-300" />
-                      <Button variant="outline" className="relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border-0 hover:bg-white/60 dark:hover:bg-slate-900/60 transition-all duration-300 overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                      <div className="absolute -inset-[1px] rounded-xl bg-accent-core opacity-70 group-hover:opacity-100 blur-[1px] transition-opacity duration-300" />
+                      <Button variant="outline" className="relative bg-ink-surface backdrop-blur-xl border-0 hover:bg-ink-raised transition-all duration-300 overflow-hidden">
+                        <div className="absolute inset-0 bg-ink-raised/40 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                         <div className="relative flex items-center gap-2">
                           <div className="relative">
-                            <Wallet className="w-4 h-4 text-purple-500 dark:text-purple-400" />
+                            <Wallet className="w-4 h-4 text-purple-500" />
                             <motion.div 
                               className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"
                               animate={{ scale: [1, 1.3, 1] }}
                               transition={{ duration: 2, repeat: Infinity }}
                             />
                           </div>
-                          <span className="font-mono text-sm text-slate-800 dark:text-slate-200">{formatAddress(wallet.address)}</span>
+                          <span className="font-mono text-sm text-primary">{formatAddress(wallet.address)}</span>
                         </div>
                       </Button>
                     </motion.div>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-64 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-gray-200 dark:border-purple-500/30 shadow-2xl dark:shadow-purple-500/20" align="end">
-                    <div className="p-4 border-b border-gray-200 dark:border-purple-500/20">
+                  <DropdownMenuContent className="w-64 bg-ink-surface border border-ink-edge rounded-xl shadow-2xl" align="end">
+                    <div className="p-4 border-b border-ink-edge">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-medium text-gray-600 dark:text-slate-400 uppercase tracking-wider">Connected Wallet</span>
+                        <span className="text-xs font-medium text-muted uppercase tracking-wider">Connected Wallet</span>
                         <motion.div 
                           className="flex items-center gap-1.5"
                           animate={{ opacity: [0.5, 1, 0.5] }}
@@ -669,29 +669,29 @@ export function Navigation() {
                           <span className="text-xs text-green-400 font-medium">Active</span>
                         </motion.div>
                       </div>
-                      <div className="text-sm text-gray-900 dark:text-white font-mono bg-gray-100 dark:bg-slate-800/50 px-3 py-2 rounded-lg border border-gray-200 dark:border-purple-500/20">
+                      <div className="text-sm text-primary font-mono bg-ink-raised px-3 py-2 rounded-xl border border-ink-edge">
                         {formatAddress(wallet.address)}
                       </div>
                     </div>
 
                     <div className="py-2">
                       <DropdownMenuItem asChild>
-                        <Link href="/wallet-dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-purple-500/20 transition-all duration-200 rounded-md mx-1">
+                        <Link href="/wallet-dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                           <LayoutDashboard className="w-4 h-4 text-purple-400" />
                           <span className="font-medium">Dashboard</span>
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-200 hover:text-white hover:bg-cyan-500/20 transition-all duration-200 rounded-md mx-1">
+                      <DropdownMenuItem className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
                         <ExternalLink className="w-4 h-4 text-cyan-400" />
                         <span className="font-medium">View on Explorer</span>
                       </DropdownMenuItem>
                     </div>
 
-                    <DropdownMenuSeparator className="bg-purple-500/20" />
+                    <DropdownMenuSeparator className="bg-accent-core/15" />
 
                     <div className="py-1">
                       <DropdownMenuItem 
-                        className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/20 transition-all duration-200 rounded-md mx-1"
+                        className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1"
                         onClick={disconnect}
                       >
                         <LogOut className="w-4 h-4" />
@@ -707,14 +707,14 @@ export function Navigation() {
                   className="relative group"
                 >
                   {/* Animated gradient border */}
-                  <div className="absolute -inset-[1px] rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-fuchsia-500 opacity-80 group-hover:opacity-100 blur-[1px] animate-gradient-x transition-opacity duration-300" />
+                  <div className="absolute -inset-[1px] rounded-xl bg-accent-core opacity-80 group-hover:opacity-100 blur-[1px] animate-gradient-x transition-opacity duration-300" />
                   <Button 
                     onClick={() => setWalletModalOpen(true)}
                     disabled={isConnecting}
-                    className="relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border-0 text-slate-800 dark:text-white hover:bg-white/60 dark:hover:bg-slate-900/60 transition-all duration-300 overflow-hidden px-4 py-2"
+                    className="relative bg-ink-surface backdrop-blur-xl border-0 text-primary hover:bg-ink-raised transition-all duration-300 overflow-hidden px-4 py-2"
                   >
                     {/* Shimmer effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                    <div className="absolute inset-0 bg-ink-divider translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                     {isConnecting ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin text-purple-500" />
@@ -737,7 +737,7 @@ export function Navigation() {
                 variant="outline"
                 size="icon"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden bg-slate-900/50 border-purple-500/30 hover:bg-purple-500/20"
+                className="md:hidden bg-ink-surface border-ink-edge hover:bg-ink-raised rounded-xl"
               >
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </Button>
@@ -753,7 +753,7 @@ export function Navigation() {
               animate={{ opacity: 1, height: "auto", y: 0 }}
               exit={{ opacity: 0, height: 0, y: -10 }}
               transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-              className="md:hidden mt-4 py-4 border-t border-purple-500/30 bg-slate-900/90 backdrop-blur-xl rounded-lg mx-2 shadow-xl shadow-purple-500/10"
+              className="md:hidden mt-4 py-4 border-t border-ink-divider bg-ink-surface backdrop-blur-xl rounded-xl mx-2 shadow-xl"
             >
               <div className="flex flex-col space-y-1 px-4 max-h-[70vh] overflow-y-auto">
                 {/* Streams Section - Unified */}
@@ -764,7 +764,7 @@ export function Navigation() {
                 <Link href="/streams/discover" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-red-500/20 transition-all duration-200 font-medium text-sm"
+                    className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
                     <Radio className="w-4 h-4 text-red-400" />
                     Browse All
@@ -773,7 +773,7 @@ export function Navigation() {
                 <Link href="/go-live" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-orange-500/20 transition-all duration-200 font-medium text-sm"
+                    className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
                     <Mic className="w-4 h-4 text-orange-400" />
                     Go Live
@@ -782,7 +782,7 @@ export function Navigation() {
                 <Link href="/replays" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-amber-500/20 transition-all duration-200 font-medium text-sm"
+                    className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
                     <History className="w-4 h-4 text-amber-400" />
                     Replays
@@ -790,11 +790,11 @@ export function Navigation() {
                 </Link>
 
                 {/* Discover Section */}
-                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 py-2 mt-2">Discover</div>
+                <div className="text-xs font-semibold text-muted uppercase tracking-wider px-3 py-2 mt-2">Discover</div>
                 <Link href="/discover" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-cyan-500/20 transition-all duration-200 font-medium text-sm"
+                    className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
                     <Compass className="w-4 h-4 text-cyan-400" />
                     Market Intelligence
@@ -803,7 +803,7 @@ export function Navigation() {
                 <Link href="/insights" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-blue-500/20 transition-all duration-200 font-medium text-sm"
+                    className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
                     <Brain className="w-4 h-4 text-blue-400" />
                     AI Insights
@@ -812,7 +812,7 @@ export function Navigation() {
                 <Link href="/ai-trading" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-amber-500/20 transition-all duration-200 font-medium text-sm"
+                    className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
                     <LineChart className="w-4 h-4 text-amber-400" />
                     AI Trading Signals
@@ -821,7 +821,7 @@ export function Navigation() {
                 <Link href="/bot-trading" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-cyan-500/20 transition-all duration-200 font-medium text-sm"
+                    className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
                     <Bot className="w-4 h-4 text-cyan-400" />
                     Bot Trading Simulator
@@ -829,11 +829,11 @@ export function Navigation() {
                 </Link>
 
                 {/* Markets Section */}
-                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 py-2 mt-2">Markets</div>
+                <div className="text-xs font-semibold text-muted uppercase tracking-wider px-3 py-2 mt-2">Markets</div>
                 <Link href="/markets" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-purple-500/20 transition-all duration-200 font-medium text-sm"
+                    className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
                     <TrendingUp className="w-4 h-4 text-purple-400" />
                     Prediction Markets
@@ -842,7 +842,7 @@ export function Navigation() {
                 <Link href="/portfolio" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-fuchsia-500/20 transition-all duration-200 font-medium text-sm"
+                    className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
                     <Briefcase className="w-4 h-4 text-fuchsia-400" />
                     Asset Portfolio
@@ -850,11 +850,11 @@ export function Navigation() {
                 </Link>
 
                 {/* Bounties Section */}
-                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 py-2 mt-2">Bounties</div>
+                <div className="text-xs font-semibold text-muted uppercase tracking-wider px-3 py-2 mt-2">Bounties</div>
                 <Link href="/bounties" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-fuchsia-500/20 transition-all duration-200 font-medium text-sm"
+                    className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
                     <Target className="w-4 h-4 text-fuchsia-400" />
                     Browse Bounties
@@ -863,7 +863,7 @@ export function Navigation() {
                 <Link href="/leaderboard" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-yellow-500/20 transition-all duration-200 font-medium text-sm"
+                    className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
                     <Trophy className="w-4 h-4 text-yellow-400" />
                     Leaderboard
@@ -871,11 +871,11 @@ export function Navigation() {
                 </Link>
 
                 {/* AI Section */}
-                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 py-2 mt-2">AI</div>
+                <div className="text-xs font-semibold text-muted uppercase tracking-wider px-3 py-2 mt-2">AI</div>
                 <Link href="/create-summary" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-emerald-500/20 transition-all duration-200 font-medium text-sm"
+                    className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
                     <Play className="w-4 h-4 text-emerald-400" />
                     AI Analysis
@@ -884,7 +884,7 @@ export function Navigation() {
                 <Link href="/chat" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-blue-500/20 transition-all duration-200 font-medium text-sm"
+                    className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
                     <MessageCircle className="w-4 h-4 text-blue-400" />
                     AI Chat
@@ -892,11 +892,11 @@ export function Navigation() {
                 </Link>
 
                 {/* Community Section */}
-                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 py-2 mt-2">Community</div>
+                <div className="text-xs font-semibold text-muted uppercase tracking-wider px-3 py-2 mt-2">Community</div>
                 <Link href="/dashboard" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-indigo-500/20 transition-all duration-200 font-medium text-sm"
+                    className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
                     <LayoutDashboard className="w-4 h-4 text-indigo-400" />
                     Dashboard
@@ -905,7 +905,7 @@ export function Navigation() {
                 <Link href="/points" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-emerald-500/20 transition-all duration-200 font-medium text-sm"
+                    className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
                     <Coins className="w-4 h-4 text-emerald-400" />
                     STREAM Points
@@ -914,7 +914,7 @@ export function Navigation() {
                 <Link href="/learn" className="block">
                   <button 
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-purple-500/20 transition-all duration-200 font-medium text-sm"
+                    className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
                     <GraduationCap className="w-4 h-4 text-purple-400" />
                     Learning Hub
@@ -925,7 +925,7 @@ export function Navigation() {
                     setMobileMenuOpen(false);
                     setNotificationsOpen(true);
                   }}
-                  className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-amber-500/20 transition-all duration-200 font-medium text-sm"
+                  className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                 >
                   <Bell className="w-4 h-4 text-amber-400" />
                   Notifications
@@ -933,9 +933,9 @@ export function Navigation() {
                 
                 {/* Mobile Authentication */}
                 {!isAuthenticated && (
-                  <div className="pt-3 border-t border-purple-500/20 mt-3">
+                  <div className="pt-3 border-t border-ink-divider mt-3">
                     <Link href="/auth" className="block">
-                      <button className="w-full text-center bg-gradient-to-r from-purple-500/20 to-fuchsia-500/20 hover:from-purple-500/30 hover:to-fuchsia-500/30 text-white border border-purple-500/30 py-2.5 px-4 rounded-md transition-all duration-200 font-medium text-sm">
+                      <button className="w-full text-center bg-accent-core/15 hover:bg-accent-core/25 text-primary border border-accent-core/30 py-2.5 px-4 rounded-xl transition-all duration-200 font-medium text-sm">
                         Sign In
                       </button>
                     </Link>
@@ -944,24 +944,24 @@ export function Navigation() {
                 
                 {/* Mobile User Menu */}
                 {isAuthenticated && (
-                  <div className="space-y-1 pt-3 border-t border-purple-500/20 mt-3">
-                    <div className="flex items-center gap-3 px-3 py-2.5 bg-purple-500/10 rounded-md border border-purple-500/20">
+                  <div className="space-y-1 pt-3 border-t border-ink-divider mt-3">
+                    <div className="flex items-center gap-3 px-3 py-2.5 bg-accent-core/10 rounded-xl border border-accent-core/20">
                       <Avatar className="h-7 w-7 ring-2 ring-purple-500/30">
                         <AvatarImage src={user?.avatar} alt={user?.username} />
-                        <AvatarFallback className="bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white text-xs font-medium">
+                        <AvatarFallback className="bg-accent-core text-primary text-xs font-medium">
                           {user?.username?.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-white font-medium text-sm">{user?.username}</span>
                     </div>
                     <Link href="/wallet-dashboard" className="block">
-                      <button className="w-full flex items-center gap-3 text-left text-slate-300 hover:text-white py-2.5 px-3 rounded-md hover:bg-fuchsia-500/20 transition-all duration-200 font-medium text-sm">
+                      <button className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm">
                         <Wallet className="w-4 h-4 text-fuchsia-400" />
                         Wallet
                       </button>
                     </Link>
                     <button 
-                      className="w-full flex items-center gap-3 text-left text-red-400 hover:text-red-300 py-2.5 px-3 rounded-md hover:bg-red-500/20 transition-all duration-200 font-medium text-sm"
+                      className="w-full flex items-center gap-3 text-left text-red-400 hover:text-red-300 py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                       onClick={() => logoutMutation.mutate()}
                     >
                       <LogOut className="w-4 h-4" />
@@ -972,32 +972,32 @@ export function Navigation() {
 
                 {/* Mobile Wallet Connection */}
                 {isConnected && wallet ? (
-                  <div className="space-y-3 pt-3 border-t border-purple-500/20 mt-3">
-                    <div className="p-3 bg-slate-800/50 rounded-lg border border-purple-500/20">
+                  <div className="space-y-3 pt-3 border-t border-ink-divider mt-3">
+                    <div className="p-3 bg-ink-raised rounded-xl border border-ink-edge">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-slate-300">Wallet Connected</span>
+                        <span className="text-sm font-medium text-body">Wallet Connected</span>
                         <div className="flex items-center gap-1.5">
                           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                           <span className="text-xs text-green-400">Active</span>
                         </div>
                       </div>
-                      <p className="text-xs text-slate-400 font-mono bg-slate-900/50 px-2 py-1 rounded border border-purple-500/20">{formatAddress(wallet.address)}</p>
+                      <p className="text-xs text-secondary font-mono bg-ink-page px-2 py-1 rounded-xl border border-ink-edge">{formatAddress(wallet.address)}</p>
                     </div>
                     <Button 
                       onClick={disconnect}
                       variant="outline" 
-                      className="w-full border-red-500/30 text-red-400 hover:bg-red-500/20 hover:border-red-500/50"
+                      className="w-full border-red-500/30 text-red-400 hover:bg-ink-raised hover:border-red-500/50"
                     >
                       <LogOut className="w-4 h-4 mr-2" />
                       Disconnect Wallet
                     </Button>
                   </div>
                 ) : (
-                  <div className="pt-3 border-t border-purple-500/20 mt-3">
+                  <div className="pt-3 border-t border-ink-divider mt-3">
                     <Button 
                       onClick={() => setWalletModalOpen(true)}
                       disabled={isConnecting}
-                      className="w-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600 shadow-lg shadow-purple-500/30"
+                      className="w-full grad-accent hover:bg-accent-deep shadow-lg glow-accent"
                     >
                       {isConnecting ? (
                         <>
@@ -1028,7 +1028,7 @@ export function Navigation() {
 
       {/* Notifications Dialog */}
       <Dialog open={notificationsOpen} onOpenChange={setNotificationsOpen}>
-        <DialogContent className="bg-slate-900 border-purple-500/30 text-white max-w-md max-h-[80vh] overflow-y-auto">
+        <DialogContent className="bg-ink-surface border-ink-edge text-primary rounded-2xl max-w-md max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-white">
               <Bell className="w-5 h-5 text-amber-400" />

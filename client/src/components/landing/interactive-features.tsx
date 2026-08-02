@@ -11,8 +11,9 @@ import {
   ArrowRight,
   Zap
 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { SectionHeader } from '@/components/ui/section-header';
+import Surface from '@/components/ds/Surface';
+import StatValue from '@/components/ds/StatValue';
+import SectionTitle from '@/components/ds/SectionTitle';
 
 interface FeatureCardData {
   icon: any;
@@ -47,7 +48,7 @@ export function InteractiveFeatures() {
       title: 'Bounties',
       description: 'Gamified task marketplace with multi-token rewards and AI quality scoring',
       link: '/bounties',
-      gradient: 'from-purple-500/20 to-pink-500/20',
+      gradient: 'bg-accent-core/10',
       stat: ((bountiesData as any)?.open?.toString() || '0'),
       statLabel: 'Open Bounties'
     },
@@ -56,7 +57,7 @@ export function InteractiveFeatures() {
       title: 'Prediction Markets',
       description: 'Trade on AI-generated predictions from content analysis',
       link: '/markets',
-      gradient: 'from-cyan-500/20 to-blue-500/20',
+      gradient: 'bg-accent-core/10',
       stat: ((marketsData as any)?.active?.toString() || '0'),
       statLabel: 'Active Markets'
     },
@@ -65,7 +66,7 @@ export function InteractiveFeatures() {
       title: 'Analytics',
       description: 'Real-time market intelligence with 67+ API endpoints',
       link: '/discover',
-      gradient: 'from-green-500/20 to-emerald-500/20',
+      gradient: 'bg-gain/10',
       stat: '9',
       statLabel: 'Categories'
     },
@@ -74,7 +75,7 @@ export function InteractiveFeatures() {
       title: 'AI Summaries',
       description: 'Transform podcasts & videos into actionable insights',
       link: '/summaries',
-      gradient: 'from-orange-500/20 to-red-500/20',
+      gradient: 'bg-warn/10',
       stat: ((summariesData as any)?.total?.toString() || '0'),
       statLabel: 'Summaries'
     },
@@ -83,7 +84,7 @@ export function InteractiveFeatures() {
       title: 'Dashboard',
       description: 'Your personal hub for tracking summaries, bounties & portfolio',
       link: '/dashboard',
-      gradient: 'from-purple-500/20 to-purple-500/20',
+      gradient: 'bg-accent-core/10',
       stat: 'Live',
       statLabel: 'Real-time Data'
     },
@@ -92,17 +93,16 @@ export function InteractiveFeatures() {
       title: 'Discover',
       description: 'Advanced insights with volatility forecasting & pattern recognition',
       link: '/discover',
-      gradient: 'from-yellow-500/20 to-amber-500/20',
+      gradient: 'bg-warn/10',
       stat: '67+',
       statLabel: 'API Endpoints'
     }
   ];
 
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <section className="relative overflow-hidden bg-ink-page px-4 py-24 sm:px-6 lg:px-8">
       {/* Background effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-900/50 to-black pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-500/10 via-transparent to-transparent pointer-events-none" />
+      <div className="pointer-events-none absolute inset-0 bg-accent-core/5" />
       
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
@@ -113,12 +113,18 @@ export function InteractiveFeatures() {
           transition={{ duration: 0.5 }}
           className="text-center mb-16"
         >
-          <SectionHeader
-            title="Access Everything"
-            subtitle="Navigate directly to any section of the platform"
-            badge="Explore Platform"
-            badgeIcon={<Zap className="h-3 w-3" />}
-          />
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-accent-bright">
+              <Zap className="h-3 w-3" />
+              <span>Explore Platform</span>
+            </div>
+            <SectionTitle as="h2" className="text-center text-2xl sm:text-3xl">
+              Access Everything
+            </SectionTitle>
+            <p className="max-w-xl text-center text-sm text-secondary">
+              Navigate directly to any section of the platform
+            </p>
+          </div>
         </motion.div>
 
         {/* Features Grid */}
@@ -132,54 +138,44 @@ export function InteractiveFeatures() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
               <Link href={feature.link}>
-                <Card 
-                  className={`group relative bg-gradient-to-br ${feature.gradient} backdrop-blur-sm border-white/10 hover:border-cyan-500/50 transition-all duration-300 cursor-pointer h-full overflow-hidden`}
+                <Surface
+                  className={`group relative h-full cursor-pointer overflow-hidden border-ink-edge ${feature.gradient} transition-all duration-300 hover:border-accent-core`}
                   data-testid={`card-feature-${feature.title.toLowerCase().replace(' ', '-')}`}
                 >
-                  {/* Hover glow effect */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/0 via-cyan-500/0 to-cyan-500/0 group-hover:from-cyan-500/10 group-hover:via-transparent group-hover:to-purple-500/10 transition-all duration-500" />
-                  
-                  {/* Animated border gradient */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/50 via-purple-500/50 to-cyan-500/50 blur-xl" />
-                  </div>
-
-                  <CardContent className="p-6 relative z-10">
+                  <div className="relative z-10 p-6">
                     {/* Icon and stat badge */}
                     <div className="flex items-start justify-between mb-4">
-                      <div className="p-3 rounded-xl bg-white/5 border border-white/10 group-hover:border-cyan-500/30 group-hover:bg-cyan-500/10 transition-all duration-300">
-                        <feature.icon className="h-6 w-6 text-cyan-400" />
+                      <div className="rounded-xl border border-accent-core/20 bg-accent-core/10 p-3 transition-all duration-300 group-hover:border-accent-core/50 group-hover:bg-accent-core/20">
+                        <feature.icon className="h-6 w-6 text-accent-bright" />
                       </div>
                       
                       {feature.stat && (
-                        <div className="text-right">
-                          <div className="text-2xl font-bold text-white group-hover:text-cyan-400 transition-colors">
-                            {feature.stat}
-                          </div>
-                          <div className="text-xs text-gray-400">
-                            {feature.statLabel}
-                          </div>
-                        </div>
+                        <StatValue
+                          className="text-right"
+                          label={feature.statLabel}
+                          value={feature.stat}
+                          valueClassName="text-accent-bright group-hover:text-primary transition-colors"
+                        />
                       )}
                     </div>
 
                     {/* Title */}
-                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors">
+                    <h3 className="mb-2 text-xl font-semibold text-primary transition-colors group-hover:text-accent-bright">
                       {feature.title}
                     </h3>
 
                     {/* Description */}
-                    <p className="text-gray-400 text-sm mb-4 line-clamp-2">
+                    <p className="mb-4 line-clamp-2 text-sm text-secondary">
                       {feature.description}
                     </p>
 
                     {/* CTA */}
-                    <div className="flex items-center gap-2 text-cyan-400 text-sm font-medium group-hover:gap-3 transition-all">
+                    <div className="flex items-center gap-2 text-sm font-medium text-accent-bright transition-all group-hover:gap-3">
                       <span>Explore</span>
                       <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </Surface>
               </Link>
             </motion.div>
           ))}
@@ -193,10 +189,10 @@ export function InteractiveFeatures() {
           transition={{ duration: 0.5, delay: 0.6 }}
           className="text-center mt-12"
         >
-          <p className="text-gray-400 text-sm">
+          <p className="text-sm text-secondary">
             New to StreamAiX?{' '}
             <Link href="/onboarding">
-              <span className="text-cyan-400 hover:text-cyan-300 underline underline-offset-4 cursor-pointer">
+              <span className="cursor-pointer text-accent-bright underline underline-offset-4 hover:text-primary">
                 Start the interactive tour
               </span>
             </Link>

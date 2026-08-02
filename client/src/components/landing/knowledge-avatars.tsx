@@ -1,11 +1,11 @@
 import { memo } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
-import { SectionHeader } from "@/components/ui/section-header";
+import SectionTitle from "@/components/ds/SectionTitle";
+import Surface from "@/components/ds/Surface";
 import { ApiErrorCard } from "@/components/ApiErrorFallback";
 import { AvatarChatButton } from "@/components/avatars/avatar-chat-button";
 import { 
@@ -91,29 +91,8 @@ interface DatabaseAvatar {
 }
 
 const getAvatarGradient = (name: string) => {
-  const gradients: Record<string, string> = {
-    'Naval Ravikant': 'from-slate-950 via-purple-950 to-slate-950',
-    'Vitalik Buterin': 'from-purple-950 via-fuchsia-950 to-purple-950',
-    'Michael Saylor': 'from-slate-950 via-purple-950 to-cyan-950',
-    'Brian Armstrong': 'from-purple-950 via-cyan-950 to-teal-950',
-    'Changpeng Zhao': 'from-purple-950 via-fuchsia-950 to-purple-950',
-    'Cathie Wood': 'from-purple-950 via-fuchsia-950 to-purple-950',
-    'Tyler Winklevoss': 'from-teal-950 via-cyan-950 to-purple-950',
-    'Cameron Winklevoss': 'from-purple-950 via-cyan-950 to-cyan-950',
-    'Balaji Srinivasan': 'from-cyan-950 via-purple-950 to-purple-950',
-    'Paul Graham': 'from-slate-950 via-gray-950 to-zinc-950',
-    // Tech Macro Leaders
-    'Jensen Huang': 'from-green-950 via-emerald-950 to-green-950',
-    'Satya Nadella': 'from-blue-950 via-cyan-950 to-blue-950',
-    'Tim Cook': 'from-slate-950 via-gray-900 to-slate-950',
-    'Lisa Su': 'from-red-950 via-rose-950 to-red-950',
-    'Sam Altman': 'from-emerald-950 via-teal-950 to-emerald-950',
-    'Jerome Powell': 'from-emerald-950 via-green-950 to-emerald-950',
-    'Andy Jassy': 'from-orange-950 via-amber-950 to-orange-950',
-    'Mark Zuckerberg': 'from-blue-950 via-indigo-950 to-blue-950',
-    'Sundar Pichai': 'from-blue-950 via-sky-950 to-blue-950'
-  };
-  return gradients[name] || 'from-slate-950 via-gray-950 to-zinc-950';
+  void name;
+  return 'bg-accent-core';
 };
 
 const formatFollowerCount = (count: number) => {
@@ -1089,8 +1068,8 @@ function AvatarMarketsSection({ avatarId, avatarName }: { avatarId: string; avat
     return (
       <div className="space-y-1.5">
         <div className="flex items-center gap-1.5 px-1">
-          <TrendingUp className="h-3.5 w-3.5 text-purple-500/50" />
-          <span className="text-xs font-semibold text-muted-foreground">Loading Markets...</span>
+          <TrendingUp className="h-3.5 w-3.5 text-accent-bright/50" />
+          <span className="text-xs font-semibold text-muted">Loading Markets...</span>
         </div>
       </div>
     );
@@ -1100,11 +1079,11 @@ function AvatarMarketsSection({ avatarId, avatarName }: { avatarId: string; avat
     return (
       <div className="space-y-1.5">
         <div className="flex items-center gap-1.5 px-1">
-          <TrendingUp className="h-3.5 w-3.5 text-purple-500/50" />
-          <span className="text-xs font-semibold text-foreground">Prediction Markets</span>
+          <TrendingUp className="h-3.5 w-3.5 text-accent-bright/50" />
+          <span className="text-xs font-semibold text-primary">Prediction Markets</span>
         </div>
-        <div className="bg-purple-500/5 border border-purple-500/10 rounded-lg p-2.5 text-center">
-          <span className="text-[10px] text-muted-foreground">No prediction markets created by {avatarName} yet</span>
+        <div className="bg-accent-core/5 border border-accent-core/10 rounded-xl p-2.5 text-center">
+          <span className="text-[10px] text-muted">No prediction markets created by {avatarName} yet</span>
         </div>
       </div>
     );
@@ -1113,9 +1092,9 @@ function AvatarMarketsSection({ avatarId, avatarName }: { avatarId: string; avat
   return (
     <div className="space-y-1.5">
       <div className="flex items-center gap-1.5 px-1">
-        <TrendingUp className="h-3.5 w-3.5 text-purple-500" />
-        <span className="text-xs font-semibold text-foreground">Live Prediction Markets</span>
-        <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/30 text-[10px] ml-auto">
+        <TrendingUp className="h-3.5 w-3.5 text-accent-bright" />
+        <span className="text-xs font-semibold text-primary">Live Prediction Markets</span>
+        <Badge variant="outline" className="bg-accent-core/10 text-accent-bright border-accent-core/30 text-[10px] ml-auto">
           {markets.length} Active
         </Badge>
       </div>
@@ -1330,41 +1309,41 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
 
   // Skeleton Card Component with Shimmer Effects
   const SkeletonCard = () => (
-    <Card className="min-h-[600px] flex flex-col overflow-hidden bg-gradient-to-br from-card/95 via-card/85 to-card/75 backdrop-blur-xl border-2 border-primary/20 relative">
+    <Surface className="min-h-[600px] flex flex-col overflow-hidden relative">
       {/* Skeleton Header */}
       <div className="relative overflow-hidden">
-        <div className="h-28 bg-gradient-to-r from-gray-300 to-gray-400 dark:from-gray-700 dark:to-gray-600 relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+        <div className="h-28 bg-ink-raised relative">
+          <div className="absolute inset-0 bg-accent-core/5 animate-pulse" />
         </div>
         <div className="absolute -bottom-10 left-4">
-          <div className="w-20 h-20 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse" />
+          <div className="w-20 h-20 bg-ink-edge rounded-full animate-pulse" />
         </div>
         <div className="absolute top-3 left-4">
-          <div className="w-20 h-6 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse" />
+          <div className="w-20 h-6 bg-ink-edge rounded-full animate-pulse" />
         </div>
         <div className="absolute top-3 right-3 flex gap-1.5">
-          <div className="w-2.5 h-2.5 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse" />
-          <div className="w-2.5 h-2.5 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse delay-200" />
-          <div className="w-2.5 h-2.5 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse delay-500" />
+          <div className="w-2.5 h-2.5 bg-ink-edge rounded-full animate-pulse" />
+          <div className="w-2.5 h-2.5 bg-ink-edge rounded-full animate-pulse delay-200" />
+          <div className="w-2.5 h-2.5 bg-ink-edge rounded-full animate-pulse delay-500" />
         </div>
       </div>
       
-      <CardContent className="pt-12 pb-6 px-5 space-y-4 flex-1 flex flex-col">
+      <div className="pt-12 pb-6 px-5 space-y-4 flex-1 flex flex-col">
         {/* Name Skeleton */}
         <div className="space-y-2">
-          <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded-lg animate-pulse w-3/4" />
-          <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded-lg animate-pulse w-1/2" />
+          <div className="h-6 bg-ink-edge rounded-xl animate-pulse w-3/4" />
+          <div className="h-4 bg-ink-edge rounded-xl animate-pulse w-1/2" />
         </div>
         
         {/* Metrics Grid Skeleton */}
         <div className="grid grid-cols-2 gap-3">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="bg-gray-200/50 dark:bg-gray-700/50 rounded-xl p-3 space-y-2 relative overflow-hidden">
-              <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-3/4 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
+            <div key={i} className="bg-ink-raised rounded-xl p-3 space-y-2 relative overflow-hidden">
+              <div className="h-3 bg-ink-edge rounded-xl w-3/4 relative overflow-hidden">
+                <div className="absolute inset-0 bg-accent-core/5 animate-pulse" />
               </div>
-              <div className="h-5 bg-gray-300 dark:bg-gray-600 rounded w-1/2 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
+              <div className="h-5 bg-ink-edge rounded-xl w-1/2 relative overflow-hidden">
+                <div className="absolute inset-0 bg-accent-core/5 animate-pulse" />
               </div>
             </div>
           ))}
@@ -1374,29 +1353,29 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
         <div className="space-y-3">
           {[...Array(2)].map((_, i) => (
             <div key={i} className="flex justify-between items-center">
-              <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/3 animate-pulse" />
-              <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/4 animate-pulse" />
+              <div className="h-4 bg-ink-edge rounded-xl w-1/3 animate-pulse" />
+              <div className="h-4 bg-ink-edge rounded-xl w-1/4 animate-pulse" />
             </div>
           ))}
         </div>
         
         {/* Activity Skeleton */}
         <div className="space-y-2">
-          <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-1/4 animate-pulse" />
-          <div className="bg-gray-200/50 dark:bg-gray-700/50 rounded-lg p-3 space-y-1 animate-pulse">
-            <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-full" />
-            <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-3/4" />
-            <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-1/4 mt-2" />
+          <div className="h-3 bg-ink-edge rounded-xl w-1/4 animate-pulse" />
+          <div className="bg-ink-raised rounded-xl p-3 space-y-1 animate-pulse">
+            <div className="h-3 bg-ink-edge rounded-xl w-full" />
+            <div className="h-3 bg-ink-edge rounded-xl w-3/4" />
+            <div className="h-3 bg-ink-edge rounded-xl w-1/4 mt-2" />
           </div>
         </div>
         
         {/* Button Skeleton */}
         <div className="flex gap-3 pt-4 mt-auto">
-          <div className="flex-1 h-10 bg-gray-300 dark:bg-gray-600 rounded-lg animate-pulse" />
-          <div className="w-12 h-10 bg-gray-300 dark:bg-gray-600 rounded-lg animate-pulse" />
+          <div className="flex-1 h-10 bg-ink-edge rounded-xl animate-pulse" />
+          <div className="w-12 h-10 bg-ink-edge rounded-xl animate-pulse" />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </Surface>
   );
 
   if (isLoading) {
@@ -1409,10 +1388,9 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <SectionHeader
-              title="Alpha Network"
-              subtitle="Loading alpha network..."
-            />
+            <SectionTitle as="h1" eyebrow="Alpha Network" className="text-center">
+              Loading alpha network...
+            </SectionTitle>
           </motion.div>
 
           {/* Skeleton Cards */}
@@ -1446,10 +1424,9 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <SectionHeader
-            title="Alpha Network"
-            subtitle="Real-time intelligence on crypto's top minds"
-          />
+          <SectionTitle as="h1" eyebrow="Alpha Network" className="text-center">
+            Real-time intelligence on crypto's top minds
+          </SectionTitle>
         </motion.div>
         
         {/* Enhanced Carousel Container */}
@@ -1462,9 +1439,9 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 size="icon"
                 variant="ghost"
                 disabled={!canGoPrev}
-                className={`absolute left-0 md:-left-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-950/95 to-purple-950/95 text-white rounded-full w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 ${
+                className={`absolute left-0 md:-left-6 top-1/2 -translate-y-1/2 z-[60] bg-ink-surface text-primary rounded-xl w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 shadow-xl backdrop-blur-xl border border-ink-edge transition-all duration-300 ${
                   canGoPrev 
-                    ? 'hover:from-slate-900 hover:to-purple-900 hover:scale-110 hover:shadow-purple-500/30 cursor-pointer active:scale-95' 
+                    ? 'hover:bg-ink-raised hover:scale-110 hover:shadow-xl cursor-pointer active:scale-95' 
                     : 'opacity-40 cursor-not-allowed'
                 }`}
                 style={{ pointerEvents: 'auto', isolation: 'isolate' }}
@@ -1478,9 +1455,9 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                 size="icon"
                 variant="ghost"
                 disabled={!canGoNext}
-                className={`absolute right-0 md:-right-6 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-br from-slate-950/95 to-purple-950/95 text-white rounded-full w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 shadow-2xl backdrop-blur-xl border-2 border-white/20 transition-all duration-300 ${
+                className={`absolute right-0 md:-right-6 top-1/2 -translate-y-1/2 z-[60] bg-ink-surface text-primary rounded-xl w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 shadow-xl backdrop-blur-xl border border-ink-edge transition-all duration-300 ${
                   canGoNext 
-                    ? 'hover:from-slate-900 hover:to-purple-900 hover:scale-110 hover:shadow-purple-500/30 cursor-pointer active:scale-95' 
+                    ? 'hover:bg-ink-raised hover:scale-110 hover:shadow-xl cursor-pointer active:scale-95' 
                     : 'opacity-40 cursor-not-allowed'
                 }`}
                 style={{ pointerEvents: 'auto', isolation: 'isolate' }}
@@ -1509,8 +1486,8 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                   }}
                   className={`transition-all duration-300 rounded-full ${
                     idx === currentIndex 
-                      ? 'w-8 h-2 bg-primary' 
-                      : 'w-2 h-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                      ? 'w-8 h-2 bg-accent-core' 
+                      : 'w-2 h-2 bg-muted/30 hover:bg-muted/50'
                   }`}
                   data-testid={`carousel-indicator-${idx}`}
                 />
@@ -1600,56 +1577,56 @@ export const KnowledgeAvatars = memo(function KnowledgeAvatars() {
                       href={`/knowledge-avatars/${avatar.id}`}
                       className="block w-full h-full"
                     >
-                      <div className="group cursor-pointer flex flex-col items-center p-6 md:p-8 rounded-3xl bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-xl border border-purple-500/20 hover:border-purple-400/50 hover:bg-slate-900/60 dark:hover:bg-slate-950/80 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-2">
+                      <div className="group cursor-pointer flex flex-col items-center p-6 md:p-8 rounded-xl bg-ink-surface backdrop-blur-xl border border-ink-edge hover:border-accent-core/50 hover:bg-ink-raised transition-all duration-500 hover:shadow-xl hover:-translate-y-2">
                         {/* Floating Avatar with Glow */}
                         <div className="relative mb-5">
                           {/* Outer glow ring */}
-                          <div className={`absolute -inset-3 rounded-full bg-gradient-to-r ${getAvatarGradient(avatar.name)} opacity-30 blur-xl group-hover:opacity-60 transition-opacity duration-500`} />
+                          <div className={`absolute -inset-3 rounded-full ${getAvatarGradient(avatar.name)} opacity-30 blur-xl group-hover:opacity-60 transition-opacity duration-500`} />
                           {/* Avatar ring */}
-                          <div className={`absolute -inset-2 rounded-full bg-gradient-to-r ${getAvatarGradient(avatar.name)} opacity-60 group-hover:opacity-100 transition-opacity duration-300`} />
-                          <Avatar className="relative w-28 h-28 md:w-32 md:h-32 ring-3 ring-white/20 border-3 border-slate-900/50 shadow-2xl transition-transform duration-500 group-hover:scale-110">
+                          <div className={`absolute -inset-2 rounded-full ${getAvatarGradient(avatar.name)} opacity-60 group-hover:opacity-100 transition-opacity duration-300`} />
+                          <Avatar className="relative w-28 h-28 md:w-32 md:h-32 ring-2 ring-accent-core/20 border-2 border-ink-edge shadow-xl transition-transform duration-500 group-hover:scale-110">
                             <AvatarImage 
                               src={avatar.imageUrl || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face`}
                               alt={`${avatar.name} avatar`}
                               className="object-cover object-top"
                             />
-                            <AvatarFallback className="text-2xl md:text-3xl font-bold bg-gradient-to-br from-purple-600 to-blue-600 text-white">
+                            <AvatarFallback className="text-2xl md:text-3xl font-bold bg-accent-core text-primary">
                               {avatar.name.split(' ').map(n => n[0]).join('')}
                             </AvatarFallback>
                           </Avatar>
                           {/* LIVE indicator */}
-                          <div className="absolute -top-1 -right-1 flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-sm rounded-full px-2 py-1 border border-emerald-500/50">
-                            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50" />
-                            <span className="text-[10px] text-emerald-400 font-mono font-bold">LIVE</span>
+                          <div className="absolute -top-1 -right-1 flex items-center gap-1.5 bg-ink-surface/90 backdrop-blur-sm rounded-xl px-2 py-1 border border-gain/50">
+                            <div className="w-2 h-2 bg-gain rounded-full animate-pulse" />
+                            <span className="text-[10px] text-gain font-mono font-bold">LIVE</span>
                           </div>
                           {/* Verified badge */}
                           {avatar.verificationStatus === 'verified' && (
-                            <div className="absolute -bottom-1 -right-1 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full p-1.5 shadow-lg">
-                              <CheckCircle className="h-4 w-4 text-white" />
+                            <div className="absolute -bottom-1 -right-1 bg-accent-core rounded-full p-1.5 shadow-lg">
+                              <CheckCircle className="h-4 w-4 text-primary" />
                             </div>
                           )}
                         </div>
                         
                         {/* Name */}
-                        <h3 className="text-lg md:text-xl font-bold text-white group-hover:text-purple-300 transition-colors text-center line-clamp-1 mb-1">
+                        <h3 className="text-lg md:text-xl font-bold text-primary group-hover:text-accent-bright transition-colors text-center line-clamp-1 mb-1">
                           {avatar.name.split(' ')[0]}
                         </h3>
-                        <p className="text-xs text-purple-400/70 font-mono mb-4">@{avatar.handle}</p>
+                        <p className="text-xs text-accent-bright/70 font-mono mb-4">@{avatar.handle}</p>
                         
                         {/* Compact Stats */}
                         <div className="flex items-center gap-5 text-center">
                           <div>
-                            <div className={`text-lg md:text-xl font-bold font-mono ${portfolioRoi >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            <div className={`tabular text-lg md:text-xl font-bold font-mono ${portfolioRoi >= 0 ? 'text-gain' : 'text-loss'}`}>
                               {portfolioRoi >= 0 ? '+' : ''}{portfolioRoi}%
                             </div>
-                            <div className="text-[10px] md:text-xs text-purple-400/60 uppercase tracking-wider">ROI</div>
+                            <div className="text-[10px] md:text-xs text-muted uppercase tracking-wider">ROI</div>
                           </div>
-                          <div className="w-px h-8 bg-purple-500/30" />
+                          <div className="w-px h-8 bg-ink-divider" />
                           <div>
-                            <div className={`text-lg md:text-xl font-bold font-mono ${accuracyPercentage >= 80 ? 'text-emerald-400' : accuracyPercentage >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
+                            <div className={`tabular text-lg md:text-xl font-bold font-mono ${accuracyPercentage >= 80 ? 'text-gain' : accuracyPercentage >= 60 ? 'text-warn' : 'text-loss'}`}>
                               {accuracyPercentage}%
                             </div>
-                            <div className="text-[10px] md:text-xs text-purple-400/60 uppercase tracking-wider">ACC</div>
+                            <div className="text-[10px] md:text-xs text-muted uppercase tracking-wider">ACC</div>
                           </div>
                         </div>
                       </div>
