@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, Sparkles, Activity, Mic, Radio, Brain, Zap, TrendingUp, Volume2, VolumeX, MessageCircle, Lightbulb, Target, BarChart3, Shield, Flame, Heart, Users } from 'lucide-react';
+import { Bot, Sparkles, Mic, Radio, Brain, Zap, TrendingUp, Volume2, VolumeX, MessageCircle, Target, BarChart3, Shield, Flame, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import Surface from '@/components/ds/Surface';
 
 interface AIAvatarStreamProps {
   hostName: string;
@@ -49,7 +50,7 @@ const getPersonaFromName = (name: string): AIPersona => {
       expertise: ['Market Trends', 'On-chain Metrics', 'Price Analysis'],
       mood: 'Focused',
       icon: BarChart3,
-      gradient: 'from-purple-500 to-indigo-500',
+      gradient: 'bg-accent-core',
     },
     'DeFi Master': {
       name: 'DeFi Master',
@@ -57,7 +58,7 @@ const getPersonaFromName = (name: string): AIPersona => {
       expertise: ['Yield Farming', 'Liquidity Pools', 'Protocol Analysis'],
       mood: 'Helpful',
       icon: Shield,
-      gradient: 'from-emerald-500 to-cyan-500',
+      gradient: 'bg-gain',
     },
     'AlphaBot': {
       name: 'AlphaBot',
@@ -65,7 +66,7 @@ const getPersonaFromName = (name: string): AIPersona => {
       expertise: ['Technical Analysis', 'Trading Signals', 'Risk Management'],
       mood: 'Sharp',
       icon: Target,
-      gradient: 'from-amber-500 to-orange-500',
+      gradient: 'bg-warn',
     },
     'StreamHost': {
       name: 'StreamHost',
@@ -73,7 +74,7 @@ const getPersonaFromName = (name: string): AIPersona => {
       expertise: ['Community', 'Crypto News', 'Project Updates'],
       mood: 'Energetic',
       icon: Flame,
-      gradient: 'from-pink-500 to-rose-500',
+      gradient: 'bg-accent-deep',
     },
     'Marc Andreessen': {
       name: 'Marc Andreessen',
@@ -81,7 +82,7 @@ const getPersonaFromName = (name: string): AIPersona => {
       expertise: ['Venture Capital', 'Tech Trends', 'Web3 Vision'],
       mood: 'Strategic',
       icon: Brain,
-      gradient: 'from-blue-500 to-indigo-500',
+      gradient: 'bg-accent-core',
     },
     'Vitalik Buterin': {
       name: 'Vitalik Buterin',
@@ -89,7 +90,7 @@ const getPersonaFromName = (name: string): AIPersona => {
       expertise: ['Ethereum', 'Protocol Design', 'Crypto Philosophy'],
       mood: 'Thoughtful',
       icon: Sparkles,
-      gradient: 'from-violet-500 to-purple-500',
+      gradient: 'bg-accent-deep',
     },
     'Elon Musk': {
       name: 'Elon Musk',
@@ -97,7 +98,7 @@ const getPersonaFromName = (name: string): AIPersona => {
       expertise: ['Innovation', 'Meme Coins', 'Tech Future'],
       mood: 'Unpredictable',
       icon: Zap,
-      gradient: 'from-amber-500 to-yellow-500',
+      gradient: 'bg-warn',
     },
     'Balaji Srinivasan': {
       name: 'Balaji Srinivasan',
@@ -105,7 +106,7 @@ const getPersonaFromName = (name: string): AIPersona => {
       expertise: ['Network States', 'Crypto Economics', 'Tech Predictions'],
       mood: 'Visionary',
       icon: Target,
-      gradient: 'from-cyan-500 to-teal-500',
+      gradient: 'bg-gain',
     },
   };
   
@@ -115,33 +116,33 @@ const getPersonaFromName = (name: string): AIPersona => {
     expertise: ['Crypto', 'Market Analysis', 'Trading'],
     mood: 'Engaged',
     icon: Bot,
-    gradient: 'from-fuchsia-500 to-purple-500',
+    gradient: 'bg-accent-core',
   };
 };
 
 const avatarStyles: Record<string, { gradient: string; icon: any; pulseColor: string }> = {
   broadcast: {
-    gradient: 'from-fuchsia-500 via-purple-500 to-cyan-500',
+    gradient: 'bg-accent-core',
     icon: Radio,
     pulseColor: 'rgb(217, 70, 239)',
   },
   trading_room: {
-    gradient: 'from-emerald-500 via-cyan-500 to-blue-500',
+    gradient: 'bg-gain',
     icon: TrendingUp,
     pulseColor: 'rgb(16, 185, 129)',
   },
   audio_space: {
-    gradient: 'from-cyan-500 via-blue-500 to-indigo-500',
+    gradient: 'bg-accent-core',
     icon: Mic,
     pulseColor: 'rgb(6, 182, 212)',
   },
   live_bounty: {
-    gradient: 'from-amber-500 via-orange-500 to-red-500',
+    gradient: 'bg-warn',
     icon: Zap,
     pulseColor: 'rgb(245, 158, 11)',
   },
   avatar_alpha: {
-    gradient: 'from-fuchsia-600 via-purple-500 to-cyan-400',
+    gradient: 'bg-accent-deep',
     icon: Brain,
     pulseColor: 'rgb(217, 70, 239)',
   },
@@ -159,7 +160,7 @@ function FloatingParticles() {
             top: `${Math.random() * 100}%`,
             width: 2 + Math.random() * 3,
             height: 2 + Math.random() * 3,
-            background: `linear-gradient(135deg, rgba(217,70,239,0.6), rgba(6,182,212,0.6))`,
+            background: '#8B7CF6',
           }}
           animate={{
             y: [-20, -50, -20],
@@ -203,12 +204,12 @@ function SpeakingAvatar({
         {isSpeaking && (
           <>
             <motion.div
-              className={cn("absolute -inset-3 rounded-full bg-gradient-to-br opacity-60 blur-xl", style.gradient)}
+              className={cn("absolute -inset-3 rounded-full opacity-60 blur-xl", style.gradient)}
               animate={{ scale: [1, 1.3, 1], opacity: [0.4, 0.7, 0.4] }}
               transition={{ duration: 0.5, repeat: Infinity }}
             />
             <motion.div
-              className={cn("absolute -inset-1.5 rounded-full bg-gradient-to-br", style.gradient)}
+              className={cn("absolute -inset-1.5 rounded-full", style.gradient)}
               animate={{ opacity: [0.6, 1, 0.6] }}
               transition={{ duration: 0.4, repeat: Infinity }}
               style={{ filter: 'blur(2px)' }}
@@ -218,43 +219,43 @@ function SpeakingAvatar({
         
         {!isSpeaking && (
           <motion.div
-            className={cn("absolute -inset-2 rounded-full bg-gradient-to-br opacity-30 blur-lg", style.gradient)}
+            className={cn("absolute -inset-2 rounded-full opacity-30 blur-lg", style.gradient)}
             animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0.4, 0.2] }}
             transition={{ duration: 3, repeat: Infinity }}
           />
         )}
         
         <div className={cn(
-          "relative w-28 h-28 sm:w-36 sm:h-36 rounded-full flex items-center justify-center overflow-hidden border-2 shadow-2xl",
-          isSpeaking ? "border-fuchsia-400/80" : "border-white/20",
-          `bg-gradient-to-br ${style.gradient}`
+          "relative w-28 h-28 sm:w-36 sm:h-36 rounded-full flex items-center justify-center overflow-hidden border-2 shadow-lg",
+          isSpeaking ? "border-accent-core/80" : "border-ink-edge",
+          style.gradient
         )}>
           {hostAvatar ? (
             <img src={hostAvatar} alt={hostName} className="w-full h-full object-cover" />
           ) : (
-            <Bot className="w-1/2 h-1/2 text-white/90" />
+            <Bot className="w-1/2 h-1/2 text-primary" />
           )}
         </div>
         
         <motion.div
           className={cn(
-            "absolute -bottom-1 -right-1 rounded-full p-2 shadow-lg border border-white/20",
-            `bg-gradient-to-br ${persona.gradient}`
+            "absolute -bottom-1 -right-1 rounded-full p-2 shadow-lg border border-ink-edge",
+            persona.gradient
           )}
           animate={isSpeaking ? { scale: [1, 1.15, 1] } : { scale: 1 }}
           transition={{ duration: 0.5, repeat: isSpeaking ? Infinity : 0 }}
         >
-          <PersonaIcon className="w-4 h-4 text-white" />
+          <PersonaIcon className="w-4 h-4 text-primary" />
         </motion.div>
 
         {isSpeaking && (
           <motion.div
-            className="absolute -top-1 -left-1 bg-gradient-to-br from-fuchsia-500 to-purple-500 rounded-full p-2 shadow-lg border border-white/20"
+            className="absolute -top-1 -left-1 bg-accent-core rounded-full p-2 shadow-lg border border-ink-edge"
             initial={{ scale: 0 }}
             animate={{ scale: [1, 1.15, 1] }}
             transition={{ duration: 0.4, repeat: Infinity }}
           >
-            <MessageCircle className="w-3.5 h-3.5 text-white" />
+            <MessageCircle className="w-3.5 h-3.5 text-primary" />
           </motion.div>
         )}
       </motion.div>
@@ -264,8 +265,8 @@ function SpeakingAvatar({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h3 className="text-lg sm:text-xl font-bold text-white font-orbitron">{hostName}</h3>
-        <p className="text-xs sm:text-sm text-slate-400 capitalize">{persona.style} • {persona.mood}</p>
+        <h3 className="text-lg sm:text-xl font-bold text-primary">{hostName}</h3>
+        <p className="text-xs sm:text-sm text-secondary capitalize">{persona.style} • {persona.mood}</p>
       </motion.div>
     </div>
   );
@@ -288,9 +289,9 @@ function StatusBar({
     <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between gap-2">
       <div className="flex items-center gap-2 flex-wrap">
         {isLive && (
-          <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-[10px] sm:text-xs px-2 py-0.5">
+          <Badge className="bg-loss/20 text-loss border-loss/30 text-[10px] sm:text-xs px-2 py-0.5">
             <motion.span 
-              className="w-1.5 h-1.5 rounded-full bg-red-500 mr-1.5 inline-block"
+              className="w-1.5 h-1.5 rounded-full bg-loss mr-1.5 inline-block"
               animate={{ opacity: [1, 0.5, 1] }}
               transition={{ duration: 1, repeat: Infinity }}
             />
@@ -298,13 +299,13 @@ function StatusBar({
           </Badge>
         )}
         
-        <Badge className="bg-fuchsia-500/20 text-fuchsia-400 border-fuchsia-500/30 text-[10px] sm:text-xs px-2 py-0.5">
+        <Badge className="bg-accent-core/20 text-accent-bright border-accent-core/30 text-[10px] sm:text-xs px-2 py-0.5">
           <Brain className="w-3 h-3 mr-1" />
           AI Host
         </Badge>
 
         {viewerCount !== undefined && (
-          <Badge variant="outline" className="border-cyan-500/30 text-cyan-400 text-[10px] sm:text-xs px-2 py-0.5">
+          <Badge variant="outline" className="border-accent-core/30 text-accent-bright text-[10px] sm:text-xs px-2 py-0.5">
             <Users className="w-3 h-3 mr-1" />
             {viewerCount}
           </Badge>
@@ -316,19 +317,19 @@ function StatusBar({
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex items-center gap-1.5 bg-fuchsia-500/20 rounded-full px-2.5 py-1 border border-fuchsia-500/30"
+            className="flex items-center gap-1.5 bg-accent-core/20 rounded-full px-2.5 py-1 border border-accent-core/30"
           >
             <motion.div
-              className="w-2 h-2 rounded-full bg-fuchsia-400"
+              className="w-2 h-2 rounded-full bg-accent-core"
               animate={{ scale: [1, 1.3, 1] }}
               transition={{ duration: 0.4, repeat: Infinity }}
             />
-            <span className="text-[10px] sm:text-xs text-fuchsia-300 font-medium">Speaking</span>
+            <span className="text-[10px] sm:text-xs text-accent-bright font-medium">Speaking</span>
           </motion.div>
         )}
         
         {isMuted && (
-          <Badge variant="outline" className="border-slate-500/30 text-slate-400 text-[10px] sm:text-xs px-2 py-0.5">
+          <Badge variant="outline" className="border-ink-edge text-secondary text-[10px] sm:text-xs px-2 py-0.5">
             <VolumeX className="w-3 h-3" />
           </Badge>
         )}
@@ -358,14 +359,14 @@ function SpeechBubble({ text, segmentType }: { text: string; segmentType?: strin
       transition={{ duration: 0.3, ease: "easeOut" }}
       className="w-full max-w-lg mx-auto px-3"
     >
-      <div className="relative px-4 py-3 sm:px-5 sm:py-4 bg-gradient-to-br from-slate-900/95 via-purple-900/30 to-slate-900/95 backdrop-blur-2xl rounded-2xl border border-fuchsia-500/40 shadow-xl shadow-fuchsia-500/10">
+      <Surface variant="raised" className="relative px-4 py-3 sm:px-5 sm:py-4 backdrop-blur-2xl rounded-xl border border-accent-core/40 shadow-lg shadow-accent-core/10">
         <div className="absolute -top-2.5 left-1/2 transform -translate-x-1/2">
-          <div className="px-2.5 py-0.5 bg-gradient-to-r from-fuchsia-600 to-purple-600 rounded-full shadow-lg">
-            <span className="text-[10px] text-white font-semibold tracking-wide">{getSegmentLabel()}</span>
+          <div className="px-2.5 py-0.5 bg-accent-deep rounded-full shadow-lg">
+            <span className="text-[10px] text-primary font-semibold tracking-wide">{getSegmentLabel()}</span>
           </div>
         </div>
-        <p className="text-sm sm:text-base text-white leading-relaxed mt-1 font-medium text-center">{truncatedText}</p>
-      </div>
+        <p className="text-sm sm:text-base text-body leading-relaxed mt-1 font-medium text-center">{truncatedText}</p>
+      </Surface>
     </motion.div>
   );
 }
@@ -388,10 +389,10 @@ function AudioControls({
           onToggleMute();
         }}
         className={cn(
-          "rounded-full border-2 transition-all h-12 px-5 font-medium",
+          "rounded-xl border-2 transition-all h-12 px-5 font-medium",
           isMuted 
-            ? "border-slate-500/50 bg-slate-800/50 text-slate-300 hover:bg-slate-700/50" 
-            : "border-fuchsia-500/50 bg-fuchsia-500/20 text-fuchsia-300 hover:bg-fuchsia-500/30"
+            ? "border-ink-edge bg-ink-raised text-secondary hover:bg-ink-surface" 
+            : "border-accent-core/50 bg-accent-core/20 text-accent-bright hover:bg-accent-core/30"
         )}
         data-testid="button-toggle-audio"
       >
@@ -408,7 +409,7 @@ function AudioControls({
           {[...Array(4)].map((_, i) => (
             <motion.div
               key={i}
-              className="w-1 bg-gradient-to-t from-fuchsia-500 to-cyan-400 rounded-full"
+              className="w-1 bg-accent-core rounded-full"
               animate={{ height: [8, 16 + Math.sin(i * 0.8) * 8, 8] }}
               transition={{
                 duration: 0.3 + (i * 0.05),
@@ -429,7 +430,7 @@ function MobileAudioOverlay({ onEnable }: { onEnable: () => void }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm"
+      className="absolute inset-0 z-50 flex items-center justify-center bg-ink-page/80 backdrop-blur-sm"
       onClick={onEnable}
       onTouchEnd={(e) => {
         e.preventDefault();
@@ -442,24 +443,24 @@ function MobileAudioOverlay({ onEnable }: { onEnable: () => void }) {
         className="flex flex-col items-center gap-4 p-8"
       >
         <motion.div
-          className="w-20 h-20 rounded-full bg-gradient-to-br from-fuchsia-500 to-cyan-500 flex items-center justify-center shadow-2xl shadow-fuchsia-500/30"
+          className="w-20 h-20 rounded-full bg-accent-core flex items-center justify-center shadow-lg shadow-accent-core/30"
           animate={{ scale: [1, 1.1, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
-          <Volume2 className="w-10 h-10 text-white" />
+          <Volume2 className="w-10 h-10 text-primary" />
         </motion.div>
         <div className="text-center">
-          <p className="text-lg font-semibold text-white mb-1">Tap to Enable Audio</p>
-          <p className="text-sm text-slate-400">Listen to live AI commentary</p>
+          <p className="text-lg font-semibold text-primary mb-1">Tap to Enable Audio</p>
+          <p className="text-sm text-secondary">Listen to live AI commentary</p>
         </div>
         <motion.div
           className="flex items-center gap-1 mt-2"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 1.5, repeat: Infinity }}
         >
-          <div className="w-2 h-2 rounded-full bg-fuchsia-400" />
-          <div className="w-2 h-2 rounded-full bg-cyan-400" />
-          <div className="w-2 h-2 rounded-full bg-fuchsia-400" />
+          <div className="w-2 h-2 rounded-full bg-accent-core" />
+          <div className="w-2 h-2 rounded-full bg-accent-bright" />
+          <div className="w-2 h-2 rounded-full bg-accent-core" />
         </motion.div>
       </motion.div>
     </motion.div>
@@ -690,7 +691,7 @@ export function AIAvatarStream({
   }, [currentMessage, currentSpeechText]);
 
   return (
-    <div className="absolute inset-0 flex flex-col bg-gradient-to-br from-slate-950 via-purple-950/30 to-slate-950 overflow-hidden">
+    <div className="absolute inset-0 flex flex-col bg-ink-page overflow-hidden">
       <FloatingParticles />
       
       <StatusBar 

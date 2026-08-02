@@ -16,13 +16,11 @@ import {
   Coins,
   BarChart3,
   ChevronUp,
-  ChevronDown,
-  X,
-  Sparkles,
-  Zap
+  ChevronDown
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import Surface from '@/components/ds/Surface';
+import StatValue from '@/components/ds/StatValue';
 import { cn } from '@/lib/utils';
 
 interface BroadcastControlsProps {
@@ -85,18 +83,18 @@ export function BroadcastControls({
             <motion.div
               animate={{ opacity: [1, 0.5, 1] }}
               transition={{ duration: 1.5, repeat: Infinity }}
-              className="flex items-center gap-1.5 bg-red-500/90 backdrop-blur-sm rounded-full px-3 py-1.5"
+              className="flex items-center gap-1.5 bg-loss/90 backdrop-blur-sm rounded-xl px-3 py-1.5"
             >
-              <Radio className="w-3.5 h-3.5 text-white" />
-              <span className="text-xs font-bold text-white">LIVE</span>
+              <Radio className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs font-bold text-primary">LIVE</span>
             </motion.div>
-            <Badge className="bg-slate-900/80 text-white border-0 text-xs">
+            <Badge className="bg-ink-surface text-primary border border-ink-edge text-xs">
               {formatDuration(duration)}
             </Badge>
           </div>
           
           <div className="flex items-center gap-2">
-            <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
+            <Badge className="bg-accent-core/20 text-accent-bright border-accent-core/30 text-xs">
               <Users className="w-3 h-3 mr-1" />
               {viewerCount.toLocaleString()}
             </Badge>
@@ -104,16 +102,16 @@ export function BroadcastControls({
         </motion.div>
       )}
 
-      <div className="bg-gradient-to-t from-slate-900/95 via-slate-900/80 to-transparent backdrop-blur-xl rounded-t-3xl p-4 pb-8 safe-area-inset-bottom">
+      <Surface className="bg-ink-surface/95 backdrop-blur-xl rounded-t-xl p-4 pb-8 safe-area-inset-bottom">
         <div className="flex items-center justify-around gap-2">
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={onToggleVideo}
             className={cn(
-              "relative flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-all touch-manipulation",
+               "relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all touch-manipulation",
               videoEnabled 
-                ? "bg-white/10 text-white" 
-                : "bg-red-500/20 text-red-400"
+                 ? "bg-ink-raised text-primary"
+                 : "bg-loss/20 text-loss"
             )}
             data-testid="button-toggle-video"
           >
@@ -131,10 +129,10 @@ export function BroadcastControls({
             whileTap={{ scale: 0.9 }}
             onClick={onToggleAudio}
             className={cn(
-              "relative flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-all touch-manipulation",
+               "relative flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all touch-manipulation",
               audioEnabled 
-                ? "bg-white/10 text-white" 
-                : "bg-red-500/20 text-red-400"
+                 ? "bg-ink-raised text-primary"
+                 : "bg-loss/20 text-loss"
             )}
             data-testid="button-toggle-audio"
           >
@@ -152,7 +150,7 @@ export function BroadcastControls({
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={onEndStream}
-              className="flex flex-col items-center gap-1.5 p-4 rounded-full bg-red-500 text-white shadow-lg shadow-red-500/30 touch-manipulation"
+               className="flex flex-col items-center gap-1.5 p-4 rounded-xl bg-loss text-primary shadow-lg shadow-loss/30 touch-manipulation"
               data-testid="button-end-stream"
             >
               <Square className="w-6 h-6 fill-current" />
@@ -160,7 +158,7 @@ export function BroadcastControls({
           ) : (
             <motion.button
               whileTap={{ scale: 0.9 }}
-              className="flex flex-col items-center gap-1.5 p-4 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white shadow-lg shadow-purple-500/30 touch-manipulation"
+               className="flex flex-col items-center gap-1.5 p-4 rounded-xl grad-accent text-primary glow-accent touch-manipulation"
               data-testid="button-start-stream"
             >
               <Radio className="w-6 h-6" />
@@ -170,7 +168,7 @@ export function BroadcastControls({
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={onSwitchCamera}
-            className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/10 text-white transition-all touch-manipulation"
+             className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-ink-raised text-primary transition-all touch-manipulation"
             data-testid="button-switch-camera"
           >
             <SwitchCamera className="w-6 h-6" />
@@ -181,10 +179,10 @@ export function BroadcastControls({
             whileTap={{ scale: 0.9 }}
             onClick={isScreenSharing ? onStopScreenShare : onStartScreenShare}
             className={cn(
-              "flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-all touch-manipulation",
+               "flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all touch-manipulation",
               isScreenSharing 
-                ? "bg-emerald-500/20 text-emerald-400" 
-                : "bg-white/10 text-white"
+                 ? "bg-gain/20 text-gain"
+                 : "bg-ink-raised text-primary"
             )}
             data-testid="button-screen-share"
           >
@@ -201,7 +199,7 @@ export function BroadcastControls({
 
         <motion.button
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="mt-4 flex items-center justify-center gap-2 w-full py-2 text-slate-400 text-sm"
+           className="mt-4 flex items-center justify-center gap-2 w-full py-2 text-secondary text-sm"
         >
           {showAdvanced ? (
             <>
@@ -224,11 +222,11 @@ export function BroadcastControls({
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
-              <div className="grid grid-cols-4 gap-3 pt-4 border-t border-slate-700/50">
+              <div className="grid grid-cols-4 gap-3 pt-4 border-t border-ink-divider">
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={onOpenChat}
-                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 transition-colors touch-manipulation"
+                   className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-ink-raised text-body hover:bg-ink-surface transition-colors touch-manipulation"
                   data-testid="button-open-chat"
                 >
                   <MessageCircle className="w-5 h-5" />
@@ -238,7 +236,7 @@ export function BroadcastControls({
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={onOpenStats}
-                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 transition-colors touch-manipulation"
+                   className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-ink-raised text-body hover:bg-ink-surface transition-colors touch-manipulation"
                   data-testid="button-open-stats"
                 >
                   <BarChart3 className="w-5 h-5" />
@@ -247,7 +245,7 @@ export function BroadcastControls({
                 
                 <motion.button
                   whileTap={{ scale: 0.95 }}
-                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 transition-colors touch-manipulation"
+                   className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-ink-raised text-body hover:bg-ink-surface transition-colors touch-manipulation"
                   data-testid="button-tips"
                 >
                   <Coins className="w-5 h-5" />
@@ -256,17 +254,17 @@ export function BroadcastControls({
                 
                 <motion.button
                   whileTap={{ scale: 0.95 }}
-                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white/5 text-slate-300 hover:bg-white/10 transition-colors touch-manipulation"
+                   className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-ink-raised text-body hover:bg-ink-surface transition-colors touch-manipulation"
                   data-testid="button-settings"
                 >
                   <Settings className="w-5 h-5" />
                   <span className="text-[10px]">Settings</span>
                 </motion.button>
-              </div>
+               </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+       </Surface>
     </div>
   );
 }
@@ -292,7 +290,7 @@ export function VideoPreview({
 
   return (
     <div className={cn(
-      "relative aspect-video bg-slate-900 rounded-2xl overflow-hidden",
+      "relative aspect-video bg-ink-surface rounded-xl overflow-hidden border border-ink-edge",
       className
     )}>
       {stream && videoEnabled ? (
@@ -307,18 +305,18 @@ export function VideoPreview({
           )}
         />
       ) : (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-slate-800 to-slate-900">
-          <div className="p-4 rounded-full bg-slate-700/50">
-            <VideoOff className="w-8 h-8 text-slate-400" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-ink-raised">
+          <div className="p-4 rounded-xl bg-ink-surface">
+            <VideoOff className="w-8 h-8 text-secondary" />
           </div>
-          <span className="text-sm text-slate-400">Camera is off</span>
+          <span className="text-sm text-secondary">Camera is off</span>
         </div>
       )}
 
       {isScreenSharing && (
-        <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-emerald-500/90 rounded-full px-3 py-1.5">
-          <Monitor className="w-3.5 h-3.5 text-white" />
-          <span className="text-xs font-medium text-white">Sharing Screen</span>
+        <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-gain/90 rounded-xl px-3 py-1.5">
+          <Monitor className="w-3.5 h-3.5 text-primary" />
+          <span className="text-xs font-medium text-primary">Sharing Screen</span>
         </div>
       )}
     </div>
@@ -333,16 +331,16 @@ export function LiveIndicator({ isLive, className }: { isLive: boolean; classNam
       animate={{ opacity: [1, 0.6, 1] }}
       transition={{ duration: 1.5, repeat: Infinity }}
       className={cn(
-        "flex items-center gap-1.5 bg-red-500/90 backdrop-blur-sm rounded-full px-3 py-1.5",
+        "flex items-center gap-1.5 bg-loss/90 backdrop-blur-sm rounded-xl px-3 py-1.5",
         className
       )}
     >
       <motion.div
         animate={{ scale: [1, 1.2, 1] }}
         transition={{ duration: 1, repeat: Infinity }}
-        className="w-2 h-2 rounded-full bg-white"
+        className="w-2 h-2 rounded-xl bg-primary"
       />
-      <span className="text-xs font-bold text-white tracking-wider">LIVE</span>
+      <span className="text-xs font-bold text-primary tracking-wider">LIVE</span>
     </motion.div>
   );
 }
@@ -372,41 +370,37 @@ export function StreamStats({
   };
 
   return (
-    <div className={cn(
-      "grid grid-cols-4 gap-3 p-4 bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-slate-700/50",
+    <Surface className={cn(
+      "grid grid-cols-4 gap-3 p-4 bg-ink-surface/80 backdrop-blur-xl",
       className
     )}>
       <div className="text-center">
-        <div className="flex items-center justify-center gap-1 text-purple-400 mb-1">
+        <div className="flex items-center justify-center gap-1 text-accent-bright mb-1">
           <Users className="w-4 h-4" />
         </div>
-        <p className="text-lg font-bold text-white">{viewerCount}</p>
-        <p className="text-[10px] text-slate-400">Viewers</p>
+        <StatValue label="Viewers" value={viewerCount} valueClassName="text-lg font-bold" />
       </div>
       
       <div className="text-center">
-        <div className="flex items-center justify-center gap-1 text-cyan-400 mb-1">
+        <div className="flex items-center justify-center gap-1 text-accent-bright mb-1">
           <Radio className="w-4 h-4" />
         </div>
-        <p className="text-lg font-bold text-white">{formatDuration(duration)}</p>
-        <p className="text-[10px] text-slate-400">Duration</p>
+        <StatValue label="Duration" value={formatDuration(duration)} valueClassName="text-lg font-bold" />
       </div>
       
       <div className="text-center">
-        <div className="flex items-center justify-center gap-1 text-amber-400 mb-1">
+        <div className="flex items-center justify-center gap-1 text-warn mb-1">
           <Coins className="w-4 h-4" />
         </div>
-        <p className="text-lg font-bold text-white">{tipsReceived}</p>
-        <p className="text-[10px] text-slate-400">Tips</p>
+        <StatValue label="Tips" value={tipsReceived} valueClassName="text-lg font-bold" />
       </div>
       
       <div className="text-center">
-        <div className="flex items-center justify-center gap-1 text-emerald-400 mb-1">
+        <div className="flex items-center justify-center gap-1 text-gain mb-1">
           <MessageCircle className="w-4 h-4" />
         </div>
-        <p className="text-lg font-bold text-white">{messagesCount}</p>
-        <p className="text-[10px] text-slate-400">Messages</p>
+        <StatValue label="Messages" value={messagesCount} valueClassName="text-lg font-bold" />
       </div>
-    </div>
+    </Surface>
   );
 }

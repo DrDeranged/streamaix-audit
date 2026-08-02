@@ -9,7 +9,7 @@ import {
   ThumbsUp, Send, Sparkles, Bot, AlertCircle, Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import Surface from '@/components/ds/Surface';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
@@ -86,19 +86,19 @@ interface ClipData {
 }
 
 const RARITY_COLORS = {
-  common: 'from-slate-500 to-slate-600',
-  uncommon: 'from-green-500 to-emerald-600',
-  rare: 'from-blue-500 to-cyan-600',
-  epic: 'from-purple-500 to-fuchsia-600',
-  legendary: 'from-amber-500 to-orange-600',
+  common: 'bg-ink-raised text-secondary',
+  uncommon: 'bg-gain/20 text-gain',
+  rare: 'bg-accent-core/20 text-accent-bright',
+  epic: 'bg-accent-deep text-primary',
+  legendary: 'bg-warn/20 text-warn',
 };
 
 const RARITY_BORDERS = {
-  common: 'border-slate-500/40',
-  uncommon: 'border-green-500/40',
-  rare: 'border-blue-500/40',
-  epic: 'border-purple-500/40',
-  legendary: 'border-amber-500/40',
+  common: 'border-ink-edge',
+  uncommon: 'border-gain/40',
+  rare: 'border-accent-core/40',
+  epic: 'border-accent-core/40',
+  legendary: 'border-warn/40',
 };
 
 export function ViewerLeaderboard({ streamId }: { streamId: string }) {
@@ -109,25 +109,25 @@ export function ViewerLeaderboard({ streamId }: { streamId: string }) {
 
   if (isLoading || !data?.leaderboard?.length) {
     return (
-      <Card className="p-4 bg-slate-900/60 border border-amber-500/20">
+      <Surface className="p-4">
         <div className="flex items-center gap-2 mb-3">
           <Trophy className="w-4 h-4 text-amber-400" />
           <h3 className="text-sm font-semibold text-white">Top Chatters</h3>
         </div>
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-10 bg-slate-800/50 rounded-lg animate-pulse" />
+            <div key={i} className="h-10 bg-ink-raised rounded-xl animate-pulse" />
           ))}
         </div>
-      </Card>
+      </Surface>
     );
   }
 
   return (
-    <Card className="p-4 bg-slate-900/60 border border-amber-500/20">
+    <Surface className="p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-amber-500/20">
+          <div className="p-1.5 rounded-xl bg-warn/20">
             <Trophy className="w-4 h-4 text-amber-400" />
           </div>
           <h3 className="text-sm font-semibold text-white">Top Chatters</h3>
@@ -144,24 +144,24 @@ export function ViewerLeaderboard({ streamId }: { streamId: string }) {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             className={cn(
-              "flex items-center gap-3 p-2 rounded-lg",
-              entry.rank === 1 && "bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30",
-              entry.rank === 2 && "bg-slate-700/30",
-              entry.rank === 3 && "bg-slate-700/20",
-              entry.rank > 3 && "bg-slate-800/30"
+              "flex items-center gap-3 p-2 rounded-xl",
+              entry.rank === 1 && "bg-warn/20 border border-warn/30",
+              entry.rank === 2 && "bg-ink-raised",
+              entry.rank === 3 && "bg-ink-raised",
+              entry.rank > 3 && "bg-ink-surface"
             )}
           >
             <div className={cn(
               "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold",
-              entry.rank === 1 && "bg-gradient-to-br from-amber-400 to-orange-500 text-white",
-              entry.rank === 2 && "bg-gradient-to-br from-slate-300 to-slate-400 text-slate-800",
-              entry.rank === 3 && "bg-gradient-to-br from-amber-600 to-amber-700 text-white",
-              entry.rank > 3 && "bg-slate-700 text-slate-400"
+              entry.rank === 1 && "bg-warn text-primary",
+              entry.rank === 2 && "bg-ink-raised text-secondary",
+              entry.rank === 3 && "bg-warn text-primary",
+              entry.rank > 3 && "bg-ink-raised text-secondary"
             )}>
               {entry.rank}
             </div>
             
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center text-xs font-bold text-white overflow-hidden">
+            <div className="w-8 h-8 rounded-full bg-accent-core flex items-center justify-center text-xs font-bold text-primary overflow-hidden">
               {entry.avatar ? (
                 <img src={entry.avatar} alt="" className="w-full h-full object-cover" />
               ) : (
@@ -171,7 +171,7 @@ export function ViewerLeaderboard({ streamId }: { streamId: string }) {
             
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white truncate">{entry.username}</p>
-              <div className="flex items-center gap-2 text-[10px] text-slate-400">
+              <div className="flex items-center gap-2 text-[10px] text-secondary">
                 <span>{entry.messagesCount} msgs</span>
                 <span>•</span>
                 <span>{entry.reactionsCount} reacts</span>
@@ -180,12 +180,12 @@ export function ViewerLeaderboard({ streamId }: { streamId: string }) {
             
             <div className="text-right">
               <p className="text-sm font-bold text-amber-400">{entry.activityScore}</p>
-              <p className="text-[10px] text-slate-500">pts</p>
+              <p className="text-[10px] text-muted">pts</p>
             </div>
           </motion.div>
         ))}
       </div>
-    </Card>
+    </Surface>
   );
 }
 
@@ -235,10 +235,10 @@ export function WatchTimeRewards({ streamId, userId }: { streamId: string; userI
   const progressPercent = ((5 - rewards.nextRewardAt) / 5) * 100;
 
   return (
-    <Card className="p-3 bg-gradient-to-br from-emerald-900/40 to-cyan-900/40 border border-emerald-500/30">
+    <Surface variant="raised" className="p-3 border border-gain/30">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-emerald-500/20">
+          <div className="p-1.5 rounded-xl bg-gain/20">
             <Timer className="w-3.5 h-3.5 text-emerald-400" />
           </div>
           <span className="text-xs font-medium text-emerald-400">Watch Rewards</span>
@@ -253,27 +253,27 @@ export function WatchTimeRewards({ streamId, userId }: { streamId: string; userI
       <div className="flex items-center gap-4 mb-2">
         <div className="text-center">
           <p className="text-lg font-bold text-white">{rewards.minutesWatched}</p>
-          <p className="text-[10px] text-slate-400">mins</p>
+          <p className="text-[10px] text-secondary">mins</p>
         </div>
-        <div className="flex-1 h-px bg-slate-700" />
+        <div className="flex-1 h-px bg-ink-edge" />
         <div className="text-center">
           <p className="text-lg font-bold text-amber-400">+{rewards.pointsEarned}</p>
-          <p className="text-[10px] text-slate-400">STREAM</p>
+          <p className="text-[10px] text-secondary">STREAM</p>
         </div>
         <div className="text-center">
-          <p className="text-lg font-bold text-purple-400">+{rewards.xpEarned}</p>
-          <p className="text-[10px] text-slate-400">XP</p>
+          <p className="text-lg font-bold text-accent-bright">+{rewards.xpEarned}</p>
+          <p className="text-[10px] text-secondary">XP</p>
         </div>
       </div>
       
       <div className="space-y-1">
         <div className="flex justify-between text-[10px]">
-          <span className="text-slate-400">Next reward in</span>
+          <span className="text-secondary">Next reward in</span>
           <span className="text-emerald-400">{rewards.nextRewardAt} min</span>
         </div>
-        <Progress value={progressPercent} className="h-1.5 bg-slate-700" />
+        <Progress value={progressPercent} className="h-1.5 bg-ink-edge" />
       </div>
-    </Card>
+    </Surface>
   );
 }
 
@@ -291,10 +291,10 @@ export function StreamAchievementsPanel({ userId }: { userId?: string }) {
   ];
 
   return (
-    <Card className="p-4 bg-slate-900/60 border border-purple-500/20">
+    <Surface className="p-4">
       <div className="flex items-center gap-2 mb-4">
-        <div className="p-1.5 rounded-lg bg-purple-500/20">
-          <Award className="w-4 h-4 text-purple-400" />
+        <div className="p-1.5 rounded-xl bg-accent-core/20">
+          <Award className="w-4 h-4 text-accent-bright" />
         </div>
         <h3 className="text-sm font-semibold text-white">Stream Achievements</h3>
       </div>
@@ -305,7 +305,7 @@ export function StreamAchievementsPanel({ userId }: { userId?: string }) {
             key={achievement.id}
             whileHover={{ scale: 1.02 }}
             className={cn(
-              "p-3 rounded-xl border bg-gradient-to-br from-slate-800/50 to-slate-900/50",
+              "p-3 rounded-xl border bg-ink-raised",
               RARITY_BORDERS[achievement.rarity],
               achievement.isCompleted && "ring-1 ring-emerald-500/50"
             )}
@@ -315,7 +315,7 @@ export function StreamAchievementsPanel({ userId }: { userId?: string }) {
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-white truncate">{achievement.name}</p>
                 <Badge className={cn(
-                  "text-[8px] px-1 py-0 bg-gradient-to-r",
+                  "text-[8px] px-1 py-0",
                   RARITY_COLORS[achievement.rarity]
                 )}>
                   {achievement.rarity}
@@ -328,15 +328,15 @@ export function StreamAchievementsPanel({ userId }: { userId?: string }) {
               )}
             </div>
             
-            <p className="text-[10px] text-slate-400 mb-2 line-clamp-1">{achievement.description}</p>
+            <p className="text-[10px] text-secondary mb-2 line-clamp-1">{achievement.description}</p>
             
             {!achievement.isCompleted && (
               <div className="space-y-1">
                 <Progress 
                   value={(achievement.progress / achievement.target) * 100} 
-                  className="h-1 bg-slate-700"
+                  className="h-1 bg-ink-edge"
                 />
-                <p className="text-[10px] text-slate-500 text-right">
+                <p className="text-[10px] text-muted text-right">
                   {achievement.progress}/{achievement.target}
                 </p>
               </div>
@@ -344,7 +344,7 @@ export function StreamAchievementsPanel({ userId }: { userId?: string }) {
           </motion.div>
         ))}
       </div>
-    </Card>
+    </Surface>
   );
 }
 
@@ -365,11 +365,11 @@ export function ChatCommandsHelp({ onClose }: { onClose: () => void }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
-      className="absolute bottom-full mb-2 left-0 right-0 bg-slate-900/95 backdrop-blur-xl rounded-xl border border-purple-500/30 p-3 shadow-xl z-50"
+      className="absolute bottom-full mb-2 left-0 right-0 bg-ink-surface backdrop-blur-xl rounded-xl border border-accent-core/30 p-3 shadow-xl z-50"
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Zap className="w-4 h-4 text-purple-400" />
+          <Zap className="w-4 h-4 text-accent-bright" />
           <h4 className="text-sm font-semibold text-white">Chat Commands</h4>
         </div>
         <Button variant="ghost" size="sm" onClick={onClose} className="h-6 w-6 p-0">
@@ -379,10 +379,10 @@ export function ChatCommandsHelp({ onClose }: { onClose: () => void }) {
       
       <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
         {commands.map((cmd) => (
-          <div key={cmd.command} className="p-2 rounded-lg bg-slate-800/50 border border-slate-700/50">
+          <div key={cmd.command} className="p-2 rounded-xl bg-ink-raised border border-ink-edge">
             <code className="text-xs font-bold text-cyan-400">{cmd.command}</code>
-            <p className="text-[10px] text-slate-400 mt-0.5">{cmd.description}</p>
-            <p className="text-[9px] text-slate-500 mt-0.5">e.g. {cmd.example}</p>
+            <p className="text-[10px] text-secondary mt-0.5">{cmd.description}</p>
+            <p className="text-[9px] text-muted mt-0.5">e.g. {cmd.example}</p>
           </div>
         ))}
       </div>
@@ -416,19 +416,19 @@ export function PinnedMessagesBar({
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        "p-2.5 rounded-lg border flex items-center gap-2",
+        "p-2.5 rounded-xl border flex items-center gap-2",
         current.isAlpha 
-          ? "bg-gradient-to-r from-amber-900/40 to-orange-900/40 border-amber-500/40"
-          : "bg-slate-800/60 border-purple-500/30"
+          ? "bg-warn/20 border-warn/40"
+          : "bg-ink-raised border-accent-core/30"
       )}
     >
       <div className={cn(
         "p-1 rounded",
-        current.isAlpha ? "bg-amber-500/20" : "bg-purple-500/20"
+        current.isAlpha ? "bg-warn/20" : "bg-accent-core/20"
       )}>
         <Pin className={cn(
           "w-3.5 h-3.5",
-          current.isAlpha ? "text-amber-400" : "text-purple-400"
+          current.isAlpha ? "text-warn" : "text-accent-bright"
         )} />
       </div>
       
@@ -436,7 +436,7 @@ export function PinnedMessagesBar({
         <div className="flex items-center gap-2">
           <span className={cn(
             "text-xs font-semibold",
-            current.isAlpha ? "text-amber-400" : "text-purple-400"
+            current.isAlpha ? "text-warn" : "text-accent-bright"
           )}>
             @{current.username}
           </span>
@@ -456,7 +456,7 @@ export function PinnedMessagesBar({
               key={i}
               className={cn(
                 "w-1.5 h-1.5 rounded-full transition-colors",
-                i === currentIndex ? "bg-purple-400" : "bg-slate-600"
+                i === currentIndex ? "bg-accent-core" : "bg-ink-edge"
               )}
             />
           ))}
@@ -497,11 +497,11 @@ export function StreamScheduleCard({ stream, onRemind }: { stream: ScheduledStre
   return (
     <motion.div
       whileHover={{ scale: 1.01 }}
-      className="p-3 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-purple-500/30 transition-colors"
+      className="p-3 rounded-xl bg-ink-raised border border-ink-edge hover:border-accent-core/30 transition-colors"
     >
       <div className="flex items-start gap-3">
         <div className="relative">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center text-lg font-bold text-white overflow-hidden">
+          <div className="w-12 h-12 rounded-full bg-accent-core flex items-center justify-center text-lg font-bold text-primary overflow-hidden">
             {stream.hostAvatar ? (
               <img src={stream.hostAvatar} alt="" className="w-full h-full object-cover" />
             ) : (
@@ -517,14 +517,14 @@ export function StreamScheduleCard({ stream, onRemind }: { stream: ScheduledStre
         
         <div className="flex-1 min-w-0">
           <h4 className="text-sm font-semibold text-white line-clamp-1">{stream.title}</h4>
-          <p className="text-xs text-slate-400">@{stream.hostUsername}</p>
+          <p className="text-xs text-secondary">@{stream.hostUsername}</p>
           <div className="flex items-center gap-2 mt-1">
             <Badge variant="outline" className="border-amber-500/30 text-amber-400 text-[10px] px-1.5">
               <Clock className="w-2.5 h-2.5 mr-1" />
               {timeDisplay}
             </Badge>
             {stream.category && (
-              <Badge variant="outline" className="border-slate-600 text-slate-400 text-[10px]">
+              <Badge variant="outline" className="border-ink-edge text-secondary text-[10px]">
                 {stream.category}
               </Badge>
             )}
@@ -539,7 +539,7 @@ export function StreamScheduleCard({ stream, onRemind }: { stream: ScheduledStre
             "h-8",
             stream.hasReminder 
               ? "border-emerald-500/30 text-emerald-400" 
-              : "bg-purple-600 hover:bg-purple-500"
+              : "bg-accent-core hover:bg-accent-deep"
           )}
           data-testid={`button-remind-${stream.id}`}
         >
@@ -576,26 +576,26 @@ export function MultiStreamView({
         <div 
           key={stream.id}
           className={cn(
-            "relative rounded-lg overflow-hidden bg-slate-900 border-2 transition-all",
+            "relative rounded-xl overflow-hidden bg-ink-page border-2 transition-all",
             primaryStreamId === stream.id 
-              ? "border-purple-500 ring-2 ring-purple-500/30" 
-              : "border-slate-700 hover:border-slate-600"
+              ? "border-accent-core ring-2 ring-accent-core/30" 
+              : "border-ink-edge hover:border-accent-core/50"
           )}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10 flex items-center justify-center">
+          <div className="absolute inset-0 bg-accent-core/10 flex items-center justify-center">
             <div className="text-center p-4">
-              <div className="w-12 h-12 mx-auto rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center mb-2">
+              <div className="w-12 h-12 mx-auto rounded-full bg-accent-core flex items-center justify-center mb-2">
                 <Play className="w-5 h-5 text-white" />
               </div>
               <p className="text-sm font-medium text-white truncate">{stream.title}</p>
-              <p className="text-xs text-slate-400">@{stream.hostUsername}</p>
+              <p className="text-xs text-secondary">@{stream.hostUsername}</p>
             </div>
           </div>
           
           <div className="absolute top-2 left-2 flex items-center gap-1">
             <Badge className="bg-red-500/90 text-white text-[10px] px-1.5">LIVE</Badge>
             {primaryStreamId === stream.id && (
-              <Badge className="bg-purple-500/90 text-white text-[10px] px-1.5">
+              <Badge className="bg-accent-core/90 text-primary text-[10px] px-1.5">
                 <Volume2 className="w-2.5 h-2.5" />
               </Badge>
             )}
@@ -606,23 +606,23 @@ export function MultiStreamView({
               size="sm"
               variant="ghost"
               onClick={() => onChangePrimary(stream.id)}
-              className="h-6 w-6 p-0 bg-slate-900/60 hover:bg-slate-900/80"
+              className="h-6 w-6 p-0 bg-ink-page/60 hover:bg-ink-raised"
               data-testid={`button-audio-${stream.id}`}
             >
               {primaryStreamId === stream.id ? (
-                <Volume2 className="w-3 h-3 text-purple-400" />
+                <Volume2 className="w-3 h-3 text-accent-bright" />
               ) : (
-                <VolumeX className="w-3 h-3 text-slate-400" />
+                <VolumeX className="w-3 h-3 text-secondary" />
               )}
             </Button>
             <Button
               size="sm"
               variant="ghost"
               onClick={() => onRemoveStream(stream.id)}
-              className="h-6 w-6 p-0 bg-slate-900/60 hover:bg-red-500/20"
+              className="h-6 w-6 p-0 bg-ink-page/60 hover:bg-loss/20"
               data-testid={`button-remove-${stream.id}`}
             >
-              <X className="w-3 h-3 text-slate-400 hover:text-red-400" />
+              <X className="w-3 h-3 text-secondary hover:text-loss" />
             </Button>
           </div>
         </div>
@@ -631,7 +631,7 @@ export function MultiStreamView({
       {streams.length < 4 && (
         <Button
           variant="outline"
-          className="h-full min-h-[100px] border-dashed border-slate-600 text-slate-400 hover:border-purple-500 hover:text-purple-400"
+          className="h-full min-h-[100px] border-dashed border-ink-edge text-secondary hover:border-accent-core hover:text-accent-bright"
           data-testid="button-add-stream"
         >
           <LayoutGrid className="w-5 h-5 mr-2" />
@@ -705,7 +705,7 @@ export function CreateClipButton({
         "h-8 text-xs",
         isCreating 
           ? "bg-red-500 hover:bg-red-400 animate-pulse" 
-          : "border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+          : "border-accent-core/30 text-accent-bright hover:bg-accent-core/10"
       )}
       data-testid="button-create-clip"
     >
@@ -723,8 +723,8 @@ export function VODList({ streamId }: { streamId: string }) {
   if (!data?.recordings?.length) {
     return (
       <div className="text-center py-8">
-        <Play className="w-8 h-8 text-slate-500 mx-auto mb-2" />
-        <p className="text-sm text-slate-400">No recordings yet</p>
+        <Play className="w-8 h-8 text-muted mx-auto mb-2" />
+        <p className="text-sm text-secondary">No recordings yet</p>
       </div>
     );
   }
@@ -734,23 +734,23 @@ export function VODList({ streamId }: { streamId: string }) {
       {data.recordings.map((recording) => (
         <div
           key={recording.id}
-          className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50 hover:border-purple-500/30 cursor-pointer transition-colors"
+          className="p-3 rounded-xl bg-ink-raised border border-ink-edge hover:border-accent-core/30 cursor-pointer transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className="w-16 h-10 rounded bg-slate-700 flex items-center justify-center">
-              <Play className="w-4 h-4 text-slate-400" />
+            <div className="w-16 h-10 rounded-xl bg-ink-edge flex items-center justify-center">
+              <Play className="w-4 h-4 text-secondary" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white truncate">
                 {recording.title || 'Stream Recording'}
               </p>
-              <div className="flex items-center gap-2 text-[10px] text-slate-400">
+              <div className="flex items-center gap-2 text-[10px] text-secondary">
                 <span>{recording.durationSeconds ? `${Math.floor(recording.durationSeconds / 60)}m` : '--'}</span>
                 <span>•</span>
                 <span>{recording.views || 0} views</span>
               </div>
             </div>
-            <ChevronRight className="w-4 h-4 text-slate-500" />
+            <ChevronRight className="w-4 h-4 text-muted" />
           </div>
         </div>
       ))}
@@ -766,9 +766,9 @@ export function CoStreamPanel({
   avatars: { id: string; name: string; avatar?: string; isActive: boolean; expertise: string }[];
 }) {
   return (
-    <Card className="p-4 bg-slate-900/60 border border-cyan-500/20">
+    <Surface className="p-4">
       <div className="flex items-center gap-2 mb-4">
-        <div className="p-1.5 rounded-lg bg-cyan-500/20">
+        <div className="p-1.5 rounded-xl bg-accent-core/20">
           <Users className="w-4 h-4 text-cyan-400" />
         </div>
         <h3 className="text-sm font-semibold text-white">Co-Stream Panel</h3>
@@ -784,16 +784,16 @@ export function CoStreamPanel({
             className={cn(
               "p-3 rounded-xl border transition-all",
               avatar.isActive 
-                ? "bg-gradient-to-br from-cyan-900/40 to-purple-900/40 border-cyan-500/40 ring-1 ring-cyan-500/20"
-                : "bg-slate-800/50 border-slate-700/40 opacity-60"
+                ? "bg-accent-core/10 border-accent-core/40 ring-1 ring-accent-core/20"
+                : "bg-ink-raised border-ink-edge opacity-60"
             )}
           >
             <div className="flex items-center gap-2 mb-2">
               <div className={cn(
                 "w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white overflow-hidden",
                 avatar.isActive 
-                  ? "bg-gradient-to-br from-cyan-500 to-purple-500 ring-2 ring-cyan-400/50" 
-                  : "bg-slate-700"
+                  ? "bg-accent-core ring-2 ring-accent-core/50" 
+                  : "bg-ink-edge"
               )}>
                 {avatar.avatar ? (
                   <img src={avatar.avatar} alt="" className="w-full h-full object-cover" />
@@ -803,7 +803,7 @@ export function CoStreamPanel({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-white truncate">{avatar.name}</p>
-                <p className="text-[10px] text-slate-400 truncate">{avatar.expertise}</p>
+                <p className="text-[10px] text-secondary truncate">{avatar.expertise}</p>
               </div>
             </div>
             
@@ -816,7 +816,7 @@ export function CoStreamPanel({
           </div>
         ))}
       </div>
-    </Card>
+    </Surface>
   );
 }
 
@@ -880,8 +880,8 @@ export function TipPanel({
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
       onClick={onClose}
     >
-      <Card 
-        className="w-full max-w-sm p-6 bg-gradient-to-br from-slate-900 via-purple-900/30 to-slate-900 border-amber-500/30"
+      <Surface 
+        className="w-full max-w-sm p-6 border-warn/30"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
@@ -891,7 +891,7 @@ export function TipPanel({
             </div>
             <div>
               <h3 className="text-lg font-bold text-white">Send a Tip</h3>
-              <p className="text-xs text-slate-400">to @{hostUsername}</p>
+              <p className="text-xs text-secondary">to @{hostUsername}</p>
             </div>
           </div>
           <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
@@ -901,7 +901,7 @@ export function TipPanel({
 
         <div className="space-y-4">
           <div>
-            <label className="text-sm text-slate-400 mb-2 block">Amount (STREAM)</label>
+            <label className="text-sm text-secondary mb-2 block">Amount (STREAM)</label>
             <div className="flex flex-wrap gap-2 mb-2">
               {presetAmounts.map((preset) => (
                 <Button
@@ -913,7 +913,7 @@ export function TipPanel({
                     "h-9 px-3",
                     amount === preset.toString()
                       ? "border-amber-500 bg-amber-500/20 text-amber-400"
-                      : "border-slate-600 text-slate-300"
+                      : "border-ink-edge text-body"
                   )}
                 >
                   {preset}
@@ -925,25 +925,25 @@ export function TipPanel({
               placeholder="Custom amount"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="bg-slate-800/50 border-slate-700"
+              className="bg-ink-raised border-ink-edge"
             />
           </div>
 
           <div>
-            <label className="text-sm text-slate-400 mb-2 block">Message (optional)</label>
+            <label className="text-sm text-secondary mb-2 block">Message (optional)</label>
             <Input
               placeholder="Add a message..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               maxLength={100}
-              className="bg-slate-800/50 border-slate-700"
+              className="bg-ink-raised border-ink-edge"
             />
           </div>
 
           <Button
             onClick={handleTip}
             disabled={!amount || isSubmitting}
-            className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400"
+            className="w-full grad-accent glow-accent hover:bg-accent-deep"
             data-testid="button-confirm-tip"
           >
             {isSubmitting ? (
@@ -964,7 +964,7 @@ export function TipPanel({
             )}
           </Button>
         </div>
-      </Card>
+      </Surface>
     </motion.div>
   );
 }
@@ -997,8 +997,8 @@ export function StreamCategoryFilter({
           className={cn(
             "h-9 whitespace-nowrap",
             selected === cat.id
-              ? "border-purple-500 bg-purple-500/20 text-purple-400"
-              : "border-slate-700 text-slate-400 hover:border-slate-600"
+              ? "border-accent-core bg-accent-core/20 text-accent-bright"
+              : "border-ink-edge text-secondary hover:border-accent-core"
           )}
           data-testid={`filter-${cat.id}`}
         >
@@ -1042,7 +1042,7 @@ export function ClipsGallery({ streamId }: { streamId: string }) {
     return (
       <div className="grid grid-cols-2 gap-3">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="aspect-video rounded-lg bg-slate-800/50 animate-pulse" />
+          <div key={i} className="aspect-video rounded-xl bg-ink-raised animate-pulse" />
         ))}
       </div>
     );
@@ -1051,9 +1051,9 @@ export function ClipsGallery({ streamId }: { streamId: string }) {
   if (!data?.clips?.length) {
     return (
       <div className="text-center py-8">
-        <Scissors className="w-10 h-10 text-slate-500 mx-auto mb-3" />
-        <p className="text-sm text-slate-400 mb-1">No clips yet</p>
-        <p className="text-xs text-slate-500">Create a clip to capture the best moments!</p>
+        <Scissors className="w-10 h-10 text-muted mx-auto mb-3" />
+        <p className="text-sm text-secondary mb-1">No clips yet</p>
+        <p className="text-xs text-muted">Create a clip to capture the best moments!</p>
       </div>
     );
   }
@@ -1065,10 +1065,10 @@ export function ClipsGallery({ streamId }: { streamId: string }) {
           key={clip.id}
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="group relative aspect-video rounded-xl overflow-hidden bg-slate-800/60 border border-slate-700/40 hover:border-purple-500/40 cursor-pointer transition-all"
+          className="group relative aspect-video rounded-xl overflow-hidden bg-ink-raised border border-ink-edge hover:border-accent-core/40 cursor-pointer transition-all"
           data-testid={`clip-card-${clip.id}`}
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-ink-page/80" />
           
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -1080,7 +1080,7 @@ export function ClipsGallery({ streamId }: { streamId: string }) {
             <p className="text-sm font-medium text-white line-clamp-1 mb-1">
               {clip.title}
             </p>
-            <div className="flex items-center justify-between text-[10px] text-slate-300">
+            <div className="flex items-center justify-between text-[10px] text-body">
               <span className="flex items-center gap-1">
                 <Eye className="w-3 h-3" />
                 {clip.views}
@@ -1104,7 +1104,7 @@ export function ClipsGallery({ streamId }: { streamId: string }) {
             </Button>
           </div>
 
-          <Badge className="absolute top-2 left-2 bg-purple-500/80 text-white text-[9px]">
+          <Badge className="absolute top-2 left-2 bg-accent-core/80 text-primary text-[9px]">
             by {clip.creatorUsername}
           </Badge>
         </motion.div>
@@ -1195,14 +1195,14 @@ export function RaidPanel({
   if (!isHost) return null;
 
   return (
-    <Card className="p-4 bg-gradient-to-br from-orange-900/20 to-red-900/20 border border-orange-500/30">
+    <Surface variant="raised" className="p-4 border border-warn/30">
       <div className="flex items-center gap-2 mb-4">
-        <div className="p-2 rounded-lg bg-orange-500/20">
+        <div className="p-2 rounded-xl bg-orange-500/20">
           <Zap className="w-5 h-5 text-orange-400" />
         </div>
         <div>
           <h3 className="font-semibold text-white">Raid Another Stream</h3>
-          <p className="text-xs text-slate-400">Send your {currentViewers} viewers to support another creator</p>
+          <p className="text-xs text-secondary">Send your {currentViewers} viewers to support another creator</p>
         </div>
       </div>
 
@@ -1212,7 +1212,7 @@ export function RaidPanel({
             initial={{ scale: 0.5 }}
             animate={{ scale: [1, 1.1, 1] }}
             transition={{ duration: 1, repeat: Infinity }}
-            className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center"
+            className="w-20 h-20 mx-auto mb-4 rounded-full bg-warn flex items-center justify-center"
           >
             <span className="text-3xl font-bold text-white">{countdown}</span>
           </motion.div>
@@ -1230,22 +1230,22 @@ export function RaidPanel({
         <>
           <div className="space-y-2 max-h-48 overflow-y-auto mb-4">
             {availableTargets.length === 0 ? (
-              <p className="text-sm text-slate-400 text-center py-4">No other live streams available</p>
+              <p className="text-sm text-secondary text-center py-4">No other live streams available</p>
             ) : (
               availableTargets.map((stream) => (
                 <div
                   key={stream.id}
                   onClick={() => setSelectedTarget(stream.id)}
                   className={cn(
-                    "p-3 rounded-lg border cursor-pointer transition-all",
+                    "p-3 rounded-xl border cursor-pointer transition-all",
                     selectedTarget === stream.id
                       ? "border-orange-500 bg-orange-500/10"
-                      : "border-slate-700/50 bg-slate-800/30 hover:border-slate-600"
+                      : "border-ink-edge/50 bg-ink-raised/30 hover:border-ink-edge"
                   )}
                   data-testid={`raid-target-${stream.id}`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                    <div className="w-10 h-10 rounded-full bg-accent-core flex items-center justify-center text-primary font-bold">
                       {stream.hostAvatar ? (
                         <img src={stream.hostAvatar} alt="" className="w-full h-full rounded-full object-cover" />
                       ) : (
@@ -1254,7 +1254,7 @@ export function RaidPanel({
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-white truncate">{stream.title}</p>
-                      <div className="flex items-center gap-2 text-xs text-slate-400">
+                      <div className="flex items-center gap-2 text-xs text-secondary">
                         <span>@{stream.hostUsername}</span>
                         <span>•</span>
                         <span className="flex items-center gap-1">
@@ -1277,7 +1277,7 @@ export function RaidPanel({
           <Button
             onClick={startRaid}
             disabled={!selectedTarget || availableTargets.length === 0}
-            className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 disabled:opacity-50"
+            className="w-full bg-accent-core hover:bg-accent-deep disabled:opacity-50"
             data-testid="button-start-raid"
           >
             <Zap className="w-4 h-4 mr-2" />
@@ -1285,7 +1285,7 @@ export function RaidPanel({
           </Button>
         </>
       )}
-    </Card>
+    </Surface>
   );
 }
 
@@ -1342,15 +1342,15 @@ export function ChannelPointsPanel({
   });
 
   return (
-    <Card className="p-4 bg-gradient-to-br from-amber-900/20 to-orange-900/20 border border-amber-500/30">
+    <Surface variant="raised" className="p-4 border border-warn/30">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-amber-500/20">
+          <div className="p-2 rounded-xl bg-amber-500/20">
             <Coins className="w-5 h-5 text-amber-400" />
           </div>
           <div>
             <h3 className="font-semibold text-white">Channel Points</h3>
-            <p className="text-xs text-slate-400">Earn by watching & chatting</p>
+            <p className="text-xs text-secondary">Earn by watching & chatting</p>
           </div>
         </div>
         <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-sm px-3">
@@ -1364,10 +1364,10 @@ export function ChannelPointsPanel({
           <div
             key={reward.id}
             className={cn(
-              "p-3 rounded-lg border transition-all",
+              "p-3 rounded-xl border transition-all",
               userPoints >= reward.cost
-                ? "border-amber-500/30 bg-slate-800/50 hover:border-amber-500/50 cursor-pointer"
-                : "border-slate-700/30 bg-slate-800/30 opacity-60"
+                ? "border-amber-500/30 bg-ink-raised/50 hover:border-amber-500/50 cursor-pointer"
+                : "border-ink-edge/30 bg-ink-raised/30 opacity-60"
             )}
             onClick={() => userPoints >= reward.cost && redeemMutation.mutate(reward.id)}
             data-testid={`reward-${reward.id}`}
@@ -1376,13 +1376,13 @@ export function ChannelPointsPanel({
               <span className="text-2xl">{reward.icon}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white">{reward.name}</p>
-                <p className="text-xs text-slate-400 truncate">{reward.description}</p>
+                <p className="text-xs text-secondary truncate">{reward.description}</p>
               </div>
               <Badge className={cn(
                 "text-xs",
                 userPoints >= reward.cost
                   ? "bg-amber-500/20 text-amber-400"
-                  : "bg-slate-700/50 text-slate-400"
+                  : "bg-ink-edge/50 text-secondary"
               )}>
                 {reward.cost}
               </Badge>
@@ -1391,17 +1391,17 @@ export function ChannelPointsPanel({
         ))}
       </div>
 
-      <div className="mt-4 p-3 rounded-lg bg-slate-800/40 border border-slate-700/40">
+      <div className="mt-4 p-3 rounded-xl bg-ink-raised/40 border border-ink-edge/40">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-slate-400">Earn rate</span>
+          <span className="text-secondary">Earn rate</span>
           <span className="text-amber-400">+10 points/min watching</span>
         </div>
         <div className="flex items-center justify-between text-xs mt-1">
-          <span className="text-slate-400">Chat bonus</span>
+          <span className="text-secondary">Chat bonus</span>
           <span className="text-green-400">+5 points/message</span>
         </div>
       </div>
-    </Card>
+    </Surface>
   );
 }
 
@@ -1435,19 +1435,19 @@ export function ChatModerationPanel({
   if (!isHost) return null;
 
   return (
-    <Card className="p-4 bg-slate-900/60 border border-slate-700/40">
+    <Surface className="p-4">
       <div className="flex items-center gap-2 mb-4">
-        <div className="p-2 rounded-lg bg-blue-500/20">
+        <div className="p-2 rounded-xl bg-blue-500/20">
           <AlertCircle className="w-5 h-5 text-blue-400" />
         </div>
         <h3 className="font-semibold text-white">Chat Moderation</h3>
       </div>
 
       <div className="space-y-3">
-        <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50">
+        <div className="flex items-center justify-between p-3 rounded-xl bg-ink-raised/50">
           <div>
             <p className="text-sm font-medium text-white">Slow Mode</p>
-            <p className="text-xs text-slate-400">Limit how often users can chat</p>
+            <p className="text-xs text-secondary">Limit how often users can chat</p>
           </div>
           <select
             value={slowModeSeconds}
@@ -1456,7 +1456,7 @@ export function ChatModerationPanel({
               setSlowModeSeconds(val);
               updateModeMutation.mutate({ slowModeSeconds: val });
             }}
-            className="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-sm text-white"
+            className="bg-ink-edge border border-ink-edge rounded px-2 py-1 text-sm text-white"
             data-testid="select-slow-mode"
           >
             <option value={0}>Off</option>
@@ -1468,10 +1468,10 @@ export function ChatModerationPanel({
           </select>
         </div>
 
-        <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50">
+        <div className="flex items-center justify-between p-3 rounded-xl bg-ink-raised/50">
           <div>
             <p className="text-sm font-medium text-white">Subscriber Only</p>
-            <p className="text-xs text-slate-400">Only subscribers can chat</p>
+            <p className="text-xs text-secondary">Only subscribers can chat</p>
           </div>
           <Button
             size="sm"
@@ -1480,17 +1480,17 @@ export function ChatModerationPanel({
               setSubscriberOnly(!subscriberOnly);
               updateModeMutation.mutate({ subscriberOnly: !subscriberOnly });
             }}
-            className={subscriberOnly ? "bg-purple-500" : "border-slate-600"}
+            className={subscriberOnly ? "bg-accent-core" : "border-ink-edge"}
             data-testid="toggle-subscriber-only"
           >
             {subscriberOnly ? 'On' : 'Off'}
           </Button>
         </div>
 
-        <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50">
+        <div className="flex items-center justify-between p-3 rounded-xl bg-ink-raised/50">
           <div>
             <p className="text-sm font-medium text-white">Follower Only</p>
-            <p className="text-xs text-slate-400">Only followers can chat</p>
+            <p className="text-xs text-secondary">Only followers can chat</p>
           </div>
           <Button
             size="sm"
@@ -1499,17 +1499,17 @@ export function ChatModerationPanel({
               setFollowerOnly(!followerOnly);
               updateModeMutation.mutate({ followerOnly: !followerOnly });
             }}
-            className={followerOnly ? "bg-green-500" : "border-slate-600"}
+            className={followerOnly ? "bg-green-500" : "border-ink-edge"}
             data-testid="toggle-follower-only"
           >
             {followerOnly ? 'On' : 'Off'}
           </Button>
         </div>
 
-        <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50">
+        <div className="flex items-center justify-between p-3 rounded-xl bg-ink-raised/50">
           <div>
             <p className="text-sm font-medium text-white">Emote Only</p>
-            <p className="text-xs text-slate-400">Only emotes allowed in chat</p>
+            <p className="text-xs text-secondary">Only emotes allowed in chat</p>
           </div>
           <Button
             size="sm"
@@ -1518,7 +1518,7 @@ export function ChatModerationPanel({
               setEmoteOnly(!emoteOnly);
               updateModeMutation.mutate({ emoteOnly: !emoteOnly });
             }}
-            className={emoteOnly ? "bg-amber-500" : "border-slate-600"}
+            className={emoteOnly ? "bg-amber-500" : "border-ink-edge"}
             data-testid="toggle-emote-only"
           >
             {emoteOnly ? 'On' : 'Off'}
@@ -1526,8 +1526,8 @@ export function ChatModerationPanel({
         </div>
       </div>
 
-      <div className="mt-4 pt-4 border-t border-slate-700/40">
-        <p className="text-xs font-medium text-slate-300 mb-2">Quick Actions</p>
+      <div className="mt-4 pt-4 border-t border-ink-edge/40">
+        <p className="text-xs font-medium text-body mb-2">Quick Actions</p>
         <div className="flex flex-wrap gap-2">
           <Button
             size="sm"
@@ -1555,7 +1555,7 @@ export function ChatModerationPanel({
           </Button>
         </div>
       </div>
-    </Card>
+    </Surface>
   );
 }
 
@@ -1603,14 +1603,14 @@ export function GiftSubscriptionPanel({
   ];
 
   return (
-    <Card className="p-4 bg-gradient-to-br from-pink-900/20 to-purple-900/20 border border-pink-500/30">
+    <Surface variant="raised" className="p-4 border border-accent-core/30">
       <div className="flex items-center gap-2 mb-4">
-        <div className="p-2 rounded-lg bg-pink-500/20">
+        <div className="p-2 rounded-xl bg-pink-500/20">
           <Gift className="w-5 h-5 text-pink-400" />
         </div>
         <div>
           <h3 className="font-semibold text-white">Gift Subscriptions</h3>
-          <p className="text-xs text-slate-400">Support @{streamerUsername} & the community</p>
+          <p className="text-xs text-secondary">Support @{streamerUsername} & the community</p>
         </div>
       </div>
 
@@ -1620,10 +1620,10 @@ export function GiftSubscriptionPanel({
             key={tier.count}
             onClick={() => setGiftCount(tier.count)}
             className={cn(
-              "p-3 rounded-lg border text-center cursor-pointer transition-all",
+              "p-3 rounded-xl border text-center cursor-pointer transition-all",
               giftCount === tier.count
                 ? "border-pink-500 bg-pink-500/10"
-                : "border-slate-700/50 bg-slate-800/30 hover:border-slate-600"
+                : "border-ink-edge/50 bg-ink-raised/30 hover:border-ink-edge"
             )}
             data-testid={`gift-tier-${tier.count}`}
           >
@@ -1644,7 +1644,7 @@ export function GiftSubscriptionPanel({
           giftMutation.mutate(giftCount);
         }}
         disabled={isGifting || giftMutation.isPending}
-        className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400"
+        className="w-full grad-accent glow-accent hover:bg-accent-deep"
         data-testid="button-gift-subs"
       >
         {isGifting ? (
@@ -1660,10 +1660,10 @@ export function GiftSubscriptionPanel({
         )}
       </Button>
 
-      <p className="text-[10px] text-slate-500 text-center mt-2">
+      <p className="text-[10px] text-muted text-center mt-2">
         Randomly gifted to viewers watching right now
       </p>
-    </Card>
+    </Surface>
   );
 }
 
@@ -1684,17 +1684,17 @@ export function StreamAnalyticsPanel({ streamId }: { streamId: string }) {
   const stats = [
     { label: 'Peak Viewers', value: data?.peakViewers || 0, icon: <TrendingUp className="w-4 h-4 text-green-400" />, color: 'green' },
     { label: 'Total Views', value: data?.totalViews || 0, icon: <Eye className="w-4 h-4 text-blue-400" />, color: 'blue' },
-    { label: 'Avg Watch Time', value: `${Math.round((data?.averageWatchTime || 0) / 60)}m`, icon: <Clock className="w-4 h-4 text-purple-400" />, color: 'purple' },
+    { label: 'Avg Watch Time', value: `${Math.round((data?.averageWatchTime || 0) / 60)}m`, icon: <Clock className="w-4 h-4 text-accent-bright" />, color: 'purple' },
     { label: 'Chat Messages', value: data?.chatMessages || 0, icon: <MessageCircle className="w-4 h-4 text-cyan-400" />, color: 'cyan' },
     { label: 'Tips Received', value: data?.tipsReceived || 0, icon: <Coins className="w-4 h-4 text-amber-400" />, color: 'amber', suffix: 'STREAM' },
     { label: 'New Followers', value: data?.newFollowers || 0, icon: <Users className="w-4 h-4 text-pink-400" />, color: 'pink' },
   ];
 
   return (
-    <Card className="p-4 bg-slate-900/60 border border-slate-700/40">
+    <Surface className="p-4">
       <div className="flex items-center gap-2 mb-4">
-        <div className="p-2 rounded-lg bg-purple-500/20">
-          <TrendingUp className="w-5 h-5 text-purple-400" />
+        <div className="p-2 rounded-xl bg-accent-core/20">
+          <TrendingUp className="w-5 h-5 text-accent-bright" />
         </div>
         <h3 className="font-semibold text-white">Stream Analytics</h3>
       </div>
@@ -1703,19 +1703,19 @@ export function StreamAnalyticsPanel({ streamId }: { streamId: string }) {
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30"
+            className="p-3 rounded-xl bg-ink-raised/50 border border-ink-edge/30"
           >
             <div className="flex items-center gap-2 mb-1">
               {stat.icon}
-              <span className="text-xs text-slate-400">{stat.label}</span>
+              <span className="text-xs text-secondary">{stat.label}</span>
             </div>
             <p className="text-lg font-bold text-white">
               {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
-              {stat.suffix && <span className="text-xs text-slate-400 ml-1">{stat.suffix}</span>}
+              {stat.suffix && <span className="text-xs text-secondary ml-1">{stat.suffix}</span>}
             </p>
           </div>
         ))}
       </div>
-    </Card>
+    </Surface>
   );
 }

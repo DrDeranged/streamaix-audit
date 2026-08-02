@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Users, MessageCircle, Heart, Share2, Volume2, VolumeX, 
-  ArrowLeft, Maximize2, Minimize2, Gift, X, ChevronUp
+  Users, Heart, Share2, Volume2, VolumeX, 
+  ArrowLeft, Maximize2, Minimize2, Gift
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -96,7 +96,7 @@ export function MobileStreamViewer({
   return (
     <div 
       className={cn(
-        "relative w-full bg-black",
+        "relative w-full bg-ink-page",
         isFullscreen ? "fixed inset-0 z-50" : "aspect-video max-h-[60vh]"
       )}
       onClick={handleTap}
@@ -105,11 +105,11 @@ export function MobileStreamViewer({
       {videoElement ? (
         videoElement
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900/30 to-slate-900 flex items-center justify-center">
+        <div className="absolute inset-0 grad-surface flex items-center justify-center">
           {isAvatarStream && (
             <div className="relative">
               <motion.div
-                className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-purple-600 via-cyan-500 to-emerald-500 p-1"
+                className="w-32 h-32 md:w-40 md:h-40 rounded-xl bg-accent-core p-1"
                 animate={{ scale: [1, 1.05, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
@@ -121,7 +121,7 @@ export function MobileStreamViewer({
                 />
               </motion.div>
               <motion.div
-                className="absolute inset-0 rounded-full border-2 border-cyan-400/50"
+                className="absolute inset-0 rounded-xl border-2 border-accent-bright/50"
                 animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
                 transition={{ duration: 2, repeat: Infinity }}
               />
@@ -137,7 +137,7 @@ export function MobileStreamViewer({
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-black/80 to-transparent"
+              className="absolute top-0 left-0 right-0 p-3 bg-ink-page/90"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -145,7 +145,7 @@ export function MobileStreamViewer({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-9 w-9 bg-black/40 hover:bg-black/60 text-white"
+                      className="h-9 w-9 rounded-xl bg-ink-raised/80 hover:bg-ink-raised text-primary"
                       onClick={(e) => { e.stopPropagation(); onBack(); }}
                       data-testid="button-back"
                     >
@@ -155,14 +155,14 @@ export function MobileStreamViewer({
                   <div className="flex items-center gap-2">
                     <AvatarWithFallback src={hostAvatar} name={hostName} size="sm" />
                     <div>
-                      <p className="text-white font-semibold text-sm line-clamp-1">{hostName}</p>
+                       <p className="text-primary font-semibold text-sm line-clamp-1">{hostName}</p>
                       <div className="flex items-center gap-2">
                         {isLive && (
-                          <Badge className="bg-red-500 text-white text-[10px] px-1.5 py-0 h-4">
+                           <Badge className="bg-loss text-primary text-[10px] px-1.5 py-0 h-4 rounded-xl">
                             LIVE
                           </Badge>
                         )}
-                        <span className="text-white/70 text-xs flex items-center gap-1">
+                         <span className="text-secondary text-xs flex items-center gap-1">
                           <Users className="h-3 w-3" />
                           {formatViewers(viewerCount)}
                         </span>
@@ -175,7 +175,7 @@ export function MobileStreamViewer({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 bg-black/40 hover:bg-black/60 text-white"
+                    className="h-8 w-8 rounded-xl bg-ink-raised/80 hover:bg-ink-raised text-primary"
                     onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }}
                     data-testid="button-mute"
                   >
@@ -184,7 +184,7 @@ export function MobileStreamViewer({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 bg-black/40 hover:bg-black/60 text-white"
+                    className="h-8 w-8 rounded-xl bg-ink-raised/80 hover:bg-ink-raised text-primary"
                     onClick={(e) => { e.stopPropagation(); toggleFullscreen(); }}
                     data-testid="button-fullscreen"
                   >
@@ -198,16 +198,16 @@ export function MobileStreamViewer({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent"
+              className="absolute bottom-0 left-0 right-0 p-3 bg-ink-page/90"
             >
-              <p className="text-white text-sm font-medium mb-3 line-clamp-2">{title}</p>
+              <p className="text-primary text-sm font-medium mb-3 line-clamp-2">{title}</p>
               
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-9 bg-white/10 hover:bg-white/20 text-white gap-1.5"
+                    className="h-9 rounded-xl bg-ink-raised hover:bg-ink-edge text-primary gap-1.5"
                     onClick={(e) => { e.stopPropagation(); }}
                     data-testid="button-like"
                   >
@@ -218,7 +218,7 @@ export function MobileStreamViewer({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-9 bg-white/10 hover:bg-white/20 text-white gap-1.5"
+                      className="h-9 rounded-xl bg-ink-raised hover:bg-ink-edge text-primary gap-1.5"
                       onClick={(e) => { e.stopPropagation(); onShare(); }}
                       data-testid="button-share"
                     >
@@ -231,7 +231,7 @@ export function MobileStreamViewer({
                 {onTip && (
                   <Button
                     size="sm"
-                    className="h-9 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white gap-1.5"
+                     className="h-9 rounded-xl grad-accent glow-accent hover:bg-accent-deep text-primary gap-1.5"
                     onClick={(e) => { e.stopPropagation(); onTip(); }}
                     data-testid="button-tip"
                   >
@@ -276,12 +276,12 @@ export function ViewerPresence({ recentJoins, className }: ViewerPresenceProps) 
             exit={{ opacity: 0, x: 50 }}
             transition={{ delay: index * 0.1 }}
             className={cn(
-              "flex items-center gap-2 px-3 py-1.5 bg-black/50 backdrop-blur-sm rounded-full",
+               "flex items-center gap-2 px-3 py-1.5 bg-ink-raised/90 backdrop-blur-sm rounded-xl border border-ink-edge",
               className
             )}
           >
             <AvatarWithFallback src={viewer.avatar} name={viewer.username} size="xs" />
-            <span className="text-white text-xs font-medium">
+             <span className="text-primary text-xs font-medium">
               {viewer.username} joined
             </span>
           </motion.div>

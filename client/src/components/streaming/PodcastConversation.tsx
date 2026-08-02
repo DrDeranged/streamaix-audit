@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 import { cn } from '@/lib/utils';
 
 interface ConversationExchange {
@@ -162,8 +164,8 @@ export function PodcastConversation({ debateId, onBack }: PodcastConversationPro
     return (
       <div className="min-h-[400px] flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-10 h-10 animate-spin text-purple-400 mx-auto mb-4" />
-          <p className="text-slate-400">Loading conversation...</p>
+          <Loader2 className="w-10 h-10 animate-spin text-accent-bright mx-auto mb-4" />
+          <p className="text-secondary">Loading conversation...</p>
         </div>
       </div>
     );
@@ -173,8 +175,8 @@ export function PodcastConversation({ debateId, onBack }: PodcastConversationPro
     return (
       <div className="min-h-[400px] flex items-center justify-center">
         <div className="text-center">
-          <MessageCircle className="w-10 h-10 text-slate-600 mx-auto mb-4" />
-          <p className="text-slate-400">Conversation not found</p>
+          <MessageCircle className="w-10 h-10 text-muted mx-auto mb-4" />
+          <p className="text-secondary">Conversation not found</p>
           {onBack && (
             <Button variant="outline" className="mt-4" onClick={onBack}>
               Go Back
@@ -199,18 +201,18 @@ export function PodcastConversation({ debateId, onBack }: PodcastConversationPro
         onPlay={() => setIsPlaying(true)}
       />
 
-      <div className="bg-gradient-to-br from-slate-900 via-purple-950/30 to-slate-900 rounded-2xl border border-purple-500/20 overflow-hidden">
+      <Surface className="overflow-hidden">
         <div className="p-6">
           <div className="text-center mb-6">
-            <h2 className="text-xl font-bold text-white mb-2">{conversation.topic}</h2>
-            <div className="flex items-center justify-center gap-2 text-sm text-slate-400">
+            <SectionTitle as="h2" className="mb-2">{conversation.topic}</SectionTitle>
+            <div className="flex items-center justify-center gap-2 text-sm text-secondary">
               {isLive ? (
-                <span className="flex items-center gap-1 text-red-400">
-                  <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                <span className="flex items-center gap-1 text-loss">
+                  <span className="w-2 h-2 bg-loss rounded-full animate-pulse" />
                   Live
                 </span>
               ) : (
-                <span className="text-emerald-400">Completed</span>
+                <span className="text-gain">Completed</span>
               )}
               <span>•</span>
               <span>{exchanges.length} exchanges</span>
@@ -229,10 +231,10 @@ export function PodcastConversation({ debateId, onBack }: PodcastConversationPro
           <div className="flex items-center justify-center gap-8 mb-6">
             <div className="text-center">
               <div className={cn(
-                "w-20 h-20 rounded-full overflow-hidden border-4 transition-all duration-500 mx-auto",
+                       "w-20 h-20 rounded-full overflow-hidden border-4 transition-all duration-500 mx-auto",
                 currentExchange?.speakerName === conversation.avatar1.name && isPlaying
-                  ? "border-cyan-400 shadow-lg shadow-cyan-500/50 scale-110"
-                  : "border-slate-600"
+                   ? "border-accent-core glow-accent scale-110"
+                   : "border-ink-edge"
               )}>
                 {conversation.avatar1.imageUrl ? (
                   <img
@@ -241,17 +243,17 @@ export function PodcastConversation({ debateId, onBack }: PodcastConversationPro
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-2xl font-bold text-white">
+                  <div className="w-full h-full bg-accent-deep flex items-center justify-center text-2xl font-bold text-primary">
                     {conversation.avatar1.name[0]}
                   </div>
                 )}
               </div>
-              <p className="text-sm text-white mt-2 font-medium">{conversation.avatar1.name}</p>
+               <p className="text-sm text-primary mt-2 font-medium">{conversation.avatar1.name}</p>
               {currentExchange?.speakerName === conversation.avatar1.name && isPlaying && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="text-xs text-cyan-400 mt-1"
+                   className="text-xs text-accent-bright mt-1"
                 >
                   Speaking...
                 </motion.div>
@@ -259,8 +261,8 @@ export function PodcastConversation({ debateId, onBack }: PodcastConversationPro
             </div>
 
             <div className="flex flex-col items-center">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                <MessageCircle className="w-6 h-6 text-white" />
+               <div className="w-12 h-12 rounded-full bg-accent-core flex items-center justify-center">
+                 <MessageCircle className="w-6 h-6 text-primary" />
               </div>
             </div>
 
@@ -268,8 +270,8 @@ export function PodcastConversation({ debateId, onBack }: PodcastConversationPro
               <div className={cn(
                 "w-20 h-20 rounded-full overflow-hidden border-4 transition-all duration-500 mx-auto",
                 currentExchange?.speakerName === conversation.avatar2.name && isPlaying
-                  ? "border-pink-400 shadow-lg shadow-pink-500/50 scale-110"
-                  : "border-slate-600"
+                   ? "border-accent-core glow-accent scale-110"
+                   : "border-ink-edge"
               )}>
                 {conversation.avatar2.imageUrl ? (
                   <img
@@ -278,17 +280,17 @@ export function PodcastConversation({ debateId, onBack }: PodcastConversationPro
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-2xl font-bold text-white">
+                  <div className="w-full h-full bg-accent-deep flex items-center justify-center text-2xl font-bold text-primary">
                     {conversation.avatar2.name[0]}
                   </div>
                 )}
               </div>
-              <p className="text-sm text-white mt-2 font-medium">{conversation.avatar2.name}</p>
+               <p className="text-sm text-primary mt-2 font-medium">{conversation.avatar2.name}</p>
               {currentExchange?.speakerName === conversation.avatar2.name && isPlaying && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="text-xs text-pink-400 mt-1"
+                   className="text-xs text-accent-bright mt-1"
                 >
                   Speaking...
                 </motion.div>
@@ -297,14 +299,14 @@ export function PodcastConversation({ debateId, onBack }: PodcastConversationPro
           </div>
 
           {hasAudio && (
-            <div className="bg-slate-800/50 rounded-xl p-4 mb-4">
+             <Surface variant="raised" className="p-4 mb-4">
               <div className="flex items-center justify-center gap-4 mb-4">
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={handlePrevious}
                   disabled={currentExchangeIndex === 0}
-                  className="text-slate-400 hover:text-white"
+                   className="text-secondary hover:text-primary"
                   data-testid="button-previous"
                 >
                   <SkipBack className="w-5 h-5" />
@@ -314,17 +316,17 @@ export function PodcastConversation({ debateId, onBack }: PodcastConversationPro
                   size="lg"
                   onClick={handlePlayPause}
                   className={cn(
-                    "w-16 h-16 rounded-full transition-all",
+                     "w-16 h-16 rounded-full transition-all grad-accent glow-accent",
                     isPlaying
-                      ? "bg-gradient-to-br from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600"
-                      : "bg-gradient-to-br from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                       ? "bg-accent-deep"
+                       : "bg-accent-core"
                   )}
                   data-testid="button-play-pause"
                 >
                   {isPlaying ? (
-                    <Pause className="w-7 h-7 text-white" />
+                     <Pause className="w-7 h-7 text-primary" />
                   ) : (
-                    <Play className="w-7 h-7 text-white ml-1" />
+                     <Play className="w-7 h-7 text-primary ml-1" />
                   )}
                 </Button>
 
@@ -333,7 +335,7 @@ export function PodcastConversation({ debateId, onBack }: PodcastConversationPro
                   size="icon"
                   onClick={handleNext}
                   disabled={currentExchangeIndex >= exchanges.length - 1}
-                  className="text-slate-400 hover:text-white"
+                   className="text-secondary hover:text-primary"
                   data-testid="button-next"
                 >
                   <SkipForward className="w-5 h-5" />
@@ -343,7 +345,7 @@ export function PodcastConversation({ debateId, onBack }: PodcastConversationPro
                   variant="ghost"
                   size="icon"
                   onClick={() => setIsMuted(!isMuted)}
-                  className={cn("text-slate-400 hover:text-white", isMuted && "text-red-400")}
+                   className={cn("text-secondary hover:text-primary", isMuted && "text-loss")}
                   data-testid="button-mute"
                 >
                   {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
@@ -352,24 +354,24 @@ export function PodcastConversation({ debateId, onBack }: PodcastConversationPro
 
               <div className="space-y-2">
                 <Progress value={estimatedProgress} className="h-1" />
-                <div className="flex justify-between text-xs text-slate-500">
+                 <div className="flex justify-between text-xs text-muted tabular">
                   <span>{currentExchangeIndex + 1} / {exchanges.length}</span>
                   <span>~{Math.ceil(exchanges.length * 0.5)} min</span>
                 </div>
               </div>
-            </div>
+            </Surface>
           )}
 
           {!hasAudio && exchanges.length > 0 && (
-            <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 mb-4 text-center">
-              <p className="text-amber-400 text-sm">Audio not available for this conversation</p>
+             <div className="bg-warn/10 border border-warn/30 rounded-xl p-3 mb-4 text-center">
+               <p className="text-warn text-sm">Audio not available for this conversation</p>
             </div>
           )}
         </div>
 
-        <div className="border-t border-purple-500/20">
+         <div className="border-t border-ink-divider">
           <div className="p-4 pb-2">
-            <h3 className="text-sm font-semibold text-slate-300 mb-3">Conversation</h3>
+             <SectionTitle as="h3" className="text-sm font-semibold mb-3">Conversation</SectionTitle>
           </div>
           
           <div
@@ -387,27 +389,27 @@ export function PodcastConversation({ debateId, onBack }: PodcastConversationPro
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className={cn(
-                      "flex gap-3 p-3 rounded-lg transition-all cursor-pointer",
+                       "flex gap-3 p-3 rounded-xl transition-all cursor-pointer",
                       isCurrentlySpeaking
-                        ? "bg-purple-500/20 border border-purple-500/30"
+                         ? "bg-accent-core/20 border border-accent-core/30"
                         : index === currentExchangeIndex
-                        ? "bg-slate-800/50"
-                        : "hover:bg-slate-800/30"
+                         ? "bg-ink-raised"
+                         : "hover:bg-ink-raised"
                     )}
                     onClick={() => exchange.audioBase64 && playExchange(index)}
                     data-testid={`exchange-${index}`}
                   >
                     <div className={cn(
-                      "w-8 h-8 rounded-full flex-shrink-0 overflow-hidden border-2",
+                       "w-8 h-8 rounded-full flex-shrink-0 overflow-hidden border-2",
                       isCurrentlySpeaking
-                        ? isAvatar1 ? "border-cyan-400" : "border-pink-400"
+                         ? "border-accent-core"
                         : "border-transparent"
                     )}>
                       {isAvatar1 ? (
                         conversation.avatar1.imageUrl ? (
                           <img src={conversation.avatar1.imageUrl} alt="" className="w-full h-full object-cover" />
                         ) : (
-                          <div className="w-full h-full bg-cyan-600 flex items-center justify-center text-xs text-white font-bold">
+                           <div className="w-full h-full bg-accent-deep flex items-center justify-center text-xs text-primary font-bold">
                             {conversation.avatar1.name[0]}
                           </div>
                         )
@@ -415,7 +417,7 @@ export function PodcastConversation({ debateId, onBack }: PodcastConversationPro
                         conversation.avatar2.imageUrl ? (
                           <img src={conversation.avatar2.imageUrl} alt="" className="w-full h-full object-cover" />
                         ) : (
-                          <div className="w-full h-full bg-pink-600 flex items-center justify-center text-xs text-white font-bold">
+                           <div className="w-full h-full bg-accent-deep flex items-center justify-center text-xs text-primary font-bold">
                             {conversation.avatar2.name[0]}
                           </div>
                         )
@@ -426,26 +428,26 @@ export function PodcastConversation({ debateId, onBack }: PodcastConversationPro
                       <div className="flex items-center gap-2 mb-1">
                         <span className={cn(
                           "text-sm font-medium",
-                          isAvatar1 ? "text-cyan-400" : "text-pink-400"
+                           "text-accent-bright"
                         )}>
                           {exchange.speakerName}
                         </span>
                         {exchange.isIntroduction && (
-                          <span className="text-xs text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">
+                           <span className="text-xs text-warn bg-warn/10 px-1.5 py-0.5 rounded-xl">
                             Intro
                           </span>
                         )}
                         {isCurrentlySpeaking && (
                           <span className="flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-                            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
-                            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
+                             <span className="w-1.5 h-1.5 bg-gain rounded-full animate-pulse" />
+                             <span className="w-1.5 h-1.5 bg-gain rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
+                             <span className="w-1.5 h-1.5 bg-gain rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
                           </span>
                         )}
                       </div>
                       <p className={cn(
                         "text-sm",
-                        isCurrentlySpeaking ? "text-white" : "text-slate-300"
+                         isCurrentlySpeaking ? "text-primary" : "text-body"
                       )}>
                         {exchange.content}
                       </p>
@@ -453,7 +455,7 @@ export function PodcastConversation({ debateId, onBack }: PodcastConversationPro
 
                     {exchange.audioBase64 && !isCurrentlySpeaking && (
                       <div className="flex-shrink-0">
-                        <Play className="w-4 h-4 text-slate-500" />
+                         <Play className="w-4 h-4 text-muted" />
                       </div>
                     )}
                   </motion.div>
@@ -463,12 +465,12 @@ export function PodcastConversation({ debateId, onBack }: PodcastConversationPro
 
             {exchanges.length === 0 && (
               <div className="text-center py-8">
-                <p className="text-slate-500">Waiting for conversation to begin...</p>
+                <p className="text-muted">Waiting for conversation to begin...</p>
               </div>
             )}
           </div>
         </div>
-      </div>
+      </Surface>
     </div>
   );
 }

@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import Surface from '@/components/ds/Surface';
 
 interface HostInfo {
   id: string;
@@ -80,32 +81,32 @@ interface AudioQueueItem {
 
 const avatarStyles: Record<string, { gradient: string; icon: any; pulseColor: string }> = {
   broadcast: {
-    gradient: 'from-purple-500 via-fuchsia-500 to-pink-500',
+    gradient: 'bg-accent-core',
     icon: Radio,
     pulseColor: 'rgb(168, 85, 247)',
   },
   trading_room: {
-    gradient: 'from-emerald-500 via-cyan-500 to-blue-500',
+    gradient: 'bg-gain',
     icon: TrendingUp,
     pulseColor: 'rgb(16, 185, 129)',
   },
   audio_space: {
-    gradient: 'from-cyan-500 via-blue-500 to-indigo-500',
+    gradient: 'bg-accent-core',
     icon: Mic,
     pulseColor: 'rgb(6, 182, 212)',
   },
   live_bounty: {
-    gradient: 'from-amber-500 via-orange-500 to-red-500',
+    gradient: 'bg-warn',
     icon: Zap,
     pulseColor: 'rgb(245, 158, 11)',
   },
   avatar_alpha: {
-    gradient: 'from-purple-600 via-pink-500 to-orange-400',
+    gradient: 'bg-accent-deep',
     icon: Brain,
     pulseColor: 'rgb(168, 85, 247)',
   },
   debate: {
-    gradient: 'from-red-500 via-purple-500 to-blue-500',
+    gradient: 'bg-loss',
     icon: Swords,
     pulseColor: 'rgb(139, 92, 246)',
   },
@@ -123,7 +124,7 @@ function FloatingParticles() {
             top: `${Math.random() * 100}%`,
             width: 2 + Math.random() * 3,
             height: 2 + Math.random() * 3,
-            background: `linear-gradient(135deg, rgba(168,85,247,0.6), rgba(6,182,212,0.6))`,
+            background: 'rgba(139,124,246,0.6)',
           }}
           animate={{
             y: [-20, -50, -20],
@@ -148,7 +149,7 @@ function EnhancedSpeakingIndicator({ isActive }: { isActive: boolean }) {
       {[...Array(7)].map((_, i) => (
         <motion.div
           key={i}
-          className="w-1.5 bg-gradient-to-t from-cyan-400 via-purple-400 to-fuchsia-400 rounded-full shadow-sm shadow-purple-400/50"
+          className="w-1.5 bg-accent-bright rounded-full"
           animate={isActive ? {
             height: [8, 24 + Math.sin(i * 0.5) * 16, 8],
             opacity: [0.7, 1, 0.7],
@@ -179,48 +180,48 @@ function HostAvatar({ host, isSpeaking, size = 'lg' }: { host: HostInfo; isSpeak
       transition={{ duration: 0.5, repeat: isSpeaking ? Infinity : 0 }}
     >
       <motion.div
-        className="absolute -inset-4 rounded-full bg-gradient-to-br from-purple-500 via-cyan-500 to-purple-500 opacity-30 blur-xl"
+        className="absolute -inset-4 rounded-full bg-accent-core opacity-30 blur-xl"
         animate={isSpeaking ? { scale: [1, 1.3, 1], opacity: [0.3, 0.6, 0.3] } : { scale: [1, 1.1, 1], opacity: [0.2, 0.3, 0.2] }}
         transition={{ duration: isSpeaking ? 0.4 : 2, repeat: Infinity }}
       />
       
       <div className={cn(
-        "relative rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center overflow-hidden border-2 border-white/20 shadow-2xl",
+        "relative rounded-full bg-accent-core flex items-center justify-center overflow-hidden border-2 border-ink-edge shadow-2xl",
         sizeClasses[size]
       )}>
         {host.avatar ? (
           <img src={host.avatar} alt={host.name} className="w-full h-full object-cover" />
         ) : host.isAvatar ? (
-          <Bot className="w-1/2 h-1/2 text-white/90" />
+          <Bot className="w-1/2 h-1/2 text-primary" />
         ) : (
-          <User className="w-1/2 h-1/2 text-white/90" />
+          <User className="w-1/2 h-1/2 text-primary" />
         )}
         
         {host.isVerified && (
-          <div className="absolute bottom-1 right-1 bg-cyan-500 rounded-full p-1">
-            <CheckCircle2 className="w-3 h-3 text-white" />
+          <div className="absolute bottom-1 right-1 bg-accent-core rounded-full p-1">
+            <CheckCircle2 className="w-3 h-3 text-primary" />
           </div>
         )}
       </div>
       
       {host.isAvatar && (
         <motion.div
-          className="absolute -bottom-1 -right-1 bg-gradient-to-br from-cyan-500 to-purple-500 rounded-full p-2 shadow-lg"
+          className="absolute -bottom-1 -right-1 bg-accent-deep rounded-full p-2 shadow-lg"
           animate={{ scale: [1, 1.15, 1] }}
           transition={{ duration: 1.5, repeat: Infinity }}
         >
-          <Brain className="w-4 h-4 text-white" />
+          <Brain className="w-4 h-4 text-primary" />
         </motion.div>
       )}
       
       {isSpeaking && (
         <motion.div
-          className="absolute -top-1 -left-1 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full p-2 shadow-lg"
+          className="absolute -top-1 -left-1 bg-accent-core rounded-full p-2 shadow-lg"
           initial={{ scale: 0 }}
           animate={{ scale: [1, 1.1, 1] }}
           transition={{ duration: 0.5, repeat: Infinity }}
         >
-          <MessageCircle className="w-3.5 h-3.5 text-white" />
+          <MessageCircle className="w-3.5 h-3.5 text-primary" />
         </motion.div>
       )}
     </motion.div>
@@ -249,19 +250,19 @@ function SpeechBubble({ text, segmentType, speakerName }: { text: string; segmen
       transition={{ duration: 0.3, ease: "easeOut" }}
       className="absolute bottom-24 md:bottom-20 left-3 right-3 md:left-1/2 md:right-auto md:transform md:-translate-x-1/2 max-w-lg mx-auto"
     >
-      <div className="relative px-5 md:px-6 py-4 md:py-5 bg-gradient-to-br from-slate-900/98 via-purple-900/40 to-slate-900/98 backdrop-blur-2xl rounded-2xl md:rounded-3xl border-2 border-purple-500/50 shadow-2xl">
+      <Surface className="relative px-5 md:px-6 py-4 md:py-5 bg-ink-surface/95 backdrop-blur-2xl rounded-2xl border-2 border-accent-core/50 shadow-2xl">
         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 flex items-center gap-2">
-          <div className="px-3 py-1 bg-gradient-to-r from-purple-600 to-fuchsia-600 rounded-full shadow-lg">
-            <span className="text-[10px] md:text-xs text-white font-semibold tracking-wide">{getSegmentLabel()}</span>
+          <div className="px-3 py-1 bg-accent-core rounded-xl shadow-lg">
+            <span className="text-[10px] md:text-xs text-primary font-semibold tracking-wide">{getSegmentLabel()}</span>
           </div>
           {speakerName && (
-            <div className="px-2 py-1 bg-slate-800/90 rounded-full border border-cyan-500/30">
-              <span className="text-[10px] text-cyan-300 font-medium">{speakerName}</span>
+            <div className="px-2 py-1 bg-ink-raised/90 rounded-xl border border-accent-core/30">
+              <span className="text-[10px] text-accent-bright font-medium">{speakerName}</span>
             </div>
           )}
         </div>
-        <p className="text-sm md:text-base text-white leading-relaxed mt-1 font-medium">{truncatedText}</p>
-      </div>
+        <p className="text-sm md:text-base text-primary leading-relaxed mt-1 font-medium">{truncatedText}</p>
+      </Surface>
     </motion.div>
   );
 }
@@ -291,11 +292,11 @@ function QAPanel({
   const answeredQuestions = sortedQuestions.filter(q => q.status === 'answered');
 
   return (
-    <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl border border-purple-500/30 p-4 h-full flex flex-col">
+    <Surface className="bg-ink-surface/90 backdrop-blur-xl border border-ink-edge p-4 h-full flex flex-col">
       <div className="flex items-center gap-2 mb-4">
-        <HelpCircle className="w-5 h-5 text-purple-400" />
-        <h3 className="text-sm font-bold text-white">Live Q&A</h3>
-        <Badge variant="secondary" className="ml-auto bg-purple-500/20 text-purple-300">
+        <HelpCircle className="w-5 h-5 text-accent-bright" />
+        <h3 className="text-sm font-bold text-primary">Live Q&A</h3>
+        <Badge variant="secondary" className="ml-auto bg-accent-core/20 text-accent-bright">
           {pendingQuestions.length} pending
         </Badge>
       </div>
@@ -305,14 +306,14 @@ function QAPanel({
           value={newQuestion}
           onChange={(e) => setNewQuestion(e.target.value)}
           placeholder="Ask a question..."
-          className="flex-1 bg-slate-800/50 border-purple-500/30 text-white placeholder:text-slate-400"
+          className="flex-1 bg-ink-raised border-ink-edge text-primary placeholder:text-muted rounded-xl"
           onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
           data-testid="input-stream-question"
         />
         <Button 
           onClick={handleSubmit}
           size="sm"
-          className="bg-purple-600 hover:bg-purple-700"
+           className="bg-accent-core hover:bg-accent-deep text-primary rounded-xl"
           data-testid="button-submit-question"
         >
           <Send className="w-4 h-4" />
@@ -322,7 +323,7 @@ function QAPanel({
       <ScrollArea className="flex-1">
         <div className="space-y-3">
           {pendingQuestions.length === 0 && answeredQuestions.length === 0 && (
-            <div className="text-center py-8 text-slate-400">
+            <div className="text-center py-8 text-secondary">
               <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
               <p className="text-sm">No questions yet. Be the first to ask!</p>
             </div>
@@ -333,7 +334,7 @@ function QAPanel({
               key={q.id}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="bg-slate-800/50 rounded-lg p-3 border border-purple-500/20"
+               className="bg-ink-raised rounded-xl p-3 border border-ink-edge"
             >
               <div className="flex items-start gap-3">
                 <Button
@@ -342,7 +343,7 @@ function QAPanel({
                   onClick={() => onVoteQuestion(q.id)}
                   className={cn(
                     "flex flex-col items-center gap-0.5 p-2 h-auto",
-                    q.hasVoted ? "text-purple-400" : "text-slate-400 hover:text-purple-400"
+                     q.hasVoted ? "text-accent-bright" : "text-muted hover:text-accent-bright"
                   )}
                   data-testid={`button-vote-question-${q.id}`}
                 >
@@ -352,12 +353,12 @@ function QAPanel({
                 
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-medium text-cyan-300">{q.username}</span>
-                    <span className="text-[10px] text-slate-500">
+                     <span className="text-xs font-medium text-accent-bright">{q.username}</span>
+                     <span className="text-[10px] text-muted">
                       {new Date(q.timestamp).toLocaleTimeString()}
                     </span>
                   </div>
-                  <p className="text-sm text-white">{q.question}</p>
+                   <p className="text-sm text-body">{q.question}</p>
                 </div>
               </div>
             </motion.div>
@@ -366,26 +367,26 @@ function QAPanel({
           {answeredQuestions.length > 0 && (
             <>
               <div className="flex items-center gap-2 mt-4 mb-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span className="text-xs font-medium text-emerald-300">Answered</span>
+                 <CheckCircle2 className="w-4 h-4 text-gain" />
+                 <span className="text-xs font-medium text-gain">Answered</span>
               </div>
               {answeredQuestions.map((q) => (
                 <div
                   key={q.id}
-                  className="bg-emerald-900/20 rounded-lg p-3 border border-emerald-500/20 opacity-75"
+                   className="bg-gain/10 rounded-xl p-3 border border-gain/20 opacity-75"
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-medium text-emerald-300">{q.username}</span>
-                    <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                     <span className="text-xs font-medium text-gain">{q.username}</span>
+                     <CheckCircle2 className="w-3 h-3 text-gain" />
                   </div>
-                  <p className="text-sm text-slate-300">{q.question}</p>
+                   <p className="text-sm text-body">{q.question}</p>
                 </div>
               ))}
             </>
           )}
         </div>
       </ScrollArea>
-    </div>
+    </Surface>
   );
 }
 
@@ -395,18 +396,18 @@ function DebateScoreCard({ participant, onVote }: { participant: DebateParticipa
   return (
     <motion.div
       className={cn(
-        "bg-slate-900/80 backdrop-blur-xl rounded-xl border p-4",
-        participant.side === 'pro' ? 'border-emerald-500/30' : 'border-rose-500/30'
+        "bg-ink-surface/90 backdrop-blur-xl rounded-xl border p-4",
+        participant.side === 'pro' ? 'border-gain/30' : 'border-loss/30'
       )}
       animate={participant.isSpeaking ? { borderColor: participant.side === 'pro' ? 'rgb(16, 185, 129)' : 'rgb(244, 63, 94)' } : {}}
     >
       <div className="flex items-center gap-3 mb-3">
         <HostAvatar host={{ id: participant.id, name: participant.name, avatar: participant.avatar, isAvatar: participant.isAvatar }} isSpeaking={participant.isSpeaking} size="sm" />
         <div>
-          <h4 className="text-sm font-bold text-white">{participant.name}</h4>
+           <h4 className="text-sm font-bold text-primary">{participant.name}</h4>
           <Badge className={cn(
             "text-[10px]",
-            participant.side === 'pro' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
+             participant.side === 'pro' ? 'bg-gain/20 text-gain' : 'bg-loss/20 text-loss'
           )}>
             {participant.side === 'pro' ? '👍 PRO' : '👎 CON'}
           </Badge>
@@ -414,10 +415,10 @@ function DebateScoreCard({ participant, onVote }: { participant: DebateParticipa
       </div>
       
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs text-slate-400">Audience Score</span>
+         <span className="text-xs text-secondary">Audience Score</span>
         <span className={cn(
           "text-lg font-bold",
-          participant.side === 'pro' ? 'text-emerald-400' : 'text-rose-400'
+           participant.side === 'pro' ? 'text-gain' : 'text-loss'
         )}>
           {participant.score}
         </span>
@@ -427,9 +428,9 @@ function DebateScoreCard({ participant, onVote }: { participant: DebateParticipa
         onClick={onVote}
         className={cn(
           "w-full",
-          participant.side === 'pro' 
-            ? 'bg-emerald-600 hover:bg-emerald-700' 
-            : 'bg-rose-600 hover:bg-rose-700'
+           participant.side === 'pro' 
+             ? 'bg-gain hover:bg-gain/80' 
+             : 'bg-loss hover:bg-loss/80'
         )}
         data-testid={`button-vote-${participant.side}`}
       >
@@ -461,21 +462,21 @@ function DebateView({
     <div className="p-4 space-y-4">
       <div className="text-center mb-6">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <Swords className="w-5 h-5 text-purple-400" />
-          <span className="text-xs font-bold text-purple-300 uppercase tracking-wider">Live Debate</span>
+          <Swords className="w-5 h-5 text-accent-bright" />
+          <span className="text-xs font-bold text-accent-bright uppercase tracking-wider">Live Debate</span>
         </div>
-        <h2 className="text-lg font-bold text-white">{topic}</h2>
+        <h2 className="text-lg font-bold text-primary">{topic}</h2>
         {timeRemaining && (
-          <div className="flex items-center justify-center gap-2 mt-2 text-amber-400">
+          <div className="flex items-center justify-center gap-2 mt-2 text-warn">
             <Timer className="w-4 h-4" />
             <span className="text-sm font-medium">{Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}</span>
           </div>
         )}
       </div>
       
-      <div className="w-full h-3 bg-slate-800 rounded-full overflow-hidden mb-6">
+      <div className="w-full h-3 bg-ink-raised rounded-full overflow-hidden mb-6">
         <motion.div
-          className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400"
+          className="h-full bg-gain"
           initial={{ width: '50%' }}
           animate={{ width: `${proPercentage}%` }}
           transition={{ duration: 0.5 }}
@@ -689,7 +690,7 @@ export function UnifiedStreamViewer({
   };
 
   return (
-    <div className="relative w-full h-full min-h-[400px] bg-gradient-to-br from-slate-900 via-purple-950/50 to-slate-900 flex flex-col overflow-hidden">
+    <div className="relative w-full h-full min-h-[400px] bg-ink-page flex flex-col overflow-hidden">
       <FloatingParticles />
       
       <AnimatePresence>
@@ -698,20 +699,20 @@ export function UnifiedStreamViewer({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm"
+            className="absolute inset-0 z-50 flex items-center justify-center bg-ink-surface/90 backdrop-blur-sm"
             onClick={handleEnableAudio}
           >
             <motion.div className="flex flex-col items-center gap-4 p-8">
               <motion.div
-                className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center shadow-2xl"
+                className="w-20 h-20 rounded-full bg-accent-core flex items-center justify-center shadow-2xl glow-accent"
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                <Volume2 className="w-10 h-10 text-white" />
+                <Volume2 className="w-10 h-10 text-primary" />
               </motion.div>
               <div className="text-center">
-                <p className="text-lg font-semibold text-white mb-1">Tap to Enable Audio</p>
-                <p className="text-sm text-slate-400">Listen to live commentary</p>
+                <p className="text-lg font-semibold text-primary mb-1">Tap to Enable Audio</p>
+                <p className="text-sm text-secondary">Listen to live commentary</p>
               </div>
             </motion.div>
           </motion.div>
@@ -721,7 +722,7 @@ export function UnifiedStreamViewer({
       <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">
         {isLive && (
           <motion.div
-            className="flex items-center gap-2 bg-red-500/90 rounded-full px-3 py-1.5 shadow-lg"
+            className="flex items-center gap-2 bg-loss/90 rounded-full px-3 py-1.5 shadow-lg"
             animate={{ opacity: [1, 0.8, 1] }}
             transition={{ duration: 1.5, repeat: Infinity }}
           >
@@ -730,13 +731,13 @@ export function UnifiedStreamViewer({
               animate={{ scale: [1, 1.3, 1] }}
               transition={{ duration: 0.8, repeat: Infinity }}
             />
-            <span className="text-xs font-bold text-white tracking-wider">LIVE</span>
+            <span className="text-xs font-bold text-primary tracking-wider">LIVE</span>
           </motion.div>
         )}
         
-        <div className="flex items-center gap-2 bg-slate-900/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-purple-500/30">
-          <Users className="w-3.5 h-3.5 text-cyan-400" />
-          <span className="text-xs font-medium text-white">{viewerCount || 0}</span>
+        <div className="flex items-center gap-2 bg-ink-surface/90 backdrop-blur-sm rounded-full px-3 py-1.5 border border-ink-edge">
+          <Users className="w-3.5 h-3.5 text-accent-bright" />
+          <span className="text-xs font-medium text-primary">{viewerCount || 0}</span>
         </div>
       </div>
       
@@ -758,37 +759,37 @@ export function UnifiedStreamViewer({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <div className="flex items-center justify-center gap-2 mb-3 px-4 py-2 rounded-full bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20 border border-cyan-400/40 backdrop-blur-sm">
+              <div className="flex items-center justify-center gap-2 mb-3 px-4 py-2 rounded-full bg-accent-core/20 border border-accent-core/40 backdrop-blur-sm">
                 {host.isAvatar ? (
                   <>
-                    <Bot className="w-4 h-4 text-cyan-400" />
-                    <span className="text-xs font-bold text-cyan-300 uppercase tracking-widest">AI Host</span>
+                    <Bot className="w-4 h-4 text-accent-bright" />
+                    <span className="text-xs font-bold text-accent-bright uppercase tracking-widest">AI Host</span>
                   </>
                 ) : (
                   <>
-                    <User className="w-4 h-4 text-cyan-400" />
-                    <span className="text-xs font-bold text-cyan-300 uppercase tracking-widest">Creator</span>
+                    <User className="w-4 h-4 text-accent-bright" />
+                    <span className="text-xs font-bold text-accent-bright uppercase tracking-widest">Creator</span>
                   </>
                 )}
-                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                <Sparkles className="w-3.5 h-3.5 text-accent-bright" />
               </div>
               
-              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{host.name}</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-primary mb-2">{host.name}</h3>
               {title && (
-                <p className="text-sm text-slate-400 max-w-xs mx-auto mb-3">{title}</p>
+                <p className="text-sm text-secondary max-w-xs mx-auto mb-3">{title}</p>
               )}
               
               <div className="flex items-center justify-center gap-2">
                 <motion.div
                   className={cn(
-                    "px-3 py-1.5 rounded-full bg-gradient-to-r flex items-center gap-2 shadow-lg",
+                    "px-3 py-1.5 rounded-full bg-accent-core flex items-center gap-2 shadow-lg",
                     style.gradient
                   )}
                   animate={isSpeaking ? { scale: [1, 1.05, 1] } : {}}
                   transition={{ duration: 0.3, repeat: isSpeaking ? Infinity : 0 }}
                 >
-                  <TypeIcon className="w-4 h-4 text-white" />
-                  <span className="text-xs font-medium text-white capitalize">
+                  <TypeIcon className="w-4 h-4 text-primary" />
+                  <span className="text-xs font-medium text-primary capitalize">
                     {streamType.replace('_', ' ')}
                   </span>
                 </motion.div>
@@ -802,16 +803,16 @@ export function UnifiedStreamViewer({
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                    className="flex items-center gap-4 bg-gradient-to-r from-purple-900/60 via-slate-800/70 to-purple-900/60 backdrop-blur-xl rounded-full px-5 py-2.5 border-2 border-purple-400/40 shadow-lg"
+                    className="flex items-center gap-4 bg-ink-raised/90 backdrop-blur-xl rounded-full px-5 py-2.5 border-2 border-accent-core/40 shadow-lg"
                   >
                     <motion.div
                       animate={{ scale: [1, 1.15, 1] }}
                       transition={{ duration: 0.6, repeat: Infinity }}
                     >
-                      <Volume2 className="w-5 h-5 text-purple-300" />
+                      <Volume2 className="w-5 h-5 text-accent-bright" />
                     </motion.div>
                     <EnhancedSpeakingIndicator isActive={isSpeaking} />
-                    <span className="text-sm text-purple-200 font-semibold tracking-wide">Speaking</span>
+                    <span className="text-sm text-body font-semibold tracking-wide">Speaking</span>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -838,8 +839,8 @@ export function UnifiedStreamViewer({
             className={cn(
               "rounded-full border-2 min-h-[44px] px-4",
               isMuted 
-                ? "border-red-500/50 bg-red-500/10 text-red-400" 
-                : "border-purple-500/50 bg-purple-500/10 text-purple-400"
+                ? "border-loss/50 bg-loss/10 text-loss" 
+                : "border-purple-500/50 bg-accent-core/10 text-accent-bright"
             )}
             data-testid="button-toggle-audio"
           >
@@ -851,14 +852,14 @@ export function UnifiedStreamViewer({
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex items-center gap-2 bg-purple-500/20 rounded-full px-3 py-2 border border-purple-500/30"
+              className="flex items-center gap-2 bg-accent-core/20 rounded-full px-3 py-2 border border-ink-edge"
             >
               <motion.div
-                className="w-2.5 h-2.5 rounded-full bg-green-400"
+                className="w-2.5 h-2.5 rounded-full bg-gain"
                 animate={{ scale: [1, 1.3, 1] }}
                 transition={{ duration: 0.5, repeat: Infinity }}
               />
-              <span className="text-sm text-purple-300">Playing</span>
+              <span className="text-sm text-accent-bright">Playing</span>
             </motion.div>
           )}
         </div>
@@ -871,8 +872,8 @@ export function UnifiedStreamViewer({
               className={cn(
                 "rounded-full border-2 min-h-[44px] px-4",
                 showQA 
-                  ? "border-cyan-500 bg-cyan-500/20 text-cyan-300" 
-                  : "border-slate-600 bg-slate-800/50 text-slate-300"
+                  ? "border-cyan-500 bg-accent-core/20 text-accent-bright" 
+                  : "border-ink-edge bg-ink-raised text-body"
               )}
               data-testid="button-toggle-qa"
             >
@@ -881,9 +882,9 @@ export function UnifiedStreamViewer({
             </Button>
           )}
           
-          <div className="flex items-center gap-2 bg-slate-900/80 backdrop-blur-sm rounded-full px-4 py-2 border border-purple-500/30">
-            <Activity className="w-3 h-3 text-emerald-400" />
-            <span className="text-xs text-slate-300 font-medium">
+          <div className="flex items-center gap-2 bg-ink-surface/90 backdrop-blur-sm rounded-full px-4 py-2 border border-ink-edge">
+            <Activity className="w-3 h-3 text-gain" />
+            <span className="text-xs text-body font-medium">
               {host.isAvatar ? 'AI Powered' : 'Live'}
             </span>
           </div>

@@ -28,10 +28,10 @@ import {
   Check,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import Surface from '@/components/ds/Surface';
 import { cn } from '@/lib/utils';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -79,15 +79,15 @@ export const SentimentIndicator = memo(function SentimentIndicator({
   }
 
   const getSentimentIcon = () => {
-    if (sentiment.overallSentiment > 0.3) return <Smile className="w-4 h-4 text-emerald-400" />;
-    if (sentiment.overallSentiment < -0.3) return <Frown className="w-4 h-4 text-red-400" />;
-    return <Meh className="w-4 h-4 text-amber-400" />;
+     if (sentiment.overallSentiment > 0.3) return <Smile className="w-4 h-4 text-gain" />;
+     if (sentiment.overallSentiment < -0.3) return <Frown className="w-4 h-4 text-loss" />;
+     return <Meh className="w-4 h-4 text-warn" />;
   };
 
   const getSentimentColor = () => {
-    if (sentiment.overallSentiment > 0.3) return 'from-emerald-500/20 to-green-500/20 border-emerald-500/30';
-    if (sentiment.overallSentiment < -0.3) return 'from-red-500/20 to-orange-500/20 border-red-500/30';
-    return 'from-amber-500/20 to-yellow-500/20 border-amber-500/30';
+    if (sentiment.overallSentiment > 0.3) return 'bg-gain/10 border-gain/30';
+    if (sentiment.overallSentiment < -0.3) return 'bg-loss/10 border-loss/30';
+    return 'bg-warn/10 border-warn/30';
   };
 
   return (
@@ -95,19 +95,19 @@ export const SentimentIndicator = memo(function SentimentIndicator({
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       className={cn(
-        "flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md border bg-gradient-to-r",
+        "flex items-center gap-2 px-3 py-1.5 rounded-xl backdrop-blur-md border",
         getSentimentColor()
       )}
     >
       {getSentimentIcon()}
-      <span className="text-xs font-medium text-white capitalize">
+      <span className="text-xs font-medium text-primary capitalize">
         {sentiment.dominantEmotion}
       </span>
-      <div className="w-12 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+      <div className="w-12 h-1.5 bg-ink-raised rounded-xl overflow-hidden">
         <div 
           className={cn(
-            "h-full rounded-full transition-all",
-            sentiment.energyLevel > 0.6 ? "bg-gradient-to-r from-amber-400 to-orange-400" : "bg-slate-500"
+            "h-full rounded-xl transition-all",
+            sentiment.energyLevel > 0.6 ? "bg-warn" : "bg-muted"
           )}
           style={{ width: `${sentiment.energyLevel * 100}%` }}
         />
@@ -153,22 +153,22 @@ export const LivePollOverlay = memo(function LivePollOverlay({
       exit={{ opacity: 0, y: -20, scale: 0.95 }}
       className="absolute top-20 right-4 w-72 z-30"
     >
-      <Card className="bg-slate-900/95 backdrop-blur-xl border-purple-500/30 p-4">
+      <Surface className="bg-ink-surface/95 backdrop-blur-xl border-accent-core/30 p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Vote className="w-4 h-4 text-purple-400" />
-            <span className="text-sm font-semibold text-white">Live Poll</span>
+            <Vote className="w-4 h-4 text-accent-bright" />
+            <span className="text-sm font-semibold text-primary">Live Poll</span>
           </div>
           <Badge className={cn(
             "text-[10px]",
-            timeLeft > 10 ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400 animate-pulse"
+            timeLeft > 10 ? "bg-gain/10 text-gain" : "bg-loss/10 text-loss animate-pulse"
           )}>
             <Clock className="w-3 h-3 mr-1" />
             {timeLeft}s
           </Badge>
         </div>
 
-        <p className="text-sm text-white mb-3 font-medium">{poll.question}</p>
+        <p className="text-sm text-primary mb-3 font-medium">{poll.question}</p>
 
         <div className="space-y-2">
           {poll.options.map((option) => {
@@ -181,18 +181,18 @@ export const LivePollOverlay = memo(function LivePollOverlay({
                 onClick={() => handleVote(option.id)}
                 disabled={hasVoted || !poll.isActive}
                 className={cn(
-                  "w-full relative rounded-lg p-2 text-left transition-all border",
+                  "w-full relative rounded-xl p-2 text-left transition-all border",
                   hasVoted || !poll.isActive
-                    ? "bg-slate-800/50 border-slate-700/50 cursor-default"
-                    : "bg-slate-800/80 border-purple-500/30 hover:border-purple-500/50 cursor-pointer",
-                  isSelected && "border-purple-500 bg-purple-500/20"
+                    ? "bg-ink-raised/50 border-ink-edge cursor-default"
+                    : "bg-ink-raised/80 border-accent-core/30 hover:border-accent-core/50 cursor-pointer",
+                  isSelected && "border-accent-core bg-accent-core/20"
                 )}
                 data-testid={`poll-option-${option.id}`}
               >
                 <div className="relative z-10 flex items-center justify-between">
-                  <span className="text-sm text-white">{option.text}</span>
+                  <span className="text-sm text-primary">{option.text}</span>
                   {hasVoted && (
-                    <span className="text-xs text-slate-400">{Math.round(percentage)}%</span>
+                    <span className="text-xs text-secondary tabular">{Math.round(percentage)}%</span>
                   )}
                 </div>
                 {hasVoted && (
@@ -200,7 +200,7 @@ export const LivePollOverlay = memo(function LivePollOverlay({
                     initial={{ width: 0 }}
                     animate={{ width: `${percentage}%` }}
                     transition={{ duration: 0.5 }}
-                    className="absolute inset-0 bg-purple-500/20 rounded-lg"
+                    className="absolute inset-0 bg-accent-core/20 rounded-xl"
                   />
                 )}
               </button>
@@ -208,11 +208,11 @@ export const LivePollOverlay = memo(function LivePollOverlay({
           })}
         </div>
 
-        <div className="mt-3 flex items-center justify-between text-xs text-slate-400">
+        <div className="mt-3 flex items-center justify-between text-xs text-secondary">
           <span>{totalVotes} vote{totalVotes !== 1 ? 's' : ''}</span>
-          {hasVoted && <CheckCircle className="w-3 h-3 text-emerald-400" />}
+          {hasVoted && <CheckCircle className="w-3 h-3 text-gain" />}
         </div>
-      </Card>
+      </Surface>
     </motion.div>
   );
 });
@@ -249,22 +249,22 @@ export const TriviaChallenge = memo(function TriviaChallenge({
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-ink-page/90 backdrop-blur-sm z-50 flex items-center justify-center p-4"
     >
-      <Card className="bg-slate-900/95 backdrop-blur-xl border-amber-500/30 p-6 w-full max-w-md">
+      <Surface className="bg-ink-surface/95 backdrop-blur-xl border-warn/30 p-6 w-full max-w-md rounded-2xl">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-full bg-amber-500/20">
-              <HelpCircle className="w-5 h-5 text-amber-400" />
+            <div className="p-2 rounded-xl bg-warn/10">
+              <HelpCircle className="w-5 h-5 text-warn" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white font-orbitron">Trivia Challenge!</h3>
-              <p className="text-xs text-amber-400">{trivia.pointsReward} STREAM up for grabs</p>
+              <h3 className="text-lg font-bold text-primary font-display">Trivia Challenge!</h3>
+              <p className="text-xs text-warn">{trivia.pointsReward} STREAM up for grabs</p>
             </div>
           </div>
           <div className={cn(
             "text-2xl font-bold font-orbitron",
-            timeLeft <= 5 ? "text-red-400 animate-pulse" : "text-white"
+            timeLeft <= 5 ? "text-loss animate-pulse" : "text-primary"
           )}>
             {timeLeft}s
           </div>
@@ -275,7 +275,7 @@ export const TriviaChallenge = memo(function TriviaChallenge({
           className="h-1 mb-4"
         />
 
-        <p className="text-base text-white mb-4">{trivia.question}</p>
+        <p className="text-base text-primary mb-4">{trivia.question}</p>
 
         <div className="grid grid-cols-2 gap-2">
           {trivia.options.map((option, index) => (
@@ -285,12 +285,12 @@ export const TriviaChallenge = memo(function TriviaChallenge({
               disabled={answered || !trivia.isActive}
               variant="outline"
               className={cn(
-                "h-auto py-3 text-sm text-left justify-start border-slate-600 hover:border-amber-500/50 hover:bg-amber-500/10",
-                result && index === result.rank - 1 && "border-emerald-500 bg-emerald-500/20"
+                "h-auto py-3 text-sm text-left justify-start border-ink-edge hover:border-warn/50 hover:bg-warn/10 rounded-xl",
+                result && index === result.rank - 1 && "border-gain bg-gain/10"
               )}
               data-testid={`trivia-option-${index}`}
             >
-              <span className="mr-2 text-amber-400 font-bold">{String.fromCharCode(65 + index)}.</span>
+              <span className="mr-2 text-warn font-bold">{String.fromCharCode(65 + index)}.</span>
               {option}
             </Button>
           ))}
@@ -302,30 +302,30 @@ export const TriviaChallenge = memo(function TriviaChallenge({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className={cn(
-                "mt-4 p-3 rounded-lg text-center",
-                result.correct ? "bg-emerald-500/20 border border-emerald-500/30" : "bg-red-500/20 border border-red-500/30"
+                "mt-4 p-3 rounded-xl text-center",
+                result.correct ? "bg-gain/10 border border-gain/30" : "bg-loss/10 border border-loss/30"
               )}
             >
               {result.correct ? (
                 <>
-                  <CheckCircle className="w-8 h-8 mx-auto text-emerald-400 mb-2" />
-                  <p className="text-emerald-400 font-bold">Correct! +{result.points} STREAM</p>
+                  <CheckCircle className="w-8 h-8 mx-auto text-gain mb-2" />
+                  <p className="text-gain font-bold">Correct! +{result.points} STREAM</p>
                   {result.rank <= 3 && (
-                    <p className="text-xs text-emerald-300 mt-1">
+                    <p className="text-xs text-gain mt-1">
                       {result.rank === 1 ? '🥇 First!' : result.rank === 2 ? '🥈 Second!' : '🥉 Third!'}
                     </p>
                   )}
                 </>
               ) : (
                 <>
-                  <XCircle className="w-8 h-8 mx-auto text-red-400 mb-2" />
-                  <p className="text-red-400 font-bold">Not quite!</p>
+                  <XCircle className="w-8 h-8 mx-auto text-loss mb-2" />
+                  <p className="text-loss font-bold">Not quite!</p>
                 </>
               )}
             </motion.div>
           )}
         </AnimatePresence>
-      </Card>
+      </Surface>
     </motion.div>
   );
 });
@@ -377,11 +377,11 @@ export const WatchPartyPanel = memo(function WatchPartyPanel({
   };
 
   return (
-    <Card className="bg-slate-900/95 backdrop-blur-xl border-cyan-500/30 p-4">
+      <Surface className="bg-ink-surface/95 backdrop-blur-xl border-accent-core/30 p-4">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Users className="w-5 h-5 text-cyan-400" />
-          <h3 className="font-semibold text-white">Watch Party</h3>
+          <Users className="w-5 h-5 text-accent-bright" />
+          <h3 className="font-semibold text-primary">Watch Party</h3>
         </div>
         <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
           <XCircle className="w-4 h-4" />
@@ -390,15 +390,15 @@ export const WatchPartyPanel = memo(function WatchPartyPanel({
 
       {partyCode ? (
         <div className="space-y-3">
-          <p className="text-sm text-slate-400">Share this code with friends:</p>
+          <p className="text-sm text-secondary">Share this code with friends:</p>
           <div className="flex items-center gap-2">
-            <div className="flex-1 bg-slate-800 rounded-lg px-4 py-3 text-center">
-              <span className="text-2xl font-bold font-orbitron text-cyan-400 tracking-wider">
+            <div className="flex-1 bg-ink-raised rounded-xl px-4 py-3 text-center">
+              <span className="text-2xl font-bold text-accent-bright tracking-wider tabular">
                 {partyCode}
               </span>
             </div>
             <Button onClick={copyCode} variant="outline" size="icon" className="h-12 w-12">
-              {copied ? <Check className="w-5 h-5 text-emerald-400" /> : <Copy className="w-5 h-5" />}
+              {copied ? <Check className="w-5 h-5 text-gain" /> : <Copy className="w-5 h-5" />}
             </Button>
           </div>
         </div>
@@ -407,7 +407,7 @@ export const WatchPartyPanel = memo(function WatchPartyPanel({
           <Button
             onClick={() => createPartyMutation.mutate()}
             disabled={createPartyMutation.isPending}
-            className="w-full bg-gradient-to-r from-cyan-500 to-blue-500"
+            className="w-full grad-accent glow-accent"
           >
             <Sparkles className="w-4 h-4 mr-2" />
             Create Watch Party
@@ -415,10 +415,10 @@ export const WatchPartyPanel = memo(function WatchPartyPanel({
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-700" />
+              <div className="w-full border-t border-ink-divider" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-slate-900 px-2 text-slate-500">or join existing</span>
+              <span className="bg-ink-surface px-2 text-muted">or join existing</span>
             </div>
           </div>
 
@@ -427,7 +427,7 @@ export const WatchPartyPanel = memo(function WatchPartyPanel({
               placeholder="Enter party code"
               value={joinCode}
               onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-              className="bg-slate-800 border-slate-700 text-center font-mono uppercase"
+              className="bg-ink-raised border-ink-edge text-primary text-center font-mono uppercase rounded-xl"
               maxLength={6}
             />
             <Button
@@ -440,7 +440,7 @@ export const WatchPartyPanel = memo(function WatchPartyPanel({
           </div>
         </div>
       )}
-    </Card>
+    </Surface>
   );
 });
 
@@ -455,13 +455,13 @@ export const AvatarExpressionBadge = memo(function AvatarExpressionBadge({
   intensity: number;
 }) {
   const config: Record<AvatarExpression, { emoji: string; color: string }> = {
-    neutral: { emoji: '😐', color: 'bg-slate-500/20 text-slate-400' },
-    thinking: { emoji: '🤔', color: 'bg-blue-500/20 text-blue-400' },
-    excited: { emoji: '🔥', color: 'bg-orange-500/20 text-orange-400' },
-    concerned: { emoji: '😟', color: 'bg-amber-500/20 text-amber-400' },
-    laughing: { emoji: '😂', color: 'bg-emerald-500/20 text-emerald-400' },
-    surprised: { emoji: '😮', color: 'bg-purple-500/20 text-purple-400' },
-    confident: { emoji: '💪', color: 'bg-cyan-500/20 text-cyan-400' },
+    neutral: { emoji: '😐', color: 'bg-ink-raised text-secondary' },
+    thinking: { emoji: '🤔', color: 'bg-accent-core/20 text-accent-bright' },
+    excited: { emoji: '🔥', color: 'bg-warn/20 text-warn' },
+    concerned: { emoji: '😟', color: 'bg-warn/20 text-warn' },
+    laughing: { emoji: '😂', color: 'bg-gain/20 text-gain' },
+    surprised: { emoji: '😮', color: 'bg-accent-core/20 text-accent-bright' },
+    confident: { emoji: '💪', color: 'bg-accent-core/20 text-accent-bright' },
   };
 
   const { emoji, color } = config[expression];
@@ -471,7 +471,7 @@ export const AvatarExpressionBadge = memo(function AvatarExpressionBadge({
       initial={{ scale: 0.8 }}
       animate={{ scale: intensity > 0.7 ? [1, 1.1, 1] : 1 }}
       transition={{ duration: 0.3 }}
-      className={cn("flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium", color)}
+    className={cn("flex items-center gap-1.5 px-2 py-1 rounded-xl text-xs font-medium", color)}
     >
       <span>{emoji}</span>
       <span className="capitalize">{expression}</span>
@@ -496,9 +496,9 @@ export const MarketPredictionCard = memo(function MarketPredictionCard({
   avatarName: string;
 }) {
   const directionConfig = {
-    bullish: { icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-500/20' },
-    bearish: { icon: TrendingDown, color: 'text-red-400', bg: 'bg-red-500/20' },
-    neutral: { icon: Minus, color: 'text-slate-400', bg: 'bg-slate-500/20' },
+    bullish: { icon: TrendingUp, color: 'text-gain', bg: 'bg-gain/10' },
+    bearish: { icon: TrendingDown, color: 'text-loss', bg: 'bg-loss/10' },
+    neutral: { icon: Minus, color: 'text-secondary', bg: 'bg-ink-raised' },
   };
 
   const { icon: DirectionIcon, color, bg } = directionConfig[prediction.direction];
@@ -507,16 +507,16 @@ export const MarketPredictionCard = memo(function MarketPredictionCard({
     <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="bg-slate-900/90 backdrop-blur-xl rounded-xl border border-purple-500/30 p-4"
+      className="bg-ink-surface/90 backdrop-blur-xl rounded-xl border border-accent-core/30 p-4"
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div className={cn("p-2 rounded-lg", bg)}>
+          <div className={cn("p-2 rounded-xl", bg)}>
             <DirectionIcon className={cn("w-5 h-5", color)} />
           </div>
           <div>
-            <p className="font-bold text-white">{prediction.asset}</p>
-            <p className="text-xs text-slate-400">{prediction.timeframe} outlook</p>
+            <p className="font-bold text-primary">{prediction.asset}</p>
+            <p className="text-xs text-secondary">{prediction.timeframe} outlook</p>
           </div>
         </div>
         <Badge className={cn("capitalize", bg, color)}>
@@ -527,13 +527,13 @@ export const MarketPredictionCard = memo(function MarketPredictionCard({
       <div className="mb-3">
         <div className="flex items-center justify-between text-xs mb-1">
           <span className="text-slate-400">Confidence</span>
-          <span className={color}>{prediction.confidence}%</span>
+        <span className={cn(color, "tabular")}>{prediction.confidence}%</span>
         </div>
         <Progress value={prediction.confidence} className="h-1.5" />
       </div>
 
-      <p className="text-sm text-slate-300 italic">"{prediction.reasoning}"</p>
-      <p className="text-xs text-slate-500 mt-2">— {avatarName}</p>
+      <p className="text-sm text-body italic">"{prediction.reasoning}"</p>
+      <p className="text-xs text-muted mt-2">— {avatarName}</p>
     </motion.div>
   );
 });
@@ -554,37 +554,37 @@ export const DebateModeIndicator = memo(function DebateModeIndicator({
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 backdrop-blur-xl rounded-xl border border-purple-500/30 p-4"
+      className="bg-ink-surface/90 backdrop-blur-xl rounded-xl border border-accent-core/30 p-4"
     >
       <div className="flex items-center justify-center gap-2 mb-2">
-        <Zap className="w-4 h-4 text-purple-400" />
-        <span className="text-sm font-semibold text-purple-300">DEBATE MODE</span>
-        <Zap className="w-4 h-4 text-purple-400" />
+        <Zap className="w-4 h-4 text-accent-bright" />
+        <span className="text-sm font-semibold text-accent-bright">DEBATE MODE</span>
+        <Zap className="w-4 h-4 text-accent-bright" />
       </div>
 
-      <p className="text-xs text-slate-400 text-center mb-3">Topic: {topic}</p>
+      <p className="text-xs text-secondary text-center mb-3">Topic: {topic}</p>
 
       <div className="flex items-center justify-center gap-4">
         <div className={cn(
-          "flex flex-col items-center p-2 rounded-lg transition-all",
-          currentSpeaker === 1 ? "bg-cyan-500/20 ring-2 ring-cyan-500" : "bg-slate-800/50"
+          "flex flex-col items-center p-2 rounded-xl transition-all",
+          currentSpeaker === 1 ? "bg-accent-core/20 ring-2 ring-accent-core" : "bg-ink-raised/50"
         )}>
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-sm font-bold">
+          <div className="w-10 h-10 rounded-xl bg-accent-core flex items-center justify-center text-sm font-bold text-primary">
             {avatar1Name[0]}
           </div>
-          <span className="text-xs text-white mt-1">{avatar1Name.split(' ')[0]}</span>
+          <span className="text-xs text-primary mt-1">{avatar1Name.split(' ')[0]}</span>
         </div>
 
-        <span className="text-xl font-bold text-purple-400">VS</span>
+        <span className="text-xl font-bold text-accent-bright">VS</span>
 
         <div className={cn(
-          "flex flex-col items-center p-2 rounded-lg transition-all",
-          currentSpeaker === 2 ? "bg-pink-500/20 ring-2 ring-pink-500" : "bg-slate-800/50"
+          "flex flex-col items-center p-2 rounded-xl transition-all",
+          currentSpeaker === 2 ? "bg-accent-deep/30 ring-2 ring-accent-core" : "bg-ink-raised/50"
         )}>
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-sm font-bold">
+          <div className="w-10 h-10 rounded-xl bg-accent-deep flex items-center justify-center text-sm font-bold text-primary">
             {avatar2Name[0]}
           </div>
-          <span className="text-xs text-white mt-1">{avatar2Name.split(' ')[0]}</span>
+          <span className="text-xs text-primary mt-1">{avatar2Name.split(' ')[0]}</span>
         </div>
       </div>
     </motion.div>
@@ -616,31 +616,31 @@ export const PictureInPictureAvatar = memo(function PictureInPictureAvatar({
     >
       <div className={cn(
         "relative w-32 h-32 rounded-2xl overflow-hidden border-2 shadow-2xl",
-        isSpeaking ? "border-cyan-500 animate-pulse" : "border-purple-500/50"
+         isSpeaking ? "border-accent-core animate-pulse" : "border-accent-core/50"
       )}>
         {avatarImage ? (
           <img src={avatarImage} alt={avatarName} className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center text-3xl font-bold">
+          <div className="w-full h-full bg-accent-deep flex items-center justify-center text-3xl font-bold text-primary">
             {avatarName[0]}
           </div>
         )}
 
         {isSpeaking && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-            <Activity className="w-8 h-8 text-cyan-400 animate-pulse" />
+          <div className="absolute inset-0 flex items-center justify-center bg-ink-page/30">
+            <Activity className="w-8 h-8 text-accent-bright animate-pulse" />
           </div>
         )}
 
-        <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
-          <p className="text-xs font-medium text-white truncate">{avatarName}</p>
+        <div className="absolute bottom-0 left-0 right-0 p-2 bg-ink-page/80">
+           <p className="text-xs font-medium text-primary truncate">{avatarName}</p>
         </div>
 
         <button
           onClick={onClose}
-          className="absolute top-1 right-1 p-1 rounded-full bg-black/50 hover:bg-black/80 transition-colors"
+           className="absolute top-1 right-1 p-1 rounded-xl bg-ink-page/80 hover:bg-ink-raised transition-colors"
         >
-          <XCircle className="w-4 h-4 text-white" />
+           <XCircle className="w-4 h-4 text-primary" />
         </button>
       </div>
     </motion.div>
@@ -661,14 +661,14 @@ export const ARDataVisualization = memo(function ARDataVisualization({
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: index * 0.1 }}
-          className="flex items-center gap-2 bg-black/40 backdrop-blur-md rounded-lg px-3 py-2 border border-white/10"
+          className="flex items-center gap-2 bg-ink-surface/90 backdrop-blur-md rounded-xl px-3 py-2 border border-ink-edge"
         >
-          <div className="w-2 h-2 rounded-full bg-cyan-400" />
-          <span className="text-xs text-white font-medium">{item.label}</span>
-          <span className="text-sm font-bold text-white">${item.value.toLocaleString()}</span>
+          <div className="w-2 h-2 rounded-xl bg-accent-core" />
+          <span className="text-xs text-primary font-medium">{item.label}</span>
+          <span className="text-sm font-bold text-primary tabular">${item.value.toLocaleString()}</span>
           <span className={cn(
             "text-xs font-medium",
-            item.change >= 0 ? "text-emerald-400" : "text-red-400"
+            item.change >= 0 ? "text-gain" : "text-loss"
           )}>
             {item.change >= 0 ? '+' : ''}{item.change.toFixed(2)}%
           </span>
@@ -702,13 +702,13 @@ export const ChartHighlight = memo(function ChartHighlight({
       onClick={onDismiss}
     >
       <div className="relative">
-        <div className="bg-gradient-to-br from-cyan-500 to-purple-500 rounded-lg px-3 py-2 shadow-lg">
-          <p className="text-xs text-white/80">{label}</p>
-          <p className="text-sm font-bold text-white">{value}</p>
+         <div className="bg-accent-core rounded-xl px-3 py-2 shadow-lg">
+           <p className="text-xs text-primary/80">{label}</p>
+           <p className="text-sm font-bold text-primary tabular">{value}</p>
         </div>
-        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-8 border-l-transparent border-r-transparent border-t-cyan-500" />
-        <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-3 h-3 rounded-full bg-cyan-400 animate-ping" />
-        <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-3 h-3 rounded-full bg-cyan-400" />
+         <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-8 border-l-transparent border-r-transparent border-t-accent-core" />
+         <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-3 h-3 rounded-xl bg-accent-bright animate-ping" />
+         <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-3 h-3 rounded-xl bg-accent-bright" />
       </div>
     </motion.div>
   );

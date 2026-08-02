@@ -106,3 +106,16 @@ client/src/components/UserNotesList.tsx
 client/src/components/VoiceAssistant.tsx
 client/src/components/WaitlistModal.tsx
 client/src/components/WidgetSettingsPanel.tsx
+client/src/components/streaming/AIAvatarStream.tsx
+client/src/components/streaming/AvatarDebateHub.tsx
+client/src/components/streaming/BroadcastControls.tsx
+client/src/components/streaming/BroadcasterView.tsx
+client/src/components/streaming/CreateStreamModal.tsx
+client/src/components/streaming/EnhancedStreamingFeatures.tsx
+client/src/components/streaming/ImmersiveStreamView.tsx
+client/src/components/streaming/LiveChatPanel.tsx
+client/src/components/streaming/MobileStreamViewer.tsx
+client/src/components/streaming/PodcastConversation.tsx
+client/src/components/streaming/StreamEnhancements.tsx
+client/src/components/streaming/StreamPoll.tsx
+client/src/components/streaming/UnifiedStreamViewer.tsx

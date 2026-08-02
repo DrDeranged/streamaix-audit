@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useMutation } from '@tanstack/react-query';
 import {
   Video,
   VideoOff,
@@ -9,7 +8,6 @@ import {
   Monitor,
   MonitorOff,
   SwitchCamera,
-  Settings,
   StopCircle,
   Users,
   Clock,
@@ -19,17 +17,12 @@ import {
   Radio,
   Wifi,
   WifiOff,
-  Signal,
-  SignalHigh,
-  SignalLow,
-  SignalMedium
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useMediaStream } from '@/hooks/useMediaStream';
 import { useBroadcastStream } from '@/hooks/useBroadcastStream';
 import { useToast } from '@/hooks/use-toast';
-import { apiRequest, queryClient } from '@/lib/queryClient';
 import { cn } from '@/lib/utils';
 
 interface BroadcasterViewProps {
@@ -52,7 +45,6 @@ export function BroadcasterView({
   const { toast } = useToast();
   const [showEndConfirm, setShowEndConfirm] = useState(false);
   const [streamDuration, setStreamDuration] = useState(0);
-  const [showSettings, setShowSettings] = useState(false);
 
   const {
     stream,
@@ -158,16 +150,16 @@ export function BroadcasterView({
   const isAudioOnly = streamType === 'audio_space';
 
   return (
-    <div className="relative w-full h-full bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
+    <div className="relative w-full h-full bg-ink-page">
       {mediaError && (
-        <div className="absolute inset-0 flex items-center justify-center z-10 bg-slate-900/90">
+        <div className="absolute inset-0 flex items-center justify-center z-10 bg-ink-page/95">
           <div className="text-center p-6 max-w-md">
-            <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-white mb-2">Camera/Microphone Error</h3>
-            <p className="text-sm text-slate-400 mb-4">{mediaError}</p>
+            <AlertTriangle className="w-12 h-12 text-warn mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-primary mb-2">Camera/Microphone Error</h3>
+            <p className="text-sm text-secondary mb-4">{mediaError}</p>
             <Button
               onClick={() => startStream()}
-              className="bg-purple-600 hover:bg-purple-500"
+              className="grad-accent glow-accent text-primary hover:bg-accent-deep"
             >
               Retry
             </Button>
@@ -181,14 +173,14 @@ export function BroadcasterView({
             animate={audioEnabled ? { scale: [1, 1.15, 1] } : {}}
             transition={{ duration: 0.8, repeat: Infinity }}
             className={cn(
-              "p-8 rounded-full mb-6",
-              audioEnabled ? "bg-cyan-500/20 ring-4 ring-cyan-500/30" : "bg-slate-700/50"
+               "p-8 rounded-xl mb-6",
+               audioEnabled ? "bg-accent-core/20 ring-4 ring-accent-core/30" : "bg-ink-raised"
             )}
           >
             {audioEnabled ? (
-              <Mic className="w-16 h-16 text-cyan-400" />
+               <Mic className="w-16 h-16 text-accent-bright" />
             ) : (
-              <MicOff className="w-16 h-16 text-slate-400" />
+               <MicOff className="w-16 h-16 text-secondary" />
             )}
           </motion.div>
           
@@ -203,7 +195,7 @@ export function BroadcasterView({
                   transition={{ duration: 0.3, repeat: Infinity, delay: i * 0.1 }}
                   className={cn(
                     "w-1 rounded-full",
-                    audioEnabled ? "bg-cyan-400" : "bg-slate-600"
+                     audioEnabled ? "bg-accent-bright" : "bg-ink-edge"
                   )}
                   style={{ height: 8 }}
                 />
@@ -211,7 +203,7 @@ export function BroadcasterView({
             </div>
           </div>
           
-          <p className="text-sm text-slate-400">
+           <p className="text-sm text-secondary">
             {audioEnabled ? 'Audio is on - Your viewers can hear you' : 'Audio is muted'}
           </p>
         </div>
@@ -235,10 +227,10 @@ export function BroadcasterView({
             />
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="p-6 rounded-full bg-slate-700/50 mb-4">
-                <VideoOff className="w-12 h-12 text-slate-400" />
+               <div className="p-6 rounded-xl bg-ink-raised mb-4">
+                 <VideoOff className="w-12 h-12 text-secondary" />
               </div>
-              <p className="text-sm text-slate-400">
+               <p className="text-sm text-secondary">
                 {stream ? 'Camera is off' : 'Connecting to camera...'}
               </p>
             </div>
@@ -247,7 +239,7 @@ export function BroadcasterView({
       )}
 
       <div className="absolute top-3 left-3 flex items-center gap-2 z-10">
-        <Badge className="bg-red-500/90 text-white text-xs px-2.5 py-1">
+        <Badge className="bg-loss/90 text-primary text-xs px-2.5 py-1">
           <motion.div
             animate={{ opacity: [1, 0.5, 1] }}
             transition={{ duration: 1, repeat: Infinity }}
@@ -258,10 +250,10 @@ export function BroadcasterView({
         
         <Badge className={cn(
           "backdrop-blur-sm text-xs px-2.5 py-1",
-          connectionQuality === 'excellent' ? "bg-emerald-500/80 text-white" :
-          connectionQuality === 'good' ? "bg-cyan-500/80 text-white" :
-          connectionQuality === 'poor' ? "bg-amber-500/80 text-white" :
-          "bg-slate-700/80 text-slate-300"
+          connectionQuality === 'excellent' ? "bg-gain/20 text-gain" :
+          connectionQuality === 'good' ? "bg-accent-core/20 text-accent-bright" :
+          connectionQuality === 'poor' ? "bg-warn/20 text-warn" :
+          "bg-ink-raised text-secondary"
         )}>
           {connectionQuality === 'excellent' ? <Wifi className="w-3 h-3 mr-1.5" /> :
            connectionQuality === 'good' ? <Wifi className="w-3 h-3 mr-1.5" /> :
@@ -270,14 +262,14 @@ export function BroadcasterView({
           {connectionQuality === 'disconnected' ? 'Connecting...' : connectionQuality.charAt(0).toUpperCase() + connectionQuality.slice(1)}
         </Badge>
         
-        <Badge className="bg-slate-900/80 backdrop-blur-sm text-white text-xs px-2.5 py-1">
+        <Badge className="bg-ink-surface/90 backdrop-blur-sm text-primary text-xs px-2.5 py-1">
           <Clock className="w-3 h-3 mr-1.5" />
           {formatDuration(streamDuration)}
         </Badge>
       </div>
 
       <div className="absolute top-3 right-3 z-10">
-        <Badge className="bg-slate-900/80 backdrop-blur-sm text-cyan-400 text-xs px-2.5 py-1">
+        <Badge className="bg-ink-surface/90 backdrop-blur-sm text-accent-bright text-xs px-2.5 py-1">
           <Users className="w-3 h-3 mr-1.5" />
           {viewerCount} watching
         </Badge>
@@ -287,17 +279,17 @@ export function BroadcasterView({
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="flex items-center gap-2 bg-slate-900/90 backdrop-blur-xl rounded-full px-4 py-2 border border-purple-500/30"
+          className="flex items-center gap-2 bg-ink-surface/95 backdrop-blur-xl rounded-xl px-4 py-2 border border-ink-edge"
         >
           {!isAudioOnly && (
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={toggleVideo}
               className={cn(
-                "p-2.5 rounded-full transition-all",
+                "p-2.5 rounded-xl transition-all",
                 videoEnabled 
-                  ? "bg-slate-700/50 text-white hover:bg-slate-600/50" 
-                  : "bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                  ? "bg-ink-raised text-primary hover:bg-ink-edge" 
+                  : "bg-loss/20 text-loss hover:bg-loss/30"
               )}
               data-testid="button-toggle-video"
             >
@@ -309,10 +301,10 @@ export function BroadcasterView({
             whileTap={{ scale: 0.9 }}
             onClick={toggleAudio}
             className={cn(
-              "p-2.5 rounded-full transition-all",
+              "p-2.5 rounded-xl transition-all",
               audioEnabled 
-                ? "bg-slate-700/50 text-white hover:bg-slate-600/50" 
-                : "bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                ? "bg-ink-raised text-primary hover:bg-ink-edge" 
+                : "bg-loss/20 text-loss hover:bg-loss/30"
             )}
             data-testid="button-toggle-audio"
           >
@@ -325,10 +317,10 @@ export function BroadcasterView({
                 whileTap={{ scale: 0.9 }}
                 onClick={handleToggleScreenShare}
                 className={cn(
-                  "p-2.5 rounded-full transition-all",
+                  "p-2.5 rounded-xl transition-all",
                   isScreenSharing 
-                    ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30" 
-                    : "bg-slate-700/50 text-white hover:bg-slate-600/50"
+                    ? "bg-gain/20 text-gain hover:bg-gain/30" 
+                    : "bg-ink-raised text-primary hover:bg-ink-edge"
                 )}
                 data-testid="button-toggle-screen-share"
               >
@@ -339,7 +331,7 @@ export function BroadcasterView({
                 <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={switchCamera}
-                  className="p-2.5 rounded-full bg-slate-700/50 text-white hover:bg-slate-600/50 transition-all"
+                  className="p-2.5 rounded-full bg-ink-raised text-primary hover:bg-ink-edge transition-all"
                   data-testid="button-switch-camera"
                 >
                   <SwitchCamera className="w-5 h-5" />
@@ -348,13 +340,13 @@ export function BroadcasterView({
             </>
           )}
 
-          <div className="w-px h-6 bg-slate-600 mx-1" />
+          <div className="w-px h-6 bg-ink-divider mx-1" />
 
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={handleEndStream}
             disabled={isEnding}
-            className="p-2.5 rounded-full bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all disabled:opacity-50"
+            className="p-2.5 rounded-full bg-loss/20 text-loss hover:bg-loss/30 transition-all disabled:opacity-50"
             data-testid="button-end-stream"
           >
             {isEnding ? (
@@ -372,20 +364,20 @@ export function BroadcasterView({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-20"
+            className="absolute inset-0 bg-ink-page/90 backdrop-blur-sm flex items-center justify-center z-20"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-gradient-to-br from-slate-900 via-red-900/20 to-slate-900 border border-red-500/30 rounded-2xl p-6 max-w-sm mx-4 text-center"
+               className="bg-ink-surface border border-loss/30 rounded-2xl p-6 max-w-sm mx-4 text-center"
             >
-              <div className="w-14 h-14 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
-                <StopCircle className="w-7 h-7 text-red-400" />
+              <div className="w-14 h-14 rounded-xl bg-loss/20 flex items-center justify-center mx-auto mb-4">
+                <StopCircle className="w-7 h-7 text-loss" />
               </div>
               
-              <h3 className="text-lg font-bold text-white mb-2">End Stream?</h3>
-              <p className="text-sm text-slate-400 mb-6">
+              <h3 className="text-lg font-bold text-primary mb-2">End Stream?</h3>
+              <p className="text-sm text-secondary mb-6">
                 Your stream has been live for {formatDuration(streamDuration)} with {viewerCount} viewers.
               </p>
               
@@ -393,7 +385,7 @@ export function BroadcasterView({
                 <Button
                   variant="outline"
                   onClick={() => setShowEndConfirm(false)}
-                  className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
+                   className="flex-1 border-ink-edge text-secondary hover:bg-ink-raised"
                   data-testid="button-cancel-end"
                 >
                   Keep Streaming
@@ -401,7 +393,7 @@ export function BroadcasterView({
                 <Button
                   onClick={confirmEndStream}
                   disabled={isEnding}
-                  className="flex-1 bg-red-600 hover:bg-red-500 text-white"
+                  className="flex-1 bg-loss hover:bg-loss/80 text-primary"
                   data-testid="button-confirm-end"
                 >
                   {isEnding ? (
@@ -424,9 +416,9 @@ export function BroadcasterView({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
-          className="bg-slate-900/70 backdrop-blur-sm rounded-lg p-2 text-xs text-slate-400 text-center"
+          className="bg-ink-surface/90 backdrop-blur-sm rounded-xl p-2 text-xs text-secondary border border-ink-edge text-center"
         >
-          <Sparkles className="w-3 h-3 inline mr-1 text-purple-400" />
+          <Sparkles className="w-3 h-3 inline mr-1 text-accent-bright" />
           You're broadcasting live • Viewers see your stream with a slight delay
         </motion.div>
       </div>

@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
-  Users,
   MessageCircle,
   Heart,
   Send,
@@ -11,24 +10,13 @@ import {
   VolumeX,
   Maximize2,
   Minimize2,
-  Settings,
   Radio,
-  Wifi,
   WifiOff,
-  ChevronUp,
-  ChevronDown,
   Gift,
-  Sparkles,
   Crown,
   Bot,
-  Zap,
-  MoreVertical,
-  Share2,
-  Flag,
   Clock,
   Eye,
-  ThumbsUp,
-  MessageSquare,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -112,35 +100,35 @@ const FloatingChatBubble = memo(function FloatingChatBubble({ msg }: { msg: Chat
       className="flex items-start gap-2 max-w-[85%]"
     >
       <div className={cn(
-        "w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold",
-        msg.isAiAgent ? "bg-gradient-to-br from-cyan-500/80 to-blue-500/80" :
-        msg.isModerator ? "bg-gradient-to-br from-emerald-500/80 to-green-500/80" :
-        msg.isSubscriber ? "bg-gradient-to-br from-purple-500/80 to-fuchsia-500/80" :
-        "bg-slate-700/80"
+        "w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0 text-[10px] font-bold",
+        msg.isAiAgent ? "bg-accent-core/80 text-primary" :
+        msg.isModerator ? "bg-gain/80 text-primary" :
+        msg.isSubscriber ? "bg-accent-deep/80 text-primary" :
+        "bg-ink-raised text-secondary"
       )}>
-        {msg.isAiAgent ? <Bot className="w-3.5 h-3.5 text-white" /> : msg.username[0]?.toUpperCase()}
+        {msg.isAiAgent ? <Bot className="w-3.5 h-3.5 text-primary" /> : msg.username[0]?.toUpperCase()}
       </div>
-      <div className="bg-black/40 backdrop-blur-md rounded-2xl rounded-tl-sm px-3 py-2 border border-white/10">
+      <div className="bg-ink-surface/95 backdrop-blur-md rounded-xl rounded-tl-sm px-3 py-2 border border-ink-edge">
         <div className="flex items-center gap-1.5 mb-0.5">
           {msg.isAiAgent && (
-            <Badge className="bg-cyan-500/30 text-cyan-300 text-[8px] px-1 py-0 h-auto">AI</Badge>
+            <Badge className="bg-accent-core/20 text-accent-bright text-[8px] px-1 py-0 h-auto">AI</Badge>
           )}
           {msg.isModerator && (
-            <Badge className="bg-emerald-500/30 text-emerald-300 text-[8px] px-1 py-0 h-auto">MOD</Badge>
+            <Badge className="bg-gain/20 text-gain text-[8px] px-1 py-0 h-auto">MOD</Badge>
           )}
           {msg.isSubscriber && (
-            <Crown className="w-2.5 h-2.5 text-purple-400" />
+            <Crown className="w-2.5 h-2.5 text-accent-bright" />
           )}
           <span className={cn(
             "text-xs font-semibold",
-            msg.isAiAgent ? "text-cyan-300" :
-            msg.isModerator ? "text-emerald-300" :
-            msg.isSubscriber ? "text-purple-300" : "text-white/80"
+            msg.isAiAgent ? "text-accent-bright" :
+            msg.isModerator ? "text-gain" :
+            msg.isSubscriber ? "text-accent-bright" : "text-body"
           )}>
             {msg.username}
           </span>
         </div>
-        <p className="text-sm text-white/90 break-words leading-snug">{msg.content}</p>
+        <p className="text-sm text-body break-words leading-snug">{msg.content}</p>
       </div>
     </motion.div>
   );
@@ -181,19 +169,19 @@ const TipNotificationOverlay = memo(function TipNotificationOverlay({
 
   const tierConfig = {
     basic: { 
-      bg: 'from-amber-500/90 to-orange-500/90', 
-      border: 'border-amber-400/50',
-      glow: 'shadow-amber-500/40'
+      bg: 'bg-warn/90', 
+      border: 'border-warn/50',
+      glow: 'shadow-warn/20'
     },
     super: { 
-      bg: 'from-purple-500/90 to-pink-500/90', 
-      border: 'border-purple-400/50',
-      glow: 'shadow-purple-500/40'
+      bg: 'bg-accent-deep/90', 
+      border: 'border-accent-core/50',
+      glow: 'shadow-accent-core/20'
     },
     mega: { 
-      bg: 'from-cyan-500/90 via-purple-500/90 to-pink-500/90', 
-      border: 'border-cyan-400/50',
-      glow: 'shadow-cyan-500/40'
+      bg: 'bg-accent-core/90', 
+      border: 'border-accent-bright/50',
+      glow: 'shadow-accent-core/20'
     },
   };
   const config = tierConfig[tip.tier];
@@ -206,30 +194,30 @@ const TipNotificationOverlay = memo(function TipNotificationOverlay({
       className="fixed top-1/3 left-1/2 -translate-x-1/2 z-50"
     >
       <div className={cn(
-        "bg-gradient-to-br backdrop-blur-xl rounded-2xl p-5 border-2 shadow-2xl",
+        "backdrop-blur-xl rounded-2xl p-5 border-2 shadow-2xl",
         config.bg, config.border, config.glow,
         tip.tier === 'mega' && "animate-pulse"
       )}>
         <div className="flex items-center gap-3 mb-2">
           <div className={cn(
-            "p-2 rounded-full",
-            tip.tier === 'mega' ? "bg-gradient-to-r from-cyan-400 to-purple-400" : "bg-white/20"
+            "p-2 rounded-xl",
+            tip.tier === 'mega' ? "bg-accent-bright" : "bg-primary/20"
           )}>
-            {tip.tier === 'mega' ? <Crown className="w-5 h-5 text-white" /> : <Coins className="w-5 h-5 text-yellow-200" />}
+            {tip.tier === 'mega' ? <Crown className="w-5 h-5 text-primary" /> : <Coins className="w-5 h-5 text-warn" />}
           </div>
           <div>
-            <p className="text-base font-bold text-white">@{tip.username}</p>
-            <p className="text-xs text-white/80">sent a {tip.tier} tip!</p>
+            <p className="text-base font-bold text-primary">@{tip.username}</p>
+            <p className="text-xs text-body">sent a {tip.tier} tip!</p>
           </div>
         </div>
         <p className={cn(
-          "text-2xl font-bold text-center text-white font-orbitron",
+          "text-2xl font-bold text-center text-primary tabular",
           tip.tier === 'mega' && "text-3xl"
         )}>
           {tip.amount.toLocaleString()} STREAM
         </p>
         {tip.message && (
-          <p className="text-sm text-white/90 mt-2 text-center italic bg-black/20 rounded-lg p-2">
+          <p className="text-sm text-body mt-2 text-center italic bg-ink-page/40 rounded-xl p-2">
             "{tip.message}"
           </p>
         )}
@@ -439,7 +427,7 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
   return (
     <div 
       ref={containerRef}
-      className="fixed inset-0 bg-black z-[100] overflow-hidden"
+       className="fixed inset-0 bg-ink-page z-[100] overflow-hidden"
       data-testid="immersive-stream-view"
     >
       {/* Video Background - prioritize LiveKit video track over WebRTC MediaStream */}
@@ -463,16 +451,16 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
         ) : children ? (
           <div className="w-full h-full">{children}</div>
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-slate-900 via-purple-900/30 to-slate-900 flex items-center justify-center">
+          <div className="w-full h-full bg-ink-page flex items-center justify-center">
             <div className="text-center">
               <motion.div
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="p-6 rounded-full bg-gradient-to-br from-purple-500/30 to-fuchsia-500/30 border border-purple-500/20 mb-4 inline-block"
+                className="p-6 rounded-xl bg-accent-core/20 border border-accent-core/30 mb-4 inline-block"
               >
-                <Radio className="w-12 h-12 text-purple-400" />
+                <Radio className="w-12 h-12 text-accent-bright" />
               </motion.div>
-              <p className="text-lg font-bold text-white/80 font-orbitron">
+              <p className="text-lg font-bold text-body">
                 {connectionState === 'connecting' ? 'Connecting...' :
                  connectionState === 'reconnecting' ? 'Reconnecting...' :
                  connectionState === 'failed' ? 'Connection Failed' : 'Stream Loading...'}
@@ -483,8 +471,8 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
       </div>
 
       {/* Gradient Overlays for Visibility */}
-      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 via-black/30 to-transparent pointer-events-none" />
-      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
+       <div className="absolute inset-x-0 top-0 h-32 bg-ink-page/60 pointer-events-none" />
+       <div className="absolute inset-x-0 bottom-0 h-48 bg-ink-page/75 pointer-events-none" />
 
       {/* Floating Reactions */}
       <AnimatePresence>
@@ -518,7 +506,7 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
               {/* Host Info */}
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center font-bold text-sm ring-2 ring-white/20 overflow-hidden">
+                  <div className="w-11 h-11 rounded-xl bg-accent-core flex items-center justify-center font-bold text-sm ring-2 ring-accent-bright/30 overflow-hidden">
                     {hostAvatar ? (
                       <img src={hostAvatar} alt="" className="w-full h-full object-cover" />
                     ) : (
@@ -526,18 +514,18 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
                     )}
                   </div>
                   {isLive && (
-                    <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-black animate-pulse" />
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-loss rounded-xl border-2 border-ink-page animate-pulse" />
                   )}
                 </div>
                 <div>
-                  <h2 className="text-sm font-bold text-white line-clamp-1 max-w-[180px] sm:max-w-[280px]">
+                      <h2 className="text-sm font-bold text-primary line-clamp-1 max-w-[180px] sm:max-w-[280px]">
                     {title}
                   </h2>
-                  <div className="flex items-center gap-2 text-xs text-white/70">
+                  <div className="flex items-center gap-2 text-xs text-secondary">
                     <span className="font-medium">@{hostUsername}</span>
                     {isLive && (
                       <>
-                        <span className="w-1 h-1 rounded-full bg-white/40" />
+                        <span className="w-1 h-1 rounded-xl bg-secondary/40" />
                         <span className="flex items-center gap-1">
                           <Eye className="w-3 h-3" />
                           {formatViewers(viewerCount)}
@@ -551,13 +539,13 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
               {/* Right Controls */}
               <div className="flex items-center gap-2">
                 {isLive && (
-                  <Badge className="bg-red-500/90 text-white text-[10px] px-2 py-0.5 animate-pulse flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                  <Badge className="bg-loss/90 text-primary text-[10px] px-2 py-0.5 animate-pulse flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-xl bg-primary" />
                     LIVE
                   </Badge>
                 )}
                 {isLive && (
-                  <Badge className="bg-black/40 backdrop-blur-sm text-white/80 text-[10px] px-2 py-0.5 border border-white/10">
+                  <Badge className="bg-ink-surface/80 backdrop-blur-sm text-body text-[10px] px-2 py-0.5 border border-ink-edge">
                     <Clock className="w-3 h-3 mr-1" />
                     {formatDuration(streamDuration)}
                   </Badge>
@@ -566,7 +554,7 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
                   variant="ghost"
                   size="icon"
                   onClick={onExit}
-                  className="h-10 w-10 rounded-full bg-black/40 backdrop-blur-sm text-white hover:bg-white/20 border border-white/10"
+                  className="h-10 w-10 rounded-xl bg-ink-surface/80 backdrop-blur-sm text-primary hover:bg-ink-raised border border-ink-edge"
                   data-testid="button-exit-immersive"
                 >
                   <X className="w-5 h-5" />
@@ -582,9 +570,9 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
         <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30">
           <Badge className={cn(
             "backdrop-blur-sm text-xs px-3 py-1.5 flex items-center gap-2",
-            connectionState === 'connecting' ? "bg-cyan-500/80 text-white" :
-            connectionState === 'reconnecting' ? "bg-amber-500/80 text-white" :
-            "bg-red-500/80 text-white"
+            connectionState === 'connecting' ? "bg-accent-core/80 text-primary" :
+            connectionState === 'reconnecting' ? "bg-warn/80 text-primary" :
+            "bg-loss/80 text-primary"
           )}>
             {connectionState === 'connecting' || connectionState === 'reconnecting' ? (
               <Radio className="w-3.5 h-3.5 animate-pulse" />
@@ -635,13 +623,13 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
             <div className="flex items-end justify-between gap-3 mb-3">
               {/* Chat Input */}
               <div className="flex-1 max-w-lg">
-                <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md rounded-full border border-white/20 px-2 py-1">
+                <div className="flex items-center gap-2 bg-ink-surface/80 backdrop-blur-md rounded-xl border border-ink-edge px-2 py-1">
                   <Input
                     placeholder="Say something..."
                     value={chatMessage}
                     onChange={(e) => setChatMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                    className="bg-transparent border-0 text-white text-sm h-10 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-white/50"
+                    className="bg-transparent border-0 text-primary text-sm h-10 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted"
                     disabled={!isConnected}
                     data-testid="input-immersive-chat"
                   />
@@ -649,7 +637,7 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
                     size="icon"
                     onClick={handleSendMessage}
                     disabled={!isConnected || !chatMessage.trim()}
-                    className="h-9 w-9 rounded-full bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-400 hover:to-fuchsia-400 flex-shrink-0"
+                    className="h-9 w-9 rounded-xl grad-accent glow-accent flex-shrink-0"
                     data-testid="button-immersive-send"
                   >
                     <Send className="w-4 h-4" />
@@ -673,7 +661,7 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
                           key={emoji}
                           whileTap={{ scale: 1.3 }}
                           onClick={() => handleReaction(emoji)}
-                          className="w-11 h-11 rounded-full bg-black/50 backdrop-blur-md border border-white/20 flex items-center justify-center text-xl hover:bg-white/20 transition-colors"
+                          className="w-11 h-11 rounded-xl bg-ink-surface/80 backdrop-blur-md border border-ink-edge flex items-center justify-center text-xl hover:bg-ink-raised transition-colors"
                         >
                           {emoji}
                         </motion.button>
@@ -688,10 +676,10 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
                     size="icon"
                     onClick={() => setShowQuickActions(!showQuickActions)}
                     className={cn(
-                      "h-12 w-12 rounded-full backdrop-blur-md border transition-all",
+                      "h-12 w-12 rounded-xl backdrop-blur-md border transition-all",
                       showQuickActions 
-                        ? "bg-purple-500/80 border-purple-400/50 text-white" 
-                        : "bg-black/50 border-white/20 text-white hover:bg-white/20"
+                        ? "bg-accent-core border-accent-bright text-primary glow-accent" 
+                        : "bg-ink-surface/80 border-ink-edge text-primary hover:bg-ink-raised"
                     )}
                     data-testid="button-toggle-reactions"
                   >
@@ -703,10 +691,10 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
                       size="icon"
                       onClick={() => setShowTipPanel(!showTipPanel)}
                       className={cn(
-                        "h-12 w-12 rounded-full backdrop-blur-md border transition-all",
+                        "h-12 w-12 rounded-xl backdrop-blur-md border transition-all",
                         showTipPanel 
-                          ? "bg-amber-500/80 border-amber-400/50 text-white" 
-                          : "bg-black/50 border-white/20 text-white hover:bg-white/20"
+                          ? "bg-warn/80 border-warn text-primary" 
+                          : "bg-ink-surface/80 border-ink-edge text-primary hover:bg-ink-raised"
                       )}
                       data-testid="button-toggle-tip"
                     >
@@ -718,10 +706,10 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
                     size="icon"
                     onClick={() => setShowChat(!showChat)}
                     className={cn(
-                      "h-12 w-12 rounded-full backdrop-blur-md border transition-all",
+                      "h-12 w-12 rounded-xl backdrop-blur-md border transition-all",
                       showChat 
-                        ? "bg-cyan-500/80 border-cyan-400/50 text-white" 
-                        : "bg-black/50 border-white/20 text-white hover:bg-white/20"
+                        ? "bg-accent-core border-accent-bright text-primary glow-accent" 
+                        : "bg-ink-surface/80 border-ink-edge text-primary hover:bg-ink-raised"
                     )}
                     data-testid="button-toggle-chat"
                   >
@@ -731,7 +719,7 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
                   <Button
                     size="icon"
                     onClick={onToggleMute}
-                    className="h-12 w-12 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-white hover:bg-white/20"
+                    className="h-12 w-12 rounded-xl bg-ink-surface/80 backdrop-blur-md border border-ink-edge text-primary hover:bg-ink-raised"
                     data-testid="button-toggle-mute"
                   >
                     {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
@@ -740,7 +728,7 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
                   <Button
                     size="icon"
                     onClick={toggleBrowserFullscreen}
-                    className="h-12 w-12 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-white hover:bg-white/20"
+                    className="h-12 w-12 rounded-xl bg-ink-surface/80 backdrop-blur-md border border-ink-edge text-primary hover:bg-ink-raised"
                     data-testid="button-toggle-fullscreen"
                   >
                     {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
@@ -759,7 +747,7 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm z-40 flex items-center justify-center p-4"
+            className="absolute inset-0 bg-ink-page/80 backdrop-blur-sm z-40 flex items-center justify-center p-4"
             onClick={() => setShowTipPanel(false)}
           >
             <motion.div
@@ -767,18 +755,18 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-slate-900/95 backdrop-blur-xl rounded-2xl border border-purple-500/30 p-5 w-full max-w-sm"
+              className="bg-ink-surface/95 backdrop-blur-xl rounded-2xl border border-accent-core/30 p-5 w-full max-w-sm"
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-white font-orbitron flex items-center gap-2">
-                  <Gift className="w-5 h-5 text-amber-400" />
+                <h3 className="text-lg font-bold text-primary font-orbitron flex items-center gap-2">
+                  <Gift className="w-5 h-5 text-warn" />
                   Send Tip
                 </h3>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setShowTipPanel(false)}
-                  className="h-8 w-8 text-slate-400 hover:text-white"
+                  className="h-8 w-8 text-muted hover:text-primary"
                 >
                   <X className="w-4 h-4" />
                 </Button>
@@ -792,8 +780,8 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
                       variant="outline"
                       onClick={() => setTipAmount(amount.toString())}
                       className={cn(
-                        "border-slate-600 text-slate-300 hover:bg-amber-500/20 hover:border-amber-500/50 hover:text-amber-300 transition-all",
-                        tipAmount === amount.toString() && "bg-amber-500/20 border-amber-500/50 text-amber-300"
+                        "border-ink-edge text-body hover:bg-warn/20 hover:border-warn/50 hover:text-warn transition-all",
+                        tipAmount === amount.toString() && "bg-warn/20 border-warn/50 text-warn"
                       )}
                     >
                       {amount}
@@ -806,7 +794,7 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
                   placeholder="Custom amount"
                   value={tipAmount}
                   onChange={(e) => setTipAmount(e.target.value)}
-                  className="bg-slate-800/50 border-slate-600 text-white"
+                  className="bg-ink-raised border-ink-edge text-primary"
                   data-testid="input-tip-amount"
                 />
 
@@ -814,14 +802,14 @@ export const ImmersiveStreamView = memo(function ImmersiveStreamView({
                   placeholder="Add a message (optional)"
                   value={tipMessage}
                   onChange={(e) => setTipMessage(e.target.value)}
-                  className="bg-slate-800/50 border-slate-600 text-white"
+                  className="bg-ink-raised border-ink-edge text-primary"
                   data-testid="input-tip-message"
                 />
 
                 <Button
                   onClick={handleSendTip}
                   disabled={!tipAmount || parseInt(tipAmount) <= 0}
-                  className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 h-12 font-semibold"
+                  className="w-full bg-warn hover:bg-warn/80 h-12 font-semibold"
                   data-testid="button-send-tip"
                 >
                   <Coins className="w-5 h-5 mr-2" />

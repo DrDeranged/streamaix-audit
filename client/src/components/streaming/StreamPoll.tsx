@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { BarChart3, Check, Clock, Users, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 import { cn } from '@/lib/utils';
 
 interface PollOption {
@@ -76,116 +78,118 @@ export function StreamPoll({ poll, hasVoted, onVote, isHost, onEndPoll }: Stream
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-br from-slate-900/95 via-purple-900/30 to-slate-900/95 backdrop-blur-xl rounded-2xl border border-purple-500/30 p-4 shadow-xl"
+      className="rounded-xl"
     >
-      <div className="flex items-start justify-between gap-3 mb-4">
-        <div className="flex items-center gap-2">
-          <div className="p-2 rounded-xl bg-purple-500/20">
-            <BarChart3 className="w-4 h-4 text-purple-400" />
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-white">Live Poll</h3>
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <Users className="w-3 h-3" />
-              <span>{poll.totalVotes} votes</span>
-              {timeLeft && (
-                <>
-                  <span>•</span>
-                  <Clock className="w-3 h-3" />
-                  <span>{timeLeft}</span>
-                </>
-              )}
+      <Surface className="p-4">
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-xl bg-accent-core/10">
+              <BarChart3 className="w-4 h-4 text-accent-bright" />
             </div>
-          </div>
-        </div>
-        
-        {isHost && poll.isActive && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onEndPoll}
-            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 px-2"
-            data-testid="button-end-poll"
-          >
-            End Poll
-          </Button>
-        )}
-      </div>
-
-      <p className="text-white font-medium mb-4">{poll.question}</p>
-
-      <div className="space-y-2">
-        {poll.options.map((option) => {
-          const percentage = getPercentage(option.votes);
-          const isSelected = selectedOption === option.id;
-          const showResults = !!hasVoted || !poll.isActive;
-          
-          return (
-            <motion.button
-              key={option.id}
-              whileHover={!hasVoted && poll.isActive ? { scale: 1.01 } : {}}
-              whileTap={!hasVoted && poll.isActive ? { scale: 0.99 } : {}}
-              onClick={() => handleVote(option.id)}
-              disabled={!!hasVoted || !poll.isActive}
-              className={cn(
-                "relative w-full p-3 rounded-xl border text-left overflow-hidden transition-all",
-                isSelected
-                  ? "border-purple-500 bg-purple-500/10"
-                  : "border-purple-500/20 bg-slate-800/50 hover:border-purple-500/40",
-                (hasVoted || !poll.isActive) && "cursor-default"
-              )}
-              data-testid={`poll-option-${option.id}`}
-            >
-              {showResults && (
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${percentage}%` }}
-                  transition={{ duration: 0.5, ease: 'easeOut' }}
-                  className={cn(
-                    "absolute inset-y-0 left-0",
-                    isSelected ? "bg-purple-500/30" : "bg-slate-700/50"
-                  )}
-                />
-              )}
-              
-              <div className="relative flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {isSelected && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center"
-                    >
-                      <Check className="w-3 h-3 text-white" />
-                    </motion.div>
-                  )}
-                  <span className={cn(
-                    "text-sm",
-                    isSelected ? "text-white font-medium" : "text-slate-300"
-                  )}>
-                    {option.text}
-                  </span>
-                </div>
-                
-                {showResults && (
-                  <span className={cn(
-                    "text-sm font-medium",
-                    isSelected ? "text-purple-300" : "text-slate-400"
-                  )}>
-                    {percentage}%
-                  </span>
+            <div>
+              <SectionTitle as="h3">Live Poll</SectionTitle>
+              <div className="flex items-center gap-2 text-xs text-secondary">
+                <Users className="w-3 h-3" />
+                <span className="tabular">{poll.totalVotes} votes</span>
+                {timeLeft && (
+                  <>
+                    <span>•</span>
+                    <Clock className="w-3 h-3" />
+                    <span className="tabular">{timeLeft}</span>
+                  </>
                 )}
               </div>
-            </motion.button>
-          );
-        })}
-      </div>
-
-      {!poll.isActive && (
-        <div className="mt-4 pt-3 border-t border-purple-500/20 text-center">
-          <span className="text-xs text-slate-400">Poll has ended</span>
+            </div>
+          </div>
+          
+          {isHost && poll.isActive && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onEndPoll}
+              className="text-loss hover:text-loss hover:bg-loss/10 h-8 px-2 rounded-xl"
+              data-testid="button-end-poll"
+            >
+              End Poll
+            </Button>
+          )}
         </div>
-      )}
+
+        <p className="text-primary font-medium mb-4">{poll.question}</p>
+
+        <div className="space-y-2">
+          {poll.options.map((option) => {
+            const percentage = getPercentage(option.votes);
+            const isSelected = selectedOption === option.id;
+            const showResults = !!hasVoted || !poll.isActive;
+            
+            return (
+              <motion.button
+                key={option.id}
+                whileHover={!hasVoted && poll.isActive ? { scale: 1.01 } : {}}
+                whileTap={!hasVoted && poll.isActive ? { scale: 0.99 } : {}}
+                onClick={() => handleVote(option.id)}
+                disabled={!!hasVoted || !poll.isActive}
+                className={cn(
+                  "relative w-full p-3 rounded-xl border border-ink-edge text-left overflow-hidden transition-all bg-ink-raised",
+                  isSelected
+                    ? "border-accent-core bg-accent-core/10 glow-accent"
+                    : "hover:border-accent-core/40",
+                  (hasVoted || !poll.isActive) && "cursor-default"
+                )}
+                data-testid={`poll-option-${option.id}`}
+              >
+                {showResults && (
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${percentage}%` }}
+                    transition={{ duration: 0.5, ease: 'easeOut' }}
+                    className={cn(
+                      "absolute inset-y-0 left-0",
+                      isSelected ? "bg-accent-core/30" : "bg-ink-edge"
+                    )}
+                  />
+                )}
+                
+                <div className="relative flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {isSelected && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="w-5 h-5 rounded-xl bg-accent-core flex items-center justify-center"
+                      >
+                        <Check className="w-3 h-3 text-primary" />
+                      </motion.div>
+                    )}
+                    <span className={cn(
+                      "text-sm",
+                      isSelected ? "text-primary font-medium" : "text-body"
+                    )}>
+                      {option.text}
+                    </span>
+                  </div>
+                  
+                  {showResults && (
+                    <span className={cn(
+                      "tabular text-sm font-medium",
+                      isSelected ? "text-accent-bright" : "text-secondary"
+                    )}>
+                      {percentage}%
+                    </span>
+                  )}
+                </div>
+              </motion.button>
+            );
+          })}
+        </div>
+
+        {!poll.isActive && (
+          <div className="mt-4 pt-3 border-t border-ink-divider text-center">
+            <span className="text-xs text-muted">Poll has ended</span>
+          </div>
+        )}
+      </Surface>
     </motion.div>
   );
 }
@@ -225,83 +229,85 @@ export function CreatePollForm({ onCreate, onCancel }: CreatePollFormProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-br from-slate-900/95 via-purple-900/30 to-slate-900/95 backdrop-blur-xl rounded-2xl border border-purple-500/30 p-4 shadow-xl"
+      className="rounded-xl"
     >
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <div className="p-2 rounded-xl bg-purple-500/20">
-            <BarChart3 className="w-4 h-4 text-purple-400" />
+      <Surface className="p-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-xl bg-accent-core/10">
+              <BarChart3 className="w-4 h-4 text-accent-bright" />
+            </div>
+            <SectionTitle as="h3">Create Poll</SectionTitle>
           </div>
-          <h3 className="text-sm font-semibold text-white">Create Poll</h3>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onCancel}
-          className="h-8 w-8 p-0 text-slate-400 hover:text-white"
-        >
-          <X className="w-4 h-4" />
-        </Button>
-      </div>
-
-      <div className="space-y-4">
-        <div>
-          <label className="text-xs text-slate-400 mb-1 block">Question</label>
-          <Input
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            placeholder="Ask a question..."
-            className="bg-slate-800/50 border-purple-500/30 text-white"
-            data-testid="input-poll-question"
-          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onCancel}
+            className="h-8 w-8 p-0 rounded-xl text-secondary hover:text-primary"
+          >
+            <X className="w-4 h-4" />
+          </Button>
         </div>
 
-        <div className="space-y-2">
-          <label className="text-xs text-slate-400">Options</label>
-          {options.map((option, index) => (
-            <div key={index} className="flex gap-2">
-              <Input
-                value={option}
-                onChange={(e) => updateOption(index, e.target.value)}
-                placeholder={`Option ${index + 1}`}
-                className="bg-slate-800/50 border-purple-500/30 text-white flex-1"
-                data-testid={`input-poll-option-${index}`}
-              />
-              {options.length > 2 && (
+        <div className="space-y-4">
+          <div>
+            <label className="text-xs text-muted mb-1 block">Question</label>
+            <Input
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              placeholder="Ask a question..."
+              className="rounded-xl bg-ink-raised border-ink-edge text-primary placeholder:text-muted"
+              data-testid="input-poll-question"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs text-muted">Options</label>
+            {options.map((option, index) => (
+              <div key={index} className="flex gap-2">
+                <Input
+                  value={option}
+                  onChange={(e) => updateOption(index, e.target.value)}
+                  placeholder={`Option ${index + 1}`}
+                  className="flex-1 rounded-xl bg-ink-raised border-ink-edge text-primary placeholder:text-muted"
+                  data-testid={`input-poll-option-${index}`}
+                />
+                {options.length > 2 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeOption(index)}
+                    className="h-10 w-10 p-0 rounded-xl text-loss hover:text-loss hover:bg-loss/10"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+            
+            {options.length < 5 && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => removeOption(index)}
-                  className="h-10 w-10 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                  onClick={addOption}
+                  className="w-full h-10 rounded-xl border border-dashed border-accent-core/30 text-accent-bright hover:bg-accent-core/10"
                 >
-                  <X className="w-4 h-4" />
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Option
                 </Button>
-              )}
-            </div>
-          ))}
-          
-          {options.length < 5 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={addOption}
-              className="w-full h-10 border border-dashed border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
-            >
-              <Plus className="w-4 h-4 mr-1" />
-              Add Option
-            </Button>
-          )}
-        </div>
+            )}
+          </div>
 
-        <Button
-          onClick={handleCreate}
-          disabled={!isValid}
-          className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 disabled:opacity-50"
-          data-testid="button-create-poll"
-        >
-          Create Poll
-        </Button>
-      </div>
+          <Button
+            onClick={handleCreate}
+            disabled={!isValid}
+            className="w-full rounded-xl grad-accent glow-accent hover:bg-accent-deep disabled:opacity-50"
+            data-testid="button-create-poll"
+          >
+            Create Poll
+          </Button>
+        </div>
+      </Surface>
     </motion.div>
   );
 }
