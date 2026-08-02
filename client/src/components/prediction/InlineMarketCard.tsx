@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { Card } from '@/components/ui/card';
+import { useMutation } from '@tanstack/react-query';
+import Surface from '@/components/ds/Surface';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -9,7 +9,6 @@ import {
   TrendingDown,
   Clock,
   DollarSign,
-  Users,
   Sparkles,
   ChevronRight
 } from 'lucide-react';
@@ -76,11 +75,11 @@ export function InlineMarketCard({
   // Category styling
   const getCategoryStyle = (category: string) => {
     const styles: Record<string, string> = {
-      crypto: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
-      defi: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
-      social: 'bg-pink-500/10 text-pink-400 border-pink-500/30',
-      avatar: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
-      macro: 'bg-orange-500/10 text-orange-400 border-orange-500/30',
+      crypto: 'bg-accent-core/10 text-accent-bright border-accent-core/30',
+      defi: 'bg-accent-deep/20 text-accent-bright border-accent-core/30',
+      social: 'bg-warn/10 text-warn border-warn/30',
+      avatar: 'bg-accent-core/10 text-accent-bright border-accent-core/30',
+      macro: 'bg-gain/10 text-gain border-gain/30',
     };
     return styles[category.toLowerCase()] || styles.crypto;
   };
@@ -125,20 +124,20 @@ export function InlineMarketCard({
 
   if (variant === 'mini') {
     return (
-      <Card className="bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-lg border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 overflow-hidden group">
+      <Surface className="overflow-hidden transition-all duration-300 group hover:bg-ink-raised">
         <div className="p-3">
           <div className="flex items-start gap-2 mb-2">
             <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0.5", getCategoryStyle(market.category))}>
               {market.category}
             </Badge>
-            <div className="flex items-center gap-1 text-[10px] text-muted-foreground ml-auto">
+            <div className="ml-auto flex items-center gap-1 text-[10px] text-muted">
               <Clock className="h-2.5 w-2.5" />
               <span>{timeUntilDeadline}</span>
             </div>
           </div>
 
           <Link href={`/markets/${market.id}`}>
-            <h3 className="text-xs font-semibold text-foreground mb-2 line-clamp-2 hover:text-purple-400 transition-colors cursor-pointer">
+            <h3 className="mb-2 line-clamp-2 text-xs font-semibold text-primary transition-colors hover:text-accent-bright">
               {market.question}
             </h3>
           </Link>
@@ -148,7 +147,7 @@ export function InlineMarketCard({
               size="sm"
               onClick={() => handleQuickTrade('yes')}
               disabled={tradeMutation.isPending}
-              className="h-8 text-[11px] bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white border-0"
+              className="h-8 rounded-xl border-0 bg-gain text-[11px] text-ink-page transition-colors hover:bg-gain/80"
             >
               <TrendingUp className="h-3 w-3 mr-1" />
               YES {yesPricePercent}%
@@ -157,19 +156,19 @@ export function InlineMarketCard({
               size="sm"
               onClick={() => handleQuickTrade('no')}
               disabled={tradeMutation.isPending}
-              className="h-8 text-[11px] bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white border-0"
+              className="h-8 rounded-xl border-0 bg-loss text-[11px] text-ink-page transition-colors hover:bg-loss/80"
             >
               <TrendingDown className="h-3 w-3 mr-1" />
               NO {noPricePercent}%
             </Button>
           </div>
         </div>
-      </Card>
+      </Surface>
     );
   }
 
   return (
-    <Card className="bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-lg border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300 overflow-hidden group">
+    <Surface className="overflow-hidden transition-all duration-300 group hover:bg-ink-raised">
       <div className="p-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
@@ -177,12 +176,12 @@ export function InlineMarketCard({
             <Badge variant="outline" className={cn("text-xs", getCategoryStyle(market.category))}>
               {market.category}
             </Badge>
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <Sparkles className="h-3 w-3 text-purple-400" />
+            <span className="flex items-center gap-1 text-xs text-muted">
+              <Sparkles className="h-3 w-3 text-accent-bright" />
               Trade on this
             </span>
           </div>
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1 text-xs text-muted">
             <Clock className="h-3 w-3" />
             <span>{timeUntilDeadline}</span>
           </div>
@@ -190,7 +189,7 @@ export function InlineMarketCard({
 
         {/* Question */}
         <Link href={`/markets/${market.id}`}>
-          <h3 className="text-sm font-semibold text-foreground mb-3 line-clamp-2 hover:text-purple-400 transition-colors cursor-pointer group-hover:text-purple-300">
+          <h3 className="mb-3 line-clamp-2 text-sm font-semibold text-primary transition-colors group-hover:text-accent-bright hover:text-accent-bright">
             {market.question}
           </h3>
         </Link>
@@ -198,12 +197,12 @@ export function InlineMarketCard({
         {/* Price Progress Bar */}
         <div className="mb-3">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs text-green-400 font-medium">YES {yesPricePercent}%</span>
-            <span className="text-xs text-red-400 font-medium">NO {noPricePercent}%</span>
+            <span className="tabular text-xs font-medium text-gain">YES {yesPricePercent}%</span>
+            <span className="tabular text-xs font-medium text-loss">NO {noPricePercent}%</span>
           </div>
           <Progress 
             value={yesPricePercent} 
-            className="h-2 bg-red-900/30 [&>div]:bg-gradient-to-r [&>div]:from-green-500 [&>div]:to-emerald-500"
+            className="h-2 bg-loss/20 [&>div]:bg-gain"
           />
         </div>
 
@@ -213,7 +212,7 @@ export function InlineMarketCard({
             size="sm"
             onClick={() => handleQuickTrade('yes')}
             disabled={tradeMutation.isPending}
-            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white border-0 shadow-lg shadow-green-500/20"
+            className="rounded-xl border-0 bg-gain text-ink-page transition-colors hover:bg-gain/80"
           >
             <TrendingUp className="h-4 w-4 mr-1.5" />
             Buy YES
@@ -222,7 +221,7 @@ export function InlineMarketCard({
             size="sm"
             onClick={() => handleQuickTrade('no')}
             disabled={tradeMutation.isPending}
-            className="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white border-0 shadow-lg shadow-red-500/20"
+            className="rounded-xl border-0 bg-loss text-ink-page transition-colors hover:bg-loss/80"
           >
             <TrendingDown className="h-4 w-4 mr-1.5" />
             Buy NO
@@ -230,20 +229,20 @@ export function InlineMarketCard({
         </div>
 
         {/* Footer Stats */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-white/5">
+        <div className="flex items-center justify-between border-t border-ink-divider pt-2 text-xs text-muted">
           <div className="flex items-center gap-1">
             <DollarSign className="h-3 w-3" />
             <AnimatedCounter value={totalVolume} />
             <span>STREAM</span>
           </div>
           <Link href={`/markets/${market.id}`}>
-            <Button variant="ghost" size="sm" className="h-6 text-xs text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 px-2">
+            <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-accent-bright hover:bg-ink-raised hover:text-primary">
               View Details
               <ChevronRight className="h-3 w-3 ml-1" />
             </Button>
           </Link>
         </div>
       </div>
-    </Card>
+    </Surface>
   );
 }

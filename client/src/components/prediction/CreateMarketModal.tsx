@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,6 +16,8 @@ import { cn } from '@/lib/utils';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 
 const createMarketSchema = z.object({
   question: z.string().min(10, 'Question must be at least 10 characters').max(200, 'Question must be less than 200 characters'),
@@ -105,33 +106,34 @@ export function CreateMarketModal({ open, onOpenChange }: CreateMarketModalProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] bg-slate-900 border-slate-700 text-white">
+      <DialogContent className="sm:max-w-[600px] rounded-2xl border border-ink-edge bg-ink-surface text-body">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-            Create Prediction Market
+          <DialogTitle asChild>
+            <SectionTitle as="h2">Create Prediction Market</SectionTitle>
           </DialogTitle>
-          <DialogDescription className="text-slate-400">
+          <DialogDescription className="text-secondary">
             Create a new prediction market and let the community trade on future outcomes.
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <Surface variant="raised" className="border border-ink-edge/60 p-4">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="question"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">Market Question</FormLabel>
+                  <FormLabel className="text-primary">Market Question</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Will Bitcoin reach $150,000 by end of 2025?"
-                      className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                      className="rounded-xl border-ink-edge bg-ink-surface text-primary placeholder:text-muted focus-visible:ring-accent-core"
                       data-testid="input-market-question"
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription className="text-slate-500 text-xs">
+                  <FormDescription className="text-xs text-muted">
                     Ask a clear yes/no question about a future event
                   </FormDescription>
                   <FormMessage />
@@ -144,11 +146,11 @@ export function CreateMarketModal({ open, onOpenChange }: CreateMarketModalProps
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">Description (Optional)</FormLabel>
+                  <FormLabel className="text-primary">Description (Optional)</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Add context, resolution criteria, and any important details..."
-                      className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 min-h-[80px]"
+                      className="min-h-[80px] rounded-xl border-ink-edge bg-ink-surface text-primary placeholder:text-muted focus-visible:ring-accent-core"
                       data-testid="input-market-description"
                       {...field}
                     />
@@ -164,14 +166,14 @@ export function CreateMarketModal({ open, onOpenChange }: CreateMarketModalProps
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-white">Category</FormLabel>
+                    <FormLabel className="text-primary">Category</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white" data-testid="select-market-category">
+                        <SelectTrigger className="rounded-xl border-ink-edge bg-ink-surface text-primary focus:ring-accent-core" data-testid="select-market-category">
                           <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectContent className="rounded-xl border-ink-edge bg-ink-raised text-primary">
                         <SelectItem value="crypto">Crypto</SelectItem>
                         <SelectItem value="defi">DeFi</SelectItem>
                         <SelectItem value="real_world">Real World</SelectItem>
@@ -188,15 +190,15 @@ export function CreateMarketModal({ open, onOpenChange }: CreateMarketModalProps
                 name="deadline"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel className="text-white">Deadline</FormLabel>
+                    <FormLabel className="text-primary">Deadline</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
                             variant="outline"
                             className={cn(
-                              'bg-slate-800 border-slate-700 text-white hover:bg-slate-700',
-                              !field.value && 'text-slate-500'
+                              'w-full rounded-xl border-ink-edge bg-ink-surface text-primary hover:bg-ink-raised hover:text-primary',
+                              !field.value && 'text-muted'
                             )}
                             data-testid="button-select-deadline"
                           >
@@ -205,14 +207,14 @@ export function CreateMarketModal({ open, onOpenChange }: CreateMarketModalProps
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 bg-slate-800 border-slate-700" align="start">
+                       <PopoverContent className="w-auto rounded-xl border border-ink-edge bg-ink-raised p-0" align="start">
                         <Calendar
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
                           disabled={(date) => date < new Date()}
                           initialFocus
-                          className="bg-slate-800 text-white"
+                           className="bg-ink-raised text-primary"
                         />
                       </PopoverContent>
                     </Popover>
@@ -227,18 +229,18 @@ export function CreateMarketModal({ open, onOpenChange }: CreateMarketModalProps
               name="initialLiquidity"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">Initial Liquidity (STREAM)</FormLabel>
+                  <FormLabel className="text-primary">Initial Liquidity (STREAM)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       placeholder="1000"
-                      className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                       className="rounded-xl border-ink-edge bg-ink-surface text-primary placeholder:text-muted focus-visible:ring-accent-core tabular"
                       data-testid="input-initial-liquidity"
                       {...field}
                       onChange={(e) => field.onChange(parseFloat(e.target.value))}
                     />
                   </FormControl>
-                  <FormDescription className="text-slate-500 text-xs">
+                   <FormDescription className="text-xs text-muted">
                     Minimum 100 STREAM required to create a market
                   </FormDescription>
                   <FormMessage />
@@ -251,16 +253,16 @@ export function CreateMarketModal({ open, onOpenChange }: CreateMarketModalProps
               name="tags"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">Tags (Optional)</FormLabel>
+                  <FormLabel className="text-primary">Tags (Optional)</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="bitcoin, price, prediction (comma separated)"
-                      className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                       className="rounded-xl border-ink-edge bg-ink-surface text-primary placeholder:text-muted focus-visible:ring-accent-core"
                       data-testid="input-market-tags"
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription className="text-slate-500 text-xs">
+                   <FormDescription className="text-xs text-muted">
                     Add tags separated by commas
                   </FormDescription>
                   <FormMessage />
@@ -273,7 +275,7 @@ export function CreateMarketModal({ open, onOpenChange }: CreateMarketModalProps
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                className="flex-1 bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
+                 className="flex-1 rounded-xl border-ink-edge bg-ink-surface text-primary hover:bg-ink-raised hover:text-primary"
                 disabled={createMarketMutation.isPending}
                 data-testid="button-cancel-create"
               >
@@ -281,7 +283,7 @@ export function CreateMarketModal({ open, onOpenChange }: CreateMarketModalProps
               </Button>
               <Button
                 type="submit"
-                className="flex-1 bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white"
+                 className="grad-accent glow-accent flex-1 rounded-xl text-primary hover:bg-accent-deep"
                 disabled={createMarketMutation.isPending}
                 data-testid="button-submit-create"
               >
@@ -297,9 +299,10 @@ export function CreateMarketModal({ open, onOpenChange }: CreateMarketModalProps
                   </>
                 )}
               </Button>
-            </div>
-          </form>
-        </Form>
+             </div>
+           </form>
+         </Form>
+       </Surface>
       </DialogContent>
     </Dialog>
   );

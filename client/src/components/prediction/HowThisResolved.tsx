@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import Surface from "@/components/ds/Surface";
+import SectionTitle from "@/components/ds/SectionTitle";
 import { CheckCircle2, XCircle, AlertTriangle, Bot, ShieldCheck, FileText, Clock } from "lucide-react";
 
 interface EvidenceItem {
@@ -28,9 +29,7 @@ export function HowThisResolved({ marketId }: { marketId: string }) {
 
   if (isLoading) {
     return (
-      <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30 animate-pulse">
-        <CardContent className="py-8" />
-      </Card>
+      <Surface className="animate-pulse py-8" />
     );
   }
 
@@ -42,10 +41,10 @@ export function HowThisResolved({ marketId }: { marketId: string }) {
   const isNo = outcome === "NO";
   const OutcomeIcon = isYes ? CheckCircle2 : isNo ? XCircle : AlertTriangle;
   const outcomeColor = isYes
-    ? "text-emerald-400 bg-emerald-500/15 border-emerald-500/30"
+    ? "text-gain bg-gain/10 border-gain/30"
     : isNo
-      ? "text-red-400 bg-red-500/15 border-red-500/30"
-      : "text-amber-400 bg-amber-500/15 border-amber-500/30";
+      ? "text-loss bg-loss/10 border-loss/30"
+      : "text-warn bg-warn/10 border-warn/30";
 
   const resolverLabel = audit.resolvedBy === "ai"
     ? "AI evidence pipeline"
@@ -59,33 +58,33 @@ export function HowThisResolved({ marketId }: { marketId: string }) {
   const shownEvidence = citedItems.length > 0 ? citedItems : audit.evidence.slice(0, 5);
 
   return (
-    <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-500/30" data-testid="card-how-resolved">
-      <CardHeader>
-        <CardTitle className="text-white flex items-center gap-2">
-          <FileText className="w-5 h-5 text-purple-400" />
+    <Surface className="p-4 sm:p-5" data-testid="card-how-resolved">
+      <div className="mb-4">
+        <SectionTitle className="flex items-center gap-2">
+          <FileText className="h-5 w-5 text-accent-bright" />
           How this resolved
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+        </SectionTitle>
+      </div>
+      <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-3">
           <Badge className={`border ${outcomeColor} flex items-center gap-1.5 px-3 py-1 text-sm`} data-testid="badge-resolution-outcome">
             <OutcomeIcon className="w-4 h-4" />
             {outcome}
           </Badge>
-          <div className="flex items-center gap-1.5 text-sm text-slate-300">
-            <ResolverIcon className="w-4 h-4 text-cyan-400" />
+          <div className="flex items-center gap-1.5 text-sm text-body">
+            <ResolverIcon className="w-4 h-4 text-accent-bright" />
             <span data-testid="text-resolved-by">
               {audit.autoResolved ? "Auto-resolved by " : "Resolved by "}
               {resolverLabel}
             </span>
           </div>
           {typeof audit.confidence === "number" && (
-            <Badge variant="outline" className="text-purple-300 border-purple-500/40" data-testid="badge-resolution-confidence">
+            <Badge variant="outline" className="border-accent-core/40 text-accent-bright" data-testid="badge-resolution-confidence">
               {(audit.confidence * 100).toFixed(0)}% confidence
             </Badge>
           )}
           {audit.createdAt && (
-            <span className="flex items-center gap-1 text-xs text-slate-500">
+            <span className="flex items-center gap-1 text-xs text-muted">
               <Clock className="w-3 h-3" />
               {new Date(audit.createdAt).toLocaleString()}
             </span>
@@ -93,24 +92,24 @@ export function HowThisResolved({ marketId }: { marketId: string }) {
         </div>
 
         {audit.reasoning && (
-          <p className="text-sm text-slate-300 leading-relaxed" data-testid="text-resolution-reasoning">
+          <p className="text-sm leading-relaxed text-body" data-testid="text-resolution-reasoning">
             {audit.reasoning}
           </p>
         )}
 
         {shownEvidence.length > 0 && (
           <div className="space-y-2">
-            <div className="text-xs uppercase tracking-wide text-slate-400 font-medium">
+            <div className="text-xs font-medium uppercase tracking-wide text-secondary">
               {citedItems.length > 0 ? "Cited evidence" : "Gathered evidence"}
             </div>
             {shownEvidence.map((item, idx) => (
               <div
                 key={idx}
-                className="p-3 rounded-lg bg-slate-900/40 border border-purple-500/20"
+                className="rounded-xl border border-ink-edge bg-ink-raised p-3"
                 data-testid={`evidence-item-${idx}`}
               >
-                <div className="text-sm text-slate-200">{item.claim}</div>
-                <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
+                <div className="text-sm text-primary">{item.claim}</div>
+                <div className="mt-1 flex items-center gap-2 text-xs text-muted">
                   <span>{item.source}</span>
                   <span>·</span>
                   <span>fetched {new Date(item.fetchedAt).toLocaleString()}</span>
@@ -119,7 +118,7 @@ export function HowThisResolved({ marketId }: { marketId: string }) {
             ))}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </Surface>
   );
 }

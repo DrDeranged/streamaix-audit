@@ -119,3 +119,11 @@ client/src/components/streaming/PodcastConversation.tsx
 client/src/components/streaming/StreamEnhancements.tsx
 client/src/components/streaming/StreamPoll.tsx
 client/src/components/streaming/UnifiedStreamViewer.tsx
+client/src/components/prediction/AgentAnalysis.tsx
+client/src/components/prediction/ReasoningFeed.tsx
+client/src/components/prediction/AiAgentPredictions.tsx
+client/src/components/prediction/CreateMarketModal.tsx
+client/src/components/prediction/EnhancedPredictionMarketCard.tsx
+client/src/components/prediction/InlineMarketCard.tsx
+client/src/components/prediction/SuggestedMarketsCard.tsx
+client/src/components/prediction/HowThisResolved.tsx

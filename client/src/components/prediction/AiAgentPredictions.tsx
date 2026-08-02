@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Brain, TrendingUp, TrendingDown, Sparkles, Info, Snowflake } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import Surface from "@/components/ds/Surface";
+import SectionTitle from "@/components/ds/SectionTitle";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -43,13 +44,13 @@ export function AiAgentPredictions({ marketId, compact = false }: AiAgentPredict
 
   if (isLoading) {
     return compact ? null : (
-      <Card className="bg-gradient-to-br from-violet-900/20 to-fuchsia-900/10 border-violet-500/30 p-4">
+      <Surface className="p-4">
         <div className="animate-pulse space-y-3">
-          <div className="h-4 bg-violet-500/20 rounded w-1/3" />
-          <div className="h-8 bg-violet-500/20 rounded" />
-          <div className="h-8 bg-violet-500/20 rounded" />
+          <div className="h-4 bg-accent-core/20 rounded-xl w-1/3" />
+          <div className="h-8 bg-accent-core/20 rounded-xl" />
+          <div className="h-8 bg-accent-core/20 rounded-xl" />
         </div>
-      </Card>
+      </Surface>
     );
   }
 
@@ -73,25 +74,25 @@ export function AiAgentPredictions({ marketId, compact = false }: AiAgentPredict
           <TooltipTrigger asChild>
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="flex items-center gap-2 p-2 rounded-lg bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/30 cursor-help"
+              className="flex items-center gap-2 p-2 rounded-xl bg-accent-core/10 border border-accent-core/30 cursor-help"
               data-testid="ai-predictions-compact"
             >
-              <Brain className="w-4 h-4 text-violet-400" />
-              <span className="text-xs font-medium text-violet-300">
+              <Brain className="w-4 h-4 text-accent-bright" />
+              <span className="text-xs font-medium text-accent-bright">
                 {predictions.length} AI Agents Predict:
               </span>
-              <span className={`text-sm font-bold ${consensus === 'YES' ? 'text-green-400' : 'text-red-400'}`}>
+              <span className={`text-sm font-bold ${consensus === 'YES' ? 'text-gain' : 'text-loss'}`}>
                 {consensus} {avgConfidence}%
               </span>
             </motion.div>
           </TooltipTrigger>
-          <TooltipContent className="bg-slate-900 border-violet-500/30 p-4 max-w-sm">
-            <p className="text-sm text-slate-300 mb-2">
+          <TooltipContent className="bg-ink-surface border-accent-core/30 p-4 max-w-sm">
+            <p className="text-sm text-body mb-2">
               {consensusPercentage}% consensus ({yesPredictions.length} YES, {noPredictions.length} NO)
             </p>
             <div className="space-y-1">
               {predictions.slice(0, 3).map(pred => (
-                <div key={pred.id} className="text-xs text-slate-400">
+                <div key={pred.id} className="text-xs text-secondary">
                   {pred.agent.avatar} {pred.agent.name}: {pred.prediction} ({Math.round(pred.confidence * 100)}%)
                 </div>
               ))}
@@ -103,34 +104,34 @@ export function AiAgentPredictions({ marketId, compact = false }: AiAgentPredict
   }
 
   return (
-    <Card className="bg-gradient-to-br from-violet-900/20 to-fuchsia-900/10 border-violet-500/30 overflow-hidden backdrop-blur-sm" data-testid="ai-predictions-full">
+    <Surface className="overflow-hidden" data-testid="ai-predictions-full">
       <div className="p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Brain className="w-5 h-5 text-violet-400" />
-            <h3 className="text-lg font-bold text-white">AI Agent Predictions</h3>
+            <Brain className="w-5 h-5 text-accent-bright" />
+            <SectionTitle as="h3">AI Agent Predictions</SectionTitle>
           </div>
-          <Badge className="bg-violet-500/20 text-violet-300 border-violet-500/30">
+          <Badge className="bg-accent-core/20 text-accent-bright border-accent-core/30">
             {predictions.length} Agents
           </Badge>
         </div>
 
         {/* Consensus Overview */}
-        <div className="flex items-center justify-between p-4 rounded-lg bg-violet-500/10 border border-violet-500/20">
+        <div className="flex items-center justify-between p-4 rounded-xl bg-accent-core/10 border border-accent-core/20">
           <div>
-            <div className="text-sm text-violet-300 mb-1">AI Consensus</div>
+            <div className="text-sm text-accent-bright mb-1">AI Consensus</div>
             <div className="flex items-center gap-2">
-              <span className={`text-2xl font-bold ${consensus === 'YES' ? 'text-green-400' : 'text-red-400'}`}>
+              <span className={`text-2xl font-bold ${consensus === 'YES' ? 'text-gain' : 'text-loss'}`}>
                 {consensus}
               </span>
-              <span className="text-lg text-slate-400">
+              <span className="text-lg text-secondary">
                 ({consensusPercentage}% agreement)
               </span>
             </div>
           </div>
           <div className="text-right">
-            <div className="text-sm text-violet-300 mb-1">Avg. Confidence</div>
-            <div className="text-2xl font-bold text-violet-400">{avgConfidence}%</div>
+            <div className="text-sm text-accent-bright mb-1">Avg. Confidence</div>
+            <div className="tabular text-2xl font-bold text-accent-bright">{avgConfidence}%</div>
           </div>
         </div>
 
@@ -144,16 +145,16 @@ export function AiAgentPredictions({ marketId, compact = false }: AiAgentPredict
               transition={{ delay: index * 0.1 }}
               data-testid={`ai-prediction-${pred.agent.name.toLowerCase()}`}
             >
-              <Card className="bg-slate-900/50 border-slate-700/50 p-4 hover:border-violet-500/30 transition-colors">
+              <Surface variant="raised" className="border border-ink-edge p-4 hover:border-accent-core/30 transition-colors">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{pred.agent.avatar}</span>
                     <div>
-                      <div className="font-semibold text-white flex items-center gap-2">
+                       <div className="font-semibold text-primary flex items-center gap-2">
                         {pred.agent.name}
                         {pred.agent.suspendedUntil && (
                           <Badge
-                            className="bg-amber-500/20 text-amber-400 border-amber-500/30 border text-[10px] px-1.5 py-0"
+                             className="bg-warn/20 text-warn border-warn/30 border text-[10px] px-1.5 py-0 rounded-xl"
                             data-testid={`badge-cooling-off-${pred.agent.id}`}
                           >
                             <Snowflake className="w-3 h-3 mr-1" />
@@ -161,15 +162,15 @@ export function AiAgentPredictions({ marketId, compact = false }: AiAgentPredict
                           </Badge>
                         )}
                       </div>
-                      <div className="text-xs text-slate-400 capitalize">{pred.agent.personality}</div>
+                       <div className="text-xs text-secondary capitalize">{pred.agent.personality}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge 
                       className={
                         pred.prediction === "YES"
-                          ? "bg-green-500/20 text-green-400 border-green-500/30"
-                          : "bg-red-500/20 text-red-400 border-red-500/30"
+                           ? "bg-gain/20 text-gain border-gain/30"
+                           : "bg-loss/20 text-loss border-loss/30"
                       }
                     >
                       {pred.prediction === "YES" ? (
@@ -179,7 +180,7 @@ export function AiAgentPredictions({ marketId, compact = false }: AiAgentPredict
                       )}
                       {pred.prediction}
                     </Badge>
-                    <span className="text-sm font-bold text-violet-400">
+                     <span className="tabular text-sm font-bold text-accent-bright">
                       {Math.round(pred.confidence * 100)}%
                     </span>
                   </div>
@@ -188,14 +189,14 @@ export function AiAgentPredictions({ marketId, compact = false }: AiAgentPredict
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="flex items-start gap-2 text-sm text-slate-400 cursor-help">
-                        <Info className="w-4 h-4 mt-0.5 flex-shrink-0 text-violet-400" />
+                      <div className="flex items-start gap-2 text-sm text-secondary cursor-help">
+                        <Info className="w-4 h-4 mt-0.5 flex-shrink-0 text-accent-bright" />
                         <p className="line-clamp-2">{pred.reasoning}</p>
                       </div>
                     </TooltipTrigger>
-                    <TooltipContent className="bg-slate-900 border-violet-500/30 max-w-md p-4">
-                      <p className="text-sm text-slate-300">{pred.reasoning}</p>
-                      <div className="mt-2 pt-2 border-t border-slate-700 flex items-center justify-between text-xs text-slate-400">
+                     <TooltipContent className="bg-ink-surface border-accent-core/30 max-w-md p-4">
+                       <p className="text-sm text-body">{pred.reasoning}</p>
+                       <div className="mt-2 pt-2 border-t border-ink-divider flex items-center justify-between text-xs text-secondary">
                         <span>Accuracy: {Math.round(pred.agent.accuracyRate * 100)}%</span>
                         <span>{pred.agent.totalPredictions} predictions</span>
                       </div>
@@ -204,29 +205,29 @@ export function AiAgentPredictions({ marketId, compact = false }: AiAgentPredict
                 </TooltipProvider>
 
                 {/* Agent Stats */}
-                <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-700/50">
-                  <div className="flex items-center gap-4 text-xs text-slate-400">
+                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-ink-divider">
+                   <div className="flex items-center gap-4 text-xs text-secondary">
                     <span>
-                      Accuracy: <span className="text-violet-400 font-semibold">{Math.round(pred.agent.accuracyRate * 100)}%</span>
+                       Accuracy: <span className="tabular text-accent-bright font-semibold">{Math.round(pred.agent.accuracyRate * 100)}%</span>
                     </span>
                     <span>
                       {pred.agent.totalPredictions} predictions
                     </span>
                   </div>
                 </div>
-              </Card>
+              </Surface>
             </motion.div>
           ))}
         </div>
 
         {/* Trade Against AI Hint */}
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-gradient-to-r from-violet-500/5 to-fuchsia-500/5 border border-violet-500/20">
-          <Sparkles className="w-4 h-4 text-violet-400" />
-          <p className="text-xs text-slate-400">
+        <div className="flex items-center gap-2 p-3 rounded-xl bg-accent-core/5 border border-accent-core/20">
+          <Sparkles className="w-4 h-4 text-accent-bright" />
+          <p className="text-xs text-secondary">
             Think the AI is wrong? Trade against their predictions and prove your market insight!
           </p>
         </div>
       </div>
-    </Card>
+    </Surface>
   );
 }

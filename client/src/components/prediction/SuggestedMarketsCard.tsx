@@ -1,6 +1,7 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 import { 
   Sparkles, 
   AlertCircle
@@ -44,15 +45,15 @@ export function SuggestedMarketsCard({
 
   if (isLoading) {
     return (
-      <Card className="bg-gradient-to-br from-slate-900/50 to-purple-900/20 border-purple-500/30" data-testid="card-suggested-markets-loading">
-        <CardHeader>
+      <Surface className="overflow-hidden" data-testid="card-suggested-markets-loading">
+        <div className="border-b border-ink-divider px-5 py-4">
           <div className="flex items-center gap-2">
-            <Skeleton className="h-6 w-6 rounded-full" />
+            <Skeleton className="h-6 w-6 rounded-xl bg-ink-raised" />
             <Skeleton className="h-6 w-48" />
           </div>
-          <Skeleton className="h-4 w-full mt-2" />
-        </CardHeader>
-        <CardContent className="space-y-4">
+          <Skeleton className="mt-2 h-4 w-full" />
+        </div>
+        <div className="space-y-4 p-5">
           {[1, 2, 3].map((i) => (
             <div key={i} className="space-y-3">
               <Skeleton className="h-4 w-3/4" />
@@ -60,56 +61,55 @@ export function SuggestedMarketsCard({
               <Skeleton className="h-8 w-full" />
             </div>
           ))}
-        </CardContent>
-      </Card>
+        </div>
+      </Surface>
     );
   }
 
   if (!suggestedMarkets || suggestedMarkets.length === 0) {
     return (
-      <Card className="bg-gradient-to-br from-slate-900/50 to-purple-900/20 border-purple-500/30" data-testid="card-suggested-markets-empty">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Sparkles className="w-5 h-5 text-purple-400" />
+      <Surface className="overflow-hidden" data-testid="card-suggested-markets-empty">
+        <div className="border-b border-ink-divider px-5 py-4">
+          <SectionTitle as="h3" className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-accent-bright" />
             AI-Suggested Markets
-          </CardTitle>
-          <CardDescription>
+          </SectionTitle>
+          <p className="mt-1 text-sm text-secondary">
             Prediction markets generated from this content
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            <AlertCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
+          </p>
+        </div>
+        <div className="p-5">
+          <div className="py-8 text-center text-secondary">
+            <AlertCircle className="mx-auto mb-3 h-12 w-12 text-muted opacity-50" />
             <p className="text-sm">No prediction markets were suggested for this content.</p>
-            <p className="text-xs mt-1">The AI analyzes content to find verifiable predictions.</p>
+            <p className="mt-1 text-xs text-muted">The AI analyzes content to find verifiable predictions.</p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </Surface>
     );
   }
 
   return (
-    <Card className="bg-gradient-to-br from-slate-900/50 to-purple-900/20 border-purple-500/30" data-testid="card-suggested-markets">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
+    <Surface className="overflow-hidden" data-testid="card-suggested-markets">
+      <div className="border-b border-ink-divider px-5 py-4">
+        <div className="flex items-center gap-2">
           <div className="flex items-center gap-2">
             <div className="relative">
-              <Sparkles className="w-5 h-5 text-purple-400 animate-pulse" />
-              <div className="absolute inset-0 bg-purple-400/20 blur-xl rounded-full" />
+              <Sparkles className="h-5 w-5 animate-pulse text-accent-bright" />
             </div>
-            <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+            <SectionTitle as="h3">
               AI-Suggested Markets
-            </span>
+            </SectionTitle>
           </div>
-          <Badge variant="outline" className="ml-auto text-xs bg-purple-500/10 border-purple-500/30">
+          <Badge variant="outline" className="ml-auto rounded-xl border-accent-core/30 bg-accent-core/10 text-xs text-accent-bright">
             {topMarkets.length} {topMarkets.length === 1 ? 'Market' : 'Markets'}
           </Badge>
-        </CardTitle>
-        <CardDescription className="text-sm">
+        </div>
+        <p className="mt-1 text-sm text-secondary">
           Prediction markets generated from "{summaryTitle}"
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
+        </p>
+      </div>
+      <div className="space-y-4 p-5">
         {topMarkets.map((market, index) => (
           <EnhancedPredictionMarketCard
             key={index}
@@ -135,7 +135,7 @@ export function SuggestedMarketsCard({
             showActions={true}
           />
         ))}
-      </CardContent>
-    </Card>
+      </div>
+    </Surface>
   );
 }
