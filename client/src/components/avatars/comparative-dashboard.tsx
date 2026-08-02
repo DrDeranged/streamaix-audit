@@ -200,7 +200,7 @@ export const ComparativeDashboard = memo(function ComparativeDashboard({ entrepr
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {entrepreneurs.map((entrepreneur, idx) => (
-              <div key={entrepreneur.id} className="border rounded-lg p-4" style={{ borderColor: colors[idx % colors.length] + '40' }}>
+              <div key={entrepreneur.id} className="border rounded-xl p-4" style={{ borderColor: colors[idx % colors.length] + '40' }}>
                 <h4 className="font-semibold text-foreground mb-3">{entrepreneur.name}</h4>
                 
                 {/* Best Calls */}
@@ -241,7 +241,7 @@ export const ComparativeDashboard = memo(function ComparativeDashboard({ entrepr
       </Card>
 
       {/* Key Insights */}
-      <Card className="bg-gradient-to-br from-blue-500/5 to-purple-500/5 border-blue-500/20">
+      <Card className="bg-ink-surface border-ink-edge">
         <CardHeader>
           <CardTitle className="text-lg">Comparative Insights</CardTitle>
         </CardHeader>

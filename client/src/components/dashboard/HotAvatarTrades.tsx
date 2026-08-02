@@ -51,7 +51,7 @@ export function HotAvatarTrades({ limit = 5, className = "" }: HotAvatarTradesPr
         <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="animate-pulse">
-              <div className="h-16 bg-muted rounded-lg"></div>
+              <div className="h-16 bg-muted rounded-xl"></div>
             </div>
           ))}
         </div>
@@ -75,7 +75,7 @@ export function HotAvatarTrades({ limit = 5, className = "" }: HotAvatarTradesPr
   }
 
   return (
-    <Card className={`bg-gradient-to-br from-slate-900/90 to-orange-950/30 border border-orange-500/20 backdrop-blur-xl p-4 ${className}`}>
+    <Card className={`bg-ink-surface border border-ink-edge p-4 ${className}`}>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <motion.div
@@ -105,10 +105,10 @@ export function HotAvatarTrades({ limit = 5, className = "" }: HotAvatarTradesPr
               transition={{ delay: index * 0.1 }}
             >
               <Link href={`/avatars/${trade.agentId}`}>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800/80 transition-colors cursor-pointer group">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-ink-raised hover:bg-ink-raised/80 transition-colors cursor-pointer group">
                   <Avatar className="w-10 h-10 border-2 border-cyan-400/30 group-hover:border-cyan-400/60 transition-colors">
                     <AvatarImage src={trade.avatarImageUrl || undefined} alt={trade.agentName} />
-                    <AvatarFallback className="bg-gradient-to-br from-cyan-500/30 to-purple-500/30 text-sm">
+                    <AvatarFallback className="bg-accent-deep/40 text-sm">
                       {trade.agentName.slice(0, 2)}
                     </AvatarFallback>
                   </Avatar>

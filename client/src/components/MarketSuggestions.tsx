@@ -64,7 +64,7 @@ export function MarketSuggestions({ summaryId, onCreateMarket }: MarketSuggestio
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
       crypto: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-      defi: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+      defi: 'bg-accent-deep/40 text-accent-bright border-accent-core/30',
       bounty: 'bg-green-500/20 text-green-400 border-green-500/30',
       realworld: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
       community: 'bg-pink-500/20 text-pink-400 border-pink-500/30'
@@ -111,7 +111,7 @@ export function MarketSuggestions({ summaryId, onCreateMarket }: MarketSuggestio
       </div>
 
       {summaryInsights && (
-        <Alert className="bg-purple-500/10 border-purple-500/30">
+        <Alert className="bg-accent-deep/20 border-accent-core/30">
           <Lightbulb className="h-4 w-4 text-purple-400" />
           <AlertDescription className="text-purple-300">
             {summaryInsights}

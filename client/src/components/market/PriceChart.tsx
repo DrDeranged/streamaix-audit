@@ -43,7 +43,7 @@ export function PriceChart({ marketId, hours = 24 }: PriceChartProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-64 rounded-lg bg-slate-800/30 animate-pulse" />
+          <div className="h-64 rounded-xl bg-ink-raised/50 animate-pulse" />
         </CardContent>
       </Card>
     );

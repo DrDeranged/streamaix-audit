@@ -80,7 +80,7 @@ export function DiagnosticPanel() {
   const clearResults = () => setResponses([]);
 
   return (
-    <Card className="w-full border-purple-500/30 bg-slate-900/40 backdrop-blur-sm">
+    <Card className="w-full border-ink-edge bg-ink-surface">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-purple-400">
           <Activity className="h-5 w-5" />
@@ -134,7 +134,7 @@ export function DiagnosticPanel() {
             onClick={() => testEndpoint('/api/analyze-content', 'POST', { url: 'https://www.youtube.com/watch?v=test' })}
             disabled={testing === '/api/analyze-content'}
             variant="outline"
-            className="text-xs col-span-2 bg-purple-500/20"
+            className="text-xs col-span-2 bg-accent-deep/40"
             data-testid="button-test-analyze-content"
           >
             {testing === '/api/analyze-content' ? 'Testing...' : 'Test /api/analyze-content (Current Issue)'}
@@ -188,7 +188,7 @@ export function DiagnosticPanel() {
               <CardContent className="pt-2 space-y-2">
                 {/* Server Version Headers */}
                 {resp.headers['x-server-version'] && (
-                  <div className="bg-purple-500/10 p-2 rounded text-xs space-y-1">
+                  <div className="bg-ink-raised p-2 rounded-xl text-xs space-y-1">
                     <div className="flex items-center gap-2">
                       <Server className="h-3 w-3 text-purple-400" />
                       <span className="text-purple-400 font-semibold">Server Info:</span>

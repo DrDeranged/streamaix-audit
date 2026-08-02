@@ -74,7 +74,7 @@ function Router() {
       </Route>
       
       <Route path="/create-summary">
-        <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center"><div className="text-gray-900 dark:text-white">Loading...</div></div>}>
+        <Suspense fallback={<div className="min-h-screen bg-ink-page flex items-center justify-center"><div className="text-primary">Loading...</div></div>}>
           <CreateSummary />
         </Suspense>
       </Route>
@@ -322,14 +322,14 @@ function Router() {
       </Route>
       
       <Route path="/summary/:id">
-        <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center"><div className="text-gray-900 dark:text-white">Loading...</div></div>}>
+        <Suspense fallback={<div className="min-h-screen bg-ink-page flex items-center justify-center"><div className="text-primary">Loading...</div></div>}>
           <SummaryView />
         </Suspense>
       </Route>
       
       <Route path="/results/:id">
         {(params) => (
-          <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center"><div className="text-gray-900 dark:text-white">Loading...</div></div>}>
+          <Suspense fallback={<div className="min-h-screen bg-ink-page flex items-center justify-center"><div className="text-primary">Loading...</div></div>}>
             <ProcessingResults params={params} />
           </Suspense>
         )}
@@ -337,7 +337,7 @@ function Router() {
       
       <Route path="/processing-results/:id">
         {(params) => (
-          <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center"><div className="text-gray-900 dark:text-white">Loading...</div></div>}>
+          <Suspense fallback={<div className="min-h-screen bg-ink-page flex items-center justify-center"><div className="text-primary">Loading...</div></div>}>
             <ProcessingResults params={params} />
           </Suspense>
         )}

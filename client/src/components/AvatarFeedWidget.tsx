@@ -64,7 +64,7 @@ export default function AvatarFeedWidget() {
                       className="w-8 h-8 rounded-full object-cover shrink-0 ring-1 ring-cyan-500/30"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 shrink-0" />
+                    <div className="w-8 h-8 rounded-full bg-accent-core shrink-0" />
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 text-xs">

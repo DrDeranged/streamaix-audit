@@ -287,7 +287,7 @@ export default function MultiAssetChart({
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length && viewMode === 'overlay') {
       return (
-        <div className="bg-background/95 border border-border rounded-lg p-4 shadow-lg backdrop-blur-sm">
+        <div className="bg-background/95 border border-border rounded-xl p-4 shadow-lg backdrop-blur-sm">
           <div className="text-sm font-medium mb-2">
             {label}
           </div>
@@ -311,7 +311,7 @@ export default function MultiAssetChart({
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-background/95 border border-border rounded-lg p-3 shadow-lg backdrop-blur-sm">
+        <div className="bg-background/95 border border-border rounded-xl p-3 shadow-lg backdrop-blur-sm">
           <div className="text-sm font-medium">{data.symbol}</div>
           <div className="text-sm">
             Correlation: <span className="font-mono">{data.correlation.toFixed(3)}</span>

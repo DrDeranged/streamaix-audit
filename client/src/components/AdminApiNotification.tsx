@@ -36,7 +36,7 @@ export function AdminApiNotification() {
   const totalMonthlyCost = highPriorityUpgrades.reduce((sum, u) => sum + u.monthlyPrice, 0);
 
   return (
-    <Alert className="mb-6 bg-gradient-to-r from-amber-900/20 to-orange-900/20 border-amber-500/30">
+    <Alert className="mb-6 bg-warn/10 border-warn/30">
       <AlertTriangle className="h-5 w-5 text-amber-500" />
       <AlertTitle className="text-amber-200 font-semibold flex items-center justify-between">
         <span>API Upgrade Recommended</span>
@@ -60,7 +60,7 @@ export function AdminApiNotification() {
           {highPriorityUpgrades.map((upgrade) => (
             <div 
               key={upgrade.service}
-              className="bg-slate-900/50 rounded-lg p-3 border border-amber-500/20"
+              className="bg-ink-surface rounded-xl p-3 border border-warn/20"
             >
               <div className="flex items-start justify-between mb-2">
                 <div>

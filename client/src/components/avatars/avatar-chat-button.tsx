@@ -55,12 +55,12 @@ export function AvatarChatButton({ avatar, size = "sm", className = "", variant 
     return (
       <>
         <div className="relative group">
-          <div className="absolute -inset-[1px] rounded-lg bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-500 opacity-0 group-hover:opacity-70 blur-[1px] transition-opacity duration-300 animate-pulse" />
+          <div className="absolute -inset-[1px] rounded-xl bg-accent-core opacity-0 group-hover:opacity-40 blur-[1px] transition-opacity duration-300 animate-pulse" />
           <Button
             onClick={handleClick}
             size={size}
             variant="outline"
-            className="relative px-3 text-xs font-mono bg-gradient-to-r from-purple-500/20 to-cyan-500/20 dark:from-purple-600/30 dark:to-cyan-600/30 backdrop-blur-xl border-0 text-purple-600 dark:text-white hover:from-purple-500/30 hover:to-cyan-500/30 dark:hover:from-purple-600/40 dark:hover:to-cyan-600/40 transition-all duration-300"
+            className="relative px-3 text-xs font-mono bg-accent-deep/40 border-0 text-accent-bright hover:bg-accent-deep/60 transition-all duration-300"
             data-testid={`button-chat-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}
           >
             <Sparkles className="h-3.5 w-3.5 text-purple-500 dark:text-purple-300 mr-1.5" />
@@ -82,7 +82,7 @@ export function AvatarChatButton({ avatar, size = "sm", className = "", variant 
       <Button
         onClick={handleClick}
         size={size}
-        className={`bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white ${className}`}
+        className={`bg-accent-core hover:bg-accent-bright text-white ${className}`}
         data-testid={`button-chat-${avatar.name.toLowerCase().replace(/\s+/g, '-')}`}
       >
         <MessageCircle className="h-4 w-4 mr-2" />

@@ -231,7 +231,7 @@ export default function TradingChart({
       const data = payload[0].payload;
       
       return (
-        <div className="bg-background/95 border border-border rounded-lg p-4 shadow-lg backdrop-blur-sm">
+        <div className="bg-background/95 border border-border rounded-xl p-4 shadow-lg backdrop-blur-sm">
           <div className="text-sm font-medium mb-2">
             {format(new Date(data.timestamp), 'MMM dd, yyyy HH:mm')}
           </div>

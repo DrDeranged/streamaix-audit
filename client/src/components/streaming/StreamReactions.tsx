@@ -92,7 +92,7 @@ export function StreamReactions({ streamId, onReact, incomingReactions }: Stream
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => setShowPicker(prev => !prev)}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-slate-800/80 backdrop-blur-sm border border-purple-500/30 text-white text-sm"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-ink-raised/90 backdrop-blur-sm border border-ink-edge text-primary text-sm"
           data-testid="button-show-reactions"
         >
           <span>🔥</span>
@@ -105,7 +105,7 @@ export function StreamReactions({ streamId, onReact, incomingReactions }: Stream
               initial={{ opacity: 0, y: 10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              className="absolute bottom-full mb-2 left-0 bg-slate-900/95 backdrop-blur-xl rounded-2xl border border-purple-500/30 p-2 shadow-xl"
+              className="absolute bottom-full mb-2 left-0 bg-ink-surface backdrop-blur-xl rounded-2xl border border-ink-edge p-2 shadow-xl"
             >
               <div className="flex flex-wrap gap-1 max-w-[200px]">
                 {REACTION_EMOJIS.map((emoji) => (
@@ -114,7 +114,7 @@ export function StreamReactions({ streamId, onReact, incomingReactions }: Stream
                     whileHover={{ scale: 1.2 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => handleReact(emoji)}
-                    className="p-2 text-2xl hover:bg-purple-500/20 rounded-lg transition-colors"
+                    className="p-2 text-2xl hover:bg-ink-raised rounded-xl transition-colors"
                     data-testid={`reaction-${emoji}`}
                   >
                     {emoji}
@@ -144,7 +144,7 @@ export function QuickReactButtons({ onReact }: QuickReactButtonsProps) {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={() => onReact(emoji)}
-          className="p-2 text-xl bg-slate-800/60 hover:bg-purple-500/20 rounded-xl border border-purple-500/20 transition-colors"
+          className="p-2 text-xl bg-ink-raised hover:bg-ink-surface rounded-xl border border-ink-edge transition-colors"
           data-testid={`quick-react-${emoji}`}
         >
           {emoji}

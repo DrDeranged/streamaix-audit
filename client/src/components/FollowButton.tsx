@@ -151,7 +151,7 @@ export function FollowUserButton({
           "tap-target gap-2 transition-all",
           isFollowing 
             ? "border-emerald-500/50 text-emerald-400 hover:border-red-500/50 hover:text-red-400 hover:bg-red-500/10" 
-            : "bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white",
+            : "bg-accent-core hover:bg-accent-bright text-white",
           className
         )}
         data-testid={`follow-user-${userId}`}
@@ -258,7 +258,7 @@ export function FollowCategoryButton({
           "tap-target px-3 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1.5",
           isFollowing 
             ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/40" 
-            : "bg-purple-500/20 text-purple-300 border border-purple-500/40 hover:bg-purple-500/30",
+            : "bg-accent-deep/40 text-accent-bright border border-accent-core/40 hover:bg-accent-deep/60",
           className
         )}
         whileHover={{ scale: 1.02 }}
@@ -295,7 +295,7 @@ export function FollowCategoryButton({
           "tap-target gap-2 transition-all",
           isFollowing 
             ? "border-emerald-500/50 text-emerald-400 hover:border-red-500/50 hover:text-red-400 hover:bg-red-500/10" 
-            : "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white",
+            : "bg-accent-core hover:bg-accent-bright text-white",
           className
         )}
         data-testid={`follow-category-${category}`}

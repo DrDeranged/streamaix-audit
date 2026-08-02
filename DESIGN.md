@@ -93,6 +93,6 @@ The following must not appear in migrated files:
 
 ## Enforcement
 
-`npm run design:lint` (`scripts/design-lint.sh`) greps `client/src` for the
-banned classes and fails on violations in **migrated** files — the list in
-`scripts/design-migrated.txt`. Every migrated file must be added to that list.
+`npm run design:lint` (`scripts/design-lint.sh`) greps **all of `client/src`**
+for the banned classes and fails on any violation. Enforcement is global —
+there is no allowlist; every file must comply.

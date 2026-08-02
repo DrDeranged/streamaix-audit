@@ -257,7 +257,7 @@ export const SlidingPageContainer = forwardRef<SlidingPageContainerHandle, Slidi
                   <div
                     className={`h-2 rounded-full transition-all duration-300
                       ${index === currentSection 
-                        ? "bg-purple-500 w-6 shadow-lg shadow-purple-500/50" 
+                        ? "bg-accent-core w-6 shadow-lg" 
                         : "bg-white/30 hover:bg-white/60 w-2"}`}
                   />
                 </button>

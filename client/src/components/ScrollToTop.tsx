@@ -37,8 +37,8 @@ export function ScrollToTop() {
           transition={{ duration: 0.2 }}
           onClick={scrollToTop}
           className="fixed bottom-6 right-6 z-50 p-3 rounded-full shadow-lg transition-all duration-300 
-                     bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500
-                     hover:from-purple-600 hover:via-fuchsia-600 hover:to-cyan-600
+                     bg-accent-core
+                     hover:bg-accent-bright
                      hover:shadow-xl hover:shadow-purple-500/25
                      active:scale-95
                      md:bottom-8 md:right-8 md:p-4"
@@ -48,7 +48,7 @@ export function ScrollToTop() {
           <ArrowUp className="w-5 h-5 text-white md:w-6 md:h-6" />
           
           {/* Glow effect */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-500/50 via-fuchsia-500/50 to-cyan-500/50 blur-lg opacity-0 hover:opacity-60 transition-opacity duration-300 -z-10" />
+          <div className="absolute inset-0 rounded-full bg-accent-core/50 blur-lg opacity-0 hover:opacity-60 transition-opacity duration-300 -z-10" />
         </motion.button>
       )}
     </AnimatePresence>

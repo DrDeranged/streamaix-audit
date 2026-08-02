@@ -31,7 +31,7 @@ export function ApiStatusIndicator() {
       case "down":
         return "bg-red-500/10 text-red-400 border-red-500/30";
       default:
-        return "bg-slate-500/10 text-slate-400 border-slate-500/30";
+        return "bg-ink-raised text-muted border-ink-edge";
     }
   };
 
@@ -72,7 +72,7 @@ export function ApiStatusIndicator() {
           API Status
         </Badge>
       </TooltipTrigger>
-      <TooltipContent className="bg-slate-900 border-slate-700 max-w-xs">
+      <TooltipContent className="bg-ink-surface border-ink-edge max-w-xs">
         <div className="space-y-2">
           <p className="text-xs font-semibold text-slate-300 mb-2">API Services</p>
           {statuses.map((api) => (

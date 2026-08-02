@@ -86,8 +86,8 @@ export function FollowButton({
   };
 
   const baseClassName = isFollowing 
-    ? "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white"
-    : "bg-gradient-to-r from-cyan-500 via-emerald-500 to-purple-500 hover:from-cyan-600 hover:via-emerald-600 hover:to-purple-600 text-white";
+    ? "bg-gain/20 text-gain border border-gain/40 hover:bg-gain/30"
+    : "bg-accent-core hover:bg-accent-bright text-white";
 
   return (
     <Button
