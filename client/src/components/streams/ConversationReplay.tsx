@@ -1,8 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 import { 
   Bot, 
   Mic, 
@@ -73,12 +75,12 @@ export function ConversationReplay({
     return (
       <div className={cn("flex flex-col h-full p-4 space-y-3", className)}>
         <div className="flex items-center gap-2 mb-2">
-          <Skeleton className="h-4 w-4 rounded-full" />
+          <Skeleton className="h-4 w-4 rounded-xl" />
           <Skeleton className="h-4 w-32" />
         </div>
         {[1, 2, 3, 4, 5].map((i) => (
           <div key={i} className="flex items-start gap-2">
-            <Skeleton className="h-8 w-8 rounded-full" />
+            <Skeleton className="h-8 w-8 rounded-xl" />
             <div className="space-y-1 flex-1">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-12 w-full" />
@@ -95,9 +97,9 @@ export function ConversationReplay({
         "flex flex-col items-center justify-center h-full p-6 text-center",
         className
       )}>
-        <History className="w-12 h-12 text-slate-500 mb-4" />
-        <h3 className="text-lg font-semibold text-white mb-2">No Conversation History</h3>
-        <p className="text-sm text-slate-400">
+        <History className="w-12 h-12 text-muted mb-4" />
+        <SectionTitle as="h3" className="mb-2">No Conversation History</SectionTitle>
+        <p className="text-sm text-secondary">
           {error ? 'Failed to load conversation history' : 'This stream has no recorded conversations yet'}
         </p>
       </div>
@@ -108,26 +110,26 @@ export function ConversationReplay({
   const avatarMessages = messages.filter(m => m.speakerType === 'avatar').length;
 
   return (
-    <div className={cn(
-      "flex flex-col h-full bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-xl overflow-hidden",
+    <Surface className={cn(
+      "flex flex-col h-full overflow-hidden",
       className
     )}>
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/40 bg-slate-800/50">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-ink-divider bg-ink-raised">
         <div className="flex items-center gap-2">
-          <History className="w-4 h-4 text-cyan-400" />
-          <span className="text-sm font-medium text-white">Conversation Replay</span>
+          <History className="w-4 h-4 text-accent-bright" />
+          <SectionTitle as="h3" className="text-sm font-medium">Conversation Replay</SectionTitle>
         </div>
         
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-xs border-slate-600 text-slate-300">
+          <Badge variant="outline" className="text-xs border-ink-edge text-secondary">
             <MessageSquare className="w-3 h-3 mr-1" />
             {messages.length}
           </Badge>
-          <Badge variant="outline" className="text-xs border-slate-600 text-slate-300">
+          <Badge variant="outline" className="text-xs border-ink-edge text-secondary">
             <Users className="w-3 h-3 mr-1" />
             {uniqueSpeakers}
           </Badge>
-          <Badge variant="outline" className="text-xs border-cyan-500/30 text-cyan-300">
+          <Badge variant="outline" className="text-xs border-accent-core/30 text-accent-bright">
             <Bot className="w-3 h-3 mr-1" />
             {avatarMessages}
           </Badge>
@@ -146,7 +148,7 @@ export function ConversationReplay({
           ))}
         </div>
       </ScrollArea>
-    </div>
+    </Surface>
   );
 }
 
@@ -169,7 +171,7 @@ function ReplayMessageBubble({
     <div className="space-y-1">
       {showTimestamp && (
         <div className="flex items-center justify-center my-2">
-          <div className="flex items-center gap-1 text-xs text-slate-500 bg-slate-800/50 px-2 py-0.5 rounded-full">
+          <div className="flex items-center gap-1 text-xs text-muted bg-ink-raised px-2 py-0.5 rounded-xl">
             <Clock className="w-3 h-3" />
             {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
           </div>
@@ -178,19 +180,19 @@ function ReplayMessageBubble({
       
       <div className={cn(
         "flex items-start gap-2",
-        isAvatar && "bg-gradient-to-r from-cyan-500/10 to-purple-500/10 -mx-3 px-3 py-2 rounded-lg"
+        isAvatar && "bg-accent-core/10 -mx-3 px-3 py-2 rounded-xl"
       )}>
         <div className="flex-shrink-0 relative">
-          <Avatar className="h-8 w-8 border border-slate-600">
+          <Avatar className="h-8 w-8 border border-ink-edge">
             <AvatarFallback className={cn(
               "text-xs",
-              isAvatar ? "bg-gradient-to-br from-cyan-600 to-purple-600 text-white" : "bg-slate-700 text-white"
+              isAvatar ? "bg-accent-deep text-primary" : "bg-ink-raised text-primary"
             )}>
               {(message.speakerName || 'U').charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           {isAvatar && (
-            <Bot className="absolute -bottom-0.5 -right-0.5 h-3 w-3 text-cyan-400 bg-slate-900 rounded-full" />
+            <Bot className="absolute -bottom-0.5 -right-0.5 h-3 w-3 text-accent-bright bg-ink-surface rounded-xl" />
           )}
         </div>
         
@@ -198,18 +200,18 @@ function ReplayMessageBubble({
           <div className="flex items-center gap-2">
             <span className={cn(
               "text-sm font-medium",
-              isAvatar ? "text-cyan-300" : "text-white"
+              isAvatar ? "text-accent-bright" : "text-primary"
             )}>
               {message.speakerName || 'Unknown'}
             </span>
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-muted">
               {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
             {message.sourceType === 'microphone_transcription' && (
-              <Mic className="h-3 w-3 text-slate-500" />
+              <Mic className="h-3 w-3 text-muted" />
             )}
           </div>
-          <p className="text-sm text-slate-300 mt-0.5 whitespace-pre-wrap">
+          <p className="text-sm text-body mt-0.5 whitespace-pre-wrap">
             {message.textContent || ''}
           </p>
           {message.audioUrl && (

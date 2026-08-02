@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import Surface from '@/components/ds/Surface';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { MessageCircle, Sparkles, X } from 'lucide-react';
+import { MessageCircle, Sparkles } from 'lucide-react';
 
 interface PostCreationModalProps {
   isOpen: boolean;
@@ -80,20 +81,21 @@ export function PostCreationModal({ isOpen, onClose }: PostCreationModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-purple-500/30 text-white max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-2xl">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 border border-purple-500/30">
-              <MessageCircle className="w-5 h-5 text-fuchsia-400" />
-            </div>
-            Create a Post
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-2xl rounded-2xl border border-ink-edge bg-ink-surface p-0 text-primary shadow-2xl">
+        <Surface className="rounded-2xl border-0 p-6 sm:p-7">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-display text-2xl text-primary">
+              <div className="rounded-xl border border-accent-core/30 bg-accent-core/10 p-2">
+                <MessageCircle className="h-5 w-5 text-accent-bright" />
+              </div>
+              Create a Post
+            </DialogTitle>
+          </DialogHeader>
 
-        <div className="space-y-4 mt-4">
+        <div className="mt-4 space-y-4">
           {/* Title */}
           <div>
-            <Label htmlFor="post-title" className="text-gray-300 mb-2 block">
+            <Label htmlFor="post-title" className="mb-2 block text-secondary">
               Title
             </Label>
             <Input
@@ -101,18 +103,18 @@ export function PostCreationModal({ isOpen, onClose }: PostCreationModalProps) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="What's on your mind?"
-              className="bg-white/5 border-purple-500/30 focus:border-fuchsia-500/50 text-white placeholder:text-gray-500"
+              className="rounded-xl border-ink-edge bg-ink-raised text-primary placeholder:text-muted focus:border-accent-core focus:ring-accent-core/20"
               maxLength={200}
               data-testid="input-post-title"
             />
-            <div className="text-xs text-gray-500 mt-1 text-right">
+            <div className="mt-1 text-right text-xs text-muted">
               {title.length}/200
             </div>
           </div>
 
           {/* Content */}
           <div>
-            <Label htmlFor="post-content" className="text-gray-300 mb-2 block">
+            <Label htmlFor="post-content" className="mb-2 block text-secondary">
               Content
             </Label>
             <Textarea
@@ -120,26 +122,26 @@ export function PostCreationModal({ isOpen, onClose }: PostCreationModalProps) {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="Share your thoughts, analysis, or insights..."
-              className="bg-white/5 border-purple-500/30 focus:border-fuchsia-500/50 text-white placeholder:text-gray-500 min-h-[200px] resize-none"
+              className="min-h-[200px] resize-none rounded-xl border-ink-edge bg-ink-raised text-primary placeholder:text-muted focus:border-accent-core focus:ring-accent-core/20"
               maxLength={5000}
               data-testid="input-post-content"
             />
-            <div className="text-xs text-gray-500 mt-1 text-right">
+            <div className="mt-1 text-right text-xs text-muted">
               {content.length}/5000
             </div>
           </div>
 
           {/* Tags */}
           <div>
-            <Label htmlFor="post-tags" className="text-gray-300 mb-2 block">
-              Tags <span className="text-gray-500 text-xs">(optional, comma-separated)</span>
+            <Label htmlFor="post-tags" className="mb-2 block text-secondary">
+              Tags <span className="text-xs text-muted">(optional, comma-separated)</span>
             </Label>
             <Input
               id="post-tags"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
               placeholder="DeFi, Layer2, NFT"
-              className="bg-white/5 border-purple-500/30 focus:border-fuchsia-500/50 text-white placeholder:text-gray-500"
+              className="rounded-xl border-ink-edge bg-ink-raised text-primary placeholder:text-muted focus:border-accent-core focus:ring-accent-core/20"
               data-testid="input-post-tags"
             />
           </div>
@@ -153,7 +155,7 @@ export function PostCreationModal({ isOpen, onClose }: PostCreationModalProps) {
                 return (
                   <span
                     key={index}
-                    className="px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/30 text-sm text-purple-300"
+                    className="rounded-xl border border-accent-core/30 bg-accent-core/10 px-3 py-1 text-sm text-accent-bright"
                   >
                     #{trimmedTag}
                   </span>
@@ -163,11 +165,11 @@ export function PostCreationModal({ isOpen, onClose }: PostCreationModalProps) {
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 border-t border-ink-divider pt-4">
             <Button
               onClick={onClose}
               variant="outline"
-              className="flex-1 border-purple-500/30 hover:border-fuchsia-500/50 text-gray-300"
+              className="flex-1 rounded-xl border-ink-edge bg-ink-surface text-secondary hover:bg-ink-raised hover:text-primary"
               data-testid="button-cancel-post"
             >
               Cancel
@@ -175,7 +177,7 @@ export function PostCreationModal({ isOpen, onClose }: PostCreationModalProps) {
             <Button
               onClick={handleSubmit}
               disabled={createPostMutation.isPending || !title.trim() || !content.trim()}
-              className="flex-1 bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 disabled:opacity-50"
+              className="grad-accent glow-accent flex-1 rounded-xl text-primary hover:bg-accent-deep disabled:opacity-50"
               data-testid="button-submit-post"
             >
               {createPostMutation.isPending ? (
@@ -192,6 +194,7 @@ export function PostCreationModal({ isOpen, onClose }: PostCreationModalProps) {
             </Button>
           </div>
         </div>
+        </Surface>
       </DialogContent>
     </Dialog>
   );

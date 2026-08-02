@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { X, Download, Smartphone, Share, Plus, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 import { 
   showInstallPrompt, 
   canInstallPWA, 
@@ -96,14 +98,14 @@ export function PWAInstallPrompt({ onDismiss }: PWAInstallPromptProps) {
           className="fixed bottom-4 left-4 right-4 z-50 md:left-auto md:right-4 md:max-w-sm"
           data-testid="pwa-install-prompt"
         >
-          <div className="relative overflow-hidden rounded-2xl border border-violet-500/30 bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 p-5 shadow-2xl backdrop-blur-xl">
-            <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 via-cyan-500/5 to-violet-500/5" />
-            <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-violet-500/10 blur-3xl" />
-            <div className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-cyan-500/10 blur-3xl" />
+           <Surface className="relative overflow-hidden rounded-2xl border border-ink-edge bg-ink-surface p-5 shadow-2xl backdrop-blur-xl">
+             <div className="pointer-events-none absolute inset-0 bg-accent-core/5" />
+             <div className="pointer-events-none absolute -top-20 -right-20 h-40 w-40 rounded-full bg-accent-core/10 blur-3xl" />
+             <div className="pointer-events-none absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-accent-bright/5 blur-3xl" />
             
             <button
               onClick={handleDismiss}
-              className="absolute right-3 top-3 rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-700/50 hover:text-white"
+               className="absolute right-3 top-3 rounded-xl p-1.5 text-secondary transition-colors hover:bg-ink-raised hover:text-primary"
               aria-label="Dismiss"
               data-testid="pwa-dismiss-button"
             >
@@ -112,18 +114,18 @@ export function PWAInstallPrompt({ onDismiss }: PWAInstallPromptProps) {
 
             <div className="relative">
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-cyan-500 shadow-lg shadow-violet-500/25">
-                  <Smartphone className="h-6 w-6 text-white" />
+                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-core/15 shadow-lg shadow-accent-core/20">
+                   <Smartphone className="h-6 w-6 text-accent-bright" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white">Install StreamAiX</h3>
-                  <p className="text-sm text-slate-400">
+                   <SectionTitle as="h3" className="text-base font-semibold">Install StreamAiX</SectionTitle>
+                   <p className="text-sm text-secondary">
                     {deviceType === 'ios' ? 'Add to Home Screen' : 'Get the app experience'}
                   </p>
                 </div>
               </div>
 
-              <p className="mb-4 text-sm text-slate-300">
+               <p className="mb-4 text-sm text-body">
                 Install StreamAiX on your {deviceType === 'ios' ? 'iPhone' : deviceType === 'android' ? 'Android' : 'device'} for 
                 instant access to prediction markets, AI insights, and push notifications.
               </p>
@@ -132,7 +134,7 @@ export function PWAInstallPrompt({ onDismiss }: PWAInstallPromptProps) {
                 {['Offline Access', 'Push Alerts', 'Fast Launch'].map((feature) => (
                   <span
                     key={feature}
-                    className="rounded-full bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-300"
+                     className="rounded-xl border border-accent-core/20 bg-accent-core/10 px-3 py-1 text-xs font-medium text-accent-bright"
                   >
                     {feature}
                   </span>
@@ -143,7 +145,7 @@ export function PWAInstallPrompt({ onDismiss }: PWAInstallPromptProps) {
                 <div className="flex gap-2">
                   <Button
                     onClick={handleInstall}
-                    className="flex-1 bg-gradient-to-r from-violet-600 to-cyan-600 text-white hover:from-violet-500 hover:to-cyan-500"
+                     className="grad-accent glow-accent flex-1 text-primary hover:bg-accent-deep"
                     data-testid="pwa-install-button"
                   >
                     <Download className="mr-2 h-4 w-4" />
@@ -152,17 +154,17 @@ export function PWAInstallPrompt({ onDismiss }: PWAInstallPromptProps) {
                   <Button
                     variant="outline"
                     onClick={handleDismiss}
-                    className="border-slate-600 text-slate-300 hover:bg-slate-700/50"
+                     className="border-ink-edge text-secondary hover:bg-ink-raised hover:text-primary"
                     data-testid="pwa-later-button"
                   >
                     Later
                   </Button>
-                </div>
+                 </div>
               ) : (
                 <IOSInstallInstructions onClose={() => setShowIOSInstructions(false)} />
               )}
             </div>
-          </div>
+           </Surface>
         </motion.div>
       )}
     </AnimatePresence>
@@ -176,32 +178,32 @@ function IOSInstallInstructions({ onClose }: { onClose: () => void }) {
       animate={{ opacity: 1, height: 'auto' }}
       className="space-y-3"
     >
-      <div className="rounded-lg bg-slate-800/50 p-3">
-        <h4 className="mb-2 text-sm font-medium text-white">To install on iOS:</h4>
-        <ol className="space-y-2 text-sm text-slate-300">
+       <Surface variant="raised" className="p-3">
+         <SectionTitle as="h3" className="mb-2 text-sm font-medium">To install on iOS:</SectionTitle>
+         <ol className="space-y-2 text-sm text-body">
           <li className="flex items-start gap-2">
-            <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-violet-500/20 text-xs font-medium text-violet-300">1</span>
+             <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-xl bg-accent-core/20 text-xs font-medium text-accent-bright">1</span>
             <span>
-              Tap the <Share className="inline h-4 w-4 text-cyan-400" /> Share button in Safari
+               Tap the <Share className="inline h-4 w-4 text-accent-bright" /> Share button in Safari
             </span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-violet-500/20 text-xs font-medium text-violet-300">2</span>
+             <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-xl bg-accent-core/20 text-xs font-medium text-accent-bright">2</span>
             <span>
-              Scroll down and tap <Plus className="inline h-4 w-4 text-cyan-400" /> "Add to Home Screen"
+               Scroll down and tap <Plus className="inline h-4 w-4 text-accent-bright" /> "Add to Home Screen"
             </span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-violet-500/20 text-xs font-medium text-violet-300">3</span>
+             <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-xl bg-accent-core/20 text-xs font-medium text-accent-bright">3</span>
             <span>Tap "Add" to install StreamAiX</span>
           </li>
         </ol>
-      </div>
+       </Surface>
       
       <Button
         variant="outline"
         onClick={onClose}
-        className="w-full border-slate-600 text-slate-300 hover:bg-slate-700/50"
+         className="w-full border-ink-edge text-secondary hover:bg-ink-raised hover:text-primary"
       >
         <ChevronDown className="mr-2 h-4 w-4" />
         Got it
@@ -234,22 +236,22 @@ export function PWAUpdatePrompt() {
       animate={{ opacity: 1, y: 0 }}
       className="fixed left-4 right-4 top-4 z-50 md:left-auto md:right-4 md:max-w-sm"
     >
-      <div className="flex items-center gap-3 rounded-xl border border-cyan-500/30 bg-slate-900/95 p-4 shadow-xl backdrop-blur-xl">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/20">
-          <Download className="h-5 w-5 text-cyan-400" />
+       <Surface className="flex items-center gap-3 rounded-xl p-4 shadow-xl backdrop-blur-xl">
+         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-core/15">
+           <Download className="h-5 w-5 text-accent-bright" />
         </div>
         <div className="flex-1">
-          <p className="text-sm font-medium text-white">Update Available</p>
-          <p className="text-xs text-slate-400">A new version is ready</p>
+           <p className="text-sm font-medium text-primary">Update Available</p>
+           <p className="text-xs text-secondary">A new version is ready</p>
         </div>
         <Button
           size="sm"
           onClick={handleUpdate}
-          className="bg-cyan-600 text-white hover:bg-cyan-500"
+           className="grad-accent glow-accent text-primary hover:bg-accent-deep"
         >
           Update
         </Button>
-      </div>
+       </Surface>
     </motion.div>
   );
 }

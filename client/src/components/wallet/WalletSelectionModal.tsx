@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 import { useWeb3 } from '@/hooks/useWeb3';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, ExternalLink, Sparkles, Shield, Zap } from 'lucide-react';
@@ -44,8 +46,8 @@ const MetaMaskIcon = () => (
 );
 
 const CoinbaseIcon = () => (
-  <div className="w-10 h-10 rounded-full bg-[#0052FF] flex items-center justify-center">
-    <svg viewBox="0 0 24 24" className="w-6 h-6 text-white" fill="currentColor">
+  <div className="w-10 h-10 rounded-xl bg-accent-core flex items-center justify-center">
+    <svg viewBox="0 0 24 24" className="w-6 h-6 text-primary" fill="currentColor">
       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
       <circle cx="12" cy="12" r="4"/>
     </svg>
@@ -53,16 +55,16 @@ const CoinbaseIcon = () => (
 );
 
 const WalletConnectIcon = () => (
-  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#3B99FC] to-[#2B6CB0] flex items-center justify-center">
-    <svg viewBox="0 0 24 24" className="w-6 h-6 text-white" fill="currentColor">
+  <div className="w-10 h-10 rounded-xl bg-accent-deep flex items-center justify-center">
+    <svg viewBox="0 0 24 24" className="w-6 h-6 text-primary" fill="currentColor">
       <path d="M6.5 8.5c2.7-2.7 7.1-2.7 9.8 0l.3.3c.1.1.1.3 0 .5l-1.1 1.1c-.1.1-.2.1-.3 0l-.4-.4c-1.9-1.9-5-1.9-6.9 0l-.4.4c-.1.1-.2.1-.3 0L6.1 9.3c-.1-.1-.1-.3 0-.5l.4-.3zm12.1 2.3l1 1c.1.1.1.3 0 .5l-4.5 4.5c-.1.1-.3.1-.5 0l-3.2-3.2c0-.1-.1-.1-.2 0l-3.2 3.2c-.1.1-.3.1-.5 0L3 12.3c-.1-.1-.1-.3 0-.5l1-1c.1-.1.3-.1.5 0l3.2 3.2c.1 0 .1.1.2 0l3.2-3.2c.1-.1.3-.1.5 0l3.2 3.2c.1 0 .1.1.2 0l3.2-3.2c.1-.1.3-.1.5 0z"/>
     </svg>
   </div>
 );
 
 const BrowserWalletIcon = () => (
-  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center">
-    <svg viewBox="0 0 24 24" className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2">
+  <div className="w-10 h-10 rounded-xl bg-ink-raised flex items-center justify-center">
+    <svg viewBox="0 0 24 24" className="w-6 h-6 text-primary" fill="none" stroke="currentColor" strokeWidth="2">
       <rect x="3" y="5" width="18" height="14" rx="2"/>
       <path d="M3 10h18"/>
       <circle cx="12" cy="15" r="2"/>
@@ -283,21 +285,17 @@ export function WalletSelectionModal({ open, onOpenChange, onWalletConnected }: 
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ duration: 0.2 }}
-          className="relative overflow-hidden rounded-3xl border border-violet-500/30 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 shadow-2xl"
+          className="relative overflow-hidden rounded-2xl border border-ink-edge bg-ink-surface shadow-2xl"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 via-transparent to-cyan-500/10" />
-          <div className="absolute -top-32 -right-32 h-64 w-64 rounded-full bg-violet-500/20 blur-3xl" />
-          <div className="absolute -bottom-32 -left-32 h-64 w-64 rounded-full bg-cyan-500/20 blur-3xl" />
-          
-          <div className="relative p-6">
+          <Surface className="relative border-0 p-6">
             <div className="mb-6 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/20 to-cyan-500/20 backdrop-blur-xl border border-violet-500/30">
-                <Sparkles className="h-8 w-8 text-violet-400" />
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-accent-core/30 bg-accent-core/10">
+                <Sparkles className="h-8 w-8 text-accent-bright" />
               </div>
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-white via-violet-200 to-cyan-200 bg-clip-text text-transparent">
+              <SectionTitle as="h2" className="text-2xl font-bold">
                 Connect Wallet
-              </h2>
-              <p className="mt-2 text-sm text-slate-400">
+              </SectionTitle>
+              <p className="mt-2 text-sm text-secondary">
                 Choose your preferred wallet to connect to StreamAiX
               </p>
             </div>
@@ -315,11 +313,9 @@ export function WalletSelectionModal({ open, onOpenChange, onWalletConnected }: 
                       <button
                         onClick={() => handleWalletConnect(wallet.id)}
                         disabled={connectingWallet === wallet.id || isConnecting}
-                        className="group relative w-full overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/50 p-4 text-left transition-all duration-300 hover:border-violet-500/50 hover:bg-slate-800/80 hover:shadow-lg hover:shadow-violet-500/10 disabled:opacity-50"
+                         className="group relative w-full overflow-hidden rounded-xl border border-ink-edge bg-ink-raised p-4 text-left transition-all duration-300 hover:border-accent-core/50 hover:bg-ink-raised hover:glow-accent disabled:opacity-50"
                         data-testid={`wallet-${wallet.id}`}
                       >
-                        <div className="absolute inset-0 bg-gradient-to-r from-violet-500/0 via-violet-500/5 to-cyan-500/0 opacity-0 transition-opacity group-hover:opacity-100" />
-                        
                         <div className="relative flex items-center gap-4">
                           <div className="flex-shrink-0 transition-transform group-hover:scale-110">
                             {getWalletIcon(wallet.id)}
@@ -327,23 +323,23 @@ export function WalletSelectionModal({ open, onOpenChange, onWalletConnected }: 
                           
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="font-semibold text-white">{wallet.name}</span>
+                               <span className="font-semibold text-primary">{wallet.name}</span>
                               {wallet.popular && (
-                                <span className="rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] font-medium text-violet-300 border border-violet-500/30">
+                                 <span className="rounded-xl border border-accent-core/30 bg-accent-core/20 px-2 py-0.5 text-[10px] font-medium text-accent-bright">
                                   Popular
                                 </span>
                               )}
                             </div>
-                            <p className="mt-0.5 text-sm text-slate-400">{wallet.description}</p>
+                             <p className="mt-0.5 text-sm text-secondary">{wallet.description}</p>
                           </div>
                           
                           <div className="flex-shrink-0">
                             {connectingWallet === wallet.id ? (
-                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-500/20">
-                                <Loader2 className="h-4 w-4 animate-spin text-violet-400" />
+                               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent-core/20">
+                                 <Loader2 className="h-4 w-4 animate-spin text-accent-bright" />
                               </div>
                             ) : (
-                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-700/50 text-slate-400 transition-all group-hover:bg-violet-500/20 group-hover:text-violet-400">
+                               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-ink-surface text-secondary transition-all group-hover:bg-accent-core/20 group-hover:text-accent-bright">
                                 <Zap className="h-4 w-4" />
                               </div>
                             )}
@@ -353,22 +349,22 @@ export function WalletSelectionModal({ open, onOpenChange, onWalletConnected }: 
                     ) : wallet.installUrl ? (
                       <button
                         onClick={() => handleInstallWallet(wallet.installUrl!)}
-                        className="group relative w-full overflow-hidden rounded-2xl border border-slate-700/30 bg-slate-800/30 p-4 text-left transition-all duration-300 hover:border-slate-600/50 hover:bg-slate-800/50"
+                         className="group relative w-full overflow-hidden rounded-xl border border-ink-edge bg-ink-surface p-4 text-left transition-all duration-300 hover:border-accent-core/30 hover:bg-ink-raised"
                         data-testid={`wallet-install-${wallet.id}`}
                       >
-                        <div className="relative flex items-center gap-4 opacity-60">
+                         <div className="relative flex items-center gap-4 opacity-60">
                           <div className="flex-shrink-0 grayscale">
                             {getWalletIcon(wallet.id)}
                           </div>
                           
                           <div className="flex-1 min-w-0">
-                            <span className="font-semibold text-slate-300">{wallet.name}</span>
-                            <p className="mt-0.5 text-sm text-slate-500">Not installed</p>
+                             <span className="font-semibold text-body">{wallet.name}</span>
+                             <p className="mt-0.5 text-sm text-muted">Not installed</p>
                           </div>
                           
                           <div className="flex-shrink-0">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-700/30">
-                              <ExternalLink className="h-4 w-4 text-slate-500" />
+                             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-ink-raised">
+                               <ExternalLink className="h-4 w-4 text-muted" />
                             </div>
                           </div>
                         </div>
@@ -379,20 +375,20 @@ export function WalletSelectionModal({ open, onOpenChange, onWalletConnected }: 
               </AnimatePresence>
             </div>
             
-            <div className="mt-6 flex items-center justify-center gap-6 border-t border-slate-700/50 pt-6">
-              <div className="flex items-center gap-2 text-xs text-slate-500">
-                <Shield className="h-4 w-4 text-emerald-500" />
+             <div className="mt-6 flex items-center justify-center gap-6 border-t border-ink-divider pt-6">
+               <div className="flex items-center gap-2 text-xs text-muted">
+                 <Shield className="h-4 w-4 text-gain" />
                 <span>Secure Connection</span>
               </div>
-              <div className="h-4 w-px bg-slate-700" />
+               <div className="h-4 w-px bg-ink-edge" />
               <button 
                 onClick={() => window.open('https://ethereum.org/wallets/', '_blank')}
-                className="text-xs text-violet-400 hover:text-violet-300 transition-colors"
+                 className="rounded-xl text-xs text-accent-bright transition-colors hover:text-primary"
               >
                 Learn more about wallets
               </button>
-            </div>
-          </div>
+             </div>
+           </Surface>
         </motion.div>
       </DialogContent>
     </Dialog>

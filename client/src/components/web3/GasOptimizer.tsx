@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 import { Zap, TrendingDown, TrendingUp, Clock, Fuel } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -82,47 +83,47 @@ export function GasOptimizer({ onGasPriceSelect, className = '' }: GasOptimizerP
 
   const getSpeedColor = (speed: string) => {
     switch (speed) {
-      case 'slow': return 'bg-green-500/20 text-green-300 border-green-500/30';
-      case 'standard': return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
-      case 'fast': return 'bg-orange-500/20 text-orange-300 border-orange-500/30';
-      case 'instant': return 'bg-red-500/20 text-red-300 border-red-500/30';
-      default: return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
+      case 'slow': return 'bg-gain/10 text-gain border-gain/30';
+      case 'standard': return 'bg-accent-core/10 text-accent-bright border-accent-core/30';
+      case 'fast': return 'bg-warn/10 text-warn border-warn/30';
+      case 'instant': return 'bg-loss/10 text-loss border-loss/30';
+      default: return 'bg-ink-raised text-secondary border-ink-edge';
     }
   };
 
   const getCongestionColor = (level: string) => {
     switch (level) {
-      case 'low': return 'text-green-400';
-      case 'medium': return 'text-yellow-400';
-      case 'high': return 'text-red-400';
-      default: return 'text-gray-400';
+      case 'low': return 'text-gain';
+      case 'medium': return 'text-warn';
+      case 'high': return 'text-loss';
+      default: return 'text-muted';
     }
   };
 
   return (
     <div className={className}>
-      <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-        <CardHeader>
-          <CardTitle className="text-gray-900 dark:text-white flex items-center justify-between">
+      <Surface className="overflow-hidden">
+        <div className="flex items-center justify-between border-b border-ink-divider p-5">
+          <SectionTitle as="h3" className="flex items-center gap-2">
             <div className="flex items-center gap-2">
-              <Fuel className="h-5 w-5" />
+              <Fuel className="h-5 w-5 text-accent-bright" />
               Gas Optimizer
             </div>
-            <div className="flex items-center gap-2">
-              {gasData.trend === 'up' ? (
-                <TrendingUp className="h-4 w-4 text-red-400" />
-              ) : gasData.trend === 'down' ? (
-                <TrendingDown className="h-4 w-4 text-green-400" />
-              ) : (
-                <div className="h-4 w-4 bg-yellow-400 rounded-full" />
-              )}
-              <span className={`text-sm ${getCongestionColor(gasData.networkCongestion)}`}>
-                {gasData.networkCongestion.toUpperCase()}
-              </span>
-            </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          </SectionTitle>
+          <div className="flex items-center gap-2">
+            {gasData.trend === 'up' ? (
+              <TrendingUp className="h-4 w-4 text-loss" />
+            ) : gasData.trend === 'down' ? (
+              <TrendingDown className="h-4 w-4 text-gain" />
+            ) : (
+              <div className="h-4 w-4 rounded-full bg-warn" />
+            )}
+            <span className={`text-sm ${getCongestionColor(gasData.networkCongestion)}`}>
+              {gasData.networkCongestion.toUpperCase()}
+            </span>
+          </div>
+        </div>
+        <div className="space-y-4 p-5">
           {/* Gas Speed Options */}
           <div className="grid grid-cols-2 gap-3">
             {Object.entries(gasData).filter(([key]) => 
@@ -133,19 +134,20 @@ export function GasOptimizer({ onGasPriceSelect, className = '' }: GasOptimizerP
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <Card
+                <Surface
+                  variant={selectedSpeed === speed ? "raised" : "panel"}
                   className={`cursor-pointer transition-all duration-200 ${
                     selectedSpeed === speed
-                      ? 'bg-purple-500/20 border-purple-500/50'
-                      : 'bg-white/5 border-white/10 hover:bg-white/10'
+                      ? 'border-accent-core/50 glow-accent'
+                      : 'hover:bg-ink-raised'
                   }`}
                   onClick={() => handleSpeedSelect(speed as 'slow' | 'standard' | 'fast' | 'instant')}
                 >
-                  <CardContent className="p-4">
+                  <div className="p-4">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        {getSpeedIcon(speed)}
-                        <span className="text-gray-900 dark:text-white font-medium capitalize">
+                        <span className="text-accent-bright">{getSpeedIcon(speed)}</span>
+                        <span className="font-medium capitalize text-primary">
                           {speed}
                         </span>
                       </div>
@@ -153,28 +155,28 @@ export function GasOptimizer({ onGasPriceSelect, className = '' }: GasOptimizerP
                         {(data as any).price} gwei
                       </Badge>
                     </div>
-                    <p className="text-gray-400 text-sm">
+                    <p className="text-sm text-secondary">
                       ~{(data as any).time}
                     </p>
-                  </CardContent>
-                </Card>
+                  </div>
+                </Surface>
               </motion.div>
             ))}
           </div>
 
           {/* Optimization Controls */}
-          <div className="flex items-center justify-between pt-4 border-t border-white/10">
+          <div className="flex items-center justify-between border-t border-ink-divider pt-4">
             <div className="flex items-center gap-2">
-              <span className="text-gray-900 dark:text-white text-sm">Selected: </span>
+              <span className="text-sm text-body">Selected: </span>
               <Badge className={getSpeedColor(selectedSpeed)}>
-                {gasData[selectedSpeed].price} gwei
+                <span className="tabular">{gasData[selectedSpeed].price} gwei</span>
               </Badge>
             </div>
             <Button
               onClick={handleOptimizeGas}
               disabled={isOptimizing}
               size="sm"
-              className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+              className="grad-accent glow-accent rounded-xl text-primary hover:bg-accent-deep"
             >
               {isOptimizing ? (
                 <>
@@ -191,17 +193,17 @@ export function GasOptimizer({ onGasPriceSelect, className = '' }: GasOptimizerP
           </div>
 
           {/* Gas Savings Estimate */}
-          <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+          <div className="rounded-xl border border-gain/20 bg-gain/10 p-3">
             <div className="flex items-center justify-between">
-              <span className="text-green-300 text-sm">Estimated Savings</span>
-              <span className="text-green-300 font-semibold">~15% ($3.20)</span>
+              <span className="text-sm text-gain">Estimated Savings</span>
+              <span className="font-semibold tabular text-gain">~15% ($3.20)</span>
             </div>
-            <p className="text-green-200/80 text-xs mt-1">
+            <p className="mt-1 text-xs text-secondary">
               Based on current network conditions and historical data
             </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </Surface>
     </div>
   );
 }

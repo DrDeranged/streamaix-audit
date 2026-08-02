@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { useStreamConversation, ConversationMessage, ConversationParticipant } from '@/hooks/useStreamConversation';
+import { useStreamConversation, ConversationMessage } from '@/hooks/useStreamConversation';
 import { useMicrophone } from '@/hooks/useMicrophone';
 import { useAwardVoiceConversation } from '@/hooks/usePoints';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import SectionTitle from '@/components/ds/SectionTitle';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -151,41 +152,41 @@ export function ConversationPanel({
   if (showOnboarding) {
     return (
       <div className={cn(
-        "flex flex-col items-center justify-center h-full bg-slate-900/80 backdrop-blur-xl border border-cyan-500/20 rounded-xl p-6 text-center",
+        "flex flex-col items-center justify-center h-full bg-ink-surface border border-ink-edge rounded-xl p-6 text-center",
         className
       )}>
         <div className="relative mb-4">
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/30 to-purple-500/30 rounded-full blur-xl animate-pulse" />
-          <div className="relative p-4 bg-gradient-to-br from-cyan-600/20 to-purple-600/20 rounded-full border border-cyan-500/30">
-            <Headphones className="w-10 h-10 text-cyan-400" />
+          <div className="absolute inset-0 bg-accent-core/20 rounded-full blur-xl animate-pulse" />
+          <div className="relative p-4 bg-accent-core/20 rounded-full border border-accent-core/30">
+            <Headphones className="w-10 h-10 text-accent-bright" />
           </div>
         </div>
         
-        <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-amber-400" />
+        <SectionTitle as="h3" className="mb-2 flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-accent-bright" />
           Live Voice Conversation
-        </h3>
+        </SectionTitle>
         
-        <p className="text-sm text-slate-400 mb-4 max-w-[280px]">
+        <p className="text-sm text-secondary mb-4 max-w-[280px]">
           Chat with AI avatars in real-time using voice or text. Ask questions, share ideas, and have natural conversations.
         </p>
 
         <div className="space-y-2 text-left w-full max-w-[280px] mb-4">
-          <div className="flex items-center gap-2 text-sm text-slate-300">
-            <MessageSquare className="w-4 h-4 text-cyan-400" />
+          <div className="flex items-center gap-2 text-sm text-body">
+            <MessageSquare className="w-4 h-4 text-accent-bright" />
             <span>Type messages or use your microphone</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-slate-300">
-            <Hand className="w-4 h-4 text-amber-400" />
+          <div className="flex items-center gap-2 text-sm text-body">
+            <Hand className="w-4 h-4 text-warn" />
             <span>Raise your hand to speak</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-slate-300">
-            <Bot className="w-4 h-4 text-purple-400" />
+          <div className="flex items-center gap-2 text-sm text-body">
+            <Bot className="w-4 h-4 text-accent-bright" />
             <span>AI avatars respond with voice</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-slate-500">
+        <div className="flex items-center gap-2 text-xs text-muted">
           <Loader2 className="w-3 h-3 animate-spin" />
           Connecting to conversation...
         </div>
@@ -195,18 +196,18 @@ export function ConversationPanel({
 
   return (
     <div className={cn(
-      "flex flex-col h-full bg-slate-900/80 backdrop-blur-xl border border-cyan-500/20 rounded-xl overflow-hidden",
+      "flex flex-col h-full bg-ink-surface border border-ink-edge rounded-xl overflow-hidden",
       className
     )}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-cyan-500/20 bg-slate-800/50">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-ink-divider bg-ink-raised">
         <div className="flex items-center gap-2">
           <Radio className={cn(
             "w-4 h-4",
-            isConnected ? "text-green-400 animate-pulse" : "text-red-400"
+            isConnected ? "text-gain animate-pulse" : "text-loss"
           )} />
-          <span className="text-sm font-medium text-white">Live Conversation</span>
-          <Badge variant="outline" className="text-xs border-cyan-500/30 text-cyan-300">
+          <span className="text-sm font-medium text-primary">Live Conversation</span>
+          <Badge variant="outline" className="text-xs border-accent-core/30 text-accent-bright">
             <Users className="w-3 h-3 mr-1" />
             {participants.length}
           </Badge>
@@ -222,9 +223,9 @@ export function ConversationPanel({
                 onClick={() => setAudioEnabled(!audioEnabled)}
               >
                 {audioEnabled ? (
-                  <Volume2 className="h-4 w-4 text-cyan-400" />
+                  <Volume2 className="h-4 w-4 text-accent-bright" />
                 ) : (
-                  <VolumeX className="h-4 w-4 text-slate-400" />
+                  <VolumeX className="h-4 w-4 text-secondary" />
                 )}
               </Button>
             </TooltipTrigger>
@@ -236,45 +237,45 @@ export function ConversationPanel({
       </div>
 
       {/* Participants bar */}
-      <div className="flex items-center gap-1 px-3 py-2 border-b border-slate-700/50 overflow-x-auto">
+      <div className="flex items-center gap-1 px-3 py-2 border-b border-ink-divider overflow-x-auto">
         {participants.slice(0, 8).map((p) => (
           <Tooltip key={p.id}>
             <TooltipTrigger>
               <div className={cn(
                 "relative",
-                p.speakingStatus === 'speaking' && "ring-2 ring-green-400 ring-offset-1 ring-offset-slate-900 rounded-full"
+                p.speakingStatus === 'speaking' && "ring-2 ring-gain ring-offset-1 ring-offset-ink-surface rounded-full"
               )}>
-                <Avatar className="h-7 w-7 border border-slate-600">
+                <Avatar className="h-7 w-7 border border-ink-edge">
                   <AvatarImage src={p.imageUrl} />
-                  <AvatarFallback className="text-xs bg-slate-700 text-white">
+                  <AvatarFallback className="text-xs bg-ink-raised text-primary">
                     {p.name.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 {p.type === 'avatar' && (
-                  <Bot className="absolute -bottom-0.5 -right-0.5 h-3 w-3 text-cyan-400 bg-slate-900 rounded-full" />
+                  <Bot className="absolute -bottom-0.5 -right-0.5 h-3 w-3 text-accent-bright bg-ink-surface rounded-full" />
                 )}
                 {p.role === 'host' && (
-                  <Crown className="absolute -top-1 -right-1 h-3 w-3 text-yellow-400" />
+                  <Crown className="absolute -top-1 -right-1 h-3 w-3 text-warn" />
                 )}
               </div>
             </TooltipTrigger>
             <TooltipContent>
               <p>{p.name}</p>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-secondary">
                 {p.type === 'avatar' ? 'AI Avatar' : 'User'} • {p.role}
               </p>
             </TooltipContent>
           </Tooltip>
         ))}
         {participants.length > 8 && (
-          <span className="text-xs text-slate-400 ml-1">+{participants.length - 8}</span>
+          <span className="text-xs text-secondary ml-1">+{participants.length - 8}</span>
         )}
       </div>
 
       {/* Speaker queue (if any) */}
       {speakerQueue.length > 0 && (
-        <div className="px-3 py-2 bg-amber-500/10 border-b border-amber-500/20">
-          <div className="flex items-center gap-2 text-xs text-amber-300">
+        <div className="px-3 py-2 bg-warn/10 border-b border-warn/20">
+          <div className="flex items-center gap-2 text-xs text-warn">
             <Hand className="h-3 w-3" />
             <span>Queue:</span>
             {speakerQueue.map((p, idx) => (
@@ -284,10 +285,10 @@ export function ConversationPanel({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-4 w-4 hover:bg-green-500/20"
+                     className="h-4 w-4 hover:bg-gain/20"
                     onClick={() => grantSpeaking(p.id)}
                   >
-                    <CheckCircle2 className="h-3 w-3 text-green-400" />
+                    <CheckCircle2 className="h-3 w-3 text-gain" />
                   </Button>
                 )}
               </span>
@@ -306,8 +307,8 @@ export function ConversationPanel({
           {/* Live transcription indicator */}
           {liveTranscription && (
             <div className="flex items-start gap-2 opacity-60">
-              <Loader2 className="h-4 w-4 mt-1 animate-spin text-cyan-400" />
-              <div className="text-sm text-slate-300 italic">
+              <Loader2 className="h-4 w-4 mt-1 animate-spin text-accent-bright" />
+              <div className="text-sm text-body italic">
                 {liveTranscription.text}...
               </div>
             </div>
@@ -318,16 +319,16 @@ export function ConversationPanel({
       </ScrollArea>
 
       {/* Input area */}
-      <div className="p-3 border-t border-slate-700/50 bg-slate-800/30 space-y-2">
+      <div className="p-3 border-t border-ink-divider bg-ink-raised space-y-2">
         {/* Mic permission helper */}
         {hasPermission === false && (
-          <div className="flex items-center gap-2 p-2 bg-amber-500/10 rounded-lg border border-amber-500/20">
-            <AlertCircle className="h-4 w-4 text-amber-400 flex-shrink-0" />
-            <span className="text-xs text-amber-300">Microphone access needed for voice chat</span>
+          <div className="flex items-center gap-2 p-2 bg-warn/10 rounded-xl border border-warn/20">
+            <AlertCircle className="h-4 w-4 text-warn flex-shrink-0" />
+            <span className="text-xs text-warn">Microphone access needed for voice chat</span>
             <Button
               variant="ghost"
               size="sm"
-              className="ml-auto text-xs h-6 text-amber-300 hover:text-amber-200"
+               className="ml-auto text-xs h-6 text-warn hover:text-primary"
               onClick={requestPermission}
             >
               Enable
@@ -337,9 +338,9 @@ export function ConversationPanel({
 
         {/* Speaking status indicator */}
         {canSpeak && (
-          <div className="flex items-center gap-2 p-2 bg-green-500/10 rounded-lg border border-green-500/20">
-            <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-xs text-green-300 font-medium">You're live! Speak or type your message.</span>
+          <div className="flex items-center gap-2 p-2 bg-gain/10 rounded-xl border border-gain/20">
+            <div className="h-2 w-2 rounded-full bg-gain animate-pulse" />
+            <span className="text-xs text-gain font-medium">You're live! Speak or type your message.</span>
           </div>
         )}
 
@@ -355,8 +356,8 @@ export function ConversationPanel({
                   className={cn(
                     "gap-1",
                     isInQueue 
-                      ? "bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border-amber-500/30" 
-                      : "border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10"
+                       ? "bg-warn/20 hover:bg-warn/30 text-warn border-warn/30"
+                       : "border-accent-core/30 text-accent-bright hover:bg-accent-core/10"
                   )}
                   onClick={isInQueue ? cancelSpeakRequest : requestSpeak}
                   data-testid="raise-hand-button"
@@ -380,8 +381,8 @@ export function ConversationPanel({
                 className={cn(
                   "gap-1",
                   isRecording 
-                    ? "bg-red-600 hover:bg-red-500" 
-                    : "bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500"
+                    ? "bg-loss hover:bg-loss/80"
+                    : "grad-accent hover:bg-accent-deep glow-accent"
                 )}
                 onClick={isRecording ? stopRecording : startRecording}
                 disabled={hasPermission === false}
@@ -389,7 +390,7 @@ export function ConversationPanel({
               >
                 {isRecording ? (
                   <>
-                    <div className="h-2 w-2 rounded-full bg-white animate-pulse mr-1" />
+                  <div className="h-2 w-2 rounded-full bg-primary animate-pulse mr-1" />
                     <MicOff className="h-3.5 w-3.5" />
                     Recording...
                   </>
@@ -401,7 +402,7 @@ export function ConversationPanel({
                 )}
               </Button>
               {isTranscribing && (
-                <div className="flex items-center gap-1 text-xs text-cyan-400">
+                  <div className="flex items-center gap-1 text-xs text-accent-bright">
                   <Loader2 className="h-3 w-3 animate-spin" />
                   Transcribing...
                 </div>
@@ -415,7 +416,7 @@ export function ConversationPanel({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={unmute}>
-                  <VolumeX className="h-4 w-4 text-red-400" />
+                   <VolumeX className="h-4 w-4 text-loss" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Unmute yourself</TooltipContent>
@@ -424,7 +425,7 @@ export function ConversationPanel({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={mute}>
-                  <Volume2 className="h-4 w-4 text-green-400" />
+                   <Volume2 className="h-4 w-4 text-gain" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Mute yourself</TooltipContent>
@@ -439,14 +440,14 @@ export function ConversationPanel({
             value={textInput}
             onChange={(e) => setTextInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="flex-1 bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-cyan-500/50"
+            className="flex-1 bg-ink-surface border-ink-edge text-primary placeholder:text-muted focus:border-accent-core/50"
             data-testid="conversation-input"
           />
           <Button 
             size="icon" 
             onClick={handleSendText}
             disabled={!textInput.trim()}
-            className="bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 disabled:opacity-50"
+             className="grad-accent hover:bg-accent-deep glow-accent disabled:opacity-50"
             data-testid="send-message-button"
           >
             <Send className="h-4 w-4" />
@@ -455,7 +456,7 @@ export function ConversationPanel({
 
         {/* Error display */}
         {error && (
-          <div className="flex items-center gap-2 text-xs text-red-400">
+           <div className="flex items-center gap-2 text-xs text-loss">
             <AlertCircle className="h-3 w-3" />
             {error}
           </div>
@@ -475,19 +476,19 @@ function MessageBubble({
   return (
     <div className={cn(
       "flex items-start gap-2",
-      isAvatar && "bg-gradient-to-r from-cyan-500/10 to-purple-500/10 -mx-3 px-3 py-2 rounded-lg"
+      isAvatar && "bg-accent-core/10 -mx-3 px-3 py-2 rounded-xl"
     )}>
       <div className="flex-shrink-0 relative">
-        <Avatar className="h-8 w-8 border border-slate-600">
+        <Avatar className="h-8 w-8 border border-ink-edge">
           <AvatarFallback className={cn(
             "text-xs",
-            isAvatar ? "bg-gradient-to-br from-cyan-600 to-purple-600 text-white" : "bg-slate-700 text-white"
+            isAvatar ? "bg-accent-deep text-primary" : "bg-ink-raised text-primary"
           )}>
             {message.speakerName.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
         {isAvatar && (
-          <Bot className="absolute -bottom-0.5 -right-0.5 h-3 w-3 text-cyan-400 bg-slate-900 rounded-full" />
+          <Bot className="absolute -bottom-0.5 -right-0.5 h-3 w-3 text-accent-bright bg-ink-surface rounded-full" />
         )}
       </div>
       
@@ -495,18 +496,18 @@ function MessageBubble({
         <div className="flex items-center gap-2">
           <span className={cn(
             "text-sm font-medium",
-            isAvatar ? "text-cyan-300" : "text-white"
+            isAvatar ? "text-accent-bright" : "text-primary"
           )}>
             {message.speakerName}
           </span>
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-muted">
             {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
           {message.sourceType === 'microphone_transcription' && (
-            <Mic className="h-3 w-3 text-slate-500" />
+            <Mic className="h-3 w-3 text-muted" />
           )}
         </div>
-        <p className="text-sm text-slate-300 mt-0.5 whitespace-pre-wrap">
+        <p className="text-sm text-body mt-0.5 whitespace-pre-wrap">
           {message.textContent}
         </p>
         {message.audioUrl && (

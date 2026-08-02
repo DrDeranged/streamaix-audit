@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 import { useWeb3 } from '@/hooks/useWeb3';
 import { useToast } from '@/hooks/use-toast';
 import { Wallet, ExternalLink, Copy, CheckCircle, Loader2, AlertTriangle, Smartphone } from 'lucide-react';
@@ -155,13 +156,12 @@ export function WalletConnector({
 
   if (!hasAnyWallet) {
     return (
-      <Card className="bg-yellow-500/10 border-yellow-500/20">
-        <CardContent className="p-4">
+      <Surface className="border-warn/30 bg-warn/10 p-4">
           <div className="flex items-center gap-3">
-            <AlertTriangle className="h-5 w-5 text-yellow-400" />
+            <AlertTriangle className="h-5 w-5 text-warn" />
             <div className="flex-1">
-              <p className="text-yellow-200 font-medium">MetaMask Required</p>
-              <p className="text-yellow-300/80 text-sm">Please install MetaMask to connect your wallet</p>
+              <p className="font-medium text-primary">MetaMask Required</p>
+              <p className="text-sm text-secondary">Please install MetaMask to connect your wallet</p>
             </div>
             <a
               href="https://metamask.io/"
@@ -169,14 +169,13 @@ export function WalletConnector({
               rel="noopener noreferrer"
               className="inline-flex"
             >
-              <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700">
+              <Button size="sm" className="bg-warn text-ink-page hover:bg-warn/80">
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Install
               </Button>
             </a>
           </div>
-        </CardContent>
-      </Card>
+      </Surface>
     );
   }
 
@@ -184,26 +183,26 @@ export function WalletConnector({
     return (
       <div className="space-y-4">
         {children && (
-          <div className="text-center text-gray-300 mb-4">
+          <div className="text-center text-body mb-4">
             {children}
           </div>
         )}
         
-        <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-          <CardHeader className="text-center">
+        <Surface className="p-4">
+          <div className="text-center">
             {mobile ? (
-              <Smartphone className="h-12 w-12 text-purple-400 mx-auto mb-2" />
+              <Smartphone className="h-12 w-12 text-accent-bright mx-auto mb-2" />
             ) : (
-              <Wallet className="h-12 w-12 text-purple-400 mx-auto mb-2" />
+              <Wallet className="h-12 w-12 text-accent-bright mx-auto mb-2" />
             )}
-            <CardTitle className="text-gray-900 dark:text-white">Connect Your Wallet</CardTitle>
-            <p className="text-gray-300 text-sm">
+            <SectionTitle as="h3">Connect Your Wallet</SectionTitle>
+            <p className="text-secondary text-sm mt-1">
               {mobile && !inWalletBrowser
                 ? 'Tap to open in your wallet app'
                 : 'Choose your preferred wallet to access Web3 features'}
             </p>
-          </CardHeader>
-          <CardContent className="space-y-3">
+          </div>
+          <div className="space-y-3 mt-5">
             {walletOptions.map((option) => (
               <Button
                 key={option.type}
@@ -211,8 +210,8 @@ export function WalletConnector({
                 disabled={isConnecting || !option.available}
                 className={`w-full border transition-all duration-200 ${
                   option.available
-                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-transparent'
-                    : 'bg-gray-600/20 hover:bg-gray-600/30 text-gray-400 border-gray-600/30'
+                     ? 'grad-accent glow-accent text-primary border-transparent'
+                     : 'bg-ink-raised hover:bg-ink-edge text-muted border-ink-edge'
                 } font-semibold`}
                 data-testid={`button-connect-${option.type}`}
               >
@@ -234,7 +233,7 @@ export function WalletConnector({
             ))}
             
             <div className="pt-2">
-              <div className="text-xs text-gray-400 text-center mb-2">
+               <div className="text-xs text-muted text-center mb-2">
                 Need a wallet?
               </div>
               <div className="flex gap-2">
@@ -247,7 +246,7 @@ export function WalletConnector({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full border-white/20 text-gray-400 hover:text-white hover:bg-white/10 text-xs"
+                     className="w-full border-ink-edge text-secondary hover:text-primary hover:bg-ink-raised text-xs"
                   >
                     <ExternalLink className="h-3 w-3 mr-1" />
                     Get MetaMask
@@ -262,7 +261,7 @@ export function WalletConnector({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full border-white/20 text-gray-400 hover:text-white hover:bg-white/10 text-xs"
+                     className="w-full border-ink-edge text-secondary hover:text-primary hover:bg-ink-raised text-xs"
                   >
                     <ExternalLink className="h-3 w-3 mr-1" />
                     Get Coinbase
@@ -272,12 +271,12 @@ export function WalletConnector({
             </div>
 
             {error && (
-              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-                <p className="text-red-200 text-sm">{error}</p>
+               <div className="p-3 bg-loss/10 border border-loss/30 rounded-xl">
+                 <p className="text-loss text-sm">{error}</p>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </Surface>
       </div>
     );
   }
@@ -287,20 +286,19 @@ export function WalletConnector({
   
   if (!isOnBaseNetwork && wallet) {
     return (
-      <Card className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-yellow-500/30">
-        <CardContent className="p-4">
+      <Surface className="border-warn/30 bg-warn/10 p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-yellow-400 mt-0.5" />
+            <AlertTriangle className="h-5 w-5 text-warn mt-0.5" />
             <div className="flex-1">
-              <h4 className="text-white font-semibold mb-1">Wrong Network</h4>
-              <p className="text-gray-300 text-sm mb-3">
+              <h4 className="text-primary font-semibold mb-1">Wrong Network</h4>
+              <p className="text-body text-sm mb-3">
                 StreamAiX operates on Base network. Please switch to continue.
               </p>
               <div className="flex items-center gap-2">
                 <Button
                   size="sm"
                   onClick={() => switchNetwork(8453)}
-                  className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600"
+                   className="grad-accent glow-accent"
                   data-testid="button-switch-to-base"
                 >
                   Switch to Base
@@ -309,42 +307,40 @@ export function WalletConnector({
                   variant="outline"
                   size="sm"
                   onClick={handleDisconnect}
-                  className="border-white/20 text-white hover:bg-white/10"
+                   className="border-ink-edge text-primary hover:bg-ink-raised"
                 >
                   Disconnect
                 </Button>
               </div>
               {showNetwork && networkInfo && (
-                <p className="text-xs text-gray-400 mt-2">
+                 <p className="text-xs text-muted mt-2">
                   Currently connected to: {networkInfo.name}
                 </p>
               )}
             </div>
           </div>
-        </CardContent>
-      </Card>
+      </Surface>
     );
   }
 
   return (
-    <Card className="bg-white/10 border-white/20 backdrop-blur-lg">
-      <CardContent className="p-4">
+    <Surface className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-              <Wallet className="h-5 w-5 text-gray-900 dark:text-white" />
+            <div className="w-10 h-10 rounded-xl bg-accent-core/15 flex items-center justify-center">
+              <Wallet className="h-5 w-5 text-accent-bright" />
             </div>
             
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <p className="text-gray-900 dark:text-white font-medium" data-testid="wallet-address">
+                <p className="text-primary font-medium" data-testid="wallet-address">
                   {wallet ? formatAddress(wallet.address) : ''}
                 </p>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => wallet && copyToClipboard(wallet.address)}
-                  className="h-6 w-6 p-0 hover:bg-white/10"
+                  className="h-6 w-6 p-0 hover:bg-ink-raised"
                   data-testid="button-copy-address"
                 >
                   <Copy className="h-3 w-3" />
@@ -355,7 +351,7 @@ export function WalletConnector({
                 {showNetwork && networkInfo && (
                   <Badge 
                     variant="secondary" 
-                    className="bg-blue-500/20 text-blue-200 border-blue-500/30 text-xs"
+                     className="bg-accent-core/15 text-accent-bright border-accent-core/30 text-xs"
                     data-testid="network-badge"
                   >
                     {networkInfo.name}
@@ -365,7 +361,7 @@ export function WalletConnector({
                 {showBalance && wallet && wallet.balance && (
                   <Badge 
                     variant="secondary" 
-                    className="bg-green-500/20 text-green-200 border-green-500/30 text-xs"
+                     className="bg-gain/10 text-gain border-gain/30 text-xs"
                     data-testid="balance-badge"
                   >
                     {formatBalance(wallet.balance)} {networkInfo?.nativeCurrency.symbol || 'ETH'}
@@ -377,7 +373,7 @@ export function WalletConnector({
 
           <div className="flex items-center gap-2">
             {isAuthenticating && (
-              <Loader2 className="h-4 w-4 animate-spin text-purple-400" />
+              <Loader2 className="h-4 w-4 animate-spin text-accent-bright" />
             )}
             
             <Dialog>
@@ -385,13 +381,13 @@ export function WalletConnector({
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10"
+                   className="border-ink-edge text-primary hover:bg-ink-raised"
                   data-testid="button-wallet-details"
                 >
                   Details
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-slate-900 border-white/20 text-gray-900 dark:text-white">
+              <DialogContent className="rounded-2xl bg-ink-surface border-ink-edge text-primary">
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2">
                     <Wallet className="h-5 w-5" />
@@ -401,9 +397,9 @@ export function WalletConnector({
                 
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm text-gray-400 mb-1">Address</p>
+                    <p className="text-sm text-muted mb-1">Address</p>
                     <div className="flex items-center gap-2">
-                      <code className="text-sm bg-white/10 px-2 py-1 rounded font-mono">
+                       <code className="text-sm bg-ink-raised px-2 py-1 rounded-xl font-mono text-secondary">
                         {wallet?.address || ''}
                       </code>
                       <Button
@@ -419,14 +415,14 @@ export function WalletConnector({
 
                   {wallet?.ensName && (
                     <div>
-                      <p className="text-sm text-gray-400 mb-1">ENS Name</p>
-                      <p className="text-sm text-purple-300">{wallet.ensName}</p>
+                       <p className="text-sm text-muted mb-1">ENS Name</p>
+                       <p className="text-sm text-accent-bright">{wallet.ensName}</p>
                     </div>
                   )}
 
                   {networkInfo && (
                     <div>
-                      <p className="text-sm text-gray-400 mb-1">Network</p>
+                     <p className="text-sm text-muted mb-1">Network</p>
                       <div className="flex items-center gap-2">
                         <p className="text-sm">{networkInfo.name}</p>
                         <Badge variant="outline" className="text-xs">
@@ -438,7 +434,7 @@ export function WalletConnector({
 
                   {wallet?.balance && (
                     <div>
-                      <p className="text-sm text-gray-400 mb-1">Balance</p>
+                     <p className="text-sm text-muted mb-1">Balance</p>
                       <p className="text-sm">
                         {formatBalance(wallet.balance)} {networkInfo?.nativeCurrency.symbol || 'ETH'}
                       </p>
@@ -451,7 +447,7 @@ export function WalletConnector({
                         variant="outline"
                         size="sm"
                         onClick={() => switchNetwork(1)} // Switch to Ethereum
-                        className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10"
+                         className="border-ink-edge text-primary hover:bg-ink-raised"
                       >
                         Switch Network
                       </Button>
@@ -461,7 +457,7 @@ export function WalletConnector({
                       variant="outline"
                       size="sm"
                       onClick={handleDisconnect}
-                      className="border-white/20 text-gray-900 dark:text-white hover:bg-white/10"
+                       className="border-ink-edge text-primary hover:bg-ink-raised"
                       data-testid="button-disconnect-wallet"
                     >
                       Disconnect
@@ -474,11 +470,10 @@ export function WalletConnector({
         </div>
 
         {children && (
-          <div className="mt-4 pt-4 border-t border-white/10">
+           <div className="mt-4 pt-4 border-t border-ink-divider">
             {children}
           </div>
         )}
-      </CardContent>
-    </Card>
+    </Surface>
   );
 }

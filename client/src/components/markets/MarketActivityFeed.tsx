@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Bot, TrendingUp, TrendingDown, Clock, Sparkles, Zap, Shield, BarChart2, RefreshCw, User } from "lucide-react";
+import Surface from "@/components/ds/Surface";
+import SectionTitle from "@/components/ds/SectionTitle";
+import { Bot, TrendingUp, TrendingDown, Sparkles, Zap, Shield, BarChart2, RefreshCw, User } from "lucide-react";
 import { Link } from "wouter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
@@ -44,10 +45,10 @@ interface MarketActivityFeedProps {
 }
 
 const personalityColors: Record<string, string> = {
-  conservative: "from-blue-500/20 to-indigo-500/20 border-blue-400/30",
-  aggressive: "from-red-500/20 to-orange-500/20 border-red-400/30",
-  quantitative: "from-cyan-500/20 to-blue-500/20 border-cyan-400/30",
-  contrarian: "from-purple-500/20 to-pink-500/20 border-purple-400/30",
+  conservative: "bg-accent-core/10 border-accent-core/30",
+  aggressive: "bg-loss/10 border-loss/30",
+  quantitative: "bg-accent-core/10 border-accent-core/30",
+  contrarian: "bg-warn/10 border-warn/30",
 };
 
 const personalityIcons: Record<string, { emoji: string; icon: typeof Shield }> = {
@@ -83,9 +84,9 @@ export function MarketActivityFeed({
   }, [allTrades.length, prevTradeCount]);
 
   const getConfidenceColor = (probability: number): string => {
-    if (probability >= 80) return "text-emerald-400";
-    if (probability >= 70) return "text-cyan-400";
-    return "text-amber-400";
+    if (probability >= 80) return "text-gain";
+    if (probability >= 70) return "text-accent-bright";
+    return "text-warn";
   };
 
   const getTradeSizeBadge = (amount: number): { label: string; className: string } => {
@@ -100,16 +101,16 @@ export function MarketActivityFeed({
         {showHeader && (
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
-              <h3 className="text-lg font-semibold">AI Trading Activity</h3>
+              <Sparkles className="w-5 h-5 text-accent-bright" />
+              <SectionTitle as="h3">AI Trading Activity</SectionTitle>
             </div>
           </div>
         )}
         {[...Array(3)].map((_, i) => (
-          <Card key={i} className="neural-glass p-4 animate-pulse">
-            <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-            <div className="h-3 bg-muted rounded w-1/2"></div>
-          </Card>
+          <Surface key={i} className="p-4 animate-pulse">
+            <div className="h-4 bg-ink-raised rounded-xl w-3/4 mb-2"></div>
+            <div className="h-3 bg-ink-raised rounded-xl w-1/2"></div>
+          </Surface>
         ))}
       </div>
     );
@@ -121,15 +122,15 @@ export function MarketActivityFeed({
         {showHeader && (
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
-              <h3 className="text-lg font-semibold">AI Trading Activity</h3>
+              <Sparkles className="w-5 h-5 text-accent-bright" />
+              <SectionTitle as="h3">AI Trading Activity</SectionTitle>
             </div>
           </div>
         )}
-        <Card className="neural-glass p-8 text-center">
-          <Bot className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-50" />
-          <p className="text-muted-foreground">No AI trades yet. The trading engine will start soon.</p>
-        </Card>
+        <Surface className="p-8 text-center">
+          <Bot className="w-12 h-12 mx-auto mb-3 text-muted opacity-50" />
+          <p className="text-secondary">No AI trades yet. The trading engine will start soon.</p>
+        </Surface>
       </div>
     );
   }
@@ -143,16 +144,16 @@ export function MarketActivityFeed({
               animate={{ rotate: [0, 360] }}
               transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
             >
-              <Sparkles className="w-5 h-5 text-purple-400" />
+              <Sparkles className="w-5 h-5 text-accent-bright" />
             </motion.div>
-            <h3 className="text-lg font-semibold">AI Trading Activity</h3>
+            <SectionTitle as="h3">AI Trading Activity</SectionTitle>
             {newTradesCount > 0 && (
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 500, damping: 30 }}
               >
-                <Badge variant="default" className="bg-purple-500/20 border-purple-500/40 animate-pulse">
+                <Badge variant="default" className="bg-accent-core/20 border-accent-core/40 text-accent-bright animate-pulse">
                   +{newTradesCount} new
                 </Badge>
               </motion.div>
@@ -162,9 +163,9 @@ export function MarketActivityFeed({
             <motion.div
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
-              className="w-2 h-2 rounded-full bg-emerald-400"
+              className="w-2 h-2 rounded-full bg-gain"
             />
-            <span className="text-emerald-400 font-semibold">Live</span>
+            <span className="text-gain font-semibold">Live</span>
           </div>
         </div>
       )}
@@ -197,14 +198,14 @@ export function MarketActivityFeed({
                   transition={{ delay: index * 0.05, duration: 0.4 }}
                   className="slide-in-trade"
                 >
-                  <Card className={`bg-gradient-to-br ${isAvatar ? 'from-cyan-500/20 to-purple-500/20 border-cyan-400/30' : (personalityColors[trade.agentPersonality] || personalityColors.quantitative)} border backdrop-blur-sm p-4 card-3d-hover`}>
+                  <Surface className={`${isAvatar ? 'bg-accent-core/10 border-accent-core/30' : (personalityColors[trade.agentPersonality] || personalityColors.quantitative)} border p-4 transition-transform hover:-translate-y-0.5`}>
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0 relative">
                         {isAvatar && trade.avatarImageUrl ? (
                           <Link href={traderLink!}>
-                            <Avatar className="w-16 h-16 border-2 border-cyan-400/50 cursor-pointer hover:border-cyan-400 transition-colors">
+                              <Avatar className="w-16 h-16 border-2 border-accent-core/50 cursor-pointer hover:border-accent-core transition-colors">
                               <AvatarImage src={trade.avatarImageUrl} alt={trade.agentName} />
-                              <AvatarFallback className="bg-gradient-to-br from-cyan-500/30 to-purple-500/30 text-lg">
+                              <AvatarFallback className="bg-accent-core/20 text-lg text-accent-bright">
                                 {trade.agentName.slice(0, 2)}
                               </AvatarFallback>
                             </Avatar>
@@ -223,12 +224,12 @@ export function MarketActivityFeed({
                           </>
                         )}
                         <motion.div
-                          className={`absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-background border-2 ${isAvatar ? 'border-cyan-400/60' : 'border-primary/40'} flex items-center justify-center shadow-lg`}
+                          className={`absolute -bottom-1 -right-1 w-8 h-8 rounded-xl bg-ink-raised border-2 ${isAvatar ? 'border-accent-core/60' : 'border-accent-core/40'} flex items-center justify-center`}
                           animate={{ scale: [1, 1.1, 1] }}
                           transition={{ duration: 2, repeat: Infinity }}
                         >
                           {isAvatar ? (
-                            <User className="w-4 h-4 text-cyan-400" />
+                            <User className="w-4 h-4 text-accent-bright" />
                           ) : (
                             <span className={`text-[10px] font-bold ${getConfidenceColor(probability)}`}>
                               {probability.toFixed(0)}%
@@ -241,7 +242,7 @@ export function MarketActivityFeed({
                         <div className="flex items-center justify-between gap-2 mb-2">
                           <div className="flex items-center gap-2 min-w-0">
                             {isAvatar ? (
-                              <Link href={traderLink!} className="font-bold text-base truncate hover:text-cyan-400 transition-colors cursor-pointer" data-testid={`text-agent-name-${trade.id}`}>
+                              <Link href={traderLink!} className="font-bold text-base truncate hover:text-accent-bright transition-colors cursor-pointer" data-testid={`text-agent-name-${trade.id}`}>
                                 {trade.agentName}
                               </Link>
                             ) : (
@@ -250,43 +251,43 @@ export function MarketActivityFeed({
                               </span>
                             )}
                             {isAvatar ? (
-                              <Badge 
+                                <Badge 
                                 variant="outline" 
-                                className="text-xs flex-shrink-0 bg-cyan-500/20 border-cyan-500/40 text-cyan-300"
+                                 className="text-xs flex-shrink-0 bg-accent-core/20 border-accent-core/40 text-accent-bright"
                               >
                                 Avatar
                               </Badge>
                             ) : (
                               <Badge 
                                 variant="outline" 
-                                className="text-xs flex-shrink-0 bg-slate-700/50 border-slate-600"
+                                 className="text-xs flex-shrink-0 bg-ink-raised border-ink-edge text-secondary"
                               >
                                 {trade.agentPersonality}
                               </Badge>
                             )}
                           </div>
-                          <span className="text-xs text-slate-400 whitespace-nowrap flex-shrink-0">
+                          <span className="text-xs text-muted whitespace-nowrap flex-shrink-0">
                             {formatDistanceToNow(new Date(trade.createdAt), { addSuffix: true })}
                           </span>
                         </div>
 
-                        <p className="text-sm text-slate-300 mb-3 line-clamp-2 leading-relaxed" data-testid={`text-market-question-${trade.id}`}>
+                        <p className="text-sm text-body mb-3 line-clamp-2 leading-relaxed" data-testid={`text-market-question-${trade.id}`}>
                           {trade.marketQuestion}
                         </p>
 
                         <div className="flex items-center gap-2 flex-wrap mb-3">
                           <div className="flex items-center gap-1.5">
                             {isYes ? (
-                              <TrendingUp className="w-5 h-5 text-emerald-400" />
+                              <TrendingUp className="w-5 h-5 text-gain" />
                             ) : (
-                              <TrendingDown className="w-5 h-5 text-rose-400" />
+                              <TrendingDown className="w-5 h-5 text-loss" />
                             )}
                             <Badge 
                               variant="outline"
                               className={`font-bold text-sm px-3 py-1 shadow-lg ${
                                 isYes 
-                                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-emerald-500/20' 
-                                  : 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-rose-500/20'
+                                   ? 'bg-gain/10 text-gain border-gain/30' 
+                                   : 'bg-loss/10 text-loss border-loss/30'
                               }`}
                               data-testid={`badge-outcome-${trade.id}`}
                             >
@@ -294,7 +295,7 @@ export function MarketActivityFeed({
                             </Badge>
                           </div>
                           
-                          <span className="text-sm font-mono font-bold text-cyan-300" data-testid={`text-amount-${trade.id}`}>
+                           <span className="tabular text-sm font-mono font-bold text-accent-bright" data-testid={`text-amount-${trade.id}`}>
                             {trade.streamAmount.toLocaleString()} STREAM
                           </span>
 
@@ -305,21 +306,21 @@ export function MarketActivityFeed({
                             {tradeSizeBadge.label} Trade
                           </Badge>
 
-                          <Badge variant="outline" className="text-xs capitalize bg-slate-700/50 border-slate-600">
+                           <Badge variant="outline" className="text-xs capitalize bg-ink-raised border-ink-edge text-secondary">
                             {trade.marketCategory}
                           </Badge>
                         </div>
 
                         {trade.reasoning && (
                           <details className="text-xs group">
-                            <summary className="cursor-pointer text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-1.5 font-medium">
+                            <summary className="cursor-pointer text-secondary hover:text-primary transition-colors flex items-center gap-1.5 font-medium">
                               <Bot className="w-3.5 h-3.5" />
                               View AI reasoning
                             </summary>
                             <motion.p 
                               initial={{ opacity: 0, height: 0 }}
                               animate={{ opacity: 1, height: "auto" }}
-                              className="mt-2 pl-4 py-2.5 border-l-2 border-purple-500/40 bg-slate-800/50 rounded-r text-xs leading-relaxed text-slate-300"
+                              className="mt-2 pl-4 py-2.5 border-l-2 border-accent-core/40 bg-ink-raised rounded-xl text-xs leading-relaxed text-body"
                             >
                               {trade.reasoning}
                             </motion.p>
@@ -327,7 +328,7 @@ export function MarketActivityFeed({
                         )}
                       </div>
                     </div>
-                  </Card>
+                  </Surface>
                 </motion.div>
               </CarouselItem>
             );
@@ -335,11 +336,11 @@ export function MarketActivityFeed({
         </CarouselContent>
         
         <div className="flex items-center justify-center gap-4 mt-4">
-          <CarouselPrevious className="relative static translate-y-0 bg-slate-800/70 border-slate-600/50 hover:bg-slate-700/70 card-3d-hover" />
-          <div className="text-xs text-slate-400 font-semibold">
+          <CarouselPrevious className="relative static translate-y-0 bg-ink-raised border-ink-edge hover:bg-ink-surface" />
+          <div className="text-xs text-muted font-semibold">
             {allTrades.length} total trades
           </div>
-          <CarouselNext className="relative static translate-y-0 bg-slate-800/70 border-slate-600/50 hover:bg-slate-700/70 card-3d-hover" />
+          <CarouselNext className="relative static translate-y-0 bg-ink-raised border-ink-edge hover:bg-ink-surface" />
         </div>
       </Carousel>
 
@@ -348,11 +349,11 @@ export function MarketActivityFeed({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.5 }}
       >
-        <Card className="neural-glass mt-4 p-4 stat-glow">
+        <Surface className="mt-4 p-4">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <motion.div 
-                className="text-2xl font-bold text-cyan-400" 
+                className="tabular text-2xl font-bold text-accent-bright" 
                 data-testid="text-total-trades"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -360,11 +361,11 @@ export function MarketActivityFeed({
               >
                 {allTrades.length}
               </motion.div>
-              <div className="text-xs text-slate-400">Total Trades</div>
+                <div className="text-xs text-muted">Total Trades</div>
             </div>
             <div>
               <motion.div 
-                className="text-2xl font-bold text-emerald-400" 
+                className="tabular text-2xl font-bold text-gain" 
                 data-testid="text-yes-trades"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -372,11 +373,11 @@ export function MarketActivityFeed({
               >
                 {allTrades.filter(t => t.outcome === "YES").length}
               </motion.div>
-              <div className="text-xs text-slate-400">YES</div>
+                <div className="text-xs text-muted">YES</div>
             </div>
             <div>
               <motion.div 
-                className="text-2xl font-bold text-rose-400" 
+                className="tabular text-2xl font-bold text-loss" 
                 data-testid="text-no-trades"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -384,10 +385,10 @@ export function MarketActivityFeed({
               >
                 {allTrades.filter(t => t.outcome === "NO").length}
               </motion.div>
-              <div className="text-xs text-slate-400">NO</div>
+                <div className="text-xs text-muted">NO</div>
             </div>
           </div>
-        </Card>
+        </Surface>
       </motion.div>
     </div>
   );

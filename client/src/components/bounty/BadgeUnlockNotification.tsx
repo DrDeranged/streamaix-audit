@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Star, TrendingUp, Target, Zap, Award, Crown, Medal, X } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { Star, TrendingUp, Target, Zap, Award, Crown, Medal, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 
 interface BadgeUnlockNotificationProps {
   badges: string[];
@@ -13,67 +14,67 @@ const BADGE_INFO: Record<string, { label: string; icon: any; color: string; desc
   first_bounty: { 
     label: 'First Steps', 
     icon: Star, 
-    color: 'from-yellow-400 to-orange-400', 
+    color: 'bg-warn', 
     description: 'Completed your first bounty!' 
   },
   speed_demon: { 
     label: 'Speed Demon', 
     icon: Zap, 
-    color: 'from-orange-400 to-red-400', 
+    color: 'bg-loss', 
     description: 'Completed a bounty in under 1 hour!' 
   },
   quality_master: { 
     label: 'Quality Master', 
     icon: Award, 
-    color: 'from-purple-400 to-pink-400', 
+    color: 'bg-accent-core', 
     description: 'Achieved 95+ quality score!' 
   },
   streak_3: { 
     label: '3-Day Streak', 
     icon: Target, 
-    color: 'from-cyan-400 to-blue-400', 
+    color: 'bg-accent-bright', 
     description: 'Maintained a 3-day completion streak!' 
   },
   streak_7: { 
     label: 'Week Warrior', 
     icon: Target, 
-    color: 'from-blue-400 to-purple-400', 
+    color: 'bg-accent-core', 
     description: 'Maintained a 7-day completion streak!' 
   },
   streak_30: { 
     label: 'Month Master', 
     icon: Target, 
-    color: 'from-purple-400 to-pink-400', 
+    color: 'bg-accent-core', 
     description: 'Maintained a 30-day completion streak!' 
   },
   specialist_crypto: { 
     label: 'Crypto Specialist', 
     icon: TrendingUp, 
-    color: 'from-green-400 to-emerald-400', 
+    color: 'bg-gain', 
     description: 'Completed 3+ crypto bounties!' 
   },
   specialist_tech: { 
     label: 'Tech Specialist', 
     icon: TrendingUp, 
-    color: 'from-blue-400 to-cyan-400', 
+    color: 'bg-accent-bright', 
     description: 'Completed 3+ tech bounties!' 
   },
   specialist_business: { 
     label: 'Business Specialist', 
     icon: TrendingUp, 
-    color: 'from-orange-400 to-yellow-400', 
+    color: 'bg-warn', 
     description: 'Completed 3+ business bounties!' 
   },
   century_club: { 
     label: 'Century Club', 
     icon: Crown, 
-    color: 'from-yellow-400 to-orange-500', 
+    color: 'bg-warn', 
     description: 'Completed 100+ bounties!' 
   },
   consistent_hunter: { 
     label: 'Consistent Hunter', 
     icon: Medal, 
-    color: 'from-pink-400 to-purple-400', 
+    color: 'bg-accent-core', 
     description: 'Completed 10+ bounties with 85+ quality!' 
   },
 };
@@ -102,7 +103,7 @@ export default function BadgeUnlockNotification({ badges, onClose }: BadgeUnlock
   const Icon = badgeInfo.icon;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-page/80 backdrop-blur-sm">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentBadge}
@@ -117,12 +118,12 @@ export default function BadgeUnlockNotification({ badges, onClose }: BadgeUnlock
           }}
           className="relative"
         >
-          <Card className="bg-gradient-to-br from-slate-900 to-purple-900/50 border-2 border-yellow-400/50 p-8 max-w-md mx-4">
+          <Surface className="relative max-w-md rounded-2xl border border-warn/50 bg-ink-surface p-8 mx-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="absolute top-2 right-2 text-gray-400 hover:text-white"
+              className="absolute right-2 top-2 rounded-xl text-secondary hover:bg-ink-raised hover:text-primary"
               data-testid="button-close-badge-notification"
             >
               <X className="w-4 h-4" />
@@ -146,9 +147,9 @@ export default function BadgeUnlockNotification({ badges, onClose }: BadgeUnlock
                 }}
                 className="mb-6"
               >
-                <div className={`w-32 h-32 mx-auto rounded-full bg-gradient-to-br ${badgeInfo.color} p-1 shadow-2xl shadow-yellow-400/50`}>
-                  <div className="w-full h-full rounded-full bg-slate-900/90 flex items-center justify-center">
-                    <Icon className="w-16 h-16 text-white" />
+                <div className={`mx-auto flex h-32 w-32 items-center justify-center rounded-xl ${badgeInfo.color} p-1 shadow-2xl shadow-warn/20`}>
+                  <div className="flex h-full w-full items-center justify-center rounded-xl bg-ink-raised">
+                    <Icon className="h-16 w-16 text-primary" />
                   </div>
                 </div>
               </motion.div>
@@ -158,13 +159,13 @@ export default function BadgeUnlockNotification({ badges, onClose }: BadgeUnlock
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
               >
-                <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400 mb-2">
+                <SectionTitle as="h2" className="mb-2 text-3xl font-bold text-warn">
                   Achievement Unlocked!
-                </h2>
-                <h3 className="text-2xl font-bold text-white mb-3">
+                </SectionTitle>
+                <h3 className="mb-3 font-display text-2xl font-bold text-primary">
                   {badgeInfo.label}
                 </h3>
-                <p className="text-gray-300 mb-6">
+                <p className="mb-6 text-body">
                   {badgeInfo.description}
                 </p>
 
@@ -173,10 +174,10 @@ export default function BadgeUnlockNotification({ badges, onClose }: BadgeUnlock
                     {badges.map((_, index) => (
                       <div
                         key={index}
-                        className={`w-2 h-2 rounded-full ${
+                        className={`h-2 w-2 rounded-xl ${
                           index === currentBadgeIndex 
-                            ? 'bg-yellow-400' 
-                            : 'bg-gray-600'
+                            ? 'bg-accent-core' 
+                            : 'bg-ink-raised'
                         }`}
                       />
                     ))}
@@ -207,17 +208,17 @@ export default function BadgeUnlockNotification({ badges, onClose }: BadgeUnlock
                     delay: i * 0.05,
                     ease: "easeOut"
                   }}
-                  className={`absolute w-2 h-2 rounded-full ${
+                  className={`absolute h-2 w-2 rounded-xl ${
                     i % 3 === 0 
-                      ? 'bg-yellow-400' 
+                      ? 'bg-warn' 
                       : i % 3 === 1 
-                      ? 'bg-orange-400' 
-                      : 'bg-purple-400'
+                      ? 'bg-loss' 
+                      : 'bg-accent-core'
                   }`}
                 />
               ))}
             </div>
-          </Card>
+          </Surface>
         </motion.div>
       </AnimatePresence>
     </div>

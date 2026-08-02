@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
-import { Target, TrendingUp, Clock, ExternalLink, ArrowUp, ArrowDown, Minus } from 'lucide-react';
+import { Target, TrendingUp, ExternalLink, ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import Surface from '@/components/ds/Surface';
 
 // Compact Bounty Card
 interface CompactBountyCardProps {
@@ -14,43 +15,44 @@ interface CompactBountyCardProps {
 
 export function CompactBountyCard({ id, title, reward, status, createdAt, creator }: CompactBountyCardProps) {
   const statusColors = {
-    open: 'bg-green-500/20 text-green-400 border-green-500/30',
-    in_progress: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-    completed: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    expired: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
+    open: 'bg-gain/10 text-gain border-gain/30',
+    in_progress: 'bg-warn/10 text-warn border-warn/30',
+    completed: 'bg-accent-core/10 text-accent-bright border-accent-core/30',
+    expired: 'bg-ink-raised text-secondary border-ink-edge',
   };
 
   return (
     <motion.div
       whileHover={{ scale: 1.01 }}
-      className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-3 hover:border-fuchsia-500/40 transition-all cursor-pointer"
-      data-testid={`bounty-card-${id}`}
+      className="cursor-pointer transition-all"
     >
-      <div className="flex items-center gap-3">
-        <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 border border-purple-500/30 flex items-center justify-center">
-          <Target className="w-5 h-5 text-fuchsia-400" />
-        </div>
-        
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-white truncate">{title}</h3>
-          <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
-            <span>{creator?.username || 'Anonymous'}</span>
-            <span>•</span>
-            <span>{formatDistanceToNow(new Date(createdAt), { addSuffix: true })}</span>
+      <Surface className="p-3 hover:bg-ink-raised" data-testid={`bounty-card-${id}`}>
+        <div className="flex items-center gap-3">
+          <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-accent-core/10 border border-accent-core/30 flex items-center justify-center">
+            <Target className="w-5 h-5 text-accent-bright" />
           </div>
-        </div>
+        
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-semibold text-primary truncate">{title}</h3>
+            <div className="flex items-center gap-2 text-xs text-secondary mt-0.5">
+              <span>{creator?.username || 'Anonymous'}</span>
+              <span>•</span>
+              <span>{formatDistanceToNow(new Date(createdAt), { addSuffix: true })}</span>
+            </div>
+          </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <span className={`px-2 py-1 rounded text-xs font-medium border ${statusColors[status as keyof typeof statusColors] || statusColors.open}`}>
-            {status}
-          </span>
-          <div className="text-right">
-            <div className="text-sm font-bold text-transparent bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text">
-              {reward} STREAM
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <span className={`px-2 py-1 rounded-xl text-xs font-medium border ${statusColors[status as keyof typeof statusColors] || statusColors.open}`}>
+              {status}
+            </span>
+            <div className="text-right">
+              <div className="tabular text-sm font-bold text-accent-bright">
+                {reward} STREAM
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </Surface>
     </motion.div>
   );
 }
@@ -77,34 +79,35 @@ export function CompactMarketCard({ id, question, yesPrice, totalVolume, created
   return (
     <motion.div
       whileHover={{ scale: 1.01 }}
-      className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-3 hover:border-fuchsia-500/40 transition-all cursor-pointer"
-      data-testid={`market-card-${id}`}
+      className="cursor-pointer transition-all"
     >
-      <div className="flex items-center gap-3">
-        <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-green-500/20 to-cyan-500/20 border border-green-500/30 flex items-center justify-center">
-          <TrendingUp className="w-5 h-5 text-cyan-400" />
-        </div>
+      <Surface className="p-3 hover:bg-ink-raised" data-testid={`market-card-${id}`}>
+        <div className="flex items-center gap-3">
+          <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gain/10 border border-gain/30 flex items-center justify-center">
+            <TrendingUp className="w-5 h-5 text-gain" />
+          </div>
         
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-white truncate">{question}</h3>
-          <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
-            <span>{totalVolume.toLocaleString()} STREAM volume</span>
-            <span>•</span>
-            <span>{formatDistanceToNow(new Date(createdAt), { addSuffix: true })}</span>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-semibold text-primary truncate">{question}</h3>
+            <div className="flex items-center gap-2 text-xs text-secondary mt-0.5">
+              <span>{totalVolume.toLocaleString()} STREAM volume</span>
+              <span>•</span>
+              <span>{formatDistanceToNow(new Date(createdAt), { addSuffix: true })}</span>
+            </div>
           </div>
-        </div>
 
-        <div className="flex gap-2 flex-shrink-0">
-          <div className="text-center px-3 py-1 rounded-lg bg-green-500/10 border border-green-500/30">
-            <div className="text-xs text-gray-400">YES</div>
-            <div className="text-sm font-bold text-green-400">{yesPriceNormalized}%</div>
-          </div>
-          <div className="text-center px-3 py-1 rounded-lg bg-red-500/10 border border-red-500/30">
-            <div className="text-xs text-gray-400">NO</div>
-            <div className="text-sm font-bold text-red-400">{noPriceNormalized}%</div>
+          <div className="flex gap-2 flex-shrink-0">
+            <div className="text-center px-3 py-1 rounded-xl bg-gain/10 border border-gain/30">
+              <div className="text-xs text-muted">YES</div>
+              <div className="tabular text-sm font-bold text-gain">{yesPriceNormalized}%</div>
+            </div>
+            <div className="text-center px-3 py-1 rounded-xl bg-loss/10 border border-loss/30">
+              <div className="text-xs text-muted">NO</div>
+              <div className="tabular text-sm font-bold text-loss">{noPriceNormalized}%</div>
+            </div>
           </div>
         </div>
-      </div>
+      </Surface>
     </motion.div>
   );
 }
@@ -125,34 +128,35 @@ export function MacroDataCard({ symbol, name, price, change, changePercent }: Ma
   return (
     <motion.div
       whileHover={{ scale: 1.01 }}
-      className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-2.5 hover:border-fuchsia-500/40 transition-all"
-      data-testid={`macro-card-${symbol}`}
+      className="transition-all"
     >
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <div className="text-sm font-bold text-white">{symbol}</div>
-          <div className="text-xs text-gray-400 truncate">{name}</div>
-        </div>
+      <Surface className="p-2.5 hover:bg-ink-raised" data-testid={`macro-card-${symbol}`}>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="text-sm font-bold text-primary">{symbol}</div>
+            <div className="text-xs text-secondary truncate">{name}</div>
+          </div>
 
-        <div className="flex items-center gap-3 flex-shrink-0">
-          <div className="text-sm font-semibold text-white">
-            ${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </div>
-          
-          <div className={`flex items-center gap-1 text-xs font-medium ${
-            isNeutral ? 'text-gray-400' : isPositive ? 'text-green-400' : 'text-red-400'
-          }`}>
-            {isNeutral ? (
-              <Minus className="w-3 h-3" />
-            ) : isPositive ? (
-              <ArrowUp className="w-3 h-3" />
-            ) : (
-              <ArrowDown className="w-3 h-3" />
-            )}
-            <span>{Math.abs(changePercent).toFixed(2)}%</span>
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="tabular text-sm font-semibold text-primary">
+              ${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+            
+            <div className={`flex items-center gap-1 text-xs font-medium ${
+              isNeutral ? 'text-muted' : isPositive ? 'text-gain' : 'text-loss'
+            }`}>
+              {isNeutral ? (
+                <Minus className="w-3 h-3" />
+              ) : isPositive ? (
+                <ArrowUp className="w-3 h-3" />
+              ) : (
+                <ArrowDown className="w-3 h-3" />
+              )}
+              <span className="tabular">{changePercent >= 0 ? '+' : ''}{changePercent.toFixed(2)}%</span>
+            </div>
           </div>
         </div>
-      </div>
+      </Surface>
     </motion.div>
   );
 }
@@ -171,32 +175,33 @@ export function CompactStoryCard({ id, title, summary, thumbnailUrl, createdAt, 
   return (
     <motion.div
       whileHover={{ scale: 1.01 }}
-      className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-3 hover:border-fuchsia-500/40 transition-all cursor-pointer"
-      data-testid={`story-card-${id}`}
+      className="cursor-pointer transition-all"
     >
-      <div className="flex items-start gap-3">
-        {thumbnailUrl && (
-          <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-purple-500/10">
-            <img 
-              src={thumbnailUrl} 
-              alt={title}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
+      <Surface className="p-3 hover:bg-ink-raised" data-testid={`story-card-${id}`}>
+        <div className="flex items-start gap-3">
+          {thumbnailUrl && (
+            <div className="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden bg-ink-raised">
+              <img 
+                src={thumbnailUrl} 
+                alt={title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
         
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-white line-clamp-2 mb-1">{title}</h3>
-          <p className="text-xs text-gray-400 line-clamp-1 mb-2">{summary}</p>
-          <div className="flex items-center gap-2 text-xs text-gray-500">
-            <span>{creator?.username || 'AI Hunter'}</span>
-            <span>•</span>
-            <span>{formatDistanceToNow(new Date(createdAt), { addSuffix: true })}</span>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-semibold text-primary line-clamp-2 mb-1">{title}</h3>
+            <p className="text-xs text-secondary line-clamp-1 mb-2">{summary}</p>
+            <div className="flex items-center gap-2 text-xs text-muted">
+              <span>{creator?.username || 'AI Hunter'}</span>
+              <span>•</span>
+              <span>{formatDistanceToNow(new Date(createdAt), { addSuffix: true })}</span>
+            </div>
           </div>
-        </div>
 
-        <ExternalLink className="w-4 h-4 text-gray-400 flex-shrink-0 mt-1" />
-      </div>
+          <ExternalLink className="w-4 h-4 text-secondary flex-shrink-0 mt-1" />
+        </div>
+      </Surface>
     </motion.div>
   );
 }

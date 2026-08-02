@@ -5,7 +5,8 @@ import {
   MessageCircle, Bot, Sparkles, FileText, 
   Award, Clock
 } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import CompletedBountyDetailModal from './CompletedBountyDetailModal';
@@ -42,8 +43,8 @@ export default function CompletedBountyCard({ bounty }: CompletedBountyCardProps
 
   return (
     <>
-      <Card 
-        className="bg-gradient-to-br from-green-900/20 to-emerald-800/10 border-green-500/30 backdrop-blur-sm overflow-hidden hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/10 transition-all cursor-pointer group"
+      <Surface 
+        className="overflow-hidden border border-ink-edge bg-ink-surface transition-all cursor-pointer group hover:border-accent-core/50 hover:bg-ink-raised"
         onClick={() => setIsModalOpen(true)}
         data-testid={`completed-bounty-card-${bounty.id}`}
       >
@@ -51,33 +52,33 @@ export default function CompletedBountyCard({ bounty }: CompletedBountyCardProps
           {/* Header with Completed Badge */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-semibold text-white mb-1 line-clamp-2 group-hover:text-green-300 transition-colors" data-testid={`completed-bounty-title-${bounty.id}`}>
+              <SectionTitle as="h3" className="mb-1 line-clamp-2 text-lg font-semibold transition-colors group-hover:text-accent-bright" data-testid={`completed-bounty-title-${bounty.id}`}>
                 {bounty.title}
-              </h3>
+              </SectionTitle>
               {bounty.completedAt && (
-                <div className="flex items-center gap-2 text-sm text-gray-400">
+                <div className="flex items-center gap-2 text-sm text-secondary">
                   <Clock className="w-3 h-3" />
                   <span>Completed {formatDistanceToNow(new Date(bounty.completedAt), { addSuffix: true })}</span>
                 </div>
               )}
             </div>
-            <Badge className="border-green-500/50 bg-green-500/10 text-green-400 flex-shrink-0" data-testid={`completed-badge-${bounty.id}`}>
+            <Badge className="flex-shrink-0 border-gain/30 bg-gain/10 text-gain" data-testid={`completed-badge-${bounty.id}`}>
               <CheckCircle className="w-3 h-3 mr-1" />
               Completed
             </Badge>
           </div>
 
           {/* Winner / Completer Info */}
-          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-green-500/10 to-emerald-500/5 border border-green-500/30 rounded-lg">
+          <div className="flex items-center gap-3 rounded-xl border border-ink-edge bg-ink-raised p-3">
             {bounty.isAiCompleted ? (
               <>
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-5 h-5 text-white" />
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-accent-core/20">
+                  <Bot className="h-5 w-5 text-accent-bright" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-medium text-cyan-300">AI Agent</span>
-                    <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/40 text-xs">
+                    <span className="text-sm font-medium text-accent-bright">AI Agent</span>
+                    <Badge className="border-accent-core/30 bg-accent-core/10 text-accent-bright text-xs">
                       <Sparkles className="w-3 h-3 mr-1" />
                       AI
                     </Badge>
@@ -86,12 +87,12 @@ export default function CompletedBountyCard({ bounty }: CompletedBountyCardProps
               </>
             ) : (
               <>
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center text-white font-bold flex-shrink-0">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-accent-core/20 font-bold text-accent-bright">
                   {bounty.completerUsername?.[0]?.toUpperCase() || 
                    bounty.claimerWallet?.slice(2, 4).toUpperCase() || '?'}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm font-medium text-purple-300 truncate block">
+                   <span className="block truncate text-sm font-medium text-accent-bright">
                     {bounty.completerUsername ? `@${bounty.completerUsername}` : 
                      bounty.claimerWallet ? `${bounty.claimerWallet.slice(0, 6)}...${bounty.claimerWallet.slice(-4)}` : 
                      'Anonymous'}
@@ -100,31 +101,31 @@ export default function CompletedBountyCard({ bounty }: CompletedBountyCardProps
               </>
             )}
             <div className="text-right flex-shrink-0">
-              <div className="flex items-center gap-1 text-green-400">
+              <div className="flex items-center gap-1 text-gain">
                 <Trophy className="w-4 h-4" />
-                <span className="font-bold">{(bounty.reward || 0).toLocaleString()}</span>
+                <span className="tabular font-bold">{(bounty.reward || 0).toLocaleString()}</span>
               </div>
-              <span className="text-xs text-gray-400">$STREAM</span>
+              <span className="text-xs text-muted">$STREAM</span>
             </div>
           </div>
 
           {/* Summary Preview */}
           {bounty.summaryPreview && bounty.summaryPreview.length > 0 && (
             <div className="space-y-2">
-              <div className="flex items-center gap-1.5 text-xs text-gray-400">
+              <div className="flex items-center gap-1.5 text-xs text-muted">
                 <FileText className="w-3.5 h-3.5" />
                 <span>Key Insights</span>
               </div>
               <ul className="space-y-1.5">
                 {bounty.summaryPreview.slice(0, 2).map((point, idx) => (
-                  <li key={idx} className="text-sm text-gray-300 flex items-start gap-2">
-                    <span className="text-green-400 mt-0.5 flex-shrink-0">•</span>
+                  <li key={idx} className="flex items-start gap-2 text-sm text-body">
+                    <span className="mt-0.5 flex-shrink-0 text-gain">•</span>
                     <span className="line-clamp-1">{point}</span>
                   </li>
                 ))}
               </ul>
               {bounty.summaryPreview.length > 2 && (
-                <p className="text-xs text-green-400 font-medium">
+                  <p className="text-xs font-medium text-accent-bright">
                   +{bounty.summaryPreview.length - 2} more insights
                 </p>
               )}
@@ -133,11 +134,11 @@ export default function CompletedBountyCard({ bounty }: CompletedBountyCardProps
 
           {/* Quality Score */}
           {qualityScore && qualityScore > 0 && (
-            <div className="flex items-center gap-2 p-2 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-              <Star className="w-4 h-4 text-yellow-400" />
-              <span className="text-sm font-semibold text-yellow-400">{qualityScore}/100</span>
+            <div className="flex items-center gap-2 rounded-xl border border-warn/30 bg-warn/10 p-2">
+              <Star className="h-4 w-4 text-warn" />
+              <span className="tabular text-sm font-semibold text-warn">{qualityScore}/100</span>
               {qualityScore >= 90 && (
-                <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/40 text-xs ml-auto">
+                <Badge className="ml-auto border-warn/30 bg-warn/10 text-warn text-xs">
                   <Award className="w-3 h-3 mr-1" />
                   Top Quality
                 </Badge>
@@ -146,27 +147,27 @@ export default function CompletedBountyCard({ bounty }: CompletedBountyCardProps
           )}
 
           {/* Engagement Stats */}
-          <div className="flex items-center justify-between pt-2 border-t border-green-500/20">
+          <div className="flex items-center justify-between border-t border-ink-divider pt-2">
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1.5 text-gray-400">
+              <div className="flex items-center gap-1.5 text-secondary">
                 <Eye className="w-4 h-4" />
-                <span className="text-sm">{engagementData?.views || 0}</span>
+                <span className="tabular text-sm">{engagementData?.views || 0}</span>
               </div>
-              <div className="flex items-center gap-1.5 text-pink-400">
+              <div className="flex items-center gap-1.5 text-loss">
                 <Heart className="w-4 h-4" />
-                <span className="text-sm">{engagementData?.likes || 0}</span>
+                <span className="tabular text-sm">{engagementData?.likes || 0}</span>
               </div>
-              <div className="flex items-center gap-1.5 text-blue-400">
+              <div className="flex items-center gap-1.5 text-accent-bright">
                 <MessageCircle className="w-4 h-4" />
-                <span className="text-sm">{comments.length}</span>
+                <span className="tabular text-sm">{comments.length}</span>
               </div>
             </div>
-            <span className="text-xs text-green-400 font-medium group-hover:underline">
+            <span className="text-xs font-medium text-accent-bright group-hover:underline">
               Read & Engage →
             </span>
           </div>
         </div>
-      </Card>
+      </Surface>
 
       {/* Detail Modal */}
       <CompletedBountyDetailModal

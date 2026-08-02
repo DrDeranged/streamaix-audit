@@ -1,10 +1,12 @@
 import { useState, useMemo, memo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
+import Surface from "@/components/ds/Surface";
+import SectionTitle from "@/components/ds/SectionTitle";
+import StatValue from "@/components/ds/StatValue";
 import {
   DollarSign,
   TrendingUp,
@@ -117,22 +119,22 @@ export const PortfolioSimulator = memo(function PortfolioSimulator({ avatars }: 
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <Card className="bg-gradient-to-br from-slate-950/90 to-blue-950/90 backdrop-blur-xl border-blue-500/20">
-        <CardHeader className="pb-4 md:pb-6">
-          <CardTitle className="text-white flex items-center gap-2 text-lg md:text-xl">
+      <Surface className="p-4 md:p-6">
+        <div className="pb-4 md:pb-6">
+          <SectionTitle className="flex items-center gap-2 text-lg md:text-xl">
             <PieChart className="w-4 h-4 md:w-5 md:h-5 text-cyan-400" />
             Portfolio Simulator
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 md:space-y-6">
+          </SectionTitle>
+        </div>
+        <div className="space-y-4 md:space-y-6">
           {/* Investment Amount */}
           <div className="space-y-2">
-            <Label className="text-blue-200">Investment Amount ($)</Label>
+            <Label className="text-secondary">Investment Amount ($)</Label>
             <Input
               type="number"
               value={investmentAmount}
               onChange={(e) => setInvestmentAmount(Number(e.target.value))}
-              className="bg-slate-900/60 border-blue-500/30 text-white"
+              className="rounded-xl border border-ink-edge bg-ink-raised text-primary"
               min={100}
               step={100}
             />
@@ -140,7 +142,7 @@ export const PortfolioSimulator = memo(function PortfolioSimulator({ avatars }: 
 
           {/* Time Horizon */}
           <div className="space-y-2">
-            <Label className="text-blue-200">Time Horizon ({timeHorizon} months)</Label>
+            <Label className="text-secondary">Time Horizon ({timeHorizon} months)</Label>
             <Slider
               value={[timeHorizon]}
               onValueChange={(value) => setTimeHorizon(value[0])}
@@ -156,7 +158,7 @@ export const PortfolioSimulator = memo(function PortfolioSimulator({ avatars }: 
             <Button
               onClick={autoAllocate}
               size="sm"
-              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 w-full sm:w-auto"
+              className="grad-accent glow-accent w-full rounded-xl text-primary hover:bg-accent-deep sm:w-auto"
             >
               <Sparkles className="w-4 h-4 mr-2" />
               Auto Allocate
@@ -165,41 +167,41 @@ export const PortfolioSimulator = memo(function PortfolioSimulator({ avatars }: 
               onClick={resetAllocations}
               size="sm"
               variant="outline"
-              className="border-blue-500/40 text-blue-300 w-full sm:w-auto"
+              className="w-full rounded-xl border border-ink-edge bg-ink-raised text-secondary sm:w-auto"
             >
               Reset
             </Button>
           </div>
 
           {/* Allocation Progress */}
-          <div className="bg-slate-900/60 rounded-lg p-4 border border-blue-500/20">
+          <Surface variant="raised" className="rounded-xl border border-ink-edge p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-blue-200">Total Allocation</span>
-              <span className={`text-sm font-bold ${totalAllocation === 100 ? 'text-green-400' : totalAllocation > 100 ? 'text-red-400' : 'text-yellow-400'}`}>
+              <span className="text-sm text-secondary">Total Allocation</span>
+              <span className={`tabular text-sm font-bold ${totalAllocation === 100 ? 'text-gain' : totalAllocation > 100 ? 'text-loss' : 'text-warn'}`}>
                 {totalAllocation}%
               </span>
             </div>
-            <div className="w-full bg-slate-800 rounded-full h-2">
+            <div className="h-2 w-full rounded-full bg-ink-edge">
               <div
-                className={`h-2 rounded-full transition-all ${totalAllocation === 100 ? 'bg-green-500' : totalAllocation > 100 ? 'bg-red-500' : 'bg-yellow-500'}`}
+                className={`h-2 rounded-full transition-all ${totalAllocation === 100 ? 'bg-gain' : totalAllocation > 100 ? 'bg-loss' : 'bg-warn'}`}
                 style={{ width: `${Math.min(totalAllocation, 100)}%` }}
               />
             </div>
-          </div>
+          </Surface>
 
           {/* Avatar Allocations */}
           <div className="space-y-3">
-            <Label className="text-blue-200">Entrepreneur Allocations</Label>
+            <Label className="text-secondary">Entrepreneur Allocations</Label>
             {avatars.map((avatar) => (
-              <div key={avatar.id} className="bg-slate-900/60 rounded-lg p-3 border border-blue-500/20">
+              <Surface key={avatar.id} variant="raised" className="rounded-xl border border-ink-edge p-3">
                 <div className="flex items-center justify-between mb-2">
                   <div>
-                    <p className="text-white text-sm font-semibold">{avatar.name}</p>
+                    <p className="text-primary text-sm font-semibold">{avatar.name}</p>
                     <div className="flex gap-2 mt-1">
-                      <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-300 border-blue-500/30">
+                      <Badge variant="outline" className="border-accent-core/30 bg-accent-core/10 text-xs text-accent-bright">
                         ROI: {avatar.portfolioRoi || 0}%
                       </Badge>
-                      <Badge variant="outline" className="text-xs bg-purple-500/10 text-purple-300 border-purple-500/30">
+                      <Badge variant="outline" className="border-accent-core/30 bg-accent-core/10 text-xs text-accent-bright">
                         Risk: {avatar.riskScore || 50}
                       </Badge>
                     </div>
@@ -208,7 +210,7 @@ export const PortfolioSimulator = memo(function PortfolioSimulator({ avatars }: 
                     type="number"
                     value={allocations[avatar.id] || 0}
                     onChange={(e) => handleAllocationChange(avatar.id, Number(e.target.value))}
-                    className="w-20 bg-slate-800 border-blue-500/30 text-white text-center"
+                    className="w-20 rounded-xl border border-ink-edge bg-ink-surface text-center text-primary"
                     min={0}
                     max={100}
                   />
@@ -221,11 +223,11 @@ export const PortfolioSimulator = memo(function PortfolioSimulator({ avatars }: 
                   step={5}
                   className="mt-2"
                 />
-              </div>
+              </Surface>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </Surface>
 
       {/* Simulation Results */}
       {totalAllocation === 100 && (
@@ -233,96 +235,84 @@ export const PortfolioSimulator = memo(function PortfolioSimulator({ avatars }: 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <Card className="bg-gradient-to-br from-green-950/40 to-emerald-950/40 backdrop-blur-xl border-green-500/20">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Target className="w-5 h-5 text-green-400" />
+            <Surface className="p-4 md:p-6">
+             <div className="pb-4">
+               <SectionTitle className="flex items-center gap-2">
+                 <Target className="w-5 h-5 text-gain" />
                 Projected Results
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+               </SectionTitle>
+             </div>
+             <div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-                <div className="bg-slate-950/60 rounded-lg p-4 border border-green-500/20">
+                <Surface variant="raised" className="rounded-xl border border-ink-edge p-4">
                   <div className="flex items-center gap-2 mb-1">
-                    <DollarSign className="w-4 h-4 text-green-400" />
-                    <p className="text-xs text-green-200">Final Value</p>
+                     <DollarSign className="w-4 h-4 text-gain" />
+                     <p className="text-xs text-secondary">Final Value</p>
                   </div>
-                  <p className="text-2xl font-bold text-white">
-                    ${Number(simulatedResults.finalValue).toLocaleString()}
-                  </p>
-                </div>
+                  <StatValue label="" value={`$${Number(simulatedResults.finalValue).toLocaleString()}`} />
+                </Surface>
 
-                <div className="bg-slate-950/60 rounded-lg p-4 border border-green-500/20">
+                <Surface variant="raised" className="rounded-xl border border-ink-edge p-4">
                   <div className="flex items-center gap-2 mb-1">
                     {Number(simulatedResults.profit) >= 0 ? (
-                      <TrendingUp className="w-4 h-4 text-green-400" />
+                       <TrendingUp className="w-4 h-4 text-gain" />
                     ) : (
-                      <TrendingDown className="w-4 h-4 text-red-400" />
+                       <TrendingDown className="w-4 h-4 text-loss" />
                     )}
-                    <p className="text-xs text-green-200">Expected Profit</p>
+                     <p className="text-xs text-secondary">Expected Profit</p>
                   </div>
-                  <p className={`text-2xl font-bold ${Number(simulatedResults.profit) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {Number(simulatedResults.profit) >= 0 ? '+' : ''}${Number(simulatedResults.profit).toLocaleString()}
-                  </p>
-                </div>
+                  <StatValue label="" value={`${Number(simulatedResults.profit) >= 0 ? '+' : ''}$${Number(simulatedResults.profit).toLocaleString()}`} valueClassName={Number(simulatedResults.profit) >= 0 ? "text-gain" : "text-loss"} />
+                </Surface>
 
-                <div className="bg-slate-950/60 rounded-lg p-4 border border-green-500/20">
+                <Surface variant="raised" className="rounded-xl border border-ink-edge p-4">
                   <div className="flex items-center gap-2 mb-1">
-                    <TrendingUp className="w-4 h-4 text-cyan-400" />
-                    <p className="text-xs text-green-200">Expected Return</p>
+                     <TrendingUp className="w-4 h-4 text-accent-bright" />
+                     <p className="text-xs text-secondary">Expected Return</p>
                   </div>
-                  <p className="text-2xl font-bold text-cyan-400">
-                    {Number(simulatedResults.expectedReturn) >= 0 ? '+' : ''}{simulatedResults.expectedReturn}%
-                  </p>
-                </div>
+                  <StatValue label="" value={`${Number(simulatedResults.expectedReturn) >= 0 ? '+' : ''}${simulatedResults.expectedReturn}%`} valueClassName="text-accent-bright" />
+                </Surface>
 
-                <div className="bg-slate-950/60 rounded-lg p-4 border border-green-500/20">
+                <Surface variant="raised" className="rounded-xl border border-ink-edge p-4">
                   <div className="flex items-center gap-2 mb-1">
-                    <AlertCircle className="w-4 h-4 text-yellow-400" />
-                    <p className="text-xs text-green-200">Risk Level</p>
+                     <AlertCircle className="w-4 h-4 text-warn" />
+                     <p className="text-xs text-secondary">Risk Level</p>
                   </div>
-                  <p className="text-2xl font-bold text-yellow-400">
-                    {simulatedResults.riskLevel}/100
-                  </p>
-                </div>
+                  <StatValue label="" value={`${simulatedResults.riskLevel}/100`} valueClassName="text-warn" />
+                </Surface>
 
-                <div className="bg-slate-950/60 rounded-lg p-4 border border-green-500/20 col-span-2">
+                <Surface variant="raised" className="col-span-2 rounded-xl border border-ink-edge p-4">
                   <div className="flex items-center gap-2 mb-1">
-                    <Sparkles className="w-4 h-4 text-purple-400" />
-                    <p className="text-xs text-green-200">Confidence Score</p>
+                     <Sparkles className="w-4 h-4 text-accent-bright" />
+                     <p className="text-xs text-secondary">Confidence Score</p>
                   </div>
-                  <p className="text-2xl font-bold text-purple-400">
-                    {simulatedResults.confidence}%
-                  </p>
-                </div>
+                  <StatValue label="" value={`${simulatedResults.confidence}%`} valueClassName="text-accent-bright" />
+                </Surface>
               </div>
 
-              <div className="mt-4 p-4 bg-blue-950/40 rounded-lg border border-blue-500/20">
-                <p className="text-xs text-blue-200 mb-2">
+              <Surface variant="raised" className="mt-4 rounded-xl border border-ink-edge p-4">
+                 <p className="mb-2 text-xs text-secondary">
                   <AlertCircle className="w-4 h-4 inline mr-1" />
                   Disclaimer
                 </p>
-                <p className="text-xs text-blue-300/70">
+                 <p className="text-xs text-muted">
                   This is a simulated projection based on historical performance. Actual returns may vary significantly. Past performance does not guarantee future results. Always conduct your own research before making investment decisions.
                 </p>
-              </div>
-            </CardContent>
-          </Card>
+              </Surface>
+             </div>
+            </Surface>
         </motion.div>
       )}
 
       {totalAllocation !== 100 && totalAllocation > 0 && (
-        <Card className="bg-yellow-950/20 backdrop-blur-xl border-yellow-500/20">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-yellow-400">
+        <Surface className="p-4">
+             <div className="flex items-center gap-2 text-warn">
               <AlertCircle className="w-5 h-5" />
               <p className="text-sm">
                 Allocate exactly 100% to see projected results
                 {totalAllocation > 100 && ` (Currently: ${totalAllocation}%)`}
               </p>
             </div>
-          </CardContent>
-        </Card>
+        </Surface>
       )}
     </div>
   );

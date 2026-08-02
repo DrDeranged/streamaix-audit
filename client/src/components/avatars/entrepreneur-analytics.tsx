@@ -1,41 +1,29 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import Surface from "@/components/ds/Surface";
+import StatValue from "@/components/ds/StatValue";
+import SectionTitle from "@/components/ds/SectionTitle";
 import { 
   TrendingUp, 
-  TrendingDown, 
   Activity, 
   Target,
   AlertTriangle,
   CheckCircle2,
   DollarSign,
-  Calendar,
   BarChart3,
   LineChart,
-  PieChart,
-  Zap,
-  ArrowUpRight,
-  ArrowDownRight,
   Clock
 } from "lucide-react";
 import { 
-  LineChart as RechartsLine, 
-  Line, 
   BarChart,
   Bar,
-  PieChart as RechartsPie,
-  Pie,
-  Cell,
   XAxis, 
   YAxis, 
   CartesianGrid, 
   Tooltip, 
   Legend, 
   ResponsiveContainer,
-  ScatterChart,
-  Scatter,
-  ZAxis
 } from 'recharts';
 
 interface BestCall {
@@ -119,19 +107,15 @@ export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMet
 
   // Colors for charts
   const COLORS = {
-    win: '#10b981',
-    loss: '#ef4444',
-    primary: '#3b82f6',
-    secondary: '#8b5cf6',
-    accent: '#06b6d4'
+    primary: '#8B7CF6'
   };
 
   // Risk score interpretation
   const getRiskLevel = (score: number): { level: string; color: string } => {
-    if (score >= 80) return { level: 'Very High', color: 'text-red-500' };
-    if (score >= 60) return { level: 'High', color: 'text-orange-500' };
-    if (score >= 40) return { level: 'Moderate', color: 'text-yellow-500' };
-    return { level: 'Conservative', color: 'text-green-500' };
+    if (score >= 80) return { level: 'Very High', color: 'text-loss' };
+    if (score >= 60) return { level: 'High', color: 'text-warn' };
+    if (score >= 40) return { level: 'Moderate', color: 'text-warn' };
+    return { level: 'Conservative', color: 'text-gain' };
   };
 
   const riskAssessment = getRiskLevel(entrepreneur.riskScore);
@@ -140,74 +124,75 @@ export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMet
     <div className="space-y-3">
       {/* Investment Thesis Section */}
       {showThesis && (
-        <Card className="bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 border-blue-500/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-blue-500" />
+        <Surface className="p-4">
+          <div className="mb-3">
+            <SectionTitle as="h3" className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-accent-bright" />
               Investment Thesis
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm leading-relaxed text-muted-foreground">
+            </SectionTitle>
+          </div>
+          <div>
+            <p className="text-sm leading-relaxed text-body">
               {entrepreneur.investmentThesis}
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </Surface>
       )}
 
       {/* Key Metrics Grid */}
       {showMetrics && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-green-500/20 bg-green-500/5">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-green-500" />
+        <Surface className="p-4">
+          <div className="mb-2">
+            <div className="text-sm font-medium flex items-center gap-2 text-secondary">
+              <DollarSign className="h-4 w-4 text-gain" />
               Net Worth
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-              ${entrepreneur.netWorth}
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className={`border-${entrepreneur.portfolioRoi && entrepreneur.portfolioRoi >= 0 ? 'blue' : 'red'}-500/20 bg-${entrepreneur.portfolioRoi && entrepreneur.portfolioRoi >= 0 ? 'blue' : 'red'}-500/5`}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-blue-500" />
+          </div>
+          <div>
+            <StatValue label="" value={`$${entrepreneur.netWorth}`} valueClassName="text-gain" />
+          </div>
+        </Surface>
+ 
+        <Surface className="p-4">
+          <div className="mb-2">
+            <div className="text-sm font-medium flex items-center gap-2 text-secondary">
+              <TrendingUp className="h-4 w-4 text-accent-bright" />
               Portfolio ROI
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold flex items-center gap-2 ${entrepreneur.portfolioRoi && entrepreneur.portfolioRoi >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-600 dark:text-red-400'}`}>
-              {entrepreneur.portfolioRoi && entrepreneur.portfolioRoi >= 0 ? <ArrowUpRight className="h-5 w-5" /> : <ArrowDownRight className="h-5 w-5" />}
-              {entrepreneur.portfolioRoi ? `${entrepreneur.portfolioRoi > 0 ? '+' : ''}${entrepreneur.portfolioRoi}%` : 'N/A'}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          <div>
+            <StatValue
+              label=""
+              value={
+                entrepreneur.portfolioRoi
+                  ? `${entrepreneur.portfolioRoi > 0 ? '+' : ''}${entrepreneur.portfolioRoi.toFixed(2)}%`
+                  : 'N/A'
+              }
+              valueClassName={entrepreneur.portfolioRoi && entrepreneur.portfolioRoi >= 0 ? 'text-accent-bright' : 'text-loss'}
+            />
+          </div>
+        </Surface>
 
-        <Card className={`border-${riskAssessment.color.includes('red') ? 'red' : riskAssessment.color.includes('orange') ? 'orange' : riskAssessment.color.includes('yellow') ? 'yellow' : 'green'}-500/20 bg-${riskAssessment.color.includes('red') ? 'red' : riskAssessment.color.includes('orange') ? 'orange' : riskAssessment.color.includes('yellow') ? 'yellow' : 'green'}-500/5`}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-orange-500" />
+        <Surface className="p-4">
+          <div className="mb-2">
+            <div className="text-sm font-medium flex items-center gap-2 text-secondary">
+              <AlertTriangle className="h-4 w-4 text-warn" />
               Risk Profile
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${riskAssessment.color}`}>
-              {entrepreneur.riskScore}/100
             </div>
+          </div>
+          <div>
+            <StatValue label="" value={`${entrepreneur.riskScore}/100`} valueClassName={riskAssessment.color} />
             <p className={`text-xs mt-1 ${riskAssessment.color}`}>{riskAssessment.level}</p>
-          </CardContent>
-        </Card>
+          </div>
+        </Surface>
         </div>
       )}
 
       {/* Tabbed Analytics */}
       <Tabs defaultValue="performance" className="w-full">
         <div className="-mx-1 px-1">
-          <TabsList className="grid w-full grid-cols-4 text-[9px] md:text-sm gap-0">
+          <TabsList className="grid w-full grid-cols-4 text-[9px] md:text-sm gap-0 bg-ink-surface border border-ink-edge rounded-xl p-1">
             <TabsTrigger value="performance" className="px-1 md:px-3 py-1.5 md:py-2 text-[9px] md:text-sm">Perf</TabsTrigger>
             <TabsTrigger value="best" className="px-1 md:px-3 py-1.5 md:py-2 text-[9px] md:text-sm">Best</TabsTrigger>
             <TabsTrigger value="worst" className="px-1 md:px-3 py-1.5 md:py-2 text-[9px] md:text-sm">Worst</TabsTrigger>
@@ -217,14 +202,14 @@ export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMet
 
         {/* Performance Chart */}
         <TabsContent value="performance" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-blue-500" />
+          <Surface className="p-4">
+            <div className="mb-3">
+              <SectionTitle as="h3" className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-accent-bright" />
                 Investment Performance Overview
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </SectionTitle>
+            </div>
+            <div>
               {performanceData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={200} className="md:!h-[300px]">
                   <BarChart data={performanceData}>
@@ -244,82 +229,72 @@ export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMet
                       contentStyle={{ 
                         backgroundColor: 'rgba(0,0,0,0.8)', 
                         border: 'none',
-                        borderRadius: '8px',
-                        color: '#fff'
+                        borderRadius: '12px',
+                        color: '#F2F4FA'
                       }}
                     />
                     <Legend />
                     <Bar 
                       dataKey="roi" 
                       name="ROI (%)"
-                      fill="url(#colorGradient)"
+                      fill={COLORS.primary}
                       radius={[8, 8, 0, 0]}
                     />
-                    <defs>
-                      <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor={COLORS.secondary} stopOpacity={0.8}/>
-                      </linearGradient>
-                    </defs>
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-[200px] md:h-[300px] flex items-center justify-center text-muted-foreground">
+                <div className="h-[200px] md:h-[300px] flex items-center justify-center text-muted">
                   No quantifiable performance data available
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </Surface>
 
           {/* Risk/Volatility Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Risk Score Distribution</CardTitle>
-              </CardHeader>
-              <CardContent>
+            <Surface className="p-4">
+              <div className="mb-3"><h3 className="text-sm font-medium text-primary">Risk Score Distribution</h3></div>
+              <div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Risk Tolerance</span>
+                    <span className="text-sm text-body">Risk Tolerance</span>
                     <Badge variant={entrepreneur.riskScore > 70 ? "destructive" : "default"}>
                       {entrepreneur.riskScore}/100
                     </Badge>
                   </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div className="w-full bg-ink-raised rounded-xl h-2">
                     <div 
-                      className={`h-2 rounded-full transition-all ${
-                        entrepreneur.riskScore > 70 ? 'bg-red-500' : 
-                        entrepreneur.riskScore > 50 ? 'bg-yellow-500' : 
-                        'bg-green-500'
+                        className={`h-2 rounded-xl transition-all ${
+                         entrepreneur.riskScore > 70 ? 'bg-loss' : 
+                         entrepreneur.riskScore > 50 ? 'bg-warn' : 
+                         'bg-gain'
                       }`}
                       style={{ width: `${entrepreneur.riskScore}%` }}
                     />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Volatility Index</CardTitle>
-              </CardHeader>
-              <CardContent>
+            <Surface className="p-4">
+              <div className="mb-3"><h3 className="text-sm font-medium text-primary">Volatility Index</h3></div>
+              <div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Market Volatility</span>
+                    <span className="text-sm text-body">Market Volatility</span>
                     <Badge variant={entrepreneur.volatility > 70 ? "destructive" : "secondary"}>
                       {entrepreneur.volatility}/100
                     </Badge>
                   </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div className="w-full bg-ink-raised rounded-xl h-2">
                     <div 
-                      className="h-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all"
+                      className="h-2 rounded-xl bg-accent-core transition-all"
                       style={{ width: `${entrepreneur.volatility}%` }}
                     />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
           </div>
         </TabsContent>
 
@@ -327,22 +302,20 @@ export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMet
         <TabsContent value="best" className="space-y-4">
           <div className="grid gap-4">
             {(!entrepreneur.bestCalls || entrepreneur.bestCalls.length === 0) ? (
-              <Card className="border-green-500/20 bg-green-500/5">
-                <CardContent className="pt-6 text-center">
-                  <CheckCircle2 className="h-8 w-8 text-green-500/50 mx-auto mb-3" />
-                  <p className="text-muted-foreground text-sm">No notable winning investments recorded yet</p>
-                </CardContent>
-              </Card>
+              <Surface className="p-4 border-gain/20 bg-gain/5 text-center">
+                <CheckCircle2 className="h-8 w-8 text-gain/50 mx-auto mb-3" />
+                <p className="text-secondary text-sm">No notable winning investments recorded yet</p>
+              </Surface>
             ) : entrepreneur.bestCalls.map((call, idx) => (
-              <Card key={idx} className="border-green-500/20 bg-green-500/5">
-                <CardContent className="pt-6">
+              <Surface key={idx} className="p-4 border-gain/20 bg-gain/5">
+                <div>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                      <CheckCircle2 className="h-5 w-5 text-gain flex-shrink-0" />
                       <h3 className="font-semibold text-lg">{call.name}</h3>
                     </div>
                     {parseROI(call.roi) !== null && (
-                      <Badge className="bg-green-500 text-white font-bold text-sm">
+                      <Badge className="bg-gain text-ink-page font-bold text-sm">
                         +{call.roi}
                       </Badge>
                     )}
@@ -351,35 +324,35 @@ export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMet
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 text-sm">
                     {call.date && (
                       <div>
-                        <p className="text-muted-foreground text-xs">Date</p>
+                        <p className="text-muted text-xs">Date</p>
                         <p className="font-medium">{call.date}</p>
                       </div>
                     )}
                     {call.entry && (
                       <div>
-                        <p className="text-muted-foreground text-xs">Entry</p>
+                        <p className="text-muted text-xs">Entry</p>
                         <p className="font-medium">{call.entry}</p>
                       </div>
                     )}
                     {call.current && (
                       <div>
-                        <p className="text-muted-foreground text-xs">Current</p>
+                        <p className="text-muted text-xs">Current</p>
                         <p className="font-medium">{call.current}</p>
                       </div>
                     )}
                     {call.exit && (
                       <div>
-                        <p className="text-muted-foreground text-xs">Exit</p>
+                        <p className="text-muted text-xs">Exit</p>
                         <p className="font-medium">{call.exit}</p>
                       </div>
                     )}
                   </div>
                   
-                  <p className="text-sm text-muted-foreground leading-relaxed">
+                  <p className="text-sm text-body leading-relaxed">
                     {call.outcome}
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </Surface>
             ))}
           </div>
         </TabsContent>
@@ -388,18 +361,16 @@ export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMet
         <TabsContent value="worst" className="space-y-4">
           <div className="grid gap-4">
             {(!entrepreneur.worstCalls || entrepreneur.worstCalls.length === 0) ? (
-              <Card className="border-red-500/20 bg-red-500/5">
-                <CardContent className="pt-6 text-center">
-                  <AlertTriangle className="h-8 w-8 text-red-500/50 mx-auto mb-3" />
-                  <p className="text-muted-foreground text-sm">No notable losing investments recorded yet</p>
-                </CardContent>
-              </Card>
+              <Surface className="p-4 border-loss/20 bg-loss/5 text-center">
+                <AlertTriangle className="h-8 w-8 text-loss/50 mx-auto mb-3" />
+                <p className="text-secondary text-sm">No notable losing investments recorded yet</p>
+              </Surface>
             ) : entrepreneur.worstCalls.map((call, idx) => (
-              <Card key={idx} className="border-red-500/20 bg-red-500/5">
-                <CardContent className="pt-6">
+              <Surface key={idx} className="p-4 border-loss/20 bg-loss/5">
+                <div>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0" />
+                      <AlertTriangle className="h-5 w-5 text-loss flex-shrink-0" />
                       <h3 className="font-semibold text-lg">{call.name}</h3>
                     </div>
                     {parseROI(call.roi) !== null && (
@@ -411,51 +382,51 @@ export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMet
                   
                   <div className="grid grid-cols-2 gap-3 mb-3 text-sm">
                     <div>
-                      <p className="text-muted-foreground text-xs">Date</p>
+                      <p className="text-muted text-xs">Date</p>
                       <p className="font-medium">{call.date}</p>
                     </div>
                     {(call.loss || call.cost) && (
                       <div>
-                        <p className="text-muted-foreground text-xs">Impact</p>
-                        <p className="font-medium text-red-600">{call.loss || call.cost}</p>
+                        <p className="text-muted text-xs">Impact</p>
+                        <p className="font-medium text-loss">{call.loss || call.cost}</p>
                       </div>
                     )}
                   </div>
                   
-                  <p className="text-sm text-muted-foreground leading-relaxed">
+                  <p className="text-sm text-body leading-relaxed">
                     {call.outcome}
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </Surface>
             ))}
           </div>
         </TabsContent>
 
         {/* Recent Activity Tab */}
         <TabsContent value="activity" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-blue-500" />
+          <Surface className="p-4">
+            <div className="mb-3">
+              <SectionTitle as="h3" className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-accent-bright" />
                 Recent Moves & Statements
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </SectionTitle>
+            </div>
+            <div>
               <ScrollArea className="h-[240px] md:h-[320px] pr-4">
                 <div className="space-y-4">
                   {(!entrepreneur.recentActivity || entrepreneur.recentActivity.length === 0) ? (
                     <div className="text-center py-4">
-                      <Clock className="h-8 w-8 text-blue-500/50 mx-auto mb-3" />
-                      <p className="text-muted-foreground text-sm">No recent activity recorded yet</p>
+                      <Clock className="h-8 w-8 text-accent-bright/50 mx-auto mb-3" />
+                      <p className="text-secondary text-sm">No recent activity recorded yet</p>
                     </div>
                   ) : entrepreneur.recentActivity.map((activity, idx) => (
                     <div 
                       key={idx} 
-                      className="flex gap-4 p-4 rounded-lg bg-gradient-to-r from-blue-500/5 to-purple-500/5 border border-blue-500/10"
+                      className="flex gap-4 p-4 rounded-xl bg-ink-raised border border-ink-divider"
                     >
                       <div className="flex-shrink-0">
-                        <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
-                          <Clock className="h-5 w-5 text-blue-500" />
+                        <div className="w-10 h-10 rounded-xl bg-accent-core/10 flex items-center justify-center">
+                          <Clock className="h-5 w-5 text-accent-bright" />
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
@@ -465,7 +436,7 @@ export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMet
                             {activity.date}
                           </Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
+                        <p className="text-sm text-body leading-relaxed">
                           {activity.details}
                         </p>
                       </div>
@@ -473,23 +444,23 @@ export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMet
                   ))}
                 </div>
               </ScrollArea>
-            </CardContent>
-          </Card>
+            </div>
+          </Surface>
 
           {/* Market Outlook */}
-          <Card className="bg-gradient-to-br from-purple-500/10 via-blue-500/10 to-cyan-500/10 border-purple-500/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <LineChart className="h-5 w-5 text-purple-500" />
+          <Surface className="p-4">
+            <div className="mb-3">
+              <SectionTitle as="h3" className="flex items-center gap-2">
+                <LineChart className="h-5 w-5 text-accent-bright" />
                 Market Outlook
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm leading-relaxed text-muted-foreground">
+              </SectionTitle>
+            </div>
+            <div>
+              <p className="text-sm leading-relaxed text-body">
                 {entrepreneur.marketOutlook}
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </Surface>
         </TabsContent>
       </Tabs>
     </div>

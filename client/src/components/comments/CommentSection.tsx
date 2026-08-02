@@ -9,6 +9,8 @@ import { MessageCircle, Send, Heart, Reply, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
+import Surface from "@/components/ds/Surface";
+import SectionTitle from "@/components/ds/SectionTitle";
 
 interface Comment {
   id: string;
@@ -113,16 +115,13 @@ export function CommentSection({ entityType, entityId, className = "" }: Comment
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 rounded-full blur-md opacity-50" />
-          <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-500 flex items-center justify-center">
-            <MessageCircle className="w-5 h-5 text-white" />
+          <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-accent-core/15">
+            <MessageCircle className="h-5 w-5 text-accent-bright" />
           </div>
         </div>
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Discussion
-          </h3>
-          <p className="text-sm text-gray-600 dark:text-slate-400">
+          <SectionTitle as="h3">Discussion</SectionTitle>
+          <p className="text-sm text-secondary">
             {comments.length} {comments.length === 1 ? "comment" : "comments"}
           </p>
         </div>
@@ -130,22 +129,22 @@ export function CommentSection({ entityType, entityId, className = "" }: Comment
 
       {/* Comment Input */}
       {isAuthenticated ? (
-        <div className="neural-glass p-4 rounded-xl border border-gray-200 dark:border-purple-500/30">
+        <Surface className="p-4">
           <div className="flex gap-3">
-            <Avatar className="h-10 w-10 ring-2 ring-purple-500/30">
+            <Avatar className="h-10 w-10 ring-2 ring-accent-core/30">
               <AvatarImage src={user?.avatar} alt={user?.username} />
-              <AvatarFallback className="bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white">
+              <AvatarFallback className="bg-accent-core text-primary">
                 {user?.username?.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 space-y-3">
               {replyTo && (
-                <div className="flex items-center gap-2 text-sm text-purple-600 dark:text-purple-400">
+                <div className="flex items-center gap-2 text-sm text-accent-bright">
                   <Reply className="w-4 h-4" />
                   <span>Replying to comment</span>
                   <button
                     onClick={() => setReplyTo(null)}
-                    className="text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-300"
+                    className="text-muted hover:text-primary"
                   >
                     Cancel
                   </button>
@@ -155,14 +154,14 @@ export function CommentSection({ entityType, entityId, className = "" }: Comment
                 placeholder="Share your thoughts..."
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                className="min-h-[80px] bg-white/50 dark:bg-slate-900/50 border-gray-300 dark:border-purple-500/30 focus:ring-purple-500 dark:focus:ring-purple-400"
+                className="min-h-[80px] rounded-xl border-ink-edge bg-ink-raised text-body focus:ring-accent-core"
                 data-testid="input-comment"
               />
               <div className="flex justify-end">
                 <Button
                   onClick={handleSubmit}
                   disabled={!newComment.trim() || createCommentMutation.isPending}
-                  className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-500 hover:opacity-90"
+                  className="grad-accent glow-accent text-primary hover:bg-accent-deep"
                   data-testid="button-submit-comment"
                 >
                   {createCommentMutation.isPending ? (
@@ -180,25 +179,25 @@ export function CommentSection({ entityType, entityId, className = "" }: Comment
               </div>
             </div>
           </div>
-        </div>
+        </Surface>
       ) : (
-        <div className="neural-glass p-6 rounded-xl border border-gray-200 dark:border-purple-500/30 text-center">
-          <p className="text-gray-600 dark:text-slate-400">
+        <Surface className="p-6 text-center">
+          <p className="text-secondary">
             Please sign in to join the discussion
           </p>
-        </div>
+        </Surface>
       )}
 
       {/* Comments List */}
       <div className="space-y-4">
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
+            <Loader2 className="w-6 h-6 animate-spin text-accent-bright" />
           </div>
         ) : topLevelComments.length === 0 ? (
           <div className="text-center py-8">
-            <MessageCircle className="w-12 h-12 mx-auto text-gray-400 dark:text-slate-600 mb-3" />
-            <p className="text-gray-600 dark:text-slate-400">
+            <MessageCircle className="mx-auto mb-3 h-12 w-12 text-muted" />
+            <p className="text-secondary">
               No comments yet. Be the first to share your thoughts!
             </p>
           </div>
@@ -238,15 +237,15 @@ function CommentCard({ comment, replies, onLike, onReply, isAuthenticated, isRep
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className={`neural-glass p-4 rounded-xl border border-gray-200 dark:border-purple-500/20 ${
+      className={`rounded-xl border border-ink-edge bg-ink-surface p-4 ${
         isReply ? "ml-12" : ""
       }`}
       data-testid={`comment-${comment.id}`}
     >
       <div className="flex gap-3">
-        <Avatar className="h-10 w-10 ring-2 ring-purple-500/20">
+        <Avatar className="h-10 w-10 ring-2 ring-accent-core/20">
           <AvatarImage src={comment.author?.avatar} alt={comment.author?.username} />
-          <AvatarFallback className="bg-gradient-to-br from-purple-400 to-fuchsia-400 text-white text-sm">
+          <AvatarFallback className="bg-accent-core text-primary text-sm">
             {comment.author?.username?.charAt(0).toUpperCase() || "?"}
           </AvatarFallback>
         </Avatar>
@@ -254,16 +253,16 @@ function CommentCard({ comment, replies, onLike, onReply, isAuthenticated, isRep
         <div className="flex-1 space-y-2">
           {/* Author & timestamp */}
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-gray-900 dark:text-white">
+            <span className="font-semibold text-primary">
               {comment.author?.username || "Anonymous"}
             </span>
-            <span className="text-sm text-gray-500 dark:text-slate-400">
+            <span className="text-sm text-muted">
               {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
             </span>
           </div>
 
           {/* Content */}
-          <p className="text-gray-700 dark:text-slate-300 whitespace-pre-wrap">
+          <p className="whitespace-pre-wrap text-body">
             {comment.content}
           </p>
 
@@ -274,8 +273,8 @@ function CommentCard({ comment, replies, onLike, onReply, isAuthenticated, isRep
               disabled={!isAuthenticated}
               className={`tap-target inline-flex items-center gap-1.5 px-1 text-sm transition-colors ${
                 comment.isLiked
-                  ? "text-pink-500 dark:text-pink-400"
-                  : "text-gray-600 dark:text-slate-400 hover:text-pink-500 dark:hover:text-pink-400"
+                   ? "text-loss"
+                   : "text-secondary hover:text-loss"
               } ${!isAuthenticated ? "opacity-50 cursor-not-allowed" : ""}`}
               data-testid={`button-like-${comment.id}`}
             >
@@ -286,7 +285,7 @@ function CommentCard({ comment, replies, onLike, onReply, isAuthenticated, isRep
             <button
               onClick={onReply}
               disabled={!isAuthenticated}
-              className={`tap-target inline-flex items-center gap-1.5 px-1 text-sm text-gray-600 dark:text-slate-400 hover:text-purple-500 dark:hover:text-purple-400 transition-colors ${
+                 className={`tap-target inline-flex items-center gap-1.5 px-1 text-sm text-secondary hover:text-accent-bright transition-colors ${
                 !isAuthenticated ? "opacity-50 cursor-not-allowed" : ""
               }`}
               data-testid={`button-reply-${comment.id}`}
@@ -298,7 +297,7 @@ function CommentCard({ comment, replies, onLike, onReply, isAuthenticated, isRep
             {replies.length > 0 && (
               <button
                 onClick={() => setShowReplies(!showReplies)}
-                className="tap-target inline-flex items-center gap-1.5 px-1 text-sm text-purple-600 dark:text-purple-400 hover:underline"
+                 className="tap-target inline-flex items-center gap-1.5 px-1 text-sm text-accent-bright hover:underline"
               >
                 <MessageCircle className="w-4 h-4" />
                 <span>
