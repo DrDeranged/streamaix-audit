@@ -1,11 +1,12 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { SectionHeader } from '@/components/ui/section-header';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
+import StatValue from '@/components/ds/StatValue';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,13 +14,8 @@ import {
   Zap, 
   Clock, 
   Users, 
-  BookOpen, 
-  Filter,
-  TrendingUp,
   Play,
-  Loader2,
-  Calendar,
-  Hash
+  Loader2
 } from 'lucide-react';
 
 interface LongFormEpisode {
@@ -176,7 +172,7 @@ const longFormEpisodes: LongFormEpisode[] = [
 export function LongFormPodcasts() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [processingEpisodeId, setProcessingEpisodeId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [sortBy, setSortBy] = useState<'recent' | 'length' | 'trending'>('recent');
@@ -254,25 +250,25 @@ export function LongFormPodcasts() {
   const getStatusBadge = (status: LongFormEpisode['processingStatus']) => {
     switch (status) {
       case 'completed':
-        return <Badge className="bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">Processed</Badge>;
+        return <Badge className="bg-gain/10 text-gain border-gain/30">Processed</Badge>;
       case 'processing':
-        return <Badge className="bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800">Processing</Badge>;
+        return <Badge className="bg-accent-core/10 text-accent-bright border-accent-core/30">Processing</Badge>;
       default:
-        return <Badge variant="outline" className="text-muted-foreground">Ready to Process</Badge>;
+        return <Badge variant="outline" className="text-secondary border-ink-edge">Ready to Process</Badge>;
     }
   };
 
   const getComplexityColor = (complexity: string) => {
     switch (complexity) {
-      case 'Beginner': return 'text-green-600 dark:text-green-400';
-      case 'Intermediate': return 'text-yellow-600 dark:text-yellow-400';
-      case 'Advanced': return 'text-red-600 dark:text-red-400';
-      default: return 'text-muted-foreground';
+      case 'Beginner': return 'text-gain';
+      case 'Intermediate': return 'text-warn';
+      case 'Advanced': return 'text-loss';
+      default: return 'text-secondary';
     }
   };
 
   return (
-    <section className="py-12 bg-gradient-to-b from-background via-muted/30 to-background">
+    <section className="bg-ink-page py-12 text-body">
       <div className="container mx-auto px-4">
         {/* Header */}
         <motion.div 
@@ -281,18 +277,17 @@ export function LongFormPodcasts() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <div className="flex items-center gap-4 mb-4 lg:mb-0">
-            <SectionHeader
-              title="Long-Form Crypto Podcasts"
-              subtitle="Transform 60+ minute episodes into actionable insights"
-              align="left"
-            />
+          <div className="mb-4 flex items-center gap-4 lg:mb-0">
+            <div>
+              <SectionTitle as="h2">Long-Form Crypto Podcasts</SectionTitle>
+              <p className="mt-1 text-sm text-secondary">Transform 60+ minute episodes into actionable insights</p>
+            </div>
           </div>
           
           {/* Controls */}
           <div className="flex flex-col sm:flex-row gap-3">
             <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-[140px] rounded-xl border-ink-edge bg-ink-surface text-secondary">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
@@ -306,13 +301,13 @@ export function LongFormPodcasts() {
 
         {/* Category Tabs */}
         <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-6">
-          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:grid-cols-6">
-            <TabsTrigger value="All">All</TabsTrigger>
-            <TabsTrigger value="Bitcoin">Bitcoin</TabsTrigger>
-            <TabsTrigger value="Ethereum">Ethereum</TabsTrigger>
-            <TabsTrigger value="DeFi">DeFi</TabsTrigger>
-            <TabsTrigger value="Trading">Trading</TabsTrigger>
-            <TabsTrigger value="General">General</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6 rounded-xl border border-ink-edge bg-ink-surface p-1 lg:w-auto lg:grid-cols-6">
+            <TabsTrigger value="All" className="rounded-xl text-secondary hover:bg-ink-raised data-[state=active]:bg-accent-core data-[state=active]:text-primary">All</TabsTrigger>
+            <TabsTrigger value="Bitcoin" className="rounded-xl text-secondary hover:bg-ink-raised data-[state=active]:bg-accent-core data-[state=active]:text-primary">Bitcoin</TabsTrigger>
+            <TabsTrigger value="Ethereum" className="rounded-xl text-secondary hover:bg-ink-raised data-[state=active]:bg-accent-core data-[state=active]:text-primary">Ethereum</TabsTrigger>
+            <TabsTrigger value="DeFi" className="rounded-xl text-secondary hover:bg-ink-raised data-[state=active]:bg-accent-core data-[state=active]:text-primary">DeFi</TabsTrigger>
+            <TabsTrigger value="Trading" className="rounded-xl text-secondary hover:bg-ink-raised data-[state=active]:bg-accent-core data-[state=active]:text-primary">Trading</TabsTrigger>
+            <TabsTrigger value="General" className="rounded-xl text-secondary hover:bg-ink-raised data-[state=active]:bg-accent-core data-[state=active]:text-primary">General</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -331,8 +326,7 @@ export function LongFormPodcasts() {
               transition={{ delay: index * 0.1 }}
               viewport={{ once: true }}
             >
-              <Card className="hover:shadow-lg transition-shadow duration-300 bg-card border-border">
-                <CardContent className="p-6">
+              <Surface className="p-6 transition-colors duration-300 hover:bg-ink-raised">
                   <div className="flex flex-col lg:flex-row lg:items-center gap-6">
                     {/* Main Content */}
                     <div className="flex-1 space-y-3">
@@ -340,23 +334,23 @@ export function LongFormPodcasts() {
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <Badge variant="outline" className="text-xs">
+                            <Badge variant="outline" className="border-ink-edge text-xs text-secondary">
                               {episode.show}
                             </Badge>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-muted">
                               {episode.publishedAt}
                             </span>
                           </div>
-                          <h3 className="font-semibold text-lg text-foreground leading-tight">
+                          <h3 className="text-lg font-semibold leading-tight text-primary">
                             {episode.title}
                           </h3>
-                          <p className="text-sm text-muted-foreground mt-2">
+                          <p className="mt-2 text-sm text-secondary">
                             {episode.description}
                           </p>
                         </div>
                         <div className="flex flex-col items-end gap-2">
                           {getStatusBadge(episode.processingStatus)}
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1 text-xs text-muted">
                             <Clock className="w-3 h-3" />
                             {episode.duration}
                           </div>
@@ -364,51 +358,49 @@ export function LongFormPodcasts() {
                       </div>
 
                       {/* Host/Guest */}
-                      <div className="flex items-center gap-4 text-sm">
+                      <div className="flex items-center gap-4 text-sm text-body">
                         <div className="flex items-center gap-1">
-                          <Users className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">Host:</span>
-                          <span className="font-medium">{episode.host}</span>
+                          <Users className="h-4 w-4 text-secondary" />
+                          <span className="text-secondary">Host:</span>
+                          <span className="font-medium text-primary">{episode.host}</span>
                         </div>
                         {episode.guest && (
                           <div className="flex items-center gap-1">
-                            <span className="text-muted-foreground">Guest:</span>
-                            <span className="font-medium">{episode.guest}</span>
+                            <span className="text-secondary">Guest:</span>
+                            <span className="font-medium text-primary">{episode.guest}</span>
                           </div>
                         )}
                       </div>
 
                       {/* AI Preview */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-3 bg-muted/50 rounded-lg">
+                      <Surface variant="raised" className="grid grid-cols-1 gap-3 rounded-xl p-3 sm:grid-cols-2 lg:grid-cols-4">
                         <div className="text-center">
-                          <div className="text-lg font-semibold text-foreground">{episode.aiPreview.chaptersCount}</div>
-                          <div className="text-xs text-muted-foreground">Chapters</div>
+                          <StatValue label="Chapters" value={episode.aiPreview.chaptersCount} />
                         </div>
                         <div className="text-center">
-                          <div className="text-lg font-semibold text-foreground">{episode.aiPreview.entitiesCount}</div>
-                          <div className="text-xs text-muted-foreground">Key Entities</div>
+                          <StatValue label="Key Entities" value={episode.aiPreview.entitiesCount} />
                         </div>
                         <div className="text-center">
-                          <div className={`text-lg font-semibold ${getComplexityColor(episode.aiPreview.complexity)}`}>
-                            {episode.aiPreview.complexity}
-                          </div>
-                          <div className="text-xs text-muted-foreground">Complexity</div>
+                          <StatValue
+                            label="Complexity"
+                            value={episode.aiPreview.complexity}
+                            valueClassName={`text-lg ${getComplexityColor(episode.aiPreview.complexity)}`}
+                          />
                         </div>
                         <div className="text-center">
-                          <div className="text-lg font-semibold text-foreground">{episode.tags.length}</div>
-                          <div className="text-xs text-muted-foreground">Topics</div>
+                          <StatValue label="Topics" value={episode.tags.length} />
                         </div>
-                      </div>
+                      </Surface>
 
                       {/* Topics */}
                       <div className="flex flex-wrap gap-2">
                         {episode.aiPreview.keyTopics.slice(0, 4).map((topic, idx) => (
-                          <Badge key={idx} variant="secondary" className="text-xs">
+                          <Badge key={idx} variant="secondary" className="border border-ink-edge bg-ink-raised text-xs text-secondary">
                             {topic}
                           </Badge>
                         ))}
                         {episode.aiPreview.keyTopics.length > 4 && (
-                          <Badge variant="secondary" className="text-xs">
+                          <Badge variant="secondary" className="border border-ink-edge bg-ink-raised text-xs text-secondary">
                             +{episode.aiPreview.keyTopics.length - 4} more
                           </Badge>
                         )}
@@ -420,7 +412,7 @@ export function LongFormPodcasts() {
                       <Button
                         onClick={() => handleProcessEpisode(episode)}
                         disabled={processingEpisodeId === episode.id || episode.processingStatus === 'processing'}
-                        className="w-full h-12 font-semibold"
+                        className="grad-accent glow-accent h-12 w-full rounded-xl border-0 font-semibold text-primary hover:bg-accent-deep"
                         data-testid={`button-process-episode-${episode.id}`}
                       >
                         {processingEpisodeId === episode.id || episode.processingStatus === 'processing' ? (
@@ -441,14 +433,13 @@ export function LongFormPodcasts() {
                         )}
                       </Button>
                       
-                      <div className="text-center text-xs text-muted-foreground">
+                      <div className="text-center text-xs text-muted">
                         <div>~{Math.round(episode.durationSeconds / 60)} min read</div>
                         <div>vs {episode.duration} listen</div>
                       </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+              </Surface>
             </motion.div>
           ))}
         </motion.div>
@@ -463,7 +454,7 @@ export function LongFormPodcasts() {
           <Button
             onClick={() => window.location.hash = 'ai-processor'}
             variant="outline"
-            className="text-sm"
+            className="grad-accent glow-accent rounded-xl border-0 text-sm text-primary hover:bg-accent-deep"
             data-testid="button-try-own-url"
           >
             <Zap className="w-4 h-4 mr-2" />

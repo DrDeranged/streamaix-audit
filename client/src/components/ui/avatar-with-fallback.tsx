@@ -46,7 +46,7 @@ export function AvatarWithFallback({
   const dicebearUrl = getDiceBearUrl(name);
   
   const baseClasses = cn(
-    'rounded-full overflow-hidden flex items-center justify-center bg-slate-700/80 flex-shrink-0',
+    'rounded-full overflow-hidden flex items-center justify-center bg-ink-raised flex-shrink-0',
     sizeClass,
     ringClassName,
     className
@@ -81,7 +81,7 @@ export function AvatarWithFallback({
   }
   
   return (
-    <div className={cn(baseClasses, 'bg-gradient-to-br from-purple-600 to-cyan-500')}>
+    <div className={cn(baseClasses, 'bg-accent-core')}>
       <span className="font-bold text-white">
         {initials}
       </span>

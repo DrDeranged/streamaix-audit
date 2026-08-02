@@ -43,7 +43,7 @@ const ScrollBar = React.forwardRef<
       className={cn(
         "relative flex-1 rounded-full",
         variant === "purple" 
-          ? "bg-gradient-to-b from-purple-500 to-purple-600 hover:from-purple-400 hover:to-purple-500" 
+          ? "bg-accent-core hover:bg-accent-bright" 
           : "bg-border"
       )} 
     />

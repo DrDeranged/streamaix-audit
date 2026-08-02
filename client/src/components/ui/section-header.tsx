@@ -37,7 +37,7 @@ export function SectionHeader({
         <span className="neon-text-all">{title}</span>
       </h2>
       {subtitle && (
-        <p className="text-xs text-gray-500 max-w-sm mx-auto font-light tracking-wide">
+        <p className="text-xs text-muted max-w-sm mx-auto font-light tracking-wide">
           {subtitle}
         </p>
       )}

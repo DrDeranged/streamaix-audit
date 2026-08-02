@@ -79,7 +79,7 @@ export function SectionErrorFallback({
   onRetry?: () => void;
 }) {
   return (
-    <div className="p-4 rounded-lg border border-red-500/20 bg-red-900/10">
+    <div className="p-4 rounded-xl border border-loss/20 bg-loss/10">
       <div className="flex items-center gap-2 text-red-400 mb-2">
         <AlertTriangle className="w-4 h-4" />
         <span className="font-medium text-sm">Error loading {section}</span>
@@ -106,11 +106,11 @@ export function SectionErrorFallback({
 export function LoadingFallback({ section }: { section?: string }) {
   return (
     <div className="p-6 animate-pulse">
-      <div className="h-4 bg-slate-700/50 rounded w-1/3 mb-4" />
+      <div className="h-4 bg-ink-raised rounded w-1/3 mb-4" />
       <div className="space-y-3">
-        <div className="h-3 bg-slate-700/50 rounded w-full" />
-        <div className="h-3 bg-slate-700/50 rounded w-5/6" />
-        <div className="h-3 bg-slate-700/50 rounded w-4/6" />
+        <div className="h-3 bg-ink-raised rounded w-full" />
+        <div className="h-3 bg-ink-raised rounded w-5/6" />
+        <div className="h-3 bg-ink-raised rounded w-4/6" />
       </div>
     </div>
   );

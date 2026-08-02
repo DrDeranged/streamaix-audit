@@ -22,7 +22,7 @@ const badgeVariants = cva(
         info:
           "border-neon-cyan/40 bg-neon-cyan/15 text-neon-cyan shadow-[0_0_10px_-4px_hsl(195_95%_55%/0.5)]",
         gradient:
-          "border-transparent bg-gradient-to-r from-neon-purple/30 via-neon-fuchsia/25 to-neon-cyan/30 text-white shadow-[0_0_14px_-4px_hsl(258_84%_62%/0.55)]",
+          "border-transparent bg-accent-core/20 text-accent-bright",
       },
     },
     defaultVariants: {

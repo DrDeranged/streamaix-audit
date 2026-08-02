@@ -2,7 +2,7 @@ import { Skeleton } from './skeleton';
 
 export function CardSkeleton() {
   return (
-    <div className="rounded-xl border border-slate-700/50 bg-slate-900/50 p-6">
+    <div className="rounded-xl border border-ink-edge bg-ink-surface p-6">
       <div className="flex items-center gap-4 mb-4">
         <Skeleton className="h-12 w-12 rounded-full" />
         <div className="space-y-2 flex-1">
@@ -31,8 +31,8 @@ export function GridSkeleton({ count = 6 }: { count?: number }) {
 
 export function TableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
-    <div className="rounded-lg border border-slate-700/50 overflow-hidden">
-      <div className="bg-slate-800/50 px-4 py-3 border-b border-slate-700/50">
+    <div className="rounded-xl border border-slate-700/50 overflow-hidden">
+      <div className="bg-ink-raised px-4 py-3 border-b border-slate-700/50">
         <div className="flex gap-4">
           <Skeleton className="h-4 w-24" />
           <Skeleton className="h-4 w-32" />
@@ -58,7 +58,7 @@ export function StatsSkeleton() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="rounded-lg border border-slate-700/50 bg-slate-900/50 p-4">
+        <div key={i} className="rounded-xl border border-ink-edge bg-ink-surface p-4">
           <Skeleton className="h-3 w-20 mb-2" />
           <Skeleton className="h-8 w-16" />
         </div>
@@ -71,7 +71,7 @@ export function AvatarListSkeleton({ count = 6 }: { count?: number }) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="flex flex-col items-center p-4 rounded-lg border border-slate-700/50 bg-slate-900/50">
+        <div key={i} className="flex flex-col items-center p-4 rounded-xl border border-ink-edge bg-ink-surface">
           <Skeleton className="h-16 w-16 rounded-full mb-3" />
           <Skeleton className="h-4 w-20 mb-1" />
           <Skeleton className="h-3 w-16" />
@@ -83,7 +83,7 @@ export function AvatarListSkeleton({ count = 6 }: { count?: number }) {
 
 export function ChartSkeleton() {
   return (
-    <div className="rounded-lg border border-slate-700/50 bg-slate-900/50 p-6">
+    <div className="rounded-xl border border-ink-edge bg-ink-surface p-6">
       <div className="flex items-center justify-between mb-6">
         <Skeleton className="h-5 w-32" />
         <div className="flex gap-2">
@@ -116,7 +116,7 @@ export function PageHeaderSkeleton() {
 
 export function FullPageSkeleton() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 p-6">
+    <div className="min-h-screen bg-ink-page p-6">
       <PageHeaderSkeleton />
       <StatsSkeleton />
       <div className="mt-8">

@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { SectionHeader } from '@/components/ui/section-header';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 import { SocialFeedCard } from '@/components/social/SocialFeedCard';
 import { InlineMarketCard } from '@/components/prediction/InlineMarketCard';
 import { useAuth } from '@/hooks/useAuth';
@@ -76,7 +77,7 @@ export function SocialFeed() {
 
           if (distance < 120) {
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(168, 85, 247, ${0.1 * (1 - distance / 120)})`;
+            ctx.strokeStyle = `rgba(139, 124, 246, ${0.1 * (1 - distance / 120)})`;
             ctx.lineWidth = 0.5;
             ctx.moveTo(node.x, node.y);
             ctx.lineTo(otherNode.x, otherNode.y);
@@ -87,7 +88,7 @@ export function SocialFeed() {
         // Draw node
         ctx.beginPath();
         ctx.arc(node.x, node.y, 1.5, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(168, 85, 247, 0.4)';
+        ctx.fillStyle = 'rgba(139, 124, 246, 0.4)';
         ctx.fill();
       });
 
@@ -288,10 +289,10 @@ export function SocialFeed() {
           viewport={{ once: true }}
           className="text-center mb-4 sm:mb-6"
         >
-          <SectionHeader
-            title="Social Feed"
-            subtitle="Engage with markets and real-time data"
-          />
+           <SectionTitle as="h1" eyebrow="Live intelligence">
+             Social Feed
+           </SectionTitle>
+           <p className="mt-1 text-sm text-secondary">Engage with markets and real-time data</p>
         </motion.div>
 
         {/* Incentive Banner */}
@@ -299,34 +300,34 @@ export function SocialFeed() {
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="mb-3 bg-gradient-to-r from-purple-600/20 via-fuchsia-600/20 to-cyan-600/20 backdrop-blur-md border border-purple-500/30 rounded-lg p-2.5 shadow-lg"
+           className="mb-3 rounded-xl border border-ink-edge bg-ink-surface p-2.5"
           data-testid="incentive-banner"
         >
           <div className="flex items-center gap-2">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center">
-              <Gift className="w-4 h-4 text-white" />
+             <div className="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-xl bg-accent-core/15">
+               <Gift className="w-4 h-4 text-accent-bright" />
             </div>
             <div className="flex-1">
-              <h3 className="text-white font-semibold text-xs mb-0.5 flex items-center gap-1.5">
+               <h3 className="mb-0.5 flex items-center gap-1.5 text-xs font-semibold text-primary">
                 Earn STREAM Points! 
-                <Sparkles className="w-3 h-3 text-yellow-400" />
+                 <Sparkles className="w-3 h-3 text-warn" />
               </h3>
-              <p className="text-gray-300 text-[10px]">
+               <p className="text-[10px] text-secondary">
                 Like, comment, and save content to earn rewards.
-                {!isAuthenticated && <span className="text-fuchsia-400 font-semibold"> Sign in to start.</span>}
+                 {!isAuthenticated && <span className="font-semibold text-accent-bright"> Sign in to start.</span>}
               </p>
             </div>
           </div>
         </motion.div>
 
         {/* Tabs */}
-        <div className="flex gap-1.5 mb-3 p-1 bg-white/5 backdrop-blur-md rounded-lg border border-purple-500/20">
+         <div className="mb-3 flex gap-1.5 rounded-xl border border-ink-edge bg-ink-surface p-1">
           <button
             onClick={() => setActiveTab('macro')}
             className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all ${
               activeTab === 'macro'
-                ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/30'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                 ? 'bg-accent-core text-primary glow-accent'
+                 : 'text-secondary hover:bg-ink-raised hover:text-primary'
             }`}
             data-testid="tab-macro"
           >
@@ -337,8 +338,8 @@ export function SocialFeed() {
             onClick={() => setActiveTab('crypto')}
             className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all ${
               activeTab === 'crypto'
-                ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/30'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                 ? 'bg-accent-core text-primary glow-accent'
+                 : 'text-secondary hover:bg-ink-raised hover:text-primary'
             }`}
             data-testid="tab-crypto"
           >
@@ -349,8 +350,8 @@ export function SocialFeed() {
             onClick={() => setActiveTab('predictions')}
             className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all ${
               activeTab === 'predictions'
-                ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/30'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                 ? 'bg-accent-core text-primary glow-accent'
+                 : 'text-secondary hover:bg-ink-raised hover:text-primary'
             }`}
             data-testid="tab-predictions"
           >
@@ -369,24 +370,24 @@ export function SocialFeed() {
               exit={{ opacity: 0 }}
               className="text-center py-8"
             >
-              <div className="bg-orange-500/10 backdrop-blur-md border border-orange-500/30 rounded-lg p-6">
-                <div className="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center mx-auto mb-3">
-                  <TrendingUp className="w-6 h-6 text-orange-400" />
+               <Surface className="p-6">
+                 <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-warn/10">
+                   <TrendingUp className="w-6 h-6 text-warn" />
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">High Demand</h3>
-                <p className="text-gray-300 text-sm mb-3">
+                 <h3 className="mb-2 text-lg font-semibold text-primary">High Demand</h3>
+                 <p className="mb-3 text-sm text-secondary">
                   Our data services are experiencing high traffic. Please try again in a few moments.
                 </p>
                 <Button
                   onClick={() => window.location.reload()}
                   variant="outline"
                   size="sm"
-                  className="border-orange-500/50 hover:bg-orange-500/20"
+                   className="rounded-xl border border-warn/50 text-warn hover:bg-warn/10"
                   data-testid="button-reload"
                 >
                   Refresh
                 </Button>
-              </div>
+               </Surface>
             </motion.div>
           ) : isLoading ? (
             <motion.div
@@ -397,19 +398,19 @@ export function SocialFeed() {
               className="space-y-2"
             >
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-2.5 animate-pulse">
+                 <Surface key={i} className="animate-pulse p-2.5">
                   <div className="flex gap-2 mb-2">
-                    <div className="w-7 h-7 rounded-full bg-purple-500/20"></div>
+                     <div className="h-7 w-7 rounded-xl bg-accent-core/15"></div>
                     <div className="flex-1 space-y-1">
-                      <div className="h-3 bg-purple-500/20 rounded w-1/3"></div>
-                      <div className="h-2 bg-purple-500/10 rounded w-1/4"></div>
+                       <div className="h-3 w-1/3 rounded-xl bg-accent-core/15"></div>
+                       <div className="h-2 w-1/4 rounded-xl bg-accent-core/10"></div>
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <div className="h-3 bg-purple-500/20 rounded w-3/4"></div>
-                    <div className="h-2 bg-purple-500/10 rounded w-full"></div>
+                     <div className="h-3 w-3/4 rounded-xl bg-accent-core/15"></div>
+                     <div className="h-2 w-full rounded-xl bg-accent-core/10"></div>
                   </div>
-                </div>
+                 </Surface>
               ))}
             </motion.div>
           ) : feedItems.length > 0 ? (
@@ -454,13 +455,13 @@ export function SocialFeed() {
               exit={{ opacity: 0 }}
               className="text-center py-16"
             >
-              <div className="bg-white/5 backdrop-blur-md border border-purple-500/20 rounded-lg p-8">
-                <Sparkles className="w-16 h-16 text-purple-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">No stories available</h3>
-                <p className="text-gray-400 mb-4">
+               <Surface className="p-8">
+                 <Sparkles className="mx-auto mb-4 h-16 w-16 text-accent-bright" />
+                 <h3 className="mb-2 text-xl font-semibold text-primary">No stories available</h3>
+                 <p className="mb-4 text-secondary">
                   Check back soon for the latest news and updates!
                 </p>
-              </div>
+               </Surface>
             </motion.div>
           )}
         </AnimatePresence>
