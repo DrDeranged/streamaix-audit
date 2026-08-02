@@ -137,8 +137,8 @@ export const ComparativeDashboard = memo(function ComparativeDashboard({ entrepr
                 <YAxis className="text-xs" />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))', 
-                    border: '1px solid hsl(var(--border))',
+                    backgroundColor: 'var(--card)', 
+                    border: '1px solid var(--border)',
                     borderRadius: '8px'
                   }}
                 />
@@ -167,8 +167,8 @@ export const ComparativeDashboard = memo(function ComparativeDashboard({ entrepr
                 <PolarRadiusAxis className="text-xs" />
                 <Tooltip
                   contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))', 
-                    border: '1px solid hsl(var(--border))',
+                    backgroundColor: 'var(--card)', 
+                    border: '1px solid var(--border)',
                     borderRadius: '8px'
                   }}
                 />

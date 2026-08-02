@@ -525,20 +525,20 @@ export default function MultiAssetChart({
                   data={correlationData}
                   margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis 
                     dataKey="symbol"
                     tick={{ fontSize: 12 }}
-                    stroke="hsl(var(--muted-foreground))"
+                    stroke="var(--muted-foreground)"
                   />
                   <YAxis 
                     domain={[-1, 1]}
                     tick={{ fontSize: 12 }}
-                    stroke="hsl(var(--muted-foreground))"
+                    stroke="var(--muted-foreground)"
                     label={{ value: 'Correlation', angle: -90, position: 'insideLeft' }}
                   />
                   <Tooltip content={<CorrelationTooltip />} />
-                  <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeDasharray="2 2" />
+                  <ReferenceLine y={0} stroke="var(--muted-foreground)" strokeDasharray="2 2" />
                   <ReferenceLine y={0.7} stroke="#10b981" strokeDasharray="2 2" />
                   <ReferenceLine y={-0.7} stroke="#ef4444" strokeDasharray="2 2" />
                   
@@ -555,15 +555,15 @@ export default function MultiAssetChart({
                   data={processedData}
                   margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis 
                     dataKey="dateFormatted"
                     tick={{ fontSize: 12 }}
-                    stroke="hsl(var(--muted-foreground))"
+                    stroke="var(--muted-foreground)"
                   />
                   <YAxis 
                     tick={{ fontSize: 12 }}
-                    stroke="hsl(var(--muted-foreground))"
+                    stroke="var(--muted-foreground)"
                   />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />

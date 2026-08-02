@@ -539,17 +539,17 @@ export default function TradingChart({
                 margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                 ref={chartRef}
               >
-                {gridVisible && <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />}
+                {gridVisible && <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />}
                 
                 <XAxis 
                   dataKey="dateFormatted"
                   tick={{ fontSize: 12 }}
-                  stroke="hsl(var(--muted-foreground))"
+                  stroke="var(--muted-foreground)"
                 />
                 <YAxis 
                   domain={['dataMin * 0.95', 'dataMax * 1.05']}
                   tick={{ fontSize: 12 }}
-                  stroke="hsl(var(--muted-foreground))"
+                  stroke="var(--muted-foreground)"
                 />
                 
                 {crosshairEnabled && <Tooltip content={<CustomTooltip />} />}
@@ -616,7 +616,7 @@ export default function TradingChart({
                   <Line
                     type="monotone"
                     dataKey="close"
-                    stroke="hsl(var(--primary))"
+                    stroke="var(--primary)"
                     strokeWidth={2}
                     dot={false}
                   />
@@ -626,7 +626,7 @@ export default function TradingChart({
                   <Line
                     type="monotone"
                     dataKey="close"
-                    stroke="hsl(var(--primary))"
+                    stroke="var(--primary)"
                     strokeWidth={2}
                     dot={false}
                   />
@@ -636,8 +636,8 @@ export default function TradingChart({
                   <Area
                     type="monotone"
                     dataKey="close"
-                    stroke="hsl(var(--primary))"
-                    fill="hsl(var(--primary))"
+                    stroke="var(--primary)"
+                    fill="var(--primary)"
                     fillOpacity={0.3}
                   />
                 )}
@@ -646,7 +646,7 @@ export default function TradingChart({
                 {volumeVisible && (
                   <Bar
                     dataKey="volume"
-                    fill="hsl(var(--muted))"
+                    fill="var(--muted)"
                     opacity={0.3}
                     yAxisId="volume"
                   />
@@ -658,7 +658,7 @@ export default function TradingChart({
                 <Brush 
                   dataKey="dateFormatted" 
                   height={30} 
-                  stroke="hsl(var(--primary))"
+                  stroke="var(--primary)"
                   startIndex={focusArea.startIndex}
                   endIndex={focusArea.endIndex}
                 />

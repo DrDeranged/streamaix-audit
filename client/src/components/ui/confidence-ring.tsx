@@ -31,9 +31,9 @@ export function ConfidenceRing({
 
   // Color based on confidence level
   const getConfidenceColor = (conf: number) => {
-    if (conf >= 80) return "hsl(var(--chart-2))"; // Emerald
-    if (conf >= 70) return "hsl(var(--chart-4))"; // Cyan
-    return "hsl(var(--chart-5))"; // Amber
+    if (conf >= 80) return "var(--gain)"; // Emerald
+    if (conf >= 70) return "var(--accent-bright)"; // Cyan
+    return "var(--warn)"; // Amber
   };
 
   const color = getConfidenceColor(confidence);

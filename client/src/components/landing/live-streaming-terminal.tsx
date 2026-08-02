@@ -961,7 +961,7 @@ export function LiveStreamingTerminal() {
                         "bg-ink-raised border border-ink-edge hover:border-accent-core/40"
                       )}
                       style={{
-                        backgroundColor: 'hsl(var(--ink-raised))',
+                        backgroundColor: 'var(--ink-raised)',
                       }}
                     >
                       <FeatureIcon className="w-3.5 h-3.5 text-accent-bright" />
