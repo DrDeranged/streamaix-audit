@@ -57,3 +57,11 @@ client/src/components/landing/how-it-works.tsx
 client/src/components/landing/social-ecosystem.tsx
 client/src/components/landing/RecentActivity.tsx
 client/src/components/landing/interactive-features.tsx
+client/src/components/landing/real-ai-demo.tsx
+client/src/components/landing/rebuilt-ai-demo.tsx
+client/src/components/landing/trending-social-content.tsx
+client/src/components/landing/live-streaming-terminal.tsx
+client/src/components/landing/learning-hub-section.tsx
+client/src/components/landing/bounties.tsx
+client/src/components/landing/live-demo.tsx
+client/src/components/landing/footer.tsx

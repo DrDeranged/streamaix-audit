@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { useWeb3 } from "@/hooks/useWeb3";
 import { useAuth } from "@/hooks/useAuth";
+import Surface from "@/components/ds/Surface";
+import SectionTitle from "@/components/ds/SectionTitle";
 
 const ADMIN_USERNAMES = ['arslan'];
 
@@ -16,21 +18,21 @@ export function Footer() {
   const isAdmin = user && ADMIN_USERNAMES.includes(user.username);
   
   return (
-    <footer className="py-20 bg-transparent text-slate-900 dark:text-white relative overflow-hidden border-t border-slate-200/50 dark:border-slate-800/50">
+    <footer className="relative overflow-hidden border-t border-ink-divider bg-ink-page py-20 text-body">
       {/* Enhanced Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
+      <div className="pointer-events-none absolute inset-0 opacity-10">
         <motion.div 
-          className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full blur-xl"
+          className="absolute left-10 top-10 h-32 w-32 rounded-xl bg-accent-core blur-xl"
           animate={{ y: [-20, 20, -20] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div 
-          className="absolute bottom-20 right-20 w-24 h-24 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full blur-lg"
+          className="absolute bottom-20 right-20 h-24 w-24 rounded-xl bg-accent-bright blur-lg"
           animate={{ y: [-15, 25, -15] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
         />
         <motion.div 
-          className="absolute top-1/2 left-1/2 w-28 h-28 bg-gradient-to-br from-fuchsia-500 to-pink-600 rounded-full blur-xl"
+          className="absolute left-1/2 top-1/2 h-28 w-28 rounded-xl bg-accent-deep blur-xl"
           animate={{ y: [-10, 30, -10], x: [-20, 20, -20] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 4 }}
         />
@@ -38,19 +40,19 @@ export function Footer() {
       
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
-          {/* Brand Section - Enhanced Glass Card */}
+            {/* Brand Section - Enhanced Glass Card */}
           <div className="lg:col-span-1">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="p-6 rounded-2xl neural-glass iridescent-border"
             >
-              <div className="font-orbitron font-bold text-2xl bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent mb-4">
+              <Surface className="p-6">
+              <div className="mb-4 font-display text-2xl font-bold text-primary">
                 StreamAiX
               </div>
-              <p className="text-slate-600 dark:text-gray-400 mb-6 text-sm leading-relaxed">
+              <p className="mb-6 text-sm leading-relaxed text-body">
                 Your Web3 Hub for AI Content, Prediction Markets, DeFi Bounties & Market Intelligence.
               </p>
               
@@ -58,14 +60,14 @@ export function Footer() {
               {!isConnected && (
                 <Button 
                   onClick={() => connectWallet('metamask')}
-                  className="w-full glass-bg glass-border hover:bg-muted/20 text-white group relative overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-purple-500/20"
+                  className="group relative w-full overflow-hidden rounded-xl grad-accent text-primary glow-accent transition-all duration-300 hover:bg-accent-deep"
                 >
-                  <span className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-fuchsia-500/20 to-cyan-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <Wallet className="w-5 h-5 mr-2 text-purple-400 group-hover:text-purple-300 transition-colors" />
+                  <Wallet className="mr-2 h-5 w-5 text-primary transition-colors group-hover:text-primary" />
                   <span className="relative">Connect Wallet</span>
                 </Button>
               )}
-            </motion.div>
+              </Surface>
+              </motion.div>
           </div>
           
           {/* Platform Links - Enhanced */}
@@ -76,56 +78,53 @@ export function Footer() {
             viewport={{ once: true }}
             className="space-y-4"
           >
-            <h3 className="text-lg font-bold mb-5 bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent flex items-center gap-2">
-              <Box className="w-5 h-5 text-purple-400" />
-              Platform
-            </h3>
+            <div className="mb-5 flex items-center gap-2"><Box className="h-5 w-5 text-accent-bright" /><SectionTitle as="h3">Platform</SectionTitle></div>
             <ul className="space-y-3">
               <li>
                 <Link 
                   href="/bounties" 
-                  className="group flex items-center text-slate-600 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-purple-500 hover:to-fuchsia-500 hover:bg-clip-text transition-all duration-200"
+                  className="group flex items-center text-secondary transition-colors duration-200 hover:text-accent-bright"
                 >
-                  <Target className="w-3.5 h-3.5 mr-2 text-slate-500 dark:text-gray-500 group-hover:text-purple-500 transition-colors" />
+                  <Target className="mr-2 h-3.5 w-3.5 text-muted transition-colors group-hover:text-accent-bright" />
                   <span className="relative">
                     Bounties
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-fuchsia-500 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-accent-core transition-all duration-300 group-hover:w-full" />
                   </span>
                 </Link>
               </li>
               <li>
                 <Link 
                   href="/markets" 
-                  className="group flex items-center text-slate-600 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-purple-500 hover:to-fuchsia-500 hover:bg-clip-text transition-all duration-200"
+                  className="group flex items-center text-secondary transition-colors duration-200 hover:text-accent-bright"
                 >
-                  <TrendingUp className="w-3.5 h-3.5 mr-2 text-slate-500 dark:text-gray-500 group-hover:text-purple-500 transition-colors" />
+                  <TrendingUp className="mr-2 h-3.5 w-3.5 text-muted transition-colors group-hover:text-accent-bright" />
                   <span className="relative">
                     Prediction Markets
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-fuchsia-500 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-accent-core transition-all duration-300 group-hover:w-full" />
                   </span>
                 </Link>
               </li>
               <li>
                 <Link 
                   href="/discover" 
-                  className="group flex items-center text-slate-600 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-purple-500 hover:to-fuchsia-500 hover:bg-clip-text transition-all duration-200"
+                  className="group flex items-center text-secondary transition-colors duration-200 hover:text-accent-bright"
                 >
-                  <BarChart3 className="w-3.5 h-3.5 mr-2 text-slate-500 dark:text-gray-500 group-hover:text-purple-500 transition-colors" />
+                  <BarChart3 className="mr-2 h-3.5 w-3.5 text-muted transition-colors group-hover:text-accent-bright" />
                   <span className="relative">
                     Analytics
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-fuchsia-500 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-accent-core transition-all duration-300 group-hover:w-full" />
                   </span>
                 </Link>
               </li>
               <li>
                 <Link 
                   href="/dashboard" 
-                  className="group flex items-center text-slate-600 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-purple-500 hover:to-fuchsia-500 hover:bg-clip-text transition-all duration-200"
+                  className="group flex items-center text-secondary transition-colors duration-200 hover:text-accent-bright"
                 >
-                  <LayoutDashboard className="w-3.5 h-3.5 mr-2 text-slate-500 dark:text-gray-500 group-hover:text-purple-500 transition-colors" />
+                  <LayoutDashboard className="mr-2 h-3.5 w-3.5 text-muted transition-colors group-hover:text-accent-bright" />
                   <span className="relative">
                     Dashboard
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-fuchsia-500 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-accent-core transition-all duration-300 group-hover:w-full" />
                   </span>
                 </Link>
               </li>
@@ -140,52 +139,49 @@ export function Footer() {
             viewport={{ once: true }}
             className="space-y-4"
           >
-            <h3 className="text-lg font-bold mb-5 bg-gradient-to-r from-fuchsia-400 to-cyan-400 bg-clip-text text-transparent flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-fuchsia-400" />
-              Resources
-            </h3>
+            <div className="mb-5 flex items-center gap-2"><Sparkles className="h-5 w-5 text-accent-bright" /><SectionTitle as="h3">Resources</SectionTitle></div>
             <ul className="space-y-3">
               <li>
                 <Link 
                   href="/auth" 
-                  className="group text-slate-600 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-fuchsia-500 hover:to-cyan-500 hover:bg-clip-text transition-all duration-200 inline-block"
+                  className="group inline-block text-secondary transition-colors duration-200 hover:text-accent-bright"
                 >
                   <span className="relative">
                     Sign Up
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-fuchsia-500 to-cyan-500 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-accent-core transition-all duration-300 group-hover:w-full" />
                   </span>
                 </Link>
               </li>
               <li>
                 <Link 
                   href="/auth" 
-                  className="group text-slate-600 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-fuchsia-500 hover:to-cyan-500 hover:bg-clip-text transition-all duration-200 inline-block"
+                  className="group inline-block text-secondary transition-colors duration-200 hover:text-accent-bright"
                 >
                   <span className="relative">
                     Sign In
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-fuchsia-500 to-cyan-500 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-accent-core transition-all duration-300 group-hover:w-full" />
                   </span>
                 </Link>
               </li>
               <li>
                 <a 
                   href="mailto:arslandin.founder@streamaix.com?subject=StreamAiX%20Support" 
-                  className="group text-slate-600 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-fuchsia-500 hover:to-cyan-500 hover:bg-clip-text transition-all duration-200 inline-block"
+                  className="group inline-block text-secondary transition-colors duration-200 hover:text-accent-bright"
                 >
                   <span className="relative">
                     Support
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-fuchsia-500 to-cyan-500 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-accent-core transition-all duration-300 group-hover:w-full" />
                   </span>
                 </a>
               </li>
               <li>
                 <a 
                   href="mailto:arslandin.founder@streamaix.com?subject=StreamAiX%20Waitlist" 
-                  className="group text-slate-600 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-fuchsia-500 hover:to-cyan-500 hover:bg-clip-text transition-all duration-200 inline-block"
+                  className="group inline-block text-secondary transition-colors duration-200 hover:text-accent-bright"
                 >
                   <span className="relative">
                     Join Waitlist
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-fuchsia-500 to-cyan-500 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-accent-core transition-all duration-300 group-hover:w-full" />
                   </span>
                 </a>
               </li>
@@ -200,31 +196,28 @@ export function Footer() {
             viewport={{ once: true }}
             className="space-y-4"
           >
-            <h3 className="text-lg font-bold mb-5 bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-cyan-400" />
-              Contact
-            </h3>
+            <div className="mb-5 flex items-center gap-2"><MessageSquare className="h-5 w-5 text-accent-bright" /><SectionTitle as="h3">Contact</SectionTitle></div>
             <ul className="space-y-3">
               <li>
                 <a 
                   href="mailto:arslandin.founder@streamaix.com" 
-                  className="group flex items-center text-slate-600 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-cyan-500 hover:to-purple-500 hover:bg-clip-text transition-all duration-200"
+                  className="group flex items-center text-secondary transition-colors duration-200 hover:text-accent-bright"
                 >
-                  <Mail className="w-4 h-4 mr-2 text-slate-500 dark:text-gray-500 group-hover:text-cyan-500 transition-colors" />
+                  <Mail className="mr-2 h-4 w-4 text-muted transition-colors group-hover:text-accent-bright" />
                   <span className="relative">
                     Email Us
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-purple-500 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-accent-core transition-all duration-300 group-hover:w-full" />
                   </span>
                 </a>
               </li>
               <li>
                 <a 
                   href="mailto:arslandin.founder@streamaix.com?subject=Partnership%20Inquiry" 
-                  className="group text-slate-600 dark:text-gray-400 hover:text-transparent hover:bg-gradient-to-r hover:from-cyan-500 hover:to-purple-500 hover:bg-clip-text transition-all duration-200 inline-block"
+                  className="group inline-block text-secondary transition-colors duration-200 hover:text-accent-bright"
                 >
                   <span className="relative">
                     Partnerships
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-purple-500 group-hover:w-full transition-all duration-300" />
+                    <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-accent-core transition-all duration-300 group-hover:w-full" />
                   </span>
                 </a>
               </li>
@@ -234,27 +227,27 @@ export function Footer() {
         
         {/* Enhanced Bottom Section */}
         <motion.div 
-          className="border-t border-gradient-to-r from-purple-500/20 via-fuchsia-500/20 to-cyan-500/20 pt-8"
+          className="border-t border-ink-divider pt-8"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.3 }}
           viewport={{ once: true }}
         >
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-slate-500 dark:text-gray-400 text-sm flex items-center gap-3 flex-wrap justify-center">
+            <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-secondary">
               <span>
                 © 2025 StreamAiX. Built with{" "}
-                <span className="text-red-500 dark:text-red-400 animate-pulse">❤️</span>{" "}
+                  <span className="animate-pulse text-loss">❤️</span>{" "}
                 for the decentralized future.
               </span>
               
               {/* Admin Link - Only visible to admin users */}
               {isAdmin && (
                 <>
-                  <span className="text-gray-600">·</span>
+                  <span className="text-muted">·</span>
                   <Link 
                     href="/newsletter-admin" 
-                    className="group inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-gradient-to-r from-amber-500/10 to-orange-600/10 border border-amber-500/20 hover:border-amber-500/40 text-amber-300 hover:text-amber-200 font-semibold text-xs transition-all duration-200 hover:scale-105"
+                    className="group inline-flex items-center gap-1.5 rounded-xl border border-warn/30 bg-warn/10 px-2 py-1 text-xs font-semibold text-warn transition-all duration-200 hover:border-warn hover:bg-warn/20"
                     data-testid="link-admin-panel"
                   >
                     <Settings className="w-3 h-3" />
@@ -264,10 +257,10 @@ export function Footer() {
               )}
             </div>
             
-            <div className="text-slate-500 dark:text-gray-400 text-sm">
+            <div className="text-sm text-secondary">
               <span className="inline-flex items-center gap-2 flex-wrap justify-center">
-                <span className="text-slate-400 dark:text-gray-500">Powered by</span>
-                <span className="px-2 py-1 rounded-md bg-gradient-to-r from-cyan-500/10 to-blue-600/10 border border-cyan-500/30 dark:border-cyan-500/20 text-cyan-600 dark:text-cyan-300 font-semibold text-xs">
+                <span className="text-muted">Powered by</span>
+                <span className="rounded-xl border border-accent-core/30 bg-accent-core/10 px-2 py-1 text-xs font-semibold text-accent-bright">
                   Base Network
                 </span>
               </span>

@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import Surface from "@/components/ds/Surface";
+import SectionTitle from "@/components/ds/SectionTitle";
 import { Loader2, ExternalLink, CheckCircle, AlertCircle, Zap, Brain, Mic, Database, Youtube, Music, Twitch, MessageSquare, MessageCircle, Users, Heart, Repeat2, Calendar, Link2, TrendingUp, BarChart3, Shield, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
@@ -58,7 +59,7 @@ function FarcasterActivityDemo() {
 
       {/* Popular Farcaster Users Selector */}
       <div className="mb-6">
-        <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-center">Select a Crypto Leader to Follow</h4>
+        <SectionTitle as="h3" className="mb-3 text-center">Select a Crypto Leader to Follow</SectionTitle>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
           {popularFids.map((user) => (
             <button
@@ -66,13 +67,13 @@ function FarcasterActivityDemo() {
               onClick={() => setSelectedFid(user.fid)}
               className={`p-2 sm:p-3 rounded-xl border-2 transition-all duration-200 ${
                 selectedFid === user.fid
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                  : 'border-muted hover:border-blue-300 hover:bg-blue-50/50 dark:hover:bg-blue-900/10'
+                   ? 'border-accent-core bg-accent-core/10 glow-accent'
+                   : 'border-ink-edge hover:border-accent-core/50 hover:bg-ink-raised'
               }`}
             >
-              <div className="text-xs sm:text-sm font-medium">{user.displayName}</div>
-              <div className="text-xs text-muted-foreground">@{user.username}</div>
-              <div className="text-xs text-muted-foreground mt-1 hidden sm:block">{user.description}</div>
+              <div className="text-xs sm:text-sm font-medium text-primary">{user.displayName}</div>
+              <div className="text-xs text-secondary">@{user.username}</div>
+              <div className="text-xs text-muted mt-1 hidden sm:block">{user.description}</div>
             </button>
           ))}
         </div>
@@ -81,19 +82,16 @@ function FarcasterActivityDemo() {
       {/* Real Activity Dashboard - Mobile-Optimized Layout */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         {/* User Profile Card */}
-        <Card className="md:col-span-1">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-blue-500" />
+        <Surface className="md:col-span-1 p-6">
+            <SectionTitle as="h3" className="mb-5 flex items-center gap-2">
+              <Users className="w-5 h-5 text-accent-bright" />
               Profile Analytics
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            </SectionTitle>
             {isLoading ? (
               <div className="space-y-3">
-                <div className="h-4 bg-muted rounded w-3/4"></div>
-                <div className="h-3 bg-muted rounded w-1/2"></div>
-                <div className="h-3 bg-muted rounded w-2/3"></div>
+                <div className="h-4 bg-ink-raised rounded-xl w-3/4"></div>
+                <div className="h-3 bg-ink-raised rounded-xl w-1/2"></div>
+                <div className="h-3 bg-ink-raised rounded-xl w-2/3"></div>
               </div>
             ) : profile ? (
               <div className="space-y-4">
@@ -102,34 +100,34 @@ function FarcasterActivityDemo() {
                     <img
                       src={profile.pfp_url}
                       alt={profile.username}
-                      className="w-12 h-12 rounded-full border-2 border-blue-400"
+                       className="w-12 h-12 rounded-full border-2 border-accent-core"
                     />
                   )}
                   <div>
-                    <div className="font-bold">{profile.display_name || profile.username}</div>
-                    <div className="text-sm text-muted-foreground">@{profile.username}</div>
+                    <div className="font-bold text-primary">{profile.display_name || profile.username}</div>
+                    <div className="text-sm text-secondary">@{profile.username}</div>
                   </div>
                 </div>
                 
                 {profile.profile?.bio?.text && (
-                  <p className="text-sm text-muted-foreground">{profile.profile.bio.text}</p>
+                  <p className="text-sm text-secondary">{profile.profile.bio.text}</p>
                 )}
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-2 bg-muted/50 rounded">
-                    <div className="font-bold text-lg">{stats?.followerCount?.toLocaleString() || profile.follower_count?.toLocaleString() || 'N/A'}</div>
-                    <div className="text-xs text-muted-foreground">Followers</div>
+                   <div className="text-center p-2 bg-ink-raised rounded-xl">
+                     <div className="font-bold text-lg tabular text-primary">{stats?.followerCount?.toLocaleString() || profile.follower_count?.toLocaleString() || 'N/A'}</div>
+                     <div className="text-xs text-muted">Followers</div>
                   </div>
-                  <div className="text-center p-2 bg-muted/50 rounded">
-                    <div className="font-bold text-lg">{stats?.totalCasts || 'N/A'}</div>
-                    <div className="text-xs text-muted-foreground">Casts</div>
+                   <div className="text-center p-2 bg-ink-raised rounded-xl">
+                     <div className="font-bold text-lg tabular text-primary">{stats?.totalCasts || 'N/A'}</div>
+                     <div className="text-xs text-muted">Casts</div>
                   </div>
                 </div>
 
                 {isAuthenticated && (
                   <Button 
                     onClick={() => setLocation('/farcaster-activity')}
-                    className="w-full bg-blue-600 hover:bg-blue-700"
+                     className="w-full grad-accent hover:bg-accent-deep glow-accent"
                     size="sm"
                   >
                     <MessageCircle className="w-4 h-4 mr-2" />
@@ -138,32 +136,28 @@ function FarcasterActivityDemo() {
                 )}
               </div>
             ) : (
-              <div className="text-center py-4 text-muted-foreground">
+              <div className="text-center py-4 text-secondary">
                 Failed to load profile data
               </div>
             )}
-          </CardContent>
-        </Card>
+        </Surface>
 
         {/* Live Activity Feed */}
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageCircle className="w-5 h-5 text-green-500" />
+        <Surface className="md:col-span-2 p-6">
+            <SectionTitle as="h3" className="flex items-center gap-2 mb-5">
+              <MessageCircle className="w-5 h-5 text-gain" />
               Live Activity Feed
-              <Badge variant="outline" className="ml-auto">
-                🔴 Real-time
+              <Badge variant="outline" className="ml-auto border-gain/30 text-gain">
+                Real-time
               </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            </SectionTitle>
             {isLoading ? (
               <div className="space-y-4">
                 {[...Array(3)].map((_, i) => (
                   <div key={i} className="space-y-2">
-                    <div className="h-4 bg-muted rounded w-full"></div>
-                    <div className="h-3 bg-muted rounded w-3/4"></div>
-                    <div className="h-6 bg-muted rounded w-1/4"></div>
+                    <div className="h-4 bg-ink-raised rounded-xl w-full"></div>
+                    <div className="h-3 bg-ink-raised rounded-xl w-3/4"></div>
+                    <div className="h-6 bg-ink-raised rounded-xl w-1/4"></div>
                   </div>
                 ))}
               </div>
@@ -175,10 +169,10 @@ function FarcasterActivityDemo() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="border-b border-muted pb-4 last:border-b-0"
+                    className="border-b border-ink-divider pb-4 last:border-b-0"
                   >
                     <p className="text-xs sm:text-sm mb-2 line-clamp-2 sm:line-clamp-3">{cast.text}</p>
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-4 text-xs text-muted">
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         {formatTimeAgo(cast.timestamp)}
@@ -200,7 +194,7 @@ function FarcasterActivityDemo() {
                           href={`https://warpcast.com/~/conversations/${cast.hash}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-blue-500 hover:text-blue-600"
+                           className="flex items-center gap-1 text-accent-bright hover:text-primary"
                         >
                           <Link2 className="w-3 h-3" />
                           View
@@ -211,7 +205,7 @@ function FarcasterActivityDemo() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className="text-center py-8 text-secondary">
                 <MessageCircle className="w-12 h-12 mx-auto mb-4 text-muted" />
                 <p>No recent activity found</p>
                 <p className="text-xs mt-2">Try selecting a different user above</p>
@@ -219,21 +213,20 @@ function FarcasterActivityDemo() {
             )}
 
             {!isAuthenticated && (
-              <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
-                <p className="text-sm text-blue-700 dark:text-blue-300 mb-2">
-                  🔐 Sign up to access full Farcaster analytics and AI-powered insights!
+              <div className="mt-4 p-3 bg-accent-core/10 border border-accent-core/30 rounded-xl text-center">
+                <p className="text-sm text-accent-bright mb-2">
+                  Sign up to access full Farcaster analytics and AI-powered insights!
                 </p>
                 <Button 
                   onClick={() => setLocation('/auth')}
                   size="sm"
-                  className="bg-blue-600 hover:bg-blue-700"
+                   className="grad-accent hover:bg-accent-deep glow-accent"
                 >
                   Get Started Free
                 </Button>
               </div>
             )}
-          </CardContent>
-        </Card>
+        </Surface>
       </div>
 
       {/* Call to Action */}
@@ -241,16 +234,16 @@ function FarcasterActivityDemo() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="text-center mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl"
+        className="text-center mt-8 p-6 bg-ink-surface border border-ink-edge rounded-xl"
       >
-        <h4 className="text-lg font-bold mb-2">🚀 Ready to Build Your Social Intelligence?</h4>
-        <p className="text-muted-foreground mb-4">
+        <h4 className="text-lg font-bold mb-2 text-primary">Ready to Build Your Social Intelligence?</h4>
+        <p className="text-secondary mb-4">
           Join StreamAiX to transform social conversations into actionable insights with AI
         </p>
         <Button 
           onClick={() => setLocation(isAuthenticated ? '/dashboard' : '/auth')}
           size="lg"
-          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+           className="grad-accent hover:bg-accent-deep glow-accent"
         >
           {isAuthenticated ? 'Go to Dashboard' : 'Start Free Trial'}
         </Button>
@@ -273,10 +266,10 @@ export function RealAIProcessor() {
   const [, setLocation] = useLocation();
 
   const supportedPlatforms = [
-    { name: "YouTube", icon: Youtube, color: "text-red-500" },
-    { name: "SoundCloud", icon: Music, color: "text-orange-500" },
-    { name: "Twitch", icon: Twitch, color: "text-purple-500" },
-    { name: "Podcasts", icon: Mic, color: "text-green-500" }
+    { name: "YouTube", icon: Youtube, color: "text-loss" },
+    { name: "SoundCloud", icon: Music, color: "text-warn" },
+    { name: "Twitch", icon: Twitch, color: "text-accent-bright" },
+    { name: "Podcasts", icon: Mic, color: "text-gain" }
   ];
 
   const processingSteps = [
@@ -551,14 +544,14 @@ export function RealAIProcessor() {
   };
 
   const getStatusIcon = () => {
-    if (error) return <AlertCircle className="w-5 h-5 text-red-500" />;
-    if (result) return <CheckCircle className="w-5 h-5 text-green-500" />;
-    if (isProcessing) return <Loader2 className="w-5 h-5 animate-spin text-blue-500" />;
-    return <Zap className="w-5 h-5 text-purple-500" />;
+    if (error) return <AlertCircle className="w-5 h-5 text-loss" />;
+    if (result) return <CheckCircle className="w-5 h-5 text-gain" />;
+    if (isProcessing) return <Loader2 className="w-5 h-5 animate-spin text-accent-bright" />;
+    return <Zap className="w-5 h-5 text-accent-bright" />;
   };
 
   return (
-    <section id="ai-processor" className="py-16 bg-background">
+    <section id="ai-processor" className="py-16 bg-ink-page text-body">
       <div className="container mx-auto px-4 sm:px-6">
         <motion.div 
           className="text-center mb-8 sm:mb-16"
@@ -567,7 +560,7 @@ export function RealAIProcessor() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <p className="text-base sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
+          <p className="text-base sm:text-xl text-secondary max-w-3xl mx-auto px-4">
             See real AI analysis in action with trending crypto content
           </p>
         </motion.div>
@@ -585,9 +578,8 @@ export function RealAIProcessor() {
                 exit={{ opacity: 0, y: -20 }}
                 className="mb-8"
               >
-                <Card className="glass-bg glass-border">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                <Surface className="p-6">
+                  <SectionTitle as="h3" className="flex items-center gap-2 mb-6">
                       {getStatusIcon()}
                       Processing Status
                       {jobId && (
@@ -595,9 +587,8 @@ export function RealAIProcessor() {
                           Job: {jobId.slice(-6)}
                         </Badge>
                       )}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
+                  </SectionTitle>
+                  <div className="space-y-6">
                     {/* Progress Bar */}
                     {isProcessing && (
                       <div className="space-y-2">
@@ -615,35 +606,35 @@ export function RealAIProcessor() {
                         <div key={step.name} className="flex items-center">
                           <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
                             progress > index * 25 
-                              ? 'bg-purple-500 border-purple-500 text-white' 
-                              : 'bg-muted border-muted-foreground/20 text-muted-foreground'
+                              ? 'bg-accent-core border-accent-core text-primary' 
+                              : 'bg-ink-raised border-ink-edge text-muted'
                           }`}>
                             <step.icon className="w-4 h-4" />
                           </div>
                           {index < processingSteps.length - 1 && (
                             <div className={`w-12 h-0.5 mx-2 ${
-                              progress > index * 25 ? 'bg-purple-500' : 'bg-muted-foreground/20'
+                              progress > index * 25 ? 'bg-accent-core' : 'bg-ink-edge'
                             }`} />
                           )}
                         </div>
                       ))}
                     </div>
-                    <div className="text-center text-sm text-muted-foreground">
+                    <div className="text-center text-sm text-secondary">
                       {processingSteps.find((_, index) => progress <= (index + 1) * 25)?.description || "Processing completed!"}
                     </div>
 
                     {/* Error Display */}
                     {error && (
-                      <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                        <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                      <div className="p-4 bg-loss/10 border border-loss/30 rounded-xl">
+                        <div className="flex items-center gap-2 text-loss">
                           <AlertCircle className="w-4 h-4" />
                           <span className="font-medium">Processing Failed</span>
                         </div>
-                        <p className="text-red-600 dark:text-red-400 text-sm mt-1">{error}</p>
+                        <p className="text-loss text-sm mt-1">{error}</p>
                       </div>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
+                </Surface>
               </motion.div>
             )}
           </AnimatePresence>
@@ -670,26 +661,26 @@ export function RealAIProcessor() {
                   transition={{ delay: 0.3 }}
                   className="text-center mb-6"
                 >
-                  <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-full">
-                    <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
-                    <span className="font-semibold text-green-700 dark:text-green-300">
+                  <div className="inline-flex items-center gap-2 px-6 py-3 bg-gain/10 border border-gain/30 rounded-xl">
+                    <CheckCircle className="w-5 h-5 text-gain" />
+                    <span className="font-semibold text-gain">
                       ✨ AI Processing Complete!
                     </span>
                   </div>
                 </motion.div>
 
-                <Card className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 border-2 border-purple-200 dark:border-purple-800 shadow-2xl shadow-purple-indigo-500/10">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-center">
-                      <div className="bg-gradient-to-r from-purple-600 to-purple-600 bg-clip-text text-transparent text-2xl font-orbitron font-bold mb-2">
+                <Surface className="border-2 border-accent-core/40 p-0">
+                  <div className="pb-4 p-6">
+                    <SectionTitle as="h3" className="text-center">
+                      <div className="text-accent-bright text-2xl font-orbitron font-bold mb-2">
                         🧠 AI Intelligence Report
                       </div>
-                      <p className="text-sm text-muted-foreground font-normal">
+                      <p className="text-sm text-secondary font-normal">
                         Advanced content analysis powered by AI
                       </p>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0">
+                    </SectionTitle>
+                  </div>
+                  <div className="p-0">
                     {/* Title and URL Header */}
                     <motion.div 
                       initial={{ opacity: 0, x: -20 }}
@@ -697,10 +688,10 @@ export function RealAIProcessor() {
                       transition={{ delay: 0.4 }}
                       className="text-center border-b p-6 pb-4"
                     >
-                      <h3 className="text-lg font-bold text-foreground mb-2">
+                      <h3 className="text-lg font-bold text-primary mb-2">
                         {result.title || "Processed Content"}
                       </h3>
-                      <p className="text-xs text-muted-foreground font-mono bg-muted/50 px-3 py-1 rounded-full inline-block">
+                      <p className="text-xs text-muted font-mono bg-ink-raised px-3 py-1 rounded-xl inline-block">
                         {result.originalUrl || url}
                       </p>
                     </motion.div>
@@ -739,58 +730,58 @@ export function RealAIProcessor() {
                         {/* SUMMARY TAB */}
                         <TabsContent value="summary" className="space-y-6">
                           {/* Video Details Header */}
-                          <div className="bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-900/30 dark:to-gray-900/30 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+                          <div className="bg-ink-raised rounded-xl p-4 border border-ink-edge">
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                               <div>
-                                <div className="text-lg font-bold text-slate-700 dark:text-slate-300">
+                                <div className="text-lg font-bold text-primary tabular">
                                   {result.duration ? `${Math.floor(result.duration / 60)}:${(result.duration % 60).toString().padStart(2, '0')}` : '12:34'}
                                 </div>
-                                <div className="text-xs text-muted-foreground">Duration</div>
+                                <div className="text-xs text-muted">Duration</div>
                               </div>
                               <div>
-                                <div className="text-lg font-bold text-slate-700 dark:text-slate-300">
+                                <div className="text-lg font-bold text-primary tabular">
                                   {result.platform || 'YouTube'}
                                 </div>
-                                <div className="text-xs text-muted-foreground">Platform</div>
+                                <div className="text-xs text-muted">Platform</div>
                               </div>
                               <div>
-                                <div className="text-lg font-bold text-slate-700 dark:text-slate-300">
+                                <div className="text-lg font-bold text-primary tabular">
                                   {result.category || 'Business'}
                                 </div>
-                                <div className="text-xs text-muted-foreground">Category</div>
+                                <div className="text-xs text-muted">Category</div>
                               </div>
                               <div>
-                                <div className="text-lg font-bold text-slate-700 dark:text-slate-300">
+                                <div className="text-lg font-bold text-primary tabular">
                                   {result.publishDate || 'Dec 2024'}
                                 </div>
-                                <div className="text-xs text-muted-foreground">Published</div>
+                                <div className="text-xs text-muted">Published</div>
                               </div>
                             </div>
                           </div>
 
                           {/* Main AI Summary */}
-                          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-purple-indigo-900/30 dark:to-purple-900/30 rounded-xl p-4 md:p-6 border border-purple-200 dark:border-purple-700">
-                            <h4 className="font-bold text-purple-700 dark:text-purple-300 mb-4 flex items-center gap-2">
+                          <div className="bg-ink-raised rounded-xl p-4 md:p-6 border border-accent-core/30">
+                            <h4 className="font-bold text-accent-bright mb-4 flex items-center gap-2">
                               <Brain className="w-5 h-5" />
                               AI-Generated Summary
                             </h4>
                             
                             {/* Content Title */}
                             <div className="mb-4">
-                              <h3 className="text-lg md:text-xl font-bold text-foreground mb-2 leading-tight">
+                              <h3 className="text-lg md:text-xl font-bold text-primary mb-2 leading-tight">
                                 {result.title || "The AI Content Creation Revolution: Efficiency Meets Ethics"}
                               </h3>
                             </div>
 
                             {/* Executive Summary */}
                             <div className="mb-6">
-                              <h5 className="text-lg font-semibold text-purple-600 dark:text-purple-400 mb-4">Executive Summary</h5>
-                              <div className="text-foreground leading-relaxed space-y-3 text-sm md:text-base">
+                              <h5 className="text-lg font-semibold text-accent-bright mb-4">Executive Summary</h5>
+                              <div className="text-primary leading-relaxed space-y-3 text-sm md:text-base">
                                 {(result.summary || result.content || "Artificial intelligence is fundamentally reshaping how we create, consume, and interact with digital content. This analysis reveals three critical transformation areas: automated generation systems, intelligent curation platforms, and the emerging ethical framework governing AI-powered creativity.")
                                   .split('. ')
                                   .filter((sentence: string) => sentence.trim().length > 0)
                                   .map((sentence: string, idx: number, array: string[]) => (
-                                    <p key={idx} className="text-gray-700 dark:text-gray-300">
+                                    <p key={idx} className="text-body">
                                       {sentence.trim() + (idx < array.length - 1 && !sentence.trim().endsWith('.') ? '.' : '')}
                                     </p>
                                   ))
@@ -799,66 +790,66 @@ export function RealAIProcessor() {
                             </div>
 
                             {/* Key Performance Metrics */}
-                            <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-4 mb-4">
-                              <h5 className="font-semibold mb-3 text-purple-600 dark:text-purple-400">Key Performance Metrics</h5>
+                            <div className="bg-ink-surface rounded-xl p-4 mb-4">
+                              <h5 className="font-semibold mb-3 text-accent-bright">Key Performance Metrics</h5>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                                    <span className="text-sm text-muted-foreground">Production Efficiency:</span>
-                                    <span className="font-semibold text-green-600 dark:text-green-400 text-sm">80% reduction in creation time</span>
+                                    <span className="text-sm text-muted">Production Efficiency:</span>
+                                    <span className="font-semibold text-gain text-sm">80% reduction in creation time</span>
                                   </div>
                                   <div className="flex items-center justify-between">
-                                    <span className="text-sm text-muted-foreground">Quality Consistency:</span>
-                                    <span className="font-semibold text-blue-600 dark:text-blue-400">High accuracy maintained</span>
+                                    <span className="text-sm text-muted">Quality Consistency:</span>
+                                    <span className="font-semibold text-accent-bright">High accuracy maintained</span>
                                   </div>
                                   <div className="flex items-center justify-between">
-                                    <span className="text-sm text-muted-foreground">Cost Optimization:</span>
-                                    <span className="font-semibold text-purple-600 dark:text-purple-400">60% resource savings</span>
+                                    <span className="text-sm text-muted">Cost Optimization:</span>
+                                    <span className="font-semibold text-accent-bright">60% resource savings</span>
                                   </div>
                                 </div>
                                 <div className="space-y-2">
                                   <div className="flex items-center justify-between">
-                                    <span className="text-sm text-muted-foreground">User Engagement:</span>
-                                    <span className="font-semibold text-orange-600 dark:text-orange-400">40% increase in retention</span>
+                                    <span className="text-sm text-muted">User Engagement:</span>
+                                    <span className="font-semibold text-warn">40% increase in retention</span>
                                   </div>
                                   <div className="flex items-center justify-between">
-                                    <span className="text-sm text-muted-foreground">Content Volume:</span>
-                                    <span className="font-semibold text-teal-600 dark:text-teal-400">300% scaling capacity</span>
+                                    <span className="text-sm text-muted">Content Volume:</span>
+                                    <span className="font-semibold text-gain">300% scaling capacity</span>
                                   </div>
                                   <div className="flex items-center justify-between">
-                                    <span className="text-sm text-muted-foreground">ROI Improvement:</span>
-                                    <span className="font-semibold text-red-600 dark:text-red-400">250% investment return</span>
+                                    <span className="text-sm text-muted">ROI Improvement:</span>
+                                    <span className="font-semibold text-gain">250% investment return</span>
                                   </div>
                                 </div>
                               </div>
                             </div>
 
                             {/* Strategic Insights */}
-                            <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-4">
-                              <h5 className="font-semibold mb-3 text-purple-600 dark:text-purple-400">Strategic Insights</h5>
+                            <div className="bg-ink-raised rounded-xl p-4">
+                              <h5 className="font-semibold mb-3 text-accent-bright">Strategic Insights</h5>
                               <div className="space-y-2">
                                 <div className="flex items-start gap-2">
-                                  <span className="w-2 h-2 rounded-full bg-purple-400 mt-2 flex-shrink-0"></span>
-                                  <p className="text-sm text-muted-foreground">
-                                    <strong className="text-foreground">Market Leadership:</strong> Early AI adoption creates sustainable competitive advantages in content-driven industries
+                                  <span className="w-2 h-2 rounded-full bg-accent-core mt-2 flex-shrink-0"></span>
+                                  <p className="text-sm text-muted">
+                                    <strong className="text-primary">Market Leadership:</strong> Early AI adoption creates sustainable competitive advantages in content-driven industries
                                   </p>
                                 </div>
                                 <div className="flex items-start gap-2">
-                                  <span className="w-2 h-2 rounded-full bg-purple-400 mt-2 flex-shrink-0"></span>
-                                  <p className="text-sm text-muted-foreground">
-                                    <strong className="text-foreground">Operational Excellence:</strong> Automated workflows reduce manual overhead while improving output consistency
+                                  <span className="w-2 h-2 rounded-full bg-accent-core mt-2 flex-shrink-0"></span>
+                                  <p className="text-sm text-muted">
+                                    <strong className="text-primary">Operational Excellence:</strong> Automated workflows reduce manual overhead while improving output consistency
                                   </p>
                                 </div>
                                 <div className="flex items-start gap-2">
-                                  <span className="w-2 h-2 rounded-full bg-purple-400 mt-2 flex-shrink-0"></span>
-                                  <p className="text-sm text-muted-foreground">
-                                    <strong className="text-foreground">Future Readiness:</strong> Organizations investing in AI infrastructure position themselves for next-generation opportunities
+                                  <span className="w-2 h-2 rounded-full bg-accent-core mt-2 flex-shrink-0"></span>
+                                  <p className="text-sm text-muted">
+                                    <strong className="text-primary">Future Readiness:</strong> Organizations investing in AI infrastructure position themselves for next-generation opportunities
                                   </p>
                                 </div>
                                 <div className="flex items-start gap-2">
-                                  <span className="w-2 h-2 rounded-full bg-purple-400 mt-2 flex-shrink-0"></span>
-                                  <p className="text-sm text-muted-foreground">
-                                    <strong className="text-foreground">Risk Mitigation:</strong> Ethical AI frameworks ensure sustainable growth while maintaining stakeholder trust
+                                  <span className="w-2 h-2 rounded-full bg-accent-core mt-2 flex-shrink-0"></span>
+                                  <p className="text-sm text-muted">
+                                    <strong className="text-primary">Risk Mitigation:</strong> Ethical AI frameworks ensure sustainable growth while maintaining stakeholder trust
                                   </p>
                                 </div>
                               </div>
@@ -867,106 +858,106 @@ export function RealAIProcessor() {
 
                           {/* Trends & Market Analytics */}
                           <div className="grid md:grid-cols-2 gap-4">
-                            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl p-5 border border-emerald-200 dark:border-emerald-700">
-                              <h5 className="font-bold mb-3 text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
+                            <div className="bg-gain/10 rounded-xl p-5 border border-gain/30">
+                              <h5 className="font-bold mb-3 text-gain flex items-center gap-2">
                                 <TrendingUp className="w-4 h-4" />
                                 Market Trends
                               </h5>
                               <div className="space-y-3">
                                 {result.trends && result.trends.length > 0 ? (
                                   result.trends.slice(0, 2).map((trend: any, idx: number) => (
-                                    <div key={idx} className="p-2 bg-white/60 dark:bg-gray-800/60 rounded-md">
+                                    <div key={idx} className="p-2 bg-ink-raised rounded-xl">
                                       <div className="flex items-center justify-between mb-1">
                                         <span className="font-medium text-sm">{trend.trend}</span>
                                         <Badge variant="outline" className={`text-xs ${
-                                          trend.strength === 'strong' ? 'text-green-600 dark:text-green-400' :
-                                          trend.strength === 'moderate' ? 'text-yellow-600 dark:text-yellow-400' :
-                                          'text-gray-600 dark:text-gray-400'
+                                          trend.strength === 'strong' ? 'text-gain' :
+                                          trend.strength === 'moderate' ? 'text-warn' :
+                                          'text-muted'
                                         }`}>
                                           {trend.strength}
                                         </Badge>
                                       </div>
-                                      <p className="text-xs text-muted-foreground">{trend.evidence}</p>
+                                      <p className="text-xs text-muted">{trend.evidence}</p>
                                     </div>
                                   ))
                                 ) : (
                                   <>
-                                    <div className="p-2 bg-white/60 dark:bg-gray-800/60 rounded-md">
+                                    <div className="p-2 bg-ink-raised rounded-xl">
                                       <div className="flex items-center justify-between mb-1">
                                         <span className="font-medium text-sm">AI Adoption Acceleration</span>
-                                        <Badge variant="outline" className="text-xs text-green-600 dark:text-green-400">Strong</Badge>
+                                        <Badge variant="outline" className="text-xs text-gain border-gain/30">Strong</Badge>
                                       </div>
-                                      <p className="text-xs text-muted-foreground">70% increase in AI tool adoption across industries</p>
+                                      <p className="text-xs text-muted">70% increase in AI tool adoption across industries</p>
                                     </div>
-                                    <div className="p-2 bg-white/60 dark:bg-gray-800/60 rounded-md">
+                                    <div className="p-2 bg-ink-raised rounded-xl">
                                       <div className="flex items-center justify-between mb-1">
                                         <span className="font-medium text-sm">Remote Work Permanence</span>
-                                        <Badge variant="outline" className="text-xs text-yellow-600 dark:text-yellow-400">Moderate</Badge>
+                                        <Badge variant="outline" className="text-xs text-warn border-warn/30">Moderate</Badge>
                                       </div>
-                                      <p className="text-xs text-muted-foreground">Hybrid models becoming the new standard</p>
+                                      <p className="text-xs text-muted">Hybrid models becoming the new standard</p>
                                     </div>
                                   </>
                                 )}
                               </div>
                             </div>
 
-                            <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-xl p-5 border border-orange-200 dark:border-orange-700">
-                              <h5 className="font-bold mb-3 text-orange-700 dark:text-orange-300 flex items-center gap-2">
+                            <div className="bg-warn/10 rounded-xl p-5 border border-warn/30">
+                              <h5 className="font-bold mb-3 text-warn flex items-center gap-2">
                                 <BarChart3 className="w-4 h-4" />
                                 Market Analytics
                               </h5>
                               <div className="space-y-3">
-                                <div className="flex items-center justify-between p-2 bg-white/60 dark:bg-gray-800/60 rounded-md">
+                                <div className="flex items-center justify-between p-2 bg-ink-raised rounded-xl">
                                   <span className="text-sm">Market Sentiment</span>
                                   <span className={`font-semibold text-sm ${
-                                    result.marketSentiment === 'POSITIVE' || result.marketSentiment === 'BULLISH' ? 'text-green-600 dark:text-green-400' :
-                                    result.marketSentiment === 'NEGATIVE' || result.marketSentiment === 'BEARISH' ? 'text-red-600 dark:text-red-400' :
-                                    'text-green-600 dark:text-green-400'
+                                    result.marketSentiment === 'POSITIVE' || result.marketSentiment === 'BULLISH' ? 'text-gain' :
+                                    result.marketSentiment === 'NEGATIVE' || result.marketSentiment === 'BEARISH' ? 'text-loss' :
+                                    'text-gain'
                                   }`}>
                                     {result.marketSentiment || 'BULLISH'}
                                   </span>
                                 </div>
-                                <div className="flex items-center justify-between p-2 bg-white/60 dark:bg-gray-800/60 rounded-md">
-                                  <span className="text-sm">Growth Indicators</span>
-                                  <span className="font-semibold text-sm text-blue-600 dark:text-blue-400">+23%</span>
+                                <div className="flex items-center justify-between p-2 bg-ink-raised rounded-xl">
+                                  <span className="text-sm text-body">Growth Indicators</span>
+                                  <span className="font-semibold text-sm text-gain tabular">+23%</span>
                                 </div>
-                                <div className="flex items-center justify-between p-2 bg-white/60 dark:bg-gray-800/60 rounded-md">
+                                <div className="flex items-center justify-between p-2 bg-ink-raised rounded-xl">
                                   <span className="text-sm">Risk Assessment</span>
-                                  <span className="font-semibold text-sm text-yellow-600 dark:text-yellow-400">Medium</span>
+                                  <span className="font-semibold text-sm text-warn">Medium</span>
                                 </div>
                               </div>
                             </div>
                           </div>
 
                           {/* Storyline & Narrative Arc */}
-                          <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-xl p-5 border border-violet-200 dark:border-violet-700">
-                            <h5 className="font-bold mb-4 text-violet-700 dark:text-violet-300 flex items-center gap-2">
+                          <div className="bg-accent-core/10 rounded-xl p-5 border border-accent-core/30">
+                            <h5 className="font-bold mb-4 text-accent-bright flex items-center gap-2">
                               <MessageSquare className="w-4 h-4" />
                               Content Storyline & Narrative Arc
                             </h5>
                             <div className="grid md:grid-cols-3 gap-4">
-                              <div className="p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
-                                <div className="text-xs text-violet-600 dark:text-violet-400 font-medium mb-1">OPENING (0-25%)</div>
+                              <div className="p-3 bg-ink-raised rounded-xl">
+                                <div className="text-xs text-accent-bright text-accent-bright font-medium mb-1">OPENING (0-25%)</div>
                                 <h6 className="font-medium text-sm mb-1">Problem Statement</h6>
-                                <p className="text-xs text-muted-foreground">Introduces current market challenges and sets context for discussion</p>
+                                <p className="text-xs text-muted">Introduces current market challenges and sets context for discussion</p>
                               </div>
-                              <div className="p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
-                                <div className="text-xs text-violet-600 dark:text-violet-400 font-medium mb-1">DEVELOPMENT (25-75%)</div>
+                              <div className="p-3 bg-ink-raised rounded-xl">
+                                <div className="text-xs text-accent-bright text-accent-bright font-medium mb-1">DEVELOPMENT (25-75%)</div>
                                 <h6 className="font-medium text-sm mb-1">Solution Framework</h6>
-                                <p className="text-xs text-muted-foreground">Explores strategies, presents data, and builds argument for proposed approach</p>
+                                <p className="text-xs text-muted">Explores strategies, presents data, and builds argument for proposed approach</p>
                               </div>
-                              <div className="p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
-                                <div className="text-xs text-violet-600 dark:text-violet-400 font-medium mb-1">CONCLUSION (75-100%)</div>
+                              <div className="p-3 bg-ink-raised rounded-xl">
+                                <div className="text-xs text-accent-bright text-accent-bright font-medium mb-1">CONCLUSION (75-100%)</div>
                                 <h6 className="font-medium text-sm mb-1">Action Items</h6>
-                                <p className="text-xs text-muted-foreground">Summarizes key takeaways and provides clear next steps</p>
+                                <p className="text-xs text-muted">Summarizes key takeaways and provides clear next steps</p>
                               </div>
                             </div>
                           </div>
 
                           {/* Executive Summary */}
-                          <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
-                            <h5 className="font-bold mb-3 text-gray-700 dark:text-gray-300">Executive Summary</h5>
-                            <p className="text-sm leading-relaxed text-muted-foreground mb-3">
+                          <div className="bg-ink-raised rounded-xl p-5 border border-ink-edge">
+                            <h5 className="font-bold mb-3 text-primary">Executive Summary</h5>
+                            <p className="text-sm leading-relaxed text-muted mb-3">
                               {result.executiveSummary || "This content provides valuable insights into current market dynamics and strategic business approaches. The discussion covers emerging trends, competitive analysis, and actionable recommendations for business leaders navigating today's complex market environment."}
                             </p>
                             <div className="flex flex-wrap gap-2">
@@ -982,15 +973,15 @@ export function RealAIProcessor() {
                         <TabsContent value="insights" className="space-y-4">
                           {/* Key Bullet Points */}
                           {result.bulletPoints && result.bulletPoints.length > 0 && (
-                            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-700">
-                              <h5 className="font-bold mb-3 text-blue-700 dark:text-blue-300 flex items-center gap-2">
+                            <div className="bg-accent-core/10 rounded-xl p-4 border border-accent-core/30">
+                              <h5 className="font-bold mb-3 text-accent-bright flex items-center gap-2">
                                 <TrendingUp className="w-4 h-4" />
                                 Key Insights
                               </h5>
                               <div className="space-y-2">
                                 {result.bulletPoints.slice(0, 6).map((point: string, idx: number) => (
-                                  <div key={idx} className="flex items-start gap-2 p-2 bg-white/50 dark:bg-gray-800/50 rounded-md">
-                                    <span className="font-medium text-blue-600 dark:text-blue-400 text-xs mt-0.5">•</span>
+                                  <div key={idx} className="flex items-start gap-2 p-2 bg-ink-raised rounded-xl">
+                                    <span className="font-medium text-accent-bright text-xs mt-0.5">•</span>
                                     <span className="text-sm">{point}</span>
                                   </div>
                                 ))}
@@ -1000,22 +991,22 @@ export function RealAIProcessor() {
 
                           {/* Trends */}
                           {result.trends && result.trends.length > 0 && (
-                            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl p-4 border border-emerald-200 dark:border-emerald-700">
-                              <h5 className="font-bold mb-3 text-emerald-700 dark:text-emerald-300">Key Trends</h5>
+                            <div className="bg-gain/10 rounded-xl p-4 border border-gain/30">
+                              <h5 className="font-bold mb-3 text-gain">Key Trends</h5>
                               <div className="grid gap-3">
                                 {result.trends.slice(0, 3).map((trend: any, idx: number) => (
-                                  <div key={idx} className="p-3 bg-white/50 dark:bg-gray-800/50 rounded-md">
+                                  <div key={idx} className="p-3 bg-ink-raised rounded-xl">
                                     <div className="flex items-center justify-between mb-1">
                                       <span className="font-medium text-sm">{trend.trend}</span>
                                       <Badge variant="outline" className={`text-xs ${
-                                        trend.strength === 'strong' ? 'text-green-600 dark:text-green-400' :
-                                        trend.strength === 'moderate' ? 'text-yellow-600 dark:text-yellow-400' :
-                                        'text-gray-600 dark:text-gray-400'
+                                        trend.strength === 'strong' ? 'text-gain' :
+                                        trend.strength === 'moderate' ? 'text-warn' :
+                                        'text-muted'
                                       }`}>
                                         {trend.strength}
                                       </Badge>
                                     </div>
-                                    <p className="text-xs text-muted-foreground">{trend.evidence}</p>
+                                    <p className="text-xs text-muted">{trend.evidence}</p>
                                   </div>
                                 ))}
                               </div>
@@ -1027,37 +1018,37 @@ export function RealAIProcessor() {
                         <TabsContent value="market" className="space-y-4">
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                             {result.marketSentiment && (
-                              <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200 dark:border-green-700">
+                              <div className="text-center p-4 bg-gain/10 rounded-xl border border-gain/30">
                                 <div className={`text-2xl font-bold mb-1 ${
-                                  result.marketSentiment === 'POSITIVE' || result.marketSentiment === 'BULLISH' ? 'text-green-600 dark:text-green-400' :
-                                  result.marketSentiment === 'NEGATIVE' || result.marketSentiment === 'BEARISH' ? 'text-red-600 dark:text-red-400' :
-                                  'text-yellow-600 dark:text-yellow-400'
+                                  result.marketSentiment === 'POSITIVE' || result.marketSentiment === 'BULLISH' ? 'text-gain' :
+                                  result.marketSentiment === 'NEGATIVE' || result.marketSentiment === 'BEARISH' ? 'text-loss' :
+                                  'text-warn'
                                 }`}>
                                   {result.marketSentiment}
                                 </div>
-                                <div className="text-xs text-muted-foreground">Market Sentiment</div>
+                                <div className="text-xs text-muted">Market Sentiment</div>
                               </div>
                             )}
                             {(result.expertCredibility || result.sourceCredibility) && (
-                              <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-purple-indigo-900/20 rounded-xl border border-purple-200 dark:border-purple-700">
-                                <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-1">
+                              <div className="text-center p-4 bg-accent-core/10 rounded-xl border border-accent-core/30">
+                                <div className="text-2xl font-bold text-accent-bright mb-1">
                                   {result.sourceCredibility || `${result.expertCredibility}/100`}
                                 </div>
-                                <div className="text-xs text-muted-foreground">Source Credibility</div>
+                                <div className="text-xs text-muted">Source Credibility</div>
                               </div>
                             )}
                           </div>
-                          <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-xl p-4 border border-orange-200 dark:border-orange-700">
-                            <h5 className="font-bold mb-2 text-orange-700 dark:text-orange-300">Market Analysis</h5>
-                            <p className="text-sm text-muted-foreground">Advanced market intelligence extracted from content analysis, sentiment scoring, and expert credibility assessment.</p>
+                          <div className="bg-warn/10 rounded-xl p-4 border border-warn/30">
+                            <h5 className="font-bold mb-2 text-warn">Market Analysis</h5>
+                            <p className="text-sm text-muted">Advanced market intelligence extracted from content analysis, sentiment scoring, and expert credibility assessment.</p>
                           </div>
                         </TabsContent>
 
                         {/* STRUCTURE TAB */}
                         <TabsContent value="structure" className="space-y-4">
                           {/* Chapters */}
-                          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-purple-indigo-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-700">
-                            <h5 className="font-bold mb-3 text-blue-700 dark:text-blue-300 flex items-center gap-2">
+                          <div className="bg-accent-core/10 rounded-xl p-4 border border-accent-core/30">
+                            <h5 className="font-bold mb-3 text-accent-bright flex items-center gap-2">
                               <Clock className="w-4 h-4" />
                               Content Structure ({(() => {
                                 try {
@@ -1067,35 +1058,35 @@ export function RealAIProcessor() {
                                 } catch (e) { return 8; }
                               })()} chapters)
                             </h5>
-                            <p className="text-sm text-muted-foreground mb-3">AI-detected chapter segments with timestamps</p>
+                            <p className="text-sm text-muted mb-3">AI-detected chapter segments with timestamps</p>
                             <div className="space-y-2">
-                              <div className="p-2 bg-white/50 dark:bg-gray-800/50 rounded-md flex justify-between">
+                              <div className="p-2 bg-ink-raised rounded-xl flex justify-between">
                                 <span className="text-sm">Introduction & Overview</span>
-                                <span className="text-xs text-muted-foreground">0:00 - 2:15</span>
+                                <span className="text-xs text-muted">0:00 - 2:15</span>
                               </div>
-                              <div className="p-2 bg-white/50 dark:bg-gray-800/50 rounded-md flex justify-between">
+                              <div className="p-2 bg-ink-raised rounded-xl flex justify-between">
                                 <span className="text-sm">Main Discussion</span>
-                                <span className="text-xs text-muted-foreground">2:15 - 8:30</span>
+                                <span className="text-xs text-muted">2:15 - 8:30</span>
                               </div>
-                              <div className="p-2 bg-white/50 dark:bg-gray-800/50 rounded-md flex justify-between">
+                              <div className="p-2 bg-ink-raised rounded-xl flex justify-between">
                                 <span className="text-sm">Key Insights</span>
-                                <span className="text-xs text-muted-foreground">8:30 - 12:45</span>
+                                <span className="text-xs text-muted">8:30 - 12:45</span>
                               </div>
                             </div>
                           </div>
 
                           {/* Key Quotes */}
                           {result.keyQuotes && result.keyQuotes.length > 0 && (
-                            <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl p-4 border border-amber-200 dark:border-amber-700">
-                              <h5 className="font-bold mb-3 text-amber-700 dark:text-amber-300 flex items-center gap-2">
+                            <div className="bg-warn/10 rounded-xl p-4 border border-warn/30">
+                              <h5 className="font-bold mb-3 text-warn flex items-center gap-2">
                                 <MessageSquare className="w-4 h-4" />
                                 Notable Quotes
                               </h5>
                               <div className="space-y-3">
                                 {result.keyQuotes.slice(0, 3).map((quote: any, idx: number) => (
-                                  <div key={idx} className="p-3 bg-white/50 dark:bg-gray-800/50 rounded-md border-l-2 border-amber-400">
+                                  <div key={idx} className="p-3 bg-ink-raised rounded-xl border-l-2 border-warn">
                                     <p className="text-sm italic mb-2">"{quote.quote}"</p>
-                                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                    <div className="flex items-center justify-between text-xs text-muted">
                                       <span>{quote.speaker || 'Speaker'}</span>
                                       <span>{quote.timestamp}</span>
                                     </div>
@@ -1110,20 +1101,20 @@ export function RealAIProcessor() {
                         <TabsContent value="technical" className="space-y-4">
                           {/* Processing Stats */}
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            <div className="text-center p-3 bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-purple-indigo-900/40 dark:to-purple-indigo-800/40 rounded-xl border border-purple-200 dark:border-purple-700">
-                              <div className="text-lg font-bold text-purple-600 dark:text-purple-400 mb-1">
+                            <div className="text-center p-3 bg-accent-core/10 rounded-xl border border-accent-core/30">
+                              <div className="text-lg font-bold text-accent-bright mb-1">
                                 {result.duration ? `${Math.floor(result.duration / 60)}min` : '5min'}
                               </div>
-                              <div className="text-xs text-muted-foreground">Duration</div>
+                              <div className="text-xs text-muted">Duration</div>
                             </div>
-                            <div className="text-center p-3 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/40 dark:to-green-800/40 rounded-xl border border-green-200 dark:border-green-700">
-                              <div className="text-lg font-bold text-green-600 dark:text-green-400 mb-1">
+                            <div className="text-center p-3 bg-gain/10 rounded-xl border border-gain/30">
+                              <div className="text-lg font-bold text-gain mb-1">
                                 {result.accuracy || result.processingAccuracy || '98'}%
                               </div>
-                              <div className="text-xs text-muted-foreground">AI Accuracy</div>
+                              <div className="text-xs text-muted">AI Accuracy</div>
                             </div>
-                            <div className="text-center p-3 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/40 dark:to-purple-800/40 rounded-xl border border-purple-200 dark:border-purple-700">
-                              <div className="text-lg font-bold text-purple-600 dark:text-purple-400 mb-1">
+                            <div className="text-center p-3 bg-accent-core/10 rounded-xl border border-accent-core/30">
+                              <div className="text-lg font-bold text-accent-bright mb-1">
                                 {(() => {
                                   try {
                                     if (Array.isArray(result.keyInsights)) return result.keyInsights.length;
@@ -1132,19 +1123,19 @@ export function RealAIProcessor() {
                                   } catch (e) { return 12; }
                                 })()}
                               </div>
-                              <div className="text-xs text-muted-foreground">Data Points</div>
+                              <div className="text-xs text-muted">Data Points</div>
                             </div>
-                            <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/40 dark:to-blue-800/40 rounded-xl border border-blue-200 dark:border-blue-700">
-                              <div className="text-lg font-bold text-blue-600 dark:text-blue-400 mb-1">
+                            <div className="text-center p-3 bg-accent-core/10 rounded-xl border border-accent-core/30">
+                              <div className="text-lg font-bold text-accent-bright mb-1">
                                 Advanced
                               </div>
-                              <div className="text-xs text-muted-foreground">AI Engine</div>
+                              <div className="text-xs text-muted">AI Engine</div>
                             </div>
                           </div>
 
                           {/* Decentralized Storage */}
-                          <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                            <h5 className="font-bold mb-3 text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                          <div className="bg-ink-raised rounded-xl p-4 border border-ink-edge">
+                            <h5 className="font-bold mb-3 text-primary flex items-center gap-2">
                               <Shield className="w-4 h-4" />
                               Decentralized Storage
                             </h5>
@@ -1166,13 +1157,13 @@ export function RealAIProcessor() {
                                 Arweave: B8kV2w9X1c7D...
                               </Badge>
                             </div>
-                            <p className="text-xs text-muted-foreground">Content permanently stored on decentralized networks for immutable access</p>
+                            <p className="text-xs text-muted">Content permanently stored on decentralized networks for immutable access</p>
                           </div>
                         </TabsContent>
                       </Tabs>
                     </motion.div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </Surface>
               </motion.div>
             )}
           </AnimatePresence>
@@ -1184,7 +1175,7 @@ export function RealAIProcessor() {
               animate={{ opacity: 1, y: 0 }}
               className="text-center mt-8"
             >
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted text-sm">
                 <strong>Sign up for free</strong> to unlock unlimited AI-powered content processing
               </p>
             </motion.div>

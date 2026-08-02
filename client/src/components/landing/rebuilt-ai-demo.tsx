@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,7 +14,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { Link, useLocation } from 'wouter';
 import UserNotesModal from '@/components/UserNotesModal';
 import { EnhancedPredictionMarketCard } from '@/components/prediction/EnhancedPredictionMarketCard';
-import { SectionHeader } from "@/components/ui/section-header";
 import { 
   Brain, 
   Zap, 
@@ -334,31 +334,28 @@ export function AIProcessor() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <SectionHeader
-            title="Live AI Processing"
-            subtitle="Paste a YouTube URL and extract AI insights instantly"
-            highlightWord="AI"
-          />
+          <SectionTitle as="h1">Live AI Processing</SectionTitle>
+          <p className="mt-2 text-body">Paste a YouTube URL and extract AI insights instantly</p>
         </motion.div>
 
         <div className="max-w-4xl mx-auto">
           {/* Input Section */}
           <div className="max-w-2xl mx-auto mb-12">
-            <div className="bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200 dark:border-purple-500/30 rounded-2xl p-6 shadow-lg shadow-purple-500/10">
+            <div className="bg-ink-surface bg-ink-surface backdrop-blur-xl border border-ink-edge border-accent-core/30 rounded-2xl p-6 shadow-lg shadow-purple-500/10">
               <div className="flex flex-col sm:flex-row gap-4">
                 <Input
                   type="url"
                   placeholder="https://youtube.com/watch?v=..."
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
-                  className="flex-1 h-12 text-base bg-white dark:bg-slate-800 border-gray-300 dark:border-muted-foreground/20 focus:border-purple-500 transition-colors"
+                  className="flex-1 h-12 text-base bg-ink-surface bg-ink-raised border-ink-edge border-ink-edge focus:border-purple-500 transition-colors"
                   disabled={isProcessing}
                   data-testid="input-youtube-url"
                 />
                 <Button 
                   onClick={handleProcess}
                   disabled={isProcessing || !url.trim()}
-                  className="h-12 px-8 bg-gradient-to-r from-purple-600 to-purple-600 hover:from-purple-700 hover:to-purple-700 font-medium"
+                  className="h-12 px-8 grad-accent  font-medium"
                   data-testid="button-analyze"
                 >
                   {isProcessing ? (
@@ -386,27 +383,27 @@ export function AIProcessor() {
                 exit={{ opacity: 0, y: -20 }}
                 className="mb-6"
               >
-                <Card className="border-red-500/50 bg-red-500/10">
-                  <CardHeader className="pb-3">
+                <Surface className="border-loss/50 bg-loss/10">
+                  <div className="pb-3">
                     <div className="flex items-center gap-2">
-                      <AlertCircle className="h-5 w-5 text-red-500" />
-                      <CardTitle className="text-red-500">Request Failed</CardTitle>
+                      <AlertCircle className="h-5 w-5 text-loss" />
+                      <SectionTitle as="h3" className="text-loss">Request Failed</SectionTitle>
                       <Badge variant="destructive" className="ml-auto">
                         {lastError.status}
                       </Badge>
                     </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
+                  </div>
+                  <div className="space-y-3">
                     <div className="space-y-1">
-                      <div className="text-xs font-semibold text-red-400">Server Response:</div>
-                      <pre className="text-xs bg-black/30 p-3 rounded overflow-x-auto">
+                      <div className="text-xs font-semibold text-loss">Server Response:</div>
+                      <pre className="text-xs bg-ink-page p-3 rounded overflow-x-auto">
                         {JSON.stringify(lastError.body, null, 2)}
                       </pre>
                     </div>
                     
                     {lastError.headers['x-server-version'] && (
-                      <div className="bg-purple-500/10 p-2 rounded text-xs space-y-1">
-                        <div className="text-purple-400 font-semibold">Server Info:</div>
+                      <div className="bg-accent-core/10 p-2 rounded text-xs space-y-1">
+                        <div className="text-accent-bright font-semibold">Server Info:</div>
                         <div className="font-mono text-[10px] space-y-0.5">
                           <div>Version: {lastError.headers['x-server-version']}</div>
                           <div>Build: {lastError.headers['x-server-build-time']}</div>
@@ -415,11 +412,11 @@ export function AIProcessor() {
                       </div>
                     )}
                     
-                    <div className="text-[10px] text-muted-foreground">
+                    <div className="text-[10px] text-secondary">
                       Failed at: {new Date(lastError.timestamp).toLocaleString()}
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </Surface>
               </motion.div>
             )}
           </AnimatePresence>
@@ -434,32 +431,32 @@ export function AIProcessor() {
               >
                 {/* Progress Card */}
                 {isProcessing && (
-                  <Card className="mb-6 bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200 dark:border-purple-500/30">
-                    <CardContent className="p-6">
+                  <Surface className="mb-6 bg-ink-surface bg-ink-surface backdrop-blur-xl border border-ink-edge border-accent-core/30">
+                    <div className="p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
                           <div className="relative">
-                            <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
-                              <Brain className="h-5 w-5 text-purple-400 animate-pulse" />
+                            <div className="w-10 h-10 rounded-xl bg-accent-core/20 flex items-center justify-center">
+                              <Brain className="h-5 w-5 text-accent-bright animate-pulse" />
                             </div>
                           </div>
                           <div>
-                            <h3 className="font-semibold text-gray-900 dark:text-white">AI Processing Active</h3>
-                            <p className="text-sm text-gray-600 dark:text-muted-foreground">{processingStatus}</p>
+                            <h3 className="font-semibold text-primary ">AI Processing Active</h3>
+                            <p className="text-sm text-secondary ">{processingStatus}</p>
                           </div>
                         </div>
                         <Badge variant="secondary" className="font-mono">
                           {Math.round(progress)}%
                         </Badge>
                       </div>
-                      <div className="w-full bg-muted rounded-full h-2">
+                      <div className="w-full bg-ink-raised rounded-xl h-2">
                         <div 
-                          className="bg-gradient-to-r from-purple-500 to-purple-500 h-2 rounded-full transition-all duration-500"
+                          className="bg-ink-surface   h-2 rounded-xl transition-all duration-500"
                           style={{ width: `${progress}%` }}
                         />
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </Surface>
                 )}
 
                 {/* Results Content */}
@@ -470,23 +467,23 @@ export function AIProcessor() {
                     transition={{ delay: 0.2 }}
                   >
                     {/* Header Card */}
-                    <Card className="mb-6 bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200 dark:border-purple-500/30">
-                      <CardContent className="p-6">
+                    <Surface className="mb-6 bg-ink-surface bg-ink-surface backdrop-blur-xl border border-ink-edge border-accent-core/30">
+                      <div className="p-6">
                         <div className="flex items-start gap-4">
                           <img 
                             src={result.rawData?.thumbnail}
                             alt={result.title}
-                            className="w-32 h-24 object-cover rounded-lg"
+                            className="w-32 h-24 object-cover rounded-xl"
                           />
                           <div className="flex-1">
-                            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">{result.title}</h3>
-                            <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400 mb-3">
+                            <h3 className="text-xl font-semibold text-primary  mb-2">{result.title}</h3>
+                            <div className="flex items-center gap-4 text-sm text-secondary  mb-3">
                               <span>📺 {result.rawData?.channel}</span>
                               <span>⏱️ {result.rawData?.duration}</span>
                               <span>👁️ {result.rawData?.views} views</span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                              <Badge className="bg-gain/20 text-gain border-gain/30">
                                 <CheckCircle className="h-3 w-3 mr-1" />
                                 Completed
                               </Badge>
@@ -502,12 +499,12 @@ export function AIProcessor() {
                             </a>
                           </Button>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </Surface>
 
                     {/* Content Tabs */}
-                    <Card className="bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200 dark:border-purple-500/30">
-                      <CardContent className="p-6">
+                    <Surface className="bg-ink-surface bg-ink-surface backdrop-blur-xl border border-ink-edge border-accent-core/30">
+                      <div className="p-6">
                         <Tabs defaultValue="summary" className="w-full">
                           <TabsList className="grid w-full grid-cols-4 mb-6">
                             <TabsTrigger value="summary" className="flex items-center gap-2">
@@ -530,28 +527,28 @@ export function AIProcessor() {
 
                           {/* Summary Tab */}
                           <TabsContent value="summary" className="space-y-4">
-                            <div className="p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-500/20">
-                              <h5 className="text-lg font-semibold text-blue-400 mb-3 flex items-center gap-2">
+                            <div className="p-4 bg-ink-surface   rounded-xl border border-accent-core/20">
+                              <h5 className="text-lg font-semibold text-accent-bright mb-3 flex items-center gap-2">
                                 <Zap className="w-5 h-5" />
                                 Executive Takeaway
                               </h5>
-                              <p className="text-foreground leading-relaxed text-base">{result.tldrSummary}</p>
+                              <p className="text-body leading-relaxed text-base">{result.tldrSummary}</p>
                             </div>
                           </TabsContent>
 
                           {/* Insights Tab */}
                           <TabsContent value="insights" className="space-y-4">
                             {result.bulletPoints && result.bulletPoints.length > 0 && (
-                              <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
-                                <h5 className="font-semibold mb-3 text-green-400 flex items-center gap-2">
+                              <div className="p-4 bg-gain/10 rounded-xl border border-gain/20">
+                                <h5 className="font-semibold mb-3 text-gain flex items-center gap-2">
                                   <TrendingUp className="w-4 h-4" />
                                   Key Insights
                                 </h5>
                                 <div className="space-y-2">
                                   {result.bulletPoints.map((point: string, idx: number) => (
-                                    <div key={idx} className="flex items-start gap-2 p-3 bg-background/50 rounded-md">
-                                      <span className="font-medium text-green-400 text-sm mt-0.5">•</span>
-                                      <span className="text-sm text-slate-800 dark:text-slate-200">{point}</span>
+                                    <div key={idx} className="flex items-start gap-2 p-3 bg-ink-raised rounded-xl">
+                                      <span className="font-medium text-gain text-sm mt-0.5">•</span>
+                                      <span className="text-sm text-body ">{point}</span>
                                     </div>
                                   ))}
                                 </div>
@@ -559,25 +556,25 @@ export function AIProcessor() {
                             )}
 
                             {result.trends && result.trends.length > 0 && (
-                              <div className="p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
-                                <h5 className="font-semibold mb-3 text-purple-400 flex items-center gap-2">
+                              <div className="p-4 bg-accent-core/10 rounded-xl border border-accent-core/20">
+                                <h5 className="font-semibold mb-3 text-accent-bright flex items-center gap-2">
                                   <TrendingUp className="w-4 h-4" />
                                   Market Trends
                                 </h5>
                                 <div className="space-y-3">
                                   {result.trends.map((trend: any, idx: number) => (
-                                    <div key={idx} className="p-3 bg-background/50 rounded-md">
+                                    <div key={idx} className="p-3 bg-ink-raised rounded-xl">
                                       <div className="flex items-center justify-between mb-1">
-                                        <span className="font-medium text-sm text-slate-900 dark:text-white">{trend.trend}</span>
+                                        <span className="font-medium text-sm text-primary ">{trend.trend}</span>
                                         <Badge variant="outline" className={`text-xs ${
-                                          trend.strength === 'strong' ? 'text-green-400 border-green-500/30' :
-                                          trend.strength === 'moderate' ? 'text-yellow-400 border-yellow-500/30' :
-                                          'text-gray-400 border-gray-500/30'
+                                          trend.strength === 'strong' ? 'text-gain border-gain/30' :
+                                          trend.strength === 'moderate' ? 'text-warn border-yellow-500/30' :
+                                          'text-muted border-gray-500/30'
                                         }`}>
                                           {trend.strength}
                                         </Badge>
                                       </div>
-                                      <p className="text-xs text-slate-600 dark:text-slate-300">{trend.evidence}</p>
+                                      <p className="text-xs text-secondary ">{trend.evidence}</p>
                                     </div>
                                   ))}
                                 </div>
@@ -586,16 +583,16 @@ export function AIProcessor() {
 
 
                             {result.keyQuotes && result.keyQuotes.length > 0 && (
-                              <div className="p-4 bg-orange-500/10 rounded-lg border border-orange-500/20">
-                                <h5 className="font-semibold mb-3 text-orange-400 flex items-center gap-2">
+                              <div className="p-4 bg-warn/10 rounded-xl border border-warn/20">
+                                <h5 className="font-semibold mb-3 text-warn flex items-center gap-2">
                                   <MessageSquare className="w-4 h-4" />
                                   Key Quotes
                                 </h5>
                                 <div className="space-y-3">
                                   {result.keyQuotes.map((quote: any, idx: number) => (
-                                    <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-orange-400">
+                                    <div key={idx} className="p-3 bg-ink-raised rounded-xl border-l-2 border-orange-400">
                                       <p className="text-sm italic mb-2">"{quote.quote}"</p>
-                                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                      <div className="flex items-center justify-between text-xs text-secondary">
                                         <span>{quote.speaker}</span>
                                         <span>{quote.timestamp}</span>
                                       </div>
@@ -610,17 +607,17 @@ export function AIProcessor() {
                           <TabsContent value="market" className="space-y-4">
                             {/* Market Overview Grid */}
                             <div className="grid grid-cols-2 gap-4 mb-4">
-                              <div className="text-center p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg border border-green-500/20">
-                                <div className="text-2xl font-bold mb-1 text-green-400">
+                              <div className="text-center p-4 bg-ink-surface   rounded-xl border border-gain/20">
+                                <div className="text-2xl font-bold mb-1 text-gain">
                                   {result.marketSentiment}
                                 </div>
-                                <div className="text-xs text-muted-foreground">Market Sentiment</div>
+                                <div className="text-xs text-secondary">Market Sentiment</div>
                               </div>
-                              <div className="text-center p-4 bg-gradient-to-br from-purple-500/10 to-cyan-500/10 rounded-lg border border-purple-500/20">
-                                <div className="text-2xl font-bold text-purple-400 mb-1">
+                              <div className="text-center p-4 bg-ink-surface   rounded-xl border border-accent-core/20">
+                                <div className="text-2xl font-bold text-accent-bright mb-1">
                                   {result.sourceCredibility}
                                 </div>
-                                <div className="text-xs text-muted-foreground">Source Credibility</div>
+                                <div className="text-xs text-secondary">Source Credibility</div>
                               </div>
                             </div>
 
@@ -629,35 +626,35 @@ export function AIProcessor() {
                             {/* REMOVED HARDCODED TEMPLATE DATA - Only show real content-based analysis */}
 
                             {/* Content Source Intelligence - REAL DATA ONLY */}
-                            <div className="p-4 bg-gradient-to-br from-purple-500/10 to-purple-500/10 rounded-lg border border-purple-indigo-500/20">
-                              <h6 className="font-semibold text-purple-400 mb-3 flex items-center gap-2">
+                            <div className="p-4 bg-ink-surface   rounded-xl border border-accent-core/20">
+                              <h6 className="font-semibold text-accent-bright mb-3 flex items-center gap-2">
                                 <Target className="w-4 h-4" />
                                 Content Source Analysis
                               </h6>
                               <div className="space-y-3 text-sm">
-                                <div className="p-3 bg-background/30 rounded-md">
-                                  <div className="text-purple-400 font-medium mb-2">Source Information</div>
+                                <div className="p-3 bg-ink-raised rounded-xl">
+                                  <div className="text-accent-bright font-medium mb-2">Source Information</div>
                                   <div className="grid grid-cols-2 gap-4 text-xs">
                                     <div>
-                                      <span className="text-gray-600 dark:text-gray-300">Channel:</span>
-                                      <span className="ml-2 font-medium text-gray-900 dark:text-gray-900 dark:text-white">{result.rawData?.channel || 'Content Creator'}</span>
+                                      <span className="text-secondary ">Channel:</span>
+                                      <span className="ml-2 font-medium text-primary  ">{result.rawData?.channel || 'Content Creator'}</span>
                                     </div>
                                     <div>
-                                      <span className="text-gray-600 dark:text-gray-300">Market Sentiment:</span>
-                                      <span className="ml-2 font-medium text-green-600 dark:text-green-400">{result.marketSentiment || 'NEUTRAL'}</span>
+                                      <span className="text-secondary ">Market Sentiment:</span>
+                                      <span className="ml-2 font-medium text-gain ">{result.marketSentiment || 'NEUTRAL'}</span>
                                     </div>
                                     <div>
-                                      <span className="text-gray-600 dark:text-gray-300">Source Credibility:</span>
-                                      <span className="ml-2 font-medium text-purple-600 dark:text-purple-400">{result.sourceCredibility || 'Medium'}</span>
+                                      <span className="text-secondary ">Source Credibility:</span>
+                                      <span className="ml-2 font-medium text-accent-bright">{result.sourceCredibility || 'Medium'}</span>
                                     </div>
                                     <div>
-                                      <span className="text-gray-600 dark:text-gray-300">Analysis Accuracy:</span>
-                                      <span className="ml-2 font-medium text-blue-600 dark:text-blue-400">{result.accuracy || 85}%</span>
+                                      <span className="text-secondary ">Analysis Accuracy:</span>
+                                      <span className="ml-2 font-medium text-accent-bright">{result.accuracy || 85}%</span>
                                     </div>
                                   </div>
                                 </div>
                                 
-                                <div className="text-gray-600 dark:text-gray-300 text-sm">
+                                <div className="text-secondary  text-sm">
                                   This analysis extracts specific market intelligence from "{result.rawData?.title || 'the processed content'}" by {result.rawData?.channel || 'this source'}. 
                                   All financial recommendations and trends are directly derived from the actual content discussion.
                                 </div>
@@ -666,8 +663,8 @@ export function AIProcessor() {
 
                             {/* REAL FINANCIAL INVESTMENT OPPORTUNITIES */}
                             {result.financialTrends && Array.isArray(result.financialTrends) && result.financialTrends.length > 0 && (
-                              <div className="p-4 bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-lg border border-emerald-500/20">
-                                <h6 className="font-semibold text-emerald-400 mb-3 flex items-center gap-2">
+                              <div className="p-4 bg-ink-surface   rounded-xl border border-gain/20">
+                                <h6 className="font-semibold text-gain mb-3 flex items-center gap-2">
                                   <TrendingUp className="w-4 h-4" />
                                   Investment Opportunities from Content Analysis
                                 </h6>
@@ -678,28 +675,28 @@ export function AIProcessor() {
                                       array.findIndex(item => item.symbol === financial.symbol) === index
                                     )
                                     .map((financial: any, idx: number) => (
-                                    <div key={idx} className="p-3 bg-background/50 rounded-md border-l-2 border-emerald-400">
+                                    <div key={idx} className="p-3 bg-ink-raised rounded-xl border-l-2 border-emerald-400">
                                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
                                         <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                                           <div className="flex items-center gap-2 flex-wrap">
                                             <Badge variant="secondary" className="text-xs">
                                               {financial.category}
                                             </Badge>
-                                            <span className="font-mono text-sm font-semibold text-emerald-400">
+                                            <span className="font-mono text-sm font-semibold text-gain">
                                               ${financial.symbol}
                                             </span>
-                                            <span className="text-sm font-medium text-gray-900 dark:text-white">{financial.company}</span>
+                                            <span className="text-sm font-medium text-primary ">{financial.company}</span>
                                           </div>
                                           {financial.liveData && (
                                             <div className="flex items-center gap-3 mt-1 sm:mt-0">
-                                              <span className="font-mono text-sm font-bold text-gray-900 dark:text-white whitespace-nowrap">
+                                              <span className="font-mono text-sm font-bold text-primary  whitespace-nowrap">
                                                 ${financial.liveData.price?.toLocaleString('en-US', { 
                                                   minimumFractionDigits: 2, 
                                                   maximumFractionDigits: 2 
                                                 })}
                                               </span>
                                               <span className={`text-sm font-medium whitespace-nowrap px-2 py-1 rounded ${
-                                                financial.liveData.percentChange24h >= 0 ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'
+                                                financial.liveData.percentChange24h >= 0 ? 'text-gain bg-gain/10' : 'text-loss bg-loss/10'
                                               }`}>
                                                 {financial.liveData.percentChange24h >= 0 ? '+' : ''}
                                                 {financial.liveData.percentChange24h?.toFixed(2)}%
@@ -708,9 +705,9 @@ export function AIProcessor() {
                                           )}
                                         </div>
                                         <Badge variant="outline" className={`text-xs self-start sm:self-center ${
-                                          financial.impact === 'bullish' ? 'text-green-400 border-green-500/30' :
-                                          financial.impact === 'bearish' ? 'text-red-400 border-red-500/30' :
-                                          'text-gray-400 border-gray-500/30'
+                                          financial.impact === 'bullish' ? 'text-gain border-gain/30' :
+                                          financial.impact === 'bearish' ? 'text-loss border-red-500/30' :
+                                          'text-muted border-gray-500/30'
                                         }`}>
                                           {financial.impact}
                                         </Badge>
@@ -718,7 +715,7 @@ export function AIProcessor() {
                                       
                                       {/* Market Alpha - Unique Insights */}
                                       {financial.marketAlpha && (
-                                        <div className="text-xs text-amber-600 dark:text-amber-400 mb-2 p-2 bg-amber-50 dark:bg-amber-900/20 rounded border-l-2 border-amber-400">
+                                        <div className="text-xs text-amber-600  mb-2 p-2 bg-amber-50  rounded border-l-2 border-amber-400">
                                           <strong>🎯 Market Alpha:</strong> {financial.marketAlpha}
                                         </div>
                                       )}
@@ -726,37 +723,37 @@ export function AIProcessor() {
                                       {/* Price Targets & Catalysts */}
                                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
                                         {financial.priceTargets && (
-                                          <div className="text-xs text-green-600 dark:text-green-400 p-2 bg-green-50 dark:bg-green-900/20 rounded">
+                                          <div className="text-xs text-gain p-2 bg-gain/10 rounded-xl">
                                             <strong>🎯 Targets:</strong> {financial.priceTargets}
                                           </div>
                                         )}
                                         {financial.catalysts && (
-                                          <div className="text-xs text-blue-600 dark:text-blue-400 p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
+                                          <div className="text-xs text-accent-bright p-2 bg-accent-core/10 rounded-xl">
                                             <strong>⚡ Catalysts:</strong> {financial.catalysts}
                                           </div>
                                         )}
                                       </div>
                                       
-                                      <p className="text-xs text-gray-600 dark:text-gray-300 mb-2"><strong>Relevance:</strong> {financial.relevance}</p>
-                                      <p className="text-xs text-gray-700 dark:text-gray-200 italic mb-2"><strong>Investment Thesis:</strong> {financial.reasoning}</p>
+                                      <p className="text-xs text-secondary  mb-2"><strong>Relevance:</strong> {financial.relevance}</p>
+                                      <p className="text-xs text-body  italic mb-2"><strong>Investment Thesis:</strong> {financial.reasoning}</p>
                                       {(financial.timeHorizon || financial.riskLevel || financial.analystSource) && (
                                         <div className="flex flex-wrap gap-2 mt-2">
                                           {financial.timeHorizon && (
-                                            <div className="text-xs bg-blue-500/10 text-blue-400 px-2 py-1 rounded border border-blue-500/20">
+                                            <div className="text-xs bg-accent-core/10 text-accent-bright px-2 py-1 rounded border border-accent-core/20">
                                               {financial.timeHorizon}
                                             </div>
                                           )}
                                           {financial.riskLevel && (
                                             <div className={`text-xs px-2 py-1 rounded border ${
-                                              financial.riskLevel === 'Low' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                                              financial.riskLevel === 'Moderate' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
-                                              'bg-red-500/10 text-red-400 border-red-500/20'
+                                              financial.riskLevel === 'Low' ? 'bg-gain/10 text-gain border-gain/20' :
+                                              financial.riskLevel === 'Moderate' ? 'bg-warn/10 text-warn border-yellow-500/20' :
+                                              'bg-loss/10 text-loss border-loss/20'
                                             }`}>
                                               Risk: {financial.riskLevel}
                                             </div>
                                           )}
                                           {financial.analystSource && (
-                                            <div className="text-xs bg-purple-indigo-500/10 text-purple-400 px-2 py-1 rounded border border-purple-indigo-500/20">
+                                            <div className="text-xs bg-accent-core/10 text-accent-bright px-2 py-1 rounded border border-accent-core/20">
                                               📊 {financial.analystSource}
                                             </div>
                                           )}
@@ -773,19 +770,19 @@ export function AIProcessor() {
 
                           {/* Structure Tab */}
                           <TabsContent value="structure" className="space-y-4">
-                            <div className="p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                              <h5 className="font-semibold mb-3 text-blue-400 flex items-center gap-2">
+                            <div className="p-4 bg-accent-core/10 rounded-xl border border-accent-core/20">
+                              <h5 className="font-semibold mb-3 text-accent-bright flex items-center gap-2">
                                 <Clock className="w-4 h-4" />
                                 Content Structure ({result.chapters?.length || 0} chapters)
                               </h5>
                               <div className="space-y-2">
                                 {result.chapters?.map((chapter: any, idx: number) => (
-                                  <div key={idx} className="p-3 bg-background/50 rounded-md flex justify-between items-start">
+                                  <div key={idx} className="p-3 bg-ink-raised rounded-xl flex justify-between items-start">
                                     <div>
                                       <span className="text-sm font-medium">{chapter.title}</span>
-                                      <p className="text-xs text-muted-foreground mt-1">{chapter.summary}</p>
+                                      <p className="text-xs text-secondary mt-1">{chapter.summary}</p>
                                     </div>
-                                    <span className="text-xs text-muted-foreground font-mono">
+                                    <span className="text-xs text-secondary font-mono">
                                       {chapter.startTime} - {chapter.endTime}
                                     </span>
                                   </div>
@@ -793,14 +790,14 @@ export function AIProcessor() {
                               </div>
                             </div>
 
-                            <div className="p-4 bg-muted/50 rounded-lg">
+                            <div className="p-4 bg-ink-raised rounded-xl">
                               <h5 className="font-semibold mb-3 flex items-center gap-2">
                                 <Target className="w-4 h-4" />
                                 Content Tags
                               </h5>
                               <div className="flex flex-wrap gap-2">
                                 {result.tags?.map((tag: string, idx: number) => (
-                                  <Badge key={idx} variant="secondary" className="text-xs text-gray-700 dark:text-gray-200">
+                                  <Badge key={idx} variant="secondary" className="text-xs text-body ">
                                     {tag}
                                   </Badge>
                                 ))}
@@ -808,8 +805,8 @@ export function AIProcessor() {
                             </div>
                           </TabsContent>
                         </Tabs>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </Surface>
 
                     {/* User Notes Section */}
                     {isAuthenticated && (
@@ -819,23 +816,23 @@ export function AIProcessor() {
                         transition={{ delay: 0.3 }}
                         className="mt-6"
                       >
-                        <Card className="bg-gradient-to-br from-slate-50 via-purple-50/60 to-slate-50 dark:from-purple-500/15 dark:via-purple-500/15 dark:to-purple-500/15 border border-purple-200/30 dark:border-purple-500/20 overflow-hidden relative">
-                          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-cyan-500/5 animate-pulse"></div>
-                          <CardContent className="p-6 relative">
+                        <Surface className="bg-ink-surface       border border-accent-core/20  overflow-hidden relative">
+                          <div className="absolute inset-0 bg-ink-surface   animate-pulse"></div>
+                          <div className="p-6 relative">
                             <div className="flex items-center justify-between mb-4">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-cyan-600 flex items-center justify-center">
-                                  <Edit3 className="h-5 w-5 text-gray-900 dark:text-white" />
+                                <div className="w-10 h-10 rounded-xl bg-ink-surface   flex items-center justify-center">
+                                  <Edit3 className="h-5 w-5 text-primary " />
                                 </div>
                                 <div>
-                                  <h4 className="text-lg font-semibold bg-gradient-to-r from-slate-700 to-slate-800 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent">Add Your Analysis</h4>
-                                  <p className="text-sm text-slate-600 dark:text-blue-200">Capture insights • Private notes • Dashboard access</p>
+                                  <h4 className="text-lg font-semibold bg-ink-surface       text-primary">Add Your Analysis</h4>
+                                  <p className="text-sm text-secondary ">Capture insights • Private notes • Dashboard access</p>
                                 </div>
                               </div>
                               <Button
                                 onClick={() => setShowNotesModal(true)}
                                 size="lg"
-                                className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-gray-900 dark:text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 group"
+                                className="grad-accent text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 group"
                                 data-testid="button-add-analysis-note"
                               >
                                 <Plus className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
@@ -845,24 +842,24 @@ export function AIProcessor() {
                             </div>
 
                             <div className="grid grid-cols-3 gap-4 mt-4">
-                              <div className="text-center p-3 bg-white/10 rounded-lg border border-white/20">
-                                <BookmarkPlus className="h-6 w-6 mx-auto mb-2 text-blue-300" />
-                                <p className="text-xs font-medium text-gray-900 dark:text-white">Footnotes</p>
-                                <p className="text-xs text-slate-600 dark:text-blue-200">Quick references</p>
+                              <div className="text-center p-3 bg-ink-surface/10 rounded-xl border border-white/20">
+                                <BookmarkPlus className="h-6 w-6 mx-auto mb-2 text-accent-bright" />
+                                <p className="text-xs font-medium text-primary ">Footnotes</p>
+                                <p className="text-xs text-secondary ">Quick references</p>
                               </div>
-                              <div className="text-center p-3 bg-white/10 rounded-lg border border-white/20">
-                                <FileText className="h-6 w-6 mx-auto mb-2 text-purple-300" />
-                                <p className="text-xs font-medium text-gray-900 dark:text-white">Analysis</p>
-                                <p className="text-xs text-slate-600 dark:text-purple-200">Detailed insights</p>
+                              <div className="text-center p-3 bg-ink-surface/10 rounded-xl border border-white/20">
+                                <FileText className="h-6 w-6 mx-auto mb-2 text-accent-bright" />
+                                <p className="text-xs font-medium text-primary ">Analysis</p>
+                                <p className="text-xs text-secondary ">Detailed insights</p>
                               </div>
-                              <div className="text-center p-3 bg-white/10 rounded-lg border border-white/20">
-                                <Sparkles className="h-6 w-6 mx-auto mb-2 text-purple-300" />
-                                <p className="text-xs font-medium text-gray-900 dark:text-white">Key Insights</p>
-                                <p className="text-xs text-slate-600 dark:text-purple-200">Important learnings</p>
+                              <div className="text-center p-3 bg-ink-surface/10 rounded-xl border border-white/20">
+                                <Sparkles className="h-6 w-6 mx-auto mb-2 text-accent-bright" />
+                                <p className="text-xs font-medium text-primary ">Key Insights</p>
+                                <p className="text-xs text-secondary ">Important learnings</p>
                               </div>
                             </div>
-                          </CardContent>
-                        </Card>
+                          </div>
+                        </Surface>
                       </motion.div>
                     )}
 
@@ -874,19 +871,19 @@ export function AIProcessor() {
                         transition={{ delay: 0.5 }}
                         className="mt-6"
                       >
-                        <Card className="bg-gradient-to-br from-slate-50 via-purple-50/60 to-slate-50 dark:from-purple-500/15 dark:via-purple-500/15 dark:to-purple-500/15 border border-purple-200/30 dark:border-purple-500/20 overflow-hidden relative">
-                          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-purple-500/5 animate-pulse"></div>
-                          <CardContent className="p-6 relative">
+                        <Surface className="bg-ink-surface       border border-accent-core/20  overflow-hidden relative">
+                          <div className="absolute inset-0 bg-ink-surface   animate-pulse"></div>
+                          <div className="p-6 relative">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center">
-                                  <BarChart3 className="h-6 w-6 text-gray-900 dark:text-white" />
+                                <div className="w-12 h-12 rounded-xl bg-ink-surface   flex items-center justify-center">
+                                  <BarChart3 className="h-6 w-6 text-primary " />
                                 </div>
                                 <div>
-                                  <h3 className="text-lg font-semibold bg-gradient-to-r from-slate-700 to-slate-800 dark:from-purple-400 dark:via-fuchsia-400 dark:to-cyan-400 bg-clip-text text-transparent mb-1">
+                                  <h3 className="text-lg font-semibold bg-ink-surface       text-primary mb-1">
                                     Maximize Your Insights
                                   </h3>
-                                  <p className="text-sm text-muted-foreground">
+                                  <p className="text-sm text-secondary">
                                     Share insights, collaborate with experts, build your reputation, and earn rewards along the way
                                   </p>
                                 </div>
@@ -894,7 +891,7 @@ export function AIProcessor() {
                               <Link href="/dashboard" data-testid="button-view-dashboard">
                                 <Button 
                                   size="lg" 
-                                  className="bg-gradient-to-r from-purple-600 to-purple-600 hover:from-purple-700 hover:to-purple-700 text-gray-900 dark:text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 group"
+                                  className="grad-accent  text-primary  font-medium shadow-lg hover:shadow-xl transition-all duration-300 group"
                                 >
                                   <Sparkles className="h-4 w-4 mr-2 group-hover:animate-pulse" />
                                   View Dashboard
@@ -902,8 +899,8 @@ export function AIProcessor() {
                                 </Button>
                               </Link>
                             </div>
-                          </CardContent>
-                        </Card>
+                          </div>
+                        </Surface>
                       </motion.div>
                     )}
 
@@ -917,17 +914,17 @@ export function AIProcessor() {
                       >
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-ink-surface   flex items-center justify-center">
                               <Target className="h-5 w-5 text-white" />
                             </div>
                             <div>
-                              <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-300 via-pink-300 to-purple-200 bg-clip-text text-transparent">
+                              <h3 className="text-lg font-semibold bg-ink-surface     text-primary">
                                 AI-Extracted Prediction Markets
                               </h3>
-                              <p className="text-sm text-muted-foreground">Trade on predictions extracted from this content</p>
+                              <p className="text-sm text-secondary">Trade on predictions extracted from this content</p>
                             </div>
                           </div>
-                          <Badge variant="outline" className="bg-purple-500/10 border-purple-500/30 text-purple-300">
+                          <Badge variant="outline" className="bg-accent-core/10 border-accent-core/30 text-accent-bright">
                             {result.suggestedMarkets.length} Markets
                           </Badge>
                         </div>
@@ -963,7 +960,7 @@ export function AIProcessor() {
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                className="border-purple-500/30 hover:bg-purple-500/10 text-purple-300 hover:text-purple-200 transition-all duration-300"
+                                className="border-accent-core/30 hover:bg-accent-core/10 text-accent-bright hover:text-accent-bright transition-all duration-300"
                                 data-testid="button-view-all-markets"
                               >
                                 View All {result.suggestedMarkets.length} Markets
@@ -983,24 +980,24 @@ export function AIProcessor() {
                         transition={{ delay: 0.5 }}
                         className="mt-6"
                       >
-                        <Card className="bg-gradient-to-br from-emerald-500/10 via-blue-500/10 to-purple-500/10 border border-emerald-500/20 overflow-hidden relative">
-                          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-blue-500/5 animate-pulse"></div>
-                          <CardContent className="p-6 relative">
+                        <Surface className="bg-ink-surface    border border-gain/20 overflow-hidden relative">
+                          <div className="absolute inset-0 bg-ink-surface   animate-pulse"></div>
+                          <div className="p-6 relative">
                             <div className="text-center">
-                              <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-r from-emerald-500 to-blue-600 flex items-center justify-center mb-4">
-                                <TrendingUpIcon className="h-8 w-8 text-gray-900 dark:text-white" />
+                              <div className="w-16 h-16 mx-auto rounded-xl bg-ink-surface   flex items-center justify-center mb-4">
+                                <TrendingUpIcon className="h-8 w-8 text-primary " />
                               </div>
-                              <h3 className="text-xl font-semibold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent mb-2">
+                              <h3 className="text-xl font-semibold bg-ink-surface    text-primary mb-2">
                                 Ready to Unlock Your Full Potential?
                               </h3>
-                              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                              <p className="text-secondary mb-6 max-w-md mx-auto">
                                 Create your account to save analyses, track trends, and access powerful AI-driven insights across all your content
                               </p>
                               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                                 <Link href="/auth" data-testid="button-sign-up">
                                   <Button 
                                     size="lg" 
-                                    className="bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-gray-900 dark:text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 group min-w-[140px]"
+                                    className="grad-accent text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 group min-w-[140px]"
                                   >
                                     <Sparkles className="h-4 w-4 mr-2 group-hover:animate-pulse" />
                                     Get Started
@@ -1011,28 +1008,28 @@ export function AIProcessor() {
                                   <Button 
                                     variant="outline" 
                                     size="lg" 
-                                    className="border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 transition-all duration-300 min-w-[140px]"
+                                    className="border-emerald-500/30 text-gain hover:bg-gain/10 hover:text-emerald-300 transition-all duration-300 min-w-[140px]"
                                   >
                                     Sign In
                                   </Button>
                                 </Link>
                               </div>
                             </div>
-                          </CardContent>
-                        </Card>
+                          </div>
+                        </Surface>
                       </motion.div>
                     )}
                   </motion.div>
                 )}
 
                 {isFailed && (
-                  <Card className="bg-red-500/10 border-red-500/20">
-                    <CardContent className="p-6 text-center">
-                      <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-red-300 mb-2">Processing Failed</h3>
-                      <p className="text-muted-foreground">{result?.summary || 'An error occurred while processing your content.'}</p>
-                    </CardContent>
-                  </Card>
+                  <Surface className="bg-loss/10 border-loss/20">
+                    <div className="p-6 text-center">
+                      <AlertCircle className="h-12 w-12 text-loss mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-loss mb-2">Processing Failed</h3>
+                      <p className="text-secondary">{result?.summary || 'An error occurred while processing your content.'}</p>
+                    </div>
+                  </Surface>
                 )}
               </motion.div>
             )}

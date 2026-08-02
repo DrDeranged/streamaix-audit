@@ -1,18 +1,16 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { SectionHeader } from '@/components/ui/section-header';
-import { useAuth } from '@/hooks/useAuth';
+import SectionTitle from '@/components/ds/SectionTitle';
+import Surface from '@/components/ds/Surface';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { 
   MessageSquare,
   Heart,
   Repeat2,
-  Clock,
   Users,
   ExternalLink,
   TrendingUp,
@@ -25,6 +23,7 @@ import {
   Eye,
   ArrowUp
 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 interface TrendingCast {
   hash: string;
@@ -82,10 +81,10 @@ function TrendingTopicsFilter({ selectedTopic, onTopicSelect }: { selectedTopic:
     <div className="flex gap-2 flex-wrap mb-6">
       <button
         onClick={() => onTopicSelect(null)}
-        className={`px-5 py-3 rounded-2xl text-sm font-bold transition-all duration-300 hover:scale-105 ${
+        className={`px-5 py-3 rounded-xl text-sm font-bold transition-all duration-300 hover:scale-105 ${
           selectedTopic === null
-            ? 'bg-gradient-to-r from-purple-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
-            : 'bg-white dark:bg-slate-800/70 backdrop-blur-md text-gray-900 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800/90 border border-gray-200 dark:border-purple-500/30 hover:border-purple-400 dark:hover:border-purple-500/50'
+            ? 'grad-accent text-primary glow-accent'
+            : 'bg-ink-surface text-body hover:bg-ink-raised border border-ink-edge hover:border-accent-core'
         }`}
         data-testid="topic-all"
       >
@@ -98,16 +97,15 @@ function TrendingTopicsFilter({ selectedTopic, onTopicSelect }: { selectedTopic:
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: i * 0.05 }}
           onClick={() => onTopicSelect(trend.topic)}
-          className={`px-5 py-3 rounded-2xl text-sm font-bold transition-all duration-300 hover:scale-105 relative overflow-hidden group ${
+          className={`px-5 py-3 rounded-xl text-sm font-bold transition-all duration-300 hover:scale-105 relative overflow-hidden group ${
             selectedTopic === trend.topic
-              ? 'bg-gradient-to-r from-purple-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
-              : 'bg-white dark:bg-slate-800/70 backdrop-blur-md text-gray-900 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800/90 border border-gray-200 dark:border-purple-500/30 hover:border-purple-400 dark:hover:border-purple-500/50'
+              ? 'grad-accent text-primary glow-accent'
+              : 'bg-ink-surface text-body hover:bg-ink-raised border border-ink-edge hover:border-accent-core'
           }`}
           data-testid={`topic-${i}`}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 ease-out" />
           <span className="relative z-10">{trend.topic}</span>
-          <span className="ml-2 text-xs opacity-80 bg-white/20 px-2 py-1 rounded-full relative z-10">{trend.mentions}</span>
+          <span className="ml-2 text-xs text-accent-bright bg-accent-core/20 px-2 py-1 rounded-xl relative z-10">{trend.mentions}</span>
         </motion.button>
       ))}
     </div>
@@ -135,21 +133,20 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
     return (
       <div className="space-y-3">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="bg-white dark:bg-slate-900/70 backdrop-blur-xl border border-gray-200 dark:border-purple-500/30 rounded-2xl p-5 sm:p-7 animate-pulse relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-200/30 dark:via-white/5 to-transparent animate-shimmer" />
+          <Surface key={i} className="p-5 sm:p-7 animate-pulse relative overflow-hidden">
             <div className="flex gap-4 mb-4 relative z-10">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-slate-700/40 dark:to-slate-600/40 rounded-full border-2 border-gray-300 dark:border-white/20" />
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-ink-raised rounded-full border-2 border-ink-edge" />
               <div className="flex-1 space-y-3">
-                <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-slate-700/40 dark:to-slate-600/40 rounded-full w-1/3" />
-                <div className="h-3 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-slate-800/30 dark:to-slate-700/30 rounded-full w-1/4" />
+                <div className="h-4 bg-ink-raised rounded-xl w-1/3" />
+                <div className="h-3 bg-ink-raised rounded-xl w-1/4" />
               </div>
             </div>
             <div className="space-y-3 relative z-10">
-              <div className="h-4 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-slate-800/30 dark:to-slate-700/30 rounded-full w-full" />
-              <div className="h-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-800/20 dark:to-slate-700/20 rounded-full w-4/5" />
-              <div className="h-3 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-800/10 dark:to-slate-700/10 rounded-full w-2/3" />
+              <div className="h-4 bg-ink-raised rounded-xl w-full" />
+              <div className="h-4 bg-ink-raised rounded-xl w-4/5" />
+              <div className="h-3 bg-ink-raised rounded-xl w-2/3" />
             </div>
-          </div>
+          </Surface>
         ))}
       </div>
     );
@@ -157,64 +154,62 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
 
   if (error) {
     return (
-      <div className="text-center py-12 sm:py-16 bg-white dark:bg-slate-900/75 backdrop-blur-xl border border-gray-200 dark:border-purple-500/30 rounded-2xl relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-purple-500/5 to-blue-500/5" />
+      <Surface className="text-center py-12 sm:py-16 relative overflow-hidden">
         <div className="relative z-10">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-red-500/20 to-purple-500/20 rounded-full flex items-center justify-center">
-            <ExternalLink className="w-8 h-8 text-red-400" />
+          <div className="w-16 h-16 mx-auto mb-4 bg-loss/10 rounded-full flex items-center justify-center">
+            <ExternalLink className="w-8 h-8 text-loss" />
           </div>
-          <p className="text-gray-900 dark:text-slate-300 mb-6 text-base font-medium">Unable to load conversations</p>
+          <p className="text-body mb-6 text-base font-medium">Unable to load conversations</p>
           <Button 
             onClick={() => window.location.reload()} 
             variant="outline" 
             size="lg"
-            className="border-gray-300 dark:border-white/30 text-gray-900 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-white/10 hover:border-gray-400 dark:hover:border-white/50 hover:scale-105 transition-all duration-300 px-6 py-3 rounded-xl font-bold"
+            className="border-ink-edge text-body hover:bg-ink-raised hover:border-accent-core hover:scale-105 transition-all duration-300 px-6 py-3 rounded-xl font-bold"
             data-testid="retry-feed"
           >
             Try again
           </Button>
         </div>
-      </div>
+      </Surface>
     );
   }
 
   if (!casts || casts.length === 0) {
     return (
-      <div className="text-center py-12 sm:py-20 bg-white dark:bg-slate-900/75 backdrop-blur-xl border border-gray-200 dark:border-purple-500/30 rounded-2xl relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-purple-500/5 to-cyan-500/5" />
+      <Surface className="text-center py-12 sm:py-20 relative overflow-hidden">
         <div className="relative z-10 px-4">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-purple-500/20 via-purple-500/20 to-cyan-500/20 rounded-full flex items-center justify-center border-2 border-gray-200 dark:border-white/20"
+            className="w-20 h-20 mx-auto mb-6 bg-accent-core/10 rounded-full flex items-center justify-center border-2 border-ink-edge"
           >
-            <TrendingUp className="w-10 h-10 text-purple-400" />
+            <TrendingUp className="w-10 h-10 text-accent-bright" />
           </motion.div>
-          <h3 className="text-xl sm:text-2xl font-bold mb-3 bg-gradient-to-r from-gray-800 to-gray-900 dark:from-white dark:to-slate-200 bg-clip-text text-transparent">
+          <h3 className="text-xl sm:text-2xl font-bold mb-3 text-primary">
             No Conversations Yet
           </h3>
-          <p className="text-gray-600 dark:text-slate-400 mb-4 text-sm sm:text-base max-w-md mx-auto">
+          <p className="text-secondary mb-4 text-sm sm:text-base max-w-md mx-auto">
             The crypto conversation space is temporarily quiet. Check back soon for the latest discussions and insights.
           </p>
-          <p className="text-gray-500 dark:text-slate-500 text-xs sm:text-sm mb-6">
+          <p className="text-muted text-xs sm:text-sm mb-6">
             Social feeds are being refreshed. This happens when API sources are temporarily unavailable.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
             <Button 
               onClick={() => window.location.reload()} 
               variant="outline" 
-              className="border-purple-500/30 text-purple-600 dark:text-purple-300 hover:bg-purple-500/10 hover:border-purple-400/50 hover:scale-105 transition-all duration-300 px-6 py-2 rounded-xl font-medium"
+               className="border-accent-core/30 text-accent-bright hover:bg-accent-core/10 hover:border-accent-core hover:scale-105 transition-all duration-300 px-6 py-2 rounded-xl font-medium"
               data-testid="refresh-feed"
             >
               Refresh Feed
             </Button>
-            <a href="/features" className="text-sm text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 transition-colors flex items-center gap-1">
+            <a href="/features" className="text-sm text-secondary hover:text-primary transition-colors flex items-center gap-1">
               Explore Features <ChevronRight className="w-4 h-4" />
             </a>
           </div>
         </div>
-      </div>
+      </Surface>
     );
   }
 
@@ -234,7 +229,7 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
           <Button
             onClick={() => setShowAll(true)}
             variant="outline"
-            className="w-full sm:w-auto bg-white dark:bg-slate-800/70 backdrop-blur-md border-gray-200 dark:border-purple-500/40 text-gray-900 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800/90 hover:text-purple-600 dark:hover:text-white hover:border-purple-500/60 hover:scale-105 transition-all duration-300 px-6 py-3 rounded-xl font-bold shadow-lg shadow-purple-500/20"
+            className="w-full sm:w-auto bg-ink-surface dark:bg-ink-surface backdrop-blur-md border-ink-edge dark:border-accent-core/40 text-primary dark:text-body hover:bg-ink-raised dark:hover:bg-ink-raised hover:text-accent-bright dark:hover:text-primary hover:border-accent-core/60 hover:scale-105 transition-all duration-300 px-6 py-3 rounded-xl font-bold shadow-lg shadow-purple-500/20"
             data-testid="show-more-posts"
           >
             Show {casts.length - initialCount} more posts
@@ -254,7 +249,7 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
             onClick={() => setShowAll(false)}
             variant="ghost"
             size="sm"
-            className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
+            className="text-secondary dark:text-secondary hover:text-primary dark:hover:text-body hover:bg-ink-raised dark:hover:bg-ink-raised px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105"
             data-testid="show-less-posts"
           >
             Show less
@@ -271,28 +266,26 @@ function DiscoverRightRail() {
   return (
     <div className="space-y-6 sticky top-6">
       {/* Trending Topics */}
-      <div className="bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200 dark:border-purple-500/30 rounded-2xl p-5 hover:border-purple-400 dark:hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-500 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-200/20 dark:via-white/5 to-transparent translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none" />
+      <Surface className="p-5 hover:bg-ink-raised transition-all duration-500 relative overflow-hidden">
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-5">
-            <TrendingUp className="w-5 h-5 text-blue-400" />
-            <h3 className="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-900 dark:from-white dark:to-slate-200 bg-clip-text text-transparent">What's happening</h3>
+             <TrendingUp className="w-5 h-5 text-accent-bright" />
+             <SectionTitle as="h3">What's happening</SectionTitle>
           </div>
           <TrendingTopicsWidget />
         </div>
-      </div>
+      </Surface>
 
       {/* Who to follow */}
-      <div className="bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200 dark:border-purple-500/30 rounded-2xl p-5 hover:border-purple-400 dark:hover:border-purple-500/50 hover:shadow-2xl hover:shadow-fuchsia-500/20 transition-all duration-500 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-200/20 dark:via-white/5 to-transparent translate-x-[-100%] hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none" />
+      <Surface className="p-5 hover:bg-ink-raised transition-all duration-500 relative overflow-hidden">
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-5">
-            <Users className="w-5 h-5 text-purple-400" />
-            <h3 className="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-900 dark:from-white dark:to-slate-200 bg-clip-text text-transparent">Who to follow</h3>
+            <Users className="w-5 h-5 text-accent-bright" />
+            <SectionTitle as="h3">Who to follow</SectionTitle>
           </div>
           <WhoToFollowWidget />
         </div>
-      </div>
+      </Surface>
     </div>
   );
 }
@@ -532,17 +525,17 @@ function TrendingTopicsWidget() {
           initial={{ opacity: 0, x: 10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: i * 0.1 }}
-          className="p-4 hover:bg-gradient-to-r hover:from-blue-500/10 hover:to-purple-500/10 rounded-xl transition-all duration-300 cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-white/20 group"
+          className="p-4 hover:bg-ink-raised rounded-xl transition-all duration-300 cursor-pointer border border-transparent hover:border-ink-edge group"
           data-testid={`trending-widget-${i}`}
         >
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <p className="text-slate-900 dark:text-white font-bold text-base group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">{trend.topic}</p>
-              <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">{trend.mentions} posts • Trending</p>
+              <p className="text-primary dark:text-primary font-bold text-base group-hover:text-accent-bright dark:group-hover:text-accent-bright transition-colors">{trend.topic}</p>
+              <p className="text-secondary dark:text-secondary text-sm mt-1">{trend.mentions} posts • Trending</p>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              <TrendingUp className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" />
+              <div className="w-2 h-2 bg-gain rounded-full animate-pulse" />
+              <TrendingUp className="w-5 h-5 text-accent-bright group-hover:scale-110 transition-transform" />
             </div>
           </div>
         </motion.div>
@@ -585,7 +578,7 @@ function WhoToFollowWidget() {
           initial={{ opacity: 0, x: 10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: i * 0.1 }}
-          className="flex items-center justify-between p-4 hover:bg-gradient-to-r hover:from-purple-500/10 hover:to-pink-500/10 rounded-xl transition-all duration-300 border border-transparent hover:border-slate-200 dark:hover:border-white/20 group"
+          className="flex items-center justify-between p-4 hover:bg-ink-raised rounded-xl transition-all duration-300 border border-transparent hover:border-ink-edge group"
           data-testid={`follow-suggestion-${i}`}
         >
           <div className="flex items-center gap-3">
@@ -593,19 +586,19 @@ function WhoToFollowWidget() {
               <img
                 src={account.account.pfp_url}
                 alt={account.account.display_name}
-                className="w-12 h-12 rounded-full border-2 border-white/30 group-hover:border-purple-400/50 transition-all duration-300 group-hover:scale-105"
+                className="w-12 h-12 rounded-full border-2 border-ink-edge group-hover:border-accent-core transition-all duration-300 group-hover:scale-105"
               />
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-400 to-blue-500 rounded-full border-2 border-slate-900" />
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gain rounded-full border-2 border-ink-surface" />
             </div>
             <div>
-              <p className="text-white font-bold text-sm group-hover:text-purple-300 transition-colors">{account.account.display_name}</p>
-              <p className="text-slate-400 text-xs mt-0.5">@{account.account.username}</p>
+              <p className="text-primary font-bold text-sm group-hover:text-accent-bright transition-colors">{account.account.display_name}</p>
+              <p className="text-secondary text-xs mt-0.5">@{account.account.username}</p>
             </div>
           </div>
           <Button
             size="sm"
             variant="outline"
-            className="text-xs border-purple-500/30 text-purple-300 hover:bg-purple-500/20 hover:border-purple-400/50 hover:text-white transition-all duration-300 hover:scale-105"
+            className="text-xs border-accent-core/30 text-accent-bright hover:bg-accent-core/20 hover:border-accent-core hover:text-primary transition-all duration-300 hover:scale-105"
             data-testid={`follow-button-${i}`}
             onClick={(e) => {
               e.stopPropagation();
@@ -683,36 +676,36 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="bg-slate-900/75 dark:bg-slate-900/75 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-5 sm:p-7 hover:bg-slate-900/85 dark:hover:bg-slate-900/85 hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-500 cursor-pointer group relative overflow-hidden"
+      className="bg-ink-surface dark:bg-ink-surface backdrop-blur-xl border border-accent-core/30 rounded-xl p-5 sm:p-7 hover:bg-ink-raised dark:hover:bg-ink-raised hover:border-accent-core/50 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-500 cursor-pointer group relative overflow-hidden"
       data-testid={`feed-post-${index}`}
     >
       {/* Animated gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-200/20 dark:via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none" />
+      <div className="absolute inset-0 bg-ink-raised   dark:  translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none" />
       {/* Header */}
       <div className="flex items-start gap-4 sm:gap-5 mb-4 sm:mb-5 relative z-10">
         <div className="relative">
           <img
             src={cast.author.pfpUrl}
             alt={cast.author.displayName}
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-slate-200 dark:border-white/30 shadow-lg ring-2 ring-purple-500/20 transition-all duration-300 group-hover:ring-purple-500/40 group-hover:scale-105"
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-ink-edge dark:border-ink-edge shadow-lg ring-2 ring-purple-500/20 transition-all duration-300 group-hover:ring-purple-500/40 group-hover:scale-105"
           />
-          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-400 to-blue-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse" />
+          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-ink-raised   rounded-full border-2 border-white dark:border-ink-surface animate-pulse" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <h4 className="text-slate-900 dark:text-white font-bold text-base sm:text-lg truncate">{cast.author.displayName}</h4>
-            <span className="text-slate-600 dark:text-slate-300 text-sm sm:text-base font-medium truncate">@{cast.author.username}</span>
-            <span className="text-slate-400 dark:text-slate-500 text-sm hidden sm:inline">·</span>
-            <span className="text-slate-600 dark:text-slate-400 text-sm bg-slate-100 dark:bg-slate-800/50 px-2 py-1 rounded-full border border-slate-200 dark:border-white/10">{formatTime(cast.timestamp)}</span>
+            <h4 className="text-primary dark:text-primary font-bold text-base sm:text-lg truncate">{cast.author.displayName}</h4>
+            <span className="text-secondary dark:text-secondary text-sm sm:text-base font-medium truncate">@{cast.author.username}</span>
+            <span className="text-secondary dark:text-muted text-sm hidden sm:inline">·</span>
+            <span className="text-secondary dark:text-secondary text-sm bg-ink-raised dark:bg-ink-raised px-2 py-1 rounded-full border border-ink-edge dark:border-ink-edge">{formatTime(cast.timestamp)}</span>
           </div>
-          <div className="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-400">
+          <div className="flex items-center gap-3 text-xs text-secondary dark:text-secondary">
             <div className="flex items-center gap-1">
               <Users className="w-3 h-3" />
               <span>{(cast.author.followerCount || 0).toLocaleString()} followers</span>
             </div>
             <div className="flex items-center gap-1">
-              <Zap className="w-3 h-3 text-yellow-400" />
-              <span className="text-yellow-400 font-medium">Verified</span>
+              <Zap className="w-3 h-3 text-warn" />
+              <span className="text-warn font-medium">Verified</span>
             </div>
           </div>
         </div>
@@ -720,10 +713,10 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
 
       {/* Content */}
       <div className="mb-5 sm:mb-6 relative z-10">
-        <p className="text-slate-900 dark:text-slate-100 leading-relaxed text-base sm:text-lg font-light tracking-wide">{cast.text}</p>
+        <p className="text-primary dark:text-body leading-relaxed text-base sm:text-lg font-light tracking-wide">{cast.text}</p>
         {cast.embeds && cast.embeds.length > 0 && (
-          <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl border border-blue-200 dark:border-blue-500/20">
-            <div className="flex items-center gap-2 text-blue-600 dark:text-blue-300 text-sm">
+          <div className="mt-4 p-3 bg-ink-raised   dark: dark: rounded-xl border border-accent-core/30 dark:border-accent-core/20">
+            <div className="flex items-center gap-2 text-accent-bright dark:text-accent-bright text-sm">
               <ExternalLink className="w-4 h-4" />
               <span>Contains {cast.embeds.length} embedded link{cast.embeds.length > 1 ? 's' : ''}</span>
             </div>
@@ -732,7 +725,7 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
       </div>
 
       {/* Engagement */}
-      <div className="flex items-center justify-between pt-4 border-t border-gradient-to-r from-transparent via-white/20 to-transparent relative z-10">
+      <div className="flex items-center justify-between pt-4 border-t border-gradient-    relative z-10">
         <div className="flex items-center gap-6 sm:gap-8">
           <button 
             onClick={(e) => {
@@ -742,7 +735,7 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
                 navigator.vibrate(50);
               }
             }}
-            className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-500/10 px-3 py-2 rounded-full transition-all duration-300 hover:scale-105"
+            className="flex items-center gap-2 text-secondary dark:text-secondary hover:text-accent-bright dark:hover:text-accent-bright hover:bg-accent-core/10 px-3 py-2 rounded-full transition-all duration-300 hover:scale-105"
             data-testid={`reply-button-${cast.hash}`}
             title="Reply to this cast"
             disabled={replyMutation.isPending}
@@ -760,8 +753,8 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
             }}
             className={`flex items-center gap-2 transition-all duration-300 px-3 py-2 rounded-full hover:scale-105 ${
 Array.from(recastedCasts).includes(cast.hash) || cast.isRecasted
-                ? 'text-green-600 dark:text-green-400 bg-green-500/10' 
-                : 'text-slate-600 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-500/10'
+                ? 'text-gain dark:text-gain bg-gain/10' 
+                : 'text-secondary dark:text-secondary hover:text-gain dark:hover:text-gain hover:bg-gain/10'
             }`}
             data-testid={`recast-button-${cast.hash}`}
             title="Recast this"
@@ -780,8 +773,8 @@ Array.from(recastedCasts).includes(cast.hash) || cast.isRecasted
             }}
             className={`flex items-center gap-2 transition-all duration-300 px-3 py-2 rounded-full hover:scale-105 ${
 Array.from(likedCasts).includes(cast.hash) || cast.isLiked
-                ? 'text-red-600 dark:text-red-400 bg-red-500/10' 
-                : 'text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10'
+                ? 'text-loss dark:text-loss bg-red-500/10' 
+                : 'text-secondary dark:text-secondary hover:text-loss dark:hover:text-loss hover:bg-red-500/10'
             }`}
             data-testid={`like-button-${cast.hash}`}
             title="Like this cast"
@@ -792,7 +785,7 @@ Array.from(likedCasts).includes(cast.hash) || cast.isLiked
           </button>
         </div>
         <div className="flex items-center gap-3">
-          <div className="text-xs text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/50 px-2 py-1 rounded-full border border-slate-200 dark:border-white/10">
+          <div className="text-xs text-secondary dark:text-secondary bg-ink-raised dark:bg-ink-raised px-2 py-1 rounded-full border border-ink-edge dark:border-ink-edge">
             {cast.engagement} views
           </div>
           <button 
@@ -801,7 +794,7 @@ Array.from(likedCasts).includes(cast.hash) || cast.isLiked
               const farcasterUrl = `https://warpcast.com/~/conversations/${cast.hash}`;
               window.open(farcasterUrl, '_blank', 'noopener,noreferrer');
             }}
-            className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 p-2 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 sm:opacity-100 hover:scale-110"
+            className="text-secondary dark:text-secondary hover:text-primary dark:hover:text-primary hover:bg-ink-raised dark:hover:bg-ink-surface/10 p-2 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 sm:opacity-100 hover:scale-110"
             data-testid={`external-link-${cast.hash}`}
             title="View on Farcaster"
           >
@@ -840,12 +833,12 @@ function TrendingTopics() {
         >
           <Badge 
             variant="secondary" 
-            className="text-xs px-3 py-1.5 bg-gradient-to-r from-slate-800/50 to-purple-800/30 text-slate-300 hover:from-slate-700/60 hover:to-purple-700/40 cursor-pointer transition-all border border-white/10 backdrop-blur-sm"
+            className="text-xs px-3 py-1.5 bg-ink-raised text-secondary hover:bg-ink-surface cursor-pointer transition-all border border-ink-edge backdrop-blur-sm"
             data-testid={`trend-topic-${i}`}
           >
-            <span className="text-slate-400 mr-1">#{i + 1}</span>
+            <span className="text-secondary mr-1">#{i + 1}</span>
             {trend.topic}
-            <span className="text-slate-500 ml-2 text-[10px]">{trend.mentions}</span>
+            <span className="text-muted ml-2 text-[10px]">{trend.mentions}</span>
           </Badge>
         </motion.div>
       ))}
@@ -879,9 +872,9 @@ function ProminentAccountsRail() {
     return (
       <div className="flex gap-2 mb-4">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="flex items-center gap-2 px-3 py-2 border rounded-lg bg-muted/20 animate-pulse">
-            <div className="w-6 h-6 bg-muted/40 rounded-full" />
-            <div className="h-3 bg-muted/40 rounded w-12" />
+          <div key={i} className="flex items-center gap-2 px-3 py-2 border rounded-xl bg-ink-raised animate-pulse">
+            <div className="w-6 h-6 bg-ink-raised rounded-full" />
+            <div className="h-3 bg-ink-raised rounded w-12" />
           </div>
         ))}
       </div>
@@ -891,8 +884,8 @@ function ProminentAccountsRail() {
   return (
     <div className="flex gap-2 overflow-x-auto scrollbar-hide mb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
       {accounts.slice(0, 8).map((account: any, index: number) => {
-        const activityColor = account.recent_activity === 'high' ? 'text-green-500' : 
-                            account.recent_activity === 'medium' ? 'text-yellow-500' : 'text-gray-400';
+        const activityColor = account.recent_activity === 'high' ? 'text-gain' : 
+                            account.recent_activity === 'medium' ? 'text-warn' : 'text-muted';
         const isSelected = selectedFid === account.account.fid;
         
         return (
@@ -901,10 +894,10 @@ function ProminentAccountsRail() {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.05 }}
-            className={`flex items-center gap-2 px-3 py-2 border rounded-lg transition-all whitespace-nowrap ${
+            className={`flex items-center gap-2 px-3 py-2 border rounded-xl transition-all whitespace-nowrap ${
               isSelected 
-                ? 'bg-blue-100 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700' 
-                : 'bg-background hover:bg-muted/50'
+                ? 'bg-accent-core/10 dark:bg-accent-core/10 border-accent-core dark:border-accent-deep' 
+                : 'bg-ink-surface hover:bg-ink-raised'
             }`}
             onClick={() => setSelectedFid(isSelected ? null : account.account.fid)}
             data-testid={`account-pill-${account.account.fid}`}
@@ -918,7 +911,7 @@ function ProminentAccountsRail() {
               {account.account.display_name || account.account.username}
             </span>
             <div className={`w-2 h-2 rounded-full ${activityColor}`} />
-            {account.trending_score > 80 && <Star className="w-3 h-3 text-yellow-500" />}
+            {account.trending_score > 80 && <Star className="w-3 h-3 text-warn" />}
           </motion.button>
         );
       })}
@@ -946,9 +939,9 @@ function CompactCastItem({ cast, index }: { cast: TrendingCast; index: number })
   };
 
   const getTrendingIndicator = (cast: TrendingCast) => {
-    if (cast.engagement > 100) return { icon: Flame, color: 'text-red-500', label: 'Hot' };
-    if (cast.engagement > 50) return { icon: TrendingUp, color: 'text-orange-500', label: 'Trending' };
-    if (cast.likes > 10) return { icon: ArrowUp, color: 'text-green-500', label: 'Rising' };
+    if (cast.engagement > 100) return { icon: Flame, color: 'text-loss', label: 'Hot' };
+    if (cast.engagement > 50) return { icon: TrendingUp, color: 'text-warn', label: 'Trending' };
+    if (cast.likes > 10) return { icon: ArrowUp, color: 'text-gain', label: 'Rising' };
     return null;
   };
 
@@ -960,8 +953,8 @@ function CompactCastItem({ cast, index }: { cast: TrendingCast; index: number })
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className={`p-3 border-l-2 hover:bg-muted/30 transition-colors cursor-pointer ${
-        isHighEngagement ? 'border-l-orange-500 bg-orange-50/50 dark:bg-orange-900/10' : 'border-l-transparent'
+      className={`p-3 border-l-2 hover:bg-ink-raised transition-colors cursor-pointer ${
+        isHighEngagement ? 'border-l-warn bg-warn/10 dark:bg-warn/10' : 'border-l-transparent'
       }`}
       data-testid={`compact-cast-${cast.hash}`}
     >
@@ -977,9 +970,9 @@ function CompactCastItem({ cast, index }: { cast: TrendingCast; index: number })
           {/* Header - author info and trending indicator */}
           <div className="flex items-center gap-2 mb-1">
             <span className="font-medium text-sm">{cast.author.displayName}</span>
-            <span className="text-xs text-muted-foreground">@{cast.author.username}</span>
-            <span className="text-xs text-muted-foreground">•</span>
-            <span className="text-xs text-muted-foreground">{formatTime(cast.timestamp)}</span>
+            <span className="text-xs text-muted">@{cast.author.username}</span>
+            <span className="text-xs text-muted">•</span>
+            <span className="text-xs text-muted">{formatTime(cast.timestamp)}</span>
             {trendingInfo && (
               <div className={`flex items-center gap-1 ${trendingInfo.color}`}>
                 <trendingInfo.icon className="w-3 h-3" />
@@ -989,12 +982,12 @@ function CompactCastItem({ cast, index }: { cast: TrendingCast; index: number })
           </div>
 
           {/* Cast Content - truncated for space efficiency */}
-          <p className="text-sm text-foreground mb-2 line-clamp-2 leading-relaxed">
+          <p className="text-sm text-body mb-2 line-clamp-2 leading-relaxed">
             {cast.text}
           </p>
 
           {/* Engagement metrics - compact horizontal layout */}
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+          <div className="flex items-center gap-4 text-xs text-muted">
             <div className="flex items-center gap-1">
               <MessageSquare className="w-3 h-3" />
               <span>{formatCount(cast.replies)}</span>
@@ -1053,12 +1046,12 @@ function QuickStats() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: i * 0.1 }}
-          className="text-center p-3 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/10 dark:to-purple-900/10 rounded-lg border"
+          className="text-center p-3 bg-ink-raised   dark: dark: rounded-xl border"
           data-testid={`stat-${label.toLowerCase()}`}
         >
-          <Icon className="w-4 h-4 mx-auto mb-1 text-blue-600 dark:text-blue-400" />
-          <div className="text-lg font-bold text-foreground">{value.toLocaleString()}</div>
-          <div className="text-xs text-muted-foreground">{label}</div>
+          <Icon className="w-4 h-4 mx-auto mb-1 text-accent-bright dark:text-accent-bright" />
+          <div className="text-lg font-bold text-body">{value.toLocaleString()}</div>
+          <div className="text-xs text-muted">{label}</div>
         </motion.div>
       ))}
     </div>
@@ -1095,22 +1088,22 @@ export function TrendingSocialContent() {
           transition={{ duration: 0.5 }}
           className="mb-6"
         >
-          <SectionHeader
-            title="Discover"
-            subtitle="Stay updated with the latest in crypto conversations"
-          />
+          <SectionTitle as="h1">
+            Discover
+          </SectionTitle>
+          <p className="mt-2 text-secondary">Stay updated with the latest in crypto conversations</p>
         </motion.div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-6 mb-4 border-b border-slate-200 dark:border-white/10">
+        <div className="flex gap-6 mb-4 border-b border-ink-edge dark:border-ink-edge">
           {(['trending', 'for-you', 'following'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`pb-3 px-1 text-sm font-medium transition-colors capitalize relative ${
                 activeTab === tab
-                  ? 'text-slate-900 dark:text-white'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-300'
+                  ? 'text-primary dark:text-primary'
+                  : 'text-secondary dark:text-secondary hover:text-primary dark:hover:text-secondary'
               }`}
               data-testid={`tab-${tab}`}
             >
@@ -1118,7 +1111,7 @@ export function TrendingSocialContent() {
               {activeTab === tab && (
                 <motion.div
                   layoutId="activeTab"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 to-purple-500"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-ink-raised  "
                 />
               )}
             </button>

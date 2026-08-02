@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { SectionHeader } from "@/components/ui/section-header";
+import Surface from "@/components/ds/Surface";
+import SectionTitle from "@/components/ds/SectionTitle";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
@@ -10,29 +10,29 @@ import type { Bounty } from "@shared/schema";
 
 const getCategoryColor = (category?: string) => {
   const colors: Record<string, string> = {
-    crypto: "from-green-500 to-teal-500",
-    tech: "from-purple-500 to-pink-500",
-    business: "from-cyan-500 to-blue-500",
+    crypto: "bg-gain text-primary",
+    tech: "bg-accent-core text-primary",
+    business: "bg-accent-deep text-primary",
   };
-  return colors[category || ""] || "from-purple-500 to-purple-600";
+  return colors[category || ""] || "bg-accent-deep text-primary";
 };
 
 const getDifficultyBadge = (difficulty?: string) => {
   const badges: Record<string, { label: string; className: string }> = {
-    easy: { label: "Easy", className: "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300" },
-    medium: { label: "Medium", className: "bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300" },
-    hard: { label: "Hard", className: "bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300" },
+    easy: { label: "Easy", className: "bg-gain/10 text-gain border border-gain/30" },
+    medium: { label: "Medium", className: "bg-warn/10 text-warn border border-warn/30" },
+    hard: { label: "Hard", className: "bg-loss/10 text-loss border border-loss/30" },
   };
   return badges[difficulty || "medium"] || badges.medium;
 };
 
 const getCategoryBadge = (category?: string) => {
   const badges: Record<string, string> = {
-    crypto: "bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300",
-    tech: "bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300",
-    business: "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300",
+    crypto: "bg-accent-core/10 text-accent-bright border border-accent-core/30",
+    tech: "bg-accent-core/10 text-accent-bright border border-accent-core/30",
+    business: "bg-accent-deep/20 text-accent-bright border border-accent-core/30",
   };
-  return badges[category || ""] || "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300";
+  return badges[category || ""] || "bg-ink-raised text-secondary border border-ink-edge";
 };
 
 const formatReward = (reward: number, tokenType?: string) => {
@@ -98,8 +98,8 @@ export function Bounties() {
   const stats = statsData?.stats;
 
   return (
-    <section id="bounties" className="py-24 bg-white dark:bg-gradient-to-b dark:from-slate-950 dark:via-purple-950/20 dark:to-slate-950 relative overflow-hidden">
-      <div className="absolute inset-0 bg-grid-gray-900/[0.04] dark:bg-grid-white/[0.02] pointer-events-none" />
+    <section id="bounties" className="relative overflow-hidden bg-ink-page py-24">
+      <div className="pointer-events-none absolute inset-0 opacity-40" style={{ backgroundImage: "radial-gradient(#232B45 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
       <div className="container mx-auto px-6 relative z-10">
         <motion.div 
           className="text-center mb-16"
@@ -108,22 +108,22 @@ export function Bounties() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <SectionHeader
-            title="Summary Bounty Board"
-            subtitle="Earn STREAM points by creating valuable summaries"
-          />
+          <SectionTitle eyebrow="Earn from the ledger" className="text-2xl sm:text-3xl">
+            Summary Bounty Board
+          </SectionTitle>
+          <p className="mt-3 text-sm text-secondary">Earn STREAM points by creating valuable summaries</p>
         </motion.div>
         
         {bountiesLoading ? (
           <div className="flex flex-col justify-center items-center min-h-[300px]">
-            <Loader2 className="w-12 h-12 animate-spin text-purple-500 mb-4" />
-            <p className="text-muted-foreground animate-pulse">Loading bounties...</p>
+            <Loader2 className="mb-4 h-12 w-12 animate-spin text-accent-bright" />
+            <p className="animate-pulse text-secondary">Loading bounties...</p>
           </div>
         ) : bounties.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground text-lg">No bounties available yet</p>
+            <p className="text-lg text-secondary">No bounties available yet</p>
             <Link href="/bounties">
-              <Button className="mt-4 bg-gradient-to-r from-purple-500 to-purple-600">
+              <Button className="grad-accent glow-accent mt-4 rounded-xl text-primary">
                 Create the first bounty
               </Button>
             </Link>
@@ -132,8 +132,6 @@ export function Bounties() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
             {bounties.slice(0, 3).map((bounty, index) => {
               const rewardColor = getCategoryColor(bounty.category || undefined);
-              const difficultyBadge = getDifficultyBadge(bounty.difficulty || undefined);
-              const categoryBadge = getCategoryBadge(bounty.category || undefined);
 
               return (
                 <motion.div
@@ -144,42 +142,41 @@ export function Bounties() {
                   viewport={{ once: true }}
                   whileHover={{ scale: 1.02 }}
                 >
-                  <Card className="premium-card hover-lift h-full border-2">
-                    <CardContent className="p-6 flex flex-col h-full">
+                  <Surface className="h-full p-6 transition-transform duration-300 hover:-translate-y-1">
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center text-white font-bold">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-core text-primary font-bold">
                             {bounty.creatorWallet?.slice(2, 4).toUpperCase() || "??"}
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-foreground">
+                            <p className="text-sm font-medium text-primary">
                               {bounty.creatorWallet?.slice(0, 6)}...{bounty.creatorWallet?.slice(-4)}
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted">
                               {bounty.createdAt ? formatDistanceToNow(new Date(bounty.createdAt), { addSuffix: true }) : "recently"}
                             </p>
                           </div>
                         </div>
-                        <div className={`bg-gradient-to-r ${rewardColor} text-white px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap`}>
+                        <div className={`rounded-xl px-3 py-1 text-sm font-bold tabular whitespace-nowrap ${rewardColor}`}>
                           {formatReward(bounty.reward, bounty.tokenType)}
                         </div>
                       </div>
                       
-                      <h3 className="text-lg font-semibold text-foreground mb-3 line-clamp-2">
+                      <h3 className="mb-3 line-clamp-2 text-lg font-semibold text-primary">
                         {bounty.title}
                       </h3>
                       
-                      <p className="text-muted-foreground text-sm mb-4 line-clamp-2 flex-grow">
+                      <p className="mb-4 line-clamp-2 flex-grow text-sm text-body">
                         {bounty.description}
                       </p>
                       
-                      <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                      <div className="mb-4 flex items-center justify-between text-sm text-secondary">
                         <span className="flex items-center gap-1">
                           <Clock className="w-4 h-4" />
                           {formatTimeLeft(bounty.deadline)}
                         </span>
                         {bounty.tipPool && bounty.tipPool > 0 && (
-                          <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                            <span className="flex items-center gap-1 text-gain">
                             <TrendingUp className="w-4 h-4" />
                             +{bounty.tipPool} tips
                           </span>
@@ -188,12 +185,12 @@ export function Bounties() {
                       
                       <div className="flex space-x-2 mb-4 flex-wrap gap-2">
                         {bounty.category && (
-                          <span className={`text-xs px-2 py-1 rounded ${getCategoryBadge(bounty.category || undefined)}`}>
+                          <span className={`rounded-xl px-2 py-1 text-xs ${getCategoryBadge(bounty.category || undefined)}`}>
                             {bounty.category}
                           </span>
                         )}
                         {bounty.difficulty && (
-                          <span className={`text-xs px-2 py-1 rounded ${getDifficultyBadge(bounty.difficulty || undefined).className}`}>
+                          <span className={`rounded-xl px-2 py-1 text-xs ${getDifficultyBadge(bounty.difficulty || undefined).className}`}>
                             {getDifficultyBadge(bounty.difficulty || undefined).label}
                           </span>
                         )}
@@ -201,14 +198,13 @@ export function Bounties() {
                       
                       <Link href={`/bounties/${bounty.id}`}>
                         <Button 
-                          className={`w-full bg-gradient-to-r ${rewardColor} hover:opacity-90 text-white font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300`}
+                          className="grad-accent glow-accent w-full rounded-xl font-semibold text-primary transition-transform duration-300 hover:-translate-y-0.5"
                           data-testid={`button-view-bounty-${bounty.id}`}
                         >
                           View Bounty
                         </Button>
                       </Link>
-                    </CardContent>
-                  </Card>
+                  </Surface>
                 </motion.div>
               );
             })}
@@ -225,27 +221,27 @@ export function Bounties() {
         >
           {statsLoading ? (
             <div className="col-span-4 flex justify-center">
-              <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
+              <Loader2 className="h-6 w-6 animate-spin text-accent-bright" />
             </div>
           ) : stats ? (
             <>
               <div className="text-center">
-                <div className="text-3xl font-bold text-purple-500">{stats.activeBounties}</div>
-                <div className="text-muted-foreground">Active Bounties</div>
+                <div className="tabular font-display text-3xl font-bold text-primary">{stats.activeBounties}</div>
+                <div className="text-secondary">Active Bounties</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-purple-500">
+                <div className="tabular font-display text-3xl font-bold text-primary">
                   ${(stats.totalRewards / 1000).toFixed(1)}k
                 </div>
-                <div className="text-muted-foreground">Total Rewards</div>
+                <div className="text-secondary">Total Rewards</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-cyan-500">{stats.summariesCreated}</div>
-                <div className="text-muted-foreground">Summaries Created</div>
+                <div className="tabular font-display text-3xl font-bold text-primary">{stats.summariesCreated}</div>
+                <div className="text-secondary">Summaries Created</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-500">{stats.avgCompletionTime}</div>
-                <div className="text-muted-foreground">Avg Completion</div>
+                <div className="tabular font-display text-3xl font-bold text-gain">{stats.avgCompletionTime}</div>
+                <div className="text-secondary">Avg Completion</div>
               </div>
             </>
           ) : null}
