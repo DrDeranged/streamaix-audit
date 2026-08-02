@@ -1,6 +1,6 @@
 import { AlertCircle, RefreshCw, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Surface from "@/components/ds/Surface";
 
 interface ApiErrorFallbackProps {
   title?: string;
@@ -21,50 +21,54 @@ export function ApiErrorFallback({
 }: ApiErrorFallbackProps) {
   return (
     <div className={`flex items-center justify-center p-8 ${className}`}>
-      <Alert className="max-w-lg border-slate-700 bg-slate-800/50 backdrop-blur-sm">
-        <AlertCircle className="h-5 w-5 text-amber-500" />
-        <AlertTitle className="text-slate-200 text-lg font-semibold mb-2">
-          {title}
-        </AlertTitle>
-        <AlertDescription className="space-y-3">
-          <p className="text-slate-400 text-sm leading-relaxed">
-            {message}
-          </p>
-          
-          {apiName && (
-            <p className="text-slate-500 text-xs">
-              Service: {apiName}
-            </p>
-          )}
+      <Surface className="max-w-lg p-5">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-warn" />
+          <div className="min-w-0 flex-1">
+            <h3 className="mb-2 text-lg font-semibold text-primary">
+              {title}
+            </h3>
+            <div className="space-y-3">
+              <p className="text-sm leading-relaxed text-body">
+                {message}
+              </p>
 
-          {showUpgradePrompt && (
-            <div className="mt-4 p-3 bg-gradient-to-r from-purple-900/30 to-fuchsia-900/30 border border-purple-700/30 rounded-lg">
-              <div className="flex items-start gap-2">
-                <TrendingUp className="h-4 w-4 text-purple-400 mt-0.5 flex-shrink-0" />
-                <div className="text-xs text-slate-300">
-                  <p className="font-medium mb-1">Upgrade Available</p>
-                  <p className="text-slate-400">
-                    Premium API tier provides higher rate limits and real-time data access.
-                  </p>
+              {apiName && (
+                <p className="text-xs text-muted">
+                  Service: {apiName}
+                </p>
+              )}
+
+              {showUpgradePrompt && (
+                <div className="mt-4 rounded-xl border border-accent-core/30 bg-accent-core/10 p-3">
+                  <div className="flex items-start gap-2">
+                    <TrendingUp className="mt-0.5 h-4 w-4 shrink-0 text-accent-bright" />
+                    <div className="text-xs text-body">
+                      <p className="mb-1 font-medium">Upgrade Available</p>
+                      <p className="text-secondary">
+                        Premium API tier provides higher rate limits and real-time data access.
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          )}
+              )}
 
-          {onRetry && (
-            <Button
-              onClick={onRetry}
-              variant="outline"
-              size="sm"
-              className="mt-3 w-full border-slate-600 hover:bg-slate-700 text-slate-200"
-              data-testid="button-retry-api"
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Retry
-            </Button>
-          )}
-        </AlertDescription>
-      </Alert>
+              {onRetry && (
+                <Button
+                  onClick={onRetry}
+                  variant="outline"
+                  size="sm"
+                  className="mt-3 w-full rounded-xl border-ink-edge bg-ink-raised text-primary hover:bg-ink-raised hover:text-primary"
+                  data-testid="button-retry-api"
+                >
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Retry
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </Surface>
     </div>
   );
 }
@@ -82,40 +86,40 @@ export function ApiErrorCard({
 }: ApiErrorCardProps) {
   if (compact) {
     return (
-      <div className="flex items-center justify-center p-4 bg-slate-800/30 rounded-lg border border-slate-700/50">
+      <Surface variant="raised" className="flex items-center justify-center p-4">
         <div className="text-center space-y-1">
-          <AlertCircle className="h-5 w-5 text-amber-500/60 mx-auto" />
-          <p className="text-xs text-slate-500">{description}</p>
+          <AlertCircle className="mx-auto h-5 w-5 text-warn/60" />
+          <p className="text-xs text-muted">{description}</p>
         </div>
-      </div>
+      </Surface>
     );
   }
 
   return (
-    <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6">
+    <Surface className="p-6">
       <div className="flex items-start gap-3">
-        <AlertCircle className="h-5 w-5 text-amber-500/70 mt-0.5 flex-shrink-0" />
+        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-warn/70" />
         <div className="space-y-1">
-          <h3 className="text-sm font-medium text-slate-300">{title}</h3>
-          <p className="text-xs text-slate-500 leading-relaxed">
+          <h3 className="text-sm font-medium text-primary">{title}</h3>
+          <p className="text-xs leading-relaxed text-secondary">
             {description}
           </p>
         </div>
       </div>
-    </div>
+    </Surface>
   );
 }
 
 export function ApiLoadingCard({ title }: { title: string }) {
   return (
-    <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6">
+    <Surface className="p-6">
       <div className="flex items-start gap-3">
-        <div className="h-5 w-5 rounded-full border-2 border-slate-600 border-t-purple-500 animate-spin mt-0.5" />
+        <div className="mt-0.5 h-5 w-5 animate-pulse rounded-xl border-2 border-ink-edge bg-ink-raised" />
         <div className="space-y-1">
-          <h3 className="text-sm font-medium text-slate-300">{title}</h3>
-          <p className="text-xs text-slate-500">Loading data...</p>
+          <h3 className="text-sm font-medium text-primary">{title}</h3>
+          <p className="text-xs text-secondary">Loading data...</p>
         </div>
       </div>
-    </div>
+    </Surface>
   );
 }

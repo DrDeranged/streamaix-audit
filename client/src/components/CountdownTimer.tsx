@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
+import Surface from '@/components/ds/Surface';
 import { Clock, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -64,8 +65,8 @@ export function CountdownTimer({ targetDate, isCompleted = false, compact = fals
   if (isCompleted || timeRemaining.total <= 0) {
     return (
       <div className={cn("flex items-center gap-1", className)}>
-        <CheckCircle className="h-3 w-3 text-green-400" />
-        <Badge className="bg-green-500/20 text-green-300 border-green-400/30 text-xs">
+        <CheckCircle className="h-3 w-3 text-gain" />
+        <Badge className="bg-gain/10 text-gain border-gain/30 text-xs rounded-xl">
           Completed
         </Badge>
       </div>
@@ -77,8 +78,8 @@ export function CountdownTimer({ targetDate, isCompleted = false, compact = fals
     if (timeRemaining.days > 0) {
       return (
         <div className={cn("flex items-center gap-1 text-xs", className)}>
-          <Clock className="h-3 w-3 text-cyan-400" />
-          <span className="text-cyan-400 font-mono">
+          <Clock className="h-3 w-3 text-accent-bright" />
+          <span className="text-accent-bright font-mono tabular">
             {timeRemaining.days}d {timeRemaining.hours}h
           </span>
         </div>
@@ -86,8 +87,8 @@ export function CountdownTimer({ targetDate, isCompleted = false, compact = fals
     } else if (timeRemaining.hours > 0) {
       return (
         <div className={cn("flex items-center gap-1 text-xs", className)}>
-          <Clock className="h-3 w-3 text-orange-400" />
-          <span className="text-orange-400 font-mono">
+          <Clock className="h-3 w-3 text-warn" />
+          <span className="text-warn font-mono tabular">
             {timeRemaining.hours}h {timeRemaining.minutes}m
           </span>
         </div>
@@ -95,8 +96,8 @@ export function CountdownTimer({ targetDate, isCompleted = false, compact = fals
     } else {
       return (
         <div className={cn("flex items-center gap-1 text-xs", className)}>
-          <Clock className="h-3 w-3 text-red-400 animate-pulse" />
-          <span className="text-red-400 font-mono">
+          <Clock className="h-3 w-3 text-loss animate-pulse" />
+          <span className="text-loss font-mono tabular">
             {timeRemaining.minutes}m {timeRemaining.seconds}s
           </span>
         </div>
@@ -106,72 +107,72 @@ export function CountdownTimer({ targetDate, isCompleted = false, compact = fals
 
   // Full countdown display
   const getUrgencyColor = () => {
-    if (timeRemaining.days <= 1) return 'text-red-400';
-    if (timeRemaining.days <= 7) return 'text-orange-400';
-    return 'text-cyan-400';
+    if (timeRemaining.days <= 1) return 'text-loss';
+    if (timeRemaining.days <= 7) return 'text-warn';
+    return 'text-accent-bright';
   };
 
   const getUrgencyBg = () => {
-    if (timeRemaining.days <= 1) return 'bg-red-500/20 border-red-400/30';
-    if (timeRemaining.days <= 7) return 'bg-orange-500/20 border-orange-400/30';
-    return 'bg-cyan-500/20 border-cyan-400/30';
+    if (timeRemaining.days <= 1) return 'bg-loss/10 border-loss/30';
+    if (timeRemaining.days <= 7) return 'bg-warn/10 border-warn/30';
+    return 'bg-accent-core/10 border-accent-core/30';
   };
 
   return (
-    <div className={cn("space-y-2", className)}>
+    <Surface className={cn("space-y-2 p-3", className)}>
       <div className="flex items-center gap-2">
         <Clock className={cn("h-4 w-4", getUrgencyColor())} />
-        <span className="text-gray-300 text-sm font-medium">Time Remaining:</span>
+        <span className="text-body text-sm font-medium">Time Remaining:</span>
       </div>
       
-      <div className={cn("inline-flex items-center gap-1 px-3 py-2 rounded-lg border", getUrgencyBg())}>
+      <div className={cn("inline-flex items-center gap-1 px-3 py-2 rounded-xl border", getUrgencyBg())}>
         <div className="grid grid-cols-4 gap-3 text-center">
           {timeRemaining.days > 0 && (
             <div className="text-center">
-              <div className={cn("text-lg font-bold font-mono", getUrgencyColor())}>
+                <div className={cn("text-lg font-bold font-mono tabular", getUrgencyColor())}>
                 {timeRemaining.days}
               </div>
-              <div className="text-xs text-gray-400">day{timeRemaining.days !== 1 ? 's' : ''}</div>
+              <div className="text-xs text-muted">day{timeRemaining.days !== 1 ? 's' : ''}</div>
             </div>
           )}
           
           <div className="text-center">
-            <div className={cn("text-lg font-bold font-mono", getUrgencyColor())}>
+            <div className={cn("text-lg font-bold font-mono tabular", getUrgencyColor())}>
               {timeRemaining.hours.toString().padStart(2, '0')}
             </div>
-            <div className="text-xs text-gray-400">hrs</div>
+            <div className="text-xs text-muted">hrs</div>
           </div>
           
           <div className="text-center">
-            <div className={cn("text-lg font-bold font-mono", getUrgencyColor())}>
+            <div className={cn("text-lg font-bold font-mono tabular", getUrgencyColor())}>
               {timeRemaining.minutes.toString().padStart(2, '0')}
             </div>
-            <div className="text-xs text-gray-400">min</div>
+            <div className="text-xs text-muted">min</div>
           </div>
           
           <div className="text-center">
-            <div className={cn("text-lg font-bold font-mono", getUrgencyColor())}>
+            <div className={cn("text-lg font-bold font-mono tabular", getUrgencyColor())}>
               {timeRemaining.seconds.toString().padStart(2, '0')}
             </div>
-            <div className="text-xs text-gray-400">sec</div>
+            <div className="text-xs text-muted">sec</div>
           </div>
         </div>
       </div>
       
       {/* Urgency indicator */}
       {timeRemaining.days <= 1 && (
-        <div className="flex items-center gap-1 text-xs text-red-400">
+        <div className="flex items-center gap-1 text-xs text-loss">
           <span className="animate-pulse">🚨</span>
           <span>High Urgency - Event Tomorrow or Today</span>
         </div>
       )}
       {timeRemaining.days <= 7 && timeRemaining.days > 1 && (
-        <div className="flex items-center gap-1 text-xs text-orange-400">
+        <div className="flex items-center gap-1 text-xs text-warn">
           <span>⚡</span>
           <span>Medium Urgency - Event This Week</span>
         </div>
       )}
-    </div>
+    </Surface>
   );
 }
 

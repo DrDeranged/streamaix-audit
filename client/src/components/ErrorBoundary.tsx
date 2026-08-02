@@ -1,7 +1,8 @@
 import React from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -58,23 +59,23 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
       // Default error UI
       return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-6">
-          <Card className="bg-white/10 border-red-500/30 backdrop-blur-lg max-w-md w-full">
-            <CardHeader className="text-center">
-              <div className="mx-auto w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mb-4">
-                <AlertTriangle className="h-6 w-6 text-red-400" />
+        <div className="min-h-[100dvh] bg-ink-page flex items-center justify-center p-6">
+          <Surface className="max-w-md w-full p-6">
+            <div className="text-center">
+              <div className="mx-auto w-12 h-12 bg-loss/10 rounded-xl flex items-center justify-center mb-4">
+                <AlertTriangle className="h-6 w-6 text-loss" />
               </div>
-              <CardTitle className="text-gray-900 dark:text-white">Something went wrong</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-300 text-center text-sm">
+              <SectionTitle as="h2">Something went wrong</SectionTitle>
+            </div>
+            <div className="space-y-4 mt-4">
+              <p className="text-body text-center text-sm">
                 An unexpected error occurred. This has been logged and we'll look into it.
               </p>
               
               {import.meta.env.DEV && this.state.error && (
-                <details className="bg-black/20 rounded p-3 text-xs text-gray-400">
-                  <summary className="cursor-pointer mb-2 text-red-400">Error Details</summary>
-                  <pre className="whitespace-pre-wrap overflow-auto max-h-32">
+                <details className="bg-ink-raised rounded-xl p-3 text-xs text-secondary">
+                  <summary className="cursor-pointer mb-2 text-loss">Error Details</summary>
+                  <pre className="whitespace-pre-wrap overflow-auto max-h-32 text-secondary">
                     {this.state.error.stack}
                   </pre>
                 </details>
@@ -83,7 +84,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               <div className="flex gap-2">
                 <Button 
                   onClick={this.resetError}
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600"
+                  className="flex-1 grad-accent glow-accent text-primary"
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Try Again
@@ -92,13 +93,13 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                 <Button 
                   onClick={() => window.location.reload()}
                   variant="outline"
-                  className="border-white/20 text-gray-900 dark:text-white hover:bg-white/5"
+                  className="border-ink-edge text-body hover:bg-ink-raised"
                 >
                   Reload Page
                 </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </Surface>
         </div>
       );
     }
@@ -112,13 +113,13 @@ export function Web3ErrorBoundary({ children }: { children: React.ReactNode }) {
   return (
     <ErrorBoundary
       fallback={({ error, resetError }) => (
-        <div className="p-6 bg-red-500/10 border border-red-500/30 rounded-lg">
+        <Surface className="p-6 border-loss/30 bg-loss/10">
           <div className="flex items-center gap-3 mb-4">
-            <AlertTriangle className="h-5 w-5 text-red-400" />
-            <h3 className="text-red-400 font-semibold">Web3 Connection Error</h3>
+            <AlertTriangle className="h-5 w-5 text-loss" />
+            <SectionTitle as="h3" className="text-loss">Web3 Connection Error</SectionTitle>
           </div>
           
-          <p className="text-gray-300 text-sm mb-4">
+          <p className="text-body text-sm mb-4">
             There was an issue with your Web3 connection. Please check your wallet and try again.
           </p>
           
@@ -126,7 +127,7 @@ export function Web3ErrorBoundary({ children }: { children: React.ReactNode }) {
             <Button 
               onClick={resetError}
               size="sm" 
-              className="bg-gradient-to-r from-purple-600 to-blue-600"
+              className="grad-accent glow-accent text-primary"
             >
               Retry Connection
             </Button>
@@ -135,12 +136,12 @@ export function Web3ErrorBoundary({ children }: { children: React.ReactNode }) {
               onClick={() => window.location.reload()}
               variant="outline" 
               size="sm"
-              className="border-white/20 text-gray-900 dark:text-white hover:bg-white/5"
+              className="border-ink-edge text-body hover:bg-ink-raised"
             >
               Refresh
             </Button>
           </div>
-        </div>
+        </Surface>
       )}
       onError={(error, errorInfo) => {
         // Log Web3 specific errors
@@ -165,13 +166,13 @@ export function QueryErrorBoundary({ children }: { children: React.ReactNode }) 
   return (
     <ErrorBoundary
       fallback={({ error, resetError }) => (
-        <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded">
+        <Surface className="p-4 border-warn/30 bg-warn/10">
           <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle className="h-4 w-4 text-yellow-400" />
-            <span className="text-yellow-400 text-sm font-medium">Data Loading Error</span>
+            <AlertTriangle className="h-4 w-4 text-warn" />
+            <span className="text-warn text-sm font-medium">Data Loading Error</span>
           </div>
           
-          <p className="text-gray-300 text-sm mb-3">
+          <p className="text-body text-sm mb-3">
             Failed to load data. This might be a temporary issue.
           </p>
           
@@ -179,11 +180,11 @@ export function QueryErrorBoundary({ children }: { children: React.ReactNode }) 
             onClick={resetError}
             size="sm" 
             variant="outline"
-            className="border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10"
+            className="border-warn/30 text-warn hover:bg-warn/10"
           >
             Try Again
           </Button>
-        </div>
+        </Surface>
       )}
     >
       {children}

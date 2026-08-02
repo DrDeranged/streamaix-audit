@@ -5,8 +5,10 @@ import {
   Sparkles, Brain, Target, Activity, Crown, Flame,
   FileText, DollarSign
 } from 'lucide-react';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
+import StatValue from '@/components/ds/StatValue';
 import { formatDistanceToNow } from 'date-fns';
 
 interface BountyCompletion {
@@ -68,19 +70,19 @@ interface LeaderboardAgent {
 }
 
 const categoryColors: Record<string, string> = {
-  'DeFi': 'from-cyan-500/30 to-blue-500/30 border-cyan-500/50',
-  'NFT': 'from-purple-500/30 to-fuchsia-500/30 border-purple-500/50',
-  'Layer 2': 'from-amber-500/30 to-orange-500/30 border-amber-500/50',
-  'Trading': 'from-green-500/30 to-emerald-500/30 border-green-500/50',
-  'Infrastructure': 'from-slate-500/30 to-gray-500/30 border-slate-500/50',
-  'Gaming': 'from-pink-500/30 to-rose-500/30 border-pink-500/50',
+  'DeFi': 'bg-accent-core/10 border-accent-core/30',
+  'NFT': 'bg-accent-core/10 border-accent-core/30',
+  'Layer 2': 'bg-warn/10 border-warn/30',
+  'Trading': 'bg-gain/10 border-gain/30',
+  'Infrastructure': 'bg-ink-raised border-ink-edge',
+  'Gaming': 'bg-loss/10 border-loss/30',
 };
 
 const activityLevelColors: Record<string, string> = {
-  'hyperactive': 'text-red-400 bg-red-500/20',
-  'active': 'text-amber-400 bg-amber-500/20',
-  'regular': 'text-cyan-400 bg-cyan-500/20',
-  'casual': 'text-slate-400 bg-slate-500/20',
+  'hyperactive': 'text-loss bg-loss/10',
+  'active': 'text-warn bg-warn/10',
+  'regular': 'text-accent-bright bg-accent-core/10',
+  'casual': 'text-muted bg-ink-raised',
 };
 
 export default function AIAgentsAtWork() {
@@ -97,10 +99,10 @@ export default function AIAgentsAtWork() {
   if (isLoading) {
     return (
       <div className="space-y-6 animate-pulse">
-        <div className="h-32 bg-gradient-to-br from-purple-900/30 to-cyan-900/30 rounded-xl" />
+        <div className="h-32 bg-ink-surface border border-ink-edge rounded-xl" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-24 bg-slate-800/50 rounded-xl" />
+            <div key={i} className="h-24 bg-ink-raised rounded-xl" />
           ))}
         </div>
       </div>
@@ -118,19 +120,19 @@ export default function AIAgentsAtWork() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-900/40 via-slate-900/60 to-cyan-900/40 border border-purple-500/30 p-6"
+          className="relative overflow-hidden rounded-xl grad-surface border border-ink-edge p-6"
       >
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-accent-core/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-accent-core/10 rounded-full blur-3xl animate-pulse delay-1000" />
           
           {/* Neural Network Lines */}
           <svg className="absolute inset-0 w-full h-full opacity-20">
             <defs>
               <linearGradient id="neural-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.3" />
-                <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.3" />
+                <stop offset="0%" stopColor="#8B7CF6" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="#8B7CF6" stopOpacity="0.3" />
               </linearGradient>
             </defs>
             {[...Array(8)].map((_, i) => (
@@ -152,20 +154,20 @@ export default function AIAgentsAtWork() {
 
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500/30 to-cyan-500/30 border border-purple-500/50">
-              <Bot className="w-8 h-8 text-purple-400" />
+            <div className="p-3 rounded-xl bg-accent-core/10 border border-accent-core/30">
+              <Bot className="w-8 h-8 text-accent-bright" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+              <SectionTitle as="h2" className="text-2xl font-bold flex items-center gap-2">
                 AI Agents at Work
                 <motion.span
                   animate={{ scale: [1, 1.2, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
-                  <Sparkles className="w-5 h-5 text-cyan-400" />
+                  <Sparkles className="w-5 h-5 text-accent-bright" />
                 </motion.span>
-              </h2>
-              <p className="text-gray-400">Autonomous bounty solving ecosystem</p>
+              </SectionTitle>
+              <p className="text-secondary">Autonomous bounty solving ecosystem</p>
             </div>
           </div>
 
@@ -173,46 +175,46 @@ export default function AIAgentsAtWork() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="p-4 rounded-xl bg-slate-800/50 border border-purple-500/30 backdrop-blur-sm"
+              className="p-4 rounded-xl bg-ink-raised border border-ink-edge"
             >
-              <div className="flex items-center gap-2 text-purple-400 mb-2">
+              <div className="flex items-center gap-2 text-accent-bright mb-2">
                 <Bot className="w-4 h-4" />
                 <span className="text-xs uppercase tracking-wider">Active Agents</span>
               </div>
-              <p className="text-2xl font-bold text-white">{stats?.totalAgents || 0}</p>
+              <StatValue label="" value={stats?.totalAgents || 0} />
             </motion.div>
 
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="p-4 rounded-xl bg-slate-800/50 border border-green-500/30 backdrop-blur-sm"
+              className="p-4 rounded-xl bg-ink-raised border border-ink-edge"
             >
-              <div className="flex items-center gap-2 text-green-400 mb-2">
+              <div className="flex items-center gap-2 text-gain mb-2">
                 <CheckCircle className="w-4 h-4" />
                 <span className="text-xs uppercase tracking-wider">Bounties Solved</span>
               </div>
-              <p className="text-2xl font-bold text-white">{(stats?.totalBountiesCompleted || 0).toLocaleString()}</p>
+              <StatValue label="" value={(stats?.totalBountiesCompleted || 0).toLocaleString()} />
             </motion.div>
 
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="p-4 rounded-xl bg-slate-800/50 border border-amber-500/30 backdrop-blur-sm"
+              className="p-4 rounded-xl bg-ink-raised border border-ink-edge"
             >
-              <div className="flex items-center gap-2 text-amber-400 mb-2">
+              <div className="flex items-center gap-2 text-warn mb-2">
                 <DollarSign className="w-4 h-4" />
                 <span className="text-xs uppercase tracking-wider">Rewards Earned</span>
               </div>
-              <p className="text-2xl font-bold text-white">{(stats?.totalRewardsEarned || 0).toLocaleString()} STREAM</p>
+              <StatValue label="" value={`${(stats?.totalRewardsEarned || 0).toLocaleString()} STREAM`} />
             </motion.div>
 
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="p-4 rounded-xl bg-slate-800/50 border border-cyan-500/30 backdrop-blur-sm"
+              className="p-4 rounded-xl bg-ink-raised border border-ink-edge"
             >
-              <div className="flex items-center gap-2 text-cyan-400 mb-2">
+              <div className="flex items-center gap-2 text-accent-bright mb-2">
                 <Flame className="w-4 h-4" />
                 <span className="text-xs uppercase tracking-wider">Today's Solves</span>
               </div>
-              <p className="text-2xl font-bold text-white">{stats?.todayCompletions || 0}</p>
+              <StatValue label="" value={stats?.todayCompletions || 0} />
             </motion.div>
           </div>
         </div>
@@ -220,11 +222,11 @@ export default function AIAgentsAtWork() {
 
       {/* In-Progress Bounties */}
       {inProgressBounties.length > 0 && (
-        <Card className="bg-gradient-to-br from-amber-900/20 to-orange-900/10 border-amber-500/30 p-6">
+        <Surface className="p-6">
           <div className="flex items-center gap-2 mb-4">
-            <Activity className="w-5 h-5 text-amber-400 animate-pulse" />
-            <h3 className="text-lg font-semibold text-white">Currently Processing</h3>
-            <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/50 ml-auto">
+            <Activity className="w-5 h-5 text-warn animate-pulse" />
+            <SectionTitle as="h3">Currently Processing</SectionTitle>
+            <Badge className="bg-warn/10 text-warn border-warn/30 ml-auto">
               {inProgressBounties.length} Active
             </Badge>
           </div>
@@ -238,7 +240,7 @@ export default function AIAgentsAtWork() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ delay: index * 0.1 }}
-                  className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-amber-500/20"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-ink-raised border border-ink-edge"
                 >
                   <div className="relative">
                     <img
@@ -247,19 +249,19 @@ export default function AIAgentsAtWork() {
                       className="w-10 h-10 rounded-full ring-2 ring-amber-500/50"
                     />
                     <motion.div
-                      className="absolute -bottom-1 -right-1 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center"
+                      className="absolute -bottom-1 -right-1 w-4 h-4 bg-warn rounded-full flex items-center justify-center"
                       animate={{ scale: [1, 1.2, 1] }}
                       transition={{ duration: 1, repeat: Infinity }}
                     >
-                      <Brain className="w-2.5 h-2.5 text-white" />
+                      <Brain className="w-2.5 h-2.5 text-primary" />
                     </motion.div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white truncate">
+                    <p className="text-sm font-medium text-primary truncate">
                       {bounty.bountyTitle}
                     </p>
-                    <div className="flex items-center gap-2 text-xs text-gray-400">
-                      <span className="text-amber-400">@{bounty.agentUsername}</span>
+                    <div className="flex items-center gap-2 text-xs text-secondary">
+                      <span className="text-warn">@{bounty.agentUsername}</span>
                       <span>•</span>
                       <span>Processing...</span>
                     </div>
@@ -268,22 +270,22 @@ export default function AIAgentsAtWork() {
                     animate={{ rotate: 360 }}
                     transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                   >
-                    <Zap className="w-5 h-5 text-amber-400" />
+                    <Zap className="w-5 h-5 text-warn" />
                   </motion.div>
                 </motion.div>
               ))}
             </AnimatePresence>
           </div>
-        </Card>
+        </Surface>
       )}
 
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Completions */}
-        <Card className="bg-gradient-to-br from-green-900/20 to-emerald-900/10 border-green-500/30 p-6">
+        <Surface className="p-6">
           <div className="flex items-center gap-2 mb-4">
-            <CheckCircle className="w-5 h-5 text-green-400" />
-            <h3 className="text-lg font-semibold text-white">Recent Completions</h3>
+            <CheckCircle className="w-5 h-5 text-gain" />
+            <SectionTitle as="h3">Recent Completions</SectionTitle>
           </div>
           
           <div className="space-y-3 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-green-500/30 scrollbar-track-transparent">
@@ -294,7 +296,7 @@ export default function AIAgentsAtWork() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className={`p-3 rounded-lg bg-gradient-to-r ${categoryColors[completion.bountyCategory] || 'from-slate-800/50 to-slate-700/50 border-slate-600/50'} border backdrop-blur-sm`}
+                  className={`p-3 rounded-xl ${categoryColors[completion.bountyCategory] || 'bg-ink-raised border-ink-edge'} border`}
                 >
                   <div className="flex items-start gap-3">
                     <img
@@ -303,23 +305,23 @@ export default function AIAgentsAtWork() {
                       className="w-8 h-8 rounded-full ring-2 ring-green-500/50"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-white truncate">
+                      <p className="text-sm font-medium text-primary truncate">
                         {completion.bountyTitle}
                       </p>
-                      <div className="flex items-center gap-2 text-xs text-gray-400 mt-1">
-                        <span className="text-green-400">@{completion.agentUsername}</span>
+                      <div className="flex items-center gap-2 text-xs text-secondary mt-1">
+                        <span className="text-gain">@{completion.agentUsername}</span>
                         <span>•</span>
                         <Clock className="w-3 h-3" />
                         <span>{formatDistanceToNow(new Date(completion.completedAt), { addSuffix: true })}</span>
                       </div>
                       {completion.summaryTitle && (
-                        <div className="flex items-center gap-1.5 mt-2 text-xs text-cyan-400">
+                        <div className="flex items-center gap-1.5 mt-2 text-xs text-accent-bright">
                           <FileText className="w-3 h-3" />
                           <span className="truncate">{completion.summaryTitle}</span>
                         </div>
                       )}
                     </div>
-                    <Badge className="bg-green-500/20 text-green-300 border-green-500/50 shrink-0">
+                    <Badge className="bg-gain/10 text-gain border-gain/30 shrink-0">
                       +{completion.bountyReward} STREAM
                     </Badge>
                   </div>
@@ -327,13 +329,13 @@ export default function AIAgentsAtWork() {
               ))}
             </AnimatePresence>
           </div>
-        </Card>
+        </Surface>
 
         {/* Top Agents Leaderboard */}
-        <Card className="bg-gradient-to-br from-purple-900/20 to-fuchsia-900/10 border-purple-500/30 p-6">
+        <Surface className="p-6">
           <div className="flex items-center gap-2 mb-4">
-            <Trophy className="w-5 h-5 text-amber-400" />
-            <h3 className="text-lg font-semibold text-white">Top Bounty Solvers</h3>
+            <Trophy className="w-5 h-5 text-warn" />
+            <SectionTitle as="h3">Top Bounty Solvers</SectionTitle>
           </div>
           
           <div className="space-y-3 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-purple-500/30 scrollbar-track-transparent">
@@ -343,14 +345,14 @@ export default function AIAgentsAtWork() {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-purple-500/20"
+                className="flex items-center gap-3 p-3 rounded-xl bg-ink-raised border border-ink-edge"
               >
                 {/* Rank Badge */}
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                  index === 0 ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-slate-900' :
-                  index === 1 ? 'bg-gradient-to-br from-slate-300 to-slate-500 text-slate-900' :
-                  index === 2 ? 'bg-gradient-to-br from-amber-600 to-amber-800 text-white' :
-                  'bg-slate-700 text-gray-300'
+                  index === 0 ? 'bg-warn text-primary' :
+                  index === 1 ? 'bg-secondary text-primary' :
+                  index === 2 ? 'bg-warn text-primary' :
+                  'bg-ink-edge text-secondary'
                 }`}>
                   {index < 3 ? <Crown className="w-4 h-4" /> : agent.rank}
                 </div>
@@ -363,18 +365,18 @@ export default function AIAgentsAtWork() {
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-white">@{agent.username}</p>
-                    <Badge className={`text-xs ${activityLevelColors[agent.activityLevel] || 'text-gray-400 bg-gray-500/20'}`}>
+                    <p className="text-sm font-medium text-primary">@{agent.username}</p>
+                    <Badge className={`text-xs ${activityLevelColors[agent.activityLevel] || 'text-muted bg-ink-raised'}`}>
                       {agent.activityLevel}
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-gray-400 mt-1">
+                  <div className="flex items-center gap-3 text-xs text-secondary mt-1">
                     <span className="flex items-center gap-1">
-                      <Target className="w-3 h-3 text-green-400" />
+                      <Target className="w-3 h-3 text-gain" />
                       {agent.bountiesCompleted} solved
                     </span>
                     {agent.expertise && agent.expertise.length > 0 && (
-                      <span className="text-purple-400 truncate">
+                      <span className="text-accent-bright truncate">
                         {agent.expertise.slice(0, 2).join(', ')}
                       </span>
                     )}
@@ -382,23 +384,23 @@ export default function AIAgentsAtWork() {
                 </div>
 
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-amber-400">{agent.totalEarned.toLocaleString()}</p>
-                  <p className="text-xs text-gray-500">STREAM</p>
+                  <p className="tabular text-sm font-semibold text-warn">{agent.totalEarned.toLocaleString()}</p>
+                  <p className="text-xs text-muted">STREAM</p>
                 </div>
               </motion.div>
             ))}
           </div>
-        </Card>
+        </Surface>
       </div>
 
       {/* System Status */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="flex items-center justify-center gap-2 text-sm text-gray-500"
+        className="flex items-center justify-center gap-2 text-sm text-muted"
       >
         <motion.div
-          className="w-2 h-2 rounded-full bg-green-500"
+          className="w-2 h-2 rounded-full bg-gain"
           animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
         />

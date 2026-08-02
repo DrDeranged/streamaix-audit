@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react';
 import { ErrorBoundary } from './ErrorBoundary';
+import Surface from '@/components/ds/Surface';
 
 interface LazyWrapperProps {
   children: React.ReactNode;
@@ -10,23 +11,23 @@ interface LazyWrapperProps {
 // Enhanced loading skeleton
 function DefaultLoadingSkeleton() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-[100dvh] bg-ink-page text-body">
       <div className="max-w-7xl mx-auto p-6">
         {/* Header skeleton */}
         <div className="mb-8">
-          <div className="h-8 bg-white/10 rounded w-64 mb-2 animate-pulse"></div>
-          <div className="h-4 bg-white/5 rounded w-96 animate-pulse"></div>
+          <div className="h-8 bg-ink-raised rounded-xl w-64 mb-2 animate-pulse"></div>
+          <div className="h-4 bg-ink-surface rounded-xl w-96 animate-pulse"></div>
         </div>
         
         {/* Content skeleton */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="bg-white/10 rounded-lg p-6 animate-pulse">
-              <div className="h-6 bg-white/10 rounded w-3/4 mb-4"></div>
-              <div className="h-4 bg-white/5 rounded w-full mb-2"></div>
-              <div className="h-4 bg-white/5 rounded w-2/3 mb-4"></div>
-              <div className="h-10 bg-white/10 rounded w-full"></div>
-            </div>
+            <Surface key={i} className="p-6 animate-pulse">
+              <div className="h-6 bg-ink-raised rounded-xl w-3/4 mb-4"></div>
+              <div className="h-4 bg-ink-surface rounded-xl w-full mb-2"></div>
+              <div className="h-4 bg-ink-surface rounded-xl w-2/3 mb-4"></div>
+              <div className="h-10 bg-ink-raised rounded-xl w-full"></div>
+            </Surface>
           ))}
         </div>
       </div>
@@ -37,37 +38,37 @@ function DefaultLoadingSkeleton() {
 // Page-specific loading skeletons
 export function DashboardSkeleton() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-[100dvh] bg-ink-page text-body">
       <div className="max-w-7xl mx-auto p-6">
         <div className="mb-8">
-          <div className="h-8 bg-white/10 rounded w-48 mb-2 animate-pulse"></div>
-          <div className="h-4 bg-white/5 rounded w-72 animate-pulse"></div>
+          <div className="h-8 bg-ink-raised rounded-xl w-48 mb-2 animate-pulse"></div>
+          <div className="h-4 bg-ink-surface rounded-xl w-72 animate-pulse"></div>
         </div>
         
         {/* Stats grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-white/10 rounded-lg p-6 animate-pulse">
-              <div className="h-4 bg-white/5 rounded w-20 mb-2"></div>
-              <div className="h-8 bg-white/10 rounded w-24"></div>
-            </div>
+            <Surface key={i} className="p-6 animate-pulse">
+              <div className="h-4 bg-ink-surface rounded-xl w-20 mb-2"></div>
+              <div className="h-8 bg-ink-raised rounded-xl w-24"></div>
+            </Surface>
           ))}
         </div>
         
         {/* Main content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white/10 rounded-lg p-6 animate-pulse">
-            <div className="h-6 bg-white/10 rounded w-40 mb-4"></div>
-            <div className="h-64 bg-white/5 rounded"></div>
-          </div>
-          <div className="bg-white/10 rounded-lg p-6 animate-pulse">
-            <div className="h-6 bg-white/10 rounded w-32 mb-4"></div>
+          <Surface className="p-6 animate-pulse">
+            <div className="h-6 bg-ink-raised rounded-xl w-40 mb-4"></div>
+            <div className="h-64 bg-ink-surface rounded-xl"></div>
+          </Surface>
+          <Surface className="p-6 animate-pulse">
+            <div className="h-6 bg-ink-raised rounded-xl w-32 mb-4"></div>
             <div className="space-y-3">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-12 bg-white/5 rounded"></div>
+                <div key={i} className="h-12 bg-ink-surface rounded-xl"></div>
               ))}
             </div>
-          </div>
+          </Surface>
         </div>
       </div>
     </div>
@@ -76,43 +77,43 @@ export function DashboardSkeleton() {
 
 export function TradingSkeleton() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-[100dvh] bg-ink-page text-body">
       <div className="max-w-7xl mx-auto p-6">
         <div className="mb-8">
-          <div className="h-8 bg-white/10 rounded w-40 mb-2 animate-pulse"></div>
-          <div className="h-4 bg-white/5 rounded w-64 animate-pulse"></div>
+          <div className="h-8 bg-ink-raised rounded-xl w-40 mb-2 animate-pulse"></div>
+          <div className="h-4 bg-ink-surface rounded-xl w-64 animate-pulse"></div>
         </div>
         
         {/* Tabs skeleton */}
         <div className="flex gap-2 mb-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-10 bg-white/10 rounded w-24 animate-pulse"></div>
+            <div key={i} className="h-10 bg-ink-raised rounded-xl w-24 animate-pulse"></div>
           ))}
         </div>
         
         {/* Traders grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="bg-white/10 rounded-lg p-6 animate-pulse">
+            <Surface key={i} className="p-6 animate-pulse">
               <div className="flex items-center mb-4">
-                <div className="h-16 w-16 bg-white/10 rounded-full mr-4"></div>
+                <div className="h-16 w-16 bg-ink-raised rounded-xl mr-4"></div>
                 <div>
-                  <div className="h-5 bg-white/10 rounded w-24 mb-2"></div>
-                  <div className="h-3 bg-white/5 rounded w-32"></div>
+                  <div className="h-5 bg-ink-raised rounded-xl w-24 mb-2"></div>
+                  <div className="h-3 bg-ink-surface rounded-xl w-32"></div>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <div className="h-6 bg-white/10 rounded w-16 mb-1"></div>
-                  <div className="h-3 bg-white/5 rounded w-20"></div>
+                  <div className="h-6 bg-ink-raised rounded-xl w-16 mb-1"></div>
+                  <div className="h-3 bg-ink-surface rounded-xl w-20"></div>
                 </div>
                 <div>
-                  <div className="h-6 bg-white/10 rounded w-12 mb-1"></div>
-                  <div className="h-3 bg-white/5 rounded w-16"></div>
+                  <div className="h-6 bg-ink-raised rounded-xl w-12 mb-1"></div>
+                  <div className="h-3 bg-ink-surface rounded-xl w-16"></div>
                 </div>
               </div>
-              <div className="h-10 bg-white/10 rounded"></div>
-            </div>
+              <div className="h-10 bg-ink-raised rounded-xl"></div>
+            </Surface>
           ))}
         </div>
       </div>

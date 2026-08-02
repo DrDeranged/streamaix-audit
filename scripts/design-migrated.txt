@@ -92,3 +92,17 @@ client/src/components/ui/scroll-area.tsx
 client/src/components/ui/progress.tsx
 client/src/components/ui/hover-card.tsx
 client/src/components/ui/badge.tsx
+client/src/components/AIAgentsAtWork.tsx
+client/src/components/ApiErrorFallback.tsx
+client/src/components/CountdownTimer.tsx
+client/src/components/ErrorBoundary.tsx
+client/src/components/GlobalMobileHeader.tsx
+client/src/components/InvestmentJournal.tsx
+client/src/components/LazyWrapper.tsx
+client/src/components/NotificationSettings.tsx
+client/src/components/PredictionMarketSection.tsx
+client/src/components/ShareCard.tsx
+client/src/components/UserNotesList.tsx
+client/src/components/VoiceAssistant.tsx
+client/src/components/WaitlistModal.tsx
+client/src/components/WidgetSettingsPanel.tsx

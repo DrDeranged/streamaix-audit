@@ -3,7 +3,8 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { Bell, BellOff, Smartphone, Check, X, Send, LogIn, Bug, AlertTriangle, CheckCircle, XCircle, Loader2, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import Surface from '@/components/ds/Surface';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -487,26 +488,26 @@ export function NotificationSettings() {
 
   if (isLoading) {
     return (
-      <Card className="glass-card">
+      <Surface className="p-0">
         <CardContent className="p-6">
           <div className="flex items-center gap-3">
-            <Loader2 className="h-6 w-6 animate-spin text-cyan-400" />
-            <span className="text-sm text-muted-foreground">Checking notification support...</span>
+            <Loader2 className="h-6 w-6 animate-spin text-accent-bright" />
+            <span className="text-sm text-secondary">Checking notification support...</span>
           </div>
         </CardContent>
-      </Card>
+      </Surface>
     );
   }
 
   if (!isSupported) {
     return (
-      <Card className="glass-card border-amber-500/20">
+      <Surface className="border-warn/30">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
-            <BellOff className="w-5 h-5 text-amber-500" />
+            <BellOff className="w-5 h-5 text-warn" />
             Push Notifications Not Supported
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-secondary">
             {debugInfo?.isIOS && !debugInfo?.isPWA 
               ? 'On iOS, you must first install this app to your Home Screen. Open Safari, tap Share, then "Add to Home Screen".'
               : 'Your browser doesn\'t support push notifications. Try using a modern browser like Chrome, Firefox, or Edge.'}
@@ -514,7 +515,7 @@ export function NotificationSettings() {
         </CardHeader>
         {debugInfo && (
           <CardContent className="pt-0">
-            <div className="text-xs text-muted-foreground space-y-1 font-mono bg-black/20 p-3 rounded-lg">
+            <div className="text-xs text-secondary space-y-1 font-mono bg-ink-raised p-3 rounded-xl">
               <div>SW Support: {debugInfo.swSupported ? '✅' : '❌'}</div>
               <div>PushManager: {debugInfo.pushManagerSupported ? '✅' : '❌'}</div>
               <div>iOS: {debugInfo.isIOS ? 'Yes' : 'No'}</div>
@@ -523,55 +524,55 @@ export function NotificationSettings() {
             </div>
           </CardContent>
         )}
-      </Card>
+      </Surface>
     );
   }
 
   if (!isAuthenticated) {
     return (
-      <Card className="glass-card border-cyan-500/20">
+      <Surface className="border-accent-core/30">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
-            <Bell className="w-5 h-5 text-cyan-400" />
+            <Bell className="w-5 h-5 text-accent-bright" />
             Push Notifications
           </CardTitle>
-          <CardDescription className="mt-1">
+          <CardDescription className="mt-1 text-secondary">
             Get real-time alerts for market updates, bounties, and more
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
           <div className="flex flex-col items-center gap-4 py-4 text-center">
-            <div className="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center">
-              <LogIn className="w-6 h-6 text-cyan-400" />
+            <div className="w-12 h-12 rounded-xl bg-accent-core/20 flex items-center justify-center">
+              <LogIn className="w-6 h-6 text-accent-bright" />
             </div>
             <div>
-              <p className="text-sm font-medium text-white mb-1">Sign in to enable notifications</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm font-medium text-primary mb-1">Sign in to enable notifications</p>
+              <p className="text-xs text-secondary">
                 Create an account or sign in to receive push notifications about your markets, bounties, and earnings.
               </p>
             </div>
             <Link href="/auth">
-              <Button className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600">
+              <Button className="grad-accent glow-accent text-primary hover:bg-accent-deep">
                 <LogIn className="w-4 h-4 mr-2" />
                 Sign In
               </Button>
             </Link>
           </div>
         </CardContent>
-      </Card>
+      </Surface>
     );
   }
 
   return (
-    <Card className="glass-card border-cyan-500/20">
+    <Surface className="border-accent-core/30">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg flex items-center gap-2">
-              <Bell className="w-5 h-5 text-cyan-400" />
+              <Bell className="w-5 h-5 text-accent-bright" />
               Push Notifications
             </CardTitle>
-            <CardDescription className="mt-1">
+            <CardDescription className="mt-1 text-secondary">
               Get real-time alerts for market updates, bounties, and more
             </CardDescription>
           </div>
@@ -599,13 +600,13 @@ export function NotificationSettings() {
             transition={{ duration: 0.2 }}
           >
             <CardContent className="pt-0 space-y-4">
-              <div className="flex items-center gap-2 text-sm text-green-500">
+              <div className="flex items-center gap-2 text-sm text-gain">
                 <Smartphone className="w-4 h-4" />
                 <span>This device is receiving notifications</span>
               </div>
 
               <div className="space-y-3">
-                <h4 className="text-sm font-medium text-muted-foreground">Platform Alerts</h4>
+                <h4 className="text-sm font-medium text-secondary">Platform Alerts</h4>
                 
                 <div className="space-y-2">
                   {[
@@ -617,11 +618,11 @@ export function NotificationSettings() {
                   ].map(({ key, label, desc }) => (
                     <div 
                       key={key}
-                      className="flex items-center justify-between py-2 px-3 rounded-lg bg-card/50 hover:bg-card/80 transition-colors"
+                      className="flex items-center justify-between py-2 px-3 rounded-xl bg-ink-raised hover:bg-ink-surface transition-colors"
                     >
                       <div>
                         <div className="text-sm font-medium">{label}</div>
-                        <div className="text-xs text-muted-foreground">{desc}</div>
+                        <div className="text-xs text-secondary">{desc}</div>
                       </div>
                       <Switch
                         checked={preferences[key]}
@@ -634,10 +635,10 @@ export function NotificationSettings() {
                 </div>
               </div>
 
-              <div className="space-y-3 pt-3 border-t border-cyan-500/10">
-                <h4 className="text-sm font-medium text-cyan-400 flex items-center gap-2">
+              <div className="space-y-3 pt-3 border-t border-ink-divider">
+                <h4 className="text-sm font-medium text-accent-bright flex items-center gap-2">
                   📡 Market Intelligence
-                  <span className="text-xs bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded-full">Real-time</span>
+                  <span className="text-xs bg-accent-core/20 text-accent-bright px-2 py-0.5 rounded-xl">Real-time</span>
                 </h4>
                 
                 <div className="space-y-2">
@@ -651,11 +652,11 @@ export function NotificationSettings() {
                   ].map(({ key, label, desc }) => (
                     <div 
                       key={key}
-                      className="flex items-center justify-between py-2 px-3 rounded-lg bg-cyan-500/5 hover:bg-cyan-500/10 transition-colors border border-cyan-500/10"
+                      className="flex items-center justify-between py-2 px-3 rounded-xl bg-accent-core/10 hover:bg-accent-core/20 transition-colors border border-accent-core/20"
                     >
                       <div>
                         <div className="text-sm font-medium">{label}</div>
-                        <div className="text-xs text-muted-foreground">{desc}</div>
+                        <div className="text-xs text-secondary">{desc}</div>
                       </div>
                       <Switch
                         checked={preferences[key]}
@@ -668,10 +669,10 @@ export function NotificationSettings() {
                 </div>
               </div>
 
-              <div className="space-y-3 pt-3 border-t border-purple-500/10">
-                <h4 className="text-sm font-medium text-purple-400 flex items-center gap-2">
+              <div className="space-y-3 pt-3 border-t border-accent-core/20">
+                <h4 className="text-sm font-medium text-accent-bright flex items-center gap-2">
                   📰 CoinDesk News
-                  <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full">Every 15 min</span>
+                  <span className="text-xs bg-accent-core/20 text-accent-bright px-2 py-0.5 rounded-xl">Every 15 min</span>
                 </h4>
                 
                 <div className="space-y-2">
@@ -680,11 +681,11 @@ export function NotificationSettings() {
                   ].map(({ key, label, desc }) => (
                     <div 
                       key={key}
-                      className="flex items-center justify-between py-2 px-3 rounded-lg bg-purple-500/5 hover:bg-purple-500/10 transition-colors border border-purple-500/10"
+                      className="flex items-center justify-between py-2 px-3 rounded-xl bg-accent-core/10 hover:bg-accent-core/20 transition-colors border border-accent-core/20"
                     >
                       <div>
                         <div className="text-sm font-medium">{label}</div>
-                        <div className="text-xs text-muted-foreground">{desc}</div>
+                        <div className="text-xs text-secondary">{desc}</div>
                       </div>
                       <Switch
                         checked={preferences[key]}
@@ -697,10 +698,10 @@ export function NotificationSettings() {
                 </div>
               </div>
 
-              <div className="space-y-3 pt-3 border-t border-amber-500/10">
-                <h4 className="text-sm font-medium text-amber-400 flex items-center gap-2">
+              <div className="space-y-3 pt-3 border-t border-ink-divider">
+                <h4 className="text-sm font-medium text-warn flex items-center gap-2">
                   📈 Trading Metrics & Derivatives
-                  <span className="text-xs bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full">Pro Signals</span>
+                  <span className="text-xs bg-warn/20 text-warn px-2 py-0.5 rounded-xl">Pro Signals</span>
                 </h4>
                 
                 <div className="space-y-2">
@@ -712,11 +713,11 @@ export function NotificationSettings() {
                   ].map(({ key, label, desc }) => (
                     <div 
                       key={key}
-                      className="flex items-center justify-between py-2 px-3 rounded-lg bg-amber-500/5 hover:bg-amber-500/10 transition-colors border border-amber-500/10"
+                      className="flex items-center justify-between py-2 px-3 rounded-xl bg-warn/10 hover:bg-warn/20 transition-colors border border-ink-divider"
                     >
                       <div>
                         <div className="text-sm font-medium">{label}</div>
-                        <div className="text-xs text-muted-foreground">{desc}</div>
+                        <div className="text-xs text-secondary">{desc}</div>
                       </div>
                       <Switch
                         checked={preferences[key]}
@@ -729,10 +730,10 @@ export function NotificationSettings() {
                 </div>
               </div>
 
-              <div className="space-y-3 pt-3 border-t border-pink-500/10">
-                <h4 className="text-sm font-medium text-pink-400 flex items-center gap-2">
+              <div className="space-y-3 pt-3 border-t border-accent-core/20">
+                <h4 className="text-sm font-medium text-accent-bright flex items-center gap-2">
                   🎬 Live Streaming
-                  <span className="text-xs bg-pink-500/20 text-pink-300 px-2 py-0.5 rounded-full">Live</span>
+                  <span className="text-xs bg-accent-core/20 text-accent-bright px-2 py-0.5 rounded-xl">Live</span>
                 </h4>
                 
                 <div className="space-y-2">
@@ -744,11 +745,11 @@ export function NotificationSettings() {
                   ].map(({ key, label, desc }) => (
                     <div 
                       key={key}
-                      className="flex items-center justify-between py-2 px-3 rounded-lg bg-pink-500/5 hover:bg-pink-500/10 transition-colors border border-pink-500/10"
+                      className="flex items-center justify-between py-2 px-3 rounded-xl bg-accent-core/10 hover:bg-accent-core/20 transition-colors border border-accent-core/20"
                     >
                       <div>
                         <div className="text-sm font-medium">{label}</div>
-                        <div className="text-xs text-muted-foreground">{desc}</div>
+                        <div className="text-xs text-secondary">{desc}</div>
                       </div>
                       <Switch
                         checked={preferences[key]}
@@ -816,7 +817,7 @@ export function NotificationSettings() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowDebug(!showDebug)}
-                  className="text-muted-foreground"
+                  className="text-secondary"
                   data-testid="button-toggle-debug"
                 >
                   <Bug className="w-4 h-4 mr-2" />
@@ -827,56 +828,56 @@ export function NotificationSettings() {
 
               {/* Test Result Display */}
               {testResult && (
-                <div className={`mt-3 p-3 rounded-lg text-xs font-mono ${
-                  testResult.status === 'success' ? 'bg-green-500/10 border border-green-500/20' :
-                  testResult.status === 'pending' ? 'bg-blue-500/10 border border-blue-500/20' :
-                  'bg-red-500/10 border border-red-500/20'
+                <div className={`mt-3 p-3 rounded-xl text-xs font-mono ${
+                  testResult.status === 'success' ? 'bg-gain/10 border border-gain/20' :
+                  testResult.status === 'pending' ? 'bg-accent-core/10 border border-accent-core/20' :
+                  'bg-loss/10 border border-loss/20'
                 }`}>
                   <div className="flex items-center gap-2 mb-2">
-                    {testResult.status === 'success' && <CheckCircle className="w-4 h-4 text-green-400" />}
-                    {testResult.status === 'pending' && <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />}
-                    {(testResult.status === 'failed' || testResult.status === 'error') && <XCircle className="w-4 h-4 text-red-400" />}
+                    {testResult.status === 'success' && <CheckCircle className="w-4 h-4 text-gain" />}
+                    {testResult.status === 'pending' && <Loader2 className="w-4 h-4 text-accent-bright animate-spin" />}
+                    {(testResult.status === 'failed' || testResult.status === 'error') && <XCircle className="w-4 h-4 text-loss" />}
                     <span className={`font-medium ${
-                      testResult.status === 'success' ? 'text-green-400' :
-                      testResult.status === 'pending' ? 'text-blue-400' : 'text-red-400'
+                      testResult.status === 'success' ? 'text-gain' :
+                      testResult.status === 'pending' ? 'text-accent-bright' : 'text-loss'
                     }`}>
                       {testResult.message}
                     </span>
                   </div>
                   {testResult.testId && (
-                    <div className="text-muted-foreground mb-1">Test ID: {testResult.testId}</div>
+                    <div className="text-secondary mb-1">Test ID: {testResult.testId}</div>
                   )}
                   {testResult.hint && (
-                    <div className="text-amber-400 mb-2">{testResult.hint}</div>
+                    <div className="text-warn mb-2">{testResult.hint}</div>
                   )}
                   {testResult.steps && testResult.steps.length > 0 && (
                     <div className="space-y-1 mt-2 border-t border-white/10 pt-2">
-                      <div className="text-muted-foreground mb-1">Steps:</div>
+                      <div className="text-secondary mb-1">Steps:</div>
                       {testResult.steps.map((step: any, i: number) => (
                         <div key={i} className="flex items-start gap-2">
-                          {step.status === 'success' && <span className="text-green-400">✓</span>}
-                          {step.status === 'failed' && <span className="text-red-400">✗</span>}
-                          {step.status === 'skipped' && <span className="text-gray-400">○</span>}
-                          <span className="text-muted-foreground">{step.step}:</span>
-                          <span className={step.status === 'failed' ? 'text-red-400' : ''}>{step.details}</span>
+                          {step.status === 'success' && <span className="text-gain">✓</span>}
+                          {step.status === 'failed' && <span className="text-loss">✗</span>}
+                          {step.status === 'skipped' && <span className="text-muted">○</span>}
+                          <span className="text-secondary">{step.step}:</span>
+                          <span className={step.status === 'failed' ? 'text-loss' : ''}>{step.details}</span>
                         </div>
                       ))}
                     </div>
                   )}
                   {testResult.sendResults && testResult.sendResults.length > 0 && (
                     <div className="space-y-1 mt-2 border-t border-white/10 pt-2">
-                      <div className="text-muted-foreground mb-1">Send Results:</div>
+                      <div className="text-secondary mb-1">Send Results:</div>
                       {testResult.sendResults.map((result: any, i: number) => (
                         <div key={i} className="flex items-start gap-2">
-                          {result.success ? <span className="text-green-400">✓</span> : <span className="text-red-400">✗</span>}
+                          {result.success ? <span className="text-gain">✓</span> : <span className="text-loss">✗</span>}
                           <span className="truncate">{result.endpoint}</span>
-                          {result.error && <span className="text-red-400 ml-2">{result.error}</span>}
+                          {result.error && <span className="text-loss ml-2">{result.error}</span>}
                         </div>
                       ))}
                     </div>
                   )}
                   {testResult.error && (
-                    <div className="text-red-400 mt-2">Error: {testResult.error}</div>
+                    <div className="text-loss mt-2">Error: {testResult.error}</div>
                   )}
                   <Button
                     variant="ghost"
@@ -900,7 +901,7 @@ export function NotificationSettings() {
             variant="ghost"
             size="sm"
             onClick={() => setShowDebug(!showDebug)}
-            className="text-muted-foreground w-full justify-start"
+            className="text-secondary w-full justify-start"
             data-testid="button-toggle-debug-unsubscribed"
           >
             <Bug className="w-4 h-4 mr-2" />
@@ -918,9 +919,9 @@ export function NotificationSettings() {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            <CardContent className="pt-2 space-y-4 border-t border-cyan-500/10">
+            <CardContent className="pt-2 space-y-4 border-t border-ink-divider">
               <div className="flex items-center justify-between">
-                <h4 className="text-sm font-medium text-amber-400 flex items-center gap-2">
+                <h4 className="text-sm font-medium text-warn flex items-center gap-2">
                   <Bug className="w-4 h-4" />
                   Push Notification Diagnostics
                 </h4>
@@ -944,20 +945,20 @@ export function NotificationSettings() {
               {/* Quick Status */}
               {debugInfo && (
                 <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className={`p-2 rounded ${debugInfo.swSupported && debugInfo.swRegistered ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+                  <div className={`p-2 rounded ${debugInfo.swSupported && debugInfo.swRegistered ? 'bg-gain/10 text-gain' : 'bg-loss/10 text-loss'}`}>
                     Service Worker: {debugInfo.swRegistered ? 'Registered' : 'Not Registered'}
                   </div>
-                  <div className={`p-2 rounded ${debugInfo.pushManagerSupported ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+                  <div className={`p-2 rounded ${debugInfo.pushManagerSupported ? 'bg-gain/10 text-gain' : 'bg-loss/10 text-loss'}`}>
                     Push API: {debugInfo.pushManagerSupported ? 'Supported' : 'Not Supported'}
                   </div>
-                  <div className={`p-2 rounded ${debugInfo.notificationPermission === 'granted' ? 'bg-green-500/10 text-green-400' : debugInfo.notificationPermission === 'denied' ? 'bg-red-500/10 text-red-400' : 'bg-amber-500/10 text-amber-400'}`}>
+                  <div className={`p-2 rounded ${debugInfo.notificationPermission === 'granted' ? 'bg-gain/10 text-gain' : debugInfo.notificationPermission === 'denied' ? 'bg-loss/10 text-loss' : 'bg-warn/10 text-warn'}`}>
                     Permission: {debugInfo.notificationPermission}
                   </div>
-                  <div className={`p-2 rounded ${debugInfo.hasSubscription ? 'bg-green-500/10 text-green-400' : 'bg-amber-500/10 text-amber-400'}`}>
+                  <div className={`p-2 rounded ${debugInfo.hasSubscription ? 'bg-gain/10 text-gain' : 'bg-warn/10 text-warn'}`}>
                     Subscription: {debugInfo.hasSubscription ? 'Active' : 'None'}
                   </div>
                   {debugInfo.isIOS && (
-                    <div className={`p-2 rounded col-span-2 ${debugInfo.isPWA ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+                    <div className={`p-2 rounded col-span-2 ${debugInfo.isPWA ? 'bg-gain/10 text-gain' : 'bg-loss/10 text-loss'}`}>
                       iOS PWA: {debugInfo.isPWA ? 'Installed (Good!)' : 'NOT Installed - Add to Home Screen first!'}
                     </div>
                   )}
@@ -966,18 +967,18 @@ export function NotificationSettings() {
 
               {/* Diagnostic Steps */}
               {diagnosticSteps.length > 0 && (
-                <div className="space-y-2 text-xs font-mono bg-black/30 p-3 rounded-lg max-h-60 overflow-y-auto">
+                <div className="space-y-2 text-xs font-mono bg-ink-raised p-3 rounded-xl max-h-60 overflow-y-auto">
                   {diagnosticSteps.map((step, i) => (
                     <div key={i} className="flex items-start gap-2">
-                      {step.status === 'success' && <CheckCircle className="w-4 h-4 text-green-400 shrink-0 mt-0.5" />}
-                      {step.status === 'failed' && <XCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />}
-                      {step.status === 'pending' && <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />}
-                      {step.status === 'checking' && <Loader2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5 animate-spin" />}
+                      {step.status === 'success' && <CheckCircle className="w-4 h-4 text-gain shrink-0 mt-0.5" />}
+                      {step.status === 'failed' && <XCircle className="w-4 h-4 text-loss shrink-0 mt-0.5" />}
+                      {step.status === 'pending' && <AlertTriangle className="w-4 h-4 text-warn shrink-0 mt-0.5" />}
+                      {step.status === 'checking' && <Loader2 className="w-4 h-4 text-accent-bright shrink-0 mt-0.5 animate-spin" />}
                       <div>
-                        <span className={step.status === 'success' ? 'text-green-400' : step.status === 'failed' ? 'text-red-400' : step.status === 'pending' ? 'text-amber-400' : 'text-cyan-400'}>
+                        <span className={step.status === 'success' ? 'text-gain' : step.status === 'failed' ? 'text-loss' : step.status === 'pending' ? 'text-warn' : 'text-accent-bright'}>
                           {step.step}:
                         </span>
-                        <span className="text-muted-foreground ml-1">{step.details}</span>
+                        <span className="text-secondary ml-1">{step.details}</span>
                       </div>
                     </div>
                   ))}
@@ -987,18 +988,18 @@ export function NotificationSettings() {
               {/* Server Debug Info */}
               {serverDebugData?.diagnostics && (
                 <div className="space-y-2">
-                  <h5 className="text-xs font-medium text-muted-foreground">Server Status</h5>
-                  <div className="text-xs font-mono bg-black/30 p-3 rounded-lg space-y-1">
+                  <h5 className="text-xs font-medium text-secondary">Server Status</h5>
+                  <div className="text-xs font-mono bg-ink-raised p-3 rounded-xl space-y-1">
                     <div>VAPID Configured: {serverDebugData.diagnostics.serverConfig.serviceInitialized ? '✅' : '❌'}</div>
                     <div>Your Subscriptions: {serverDebugData.diagnostics.userSubscriptions.count}</div>
                     <div>Platform Total: {serverDebugData.diagnostics.platformStats.totalActiveSubscriptions}</div>
-                    <div className="text-muted-foreground">
+                    <div className="text-secondary">
                       Chrome: {serverDebugData.diagnostics.platformStats.subscriptionsByType.chrome}, 
                       Firefox: {serverDebugData.diagnostics.platformStats.subscriptionsByType.firefox}, 
                       Safari: {serverDebugData.diagnostics.platformStats.subscriptionsByType.safari}
                     </div>
                     {serverDebugData.diagnostics.troubleshooting.length > 0 && (
-                      <div className="text-amber-400 mt-2">
+                      <div className="text-warn mt-2">
                         Tips: {serverDebugData.diagnostics.troubleshooting.join(' | ')}
                       </div>
                     )}
@@ -1008,23 +1009,23 @@ export function NotificationSettings() {
 
               {/* iOS-specific instructions */}
               {debugInfo?.isIOS && !debugInfo?.isPWA && (
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-xs">
-                  <h5 className="font-medium text-amber-400 mb-2">iOS Push Notification Requirements:</h5>
-                  <ol className="list-decimal list-inside space-y-1 text-amber-200">
+                <div className="bg-warn/10 border border-warn/30 rounded-xl p-3 text-xs">
+                  <h5 className="font-medium text-warn mb-2">iOS Push Notification Requirements:</h5>
+                  <ol className="list-decimal list-inside space-y-1 text-warn">
                     <li>Open this website in <strong>Safari</strong> (not Chrome or Firefox)</li>
                     <li>Tap the <strong>Share</strong> button (square with arrow)</li>
                     <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
                     <li>Open the app from your Home Screen</li>
                     <li>Return here and enable notifications</li>
                   </ol>
-                  <p className="mt-2 text-muted-foreground">Note: Requires iOS 16.4 or later</p>
+                  <p className="mt-2 text-secondary">Note: Requires iOS 16.4 or later</p>
                 </div>
               )}
             </CardContent>
           </motion.div>
         )}
       </AnimatePresence>
-    </Card>
+    </Surface>
   );
 }
 
@@ -1032,7 +1033,7 @@ export function NotificationBadge({ count }: { count: number }) {
   if (count === 0) return null;
   
   return (
-    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-xl bg-red-500 text-[10px] font-bold text-primary">
       {count > 99 ? '99+' : count}
     </span>
   );

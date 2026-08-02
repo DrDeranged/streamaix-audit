@@ -107,7 +107,7 @@ export function GlobalMobileHeader() {
     <>
       {/* Scroll-to-top tap zone - tapping anywhere in this area scrolls to top */}
       <div 
-        className="fixed top-0 left-0 right-0 h-2 z-[100] cursor-pointer bg-gradient-to-b from-black/20 to-transparent"
+        className="fixed top-0 left-0 right-0 z-[100] h-2 cursor-pointer bg-ink-page/60"
         onClick={scrollToTop}
         role="button"
         aria-label="Scroll to top"
@@ -116,7 +116,7 @@ export function GlobalMobileHeader() {
       
       {/* Main navigation header */}
       <motion.header 
-        className="fixed top-0 left-0 right-0 z-[99] bg-gradient-to-r from-slate-900/95 via-purple-900/90 to-slate-900/95 backdrop-blur-xl border-b border-purple-500/20 shadow-lg shadow-purple-500/10"
+        className="fixed top-0 left-0 right-0 z-[99] border-b border-ink-edge bg-ink-surface/95 shadow-lg shadow-ink-page/40 backdrop-blur-xl"
         initial={{ y: -60 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
@@ -127,7 +127,7 @@ export function GlobalMobileHeader() {
             <Button
               variant="ghost"
               size="sm"
-              className="text-slate-300 hover:text-white hover:bg-white/10 gap-1.5 px-2"
+              className="gap-1.5 px-2 text-secondary hover:bg-ink-raised hover:text-primary"
               data-testid="button-back"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -138,14 +138,14 @@ export function GlobalMobileHeader() {
           {/* Center: StreamAiX Logo - absolutely positioned for true centering on mobile */}
           <button
             onClick={goHome}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 active:bg-white/20 transition-all duration-200 active:scale-95"
+            className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-xl px-3 py-1.5 text-primary transition-all duration-200 hover:bg-ink-raised active:scale-95 active:bg-ink-raised"
             aria-label="Go to StreamAiX home"
             data-testid="button-logo-home"
           >
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 via-fuchsia-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-purple-500/30">
-              <span className="text-white font-bold text-sm">S</span>
+            <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-accent-core shadow-lg shadow-accent-core/25">
+              <span className="text-sm font-bold text-primary">S</span>
             </div>
-            <span className="text-lg font-bold bg-gradient-to-r from-purple-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
+            <span className="text-lg font-bold text-accent-bright">
               StreamAiX
             </span>
           </button>
@@ -156,13 +156,13 @@ export function GlobalMobileHeader() {
             {isAuthenticated && pointsData && (
               <Link href="/points">
                 <motion.div
-                  className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 hover:bg-emerald-500/30 transition-all duration-200"
+                  className="flex items-center gap-1.5 rounded-xl border border-gain/30 bg-gain/10 px-2 py-1 transition-all duration-200 hover:bg-gain/20"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   data-testid="mobile-points-display"
                 >
-                  <Coins className="w-4 h-4 text-emerald-400" />
-                  <span className="text-sm font-bold text-emerald-400">
+                  <Coins className="h-4 w-4 text-gain" />
+                  <span className="tabular text-sm font-bold text-gain">
                     {formatPoints(pointsData.balance || 0)}
                   </span>
                 </motion.div>
@@ -182,10 +182,10 @@ export function GlobalMobileHeader() {
                     variant="ghost"
                     size="sm"
                     onClick={scrollToTop}
-                    className={`text-slate-300 hover:text-white hover:bg-white/10 px-2 ${isScrolling ? 'animate-pulse' : ''}`}
+                    className={`px-2 text-secondary hover:bg-ink-raised hover:text-primary ${isScrolling ? 'animate-pulse' : ''}`}
                     data-testid="button-scroll-top"
                   >
-                    <ChevronUp className={`w-5 h-5 ${isScrolling ? 'text-cyan-400' : ''}`} />
+                    <ChevronUp className={`h-5 w-5 ${isScrolling ? 'text-accent-bright' : ''}`} />
                   </Button>
                 </motion.div>
               )}

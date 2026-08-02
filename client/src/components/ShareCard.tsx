@@ -1,5 +1,8 @@
 import { motion } from 'framer-motion';
 import { Brain, Zap, Activity, TrendingUp, Sparkles, Radio } from 'lucide-react';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
+import StatValue from '@/components/ds/StatValue';
 
 interface ShareCardProps {
   mode?: 'brand' | 'stats' | 'content';
@@ -21,11 +24,8 @@ export function ShareCard({
   className = ''
 }: ShareCardProps) {
   return (
-    <div 
-      className={`relative w-full aspect-[1200/630] overflow-hidden rounded-2xl ${className}`}
-      style={{
-        background: 'linear-gradient(135deg, #0a0a0f 0%, #1a0a2e 25%, #0a1628 50%, #0f0a1a 75%, #050510 100%)'
-      }}
+    <Surface
+      className={`relative w-full aspect-[1200/630] overflow-hidden bg-ink-page ${className}`}
     >
       <NeuralNetworkStatic />
       
@@ -39,24 +39,17 @@ export function ShareCard({
             transition={{ delay: 0.2, duration: 0.6 }}
             className="relative"
           >
-            <h1 
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight whitespace-nowrap"
-              style={{
-                fontFamily: 'Orbitron, sans-serif',
-                background: 'linear-gradient(135deg, #a855f7 0%, #06b6d4 50%, #a855f7 100%)',
-                backgroundSize: '200% 200%',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                filter: 'drop-shadow(0 0 30px rgba(168, 85, 247, 0.5))'
-              }}
+            <SectionTitle
+              as="h1"
+              className="whitespace-nowrap text-3xl font-semibold tracking-tight text-primary sm:text-4xl md:text-5xl lg:text-7xl"
             >
               {title || 'StreamAiX'}
-            </h1>
+            </SectionTitle>
             
             <div className="flex items-center justify-center gap-2 mt-2 sm:mt-3">
-              <span className="h-px flex-1 max-w-12 sm:max-w-16 bg-gradient-to-r from-transparent to-purple-500/50" />
-              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-cyan-400" />
-              <span className="h-px flex-1 max-w-12 sm:max-w-16 bg-gradient-to-l from-transparent to-cyan-500/50" />
+              <span className="h-px flex-1 max-w-12 bg-accent-core/40 sm:max-w-16" />
+              <Sparkles className="h-3 w-3 text-accent-bright sm:h-4 sm:w-4" />
+              <span className="h-px flex-1 max-w-12 bg-accent-core/40 sm:max-w-16" />
             </div>
           </motion.div>
           
@@ -64,8 +57,7 @@ export function ShareCard({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.6 }}
-            className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 mt-2 sm:mt-3 md:mt-4 font-medium tracking-wide px-2"
-            style={{ textShadow: '0 0 20px rgba(6, 182, 212, 0.3)' }}
+            className="mt-2 px-2 text-sm font-medium tracking-wide text-body sm:mt-3 sm:text-base md:mt-4 md:text-lg lg:text-xl"
           >
             {subtitle || 'Stream the Noise. Capture the Signal.'}
           </motion.p>
@@ -102,9 +94,9 @@ export function ShareCard({
         </div>
       </div>
       
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/60 to-transparent z-5" />
-      <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-black/40 to-transparent z-5" />
-    </div>
+      <div className="absolute bottom-0 left-0 right-0 z-5 h-24 bg-ink-page/60" />
+      <div className="absolute left-0 right-0 top-0 z-5 h-16 bg-ink-page/40" />
+    </Surface>
   );
 }
 
@@ -126,20 +118,6 @@ function NeuralNetworkStatic() {
   return (
     <div className="absolute inset-0 overflow-hidden">
       <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="rgba(168, 85, 247, 0.3)" />
-            <stop offset="100%" stopColor="rgba(6, 182, 212, 0.3)" />
-          </linearGradient>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
-        
         {connections.map(conn => (
           <motion.line
             key={conn.id}
@@ -147,7 +125,8 @@ function NeuralNetworkStatic() {
             y1={`${conn.from.y}%`}
             x2={`${conn.to.x}%`}
             y2={`${conn.to.y}%`}
-            stroke="url(#lineGradient)"
+            stroke="#8B7CF6"
+            strokeOpacity="0.35"
             strokeWidth="1"
             initial={{ opacity: 0 }}
             animate={{ opacity: [0.2, 0.5, 0.2] }}
@@ -161,7 +140,7 @@ function NeuralNetworkStatic() {
       </svg>
       
       {nodes.map(node => (
-        <motion.div
+          <motion.div
           key={node.id}
           className="absolute rounded-full"
           style={{
@@ -169,12 +148,10 @@ function NeuralNetworkStatic() {
             top: `${node.y}%`,
             width: node.size,
             height: node.size,
-            background: node.color === 'purple' 
-              ? 'radial-gradient(circle, rgba(168, 85, 247, 0.9) 0%, rgba(168, 85, 247, 0.4) 50%, transparent 70%)'
-              : 'radial-gradient(circle, rgba(6, 182, 212, 0.9) 0%, rgba(6, 182, 212, 0.4) 50%, transparent 70%)',
-            boxShadow: node.color === 'purple'
-              ? '0 0 15px rgba(168, 85, 247, 0.6)'
-              : '0 0 15px rgba(6, 182, 212, 0.6)'
+            background: node.color === 'purple' ? '#8B7CF6' : '#3DD68C',
+             boxShadow: node.color === 'purple'
+               ? '0 0 15px rgba(139, 124, 246, 0.45)'
+               : '0 0 15px rgba(61, 214, 140, 0.4)'
           }}
           initial={{ scale: 0.8, opacity: 0.4 }}
           animate={{ 
@@ -198,7 +175,7 @@ function GlowingCore() {
       <motion.div
         className="absolute inset-0 rounded-full"
         style={{
-          background: 'radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 70%)'
+           background: 'rgba(139, 124, 246, 0.12)'
         }}
         animate={{ scale: [1, 1.3, 1] }}
         transition={{ duration: 4, repeat: Infinity }}
@@ -207,7 +184,7 @@ function GlowingCore() {
       <motion.div
         className="absolute inset-2 sm:inset-3 md:inset-4 rounded-full"
         style={{
-          background: 'radial-gradient(circle, rgba(6, 182, 212, 0.2) 0%, transparent 70%)'
+           background: 'rgba(61, 214, 140, 0.12)'
         }}
         animate={{ scale: [1.1, 0.9, 1.1] }}
         transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
@@ -221,13 +198,13 @@ function GlowingCore() {
         <div 
           className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-24 lg:h-24 rounded-full flex items-center justify-center"
           style={{
-            background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.3) 0%, rgba(6, 182, 212, 0.3) 100%)',
+             background: '#181F38',
             backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(168, 85, 247, 0.3)',
-            boxShadow: '0 0 40px rgba(168, 85, 247, 0.4), inset 0 0 30px rgba(6, 182, 212, 0.2)'
+             border: '1px solid rgba(139, 124, 246, 0.35)',
+             boxShadow: '0 0 40px rgba(139, 124, 246, 0.3), inset 0 0 30px rgba(61, 214, 140, 0.16)'
           }}
         >
-          <Brain className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 lg:w-12 lg:h-12 text-purple-400" style={{ filter: 'drop-shadow(0 0 10px rgba(168, 85, 247, 0.8))' }} />
+           <Brain className="w-5 h-5 text-accent-bright sm:h-6 sm:w-6 md:h-8 md:w-8 lg:h-12 lg:w-12" />
         </div>
       </motion.div>
       
@@ -238,10 +215,10 @@ function GlowingCore() {
           style={{
             left: '50%',
             top: '50%',
-            background: i % 2 === 0 ? '#a855f7' : '#06b6d4',
-            boxShadow: i % 2 === 0 
-              ? '0 0 10px rgba(168, 85, 247, 0.8)'
-              : '0 0 10px rgba(6, 182, 212, 0.8)',
+             background: i % 2 === 0 ? '#8B7CF6' : '#3DD68C',
+             boxShadow: i % 2 === 0 
+               ? '0 0 10px rgba(139, 124, 246, 0.7)'
+               : '0 0 10px rgba(61, 214, 140, 0.65)',
             transform: `rotate(${angle}deg) translateX(30px) translateY(-50%)`
           }}
           animate={{
@@ -272,22 +249,22 @@ function StatPill({
 }) {
   const colorMap = {
     purple: {
-      bg: 'rgba(168, 85, 247, 0.15)',
-      border: 'rgba(168, 85, 247, 0.4)',
-      text: 'text-purple-400',
-      glow: 'rgba(168, 85, 247, 0.3)'
+       bg: 'rgba(139, 124, 246, 0.12)',
+       border: '#8B7CF6',
+       text: 'text-accent-bright',
+       glow: 'rgba(139, 124, 246, 0.2)'
     },
     cyan: {
-      bg: 'rgba(6, 182, 212, 0.15)',
-      border: 'rgba(6, 182, 212, 0.4)',
-      text: 'text-cyan-400',
-      glow: 'rgba(6, 182, 212, 0.3)'
+       bg: 'rgba(61, 214, 140, 0.1)',
+       border: '#3DD68C',
+       text: 'text-gain',
+       glow: 'rgba(61, 214, 140, 0.16)'
     },
     amber: {
-      bg: 'rgba(245, 158, 11, 0.15)',
-      border: 'rgba(245, 158, 11, 0.4)',
-      text: 'text-amber-400',
-      glow: 'rgba(245, 158, 11, 0.3)'
+       bg: 'rgba(255, 180, 84, 0.1)',
+       border: '#FFB454',
+       text: 'text-warn',
+       glow: 'rgba(255, 180, 84, 0.16)'
     }
   };
   
@@ -304,10 +281,11 @@ function StatPill({
       }}
     >
       <Icon className={`w-3 h-3 sm:w-4 sm:h-4 ${colors.text}`} />
-      <div className="text-left">
-        <div className={`text-xs sm:text-sm font-bold ${colors.text}`}>{value}</div>
-        <div className="text-[8px] sm:text-[10px] text-gray-400 uppercase tracking-wider">{label}</div>
-      </div>
+      <StatValue
+        label={label}
+        value={value}
+        valueClassName={`text-xs sm:text-sm font-bold ${colors.text}`}
+      />
     </div>
   );
 }
@@ -315,14 +293,12 @@ function StatPill({
 function FeatureTag({ icon: Icon, label }: { icon: typeof Brain; label: string }) {
   return (
     <div 
-      className="flex items-center gap-1 sm:gap-1.5 md:gap-2 px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs text-gray-300"
+      className="flex items-center gap-1 rounded-xl border border-ink-edge bg-ink-raised px-2 py-1 text-[10px] text-body sm:gap-1.5 sm:px-2.5 sm:py-1.5 sm:text-xs md:gap-2 md:px-3"
       style={{
-        background: 'rgba(255, 255, 255, 0.05)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
         backdropFilter: 'blur(5px)'
       }}
     >
-      <Icon className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-purple-400" />
+      <Icon className="h-2.5 w-2.5 text-accent-bright sm:h-3 sm:w-3" />
       <span>{label}</span>
     </div>
   );

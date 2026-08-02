@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import Surface from '@/components/ds/Surface';
+import SectionTitle from '@/components/ds/SectionTitle';
+import StatValue from '@/components/ds/StatValue';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger, DrawerFooter } from '@/components/ui/drawer';
+import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from '@/components/ui/drawer';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
@@ -21,8 +23,6 @@ import {
   TrendingDown,
   Target,
   BookOpen,
-  Lightbulb,
-  DollarSign,
   Search,
   BarChart3,
   PenTool,
@@ -30,12 +30,10 @@ import {
   Plus,
   Clock,
   Activity,
-  Star,
-  Brain,
   Zap,
   Trash2
 } from 'lucide-react';
-import { format, startOfDay, subDays, addDays, isToday, parseISO } from 'date-fns';
+import { format, subDays, addDays, isToday, parseISO } from 'date-fns';
 
 interface JournalEntry {
   id: string;
@@ -60,7 +58,7 @@ const journalTemplates = {
   'trade-analysis': {
     icon: BarChart3,
     label: 'Trade Analysis',
-    color: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+    color: 'bg-accent-core/10 text-accent-bright border-accent-core/30',
     placeholder: `📊 Trade Analysis for ${format(new Date(), 'MMMM d, yyyy')}
 
 **Position:** [Stock/Crypto Symbol]
@@ -80,7 +78,7 @@ const journalTemplates = {
   'market-thoughts': {
     icon: TrendingUp,
     label: 'Market Thoughts',
-    color: 'bg-green-500/10 text-green-400 border-green-500/30',
+    color: 'bg-gain/10 text-gain border-gain/30',
     placeholder: `💭 Market Thoughts for ${format(new Date(), 'MMMM d, yyyy')}
 
 **Overall Market Sentiment:** [Bullish/Bearish/Neutral]
@@ -101,7 +99,7 @@ const journalTemplates = {
   'goals': {
     icon: Target,
     label: 'Goals & Planning',
-    color: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
+    color: 'bg-accent-core/10 text-accent-bright border-accent-core/30',
     placeholder: `🎯 Goals & Planning for ${format(new Date(), 'MMMM d, yyyy')}
 
 **Today's Trading Plan:**
@@ -122,7 +120,7 @@ const journalTemplates = {
   'lessons': {
     icon: BookOpen,
     label: 'Lessons Learned',
-    color: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+    color: 'bg-warn/10 text-warn border-warn/30',
     placeholder: `📚 Lessons Learned - ${format(new Date(), 'MMMM d, yyyy')}
 
 **Key Insight:**
@@ -146,7 +144,7 @@ What's the most important thing I learned today?
   'research': {
     icon: Search,
     label: 'Research Notes',
-    color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
+    color: 'bg-accent-core/10 text-accent-bright border-accent-core/30',
     placeholder: `🔍 Research Notes - ${format(new Date(), 'MMMM d, yyyy')}
 
 **Company/Asset:** [Name/Symbol]
@@ -169,7 +167,7 @@ What's the most important thing I learned today?
   'general': {
     icon: PenTool,
     label: 'General Notes',
-    color: 'bg-gray-500/10 text-gray-400 border-gray-500/30',
+    color: 'bg-ink-raised text-secondary border-ink-edge',
     placeholder: `📝 Investment Journal - ${format(new Date(), 'MMMM d, yyyy')}
 
 What's on your mind today? This is your space to capture any thoughts, ideas, or reflections about your investment journey.
@@ -309,19 +307,19 @@ export default function InvestmentJournal() {
 
   if (!isAuthenticated) {
     return (
-      <Card className="border-dashed border-purple-300 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/10 dark:to-indigo-900/10">
-        <CardContent className="pt-8 pb-8">
+      <Surface className="border-dashed border-accent-core/50">
+        <div className="pt-8 pb-8">
           <div className="text-center">
-            <BookOpen className="w-12 h-12 mx-auto mb-4 text-purple-400" />
-            <h3 className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-2">
+            <BookOpen className="w-12 h-12 mx-auto mb-4 text-accent-bright" />
+            <h3 className="text-lg font-semibold text-primary mb-2">
               Personal Investment Journal
             </h3>
-            <p className="text-purple-600 dark:text-purple-400 text-sm">
+            <p className="text-secondary text-sm">
               Sign in to access your daily trading journal and track your investment journey.
             </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </Surface>
     );
   }
 
@@ -331,13 +329,13 @@ export default function InvestmentJournal() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-br from-slate-800 to-gray-800 rounded-2xl p-4 md:p-6 border border-slate-600"
+        className="grad-surface rounded-xl p-4 md:p-6 border border-ink-edge"
       >
         {/* Mobile-first header: stack title and nav */}
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
           <div className="flex items-center gap-3 justify-center md:justify-start">
-            <Calendar className="w-6 h-6 text-blue-400" />
-            <h2 className="text-xl md:text-2xl font-bold text-white">Investment Journal</h2>
+            <Calendar className="w-6 h-6 text-accent-bright" />
+            <SectionTitle as="h1">Investment Journal</SectionTitle>
           </div>
           
           <div className="flex items-center justify-center gap-2">
@@ -346,7 +344,7 @@ export default function InvestmentJournal() {
               variant="ghost"
               size="lg"
               onClick={() => navigateDate('prev')}
-              className="text-gray-300 hover:text-white hover:bg-white/10 min-h-[44px] min-w-[44px] md:hidden"
+              className="text-secondary hover:text-primary hover:bg-ink-raised min-h-[44px] min-w-[44px] md:hidden"
               data-testid="button-prev-date"
               aria-label="Previous day"
             >
@@ -357,18 +355,18 @@ export default function InvestmentJournal() {
               variant="ghost"
               size="sm"
               onClick={() => navigateDate('prev')}
-              className="text-gray-300 hover:text-white hover:bg-white/10 hidden md:inline-flex"
+              className="text-secondary hover:text-primary hover:bg-ink-raised hidden md:inline-flex"
               data-testid="button-prev-date-desktop"
               aria-label="Previous day"
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
             
-            <div className="px-3 py-2 md:px-4 bg-white/10 rounded-lg min-w-auto md:min-w-[200px] text-center">
-              <div className="text-base md:text-lg font-semibold text-white">
+            <div className="px-3 py-2 md:px-4 bg-ink-raised rounded-xl min-w-auto md:min-w-[200px] text-center">
+              <div className="text-base md:text-lg font-semibold text-primary">
                 {isToday(selectedDate) ? 'Today' : format(selectedDate, 'EEE')}
               </div>
-              <div className="text-xs md:text-sm text-gray-300">
+              <div className="text-xs md:text-sm text-secondary">
                 {format(selectedDate, 'MMM d, yyyy')}
               </div>
             </div>
@@ -378,7 +376,7 @@ export default function InvestmentJournal() {
               variant="ghost"
               size="lg"
               onClick={() => navigateDate('next')}
-              className="text-gray-300 hover:text-white hover:bg-white/10 min-h-[44px] min-w-[44px] md:hidden"
+              className="text-secondary hover:text-primary hover:bg-ink-raised min-h-[44px] min-w-[44px] md:hidden"
               data-testid="button-next-date"
               aria-label="Next day"
             >
@@ -389,7 +387,7 @@ export default function InvestmentJournal() {
               variant="ghost"
               size="sm"
               onClick={() => navigateDate('next')}
-              className="text-gray-300 hover:text-white hover:bg-white/10 hidden md:inline-flex"
+              className="text-secondary hover:text-primary hover:bg-ink-raised hidden md:inline-flex"
               data-testid="button-next-date-desktop"
               aria-label="Next day"
             >
@@ -403,7 +401,7 @@ export default function InvestmentJournal() {
                   variant="outline"
                   size="lg"
                   onClick={goToToday}
-                  className="ml-2 text-gray-300 hover:text-white bg-white/5 border-white/20 hover:bg-white/10 min-h-[44px] md:hidden"
+                  className="ml-2 text-secondary hover:text-primary bg-ink-raised border-ink-edge hover:bg-ink-raised min-h-[44px] md:hidden"
                   data-testid="button-today"
                 >
                   Today
@@ -413,7 +411,7 @@ export default function InvestmentJournal() {
                   variant="outline"
                   size="sm"
                   onClick={goToToday}
-                  className="ml-2 text-gray-300 hover:text-white bg-white/5 border-white/20 hover:bg-white/10 hidden md:inline-flex"
+                  className="ml-2 text-secondary hover:text-primary bg-ink-raised border-ink-edge hover:bg-ink-raised hidden md:inline-flex"
                   data-testid="button-today-desktop"
                 >
                   Today
@@ -425,29 +423,27 @@ export default function InvestmentJournal() {
 
         {/* Daily Stats - Mobile optimized */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-4">
-          <div className="bg-white/5 rounded-lg p-2 md:p-3 text-center">
-            <div className="text-xl md:text-2xl font-bold text-blue-400" data-testid="text-entry-count">{stats.entryCount}</div>
-            <div className="text-xs text-gray-400">Entries</div>
+          <div className="bg-ink-raised rounded-xl p-2 md:p-3 text-center">
+            <StatValue label="Entries" value={stats.entryCount} valueClassName="text-accent-bright" data-testid="text-entry-count" />
           </div>
-          <div className="bg-white/5 rounded-lg p-2 md:p-3 text-center">
+          <div className="bg-ink-raised rounded-xl p-2 md:p-3 text-center">
             <div className={`text-xl md:text-2xl font-bold flex items-center justify-center gap-1 ${
-              (stats.portfolioChange || 0) >= 0 ? 'text-green-400' : 'text-red-400'
+              (stats.portfolioChange || 0) >= 0 ? 'text-gain' : 'text-loss'
             }`} data-testid="text-portfolio-change">
               {(stats.portfolioChange || 0) >= 0 ? <TrendingUp className="w-3 h-3 md:w-4 md:h-4" /> : <TrendingDown className="w-3 h-3 md:w-4 md:h-4" />}
-              {(stats.portfolioChange || 0) >= 0 ? '+' : ''}{(stats.portfolioChange || 0).toFixed(1)}%
+              {(stats.portfolioChange || 0) >= 0 ? '+' : ''}{(stats.portfolioChange || 0).toFixed(2)}%
             </div>
-            <div className="text-xs text-gray-400">Portfolio</div>
+            <div className="text-xs text-muted">Portfolio</div>
           </div>
-          <div className="bg-white/5 rounded-lg p-2 md:p-3 text-center">
-            <div className="text-xl md:text-2xl font-bold text-purple-400" data-testid="text-trade-count">{stats.tradeCount}</div>
-            <div className="text-xs text-gray-400">Trades</div>
+          <div className="bg-ink-raised rounded-xl p-2 md:p-3 text-center">
+            <StatValue label="Trades" value={stats.tradeCount} valueClassName="text-accent-bright" data-testid="text-trade-count" />
           </div>
-          <div className="bg-white/5 rounded-lg p-2 md:p-3 text-center">
-            <div className="text-xl md:text-2xl font-bold text-amber-400 flex items-center justify-center gap-1" data-testid="text-streak">
+          <div className="bg-ink-raised rounded-xl p-2 md:p-3 text-center">
+            <div className="text-xl md:text-2xl font-bold text-warn flex items-center justify-center gap-1 tabular" data-testid="text-streak">
               <Activity className="w-3 h-3 md:w-4 md:h-4" />
               {stats.streak}
             </div>
-            <div className="text-xs text-gray-400">Day Streak</div>
+            <div className="text-xs text-muted">Day Streak</div>
           </div>
         </div>
       </motion.div>
@@ -468,7 +464,7 @@ export default function InvestmentJournal() {
                   <Button
                     key={key}
                     variant="outline"
-                    className={`min-h-[44px] px-4 py-2 flex items-center gap-2 whitespace-nowrap transition-all ${template.color} border hover:bg-white/10`}
+                    className={`min-h-[44px] px-4 py-2 flex items-center gap-2 whitespace-nowrap transition-all ${template.color} border hover:bg-ink-raised rounded-xl`}
                     onClick={() => {
                       setSelectedTemplate(key as keyof typeof journalTemplates);
                       setIsDrawerOpen(true);
@@ -496,7 +492,7 @@ export default function InvestmentJournal() {
                   setSelectedTemplate(key as keyof typeof journalTemplates);
                   setShowNewEntry(true);
                 }}
-                className={`h-auto p-3 flex flex-col items-center gap-2 hover:scale-105 transition-all ${template.color} border`}
+                 className={`h-auto p-3 flex flex-col items-center gap-2 hover:scale-105 transition-all ${template.color} border rounded-xl`}
                 data-testid={`button-template-${key}`}
               >
                 <Icon className="w-5 h-5" />
@@ -509,9 +505,9 @@ export default function InvestmentJournal() {
 
       {/* Mobile Drawer for New Entry Form */}
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <DrawerContent className="bg-slate-900 border-slate-700">
+        <DrawerContent className="bg-ink-surface border-ink-edge rounded-2xl">
           <DrawerHeader className="pb-2">
-            <DrawerTitle className="text-cyan-300 flex items-center gap-2">
+          <DrawerTitle className="text-accent-bright flex items-center gap-2">
               <Plus className="w-5 h-5" />
               📝 New Journal Entry - {journalTemplates[selectedTemplate].label}
             </DrawerTitle>
@@ -520,7 +516,7 @@ export default function InvestmentJournal() {
           <div className="px-4 pb-4 space-y-4 max-h-[70vh] overflow-y-auto">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Select value={selectedTemplate} onValueChange={(value: keyof typeof journalTemplates) => setSelectedTemplate(value)}>
-                <SelectTrigger className="bg-white/5 border-white/20 backdrop-blur-sm text-white min-h-[44px]" data-testid="select-template">
+                 <SelectTrigger className="bg-ink-raised border-ink-edge text-primary rounded-xl min-h-[44px]" data-testid="select-template">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -536,7 +532,7 @@ export default function InvestmentJournal() {
               </Select>
               
               <Select value={selectedMood} onValueChange={(value: 'bullish' | 'bearish' | 'neutral') => setSelectedMood(value)}>
-                <SelectTrigger className="bg-white/5 border-white/20 backdrop-blur-sm text-white min-h-[44px]" data-testid="select-mood">
+                 <SelectTrigger className="bg-ink-raised border-ink-edge text-primary rounded-xl min-h-[44px]" data-testid="select-mood">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -556,12 +552,12 @@ export default function InvestmentJournal() {
                 e.target.style.height = Math.min(e.target.scrollHeight, 300) + 'px';
               }}
               placeholder="Write your thoughts..."
-              className="bg-white/5 border-white/20 backdrop-blur-sm text-white resize-none min-h-[120px] placeholder:text-gray-400"
+               className="bg-ink-raised border-ink-edge text-primary resize-none min-h-[120px] placeholder:text-muted rounded-xl"
               rows={5}
               data-testid="textarea-entry"
             />
             
-            <div className="text-xs text-gray-400 text-right">
+             <div className="text-xs text-muted text-right">
               {newEntryText.length}/5000 characters
             </div>
           </div>
@@ -570,7 +566,7 @@ export default function InvestmentJournal() {
             <Button
               onClick={handleSaveEntry}
               disabled={!newEntryText.trim() || createEntryMutation.isPending}
-              className="bg-green-600 hover:bg-green-700 flex-1 min-h-[44px]"
+               className="grad-accent glow-accent text-primary flex-1 min-h-[44px] rounded-xl"
               data-testid="button-save-entry"
             >
               <Save className="h-4 w-4 mr-2" />
@@ -582,7 +578,7 @@ export default function InvestmentJournal() {
                 onClick={() => {
                   setNewEntryText('');
                 }}
-                className="border-white/20 backdrop-blur-sm bg-white/5 text-white hover:bg-white/10 min-h-[44px]"
+                 className="border-ink-edge bg-ink-raised text-primary hover:bg-ink-raised min-h-[44px] rounded-xl"
                 data-testid="button-cancel-entry"
               >
                 Cancel
@@ -602,17 +598,17 @@ export default function InvestmentJournal() {
             transition={{ duration: 0.3 }}
             className="hidden md:block"
           >
-            <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-cyan-300 flex items-center gap-2">
+            <Surface>
+              <div className="p-6">
+                <SectionTitle className="text-accent-bright flex items-center gap-2">
                   <Plus className="w-5 h-5" />
                   📝 New Journal Entry - {journalTemplates[selectedTemplate].label}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+                </SectionTitle>
+              </div>
+              <div className="p-6 pt-0 space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Select value={selectedTemplate} onValueChange={(value: keyof typeof journalTemplates) => setSelectedTemplate(value)}>
-                    <SelectTrigger className="bg-white/5 border-white/20 backdrop-blur-sm text-white">
+                    <SelectTrigger className="bg-ink-raised border-ink-edge text-primary rounded-xl">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -628,7 +624,7 @@ export default function InvestmentJournal() {
                   </Select>
                   
                   <Select value={selectedMood} onValueChange={(value: 'bullish' | 'bearish' | 'neutral') => setSelectedMood(value)}>
-                    <SelectTrigger className="bg-white/5 border-white/20 backdrop-blur-sm text-white">
+                    <SelectTrigger className="bg-ink-raised border-ink-edge text-primary rounded-xl">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -643,7 +639,7 @@ export default function InvestmentJournal() {
                   value={newEntryText}
                   onChange={(e) => setNewEntryText(e.target.value)}
                   placeholder="Write your thoughts..."
-                  className="bg-white/5 border-white/20 backdrop-blur-sm text-white resize-none min-h-[200px] placeholder:text-gray-400"
+                  className="bg-ink-raised border-ink-edge text-primary resize-none min-h-[200px] placeholder:text-muted rounded-xl"
                   rows={8}
                 />
                 
@@ -651,7 +647,7 @@ export default function InvestmentJournal() {
                   <Button
                     onClick={handleSaveEntry}
                     disabled={!newEntryText.trim() || createEntryMutation.isPending}
-                    className="bg-green-600 hover:bg-green-700"
+                    className="grad-accent glow-accent text-primary rounded-xl"
                   >
                     <Save className="h-4 w-4 mr-2" />
                     {createEntryMutation.isPending ? 'Saving...' : 'Save Entry'}
@@ -662,13 +658,13 @@ export default function InvestmentJournal() {
                       setShowNewEntry(false);
                       setNewEntryText('');
                     }}
-                    className="border-white/20 backdrop-blur-sm bg-white/5 text-white hover:bg-white/10"
+                    className="border-ink-edge bg-ink-raised text-primary hover:bg-ink-raised rounded-xl"
                   >
                     Cancel
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
           </motion.div>
         )}
       </AnimatePresence>
@@ -683,23 +679,23 @@ export default function InvestmentJournal() {
         {isLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 2 }).map((_, i) => (
-              <Card key={i} className="animate-pulse bg-gray-800/50">
-                <CardContent className="p-4">
+              <Surface key={i} className="animate-pulse bg-ink-surface">
+                <div className="p-4">
                   <div className="space-y-2">
-                    <div className="h-4 bg-gray-700 rounded w-1/4"></div>
-                    <div className="h-3 bg-gray-700 rounded w-full"></div>
-                    <div className="h-3 bg-gray-700 rounded w-3/4"></div>
+                    <div className="h-4 bg-ink-raised rounded-xl w-1/4"></div>
+                    <div className="h-3 bg-ink-raised rounded-xl w-full"></div>
+                    <div className="h-3 bg-ink-raised rounded-xl w-3/4"></div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </Surface>
             ))}
           </div>
         ) : entries.length > 0 ? (
           <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-cyan-400 flex items-center gap-2">
+            <SectionTitle as="h3" className="text-accent-bright flex items-center gap-2">
               <BookOpen className="w-5 h-5" />
               {isToday(selectedDate) ? "Today's Entries" : `Entries for ${format(selectedDate, 'MMM d')}`} ({entries.length})
-            </h3>
+            </SectionTitle>
             {entries.map((entry: any, index: number) => {
               const template = journalTemplates[entry.noteType as keyof typeof journalTemplates] || journalTemplates.general;
               const Icon = template.icon;
@@ -711,8 +707,8 @@ export default function InvestmentJournal() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="bg-gradient-to-r from-slate-800/50 to-gray-800/50 border-slate-600 hover:border-slate-500 transition-all" data-testid={`card-entry-${entry.id}`}>
-                    <CardContent className="p-3 md:p-4">
+                  <Surface className="bg-ink-surface hover:bg-ink-raised transition-all" data-testid={`card-entry-${entry.id}`}>
+                    <div className="p-3 md:p-4">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2 flex-wrap">
                           <Badge variant="outline" className={`${template.color} text-xs`}>
@@ -721,16 +717,16 @@ export default function InvestmentJournal() {
                           </Badge>
                           {entry.mood && (
                             <Badge variant="outline" className={`text-xs ${
-                              entry.mood === 'bullish' ? 'text-green-400 border-green-500/30' :
-                              entry.mood === 'bearish' ? 'text-red-400 border-red-500/30' :
-                              'text-gray-400 border-gray-500/30'
+                              entry.mood === 'bullish' ? 'text-gain border-gain/30' :
+                              entry.mood === 'bearish' ? 'text-loss border-loss/30' :
+                              'text-secondary border-ink-edge'
                             }`}>
                               {entry.mood === 'bullish' ? '🐂' : entry.mood === 'bearish' ? '🐻' : '😐'} {entry.mood}
                             </Badge>
                           )}
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                          <div className="text-xs text-gray-400 flex items-center gap-1">
+                            <div className="text-xs text-muted flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             {format(parseISO(entry.createdAt), 'HH:mm')}
                           </div>
@@ -738,7 +734,7 @@ export default function InvestmentJournal() {
                             variant="ghost"
                             size="sm"
                             onClick={() => setDeleteConfirmId(entry.id)}
-                            className="h-6 w-6 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                            className="h-6 w-6 p-0 text-loss hover:text-loss hover:bg-loss/10 rounded-xl"
                             data-testid={`button-delete-${entry.id}`}
                           >
                             <Trash2 className="w-3 h-3" />
@@ -746,7 +742,7 @@ export default function InvestmentJournal() {
                         </div>
                       </div>
                       
-                      <div className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
+                      <div className="text-sm text-body leading-relaxed whitespace-pre-wrap">
                         {/* Mobile: Clamped with show more/less */}
                         <div className="block md:hidden">
                           <div style={{
@@ -762,7 +758,7 @@ export default function InvestmentJournal() {
                               variant="ghost"
                               size="sm"
                               onClick={() => toggleEntryExpansion(entry.id)}
-                              className="mt-2 p-0 h-auto text-cyan-400 hover:text-cyan-300"
+                              className="mt-2 p-0 h-auto text-accent-bright hover:text-accent-bright"
                               data-testid={`button-toggle-${entry.id}`}
                             >
                               {expandedEntries.has(entry.id) ? 'Show less' : 'Show more'}
@@ -774,21 +770,21 @@ export default function InvestmentJournal() {
                           {entry.noteText}
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </Surface>
                 </motion.div>
               );
             })}
           </div>
         ) : (
-          <Card className="border-dashed border-gray-600 bg-gray-800/20">
-            <CardContent className="pt-8 pb-8">
+          <Surface className="border-dashed border-ink-edge bg-ink-surface">
+            <div className="pt-8 pb-8">
               <div className="text-center">
-                <PenTool className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-lg font-semibold text-gray-400 mb-2">
+                <PenTool className="w-12 h-12 mx-auto mb-4 text-muted" />
+                <SectionTitle as="h3" className="text-secondary mb-2">
                   {isToday(selectedDate) ? "Start today's journal" : `No entries for ${format(selectedDate, 'MMM d')}`}
-                </h3>
-                <p className="text-gray-500 text-sm mb-4">
+                </SectionTitle>
+                <p className="text-muted text-sm mb-4">
                   {isToday(selectedDate) 
                     ? "Document your trading thoughts, market analysis, and insights for today."
                     : "No journal entries found for this date."
@@ -797,36 +793,36 @@ export default function InvestmentJournal() {
                 {isToday(selectedDate) && (
                   <Button
                     onClick={() => setShowNewEntry(true)}
-                    className="bg-purple-600 hover:bg-purple-700"
+                    className="grad-accent glow-accent text-primary rounded-xl"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Start Writing
                   </Button>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </Surface>
         )}
       </motion.div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
-        <AlertDialogContent className="bg-slate-800 border-slate-600">
+        <AlertDialogContent className="bg-ink-surface border-ink-edge rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">Delete Journal Entry</AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-400">
+            <AlertDialogTitle className="text-primary">Delete Journal Entry</AlertDialogTitle>
+            <AlertDialogDescription className="text-secondary">
               Are you sure you want to delete this journal entry? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel 
-              className="bg-gray-700 text-white border-gray-600 hover:bg-gray-600"
+              className="bg-ink-raised text-primary border-ink-edge hover:bg-ink-raised rounded-xl"
               onClick={() => setDeleteConfirmId(null)}
             >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-red-600 text-white hover:bg-red-700"
+              className="bg-loss text-primary hover:bg-loss rounded-xl"
               onClick={() => deleteConfirmId && handleDeleteEntry(deleteConfirmId)}
               disabled={deleteEntryMutation.isPending}
             >

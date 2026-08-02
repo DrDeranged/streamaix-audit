@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Surface from "@/components/ds/Surface";
+import SectionTitle from "@/components/ds/SectionTitle";
 import { Zap, Sun, Moon, Bot, Check, Loader2, Sparkles, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -70,9 +72,9 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
   };
 
   const benefits = [
-    { icon: Sun, label: "Morning Alpha", time: "8am EST", color: "from-amber-500 to-orange-500" },
-    { icon: Moon, label: "Market Close", time: "4pm EST", color: "from-indigo-500 to-purple-500" },
-    { icon: Bot, label: "AI Insights", time: "24/7", color: "from-cyan-500 to-blue-500" },
+    { icon: Sun, label: "Morning Alpha", time: "8am EST", color: "bg-warn text-ink-page" },
+    { icon: Moon, label: "Market Close", time: "4pm EST", color: "bg-accent-core text-primary" },
+    { icon: Bot, label: "AI Insights", time: "24/7", color: "bg-gain text-ink-page" },
   ];
 
   return (
@@ -88,39 +90,30 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
               transition={{ duration: 0.3 }}
               className="relative"
             >
-              {/* Outer glow effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-cyan-500 to-fuchsia-500 rounded-2xl blur-lg opacity-60 animate-pulse" />
-              
-              {/* Main card */}
-              <div className="relative bg-slate-950/95 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden">
-                {/* Animated gradient border overlay */}
-                <div className="absolute inset-0 rounded-2xl p-[1px] bg-gradient-to-r from-purple-500 via-cyan-400 to-fuchsia-500 opacity-50" style={{ WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)', WebkitMaskComposite: 'xor', maskComposite: 'exclude' }} />
-                
+              <Surface className="relative overflow-hidden rounded-2xl bg-ink-surface p-6 sm:p-8">
                 {/* Neural network pattern background */}
-                <div className="absolute inset-0 opacity-5">
-                  <div className="absolute top-4 left-4 w-32 h-32 border border-cyan-500/30 rounded-full" />
-                  <div className="absolute bottom-8 right-8 w-24 h-24 border border-purple-500/30 rounded-full" />
-                  <div className="absolute top-1/2 left-1/2 w-16 h-16 border border-fuchsia-500/30 rounded-full -translate-x-1/2 -translate-y-1/2" />
+                <div className="absolute inset-0 opacity-30">
+                  <div className="absolute top-4 left-4 h-32 w-32 rounded-xl border border-accent-core/20" />
+                  <div className="absolute bottom-8 right-8 h-24 w-24 rounded-xl border border-accent-core/20" />
+                  <div className="absolute top-1/2 left-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-xl border border-accent-core/20" />
                 </div>
 
-                <div className="relative p-6 sm:p-8">
+                <div className="relative">
                   {/* Header */}
                   <div className="text-center mb-6">
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-                      className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-purple-600 via-fuchsia-500 to-cyan-500 mb-4 shadow-lg shadow-purple-500/30"
+                      className="glow-accent mb-4 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-accent-core sm:h-16 sm:w-16"
                     >
-                      <Zap className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+                      <Zap className="h-7 w-7 text-ink-page sm:h-8 sm:w-8" />
                     </motion.div>
                     
-                    <h2 className="text-2xl sm:text-3xl font-bold mb-2">
-                      <span className="bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent">
-                        Get Your Daily Alpha
-                      </span>
-                    </h2>
-                    <p className="text-slate-400 text-sm sm:text-base">
+                    <SectionTitle as="h2" className="mb-2 text-2xl font-bold sm:text-3xl">
+                      Get Your Daily Alpha
+                    </SectionTitle>
+                    <p className="text-body text-sm sm:text-base">
                       AI-powered market intelligence delivered to your inbox
                     </p>
                   </div>
@@ -135,13 +128,13 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
                         transition={{ delay: 0.2 + index * 0.1 }}
                         className="relative group"
                       >
-                        <div className="p-2 sm:p-3 rounded-xl bg-slate-900/80 border border-slate-700/50 hover:border-slate-600/50 transition-all text-center">
-                          <div className={`inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br ${benefit.color} mb-1.5 sm:mb-2 shadow-lg`}>
-                            <benefit.icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                        <Surface variant="raised" className="p-2 text-center transition-colors hover:border hover:border-ink-edge sm:p-3">
+                          <div className={`mb-1.5 inline-flex h-8 w-8 items-center justify-center rounded-xl sm:mb-2 sm:h-10 sm:w-10 ${benefit.color}`}>
+                            <benefit.icon className="h-4 w-4 sm:h-5 sm:w-5" />
                           </div>
-                          <div className="text-[10px] sm:text-xs font-semibold text-white truncate">{benefit.label}</div>
-                          <div className="text-[9px] sm:text-[10px] text-slate-500">{benefit.time}</div>
-                        </div>
+                          <div className="truncate text-[10px] font-semibold text-primary sm:text-xs">{benefit.label}</div>
+                          <div className="text-[9px] text-muted sm:text-[10px]">{benefit.time}</div>
+                        </Surface>
                       </motion.div>
                     ))}
                   </div>
@@ -155,7 +148,7 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
                           placeholder="Your name (optional)"
                           value={name}
                           onChange={(e) => setName(e.target.value)}
-                          className="h-12 sm:h-14 text-base bg-slate-900/60 border-slate-700/50 rounded-xl focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all placeholder:text-slate-500"
+                           className="h-12 rounded-xl border border-ink-edge bg-ink-raised text-base text-primary transition-colors placeholder:text-muted focus:border-accent-core focus:ring-2 focus:ring-accent-core/20 sm:h-14"
                           data-testid="input-waitlist-name"
                         />
                       </div>
@@ -167,7 +160,7 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           required
-                          className="h-12 sm:h-14 text-base bg-slate-900/60 border-slate-700/50 rounded-xl focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all placeholder:text-slate-500"
+                           className="h-12 rounded-xl border border-ink-edge bg-ink-raised text-base text-primary transition-colors placeholder:text-muted focus:border-accent-core focus:ring-2 focus:ring-accent-core/20 sm:h-14"
                           data-testid="input-waitlist-email"
                         />
                       </div>
@@ -175,7 +168,7 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
 
                     <Button
                       type="submit"
-                      className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-purple-600 via-fuchsia-500 to-cyan-500 hover:from-purple-500 hover:via-fuchsia-400 hover:to-cyan-400 border-0 rounded-xl shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300"
+                       className="grad-accent glow-accent h-12 w-full rounded-xl border-0 text-base font-semibold text-primary transition-transform duration-300 hover:-translate-y-0.5 sm:h-14 sm:text-lg"
                       disabled={waitlistMutation.isPending}
                       data-testid="button-waitlist-submit"
                     >
@@ -200,20 +193,20 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.5 }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20"
+                         className="inline-flex items-center gap-1.5 rounded-xl border border-gain/30 bg-gain/10 px-3 py-1.5"
                       >
-                        <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-                        <span className="text-xs text-emerald-300 font-medium">
+                        <TrendingUp className="h-3.5 w-3.5 text-gain" />
+                        <span className="text-xs font-medium text-gain">
                           {waitlistCount?.count?.toLocaleString()}+ traders already joined
                         </span>
                       </motion.div>
                     )}
-                    <p className="text-[11px] sm:text-xs text-slate-500">
+                     <p className="text-[11px] text-muted sm:text-xs">
                       Unsubscribe anytime. We respect your inbox.
                     </p>
                   </div>
                 </div>
-              </div>
+              </Surface>
             </motion.div>
           ) : (
             <motion.div
@@ -224,36 +217,30 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
               transition={{ duration: 0.4 }}
               className="relative"
             >
-              {/* Outer glow effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 via-cyan-400 to-teal-500 rounded-2xl blur-lg opacity-60" />
-              
-              {/* Success card */}
-              <div className="relative bg-slate-950/95 backdrop-blur-xl rounded-2xl border border-emerald-500/30 p-8 sm:p-10 text-center">
+              <Surface className="relative rounded-2xl border border-gain/30 bg-ink-surface p-8 text-center sm:p-10">
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 10 }}
-                  className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 mb-5 shadow-lg shadow-emerald-500/30"
+                   className="mb-5 inline-flex h-20 w-20 items-center justify-center rounded-xl bg-gain"
                 >
-                  <Check className="w-10 h-10 text-white" strokeWidth={3} />
+                   <Check className="h-10 w-10 text-ink-page" strokeWidth={3} />
                 </motion.div>
                 
                 <motion.h3
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="text-2xl sm:text-3xl font-bold mb-3"
+                   className="mb-3 text-2xl font-bold text-primary sm:text-3xl"
                 >
-                  <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                    You're In!
-                  </span>
+                   You're In!
                 </motion.h3>
                 
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.4 }}
-                  className="text-slate-300 mb-2"
+                   className="mb-2 text-body"
                 >
                   Welcome to the alpha traders club.
                 </motion.p>
@@ -264,14 +251,14 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
                   transition={{ delay: 0.5 }}
                   className="space-y-1"
                 >
-                  <p className="text-sm text-slate-400">
+                   <p className="text-sm text-secondary">
                     Check your inbox for a welcome email.
                   </p>
-                  <p className="text-xs text-emerald-400/80">
+                   <p className="text-xs text-gain">
                     First alpha drops tomorrow at 8am EST
                   </p>
                 </motion.div>
-              </div>
+               </Surface>
             </motion.div>
           )}
         </AnimatePresence>
