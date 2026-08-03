@@ -243,11 +243,11 @@ export default function TradingChart({
             </div>
             <div className="flex justify-between gap-4">
               <span className="text-muted-foreground">High:</span>
-              <span className="font-mono text-green-500">${data.high.toFixed(2)}</span>
+              <span className="font-mono text-gain">${data.high.toFixed(2)}</span>
             </div>
             <div className="flex justify-between gap-4">
               <span className="text-muted-foreground">Low:</span>
-              <span className="font-mono text-red-500">${data.low.toFixed(2)}</span>
+              <span className="font-mono text-loss">${data.low.toFixed(2)}</span>
             </div>
             <div className="flex justify-between gap-4">
               <span className="text-muted-foreground">Close:</span>
@@ -261,7 +261,7 @@ export default function TradingChart({
             {data.priceChange !== 0 && (
               <div className="flex justify-between gap-4 pt-1 border-t border-border">
                 <span className="text-muted-foreground">Change:</span>
-                <span className={`font-mono ${data.priceChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                <span className={`font-mono ${data.priceChange >= 0 ? 'text-gain' : 'text-loss'}`}>
                   {data.priceChange >= 0 ? '+' : ''}${data.priceChange.toFixed(2)} 
                   ({data.priceChangePercent >= 0 ? '+' : ''}{data.priceChangePercent.toFixed(2)}%)
                 </span>

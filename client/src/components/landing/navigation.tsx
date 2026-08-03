@@ -153,7 +153,7 @@ export function Navigation() {
                     {/* Bottom highlight on hover */}
                     <div className="absolute bottom-0 left-2 right-2 h-px bg-accent-core opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="relative flex items-center gap-1.5">
-                      <Compass className="w-4 h-4 text-cyan-500 group-hover:text-cyan-400 transition-colors drop-shadow-sm" />
+                      <Compass className="w-4 h-4 text-accent-bright group-hover:text-accent-bright transition-colors drop-shadow-sm" />
                       <span className="font-medium text-sm">Discover</span>
                       <ChevronDown className="w-3 h-3 opacity-60" />
                     </div>
@@ -162,7 +162,7 @@ export function Navigation() {
                 <DropdownMenuContent className="w-56 bg-ink-surface border border-ink-edge rounded-xl shadow-2xl" align="start">
                   <DropdownMenuItem asChild>
                     <Link href="/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                      <Compass className="w-4 h-4 text-cyan-400" />
+                      <Compass className="w-4 h-4 text-accent-bright" />
                       <div>
                         <span className="font-medium block">Market Intelligence</span>
                         <span className="text-xs text-secondary">Real-time analytics</span>
@@ -180,7 +180,7 @@ export function Navigation() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/analytics" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                      <PieChart className="w-4 h-4 text-green-400" />
+                      <PieChart className="w-4 h-4 text-gain" />
                       <div>
                         <span className="font-medium block">Platform Stats</span>
                         <span className="text-xs text-secondary">Engagement metrics</span>
@@ -189,7 +189,7 @@ export function Navigation() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/ai-trading" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                      <LineChart className="w-4 h-4 text-amber-400" />
+                      <LineChart className="w-4 h-4 text-warn" />
                       <div>
                         <span className="font-medium block">AI Trading Signals</span>
                         <span className="text-xs text-secondary">Crypto & mining stocks</span>
@@ -198,7 +198,7 @@ export function Navigation() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/bot-trading" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                      <Bot className="w-4 h-4 text-cyan-400" />
+                      <Bot className="w-4 h-4 text-accent-bright" />
                       <div>
                         <span className="font-medium block">Bot Trading Simulator</span>
                         <span className="text-xs text-secondary">Stake on AI bots</span>
@@ -220,8 +220,8 @@ export function Navigation() {
                     <div className="absolute bottom-0 left-2 right-2 h-px bg-accent-core opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="relative flex items-center gap-1.5">
                       <div className="relative">
-                        <Radio className="w-4 h-4 text-red-500 group-hover:text-red-400 transition-colors drop-shadow-sm" />
-                        <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                        <Radio className="w-4 h-4 text-loss group-hover:text-loss transition-colors drop-shadow-sm" />
+                        <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-loss animate-pulse" />
                       </div>
                       <span className="font-medium text-sm">Streams</span>
                       <ChevronDown className="w-3 h-3 opacity-60" />
@@ -231,7 +231,7 @@ export function Navigation() {
                 <DropdownMenuContent className="w-56 bg-ink-surface border border-ink-edge rounded-xl shadow-2xl" align="start">
                   <DropdownMenuItem asChild>
                     <Link href="/streams/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                      <Radio className="w-4 h-4 text-red-400" />
+                      <Radio className="w-4 h-4 text-loss" />
                       <div>
                         <span className="font-medium block">Browse All</span>
                         <span className="text-xs text-secondary">AI & creators live</span>
@@ -240,7 +240,7 @@ export function Navigation() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/go-live" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                      <Mic className="w-4 h-4 text-orange-400" />
+                      <Mic className="w-4 h-4 text-warn" />
                       <div>
                         <span className="font-medium block">Go Live</span>
                         <span className="text-xs text-secondary">Start streaming</span>
@@ -249,7 +249,7 @@ export function Navigation() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/replays" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                      <History className="w-4 h-4 text-amber-400" />
+                      <History className="w-4 h-4 text-warn" />
                       <div>
                         <span className="font-medium block">Replays</span>
                         <span className="text-xs text-secondary">Past streams</span>
@@ -297,7 +297,7 @@ export function Navigation() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/markets/leaderboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                      <Trophy className="w-4 h-4 text-amber-400" />
+                      <Trophy className="w-4 h-4 text-warn" />
                       <div>
                         <span className="font-medium block">Leaderboard</span>
                         <span className="text-xs text-muted">Top traders</span>
@@ -306,7 +306,7 @@ export function Navigation() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/markets/achievements" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                      <Award className="w-4 h-4 text-cyan-400" />
+                      <Award className="w-4 h-4 text-accent-bright" />
                       <div>
                         <span className="font-medium block">Achievements</span>
                         <span className="text-xs text-muted">Badges & rewards</span>
@@ -345,7 +345,7 @@ export function Navigation() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/leaderboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                      <Trophy className="w-4 h-4 text-yellow-400" />
+                      <Trophy className="w-4 h-4 text-warn" />
                       <div>
                         <span className="font-medium block">Hunter Leaderboard</span>
                         <span className="text-xs text-muted">Top contributors</span>
@@ -375,7 +375,7 @@ export function Navigation() {
                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl bg-ink-raised" />
                     <div className="absolute bottom-0 left-2 right-2 h-[1px] bg-ink-divider opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="relative flex items-center gap-1.5">
-                      <Brain className="w-4 h-4 text-emerald-500 group-hover:text-emerald-400 transition-colors drop-shadow-sm" />
+                      <Brain className="w-4 h-4 text-gain group-hover:text-gain transition-colors drop-shadow-sm" />
                       <span className="font-medium text-sm">AI</span>
                       <ChevronDown className="w-3 h-3 opacity-60" />
                     </div>
@@ -384,7 +384,7 @@ export function Navigation() {
                 <DropdownMenuContent className="w-56 bg-ink-surface border border-ink-edge rounded-xl shadow-2xl" align="start">
                   <DropdownMenuItem asChild>
                     <Link href="/create-summary" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                      <Play className="w-4 h-4 text-emerald-400" />
+                      <Play className="w-4 h-4 text-gain" />
                       <div>
                         <span className="font-medium block">AI Analysis</span>
                         <span className="text-xs text-muted">Process videos</span>
@@ -402,7 +402,7 @@ export function Navigation() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/summaries" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                      <Bot className="w-4 h-4 text-amber-400" />
+                      <Bot className="w-4 h-4 text-warn" />
                       <div>
                         <span className="font-medium block">Knowledge Avatars</span>
                         <span className="text-xs text-muted">AI personas</span>
@@ -441,7 +441,7 @@ export function Navigation() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/points" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                      <Coins className="w-4 h-4 text-emerald-400" />
+                      <Coins className="w-4 h-4 text-gain" />
                       <div>
                         <span className="font-medium block">STREAM Points</span>
                         <span className="text-xs text-muted">Earn & track rewards</span>
@@ -450,7 +450,7 @@ export function Navigation() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/leagues" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                      <Trophy className="w-4 h-4 text-orange-400" />
+                      <Trophy className="w-4 h-4 text-warn" />
                       <div>
                         <span className="font-medium block">Leagues</span>
                         <span className="text-xs text-muted">Compete & earn</span>
@@ -489,7 +489,7 @@ export function Navigation() {
                     <div className="p-1 rounded-xl bg-accent-core">
                       <Coins className="w-3.5 h-3.5 text-white" />
                     </div>
-                    <span className="text-sm font-semibold text-emerald-400">
+                    <span className="text-sm font-semibold text-gain">
                       {formatPoints(pointsData.balance)}
                     </span>
                   </motion.div>
@@ -514,7 +514,7 @@ export function Navigation() {
                       </div>
                       {/* Online indicator */}
                       <motion.div 
-                        className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-emerald-500 border-2 border-white rounded-full shadow-lg shadow-emerald-500/50"
+                        className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-gain border-2 border-white rounded-full shadow-lg shadow-gain/50"
                         animate={{ scale: [1, 1.2, 1] }}
                         transition={{ duration: 2, repeat: Infinity }}
                       />
@@ -543,17 +543,17 @@ export function Navigation() {
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link href="/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                          <Compass className="w-4 h-4 text-cyan-400" />
+                          <Compass className="w-4 h-4 text-accent-bright" />
                           <span className="font-medium">Discover</span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link href="/points" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                          <Coins className="w-4 h-4 text-emerald-400" />
+                          <Coins className="w-4 h-4 text-gain" />
                           <div className="flex items-center gap-2">
                             <span className="font-medium">STREAM Points</span>
                             {pointsData && (
-                              <span className="text-xs text-emerald-400 font-semibold">{formatPoints(pointsData.balance)}</span>
+                              <span className="text-xs text-gain font-semibold">{formatPoints(pointsData.balance)}</span>
                             )}
                           </div>
                         </Link>
@@ -572,7 +572,7 @@ export function Navigation() {
                         className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1"
                         onClick={() => setNotificationsOpen(true)}
                       >
-                        <Bell className="w-4 h-4 text-amber-400" />
+                        <Bell className="w-4 h-4 text-warn" />
                         <span className="font-medium">Notifications</span>
                       </DropdownMenuItem>
                     </div>
@@ -581,7 +581,7 @@ export function Navigation() {
 
                     <div className="py-1">
                       <DropdownMenuItem 
-                        className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1"
+                        className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-loss hover:text-loss hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1"
                         onClick={() => logoutMutation.mutate()}
                       >
                         <LogOut className="w-4 h-4" />
@@ -605,11 +605,11 @@ export function Navigation() {
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 hover:bg-emerald-500/30 transition-all duration-200"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gain/20 border border-gain/30 hover:bg-gain/30 transition-all duration-200"
                   data-testid="mobile-landing-points-display"
                 >
-                  <Coins className="w-4 h-4 text-emerald-400" />
-                  <span className="text-sm font-bold text-emerald-400">
+                  <Coins className="w-4 h-4 text-gain" />
+                  <span className="text-sm font-bold text-gain">
                     {formatPoints(pointsData.balance || 0)}
                   </span>
                 </motion.div>
@@ -626,7 +626,7 @@ export function Navigation() {
                 className="relative bg-ink-surface backdrop-blur-xl border-0 hover:bg-ink-raised transition-all duration-300"
               >
                 {theme === "light" ? (
-                  <Sun className="w-5 h-5 text-amber-500" />
+                  <Sun className="w-5 h-5 text-warn" />
                 ) : (
                   <Moon className="w-5 h-5 text-accent-bright" />
                 )}
@@ -646,7 +646,7 @@ export function Navigation() {
                           <div className="relative">
                             <Wallet className="w-4 h-4 text-accent-bright" />
                             <motion.div 
-                              className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"
+                              className="absolute -top-1 -right-1 w-2 h-2 bg-gain rounded-full"
                               animate={{ scale: [1, 1.3, 1] }}
                               transition={{ duration: 2, repeat: Infinity }}
                             />
@@ -665,8 +665,8 @@ export function Navigation() {
                           animate={{ opacity: [0.5, 1, 0.5] }}
                           transition={{ duration: 2, repeat: Infinity }}
                         >
-                          <div className="w-2 h-2 bg-green-500 rounded-full" />
-                          <span className="text-xs text-green-400 font-medium">Active</span>
+                          <div className="w-2 h-2 bg-gain rounded-full" />
+                          <span className="text-xs text-gain font-medium">Active</span>
                         </motion.div>
                       </div>
                       <div className="text-sm text-primary font-mono bg-ink-raised px-3 py-2 rounded-xl border border-ink-edge">
@@ -682,7 +682,7 @@ export function Navigation() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                        <ExternalLink className="w-4 h-4 text-cyan-400" />
+                        <ExternalLink className="w-4 h-4 text-accent-bright" />
                         <span className="font-medium">View on Explorer</span>
                       </DropdownMenuItem>
                     </div>
@@ -691,7 +691,7 @@ export function Navigation() {
 
                     <div className="py-1">
                       <DropdownMenuItem 
-                        className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1"
+                        className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-loss hover:text-loss hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1"
                         onClick={disconnect}
                       >
                         <LogOut className="w-4 h-4" />
@@ -757,8 +757,8 @@ export function Navigation() {
             >
               <div className="flex flex-col space-y-1 px-4 max-h-[70vh] overflow-y-auto">
                 {/* Streams Section - Unified */}
-                <div className="text-xs font-semibold text-red-400 uppercase tracking-wider px-3 py-2 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                <div className="text-xs font-semibold text-loss uppercase tracking-wider px-3 py-2 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-loss animate-pulse" />
                   Streams
                 </div>
                 <Link href="/streams/discover" className="block">
@@ -766,7 +766,7 @@ export function Navigation() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
-                    <Radio className="w-4 h-4 text-red-400" />
+                    <Radio className="w-4 h-4 text-loss" />
                     Browse All
                   </button>
                 </Link>
@@ -775,7 +775,7 @@ export function Navigation() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
-                    <Mic className="w-4 h-4 text-orange-400" />
+                    <Mic className="w-4 h-4 text-warn" />
                     Go Live
                   </button>
                 </Link>
@@ -784,7 +784,7 @@ export function Navigation() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
-                    <History className="w-4 h-4 text-amber-400" />
+                    <History className="w-4 h-4 text-warn" />
                     Replays
                   </button>
                 </Link>
@@ -796,7 +796,7 @@ export function Navigation() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
-                    <Compass className="w-4 h-4 text-cyan-400" />
+                    <Compass className="w-4 h-4 text-accent-bright" />
                     Market Intelligence
                   </button>
                 </Link>
@@ -814,7 +814,7 @@ export function Navigation() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
-                    <LineChart className="w-4 h-4 text-amber-400" />
+                    <LineChart className="w-4 h-4 text-warn" />
                     AI Trading Signals
                   </button>
                 </Link>
@@ -823,7 +823,7 @@ export function Navigation() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
-                    <Bot className="w-4 h-4 text-cyan-400" />
+                    <Bot className="w-4 h-4 text-accent-bright" />
                     Bot Trading Simulator
                   </button>
                 </Link>
@@ -865,7 +865,7 @@ export function Navigation() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
-                    <Trophy className="w-4 h-4 text-yellow-400" />
+                    <Trophy className="w-4 h-4 text-warn" />
                     Leaderboard
                   </button>
                 </Link>
@@ -877,7 +877,7 @@ export function Navigation() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
-                    <Play className="w-4 h-4 text-emerald-400" />
+                    <Play className="w-4 h-4 text-gain" />
                     AI Analysis
                   </button>
                 </Link>
@@ -907,7 +907,7 @@ export function Navigation() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
-                    <Coins className="w-4 h-4 text-emerald-400" />
+                    <Coins className="w-4 h-4 text-gain" />
                     STREAM Points
                   </button>
                 </Link>
@@ -927,7 +927,7 @@ export function Navigation() {
                   }}
                   className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                 >
-                  <Bell className="w-4 h-4 text-amber-400" />
+                  <Bell className="w-4 h-4 text-warn" />
                   Notifications
                 </button>
                 
@@ -961,7 +961,7 @@ export function Navigation() {
                       </button>
                     </Link>
                     <button 
-                      className="w-full flex items-center gap-3 text-left text-red-400 hover:text-red-300 py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
+                      className="w-full flex items-center gap-3 text-left text-loss hover:text-loss py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                       onClick={() => logoutMutation.mutate()}
                     >
                       <LogOut className="w-4 h-4" />
@@ -977,8 +977,8 @@ export function Navigation() {
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium text-body">Wallet Connected</span>
                         <div className="flex items-center gap-1.5">
-                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                          <span className="text-xs text-green-400">Active</span>
+                          <div className="w-2 h-2 bg-gain rounded-full animate-pulse" />
+                          <span className="text-xs text-gain">Active</span>
                         </div>
                       </div>
                       <p className="text-xs text-secondary font-mono bg-ink-page px-2 py-1 rounded-xl border border-ink-edge">{formatAddress(wallet.address)}</p>
@@ -986,7 +986,7 @@ export function Navigation() {
                     <Button 
                       onClick={disconnect}
                       variant="outline" 
-                      className="w-full border-red-500/30 text-red-400 hover:bg-ink-raised hover:border-red-500/50"
+                      className="w-full border-loss/30 text-loss hover:bg-ink-raised hover:border-loss/50"
                     >
                       <LogOut className="w-4 h-4 mr-2" />
                       Disconnect Wallet
@@ -1031,7 +1031,7 @@ export function Navigation() {
         <DialogContent className="bg-ink-surface border-ink-edge text-primary rounded-2xl max-w-md max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-white">
-              <Bell className="w-5 h-5 text-amber-400" />
+              <Bell className="w-5 h-5 text-warn" />
               Notification Settings
             </DialogTitle>
           </DialogHeader>

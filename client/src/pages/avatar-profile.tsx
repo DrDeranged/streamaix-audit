@@ -370,7 +370,7 @@ function AvatarTradingSection({ avatarId, avatarName }: { avatarId: string; avat
             <CardTitle className="text-primary flex items-center gap-2 text-base">
               <Target className="w-5 h-5 text-accent-bright" />
               Active Positions
-              <Badge variant="outline" className="ml-auto border-cyan-500/30 text-accent-bright text-xs">
+              <Badge variant="outline" className="ml-auto border-accent-core/30 text-accent-bright text-xs">
                 {positions.length} markets
               </Badge>
             </CardTitle>
@@ -383,8 +383,8 @@ function AvatarTradingSection({ avatarId, avatarName }: { avatarId: string; avat
                     whileHover={{ scale: 1.01 }}
                     className={`p-3 rounded-xl cursor-pointer transition-all ${
                       pos.outcome === 'YES' 
-                        ? 'bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-400/40' 
-                        : 'bg-rose-500/10 border border-rose-500/20 hover:border-rose-400/40'
+                        ? 'bg-gain/10 border border-gain/20 hover:border-gain/40' 
+                        : 'bg-loss/10 border border-loss/20 hover:border-loss/40'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -393,8 +393,8 @@ function AvatarTradingSection({ avatarId, avatarName }: { avatarId: string; avat
                         <div className="flex items-center gap-2">
                           <Badge className={`text-xs ${
                             pos.outcome === 'YES' 
-                              ? 'bg-emerald-500/20 text-gain' 
-                              : 'bg-rose-500/20 text-loss'
+                              ? 'bg-gain/20 text-gain' 
+                              : 'bg-loss/20 text-loss'
                           }`}>
                             {pos.outcome}
                           </Badge>
@@ -439,8 +439,8 @@ function AvatarTradingSection({ avatarId, avatarName }: { avatarId: string; avat
                       <p className="text-sm text-body line-clamp-1 flex-1">{trade.marketQuestion}</p>
                       <Badge className={`text-xs shrink-0 ${
                         trade.outcome === 'YES' 
-                          ? 'bg-emerald-500/20 text-gain' 
-                          : 'bg-rose-500/20 text-loss'
+                          ? 'bg-gain/20 text-gain' 
+                          : 'bg-loss/20 text-loss'
                       }`}>
                         {trade.outcome}
                       </Badge>
@@ -1026,7 +1026,7 @@ export default function AvatarProfile() {
                     <h4 className="text-primary font-semibold mb-2">Portfolio Focus</h4>
                     <div className="flex flex-wrap gap-2">
                       {avatar.investment_focus?.map((focus: string, index: number) => (
-                        <Badge key={index} variant="outline" className="border-green-400/30 text-gain">
+                        <Badge key={index} variant="outline" className="border-gain/30 text-gain">
                           {focus}
                         </Badge>
                       ))}
@@ -1044,7 +1044,7 @@ export default function AvatarProfile() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="p-3 bg-green-500/10 rounded-xl border border-green-400/20">
+                  <div className="p-3 bg-gain/10 rounded-xl border border-gain/20">
                     <div className="text-gain font-semibold">Best Investment</div>
                     <div className="text-primary">{avatar.investmentReturns?.bestInvestment || 'N/A'}</div>
                   </div>
@@ -1084,7 +1084,7 @@ export default function AvatarProfile() {
                         <Badge 
                           variant="outline" 
                           className={`${
-                            investment.status === 'active' ? 'border-green-400/30 text-gain' :
+                            investment.status === 'active' ? 'border-gain/30 text-gain' :
                             investment.status === 'exited' ? 'border-accent-core/30 text-accent-bright' :
                             'border-accent-core/30 text-accent-bright'
                           }`}
@@ -1212,9 +1212,9 @@ export default function AvatarProfile() {
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-secondary">{opinion.confidence}% confident</span>
                             <div className={`w-2 h-2 rounded-xl ${
-                              opinion.confidence >= 80 ? 'bg-green-400' :
-                              opinion.confidence >= 60 ? 'bg-yellow-400' :
-                              'bg-red-400'
+                              opinion.confidence >= 80 ? 'bg-gain' :
+                              opinion.confidence >= 60 ? 'bg-warn' :
+                              'bg-loss'
                             }`} />
                           </div>
                         </div>
@@ -1239,12 +1239,12 @@ export default function AvatarProfile() {
                     {(avatar.predictions || []).map((prediction, index) => (
                       <motion.div
                         key={index}
-                        className="p-4 bg-ink-surface   rounded-xl border border-green-400/20"
+                        className="p-4 bg-ink-surface   rounded-xl border border-gain/20"
                         whileHover={{ scale: 1.02 }}
                         data-testid={`prediction-${index}`}
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <Badge variant="outline" className="border-green-400/30 text-gain">
+                          <Badge variant="outline" className="border-gain/30 text-gain">
                             {prediction.category}
                           </Badge>
                           <span className="text-xs text-secondary">{prediction.timeframe}</span>
@@ -1255,9 +1255,9 @@ export default function AvatarProfile() {
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-secondary">{prediction.confidence}% confident</span>
                             <div className={`w-2 h-2 rounded-xl ${
-                              prediction.confidence >= 80 ? 'bg-green-400' :
-                              prediction.confidence >= 60 ? 'bg-yellow-400' :
-                              'bg-red-400'
+                              prediction.confidence >= 80 ? 'bg-gain' :
+                              prediction.confidence >= 60 ? 'bg-warn' :
+                              'bg-loss'
                             }`} />
                           </div>
                         </div>
@@ -1279,7 +1279,7 @@ export default function AvatarProfile() {
               <CardContent>
                 <div className="grid lg:grid-cols-2 gap-4">
                   {(avatar.controversialTakes || []).map((take, index) => (
-                    <div key={index} className="p-4 bg-red-500/10 rounded-xl border border-red-400/20">
+                    <div key={index} className="p-4 bg-loss/10 rounded-xl border border-loss/20">
                       <Quote className="h-4 w-4 text-loss mb-2" />
                       <p className="text-body">{take}</p>
                     </div>
@@ -1345,17 +1345,17 @@ export default function AvatarProfile() {
                     {(avatar.keyContent || []).map((content, index) => (
                       <motion.div
                         key={index}
-                        className="p-4 bg-ink-surface   rounded-xl border border-yellow-400/20"
+                        className="p-4 bg-ink-surface   rounded-xl border border-warn/20"
                         whileHover={{ scale: 1.02 }}
                         data-testid={`key-content-${index}`}
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <Badge variant="outline" className="border-yellow-400/30 text-yellow-300">
+                          <Badge variant="outline" className="border-warn/30 text-warn">
                             {content.type}
                           </Badge>
                           <div className="flex items-center gap-1">
                             {Array.from({ length: content.importance }).map((_, i) => (
-                              <Star key={i} className="h-3 w-3 text-yellow-400 fill-current" />
+                              <Star key={i} className="h-3 w-3 text-warn fill-current" />
                             ))}
                           </div>
                         </div>
@@ -1389,7 +1389,7 @@ export default function AvatarProfile() {
                       whileHover={{ scale: 1.05 }}
                       data-testid={`book-${index}`}
                     >
-                      <Badge variant="outline" className="border-green-400/30 text-gain mb-2">
+                      <Badge variant="outline" className="border-gain/30 text-gain mb-2">
                         {book.category}
                       </Badge>
                       <h4 className="text-primary font-semibold mb-1">{book.title}</h4>

@@ -24,12 +24,12 @@ export function ApiStatusIndicator() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "operational":
-        return "bg-green-500/10 text-green-400 border-green-500/30";
+        return "bg-gain/10 text-gain border-gain/30";
       case "degraded":
       case "rate-limited":
-        return "bg-amber-500/10 text-amber-400 border-amber-500/30";
+        return "bg-warn/10 text-warn border-warn/30";
       case "down":
-        return "bg-red-500/10 text-red-400 border-red-500/30";
+        return "bg-loss/10 text-loss border-loss/30";
       default:
         return "bg-ink-raised text-muted border-ink-edge";
     }
@@ -59,8 +59,8 @@ export function ApiStatusIndicator() {
         <Badge 
           className={`${
             hasIssues 
-              ? "bg-amber-500/10 text-amber-400 border-amber-500/30" 
-              : "bg-green-500/10 text-green-400 border-green-500/30"
+              ? "bg-warn/10 text-warn border-warn/30" 
+              : "bg-gain/10 text-gain border-gain/30"
           } cursor-help`}
           data-testid="api-status-indicator"
         >
@@ -104,7 +104,7 @@ export function CompactApiStatus() {
   const issueCount = statuses.filter(s => s.status !== "operational").length;
 
   return (
-    <div className="flex items-center gap-2 text-xs text-amber-400/80">
+    <div className="flex items-center gap-2 text-xs text-warn/80">
       <AlertCircle className="h-3 w-3" />
       <span>{issueCount} API{issueCount > 1 ? 's' : ''} degraded</span>
     </div>

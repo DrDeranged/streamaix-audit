@@ -81,7 +81,7 @@ function getTimeUntilStart(startDate: string) {
 
 function LeaderboardRow({ participant, index }: { participant: LeagueParticipant; index: number }) {
   const getRankStyle = (rank: number) => {
-    if (rank === 1) return { icon: Crown, color: 'text-yellow-400', bg: 'bg-yellow-500/20', border: 'border-yellow-500/30' };
+    if (rank === 1) return { icon: Crown, color: 'text-warn', bg: 'bg-warn/20', border: 'border-warn/30' };
     if (rank === 2) return { icon: Medal, color: 'text-secondary', bg: 'bg-ink-surface', border: 'border-ink-edge' };
     if (rank === 3) return { icon: Medal, color: 'text-warn', bg: 'bg-ink-surface', border: 'border-warn/30' };
     return null;

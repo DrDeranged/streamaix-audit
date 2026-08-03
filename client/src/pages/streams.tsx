@@ -323,7 +323,7 @@ const FeaturedStreamCard = memo(function FeaturedStreamCard({ stream }: { stream
  
  {/* Top badges row */}
  <div className="absolute top-2 sm:top-4 left-2 sm:left-4 flex items-center gap-1 sm:gap-2 z-10">
- <div className="flex items-center gap-1 bg-loss rounded-full px-1.5 sm:px-3 py-0.5 sm:py-1.5 shadow-lg shadow-red-500/30">
+ <div className="flex items-center gap-1 bg-loss rounded-full px-1.5 sm:px-3 py-0.5 sm:py-1.5 shadow-lg shadow-loss/30">
  <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-ink-raised opacity-75"></span>
  <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-ink-raised"></span>
@@ -463,7 +463,7 @@ const StreamCard = memo(function StreamCard({
  "border border-ink-edge/50",
  "hover:border-accent-core/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)]",
  "transition-all duration-500",
- selectionMode && isSelected && "ring-2 ring-cyan-400 ring-offset-2 ring-offset-slate-950"
+ selectionMode && isSelected && "ring-2 ring-accent-core ring-offset-2 ring-offset-slate-950"
  )} 
  data-testid={`stream-card-${stream.id}`}
  onClick={handleClick}
@@ -481,7 +481,7 @@ const StreamCard = memo(function StreamCard({
  <div className={cn(
  "absolute top-4 left-4 z-30 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all backdrop-blur-sm",
  isSelected 
- ? "bg-accent-core border-accent-core shadow-lg shadow-cyan-500/50" 
+ ? "bg-accent-core border-accent-core shadow-lg shadow-accent-core/50" 
  : "bg-ink-surface/80 border-ink-edge hover:border-accent-core"
  )}>
  {isSelected && <span className="text-primary text-xs font-bold">✓</span>}
@@ -532,14 +532,14 @@ const StreamCard = memo(function StreamCard({
  {/* Play button on hover */}
  <div className="absolute inset-0 flex items-center justify-center z-10">
  <div className="p-4 rounded-full bg-accent-core/20 backdrop-blur-sm border border-accent-core/30 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:scale-110">
- <Play className="w-8 h-8 text-accent-bright fill-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
+ <Play className="w-8 h-8 text-accent-bright fill-accent-bright drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
  </div>
  </div>
  
  {/* Enhanced LIVE indicator with neon glow */}
  {isLive && (
  <div className="absolute top-3 left-3 z-20">
- <div className="relative flex items-center gap-2 bg-ink-page/80 backdrop-blur-md rounded-xl px-3 py-1.5 border border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.4)]">
+ <div className="relative flex items-center gap-2 bg-ink-page/80 backdrop-blur-md rounded-xl px-3 py-1.5 border border-loss/50 shadow-[0_0_20px_rgba(239,68,68,0.4)]">
  <span className="relative flex h-2.5 w-2.5">
  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-loss opacity-75"></span>
  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-loss shadow-[0_0_10px_rgba(239,68,68,0.8)]"></span>
@@ -604,7 +604,7 @@ const StreamCard = memo(function StreamCard({
  <div className="relative group/avatar">
  <div className="absolute -inset-1 grad-surface grad-accent rounded-full opacity-0 group-hover:opacity-60 blur-sm transition-opacity duration-500 animate-[spin_4s_linear_infinite]" />
  <div className={cn(
- "relative w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 ring-2 overflow-hidden ring-cyan-500/30",
+ "relative w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 ring-2 overflow-hidden ring-accent-core/30",
  showBrandIcon ? brandFallback.bgColor : 'bg-ink-raised'
  )}>
  {showImage && (
@@ -778,7 +778,7 @@ const PastStreamCard = memo(function PastStreamCard({ stream }: { stream: PastSt
  <div className="relative aspect-video bg-ink-surface">
  <div className="absolute inset-0 flex items-center justify-center">
  <div className="p-3 rounded-full bg-accent-core/20 backdrop-blur-sm border border-accent-core/30 group-hover:bg-accent-core/30 transition-colors">
- <Play className="w-8 h-8 text-accent-bright fill-cyan-300" />
+ <Play className="w-8 h-8 text-accent-bright fill-accent-bright" />
  </div>
  </div>
  
@@ -806,7 +806,7 @@ const PastStreamCard = memo(function PastStreamCard({ stream }: { stream: PastSt
  <div className="p-3">
  <div className="flex items-start gap-2">
  <div className={cn(
- "w-8 h-8 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-cyan-500/20 flex items-center justify-center",
+ "w-8 h-8 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-accent-core/20 flex items-center justify-center",
  showBrandIcon ? brandFallback.bgColor : 'bg-ink-raised'
  )}>
  {showImage && (
@@ -857,10 +857,10 @@ const TopStreamerBadge = memo(function TopStreamerBadge({ streamer, rank }: { st
  const BrandIcon = brandFallback?.icon;
  
  const getRankColor = () => {
- if (rank === 1) return 'ring-amber-400/60';
+ if (rank === 1) return 'ring-warn/60';
  if (rank === 2) return 'ring-slate-400/60';
- if (rank === 3) return 'ring-amber-600/60';
- return 'ring-cyan-500/30';
+ if (rank === 3) return 'ring-warn/60';
+ return 'ring-accent-core/30';
  };
 
  const getRankIcon = () => {
@@ -1172,7 +1172,7 @@ export default function StreamsPage() {
  className={cn(
  "group relative rounded-xl overflow-hidden grad-surface border transition-all duration-300",
  isCompleted 
- ? "border-gain/50 hover:border-emerald-400/70 cursor-pointer" 
+ ? "border-gain/50 hover:border-gain/70 cursor-pointer" 
  : "border-ink-edge/50 hover:border-accent-core/50"
  )}
  >
@@ -1613,7 +1613,7 @@ export default function StreamsPage() {
  </div>
  {/* Orbiting dot */}
  <div className="absolute inset-0 animate-spin" style={{ animationDuration: '8s' }}>
- <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-cyan-400 shadow-lg shadow-cyan-400/50" />
+ <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-accent-core shadow-lg shadow-accent-core/50" />
  </div>
  </div>
  

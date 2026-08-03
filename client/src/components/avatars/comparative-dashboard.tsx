@@ -96,7 +96,7 @@ export const ComparativeDashboard = memo(function ComparativeDashboard({ entrepr
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted-foreground">Portfolio ROI</span>
-                <span className={`text-sm font-bold ${entrepreneur.portfolioRoi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                <span className={`text-sm font-bold ${entrepreneur.portfolioRoi >= 0 ? 'text-gain' : 'text-loss'}`}>
                   {entrepreneur.portfolioRoi >= 0 ? '+' : ''}{entrepreneur.portfolioRoi}%
                 </span>
               </div>
@@ -106,7 +106,7 @@ export const ComparativeDashboard = memo(function ComparativeDashboard({ entrepr
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted-foreground">Risk Score</span>
-                <span className={`text-sm font-bold ${entrepreneur.riskScore > 70 ? 'text-red-500' : entrepreneur.riskScore > 40 ? 'text-yellow-500' : 'text-green-500'}`}>
+                <span className={`text-sm font-bold ${entrepreneur.riskScore > 70 ? 'text-loss' : entrepreneur.riskScore > 40 ? 'text-warn' : 'text-gain'}`}>
                   {entrepreneur.riskScore}/100
                 </span>
               </div>
@@ -193,7 +193,7 @@ export const ComparativeDashboard = memo(function ComparativeDashboard({ entrepr
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-orange-500" />
+            <AlertTriangle className="h-5 w-5 text-warn" />
             Investment Track Record Summary
           </CardTitle>
         </CardHeader>
@@ -206,14 +206,14 @@ export const ComparativeDashboard = memo(function ComparativeDashboard({ entrepr
                 {/* Best Calls */}
                 {entrepreneur.bestCalls && entrepreneur.bestCalls.length > 0 && (
                   <div className="mb-3">
-                    <div className="flex items-center gap-1 text-xs text-green-500 font-medium mb-2">
+                    <div className="flex items-center gap-1 text-xs text-gain font-medium mb-2">
                       <TrendingUp className="h-3 w-3" />
                       Top Call
                     </div>
                     <div className="text-sm text-foreground">
                       {entrepreneur.bestCalls[0].investment}
                     </div>
-                    <div className="text-xs text-green-500 font-semibold">
+                    <div className="text-xs text-gain font-semibold">
                       +{entrepreneur.bestCalls[0].return} ROI
                     </div>
                   </div>
@@ -222,14 +222,14 @@ export const ComparativeDashboard = memo(function ComparativeDashboard({ entrepr
                 {/* Worst Calls */}
                 {entrepreneur.worstCalls && entrepreneur.worstCalls.length > 0 && (
                   <div>
-                    <div className="flex items-center gap-1 text-xs text-red-500 font-medium mb-2">
+                    <div className="flex items-center gap-1 text-xs text-loss font-medium mb-2">
                       <TrendingDown className="h-3 w-3" />
                       Biggest Miss
                     </div>
                     <div className="text-sm text-foreground">
                       {entrepreneur.worstCalls[0].investment}
                     </div>
-                    <div className="text-xs text-red-500 font-semibold">
+                    <div className="text-xs text-loss font-semibold">
                       {entrepreneur.worstCalls[0].return} ROI
                     </div>
                   </div>
@@ -248,7 +248,7 @@ export const ComparativeDashboard = memo(function ComparativeDashboard({ entrepr
         <CardContent>
           <div className="space-y-3">
             <div className="flex items-start gap-3">
-              <div className="w-2 h-2 rounded-full bg-green-500 mt-1.5" />
+              <div className="w-2 h-2 rounded-full bg-gain mt-1.5" />
               <div>
                 <p className="text-sm font-medium text-foreground">Highest ROI</p>
                 <p className="text-xs text-muted-foreground">
@@ -266,7 +266,7 @@ export const ComparativeDashboard = memo(function ComparativeDashboard({ entrepr
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="w-2 h-2 rounded-full bg-orange-500 mt-1.5" />
+              <div className="w-2 h-2 rounded-full bg-warn mt-1.5" />
               <div>
                 <p className="text-sm font-medium text-foreground">Lowest Risk</p>
                 <p className="text-xs text-muted-foreground">

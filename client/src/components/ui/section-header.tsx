@@ -26,7 +26,7 @@ export function SectionHeader({
       {badge && (
         <div className={cn(
           "inline-flex items-center gap-1.5 px-3 py-1 rounded-full",
-          "bg-cyan-500/5 border border-cyan-500/30 text-cyan-400 text-[10px] font-medium tracking-wider uppercase",
+          "bg-accent-core/5 border border-accent-core/30 text-accent-bright text-[10px] font-medium tracking-wider uppercase",
           align === "center" ? "mx-auto" : ""
         )}>
           {badgeIcon}

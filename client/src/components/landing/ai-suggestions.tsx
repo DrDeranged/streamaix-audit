@@ -381,7 +381,7 @@ export function AISuggestions() {
                                 <h4 className="text-base font-bold text-primary group-hover:text-accent-bright transition-colors leading-snug line-clamp-2">
                                   {rec.data.title}
                                 </h4>
-                                <Badge className="bg-cyan-500/20 text-accent-bright border-accent-core/40 text-sm font-bold font-mono px-3 py-1 flex-shrink-0">
+                                <Badge className="bg-accent-core/20 text-accent-bright border-accent-core/40 text-sm font-bold font-mono px-3 py-1 flex-shrink-0">
                                   {Math.round(rec.score)}%
                                 </Badge>
                               </div>
@@ -520,7 +520,7 @@ export function AISuggestions() {
                                 <h4 className="text-lg font-bold text-primary font-mono mb-1">{asset.symbol}</h4>
                                 <p className="text-sm text-secondary">{asset.name}</p>
                               </div>
-                              <Badge className="bg-green-500/20 text-gain border-gain/40 text-xs font-bold px-3 py-1.5 flex-shrink-0">
+                              <Badge className="bg-gain/20 text-gain border-gain/40 text-xs font-bold px-3 py-1.5 flex-shrink-0">
                                 {asset.type.toUpperCase()}
                               </Badge>
                             </div>
@@ -544,7 +544,7 @@ export function AISuggestions() {
                   This report is updated in real-time based on your activity and market conditions
                 </p>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                  <div className="w-2 h-2 bg-gain rounded-full animate-pulse" />
                   <span className="text-xs text-gain font-mono">Live</span>
                 </div>
               </div>

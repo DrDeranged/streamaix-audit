@@ -425,7 +425,7 @@ export default function NewsletterAdmin() {
  
  <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
  <div className="flex items-center gap-4">
- <div className="p-4 rounded-xl bg-ink-surface shadow-lg shadow-cyan-500/30">
+ <div className="p-4 rounded-xl bg-ink-surface shadow-lg shadow-accent-core/30">
  <LayoutDashboard className="w-8 h-8 text-primary" />
  </div>
  <div>
@@ -498,7 +498,7 @@ export default function NewsletterAdmin() {
  </div>
  </div>
 
- <div className="relative group overflow-hidden rounded-xl bg-ink-surface border border-warn p-5 hover:border-amber-400/50 transition-all duration-300">
+ <div className="relative group overflow-hidden rounded-xl bg-ink-surface border border-warn p-5 hover:border-warn/50 transition-all duration-300">
  <div className="absolute inset-0 bg-ink-surface opacity-0 group-hover:opacity-100 transition-opacity" />
  <div className="relative">
  <div className="flex items-center justify-between mb-4">
@@ -520,7 +520,7 @@ export default function NewsletterAdmin() {
  </div>
  </div>
 
- <div className="relative group overflow-hidden rounded-xl bg-ink-surface border border-accent-core p-5 hover:border-cyan-400/50 transition-all duration-300">
+ <div className="relative group overflow-hidden rounded-xl bg-ink-surface border border-accent-core p-5 hover:border-accent-core/50 transition-all duration-300">
  <div className="absolute inset-0 bg-ink-surface opacity-0 group-hover:opacity-100 transition-opacity" />
  <div className="relative">
  <div className="flex items-center justify-between mb-4">
@@ -545,7 +545,7 @@ export default function NewsletterAdmin() {
 
  {/* Trading Stats - Enhanced Row */}
  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
- <div className="relative group overflow-hidden rounded-xl bg-ink-surface border border-gain p-5 hover:border-emerald-400/50 transition-all duration-300">
+ <div className="relative group overflow-hidden rounded-xl bg-ink-surface border border-gain p-5 hover:border-gain/50 transition-all duration-300">
  <div className="absolute inset-0 bg-ink-surface opacity-0 group-hover:opacity-100 transition-opacity" />
  <div className="relative flex items-center gap-4">
  <div className="p-3 rounded-xl bg-gain/10 border border-gain">
@@ -825,8 +825,8 @@ export default function NewsletterAdmin() {
  
  const iconColor = activity.type === 'user' ? 'text-accent-bright bg-accent-core/10 border-accent-core/20' :
  activity.type === 'summary' ? 'text-accent-bright bg-accent-core/10 border-accent-core/20' :
- activity.type === 'bounty' ? 'text-amber-400 bg-amber-500/10 border-amber-500/20' :
- 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20';
+ activity.type === 'bounty' ? 'text-warn bg-warn/10 border-warn/20' :
+ 'text-accent-bright bg-accent-core/10 border-accent-core/20';
 
  return (
  <div
@@ -962,24 +962,24 @@ export default function NewsletterAdmin() {
  const statusStyles = {
  active: {
  bg: 'bg-ink-surface',
- border: 'border-emerald-500/50',
- badge: 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300',
- icon: 'text-emerald-400',
- glow: 'shadow-emerald-500/20'
+ border: 'border-gain/50',
+ badge: 'bg-gain/20 border-gain/40 text-gain',
+ icon: 'text-gain',
+ glow: 'shadow-gain/20'
  },
  warning: {
  bg: 'bg-ink-surface',
- border: 'border-amber-500/50',
- badge: 'bg-amber-500/20 border-amber-500/40 text-amber-300',
- icon: 'text-amber-400',
+ border: 'border-warn/50',
+ badge: 'bg-warn/20 border-warn/40 text-warn',
+ icon: 'text-warn',
  glow: ''
  },
  error: {
  bg: 'bg-ink-surface',
- border: 'border-red-500/50',
- badge: 'bg-red-500/20 border-red-500/40 text-red-300',
- icon: 'text-red-400',
- glow: 'shadow-red-500/20'
+ border: 'border-loss/50',
+ badge: 'bg-loss/20 border-loss/40 text-loss',
+ icon: 'text-loss',
+ glow: 'shadow-loss/20'
  },
  idle: {
  bg: 'bg-ink-surface',
@@ -1056,8 +1056,8 @@ export default function NewsletterAdmin() {
  </span>
  <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${
  action.status === 'success' 
- ? 'bg-emerald-500/20 text-emerald-300'
- : 'bg-red-500/20 text-red-300'
+ ? 'bg-gain/20 text-gain'
+ : 'bg-loss/20 text-loss'
  }`}>
  {action.status}
  </span>
@@ -1155,8 +1155,8 @@ export default function NewsletterAdmin() {
  <div className="relative group">
  <div className={`p-4 rounded-xl border-2 transition-all duration-300 ${
  status?.isRunning 
- ? 'bg-ink-surface border-emerald-500/50 shadow-lg shadow-emerald-500/20' 
- : 'bg-ink-surface border-red-500/50'
+ ? 'bg-ink-surface border-gain/50 shadow-lg shadow-gain/20' 
+ : 'bg-ink-surface border-loss/50'
  }`}>
  <div className="flex items-center gap-3 mb-2">
  {status?.isRunning ? (
@@ -1174,7 +1174,7 @@ export default function NewsletterAdmin() {
 
  {/* Morning Send (8am EST) */}
  <div className="relative group">
- <div className="p-4 rounded-xl bg-ink-surface border-2 border-accent-core transition-all duration-300 hover:border-accent-core/70 hover:shadow-lg hover:shadow-blue-500/20">
+ <div className="p-4 rounded-xl bg-ink-surface border-2 border-accent-core transition-all duration-300 hover:border-accent-core/70 hover:shadow-lg hover:shadow-accent-core/20">
  <div className="font-bold text-primary text-base mb-2">
  {status?.nextMorning || 'Loading...'}
  </div>
@@ -1192,7 +1192,7 @@ export default function NewsletterAdmin() {
 
  {/* Afternoon Send (4pm EST) */}
  <div className="relative group">
- <div className="p-4 rounded-xl bg-ink-surface border-2 border-accent-core transition-all duration-300 hover:border-cyan-400/70 hover:shadow-lg hover:shadow-cyan-500/20">
+ <div className="p-4 rounded-xl bg-ink-surface border-2 border-accent-core transition-all duration-300 hover:border-accent-core/70 hover:shadow-lg hover:shadow-accent-core/20">
  <div className="font-bold text-primary text-base mb-2">
  {status?.nextAfternoon || 'Loading...'}
  </div>
@@ -1200,7 +1200,7 @@ export default function NewsletterAdmin() {
  <Button
  variant="outline"
  onClick={() => window.open('/api/newsletter/preview', '_blank')}
- className="w-full h-8 text-xs border border-accent-core hover:border-cyan-400/60 hover:bg-cyan-500/10 text-accent-bright font-semibold rounded-xl transition-all duration-300"
+ className="w-full h-8 text-xs border border-accent-core hover:border-accent-core/60 hover:bg-accent-core/10 text-accent-bright font-semibold rounded-xl transition-all duration-300"
  >
  <Eye className="w-3 h-3 mr-1" />
  Preview
@@ -1486,7 +1486,7 @@ export default function NewsletterAdmin() {
  onClick={handleDisconnectWallet}
  variant="outline"
  size="sm"
- className="border-loss hover:border-red-400/60 hover:bg-red-500/10 text-loss"
+ className="border-loss hover:border-loss/60 hover:bg-loss/10 text-loss"
  data-testid="button-disconnect-wallet"
  >
  Disconnect

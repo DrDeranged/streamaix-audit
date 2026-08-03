@@ -360,11 +360,11 @@ function CorrelationHeatmap() {
   ];
   
   const getColor = (value: number) => {
-    if (value >= 0.8) return 'bg-emerald-500';
-    if (value >= 0.6) return 'bg-emerald-600/70';
-    if (value >= 0.4) return 'bg-amber-500/70';
+    if (value >= 0.8) return 'bg-gain';
+    if (value >= 0.6) return 'bg-gain/70';
+    if (value >= 0.4) return 'bg-warn/70';
     if (value >= 0.2) return 'bg-warn/70';
-    return 'bg-red-500/70';
+    return 'bg-loss/70';
   };
   
   return (
@@ -400,15 +400,15 @@ function CorrelationHeatmap() {
       </div>
       <div className="flex items-center justify-center gap-4 mt-4">
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded bg-red-500/70" />
+          <div className="w-3 h-3 rounded bg-loss/70" />
            <span className="text-[10px] text-muted">Low</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded bg-amber-500/70" />
+          <div className="w-3 h-3 rounded bg-warn/70" />
            <span className="text-[10px] text-muted">Medium</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded bg-emerald-500" />
+          <div className="w-3 h-3 rounded bg-gain" />
            <span className="text-[10px] text-muted">High</span>
         </div>
       </div>
@@ -1051,7 +1051,7 @@ export default function Discover() {
               <div className="relative p-3 rounded-xl bg-ink-surface border border-ink-edge backdrop-blur-sm hover:border-accent-core/30 transition-all">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-secondary">S&P 500</span>
-                  <Badge className={`text-xs px-1.5 py-0 ${indexFutures[0].change >= 0 ? 'bg-emerald-500/20 text-gain' : 'bg-red-500/20 text-loss'}`}>
+                  <Badge className={`text-xs px-1.5 py-0 ${indexFutures[0].change >= 0 ? 'bg-gain/20 text-gain' : 'bg-loss/20 text-loss'}`}>
                     {indexFutures[0].change >= 0 ? '+' : ''}{indexFutures[0].changePercent?.toFixed(2)}%
                   </Badge>
                 </div>
@@ -1067,7 +1067,7 @@ export default function Discover() {
               <div className="relative p-3 rounded-xl bg-ink-surface border border-ink-edge backdrop-blur-sm hover:border-accent-core/30 transition-all">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-secondary">Nasdaq</span>
-                  <Badge className={`text-xs px-1.5 py-0 ${indexFutures[1].change >= 0 ? 'bg-emerald-500/20 text-gain' : 'bg-red-500/20 text-loss'}`}>
+                  <Badge className={`text-xs px-1.5 py-0 ${indexFutures[1].change >= 0 ? 'bg-gain/20 text-gain' : 'bg-loss/20 text-loss'}`}>
                     {indexFutures[1].change >= 0 ? '+' : ''}{indexFutures[1].changePercent?.toFixed(2)}%
                   </Badge>
                 </div>
@@ -1084,9 +1084,9 @@ export default function Discover() {
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-secondary">VIX</span>
                   <Badge className={`text-xs px-1.5 py-0 ${
-                    volatilityIndices.vix.level === 'low' ? 'bg-emerald-500/20 text-gain' :
+                    volatilityIndices.vix.level === 'low' ? 'bg-gain/20 text-gain' :
                     volatilityIndices.vix.level === 'moderate' ? 'bg-warn/20 text-warn' :
-                    'bg-red-500/20 text-loss'
+                    'bg-loss/20 text-loss'
                   }`}>
                     {volatilityIndices.vix.level}
                   </Badge>
@@ -1103,7 +1103,7 @@ export default function Discover() {
               <div className="relative p-3 rounded-xl bg-ink-surface border border-ink-edge backdrop-blur-sm hover:border-gain/30 transition-all">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-secondary">DXY</span>
-                  <Badge className={`text-xs px-1.5 py-0 ${volatilityIndices.dxy.change >= 0 ? 'bg-emerald-500/20 text-gain' : 'bg-red-500/20 text-loss'}`}>
+                  <Badge className={`text-xs px-1.5 py-0 ${volatilityIndices.dxy.change >= 0 ? 'bg-gain/20 text-gain' : 'bg-loss/20 text-loss'}`}>
                     {volatilityIndices.dxy.change >= 0 ? '+' : ''}{volatilityIndices.dxy.changePercent?.toFixed(2)}%
                   </Badge>
                 </div>
@@ -1119,7 +1119,7 @@ export default function Discover() {
               <div className="relative p-3 rounded-xl bg-ink-surface border border-ink-edge backdrop-blur-sm hover:border-accent-core/30 transition-all">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-secondary">10Y Yield</span>
-                  <Badge className={`text-xs px-1.5 py-0 ${treasuryYields['10Y'].change >= 0 ? 'bg-red-500/20 text-loss' : 'bg-emerald-500/20 text-gain'}`}>
+                  <Badge className={`text-xs px-1.5 py-0 ${treasuryYields['10Y'].change >= 0 ? 'bg-loss/20 text-loss' : 'bg-gain/20 text-gain'}`}>
                     {treasuryYields['10Y'].change >= 0 ? '+' : ''}{(treasuryYields['10Y'].change * 100)?.toFixed(1)}bp
                   </Badge>
                 </div>
@@ -1283,7 +1283,7 @@ export default function Discover() {
                         <p className="text-sm font-medium text-primary truncate">{stock.name}</p>
                         <p className="text-xs text-muted">{stock.sector}</p>
                       </div>
-                      <Badge className={`text-xs px-1.5 ${stock.changePercent >= 0 ? 'bg-emerald-500/10 text-gain' : 'bg-red-500/10 text-loss'}`}>
+                      <Badge className={`text-xs px-1.5 ${stock.changePercent >= 0 ? 'bg-gain/10 text-gain' : 'bg-loss/10 text-loss'}`}>
                         {stock.reason}
                       </Badge>
                     </div>
@@ -1303,11 +1303,11 @@ export default function Discover() {
                     <TrendingUp className="w-4 h-4 text-gain" />
                     <span className="text-sm font-medium text-primary">Stock Gainers</span>
                   </div>
-                  <Badge className="bg-emerald-500/10 text-gain border border-gain/30 text-xs px-2">Tech/AI</Badge>
+                  <Badge className="bg-gain/10 text-gain border border-gain/30 text-xs px-2">Tech/AI</Badge>
                 </div>
                 <div className="space-y-2">
                   {stockGainers.slice(0, 6).map((stock: any, idx: number) => (
-                    <div key={stock.symbol} className="flex items-center gap-3 p-2 rounded-xl bg-emerald-500/5 hover:bg-emerald-500/10 transition-colors">
+                    <div key={stock.symbol} className="flex items-center gap-3 p-2 rounded-xl bg-gain/5 hover:bg-gain/10 transition-colors">
                       <span className="text-xs text-muted w-4">#{idx + 1}</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-primary truncate">{stock.symbol}</p>
@@ -1331,11 +1331,11 @@ export default function Discover() {
                     <TrendingDown className="w-4 h-4 text-loss" />
                     <span className="text-sm font-medium text-primary">Stock Losers</span>
                   </div>
-                  <Badge className="bg-red-500/10 text-loss border border-loss/30 text-xs px-2">Tech/AI</Badge>
+                  <Badge className="bg-loss/10 text-loss border border-loss/30 text-xs px-2">Tech/AI</Badge>
                 </div>
                 <div className="space-y-2">
                   {stockLosers.slice(0, 6).map((stock: any, idx: number) => (
-                    <div key={stock.symbol} className="flex items-center gap-3 p-2 rounded-xl bg-red-500/5 hover:bg-red-500/10 transition-colors">
+                    <div key={stock.symbol} className="flex items-center gap-3 p-2 rounded-xl bg-loss/5 hover:bg-loss/10 transition-colors">
                       <span className="text-xs text-muted w-4">#{idx + 1}</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-primary truncate">{stock.symbol}</p>
@@ -1365,8 +1365,8 @@ export default function Discover() {
                     <span className="text-sm font-medium text-primary">Derivatives</span>
                   </div>
                   <Badge className={`text-xs px-2 ${
-                    derivatives?.fundingRateSummary?.sentiment === 'bullish' ? 'bg-emerald-500/10 text-gain border-gain/30' :
-                    derivatives?.fundingRateSummary?.sentiment === 'bearish' ? 'bg-red-500/10 text-loss border-loss/30' :
+                    derivatives?.fundingRateSummary?.sentiment === 'bullish' ? 'bg-gain/10 text-gain border-gain/30' :
+                    derivatives?.fundingRateSummary?.sentiment === 'bearish' ? 'bg-loss/10 text-loss border-loss/30' :
                     'bg-ink-raised/10 text-secondary border-ink-edge/30'
                   }`}>
                     {derivatives?.fundingRateSummary?.sentiment || 'Loading...'}
@@ -1414,9 +1414,9 @@ export default function Discover() {
                   </div>
                   {onchain?.networkHealth && (
                     <Badge className={`text-xs px-2 ${
-                      onchain.networkHealth.score >= 80 ? 'bg-emerald-500/10 text-gain border-gain/30' :
-                      onchain.networkHealth.score >= 60 ? 'bg-amber-500/10 text-warn border-warn/30' :
-                      'bg-red-500/10 text-loss border-loss/30'
+                      onchain.networkHealth.score >= 80 ? 'bg-gain/10 text-gain border-gain/30' :
+                      onchain.networkHealth.score >= 60 ? 'bg-warn/10 text-warn border-warn/30' :
+                      'bg-loss/10 text-loss border-loss/30'
                     }`}>
                       Health: {onchain.networkHealth.score}%
                     </Badge>
@@ -1468,16 +1468,16 @@ export default function Discover() {
             {/* Volatility Index */}
             <div className="relative group">
               <div className="absolute inset-0 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative p-4 rounded-xl bg-ink-surface border border-ink-edge backdrop-blur-sm hover:border-rose-500/30 transition-all h-full">
+              <div className="relative p-4 rounded-xl bg-ink-surface border border-ink-edge backdrop-blur-sm hover:border-loss/30 transition-all h-full">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <Waves className="w-4 h-4 text-rose-400" />
+                    <Waves className="w-4 h-4 text-loss" />
                     <span className="text-sm font-medium text-primary">Volatility</span>
                   </div>
                   {volatility && (
                     <Badge className={`text-xs px-2 ${
-                      volatility.volTrend === 'increasing' ? 'bg-red-500/10 text-loss border-loss/30' :
-                      'bg-emerald-500/10 text-gain border-gain/30'
+                      volatility.volTrend === 'increasing' ? 'bg-loss/10 text-loss border-loss/30' :
+                      'bg-gain/10 text-gain border-gain/30'
                     }`}>
                       {volatility.volTrend === 'increasing' ? 'Rising' : 'Falling'}
                     </Badge>
@@ -1490,7 +1490,7 @@ export default function Discover() {
                       <p className="text-3xl font-bold text-primary">{volatility.marketVolIndex.toFixed(1)}%</p>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="p-2 rounded-xl bg-amber-500/10">
+                      <div className="p-2 rounded-xl bg-warn/10">
                         <p className="text-secondary mb-0.5">BTC 30d</p>
                         <p className="text-warn font-bold">{volatility.btcVolatility.realized30d.toFixed(1)}%</p>
                       </div>
@@ -1503,7 +1503,7 @@ export default function Discover() {
                       <p className="text-xs text-muted mb-1">High Vol Assets</p>
                       <div className="flex gap-1">
                         {volatility.highVolAssets.map((a: any, i: number) => (
-                          <Badge key={i} className="bg-red-500/10 text-loss text-xs px-1.5">
+                          <Badge key={i} className="bg-loss/10 text-loss text-xs px-1.5">
                             {a.symbol} {a.volatility.toFixed(0)}%
                           </Badge>
                         ))}
@@ -1527,16 +1527,16 @@ export default function Discover() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge className={`text-xs px-2 ${
-                      aiPredictions.marketOutlook === 'Bullish' ? 'bg-emerald-500/10 text-gain border-gain/30' :
-                      aiPredictions.marketOutlook === 'Bearish' ? 'bg-red-500/10 text-loss border-loss/30' :
-                      'bg-amber-500/10 text-warn border-warn/30'
+                      aiPredictions.marketOutlook === 'Bullish' ? 'bg-gain/10 text-gain border-gain/30' :
+                      aiPredictions.marketOutlook === 'Bearish' ? 'bg-loss/10 text-loss border-loss/30' :
+                      'bg-warn/10 text-warn border-warn/30'
                     }`}>
                       {aiPredictions.marketOutlook}
                     </Badge>
                     <Badge className={`text-xs px-2 ${
-                      aiPredictions.riskLevel === 'Low' ? 'bg-emerald-500/10 text-gain' :
-                      aiPredictions.riskLevel === 'High' ? 'bg-red-500/10 text-loss' :
-                      'bg-amber-500/10 text-warn'
+                      aiPredictions.riskLevel === 'Low' ? 'bg-gain/10 text-gain' :
+                      aiPredictions.riskLevel === 'High' ? 'bg-loss/10 text-loss' :
+                      'bg-warn/10 text-warn'
                     }`}>
                       Risk: {aiPredictions.riskLevel}
                     </Badge>
@@ -1548,8 +1548,8 @@ export default function Discover() {
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-bold text-primary">{p.symbol}</span>
                         <Badge className={`text-xs px-1.5 ${
-                          p.trend === 'bullish' ? 'bg-emerald-500/20 text-gain' :
-                          p.trend === 'bearish' ? 'bg-red-500/20 text-loss' :
+                          p.trend === 'bullish' ? 'bg-gain/20 text-gain' :
+                          p.trend === 'bearish' ? 'bg-loss/20 text-loss' :
                           'bg-ink-raised/20 text-secondary'
                         }`}>
                           {p.trend}
@@ -1583,19 +1583,19 @@ export default function Discover() {
               <div className="relative p-4 rounded-xl bg-ink-surface border border-ink-edge backdrop-blur-sm hover:border-accent-core/30 transition-all">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <BarChart3 className="w-4 h-4 text-teal-400" />
+                    <BarChart3 className="w-4 h-4 text-accent-bright" />
                     <span className="text-sm font-medium text-primary">Sector Performance</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge className={`text-xs px-2 ${
-                      categories.sectorRotation === 'risk-on' ? 'bg-emerald-500/10 text-gain border-gain/30' :
-                      categories.sectorRotation === 'risk-off' ? 'bg-red-500/10 text-loss border-loss/30' :
+                      categories.sectorRotation === 'risk-on' ? 'bg-gain/10 text-gain border-gain/30' :
+                      categories.sectorRotation === 'risk-off' ? 'bg-loss/10 text-loss border-loss/30' :
                       'bg-ink-raised/10 text-secondary border-ink-edge/30'
                     }`}>
                       {categories.sectorRotation === 'risk-on' ? 'Risk On' : categories.sectorRotation === 'risk-off' ? 'Risk Off' : 'Neutral'}
                     </Badge>
                     {categories.hotSector && (
-                      <Badge className="bg-emerald-500/10 text-gain border border-gain/30 text-xs px-2">
+                      <Badge className="bg-gain/10 text-gain border border-gain/30 text-xs px-2">
                         Hot: {categories.hotSector}
                       </Badge>
                     )}
@@ -1613,7 +1613,7 @@ export default function Discover() {
                       </div>
                       <div className="w-full h-0.5 bg-ink-raised/50 rounded-full mt-1">
                         <div 
-                          className={`h-full rounded-full ${cat.change24h >= 0 ? 'bg-emerald-500' : 'bg-red-500'}`}
+                          className={`h-full rounded-full ${cat.change24h >= 0 ? 'bg-gain' : 'bg-loss'}`}
                           style={{ width: `${Math.min(Math.abs(cat.change24h) * 5, 100)}%` }}
                         />
                       </div>
@@ -1637,11 +1637,11 @@ export default function Discover() {
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-medium text-secondary">Fear & Greed</span>
                   <Badge className={`text-xs px-2 py-0.5 ${
-                    fearGreed.value <= 25 ? 'bg-red-500/20 text-loss' :
+                    fearGreed.value <= 25 ? 'bg-loss/20 text-loss' :
                     fearGreed.value <= 45 ? 'bg-warn/20 text-warn' :
                     fearGreed.value <= 55 ? 'bg-warn/20 text-warn' :
-                    fearGreed.value <= 75 ? 'bg-lime-500/20 text-lime-400' :
-                    'bg-emerald-500/20 text-gain'
+                    fearGreed.value <= 75 ? 'bg-gain/20 text-gain' :
+                    'bg-gain/20 text-gain'
                   }`}>
                     {fearGreed.valueClassification}
                   </Badge>
@@ -1717,10 +1717,10 @@ export default function Discover() {
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-medium text-secondary">ETH Gas</span>
                   <Badge className={`text-xs px-2 py-0.5 ${
-                    gasTracker.congestionLevel === 'low' ? 'bg-emerald-500/20 text-gain' :
+                    gasTracker.congestionLevel === 'low' ? 'bg-gain/20 text-gain' :
                     gasTracker.congestionLevel === 'medium' ? 'bg-warn/20 text-warn' :
                     gasTracker.congestionLevel === 'high' ? 'bg-warn/20 text-warn' :
-                    'bg-red-500/20 text-loss'
+                    'bg-loss/20 text-loss'
                   }`}>
                     {gasTracker.congestionLevel}
                   </Badge>
@@ -1750,8 +1750,8 @@ export default function Discover() {
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-medium text-secondary">Funding Rates</span>
                   <Badge className={`text-xs px-2 py-0.5 ${
-                    fundingRates.sentiment === 'bullish' ? 'bg-emerald-500/20 text-gain' :
-                    fundingRates.sentiment === 'bearish' ? 'bg-red-500/20 text-loss' :
+                    fundingRates.sentiment === 'bullish' ? 'bg-gain/20 text-gain' :
+                    fundingRates.sentiment === 'bearish' ? 'bg-loss/20 text-loss' :
                     'bg-ink-raised/20 text-secondary'
                   }`}>
                     {fundingRates.sentiment}
@@ -1805,7 +1805,7 @@ export default function Discover() {
                           <p className="text-xs text-muted">${coin.price?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
                         </div>
                       </div>
-                      <Badge className="bg-emerald-500/20 text-gain border-0">
+                      <Badge className="bg-gain/20 text-gain border-0">
                         +{coin.change24h?.toFixed(2)}%
                       </Badge>
                     </div>
@@ -1836,7 +1836,7 @@ export default function Discover() {
                           <p className="text-xs text-muted">${coin.price?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
                         </div>
                       </div>
-                      <Badge className="bg-red-500/20 text-loss border-0">
+                      <Badge className="bg-loss/20 text-loss border-0">
                         {coin.change24h?.toFixed(2)}%
                       </Badge>
                     </div>
@@ -1937,14 +1937,14 @@ export default function Discover() {
               ) : (
                 whaleAlerts.slice(0, 6).map((alert: any, idx: number) => (
                   <div key={alert.id || idx} className={`p-3 rounded-xl border ${
-                    alert.significance === 'high' ? 'bg-red-500/10 border-loss/30' :
-                    alert.significance === 'medium' ? 'bg-amber-500/10 border-warn/30' :
+                    alert.significance === 'high' ? 'bg-loss/10 border-loss/30' :
+                    alert.significance === 'medium' ? 'bg-warn/10 border-warn/30' :
                     'bg-ink-surface border-ink-edge'
                   }`}>
                     <div className="flex items-center justify-between mb-2">
                       <Badge className={`text-xs ${
-                        alert.type === 'exchange_deposit' ? 'bg-red-500/20 text-loss' :
-                        alert.type === 'exchange_withdrawal' ? 'bg-emerald-500/20 text-gain' :
+                        alert.type === 'exchange_deposit' ? 'bg-loss/20 text-loss' :
+                        alert.type === 'exchange_withdrawal' ? 'bg-gain/20 text-gain' :
                         'bg-accent-core/20 text-accent-bright'
                       }`}>
                         {alert.type === 'exchange_deposit' ? 'Exchange In' :
@@ -1995,7 +1995,7 @@ export default function Discover() {
                   <div key={future.symbol} className="p-3 rounded-xl bg-ink-surface border border-ink-edge backdrop-blur-sm hover:border-accent-core/30 transition-all">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs text-secondary">{future.symbol}</span>
-                      <Badge className={`text-[10px] px-1.5 ${future.change >= 0 ? 'bg-emerald-500/20 text-gain' : 'bg-red-500/20 text-loss'}`}>
+                      <Badge className={`text-[10px] px-1.5 ${future.change >= 0 ? 'bg-gain/20 text-gain' : 'bg-loss/20 text-loss'}`}>
                         {future.change >= 0 ? '+' : ''}{future.changePercent?.toFixed(2)}%
                       </Badge>
                     </div>
@@ -2012,9 +2012,9 @@ export default function Discover() {
                     <Landmark className="w-4 h-4 text-accent-bright" />
                     <h3 className="text-xs font-medium text-primary">Treasury Yields</h3>
                     <Badge className={`ml-auto text-[10px] px-1.5 ${
-                      yieldCurveStatus === 'inverted' ? 'bg-red-500/20 text-loss' :
+                      yieldCurveStatus === 'inverted' ? 'bg-loss/20 text-loss' :
                       yieldCurveStatus === 'flat' ? 'bg-warn/20 text-warn' :
-                      'bg-emerald-500/20 text-gain'
+                      'bg-gain/20 text-gain'
                     }`}>
                       {yieldCurveStatus}
                     </Badge>
@@ -2092,7 +2092,7 @@ export default function Discover() {
                     <PiggyBank className="w-4 h-4 text-gain" />
                     <h3 className="text-xs font-medium text-primary">Global M2 Liquidity</h3>
                     <Badge className={`ml-auto text-[10px] px-1.5 ${
-                      globalM2.global?.trend === 'expanding' ? 'bg-emerald-500/20 text-gain' : 'bg-red-500/20 text-loss'
+                      globalM2.global?.trend === 'expanding' ? 'bg-gain/20 text-gain' : 'bg-loss/20 text-loss'
                     }`}>
                       {globalM2.global?.trend || 'neutral'}
                     </Badge>
@@ -2144,7 +2144,7 @@ export default function Discover() {
                       macroCalendar.slice(0, 4).map((event: any, idx: number) => (
                         <div key={idx} className="flex items-center gap-2 p-1.5 rounded bg-ink-surface/30">
                           <div className={`w-1.5 h-1.5 rounded-full ${
-                            event.impact === 'high' ? 'bg-red-400' :
+                            event.impact === 'high' ? 'bg-loss' :
                             event.impact === 'medium' ? 'bg-warn' : 'bg-secondary'
                           }`} />
                           <p className="text-[10px] text-primary truncate flex-1">{event.event}</p>
@@ -2298,7 +2298,7 @@ export default function Discover() {
               <div className="flex items-center gap-2 mb-4">
                 <Wallet className="w-5 h-5 text-warn" />
                 <h3 className="text-sm font-bold text-primary">Exchange Reserves</h3>
-                <Badge className="ml-auto bg-amber-500/10 text-warn border-warn/30 text-xs">
+                <Badge className="ml-auto bg-warn/10 text-warn border-warn/30 text-xs">
                   On-Chain
                 </Badge>
               </div>
@@ -2311,8 +2311,8 @@ export default function Discover() {
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium text-primary">{reserve.exchange}</span>
                         <Badge className={`text-xs ${
-                          reserve.trend === 'accumulating' ? 'bg-emerald-500/20 text-gain' :
-                          reserve.trend === 'distributing' ? 'bg-red-500/20 text-loss' :
+                          reserve.trend === 'accumulating' ? 'bg-gain/20 text-gain' :
+                          reserve.trend === 'distributing' ? 'bg-loss/20 text-loss' :
                           'bg-ink-raised/20 text-secondary'
                         }`}>
                           {reserve.trend}
@@ -2348,7 +2348,7 @@ export default function Discover() {
               <div className="flex items-center gap-2 mb-4">
                 <CircleDollarSign className="w-5 h-5 text-gain" />
                 <h3 className="text-sm font-bold text-primary">Stablecoin Flows</h3>
-                <Badge className="ml-auto bg-emerald-500/10 text-gain border-gain/30 text-xs">
+                <Badge className="ml-auto bg-gain/10 text-gain border-gain/30 text-xs">
                   Liquidity
                 </Badge>
               </div>
@@ -2362,8 +2362,8 @@ export default function Discover() {
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-bold text-primary">{flow.coin}</span>
                           <Badge className={`text-xs ${
-                            flow.marketImpact === 'bullish' ? 'bg-emerald-500/20 text-gain' :
-                            flow.marketImpact === 'bearish' ? 'bg-red-500/20 text-loss' :
+                            flow.marketImpact === 'bullish' ? 'bg-gain/20 text-gain' :
+                            flow.marketImpact === 'bearish' ? 'bg-loss/20 text-loss' :
                             'bg-ink-raised/20 text-secondary'
                           }`}>
                             {flow.marketImpact}
@@ -2379,7 +2379,7 @@ export default function Discover() {
                       </div>
                       <div className="w-full h-1.5 bg-ink-raised rounded-full overflow-hidden mt-2">
                         <div 
-                          className={`h-full rounded-full ${flow.netFlow >= 0 ? 'bg-emerald-500' : 'bg-red-500'}`}
+                          className={`h-full rounded-full ${flow.netFlow >= 0 ? 'bg-gain' : 'bg-loss'}`}
                           style={{ width: `${Math.min(Math.abs(flow.netFlow) / 5e8 * 100, 100)}%` }}
                         />
                       </div>
@@ -2449,8 +2449,8 @@ export default function Discover() {
                           {opt.asset}
                         </span>
                         <Badge className={`text-xs ${
-                          opt.sentiment === 'bullish' ? 'bg-emerald-500/20 text-gain' :
-                          opt.sentiment === 'bearish' ? 'bg-red-500/20 text-loss' :
+                          opt.sentiment === 'bullish' ? 'bg-gain/20 text-gain' :
+                          opt.sentiment === 'bearish' ? 'bg-loss/20 text-loss' :
                           'bg-ink-raised/20 text-secondary'
                         }`}>
                           {opt.sentiment}
@@ -2489,7 +2489,7 @@ export default function Discover() {
                       <span className="w-16 text-right text-secondary">${(level.price / 1000)?.toFixed(1)}K</span>
                       <div className="flex-1 h-2 bg-ink-raised rounded-full overflow-hidden">
                         <div 
-                          className={`h-full rounded-full ${isAbove ? 'bg-red-500' : 'bg-emerald-500'}`}
+                          className={`h-full rounded-full ${isAbove ? 'bg-loss' : 'bg-gain'}`}
                           style={{ width: `${Math.min((level.totalValue / 5e8) * 100, 100)}%` }}
                         />
                       </div>
@@ -2499,8 +2499,8 @@ export default function Discover() {
                 })}
               </div>
               <Badge className={`w-full justify-center mt-3 ${
-                btcLiquidations.riskBias === 'long_heavy' ? 'bg-red-500/20 text-loss' :
-                btcLiquidations.riskBias === 'short_heavy' ? 'bg-emerald-500/20 text-gain' :
+                btcLiquidations.riskBias === 'long_heavy' ? 'bg-loss/20 text-loss' :
+                btcLiquidations.riskBias === 'short_heavy' ? 'bg-gain/20 text-gain' :
                 'bg-ink-raised/20 text-secondary'
               }`}>
                 {btcLiquidations.riskBias === 'long_heavy' ? 'Heavy Long Exposure' :
@@ -2515,7 +2515,7 @@ export default function Discover() {
             <div className="flex items-center gap-2 mb-4">
               <Trophy className="w-5 h-5 text-warn" />
               <h3 className="text-sm font-bold text-primary">Smart Money Tracker</h3>
-              <Badge className="ml-auto bg-amber-500/10 text-warn border-warn/30 text-xs">
+              <Badge className="ml-auto bg-warn/10 text-warn border-warn/30 text-xs">
                 Top Traders
               </Badge>
             </div>
@@ -2528,7 +2528,7 @@ export default function Discover() {
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                          idx === 0 ? 'bg-amber-500/30 text-warn' :
+                          idx === 0 ? 'bg-warn/30 text-warn' :
                           idx === 1 ? 'bg-secondary/30 text-body' :
                           idx === 2 ? 'bg-warn/30 text-warn' :
                           'bg-ink-raised text-secondary'
@@ -2538,7 +2538,7 @@ export default function Discover() {
                         <span className="text-sm font-medium text-primary">{trader.traderName}</span>
                         {trader.isAiAgent && <Bot className="w-3 h-3 text-accent-bright" />}
                       </div>
-                      <Badge className={`text-xs ${trader.winRate >= 60 ? 'bg-emerald-500/20 text-gain' : 'bg-ink-raised/20 text-secondary'}`}>
+                      <Badge className={`text-xs ${trader.winRate >= 60 ? 'bg-gain/20 text-gain' : 'bg-ink-raised/20 text-secondary'}`}>
                         {trader.winRate}% Win
                       </Badge>
                     </div>
@@ -2592,8 +2592,8 @@ export default function Discover() {
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-primary">{n.narrative}</span>
                         <Badge className={`text-[10px] px-1.5 ${
-                          n.trend === 'rising' ? 'bg-emerald-500/20 text-gain' :
-                          n.trend === 'falling' ? 'bg-red-500/20 text-loss' :
+                          n.trend === 'rising' ? 'bg-gain/20 text-gain' :
+                          n.trend === 'falling' ? 'bg-loss/20 text-loss' :
                           'bg-ink-raised/20 text-secondary'
                         }`}>
                           {n.trend === 'rising' ? '↑' : n.trend === 'falling' ? '↓' : '→'} {n.weeklyChange > 0 ? '+' : ''}{n.weeklyChange?.toFixed(1)}%
@@ -2650,8 +2650,8 @@ export default function Discover() {
               ) : (
                 ctAlpha.map((signal: any, idx: number) => (
                   <div key={signal.id || idx} className={`p-2.5 rounded-xl border transition-colors ${
-                    signal.sentiment === 'bullish' ? 'bg-emerald-500/5 border-gain/20 hover:border-gain/40' :
-                    signal.sentiment === 'bearish' ? 'bg-red-500/5 border-loss/20 hover:border-loss/40' :
+                    signal.sentiment === 'bullish' ? 'bg-gain/5 border-gain/20 hover:border-gain/40' :
+                    signal.sentiment === 'bearish' ? 'bg-loss/5 border-loss/20 hover:border-loss/40' :
                     'bg-ink-surface border-ink-edge hover:border-white/20'
                   }`}>
                     <div className="flex items-start justify-between mb-1">
@@ -2660,8 +2660,8 @@ export default function Discover() {
                         <span className="text-[10px] text-muted">{signal.handle}</span>
                       </div>
                       <Badge className={`text-[10px] ${
-                        signal.sentiment === 'bullish' ? 'bg-emerald-500/20 text-gain' :
-                        signal.sentiment === 'bearish' ? 'bg-red-500/20 text-loss' :
+                        signal.sentiment === 'bullish' ? 'bg-gain/20 text-gain' :
+                        signal.sentiment === 'bearish' ? 'bg-loss/20 text-loss' :
                         'bg-ink-raised/20 text-secondary'
                       }`}>
                         {signal.confidence}%
@@ -2696,7 +2696,7 @@ export default function Discover() {
                     {timeAgo(tokenUnlocksTimestamp)}
                   </span>
                 )}
-                <Badge className="bg-red-500/10 text-loss border-loss/30 text-xs">
+                <Badge className="bg-loss/10 text-loss border-loss/30 text-xs">
                   Next 30 Days
                 </Badge>
               </div>
@@ -2711,8 +2711,8 @@ export default function Discover() {
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-primary">{unlock.symbol}</span>
                         <Badge className={`text-[10px] px-1.5 ${
-                          unlock.priceImpact === 'high' ? 'bg-red-500/20 text-loss' :
-                          unlock.priceImpact === 'medium' ? 'bg-amber-500/20 text-warn' :
+                          unlock.priceImpact === 'high' ? 'bg-loss/20 text-loss' :
+                          unlock.priceImpact === 'medium' ? 'bg-warn/20 text-warn' :
                           'bg-ink-raised/20 text-secondary'
                         }`}>
                           {unlock.priceImpact} impact
@@ -2769,9 +2769,9 @@ export default function Discover() {
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-primary">{airdrop.project}</span>
                         <Badge className={`text-[10px] px-1.5 ${
-                          airdrop.status === 'confirmed' ? 'bg-emerald-500/20 text-gain' :
+                          airdrop.status === 'confirmed' ? 'bg-gain/20 text-gain' :
                           airdrop.status === 'ongoing' ? 'bg-accent-core/20 text-accent-bright' :
-                          'bg-amber-500/20 text-warn'
+                          'bg-warn/20 text-warn'
                         }`}>
                           {airdrop.status}
                         </Badge>
@@ -2781,9 +2781,9 @@ export default function Discover() {
                     <div className="flex items-center gap-2 text-[10px] mb-1.5">
                       <Badge className="bg-ink-raised text-body">{airdrop.chain}</Badge>
                       <Badge className={`${
-                        airdrop.difficulty === 'easy' ? 'bg-emerald-500/10 text-gain' :
-                        airdrop.difficulty === 'medium' ? 'bg-amber-500/10 text-warn' :
-                        'bg-red-500/10 text-loss'
+                        airdrop.difficulty === 'easy' ? 'bg-gain/10 text-gain' :
+                        airdrop.difficulty === 'medium' ? 'bg-warn/10 text-warn' :
+                        'bg-loss/10 text-loss'
                       }`}>
                         {airdrop.difficulty}
                       </Badge>
@@ -2817,16 +2817,16 @@ export default function Discover() {
                       <div className="flex items-center gap-2">
                         <Badge className="text-[10px] px-1.5 bg-accent-core/20 text-indigo-400">{proposal.protocol}</Badge>
                         <Badge className={`text-[10px] px-1.5 ${
-                          proposal.status === 'active' ? 'bg-emerald-500/20 text-gain' :
+                          proposal.status === 'active' ? 'bg-gain/20 text-gain' :
                           proposal.status === 'passed' ? 'bg-accent-core/20 text-accent-bright' :
-                          proposal.status === 'failed' ? 'bg-red-500/20 text-loss' :
+                          proposal.status === 'failed' ? 'bg-loss/20 text-loss' :
                           'bg-ink-raised/20 text-secondary'
                         }`}>
                           {proposal.status}
                         </Badge>
                       </div>
                       <Badge className={`text-[10px] ${
-                        proposal.priceImpact === 'high' ? 'bg-amber-500/20 text-warn' :
+                        proposal.priceImpact === 'high' ? 'bg-warn/20 text-warn' :
                         'bg-ink-raised/20 text-secondary'
                       }`}>
                         {proposal.priceImpact} impact
@@ -2840,11 +2840,11 @@ export default function Discover() {
                       </div>
                       <div className="h-1.5 bg-ink-raised rounded-full overflow-hidden flex">
                         <div 
-                          className="h-full bg-emerald-500"
+                          className="h-full bg-gain"
                           style={{ width: `${((proposal.votesFor / (proposal.votesFor + proposal.votesAgainst)) * 100) || 50}%` }}
                         />
                         <div 
-                          className="h-full bg-red-500"
+                          className="h-full bg-loss"
                           style={{ width: `${((proposal.votesAgainst / (proposal.votesFor + proposal.votesAgainst)) * 100) || 50}%` }}
                         />
                       </div>
@@ -2871,7 +2871,7 @@ export default function Discover() {
                     {timeAgo(vcWalletsTimestamp)}
                   </span>
                 )}
-                <Badge className="bg-amber-500/10 text-warn border-warn/30 text-xs">
+                <Badge className="bg-warn/10 text-warn border-warn/30 text-xs">
                   On-Chain
                 </Badge>
               </div>
@@ -2882,23 +2882,23 @@ export default function Discover() {
               ) : (
                 vcWallets.map((activity: any, idx: number) => (
                   <div key={activity.id || idx} className={`p-2.5 rounded-xl border transition-colors ${
-                    activity.action === 'buy' ? 'bg-emerald-500/5 border-gain/20' :
-                    activity.action === 'sell' ? 'bg-red-500/5 border-loss/20' :
+                    activity.action === 'buy' ? 'bg-gain/5 border-gain/20' :
+                    activity.action === 'sell' ? 'bg-loss/5 border-loss/20' :
                     'bg-ink-surface border-ink-edge'
                   }`}>
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-primary">{activity.fund}</span>
                         <Badge className={`text-[10px] px-1.5 ${
-                          activity.action === 'buy' ? 'bg-emerald-500/20 text-gain' :
-                          activity.action === 'sell' ? 'bg-red-500/20 text-loss' :
+                          activity.action === 'buy' ? 'bg-gain/20 text-gain' :
+                          activity.action === 'sell' ? 'bg-loss/20 text-loss' :
                           'bg-accent-core/20 text-accent-bright'
                         }`}>
                           {activity.action.toUpperCase()}
                         </Badge>
                       </div>
                       <Badge className={`text-[10px] ${
-                        activity.significance === 'major' ? 'bg-amber-500/20 text-warn' :
+                        activity.significance === 'major' ? 'bg-warn/20 text-warn' :
                         activity.significance === 'notable' ? 'bg-ink-raised/20 text-body' :
                         'bg-ink-raised/20 text-muted'
                       }`}>
@@ -2948,8 +2948,8 @@ export default function Discover() {
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-sm font-medium text-primary">{flow.exchange}</span>
                       <Badge className={`text-[10px] ${
-                        flow.trend === 'accumulation' ? 'bg-emerald-500/20 text-gain' :
-                        flow.trend === 'distribution' ? 'bg-red-500/20 text-loss' :
+                        flow.trend === 'accumulation' ? 'bg-gain/20 text-gain' :
+                        flow.trend === 'distribution' ? 'bg-loss/20 text-loss' :
                         'bg-ink-raised/20 text-secondary'
                       }`}>
                         {flow.trend}
@@ -2972,8 +2972,8 @@ export default function Discover() {
                       </div>
                     </div>
                     <div className="h-1.5 bg-ink-raised rounded-full overflow-hidden mt-2 flex">
-                      <div className="h-full bg-emerald-500" style={{ width: `${(flow.inflow24h / (flow.inflow24h + flow.outflow24h)) * 100}%` }} />
-                      <div className="h-full bg-red-500" style={{ width: `${(flow.outflow24h / (flow.inflow24h + flow.outflow24h)) * 100}%` }} />
+                      <div className="h-full bg-gain" style={{ width: `${(flow.inflow24h / (flow.inflow24h + flow.outflow24h)) * 100}%` }} />
+                      <div className="h-full bg-loss" style={{ width: `${(flow.outflow24h / (flow.inflow24h + flow.outflow24h)) * 100}%` }} />
                     </div>
                   </div>
                 ))
@@ -2984,9 +2984,9 @@ export default function Discover() {
           {/* DEX vs CEX Volume */}
           <div className="rounded-xl border border-ink-edge bg-ink-surface backdrop-blur-sm p-4 hover:border-accent-core/30 transition-all">
             <div className="flex items-center gap-2 mb-3">
-              <BarChart3 className="w-4 h-4 text-teal-400" />
+              <BarChart3 className="w-4 h-4 text-accent-bright" />
               <h3 className="text-sm font-bold text-primary">DEX vs CEX Volume</h3>
-              <Badge className="ml-auto bg-teal-500/10 text-teal-400 border-accent-core/30 text-xs">
+              <Badge className="ml-auto bg-accent-core/10 text-accent-bright border-accent-core/30 text-xs">
                 24h
               </Badge>
             </div>
@@ -2998,16 +2998,16 @@ export default function Discover() {
                   <div key={idx} className="p-2.5 rounded-xl bg-ink-surface hover:bg-ink-raised transition-colors">
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-sm font-medium text-primary">{vol.token}</span>
-                      <Badge className={`text-[10px] ${vol.dexDominant ? 'bg-teal-500/20 text-teal-400' : 'bg-accent-core/20 text-accent-bright'}`}>
+                      <Badge className={`text-[10px] ${vol.dexDominant ? 'bg-accent-core/20 text-accent-bright' : 'bg-accent-core/20 text-accent-bright'}`}>
                         {vol.dexDominant ? 'DEX Leading' : 'CEX Leading'}
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between text-[10px] mb-1.5">
-                      <span className="text-teal-400">DEX: {vol.dexPercent?.toFixed(0)}%</span>
+                      <span className="text-accent-bright">DEX: {vol.dexPercent?.toFixed(0)}%</span>
                       <span className="text-accent-bright">CEX: {vol.cexPercent?.toFixed(0)}%</span>
                     </div>
                     <div className="h-2 bg-ink-raised rounded-full overflow-hidden flex">
-                      <div className="h-full bg-teal-500" style={{ width: `${vol.dexPercent}%` }} />
+                      <div className="h-full bg-accent-core" style={{ width: `${vol.dexPercent}%` }} />
                       <div className="h-full bg-accent-core" style={{ width: `${vol.cexPercent}%` }} />
                     </div>
                     <p className="text-[10px] text-muted mt-1.5 truncate">{vol.interpretation}</p>
@@ -3044,12 +3044,12 @@ export default function Discover() {
               ) : (
                 aiTradeIdeas.map((idea: any, idx: number) => (
                   <div key={idea.id || idx} className={`p-3 rounded-xl border transition-colors ${
-                    idea.direction === 'long' ? 'bg-emerald-500/5 border-gain/20' : 'bg-red-500/5 border-loss/20'
+                    idea.direction === 'long' ? 'bg-gain/5 border-gain/20' : 'bg-loss/5 border-loss/20'
                   }`}>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-bold text-primary">{idea.asset}</span>
-                        <Badge className={`text-[10px] ${idea.direction === 'long' ? 'bg-emerald-500/20 text-gain' : 'bg-red-500/20 text-loss'}`}>
+                        <Badge className={`text-[10px] ${idea.direction === 'long' ? 'bg-gain/20 text-gain' : 'bg-loss/20 text-loss'}`}>
                           {idea.direction.toUpperCase()}
                         </Badge>
                       </div>
@@ -3120,7 +3120,7 @@ export default function Discover() {
                         </div>
                         <div className="h-1.5 bg-ink-raised rounded-full overflow-hidden">
                           <div 
-                            className={`h-full rounded-full ${event.predictedImpact >= 0 ? 'bg-emerald-500' : 'bg-red-500'}`}
+                            className={`h-full rounded-full ${event.predictedImpact >= 0 ? 'bg-gain' : 'bg-loss'}`}
                             style={{ width: `${Math.min(Math.abs(event.predictedImpact) * 10, 100)}%` }}
                           />
                         </div>
@@ -3145,9 +3145,9 @@ export default function Discover() {
         {/* Row 6: Anomaly Detector & Crypto Conferences */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Anomaly Detector */}
-          <div className="rounded-xl border border-ink-edge bg-ink-surface backdrop-blur-sm p-4 hover:border-rose-500/30 transition-all">
+          <div className="rounded-xl border border-ink-edge bg-ink-surface backdrop-blur-sm p-4 hover:border-loss/30 transition-all">
             <div className="flex items-center gap-2 mb-3">
-              <Shield className="w-4 h-4 text-rose-400" />
+              <Shield className="w-4 h-4 text-loss" />
               <h3 className="text-sm font-bold text-primary">Anomaly Detector</h3>
               <div className="ml-auto flex items-center gap-2">
                 {anomaliesTimestamp && (
@@ -3156,7 +3156,7 @@ export default function Discover() {
                     {timeAgo(anomaliesTimestamp)}
                   </span>
                 )}
-                <Badge className="bg-rose-500/10 text-rose-400 border-rose-500/30 text-xs">
+                <Badge className="bg-loss/10 text-loss border-loss/30 text-xs">
                   {anomalies.filter((a: any) => a.severity === 'critical').length} Critical
                 </Badge>
               </div>
@@ -3167,16 +3167,16 @@ export default function Discover() {
               ) : (
                 anomalies.map((anomaly: any, idx: number) => (
                   <div key={anomaly.id || idx} className={`p-2.5 rounded-xl border transition-colors ${
-                    anomaly.severity === 'critical' ? 'bg-red-500/10 border-loss/30' :
-                    anomaly.severity === 'warning' ? 'bg-amber-500/10 border-warn/30' :
+                    anomaly.severity === 'critical' ? 'bg-loss/10 border-loss/30' :
+                    anomaly.severity === 'warning' ? 'bg-warn/10 border-warn/30' :
                     'bg-ink-surface border-ink-edge'
                   }`}>
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-primary">{anomaly.asset}</span>
                         <Badge className={`text-[10px] ${
-                          anomaly.severity === 'critical' ? 'bg-red-500/20 text-loss' :
-                          anomaly.severity === 'warning' ? 'bg-amber-500/20 text-warn' :
+                          anomaly.severity === 'critical' ? 'bg-loss/20 text-loss' :
+                          anomaly.severity === 'warning' ? 'bg-warn/20 text-warn' :
                           'bg-accent-core/20 text-accent-bright'
                         }`}>
                           {anomaly.severity}
@@ -3196,11 +3196,11 @@ export default function Discover() {
           </div>
 
           {/* Crypto Conferences */}
-          <div className="rounded-xl border border-ink-edge bg-ink-surface backdrop-blur-sm p-4 hover:border-sky-500/30 transition-all">
+          <div className="rounded-xl border border-ink-edge bg-ink-surface backdrop-blur-sm p-4 hover:border-accent-core/30 transition-all">
             <div className="flex items-center gap-2 mb-3">
-              <MapPin className="w-4 h-4 text-sky-400" />
+              <MapPin className="w-4 h-4 text-accent-bright" />
               <h3 className="text-sm font-bold text-primary">Crypto Conferences</h3>
-              <Badge className="ml-auto bg-sky-500/10 text-sky-400 border-sky-500/30 text-xs">
+              <Badge className="ml-auto bg-accent-core/10 text-accent-bright border-accent-core/30 text-xs">
                 Upcoming
               </Badge>
             </div>
@@ -3213,8 +3213,8 @@ export default function Discover() {
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-sm font-medium text-primary">{conf.name}</span>
                       <Badge className={`text-[10px] ${
-                        conf.tier === 'major' ? 'bg-amber-500/20 text-warn' :
-                        conf.tier === 'notable' ? 'bg-sky-500/20 text-sky-400' :
+                        conf.tier === 'major' ? 'bg-warn/20 text-warn' :
+                        conf.tier === 'notable' ? 'bg-accent-core/20 text-accent-bright' :
                         'bg-ink-raised/20 text-secondary'
                       }`}>
                         {conf.tier}
@@ -3232,7 +3232,7 @@ export default function Discover() {
                     {conf.relevantTokens?.length > 0 && (
                       <div className="flex gap-1 flex-wrap">
                         {conf.relevantTokens.slice(0, 5).map((token: string, i: number) => (
-                          <Badge key={i} className="text-[9px] px-1 py-0 bg-sky-500/10 text-sky-300">{token}</Badge>
+                          <Badge key={i} className="text-[9px] px-1 py-0 bg-accent-core/10 text-accent-bright">{token}</Badge>
                         ))}
                       </div>
                     )}
@@ -3249,14 +3249,14 @@ export default function Discover() {
           {/* Real-time Activity Feed */}
           <section className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-xl border border-green-500/20">
-                <Activity className="w-5 h-5 text-green-400" />
+              <div className="p-2 rounded-xl border border-gain/20">
+                <Activity className="w-5 h-5 text-gain" />
               </div>
               <div>
                 <h2 className="text-lg font-orbitron font-bold text-primary">Live Activity</h2>
                 <p className="text-xs text-secondary">Real-time platform activity</p>
               </div>
-              <Badge className="ml-auto bg-green-500/10 text-green-400 border-green-500/30 text-xs">
+              <Badge className="ml-auto bg-gain/10 text-gain border-gain/30 text-xs">
                 <Radio className="w-2 h-2 mr-1 animate-pulse" />
                 Live
               </Badge>
@@ -3275,7 +3275,7 @@ export default function Discover() {
                       {recentTrades.slice(0, 15).map((trade, idx) => (
                         <div key={trade.id || idx} className="p-3 hover:bg-ink-surface transition-colors">
                           <div className="flex items-start gap-3">
-                            <div className={`p-1.5 rounded-xl ${trade.outcome === 'yes' ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
+                            <div className={`p-1.5 rounded-xl ${trade.outcome === 'yes' ? 'bg-gain/20' : 'bg-loss/20'}`}>
                               {trade.outcome === 'yes' ? (
                                 <ArrowUpRight className="w-3.5 h-3.5 text-gain" />
                               ) : (
@@ -3364,7 +3364,7 @@ export default function Discover() {
                                 <p className="text-secondary line-clamp-1 mb-1">
                                   {whale.topPositions[0].marketQuestion?.slice(0, 40)}...
                                 </p>
-                                <Badge className={`text-xs ${whale.topPositions[0].outcome === 'yes' ? 'bg-emerald-500/20 text-gain' : 'bg-red-500/20 text-loss'}`}>
+                                <Badge className={`text-xs ${whale.topPositions[0].outcome === 'yes' ? 'bg-gain/20 text-gain' : 'bg-loss/20 text-loss'}`}>
                                   {whale.topPositions[0].outcome?.toUpperCase()} • {whale.topPositions[0].shares} shares
                                 </Badge>
                               </div>
@@ -3405,8 +3405,8 @@ export default function Discover() {
                         <div className="p-3 hover:bg-ink-surface transition-colors cursor-pointer">
                           <div className="flex items-start gap-3">
                             <div className={`p-1.5 rounded-xl ${
-                              market.outcome === 'yes' ? 'bg-emerald-500/20' : 
-                              market.outcome === 'no' ? 'bg-red-500/20' : 'bg-ink-raised/20'
+                              market.outcome === 'yes' ? 'bg-gain/20' : 
+                              market.outcome === 'no' ? 'bg-loss/20' : 'bg-ink-raised/20'
                             }`}>
                               {market.outcome === 'yes' ? (
                                 <Check className="w-4 h-4 text-gain" />
@@ -3422,8 +3422,8 @@ export default function Discover() {
                               </p>
                               <div className="flex items-center gap-2 text-xs">
                                 <Badge className={`${
-                                  market.outcome === 'yes' ? 'bg-emerald-500/20 text-gain border-gain/30' : 
-                                  market.outcome === 'no' ? 'bg-red-500/20 text-loss border-loss/30' : 
+                                  market.outcome === 'yes' ? 'bg-gain/20 text-gain border-gain/30' : 
+                                  market.outcome === 'no' ? 'bg-loss/20 text-loss border-loss/30' : 
                                   'bg-ink-raised/20 text-secondary border-ink-edge/30'
                                 }`}>
                                   Resolved: {market.outcome?.toUpperCase() || 'VOID'}
@@ -3458,7 +3458,7 @@ export default function Discover() {
               <h2 className="text-lg font-orbitron font-bold text-primary">AI Trading Signals</h2>
               <p className="text-xs text-secondary">Real-time AI-powered market signals</p>
             </div>
-            <Badge className="bg-emerald-500/10 text-gain border border-gain/30 text-xs">
+            <Badge className="bg-gain/10 text-gain border border-gain/30 text-xs">
               <RefreshCw className="w-3 h-3 mr-1" />
               Live
             </Badge>
@@ -3695,9 +3695,9 @@ export default function Discover() {
                 const deadline = new Date(market.deadline);
                 const now = new Date();
                 const daysLeft = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-                const urgencyColor = daysLeft <= 3 ? 'border-loss/30 bg-red-500/5' : 
-                                     daysLeft <= 7 ? 'border-warn/30 bg-amber-500/5' : 
-                                     'border-yellow-500/30 bg-warn/5';
+                const urgencyColor = daysLeft <= 3 ? 'border-loss/30 bg-loss/5' : 
+                                     daysLeft <= 7 ? 'border-warn/30 bg-warn/5' : 
+                                     'border-warn/30 bg-warn/5';
                 
                 return (
                   <Link key={market.id} href={`/markets/${market.id}`}>
@@ -3833,7 +3833,7 @@ export default function Discover() {
                           <span className="text-xs text-primary truncate flex-1 mr-2">
                             {market.question.slice(0, 50)}...
                           </span>
-                          <Badge className="bg-emerald-500/20 text-gain border-0 text-xs">
+                          <Badge className="bg-gain/20 text-gain border-0 text-xs">
                             {market.aiProbability}%
                           </Badge>
                         </div>

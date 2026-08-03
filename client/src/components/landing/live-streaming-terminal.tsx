@@ -228,8 +228,8 @@ function RecentActivityFeed({ activities }: { activities: ActivityItem[] }) {
         <Activity className="w-4 h-4 text-accent-bright" />
         <span className="text-xs font-semibold text-primary">Live Activity</span>
         <span className="relative flex h-2 w-2 ml-auto">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gain opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-gain"></span>
         </span>
       </div>
       
@@ -244,16 +244,16 @@ function RecentActivityFeed({ activities }: { activities: ActivityItem[] }) {
             >
               <IconComponent className={cn(
                 "w-3 h-3",
-                activity.type === 'tip' ? 'text-amber-400' : 
-                activity.type === 'live' ? 'text-red-400' : 'text-cyan-400'
+                activity.type === 'tip' ? 'text-warn' : 
+                activity.type === 'live' ? 'text-loss' : 'text-accent-bright'
               )} />
               <span className="text-body truncate flex-1">
                 {activity.type === 'tip' ? (
-                  <><span className="text-amber-400 font-medium">{activity.user}</span> tipped <span className="text-amber-400">${activity.amount}</span></>
+                  <><span className="text-warn font-medium">{activity.user}</span> tipped <span className="text-warn">${activity.amount}</span></>
                 ) : activity.type === 'live' ? (
                   <><span className="text-fuchsia-400 font-medium">{activity.user}</span> went live</>
                 ) : (
-                  <><span className="text-cyan-400 font-medium">{activity.user}</span> joined {activity.stream}</>
+                  <><span className="text-accent-bright font-medium">{activity.user}</span> joined {activity.stream}</>
                 )}
               </span>
               <span className="text-muted text-[10px]">{activity.time}</span>
@@ -315,30 +315,30 @@ const avatarBrandIcons: Record<string, { icon: any; color: string; bgColor: stri
   'Anatoly Yakovenko': { icon: SiSolana, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
   'Brian Armstrong': { icon: SiCoinbase, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
   'Jesse Powell': { icon: Wallet, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
-  'Sam Altman': { icon: SiOpenai, color: 'text-emerald-400', bgColor: 'bg-emerald-500/20' },
+  'Sam Altman': { icon: SiOpenai, color: 'text-gain', bgColor: 'bg-gain/20' },
   'Elon Musk': { icon: SiX, color: 'text-primary', bgColor: 'bg-ink-raised' },
-  'Stani Kulechov': { icon: Zap, color: 'text-cyan-400', bgColor: 'bg-cyan-500/20' },
-  'Arthur Hayes': { icon: BarChart3, color: 'text-red-400', bgColor: 'bg-red-500/20' },
+  'Stani Kulechov': { icon: Zap, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
+  'Arthur Hayes': { icon: BarChart3, color: 'text-loss', bgColor: 'bg-loss/20' },
   'Andre Cronje': { icon: Rocket, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
   'Charles Hoskinson': { icon: SiCardano, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
-  'Justin Sun': { icon: Zap, color: 'text-red-500', bgColor: 'bg-red-500/20' },
-  'Marc Andreessen': { icon: Globe, color: 'text-orange-400', bgColor: 'bg-orange-500/20' },
-  'Chris Dixon': { icon: Globe, color: 'text-orange-400', bgColor: 'bg-orange-500/20' },
-  'Anthony Pompliano': { icon: SiBitcoin, color: 'text-amber-400', bgColor: 'bg-amber-500/20' },
-  'Adam Back': { icon: SiBitcoin, color: 'text-amber-400', bgColor: 'bg-amber-500/20' },
+  'Justin Sun': { icon: Zap, color: 'text-loss', bgColor: 'bg-loss/20' },
+  'Marc Andreessen': { icon: Globe, color: 'text-warn', bgColor: 'bg-warn/20' },
+  'Chris Dixon': { icon: Globe, color: 'text-warn', bgColor: 'bg-warn/20' },
+  'Anthony Pompliano': { icon: SiBitcoin, color: 'text-warn', bgColor: 'bg-warn/20' },
+  'Adam Back': { icon: SiBitcoin, color: 'text-warn', bgColor: 'bg-warn/20' },
   'Brad Garlinghouse': { icon: Zap, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
   'Katie Haun': { icon: Shield, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
-  'Robert Leshner': { icon: BarChart3, color: 'text-green-400', bgColor: 'bg-green-500/20' },
-  'Naval Ravikant': { icon: Brain, color: 'text-cyan-400', bgColor: 'bg-cyan-500/20' },
-  'Cameron Winklevoss': { icon: SiBitcoin, color: 'text-amber-400', bgColor: 'bg-amber-500/20' },
-  'Tyler Winklevoss': { icon: SiBitcoin, color: 'text-amber-400', bgColor: 'bg-amber-500/20' },
+  'Robert Leshner': { icon: BarChart3, color: 'text-gain', bgColor: 'bg-gain/20' },
+  'Naval Ravikant': { icon: Brain, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
+  'Cameron Winklevoss': { icon: SiBitcoin, color: 'text-warn', bgColor: 'bg-warn/20' },
+  'Tyler Winklevoss': { icon: SiBitcoin, color: 'text-warn', bgColor: 'bg-warn/20' },
   'Balaji Srinivasan': { icon: Brain, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
   'Cathie Wood': { icon: TrendingUp, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
   'Jesse Pollak': { icon: SiCoinbase, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
-  'Paul Graham': { icon: Rocket, color: 'text-orange-400', bgColor: 'bg-orange-500/20' },
-  'Michael Saylor': { icon: SiBitcoin, color: 'text-amber-400', bgColor: 'bg-amber-500/20' },
+  'Paul Graham': { icon: Rocket, color: 'text-warn', bgColor: 'bg-warn/20' },
+  'Michael Saylor': { icon: SiBitcoin, color: 'text-warn', bgColor: 'bg-warn/20' },
   'Jack Dorsey': { icon: SiX, color: 'text-primary', bgColor: 'bg-ink-raised' },
-  'Raoul Pal': { icon: TrendingUp, color: 'text-emerald-400', bgColor: 'bg-emerald-500/20' },
+  'Raoul Pal': { icon: TrendingUp, color: 'text-gain', bgColor: 'bg-gain/20' },
 };
 
 const getAvatarFallback = (username?: string) => {
@@ -440,8 +440,8 @@ function StreamCard({ stream, isFeatured = false }: { stream: LiveStream; isFeat
               </div>
               {stream.status === 'live' && (
                 <div className="relative">
-                  <div className="absolute inset-0 bg-red-500 rounded-full blur-md opacity-60 animate-pulse" />
-                  <Badge className="relative bg-red-500/90 text-white border-0 text-[10px] px-2.5 py-1 font-bold shadow-lg shadow-red-500/40">
+                  <div className="absolute inset-0 bg-loss rounded-full blur-md opacity-60 animate-pulse" />
+                  <Badge className="relative bg-loss/90 text-white border-0 text-[10px] px-2.5 py-1 font-bold shadow-lg shadow-loss/40">
                     <span className="relative flex h-1.5 w-1.5 mr-1.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white" />
@@ -691,7 +691,7 @@ export function LiveStreamingTerminal() {
           <div className="absolute inset-0 backdrop-blur-3xl" />
           
           <div className="absolute top-20 -left-20 w-80 h-80 bg-fuchsia-600/20 rounded-full blur-[100px] animate-pulse" />
-          <div className="absolute bottom-20 -right-20 w-96 h-96 bg-cyan-600/15 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute bottom-20 -right-20 w-96 h-96 bg-accent-core/15 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent-core/10 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '2s' }} />
           
           <div className="absolute inset-0 opacity-30">
@@ -745,11 +745,11 @@ export function LiveStreamingTerminal() {
                 
                 <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                   <div className="relative group">
-                    <div className="absolute -inset-1 bg-red-500/30 rounded-xl blur-md opacity-60 group-hover:opacity-100 transition-opacity animate-pulse" />
+                    <div className="absolute -inset-1 bg-loss/30 rounded-xl blur-md opacity-60 group-hover:opacity-100 transition-opacity animate-pulse" />
                     <div className="relative flex items-center gap-2 px-4 py-2.5 rounded-xl bg-loss/10 border border-loss/40 backdrop-blur-sm">
                       <div className="relative flex items-center justify-center">
-                        <span className="absolute w-4 h-4 rounded-full bg-red-500 animate-ping opacity-40" />
-                        <span className="relative w-2.5 h-2.5 rounded-full bg-red-500 shadow-lg shadow-red-500/50" />
+                        <span className="absolute w-4 h-4 rounded-full bg-loss animate-ping opacity-40" />
+                        <span className="relative w-2.5 h-2.5 rounded-full bg-loss shadow-lg shadow-loss/50" />
                       </div>
                          <span className="text-sm font-bold text-loss">{totalLive} Live</span>
                        </div>
@@ -928,7 +928,7 @@ export function LiveStreamingTerminal() {
                           <div className="flex items-center gap-2">
                             <span className={cn(
                               "w-5 h-5 flex items-center justify-center rounded-full font-bold text-[10px]",
-                              idx === 0 ? "bg-amber-500/20 text-amber-400" :
+                              idx === 0 ? "bg-warn/20 text-warn" :
                               idx === 1 ? "bg-ink-surface text-secondary" :
                               "bg-warn/20 text-warn"
                             )}>
@@ -936,7 +936,7 @@ export function LiveStreamingTerminal() {
                             </span>
                             <span className="text-body">{earner.username}</span>
                           </div>
-                          <span className="text-amber-400 font-semibold">${earner.earnings.toLocaleString()}</span>
+                          <span className="text-warn font-semibold">${earner.earnings.toLocaleString()}</span>
                         </div>
                       ))}
                     </div>

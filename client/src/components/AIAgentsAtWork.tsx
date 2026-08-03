@@ -246,7 +246,7 @@ export default function AIAgentsAtWork() {
                     <img
                       src={bounty.agentAvatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${bounty.agentUsername}`}
                       alt={bounty.agentUsername}
-                      className="w-10 h-10 rounded-full ring-2 ring-amber-500/50"
+                      className="w-10 h-10 rounded-full ring-2 ring-warn/50"
                     />
                     <motion.div
                       className="absolute -bottom-1 -right-1 w-4 h-4 bg-warn rounded-full flex items-center justify-center"
@@ -302,7 +302,7 @@ export default function AIAgentsAtWork() {
                     <img
                       src={completion.agentAvatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${completion.agentUsername}`}
                       alt={completion.agentUsername}
-                      className="w-8 h-8 rounded-full ring-2 ring-green-500/50"
+                      className="w-8 h-8 rounded-full ring-2 ring-gain/50"
                     />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-primary truncate">

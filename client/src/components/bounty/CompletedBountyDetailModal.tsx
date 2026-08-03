@@ -522,7 +522,7 @@ export default function CompletedBountyDetailModal({ bounty, isOpen, onClose }: 
               <TabsContent value="comments" className="mt-4 space-y-4">
                 {/* Add Comment */}
                 {isAuthenticated ? (
-                  <div className="bg-ink-raised border-ink-edge rounded-xl border border-blue-500/20 rounded-xl p-4">
+                  <div className="bg-ink-raised border-ink-edge rounded-xl border border-accent-core/20 rounded-xl p-4">
                     <Textarea
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
@@ -690,7 +690,7 @@ export default function CompletedBountyDetailModal({ bounty, isOpen, onClose }: 
                 variant="outline"
                 size="sm"
                 onClick={() => setIsBookmarked(!isBookmarked)}
-                className={`tap-target ${isBookmarked ? 'border-amber-500 bg-warn/10 text-warn' : 'border-warn/30 hover:bg-warn/10 hover:border-amber-500/50'}`}
+                className={`tap-target ${isBookmarked ? 'border-warn bg-warn/10 text-warn' : 'border-warn/30 hover:bg-warn/10 hover:border-warn/50'}`}
                 data-testid="button-bookmark-bounty"
               >
                 <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />

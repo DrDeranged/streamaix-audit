@@ -37,14 +37,14 @@ export function AdminApiNotification() {
 
   return (
     <Alert className="mb-6 bg-warn/10 border-warn/30">
-      <AlertTriangle className="h-5 w-5 text-amber-500" />
-      <AlertTitle className="text-amber-200 font-semibold flex items-center justify-between">
+      <AlertTriangle className="h-5 w-5 text-warn" />
+      <AlertTitle className="text-warn font-semibold flex items-center justify-between">
         <span>API Upgrade Recommended</span>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setDismissed(true)}
-          className="h-6 w-6 p-0 hover:bg-amber-500/20"
+          className="h-6 w-6 p-0 hover:bg-warn/20"
           data-testid="button-dismiss-notification"
         >
           <X className="h-4 w-4" />
@@ -64,19 +64,19 @@ export function AdminApiNotification() {
             >
               <div className="flex items-start justify-between mb-2">
                 <div>
-                  <p className="text-sm font-semibold text-amber-200">{upgrade.service}</p>
+                  <p className="text-sm font-semibold text-warn">{upgrade.service}</p>
                   <p className="text-xs text-muted">
                     {upgrade.currentTier} → {upgrade.recommendedTier}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-bold text-amber-400">${upgrade.monthlyPrice}/mo</p>
+                  <p className="text-sm font-bold text-warn">${upgrade.monthlyPrice}/mo</p>
                 </div>
               </div>
               <ul className="text-xs text-muted space-y-1">
                 {upgrade.benefits.slice(0, 2).map((benefit, i) => (
                   <li key={i} className="flex items-start gap-1.5">
-                    <TrendingUp className="h-3 w-3 text-green-400 mt-0.5 flex-shrink-0" />
+                    <TrendingUp className="h-3 w-3 text-gain mt-0.5 flex-shrink-0" />
                     <span>{benefit}</span>
                   </li>
                 ))}
@@ -85,13 +85,13 @@ export function AdminApiNotification() {
           ))}
         </div>
 
-        <div className="flex items-center justify-between pt-2 border-t border-amber-500/20">
+        <div className="flex items-center justify-between pt-2 border-t border-warn/20">
           <p className="text-xs text-muted">
-            Total estimated cost: <span className="text-amber-400 font-semibold">${totalMonthlyCost}/month</span>
+            Total estimated cost: <span className="text-warn font-semibold">${totalMonthlyCost}/month</span>
           </p>
           <Button 
             size="sm" 
-            className="bg-amber-600 hover:bg-amber-700 text-white"
+            className="bg-warn hover:bg-warn text-white"
             data-testid="button-view-upgrade-guide"
           >
             View Upgrade Guide

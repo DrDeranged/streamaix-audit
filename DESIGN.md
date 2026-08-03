@@ -84,10 +84,10 @@ header, already restyled with the tokens.
 
 ## BANNED
 
-The following must not appear in migrated files:
+The following must not appear anywhere in `client/src`:
 
-- `bg-slate-*`, `bg-gray-*`, `bg-zinc-*`, `bg-purple-*`, `bg-violet-*`, `bg-indigo-*`
-- `text-gray-*`
+- legacy neutrals/accents: `bg-slate-*`, `bg-gray-*`, `bg-zinc-*`, `bg-purple-*`, `bg-violet-*`, `bg-indigo-*`, `bg-blue-*`, `text-gray-*`, `text-slate-*`, `text-zinc-*`, `text-purple-*`, `border-slate-*`, `border-gray-*`, `border-purple-*`
+- raw semantic colors — use the tokens instead: `text/bg/border-red-*`, `-rose-*` → `loss`; `-green-*`, `-emerald-*`, `-lime-*` → `gain`; `-amber-*`, `-yellow-*`, `-orange-*` → `warn`; `-cyan-*`, `-blue-*`, `-sky-*`, `-teal-*` → `accent-bright` (text) / `accent-core` (bg/border)
 - `rounded-lg`, `rounded-3xl`
 - any `from-*` / `to-*` gradient class outside the two sanctioned utilities
 

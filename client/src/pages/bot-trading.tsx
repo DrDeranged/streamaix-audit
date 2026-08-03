@@ -724,7 +724,7 @@ function LeaderboardContent() {
   });
   const leaderboard = Array.isArray(leaderboardData) ? leaderboardData : [];
 
-  const crownColors = ['text-warn', 'text-body', 'text-amber-700'];
+  const crownColors = ['text-warn', 'text-body', 'text-warn'];
 
   return (
     <div>
@@ -943,7 +943,7 @@ export default function BotTradingPage() {
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <motion.div
-              className="w-14 h-14 rounded-2xl bg-accent-core/10 flex items-center justify-center border border-accent-core/30 shadow-lg shadow-cyan-500/10"
+              className="w-14 h-14 rounded-2xl bg-accent-core/10 flex items-center justify-center border border-accent-core/30 shadow-lg shadow-accent-core/10"
               animate={{ boxShadow: ['0 0 20px rgba(6,182,212,0.1)', '0 0 40px rgba(6,182,212,0.2)', '0 0 20px rgba(6,182,212,0.1)'] }}
               transition={{ duration: 3, repeat: Infinity }}
             >
@@ -965,10 +965,10 @@ export default function BotTradingPage() {
           className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8"
         >
           {[
-            { icon: Coins, label: 'Total Staked', value: stats?.totalStaked ? `${(Number(stats.totalStaked) / 1000).toFixed(0)}k` : '0', sub: 'STREAM', iconBg: 'bg-accent-core/10', iconBorder: 'border-accent-core/20', iconColor: 'text-accent-bright', subColor: 'text-accent-bright/70', hoverBorder: 'hover:border-accent-core/40', glow: 'shadow-cyan-500/10' },
+            { icon: Coins, label: 'Total Staked', value: stats?.totalStaked ? `${(Number(stats.totalStaked) / 1000).toFixed(0)}k` : '0', sub: 'STREAM', iconBg: 'bg-accent-core/10', iconBorder: 'border-accent-core/20', iconColor: 'text-accent-bright', subColor: 'text-accent-bright/70', hoverBorder: 'hover:border-accent-core/40', glow: 'shadow-accent-core/10' },
             { icon: Users, label: 'Active Traders', value: stats?.activeTraders ?? '0', sub: 'staking now', iconBg: 'bg-accent-core/10', iconBorder: 'border-accent-core/20', iconColor: 'text-accent-bright', subColor: 'text-accent-bright/70', hoverBorder: 'hover:border-accent-core/40', glow: 'shadow-purple-500/10' },
-            { icon: Trophy, label: 'Top Avatar', value: stats?.topBot?.name ?? '—', sub: stats?.topBot ? `${(stats.topBot.avgTradeRoi ?? 0).toFixed(1)}% ROI` : '', iconBg: 'bg-gain/10', iconBorder: 'border-gain/20', iconColor: 'text-gain', subColor: 'text-gain/70', hoverBorder: 'hover:border-gain/40', glow: 'shadow-emerald-500/10', imageUrl: stats?.topBot?.imageUrl },
-            { icon: Activity, label: 'Total Trades', value: stats?.totalTrades ?? '0', sub: 'executed', iconBg: 'bg-warn/10', iconBorder: 'border-warn/20', iconColor: 'text-warn', subColor: 'text-warn/70', hoverBorder: 'hover:border-warn/40', glow: 'shadow-amber-500/10' },
+            { icon: Trophy, label: 'Top Avatar', value: stats?.topBot?.name ?? '—', sub: stats?.topBot ? `${(stats.topBot.avgTradeRoi ?? 0).toFixed(1)}% ROI` : '', iconBg: 'bg-gain/10', iconBorder: 'border-gain/20', iconColor: 'text-gain', subColor: 'text-gain/70', hoverBorder: 'hover:border-gain/40', glow: 'shadow-gain/10', imageUrl: stats?.topBot?.imageUrl },
+            { icon: Activity, label: 'Total Trades', value: stats?.totalTrades ?? '0', sub: 'executed', iconBg: 'bg-warn/10', iconBorder: 'border-warn/20', iconColor: 'text-warn', subColor: 'text-warn/70', hoverBorder: 'hover:border-warn/40', glow: 'shadow-warn/10' },
           ].map((item, i) => (
             <motion.div
               key={i}

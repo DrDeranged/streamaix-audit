@@ -206,7 +206,7 @@ const TipAlertAnimation = memo(function TipAlertAnimation({ tip, onComplete }: {
               "p-2 rounded-full",
               tip.tier === 'mega' ? "bg-accent-core" : "bg-ink-surface"
             )}>
-              {tip.tier === 'mega' ? <Crown className="w-6 h-6 text-primary" /> : <Coins className="w-6 h-6 text-yellow-200" />}
+              {tip.tier === 'mega' ? <Crown className="w-6 h-6 text-primary" /> : <Coins className="w-6 h-6 text-warn" />}
             </div>
             <div>
               <p className="text-lg font-bold text-primary">@{tip.username}</p>
@@ -228,10 +228,10 @@ const TipAlertAnimation = memo(function TipAlertAnimation({ tip, onComplete }: {
         {tip.tier !== 'basic' && (
           <>
             <div className="absolute -top-2 -right-2 animate-spin-slow">
-              <Sparkles className="w-6 h-6 text-yellow-300" />
+              <Sparkles className="w-6 h-6 text-warn" />
             </div>
             <div className="absolute -bottom-2 -left-2 animate-spin-slow" style={{ animationDirection: 'reverse' }}>
-              <Zap className="w-6 h-6 text-amber-300" />
+              <Zap className="w-6 h-6 text-warn" />
             </div>
           </>
         )}
@@ -312,8 +312,8 @@ const ChatMessage = memo(function ChatMessageComponent({ msg }: { msg: ChatMessa
     <div className="group flex items-start gap-3 py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 border-b border-ink-divider last:border-b-0">
       <div className={cn(
         "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold shadow-md transition-transform duration-200 group-hover:scale-105",
-        msg.isAiAgent ? "bg-ink-raised shadow-cyan-500/30" :
-        msg.isModerator ? "bg-ink-raised shadow-emerald-500/30" :
+        msg.isAiAgent ? "bg-ink-raised shadow-accent-core/30" :
+        msg.isModerator ? "bg-ink-raised shadow-gain/30" :
         msg.isSubscriber ? "bg-ink-raised shadow-purple-500/30" :
         "bg-ink-raised"
       )}>
@@ -1155,7 +1155,7 @@ export default function StreamViewPage() {
               <>
                 <Badge className="bg-loss/20 text-loss border-loss/30 text-[10px] sm:text-xs px-2">
                   <span className="relative flex h-2 w-2 mr-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-loss opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-loss"></span>
                   </span>
                   LIVE
@@ -1422,7 +1422,7 @@ export default function StreamViewPage() {
                 </Button>
                 <Button
                   onClick={() => setShowTipPanel(true)}
-                  className="bg-ink-raised   border-0 h-8 sm:h-10 min-h-0 sm:min-h-[44px] px-2 sm:px-4 text-xs sm:text-sm font-medium shadow-lg shadow-amber-500/25 transition-all duration-200 hover:scale-105 active:scale-95"
+                  className="bg-ink-raised   border-0 h-8 sm:h-10 min-h-0 sm:min-h-[44px] px-2 sm:px-4 text-xs sm:text-sm font-medium shadow-lg shadow-warn/25 transition-all duration-200 hover:scale-105 active:scale-95"
                   data-testid="button-open-tip-panel"
                 >
                   <Gift className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-2" />
@@ -1518,7 +1518,7 @@ export default function StreamViewPage() {
                             onClick={() => setIsRecording(false)}
                             className="border-loss/30 text-loss hover:bg-loss/10 h-8 text-xs"
                           >
-                            <Circle className="w-3 h-3 mr-1 fill-red-500 text-red-500 animate-pulse" />
+                            <Circle className="w-3 h-3 mr-1 fill-loss text-loss animate-pulse" />
                             {formatDuration(recordingDuration)}
                           </Button>
                         ) : (
@@ -1682,9 +1682,9 @@ export default function StreamViewPage() {
                   </TabsTrigger>
                   <TabsTrigger
                     value="points"
-                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-yellow-500 data-[state=active]:bg-transparent text-xs"
+                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-warn data-[state=active]:bg-transparent text-xs"
                   >
-                    <Sparkles className="w-3.5 h-3.5 mr-1 text-yellow-400" />
+                    <Sparkles className="w-3.5 h-3.5 mr-1 text-warn" />
                     Points
                   </TabsTrigger>
                   {isHost && (

@@ -343,7 +343,7 @@ export default function Markets() {
                     showSparkle={true}
                     duration={900}
                   />
-                  <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-emerald-500/10 rounded-full blur-xl" />
+                  <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-gain/10 rounded-full blur-xl" />
                 </div>
               </Surface>
             </div>

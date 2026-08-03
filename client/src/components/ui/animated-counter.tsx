@@ -49,9 +49,9 @@ export function AnimatedCounter({
   const getTrendIcon = () => {
     switch (trend) {
       case "up":
-        return <TrendingUp className="w-3 h-3 text-emerald-500" />;
+        return <TrendingUp className="w-3 h-3 text-gain" />;
       case "down":
-        return <TrendingDown className="w-3 h-3 text-rose-500" />;
+        return <TrendingDown className="w-3 h-3 text-loss" />;
       case "neutral":
         return <Minus className="w-3 h-3 text-muted-foreground" />;
       default:
@@ -94,9 +94,9 @@ export function AnimatedCounter({
           {getTrendIcon()}
           <span className={
             trend === "up" 
-              ? "text-emerald-500" 
+              ? "text-gain" 
               : trend === "down" 
-              ? "text-rose-500" 
+              ? "text-loss" 
               : "text-muted-foreground"
           }>
             {trendValue}

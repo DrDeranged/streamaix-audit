@@ -36,11 +36,11 @@ export default function AvatarFeedWidget() {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-white text-base flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-cyan-400" />
+            <Sparkles className="w-4 h-4 text-accent-bright" />
             Avatar Live Feed
           </CardTitle>
           <Link href="/avatar-feed">
-            <a className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1" data-testid="avatar-feed-widget-link">
+            <a className="text-xs text-accent-bright hover:text-accent-bright flex items-center gap-1" data-testid="avatar-feed-widget-link">
               See all <ArrowRight className="w-3 h-3" />
             </a>
           </Link>
@@ -61,14 +61,14 @@ export default function AvatarFeedWidget() {
                     <img
                       src={p.avatarImageUrl}
                       alt=""
-                      className="w-8 h-8 rounded-full object-cover shrink-0 ring-1 ring-cyan-500/30"
+                      className="w-8 h-8 rounded-full object-cover shrink-0 ring-1 ring-accent-core/30"
                     />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-accent-core shrink-0" />
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 text-xs">
-                      <span className="font-medium text-body group-hover:text-cyan-400 truncate">
+                      <span className="font-medium text-body group-hover:text-accent-bright truncate">
                         {p.avatarName}
                       </span>
                       <span className="text-muted">·</span>
@@ -76,7 +76,7 @@ export default function AvatarFeedWidget() {
                       {p.outcome && (
                         <Badge
                           variant="outline"
-                          className={`ml-auto h-4 px-1 text-[10px] gap-0.5 ${isYes ? "text-emerald-400 border-emerald-500/40" : "text-rose-400 border-rose-500/40"}`}
+                          className={`ml-auto h-4 px-1 text-[10px] gap-0.5 ${isYes ? "text-gain border-gain/40" : "text-loss border-loss/40"}`}
                         >
                           {isYes ? <TrendingUp className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
                           {p.outcome}

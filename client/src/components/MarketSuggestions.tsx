@@ -65,17 +65,17 @@ export function MarketSuggestions({ summaryId, onCreateMarket }: MarketSuggestio
     const colors: Record<string, string> = {
       crypto: 'bg-accent-core/20 text-accent-bright border-accent-core/30',
       defi: 'bg-accent-deep/40 text-accent-bright border-accent-core/30',
-      bounty: 'bg-green-500/20 text-green-400 border-green-500/30',
-      realworld: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+      bounty: 'bg-gain/20 text-gain border-gain/30',
+      realworld: 'bg-warn/20 text-warn border-warn/30',
       community: 'bg-pink-500/20 text-pink-400 border-pink-500/30'
     };
     return colors[category] || colors.community;
   };
 
   const getConfidenceBadge = (confidence: number) => {
-    if (confidence >= 80) return { color: 'bg-green-500/20 text-green-400', label: 'High Confidence' };
-    if (confidence >= 60) return { color: 'bg-yellow-500/20 text-yellow-400', label: 'Medium Confidence' };
-    return { color: 'bg-red-500/20 text-red-400', label: 'Low Confidence' };
+    if (confidence >= 80) return { color: 'bg-gain/20 text-gain', label: 'High Confidence' };
+    if (confidence >= 60) return { color: 'bg-warn/20 text-warn', label: 'Medium Confidence' };
+    return { color: 'bg-loss/20 text-loss', label: 'Low Confidence' };
   };
 
   return (

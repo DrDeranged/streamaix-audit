@@ -62,7 +62,7 @@ function NeuralBackground() {
       {[...Array(20)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute w-1 h-1 rounded-full bg-cyan-400/30"
+          className="absolute w-1 h-1 rounded-full bg-accent-core/30"
           style={{
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
@@ -156,27 +156,27 @@ function GlowingStatCard({ icon: Icon, label, value, subValue, color, delay = 0 
   const colorClasses = {
     cyan: {
       bg: ' ',
-      border: 'border-cyan-500/30 hover:border-cyan-400/50',
-      glow: 'shadow-cyan-500/20 hover:shadow-cyan-500/40',
+      border: 'border-accent-core/30 hover:border-accent-core/50',
+      glow: 'shadow-accent-core/20 hover:shadow-accent-core/40',
       icon: '  text-accent-bright',
       text: 'text-accent-bright',
-      pulse: 'bg-cyan-400',
+      pulse: 'bg-accent-core',
     },
     emerald: {
       bg: ' ',
-      border: 'border-emerald-500/30 hover:border-emerald-400/50',
-      glow: 'shadow-emerald-500/20 hover:shadow-emerald-500/40',
+      border: 'border-gain/30 hover:border-gain/50',
+      glow: 'shadow-gain/20 hover:shadow-gain/40',
       icon: '  text-gain',
       text: 'text-gain',
-      pulse: 'bg-emerald-400',
+      pulse: 'bg-gain',
     },
     red: {
       bg: ' ',
-      border: 'border-red-500/30 hover:border-red-400/50',
-      glow: 'shadow-red-500/20 hover:shadow-red-500/40',
+      border: 'border-loss/30 hover:border-loss/50',
+      glow: 'shadow-loss/20 hover:shadow-loss/40',
       icon: '  text-loss',
       text: 'text-loss',
-      pulse: 'bg-red-400',
+      pulse: 'bg-loss',
     },
     purple: {
       bg: ' ',
@@ -188,11 +188,11 @@ function GlowingStatCard({ icon: Icon, label, value, subValue, color, delay = 0 
     },
     amber: {
       bg: ' ',
-      border: 'border-amber-500/30 hover:border-amber-400/50',
-      glow: 'shadow-amber-500/20 hover:shadow-amber-500/40',
+      border: 'border-warn/30 hover:border-warn/50',
+      glow: 'shadow-warn/20 hover:shadow-warn/40',
       icon: '  text-warn',
       text: 'text-warn',
-      pulse: 'bg-amber-400',
+      pulse: 'bg-warn',
     },
   };
   
@@ -414,9 +414,9 @@ function ConfidenceRing({ value, size = 60 }: { value: number; size?: number }) 
 
 function RSIGauge({ value, signal }: { value: number; signal: string }) {
   const getColor = () => {
-    if (signal === 'oversold') return 'bg-emerald-500';
-    if (signal === 'overbought') return 'bg-red-500';
-    return 'bg-cyan-500';
+    if (signal === 'oversold') return 'bg-gain';
+    if (signal === 'overbought') return 'bg-loss';
+    return 'bg-accent-core';
   };
   
   const position = (value / 100) * 100;
@@ -547,10 +547,10 @@ function CorrelationHeatmap({ signals }: { signals: TradingSignal[] }) {
   );
 
   const getColor = (val: number) => {
-    if (val >= 0.7) return 'bg-emerald-500';
-    if (val >= 0.4) return 'bg-cyan-500';
-    if (val >= 0) return 'bg-amber-500';
-    return 'bg-red-500';
+    if (val >= 0.7) return 'bg-gain';
+    if (val >= 0.4) return 'bg-accent-core';
+    if (val >= 0) return 'bg-warn';
+    return 'bg-loss';
   };
 
   const gridCols = assets.length + 1;
@@ -580,10 +580,10 @@ function CorrelationHeatmap({ signals }: { signals: TradingSignal[] }) {
         ))}
       </div>
       <div className="flex items-center justify-center gap-6 mt-6 text-xs text-secondary">
-        <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-emerald-500 bg-opacity-30" /> High (0.7+)</div>
-        <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-cyan-500 bg-opacity-30" /> Medium (0.4-0.7)</div>
-        <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-amber-500 bg-opacity-30" /> Low (0-0.4)</div>
-        <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-red-500 bg-opacity-30" /> Negative</div>
+        <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-gain bg-opacity-30" /> High (0.7+)</div>
+        <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-accent-core bg-opacity-30" /> Medium (0.4-0.7)</div>
+        <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-warn bg-opacity-30" /> Low (0-0.4)</div>
+        <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-loss bg-opacity-30" /> Negative</div>
       </div>
     </div>
   );
@@ -619,14 +619,14 @@ function PriceAlertDialog({ signal }: { signal: TradingSignal }) {
         <div className="grid grid-cols-2 gap-3">
           <Button 
             variant={condition === 'above' ? 'default' : 'outline'} 
-            className={condition === 'above' ? 'bg-emerald-500' : ''}
+            className={condition === 'above' ? 'bg-gain' : ''}
             onClick={() => setCondition('above')}
           >
             <ArrowUpRight className="w-4 h-4 mr-1" /> Above
           </Button>
           <Button 
             variant={condition === 'below' ? 'default' : 'outline'} 
-            className={condition === 'below' ? 'bg-red-500' : ''}
+            className={condition === 'below' ? 'bg-loss' : ''}
             onClick={() => setCondition('below')}
           >
             <ArrowDownRight className="w-4 h-4 mr-1" /> Below
@@ -643,7 +643,7 @@ function PriceAlertDialog({ signal }: { signal: TradingSignal }) {
           />
         </div>
 
-        <Button className="w-full bg-amber-500 hover:bg-amber-600" onClick={createAlert}>
+        <Button className="w-full bg-warn hover:bg-warn" onClick={createAlert}>
           <Bell className="w-4 h-4 mr-2" /> Create Alert
         </Button>
       </div>
@@ -691,8 +691,8 @@ function NewsCard() {
             >
               <motion.div 
                 className={`w-2.5 h-2.5 rounded-full mt-1 ${
-                  item.sentiment === 'positive' ? 'bg-emerald-500' : 
-                  item.sentiment === 'negative' ? 'bg-red-500' : 'bg-ink-raised'
+                  item.sentiment === 'positive' ? 'bg-gain' : 
+                  item.sentiment === 'negative' ? 'bg-loss' : 'bg-ink-raised'
                 }`}
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 2, repeat: Infinity, delay: i * 0.5 }}
@@ -726,12 +726,12 @@ function WhaleAlertCard() {
         <div className="absolute top-0 left-0 right-0 h-[1px]    " />
         <div className="pb-2">
           <SectionTitle as="h3" className="text-sm flex items-center gap-2">
-            <div className="w-7 h-7 rounded-xl bg-orange-500/20 flex items-center justify-center">
-              <Flame className="w-3.5 h-3.5 text-orange-400" />
+            <div className="w-7 h-7 rounded-xl bg-warn/20 flex items-center justify-center">
+              <Flame className="w-3.5 h-3.5 text-warn" />
             </div>
             <span>Whale Alerts</span>
             <motion.div
-              className="w-1.5 h-1.5 rounded-full bg-orange-400 ml-auto"
+              className="w-1.5 h-1.5 rounded-full bg-warn ml-auto"
               animate={{ opacity: [1, 0.4, 1] }}
               transition={{ duration: 1.5, repeat: Infinity }}
             />
@@ -748,7 +748,7 @@ function WhaleAlertCard() {
             >
               <div className="flex items-center gap-3">
                 <div className={`w-7 h-7 rounded-xl flex items-center justify-center ${
-                  alert.direction === 'out' ? 'bg-emerald-500/20' : 'bg-red-500/20'
+                  alert.direction === 'out' ? 'bg-gain/20' : 'bg-loss/20'
                 }`}>
                   {alert.direction === 'out' ? (
                     <ArrowUpRight className="w-4 h-4 text-gain" />
@@ -781,29 +781,29 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
   };
 
   const getDirectionColor = () => {
-    if (signal.direction === 'bullish') return '  border-emerald-500/30';
-    if (signal.direction === 'bearish') return '  border-red-500/30';
+    if (signal.direction === 'bullish') return '  border-gain/30';
+    if (signal.direction === 'bearish') return '  border-loss/30';
     return '  border-ink-edge';
   };
 
   const getSignalTypeBadge = () => {
     const colors: Record<string, string> = {
-      'breakout': 'bg-emerald-500/20 text-gain border-emerald-500/30',
-      'bounce': 'bg-cyan-500/20 text-accent-bright border-cyan-500/30',
-      'flush': 'bg-red-500/20 text-loss border-red-500/30',
+      'breakout': 'bg-gain/20 text-gain border-gain/30',
+      'bounce': 'bg-accent-core/20 text-accent-bright border-accent-core/30',
+      'flush': 'bg-loss/20 text-loss border-loss/30',
       'consolidation': 'bg-ink-raised text-secondary border-ink-edge',
       'trend_continuation': 'bg-accent-core/20 text-accent-bright border-accent-core/30',
-      'reversal': 'bg-amber-500/20 text-warn border-amber-500/30',
+      'reversal': 'bg-warn/20 text-warn border-warn/30',
       'accumulation': 'bg-accent-core/20 text-accent-bright border-accent-core/30',
-      'distribution': 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+      'distribution': 'bg-warn/20 text-warn border-warn/30',
     };
     return colors[signal.signalType] || colors['consolidation'];
   };
 
   const getPriorityBadge = () => {
     const colors: Record<string, string> = {
-      'high': 'bg-red-500/20 text-loss border-red-500/30',
-      'medium': 'bg-amber-500/20 text-warn border-amber-500/30',
+      'high': 'bg-loss/20 text-loss border-loss/30',
+      'medium': 'bg-warn/20 text-warn border-warn/30',
       'low': 'bg-ink-raised text-secondary border-ink-edge',
     };
     return colors[signal.alertPriority] || colors['low'];
@@ -848,7 +848,7 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
           
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={onWatchlistToggle} className="h-8 w-8 p-0" data-testid={`btn-watchlist-${signal.asset.symbol}`}>
-              {isWatchlisted ? <Star className="w-4 h-4 text-warn fill-amber-400" /> : <StarOff className="w-4 h-4 text-secondary" />}
+              {isWatchlisted ? <Star className="w-4 h-4 text-warn fill-warn" /> : <StarOff className="w-4 h-4 text-secondary" />}
             </Button>
             <Dialog>
               <DialogTrigger asChild>
@@ -896,22 +896,22 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
             <span className={`text-lg font-bold ${signal.confluence?.overall > 60 ? 'text-gain' : signal.confluence?.overall < 40 ? 'text-loss' : 'text-warn'}`}>{signal.confluence?.overall || 50}/100</span>
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <ConfluenceBar label="Tech" value={signal.confluence?.technical || 50} color="bg-cyan-500" />
+            <ConfluenceBar label="Tech" value={signal.confluence?.technical || 50} color="bg-accent-core" />
             <ConfluenceBar label="Chain" value={signal.confluence?.onChain || 50} color="bg-accent-core" />
-            <ConfluenceBar label="Sent" value={signal.confluence?.sentiment || 50} color="bg-amber-500" />
+            <ConfluenceBar label="Sent" value={signal.confluence?.sentiment || 50} color="bg-warn" />
           </div>
         </div>
 
         <div className="grid grid-cols-3 gap-2 mb-3">
-          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-2 text-center">
+          <div className="bg-gain/10 border border-gain/20 rounded-xl p-2 text-center">
             <p className="text-[10px] text-gain uppercase font-medium">Entry</p>
             <p className="text-xs font-bold text-primary">{formatPrice(signal.entry.low)}</p>
           </div>
-          <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-2 text-center">
+          <div className="bg-loss/10 border border-loss/20 rounded-xl p-2 text-center">
             <p className="text-[10px] text-loss uppercase font-medium">Stop</p>
             <p className="text-xs font-bold text-primary">{formatPrice(signal.stopLoss)}</p>
           </div>
-          <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-xl p-2 text-center">
+          <div className="bg-accent-core/10 border border-accent-core/20 rounded-xl p-2 text-center">
             <p className="text-[10px] text-accent-bright uppercase font-medium">R:R</p>
             <p className="text-xs font-bold text-primary">{signal.riskReward}</p>
           </div>
@@ -929,9 +929,9 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
                   <TabsList className="bg-ink-raised border border-ink-edge w-full grid grid-cols-4">
                     <TabsTrigger value="overview" className="text-[10px] data-[state=active]:bg-accent-core/20">AI</TabsTrigger>
-                    <TabsTrigger value="technical" className="text-[10px] data-[state=active]:bg-cyan-500/30">Tech</TabsTrigger>
-                    <TabsTrigger value="onchain" className="text-[10px] data-[state=active]:bg-emerald-500/30">Chain</TabsTrigger>
-                    <TabsTrigger value="sentiment" className="text-[10px] data-[state=active]:bg-amber-500/30">Sent</TabsTrigger>
+                    <TabsTrigger value="technical" className="text-[10px] data-[state=active]:bg-accent-core/30">Tech</TabsTrigger>
+                    <TabsTrigger value="onchain" className="text-[10px] data-[state=active]:bg-gain/30">Chain</TabsTrigger>
+                    <TabsTrigger value="sentiment" className="text-[10px] data-[state=active]:bg-warn/30">Sent</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="overview" className="mt-3 space-y-3">
@@ -959,7 +959,7 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
                     <div>
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-xs text-secondary flex items-center gap-1"><Gauge className="w-3 h-3" /> RSI</span>
-                        <Badge className={`text-[10px] ${ti?.rsiSignal === 'oversold' ? 'bg-emerald-500/20 text-gain' : ti?.rsiSignal === 'overbought' ? 'bg-red-500/20 text-loss' : 'bg-ink-raised text-secondary'}`}>
+                        <Badge className={`text-[10px] ${ti?.rsiSignal === 'oversold' ? 'bg-gain/20 text-gain' : ti?.rsiSignal === 'overbought' ? 'bg-loss/20 text-loss' : 'bg-ink-raised text-secondary'}`}>
                           {ti?.rsiSignal?.toUpperCase()} ({ti?.rsi?.toFixed(1)})
                         </Badge>
                       </div>
@@ -968,7 +968,7 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
                     <div className="bg-ink-raised/60 rounded-xl p-3">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-xs text-secondary">MACD</span>
-                        <Badge className={`text-[10px] ${ti?.macd?.trend === 'bullish' ? 'bg-emerald-500/20 text-gain' : ti?.macd?.trend === 'bearish' ? 'bg-red-500/20 text-loss' : 'bg-ink-raised text-secondary'}`}>
+                        <Badge className={`text-[10px] ${ti?.macd?.trend === 'bullish' ? 'bg-gain/20 text-gain' : ti?.macd?.trend === 'bearish' ? 'bg-loss/20 text-loss' : 'bg-ink-raised text-secondary'}`}>
                           {ti?.macd?.trend?.toUpperCase()}
                         </Badge>
                       </div>
@@ -981,8 +981,8 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
                     <div className="bg-ink-raised/60 rounded-xl p-3">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-xs text-secondary">Moving Averages</span>
-                        {ti?.movingAverages?.goldenCross && <Badge className="bg-emerald-500/20 text-gain text-[9px]">GOLDEN CROSS</Badge>}
-                        {ti?.movingAverages?.deathCross && <Badge className="bg-red-500/20 text-loss text-[9px]">DEATH CROSS</Badge>}
+                        {ti?.movingAverages?.goldenCross && <Badge className="bg-gain/20 text-gain text-[9px]">GOLDEN CROSS</Badge>}
+                        {ti?.movingAverages?.deathCross && <Badge className="bg-loss/20 text-loss text-[9px]">DEATH CROSS</Badge>}
                       </div>
                       <div className="space-y-1">
                         {[{ label: 'SMA 20', value: ti?.movingAverages?.sma20, pos: ti?.movingAverages?.priceVsSma20 },
@@ -993,7 +993,7 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
                             <span className="text-muted">{ma.label}</span>
                             <div className="flex items-center gap-2">
                               <span className="text-primary">{formatPrice(ma.value || 0)}</span>
-                              <Badge className={`text-[8px] ${ma.pos === 'above' ? 'bg-emerald-500/20 text-gain' : 'bg-red-500/20 text-loss'}`}>{ma.pos?.toUpperCase()}</Badge>
+                              <Badge className={`text-[8px] ${ma.pos === 'above' ? 'bg-gain/20 text-gain' : 'bg-loss/20 text-loss'}`}>{ma.pos?.toUpperCase()}</Badge>
                             </div>
                           </div>
                         ))}
@@ -1012,7 +1012,7 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
                         <div className="bg-ink-raised/60 rounded-xl p-3">
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-xs text-secondary flex items-center gap-1"><Flame className="w-3 h-3" /> Whales</span>
-                            <Badge className={`text-[10px] ${onChain.whaleActivity.signal === 'accumulating' ? 'bg-emerald-500/20 text-gain' : onChain.whaleActivity.signal === 'distributing' ? 'bg-red-500/20 text-loss' : 'bg-ink-raised text-secondary'}`}>
+                            <Badge className={`text-[10px] ${onChain.whaleActivity.signal === 'accumulating' ? 'bg-gain/20 text-gain' : onChain.whaleActivity.signal === 'distributing' ? 'bg-loss/20 text-loss' : 'bg-ink-raised text-secondary'}`}>
                               {onChain.whaleActivity.signal.toUpperCase()}
                             </Badge>
                           </div>
@@ -1024,7 +1024,7 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
                         <div className="bg-ink-raised/60 rounded-xl p-3">
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-xs text-secondary">Exchange Flow</span>
-                            <Badge className={`text-[10px] ${onChain.exchangeFlows.signal === 'bullish' ? 'bg-emerald-500/20 text-gain' : onChain.exchangeFlows.signal === 'bearish' ? 'bg-red-500/20 text-loss' : 'bg-ink-raised text-secondary'}`}>
+                            <Badge className={`text-[10px] ${onChain.exchangeFlows.signal === 'bullish' ? 'bg-gain/20 text-gain' : onChain.exchangeFlows.signal === 'bearish' ? 'bg-loss/20 text-loss' : 'bg-ink-raised text-secondary'}`}>
                               {onChain.exchangeFlows.signal.toUpperCase()}
                             </Badge>
                           </div>
@@ -1051,7 +1051,7 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
                     <div className="bg-ink-raised/60 rounded-xl p-3">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-xs text-secondary">Social</span>
-                        <Badge className={`text-[10px] ${sentiment?.socialSentiment?.trend === 'rising' ? 'bg-emerald-500/20 text-gain' : sentiment?.socialSentiment?.trend === 'falling' ? 'bg-red-500/20 text-loss' : 'bg-ink-raised text-secondary'}`}>
+                        <Badge className={`text-[10px] ${sentiment?.socialSentiment?.trend === 'rising' ? 'bg-gain/20 text-gain' : sentiment?.socialSentiment?.trend === 'falling' ? 'bg-loss/20 text-loss' : 'bg-ink-raised text-secondary'}`}>
                           {sentiment?.socialSentiment?.trend?.toUpperCase()}
                         </Badge>
                       </div>
@@ -1073,7 +1073,7 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
                         <p className="text-xs text-secondary mb-2">Confluence Factors</p>
                         <div className="flex flex-wrap gap-1">
                           {signal.confluence.factors.slice(0, 6).map((f, i) => (
-                            <Badge key={i} className={`text-[9px] ${f.impact === 'bullish' ? 'bg-emerald-500/20 text-gain' : f.impact === 'bearish' ? 'bg-red-500/20 text-loss' : 'bg-ink-raised text-secondary'}`}>
+                            <Badge key={i} className={`text-[9px] ${f.impact === 'bullish' ? 'bg-gain/20 text-gain' : f.impact === 'bearish' ? 'bg-loss/20 text-loss' : 'bg-ink-raised text-secondary'}`}>
                               {f.name}
                             </Badge>
                           ))}
@@ -1305,7 +1305,7 @@ function MyWatchlistSection() {
               )}
               {cryptoResults.length > 0 && (
                 <>
-                  <div className="px-3 py-2 bg-amber-500/20 text-xs text-amber-300 font-medium flex items-center gap-2">
+                  <div className="px-3 py-2 bg-warn/20 text-xs text-warn font-medium flex items-center gap-2">
                     <Coins className="w-3 h-3" /> Crypto
                   </div>
                   {cryptoResults.map((result) => (
@@ -1446,8 +1446,8 @@ export default function AITrading() {
             eyebrow={
               <span className="inline-flex items-center gap-2">
                 Multi-factor confluence
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 text-gain">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" /> LIVE
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-gain/30 bg-gain/15 px-2 py-0.5 text-gain">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gain" /> LIVE
                 </span>
               </span>
             }
@@ -1474,7 +1474,7 @@ export default function AITrading() {
                   size="sm"
                   onClick={() => refetch()}
                   disabled={isFetching}
-                  className="   border border-cyan-500/30 text-cyan-200 hover:text-primary"
+                  className="   border border-accent-core/30 text-accent-bright hover:text-primary"
                   data-testid="btn-refresh-signals"
                 >
                   <RefreshCw className={`w-4 h-4 mr-1.5 ${isFetching ? 'animate-spin' : ''}`} />
@@ -1531,16 +1531,16 @@ export default function AITrading() {
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="relative overflow-hidden rounded-xl border border-amber-500/20     backdrop-blur-xl mb-8"
+          className="relative overflow-hidden rounded-xl border border-warn/20     backdrop-blur-xl mb-8"
         >
           <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22%23f59e0b%22%20fill-opacity%3D%220.03%22%20fill-rule%3D%22evenodd%22%3E%3Ccircle%20cx%3D%223%22%20cy%3D%223%22%20r%3D%223%22%2F%3E%3Ccircle%20cx%3D%2213%22%20cy%3D%2213%22%20r%3D%223%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-50" />
           <div className="relative p-4 flex items-center gap-4">
-            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
+            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-warn/20 flex items-center justify-center">
               <AlertTriangle className="w-5 h-5 text-warn" />
             </div>
             <div className="flex-1">
-              <p className="text-sm text-amber-200 font-semibold">Risk Disclaimer</p>
-              <p className="text-xs text-amber-300/70 mt-0.5">AI signals are for informational purposes only. Always DYOR and never invest more than you can afford to lose.</p>
+              <p className="text-sm text-warn font-semibold">Risk Disclaimer</p>
+              <p className="text-xs text-warn/70 mt-0.5">AI signals are for informational purposes only. Always DYOR and never invest more than you can afford to lose.</p>
             </div>
             <Sparkles className="w-5 h-5 text-warn/50" />
           </div>
@@ -1564,7 +1564,7 @@ export default function AITrading() {
                       <span className="flex items-center gap-1.5">All <Badge variant="secondary" className="bg-ink-raised text-xs">{signals.length}</Badge></span>
                     </TabsTrigger>
                     <TabsTrigger value="crypto" className="data-[state=active]:bg-accent-core data-[state=active]:text-white rounded-xl flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-crypto">
-                      <span className="flex items-center gap-1.5"><Coins className="w-3 h-3 sm:w-4 sm:h-4" />Crypto <Badge variant="secondary" className="bg-amber-500/20 text-amber-300 text-xs">{cryptoSignals.length}</Badge></span>
+                      <span className="flex items-center gap-1.5"><Coins className="w-3 h-3 sm:w-4 sm:h-4" />Crypto <Badge variant="secondary" className="bg-warn/20 text-warn text-xs">{cryptoSignals.length}</Badge></span>
                     </TabsTrigger>
                     <TabsTrigger value="stocks" className="data-[state=active]:bg-accent-core data-[state=active]:text-white rounded-xl flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-stocks">
                       <span className="flex items-center gap-1.5"><Building2 className="w-3 h-3 sm:w-4 sm:h-4" />Stocks <Badge variant="secondary" className="bg-accent-core/20 text-accent-bright text-xs">{stockSignals.length}</Badge></span>
@@ -1708,7 +1708,7 @@ export default function AITrading() {
               <div className="absolute top-0 left-0 right-0 h-[1px]    " />
               <div>
                 <SectionTitle as="h3" className="text-sm flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-cyan-500/20 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-accent-core/20 flex items-center justify-center">
                     <History className="w-4 h-4 text-accent-bright" />
                   </div>
                   Performance Metrics
@@ -1756,11 +1756,11 @@ export default function AITrading() {
               <div className="absolute top-0 left-0 right-0 h-[1px]    " />
               <div>
                 <SectionTitle as="h3" className="text-sm flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-warn/20 flex items-center justify-center">
                     <BarChart2 className="w-4 h-4 text-warn" />
                   </div>
                   Asset Correlation Heatmap
-                  <Badge variant="outline" className="ml-2 text-xs border-amber-500/30 text-warn">30-Day</Badge>
+                  <Badge variant="outline" className="ml-2 text-xs border-warn/30 text-warn">30-Day</Badge>
                 </SectionTitle>
               </div>
               <div>
@@ -1775,7 +1775,7 @@ export default function AITrading() {
 
         <div className="mt-12 text-center text-xs text-muted space-y-1">
           <p className="flex items-center justify-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-accent-core animate-pulse" />
             Signals refresh every 30s (live mode) | 15min cache TTL | Multi-factor confluence
           </p>
           <p>Data: CoinGecko, Finnhub, Alternative.me | AI-Powered Analysis</p>

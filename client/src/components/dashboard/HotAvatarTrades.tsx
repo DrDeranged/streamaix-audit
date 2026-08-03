@@ -45,7 +45,7 @@ export function HotAvatarTrades({ limit = 5, className = "" }: HotAvatarTradesPr
     return (
       <Card className={`neural-glass p-4 ${className}`}>
         <div className="flex items-center gap-2 mb-4">
-          <Flame className="w-5 h-5 text-orange-400" />
+          <Flame className="w-5 h-5 text-warn" />
           <h3 className="text-lg font-semibold text-white">Hot Avatar Trades</h3>
         </div>
         <div className="space-y-3">
@@ -63,7 +63,7 @@ export function HotAvatarTrades({ limit = 5, className = "" }: HotAvatarTradesPr
     return (
       <Card className={`neural-glass p-4 ${className}`}>
         <div className="flex items-center gap-2 mb-4">
-          <Flame className="w-5 h-5 text-orange-400" />
+          <Flame className="w-5 h-5 text-warn" />
           <h3 className="text-lg font-semibold text-white">Hot Avatar Trades</h3>
         </div>
         <div className="text-center py-6 text-muted">
@@ -82,12 +82,12 @@ export function HotAvatarTrades({ limit = 5, className = "" }: HotAvatarTradesPr
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ duration: 1.5, repeat: Infinity }}
           >
-            <Flame className="w-5 h-5 text-orange-400" />
+            <Flame className="w-5 h-5 text-warn" />
           </motion.div>
           <h3 className="text-lg font-semibold text-white">Hot Avatar Trades</h3>
         </div>
         <Link href="/markets/leaderboard">
-          <Button variant="ghost" size="sm" className="text-orange-400 hover:text-orange-300 text-xs">
+          <Button variant="ghost" size="sm" className="text-warn hover:text-warn text-xs">
             View All <ArrowRight className="w-3 h-3 ml-1" />
           </Button>
         </Link>
@@ -106,7 +106,7 @@ export function HotAvatarTrades({ limit = 5, className = "" }: HotAvatarTradesPr
             >
               <Link href={`/avatars/${trade.agentId}`}>
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-ink-raised hover:bg-ink-raised/80 transition-colors cursor-pointer group">
-                  <Avatar className="w-10 h-10 border-2 border-cyan-400/30 group-hover:border-cyan-400/60 transition-colors">
+                  <Avatar className="w-10 h-10 border-2 border-accent-core/30 group-hover:border-accent-core/60 transition-colors">
                     <AvatarImage src={trade.avatarImageUrl || undefined} alt={trade.agentName} />
                     <AvatarFallback className="bg-accent-deep/40 text-sm">
                       {trade.agentName.slice(0, 2)}
@@ -115,12 +115,12 @@ export function HotAvatarTrades({ limit = 5, className = "" }: HotAvatarTradesPr
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-white text-sm truncate group-hover:text-cyan-400 transition-colors">
+                      <span className="font-semibold text-white text-sm truncate group-hover:text-accent-bright transition-colors">
                         {trade.agentName}
                       </span>
                       <Badge 
                         variant="outline" 
-                        className={`text-xs ${isYes ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-rose-500/20 text-rose-300 border-rose-500/40'}`}
+                        className={`text-xs ${isYes ? 'bg-gain/20 text-gain border-gain/40' : 'bg-loss/20 text-loss border-loss/40'}`}
                       >
                         {trade.outcome}
                       </Badge>
@@ -133,11 +133,11 @@ export function HotAvatarTrades({ limit = 5, className = "" }: HotAvatarTradesPr
                   <div className="text-right shrink-0">
                     <div className="flex items-center gap-1 justify-end">
                       {isYes ? (
-                        <TrendingUp className="w-3 h-3 text-emerald-400" />
+                        <TrendingUp className="w-3 h-3 text-gain" />
                       ) : (
-                        <TrendingDown className="w-3 h-3 text-rose-400" />
+                        <TrendingDown className="w-3 h-3 text-loss" />
                       )}
-                      <span className="text-sm font-mono font-semibold text-cyan-300">
+                      <span className="text-sm font-mono font-semibold text-accent-bright">
                         {trade.streamAmount.toLocaleString()}
                       </span>
                     </div>

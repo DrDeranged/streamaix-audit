@@ -158,18 +158,18 @@ export function DiagnosticPanel() {
           {responses.map((resp, idx) => (
             <Card key={idx} className={`border ${
               resp.status >= 200 && resp.status < 300 
-                ? 'border-green-500/50 bg-green-500/5' 
+                ? 'border-gain/50 bg-gain/5' 
                 : resp.status >= 400 
-                ? 'border-red-500/50 bg-red-500/5'
-                : 'border-yellow-500/50 bg-yellow-500/5'
+                ? 'border-loss/50 bg-loss/5'
+                : 'border-warn/50 bg-warn/5'
             }`}>
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {resp.status >= 200 && resp.status < 300 ? (
-                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <CheckCircle className="h-4 w-4 text-gain" />
                     ) : (
-                      <AlertCircle className="h-4 w-4 text-red-500" />
+                      <AlertCircle className="h-4 w-4 text-loss" />
                     )}
                     <span className="font-mono text-xs">{resp.method}</span>
                     <Badge variant={resp.status >= 200 && resp.status < 300 ? 'default' : 'destructive'}>
@@ -206,7 +206,7 @@ export function DiagnosticPanel() {
                   <div className="text-xs font-semibold text-muted-foreground">Response Body:</div>
                   <pre className="text-[10px] bg-black/30 p-2 rounded overflow-x-auto max-h-40">
                     {resp.error ? (
-                      <span className="text-red-400">Error: {resp.error}</span>
+                      <span className="text-loss">Error: {resp.error}</span>
                     ) : (
                       JSON.stringify(resp.body, null, 2)
                     )}

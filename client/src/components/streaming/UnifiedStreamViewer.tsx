@@ -872,7 +872,7 @@ export function UnifiedStreamViewer({
               className={cn(
                 "rounded-full border-2 min-h-[44px] px-4",
                 showQA 
-                  ? "border-cyan-500 bg-accent-core/20 text-accent-bright" 
+                  ? "border-accent-core bg-accent-core/20 text-accent-bright" 
                   : "border-ink-edge bg-ink-raised text-body"
               )}
               data-testid="button-toggle-qa"

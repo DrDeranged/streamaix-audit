@@ -568,7 +568,7 @@ export function AIProcessor() {
                                         <span className="font-medium text-sm text-primary ">{trend.trend}</span>
                                         <Badge variant="outline" className={`text-xs ${
                                           trend.strength === 'strong' ? 'text-gain border-gain/30' :
-                                          trend.strength === 'moderate' ? 'text-warn border-yellow-500/30' :
+                                          trend.strength === 'moderate' ? 'text-warn border-warn/30' :
                                           'text-muted border-ink-edge'
                                         }`}>
                                           {trend.strength}
@@ -590,7 +590,7 @@ export function AIProcessor() {
                                 </h5>
                                 <div className="space-y-3">
                                   {result.keyQuotes.map((quote: any, idx: number) => (
-                                    <div key={idx} className="p-3 bg-ink-raised rounded-xl border-l-2 border-orange-400">
+                                    <div key={idx} className="p-3 bg-ink-raised rounded-xl border-l-2 border-warn">
                                       <p className="text-sm italic mb-2">"{quote.quote}"</p>
                                       <div className="flex items-center justify-between text-xs text-secondary">
                                         <span>{quote.speaker}</span>
@@ -675,7 +675,7 @@ export function AIProcessor() {
                                       array.findIndex(item => item.symbol === financial.symbol) === index
                                     )
                                     .map((financial: any, idx: number) => (
-                                    <div key={idx} className="p-3 bg-ink-raised rounded-xl border-l-2 border-emerald-400">
+                                    <div key={idx} className="p-3 bg-ink-raised rounded-xl border-l-2 border-gain">
                                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
                                         <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                                           <div className="flex items-center gap-2 flex-wrap">
@@ -706,7 +706,7 @@ export function AIProcessor() {
                                         </div>
                                         <Badge variant="outline" className={`text-xs self-start sm:self-center ${
                                           financial.impact === 'bullish' ? 'text-gain border-gain/30' :
-                                          financial.impact === 'bearish' ? 'text-loss border-red-500/30' :
+                                          financial.impact === 'bearish' ? 'text-loss border-loss/30' :
                                           'text-muted border-ink-edge'
                                         }`}>
                                           {financial.impact}
@@ -715,7 +715,7 @@ export function AIProcessor() {
                                       
                                       {/* Market Alpha - Unique Insights */}
                                       {financial.marketAlpha && (
-                                        <div className="text-xs text-amber-600  mb-2 p-2 bg-amber-50  rounded border-l-2 border-amber-400">
+                                        <div className="text-xs text-warn  mb-2 p-2 bg-warn  rounded border-l-2 border-warn">
                                           <strong>🎯 Market Alpha:</strong> {financial.marketAlpha}
                                         </div>
                                       )}
@@ -746,7 +746,7 @@ export function AIProcessor() {
                                           {financial.riskLevel && (
                                             <div className={`text-xs px-2 py-1 rounded border ${
                                               financial.riskLevel === 'Low' ? 'bg-gain/10 text-gain border-gain/20' :
-                                              financial.riskLevel === 'Moderate' ? 'bg-warn/10 text-warn border-yellow-500/20' :
+                                              financial.riskLevel === 'Moderate' ? 'bg-warn/10 text-warn border-warn/20' :
                                               'bg-loss/10 text-loss border-loss/20'
                                             }`}>
                                               Risk: {financial.riskLevel}
@@ -1008,7 +1008,7 @@ export function AIProcessor() {
                                   <Button 
                                     variant="outline" 
                                     size="lg" 
-                                    className="border-emerald-500/30 text-gain hover:bg-gain/10 hover:text-emerald-300 transition-all duration-300 min-w-[140px]"
+                                    className="border-gain/30 text-gain hover:bg-gain/10 hover:text-gain transition-all duration-300 min-w-[140px]"
                                   >
                                     Sign In
                                   </Button>

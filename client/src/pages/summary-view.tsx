@@ -757,7 +757,7 @@ export default function SummaryView() {
                                             <span className="font-medium text-sm text-gain">{trend.trend}</span>
                                             <Badge variant="outline" className={`text-xs ${
                                               trend.strength === 'strong' ? 'text-gain border-gain/30' :
-                                              trend.strength === 'moderate' ? 'text-warn border-yellow-500/30' :
+                                              trend.strength === 'moderate' ? 'text-warn border-warn/30' :
                                               'text-secondary border-ink-edge'
                                             }`}>
                                               {trend.strength}
@@ -807,7 +807,7 @@ export default function SummaryView() {
                               return summary.financialTrends || [];
                             }
                           })().map((financial: any, idx: number) => (
-                            <div key={idx} className="p-4 bg-ink-raised rounded-xl border-l-4 border-cyan-400">
+                            <div key={idx} className="p-4 bg-ink-raised rounded-xl border-l-4 border-accent-core">
                               {/* Header with symbol and company */}
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
                                 <div className="flex flex-wrap items-center gap-2">
@@ -821,7 +821,7 @@ export default function SummaryView() {
                                 </div>
                                 <Badge variant="outline" className={`text-sm px-3 py-1 ${
                                   financial.impact === 'bullish' ? 'text-gain border-gain/40 bg-gain/15' :
-                                  financial.impact === 'bearish' ? 'text-loss border-red-500/50 bg-ink-raised' :
+                                  financial.impact === 'bearish' ? 'text-loss border-loss/50 bg-ink-raised' :
                                   'text-secondary border-ink-edge bg-ink-surface'
                                 }`}>
                                   {financial.impact?.toUpperCase()}
@@ -879,12 +879,12 @@ export default function SummaryView() {
                                 {/* Risk & Time Horizon */}
                                 <div className="flex flex-wrap gap-2 mt-3">
                                   {financial.timeHorizon && (
-                                    <Badge variant="outline" className="text-xs px-2 py-1 text-warn border-yellow-500/30 bg-ink-raised">
+                                    <Badge variant="outline" className="text-xs px-2 py-1 text-warn border-warn/30 bg-ink-raised">
                                       {financial.timeHorizon}
                                     </Badge>
                                   )}
                                   {financial.riskLevel && (
-                                    <Badge variant="outline" className="text-xs px-2 py-1 text-orange-400 border-orange-500/30 bg-ink-raised">
+                                    <Badge variant="outline" className="text-xs px-2 py-1 text-warn border-warn/30 bg-ink-raised">
                                       Risk: {financial.riskLevel}
                                     </Badge>
                                   )}
@@ -915,7 +915,7 @@ export default function SummaryView() {
                       {summary.chapters && summary.chapters.length > 0 ? (
                         <div className="space-y-3">
                           {summary.chapters.map((chapter: any, index: number) => (
-                            <div key={index} className="p-3 bg-ink-raised rounded-xl border-l-2 border-blue-400">
+                            <div key={index} className="p-3 bg-ink-raised rounded-xl border-l-2 border-accent-core">
                               <div className="flex items-center justify-between mb-2">
                                 <h4 className="font-semibold text-accent-bright flex items-center gap-2">
                                   <span className="w-6 h-6 bg-accent-core/20 rounded-xl flex items-center justify-center text-xs">
@@ -1101,7 +1101,7 @@ export default function SummaryView() {
                                       {note.noteType}
                                     </Badge>
                                     <Badge variant="outline" className={`text-xs ${
-                                      note.isPrivate ? 'text-warn border-amber-500/30' : 'text-gain border-gain/30'
+                                      note.isPrivate ? 'text-warn border-warn/30' : 'text-gain border-gain/30'
                                     }`}>
                                       {note.isPrivate ? '🔒 Private' : '🌐 Public'}
                                     </Badge>

@@ -250,7 +250,7 @@ export function AIRecommendations() {
                       >
                         <div className="p-5">
                           <div className="flex items-start gap-4">
-                            <Avatar className="h-16 w-16 ring-2 ring-blue-500/40 shadow-lg">
+                            <Avatar className="h-16 w-16 ring-2 ring-accent-core/40 shadow-lg">
                               <AvatarImage src={avatar.imageUrl} alt={avatar.name} />
                               <AvatarFallback className="bg-accent-deep font-bold text-primary">
                                 {avatar.name.split(' ').map((n: string) => n[0]).join('')}

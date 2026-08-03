@@ -41,9 +41,9 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <Card className="border-red-500/20 bg-red-900/10">
+        <Card className="border-loss/20 bg-loss/10">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-red-400 text-sm">
+            <CardTitle className="flex items-center gap-2 text-loss text-sm">
               <AlertTriangle className="w-4 h-4" />
               {this.props.section ? `Error in ${this.props.section}` : 'Something went wrong'}
             </CardTitle>
@@ -56,7 +56,7 @@ export class ErrorBoundary extends Component<Props, State> {
               variant="outline"
               size="sm"
               onClick={this.handleReset}
-              className="text-red-400 border-red-500/30 hover:bg-red-500/10"
+              className="text-loss border-loss/30 hover:bg-loss/10"
               data-testid="button-retry-error"
             >
               <RefreshCw className="w-3 h-3 mr-2" />
@@ -80,7 +80,7 @@ export function SectionErrorFallback({
 }) {
   return (
     <div className="p-4 rounded-xl border border-loss/20 bg-loss/10">
-      <div className="flex items-center gap-2 text-red-400 mb-2">
+      <div className="flex items-center gap-2 text-loss mb-2">
         <AlertTriangle className="w-4 h-4" />
         <span className="font-medium text-sm">Error loading {section}</span>
       </div>
@@ -92,7 +92,7 @@ export function SectionErrorFallback({
           variant="ghost"
           size="sm"
           onClick={onRetry}
-          className="text-xs text-red-400 hover:bg-red-500/10"
+          className="text-xs text-loss hover:bg-loss/10"
           data-testid={`button-retry-${section.toLowerCase().replace(/\s+/g, '-')}`}
         >
           <RefreshCw className="w-3 h-3 mr-1" />

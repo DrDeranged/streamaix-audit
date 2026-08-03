@@ -86,8 +86,8 @@ export function FollowUserButton({
         className={cn(
           "tap-target p-2 rounded-full transition-all inline-flex items-center justify-center",
           isFollowing 
-            ? "bg-emerald-500/20 text-emerald-400 hover:bg-red-500/20 hover:text-red-400" 
-            : "bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30",
+            ? "bg-gain/20 text-gain hover:bg-loss/20 hover:text-loss" 
+            : "bg-accent-core/20 text-accent-bright hover:bg-accent-core/30",
           className
         )}
         whileHover={{ scale: 1.05 }}
@@ -111,7 +111,7 @@ export function FollowUserButton({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.5 }}
             >
-              <Check className="w-4 h-4 text-emerald-400" />
+              <Check className="w-4 h-4 text-gain" />
             </motion.div>
           ) : isFollowing ? (
             <motion.div
@@ -150,7 +150,7 @@ export function FollowUserButton({
         className={cn(
           "tap-target gap-2 transition-all",
           isFollowing 
-            ? "border-emerald-500/50 text-emerald-400 hover:border-red-500/50 hover:text-red-400 hover:bg-red-500/10" 
+            ? "border-gain/50 text-gain hover:border-loss/50 hover:text-loss hover:bg-loss/10" 
             : "bg-accent-core hover:bg-accent-bright text-white",
           className
         )}
@@ -257,7 +257,7 @@ export function FollowCategoryButton({
         className={cn(
           "tap-target px-3 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1.5",
           isFollowing 
-            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/40" 
+            ? "bg-gain/20 text-gain border border-gain/40 hover:bg-loss/20 hover:text-loss hover:border-loss/40" 
             : "bg-accent-deep/40 text-accent-bright border border-accent-core/40 hover:bg-accent-deep/60",
           className
         )}
@@ -294,7 +294,7 @@ export function FollowCategoryButton({
         className={cn(
           "tap-target gap-2 transition-all",
           isFollowing 
-            ? "border-emerald-500/50 text-emerald-400 hover:border-red-500/50 hover:text-red-400 hover:bg-red-500/10" 
+            ? "border-gain/50 text-gain hover:border-loss/50 hover:text-loss hover:bg-loss/10" 
             : "bg-accent-core hover:bg-accent-bright text-white",
           className
         )}

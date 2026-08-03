@@ -196,7 +196,7 @@ export function CollaborationPanel({ bountyId, userId, username, avatar, isOwner
 
                 <div className="flex items-center justify-between pt-2 border-t">
                   <span className="font-medium">Total:</span>
-                  <span className={`font-bold ${Object.values(shares).reduce((sum, val) => sum + val, 0) === 100 ? 'text-green-600' : 'text-red-600'}`}>
+                  <span className={`font-bold ${Object.values(shares).reduce((sum, val) => sum + val, 0) === 100 ? 'text-gain' : 'text-loss'}`}>
                     {Object.values(shares).reduce((sum, val) => sum + val, 0)}%
                   </span>
                 </div>

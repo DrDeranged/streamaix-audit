@@ -38,7 +38,7 @@ export function PriceChart({ marketId, hours = 24 }: PriceChartProps) {
       <Card className="neural-glass border-iridescent">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-white">
-            <TrendingUp className="w-5 h-5 text-cyan-400" />
+            <TrendingUp className="w-5 h-5 text-accent-bright" />
             Price History
           </CardTitle>
         </CardHeader>
@@ -54,7 +54,7 @@ export function PriceChart({ marketId, hours = 24 }: PriceChartProps) {
       <Card className="neural-glass border-iridescent">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-white">
-            <TrendingUp className="w-5 h-5 text-cyan-400" />
+            <TrendingUp className="w-5 h-5 text-accent-bright" />
             Price History
           </CardTitle>
         </CardHeader>
@@ -72,7 +72,7 @@ export function PriceChart({ marketId, hours = 24 }: PriceChartProps) {
     <Card className="neural-glass border-iridescent">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-white">
-          <TrendingUp className="w-5 h-5 text-cyan-400" />
+          <TrendingUp className="w-5 h-5 text-accent-bright" />
           Price History (Last {hours}h)
         </CardTitle>
       </CardHeader>
@@ -124,11 +124,11 @@ export function PriceChart({ marketId, hours = 24 }: PriceChartProps) {
         
         <div className="flex items-center justify-center gap-6 mt-4">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-emerald-500" />
+            <div className="w-3 h-3 rounded-full bg-gain" />
             <span className="text-sm text-body">YES Price</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-500" />
+            <div className="w-3 h-3 rounded-full bg-loss" />
             <span className="text-sm text-body">NO Price</span>
           </div>
         </div>

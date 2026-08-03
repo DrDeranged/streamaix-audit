@@ -227,7 +227,7 @@ const riskLevelColors: Record<string, string> = {
   conservative: "text-gain bg-gain/20",
   moderate: "text-accent-bright bg-accent-core/20",
   moderately_aggressive: "text-warn bg-warn/20",
-  aggressive: "text-warn bg-orange-500/20",
+  aggressive: "text-warn bg-warn/20",
   extreme: "text-loss bg-loss/20",
 };
 
@@ -925,7 +925,7 @@ function AddToWatchlistDialog({ onSuccess }: { onSuccess: () => void }) {
                           className="w-9 h-9 rounded-xl"
                         />
                       ) : (
-                        <div className="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                        <div className="w-9 h-9 rounded-xl bg-warn/10 flex items-center justify-center">
                           <Bitcoin className="w-4 h-4 text-warn" />
                         </div>
                       )}
@@ -1029,7 +1029,7 @@ function BotTradingTab() {
           <Button
             size="sm"
             onClick={() => navigate("/bot-trading")}
-            className="bg-cyan-600 hover:bg-accent-core text-primary text-xs"
+            className="bg-accent-core hover:bg-accent-core text-primary text-xs"
           >
             <Bot className="w-3 h-3 mr-1" />
             Browse Bots
@@ -2530,8 +2530,8 @@ function CorrelationMatrix({
 
   const getCorrelationColor = (val: number) => {
     if (val >= 0.8) return "bg-loss/60 text-primary";
-    if (val >= 0.5) return "bg-orange-500/40 text-primary";
-    if (val >= 0.2) return "bg-yellow-500/30 text-primary";
+    if (val >= 0.5) return "bg-warn/40 text-primary";
+    if (val >= 0.2) return "bg-warn/30 text-primary";
     if (val >= -0.2) return "bg-ink-raised/30 text-body";
     if (val >= -0.5) return "bg-accent-core/30 text-primary";
     return "bg-accent-core/40 text-primary";
@@ -2747,9 +2747,9 @@ const NewsAggregator = memo(function NewsAggregator({
               className={cn(
                 "w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0",
                 item.sentiment === "bullish"
-                  ? "bg-green-400"
+                  ? "bg-gain"
                   : item.sentiment === "bearish"
-                  ? "bg-red-400"
+                  ? "bg-loss"
                   : "bg-ink-raised"
               )}
             />
@@ -3716,7 +3716,7 @@ function AddAssetDialog({
                                 className="w-9 h-9 rounded-xl"
                               />
                             ) : (
-                              <div className="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                              <div className="w-9 h-9 rounded-xl bg-warn/10 flex items-center justify-center">
                                 <Bitcoin className="w-4 h-4 text-warn" />
                               </div>
                             )}
@@ -4077,7 +4077,7 @@ function AddAssetDialog({
                     className={cn(
                       "w-10 h-10 rounded-xl flex items-center justify-center",
                       selectedAsset.type === "crypto"
-                        ? "bg-orange-500/10"
+                        ? "bg-warn/10"
                         : "bg-accent-core/10"
                     )}
                   >
@@ -4206,7 +4206,7 @@ const AssetRow = memo(function AssetRow({
           <Icon className="w-4 h-4 text-primary" />
           {isRecentlyUpdated && (
             <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gain opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-gain" />
             </span>
           )}
@@ -4532,7 +4532,7 @@ function EditAssetDialog({
                 variant="outline"
                 onClick={() => recalculateMutation.mutate()}
                 disabled={recalculateMutation.isPending}
-                className="w-full border-warn/30 text-warn hover:bg-warn/10 hover:text-amber-300"
+                className="w-full border-warn/30 text-warn hover:bg-warn/10 hover:text-warn"
               >
                 {recalculateMutation.isPending ? (
                   "Recalculating..."
@@ -4965,7 +4965,7 @@ export default function PortfolioDashboard() {
                             connectionStatus === "connected"
                               ? "bg-gain/10 text-gain border border-gain/20"
                               : connectionStatus === "connecting"
-                              ? "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
+                              ? "bg-warn/10 text-warn border border-warn/20"
                               : "bg-ink-raised text-secondary border border-ink-edge"
                           )}
                           data-testid="live-connection-status"
@@ -4973,7 +4973,7 @@ export default function PortfolioDashboard() {
                           {connectionStatus === "connected" ? (
                             <>
                               <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gain opacity-75" />
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-gain" />
                               </span>
                               <span className="hidden sm:inline">LIVE</span>
@@ -5269,7 +5269,7 @@ export default function PortfolioDashboard() {
                 </Surface>
 
                 {/* Assets Count Card */}
-                <Surface className="bg-ink-raised surface-interactive p-5 hover:border-emerald-500/50">
+                <Surface className="bg-ink-raised surface-interactive p-5 hover:border-gain/50">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="p-2 rounded-xl bg-accent-core/10">
                       <Layers className="w-4 h-4 text-accent-bright" />
@@ -5285,7 +5285,7 @@ export default function PortfolioDashboard() {
                 </Surface>
 
                 {/* AI Health Score Card */}
-                <Surface className="relative overflow-hidden bg-ink-raised    border-warn/20 p-5 hover:border-warn/40 transition-all hover:shadow-lg hover:shadow-amber-500/10">
+                <Surface className="relative overflow-hidden bg-ink-raised    border-warn/20 p-5 hover:border-warn/40 transition-all hover:shadow-lg hover:shadow-warn/10">
                   <div className="absolute top-0 right-0 w-24 h-24 bg-ink-raised   rounded-full -translate-y-1/2 translate-x-1/2" />
                   <div className="relative">
                     <div className="flex items-center gap-2 mb-3">
@@ -6111,7 +6111,7 @@ export default function PortfolioDashboard() {
                               text: "text-accent-bright",
                             },
                             halving: {
-                              bg: "bg-orange-500/5",
+                              bg: "bg-warn/5",
                               border: "border-warn/20",
                               text: "text-warn",
                             },
@@ -6831,7 +6831,7 @@ export default function PortfolioDashboard() {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between p-2 bg-ink-surface rounded-xl">
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-green-400" />
+                          <div className="w-2 h-2 rounded-full bg-gain" />
                           <span className="text-xs text-secondary">
                             Long-term holdings (1yr+)
                           </span>
@@ -6846,7 +6846,7 @@ export default function PortfolioDashboard() {
                       </div>
                       <div className="flex items-center justify-between p-2 bg-ink-surface rounded-xl">
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-amber-400" />
+                          <div className="w-2 h-2 rounded-full bg-warn" />
                           <span className="text-xs text-secondary">
                             Short-term holdings
                           </span>
@@ -6910,7 +6910,7 @@ export default function PortfolioDashboard() {
                     <Button
                       variant="outline"
                       onClick={() => setShowTaxDialog(true)}
-                      className="w-full mt-4 border-warn/30 text-amber-300 hover:bg-warn/10 text-xs h-8"
+                      className="w-full mt-4 border-warn/30 text-warn hover:bg-warn/10 text-xs h-8"
                       data-testid="button-generate-tax-report"
                     >
                       <FileText className="w-3 h-3 mr-1.5" />
@@ -7376,7 +7376,7 @@ export default function PortfolioDashboard() {
                 });
                 setShowRebalanceDialog(false);
               }}
-              className="w-full bg-cyan-600 hover:bg-accent-core"
+              className="w-full bg-accent-core hover:bg-accent-core"
               data-testid="button-apply-rebalance"
             >
               <ArrowRight className="w-4 h-4 mr-2" />
@@ -7400,7 +7400,7 @@ export default function PortfolioDashboard() {
             <div className="grid grid-cols-2 gap-3">
               <div className="p-3 bg-ink-surface rounded-xl border border-gain/20">
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-2 h-2 rounded-full bg-green-400" />
+                  <div className="w-2 h-2 rounded-full bg-gain" />
                   <span className="text-xs text-secondary">
                     Long-term (15% rate)
                   </span>
@@ -7419,7 +7419,7 @@ export default function PortfolioDashboard() {
               </div>
               <div className="p-3 bg-ink-surface rounded-xl border border-warn/20">
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-2 h-2 rounded-full bg-amber-400" />
+                  <div className="w-2 h-2 rounded-full bg-warn" />
                   <span className="text-xs text-secondary">
                     Short-term (32% rate)
                   </span>
@@ -7452,7 +7452,7 @@ export default function PortfolioDashboard() {
                     ).toLocaleString()}
                   </p>
                 </div>
-                <Percent className="w-8 h-8 text-amber-500/50" />
+                <Percent className="w-8 h-8 text-warn/50" />
               </div>
             </div>
 
@@ -7520,7 +7520,7 @@ export default function PortfolioDashboard() {
                 });
                 setShowTaxDialog(false);
               }}
-              className="w-full bg-amber-600 hover:bg-warn"
+              className="w-full bg-warn hover:bg-warn"
             >
               <FileText className="w-4 h-4 mr-2" />
               Generate Full Tax Report
@@ -7815,7 +7815,7 @@ export default function PortfolioDashboard() {
                   });
                   setShowStressTestDialog(false);
                 }}
-                className="flex-1 bg-red-600 hover:bg-loss"
+                className="flex-1 bg-loss hover:bg-loss"
                 data-testid="button-apply-scenario"
               >
                 Apply Scenario

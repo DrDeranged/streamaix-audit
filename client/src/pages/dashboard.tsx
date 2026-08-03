@@ -680,7 +680,7 @@ export default function Dashboard() {
                     <BookmarkPlus className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Notes</span>
                   </TabsTrigger>
-                  <TabsTrigger value="wallet" className="hidden sm:flex data-[state=active]:bg-ink-raised data-[state=active]:bg-ink-raised data-[state=active]:bg-ink-raised data-[state=active]:border-green-500/40 data-[state=active]:shadow-lg data-[state=active]:shadow-green-500/20 rounded-xl px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px] text-muted data-[state=active]:text-primary transition-all duration-300 border border-transparent">
+                  <TabsTrigger value="wallet" className="hidden sm:flex data-[state=active]:bg-ink-raised data-[state=active]:bg-ink-raised data-[state=active]:bg-ink-raised data-[state=active]:border-gain/40 data-[state=active]:shadow-lg data-[state=active]:shadow-gain/20 rounded-xl px-2 sm:px-3 py-3 text-xs font-medium min-h-[44px] text-muted data-[state=active]:text-primary transition-all duration-300 border border-transparent">
                     <Wallet className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Wallet</span>
                   </TabsTrigger>
@@ -688,7 +688,7 @@ export default function Dashboard() {
                     <Target className="h-4 w-4 lg:mr-2" />
                     <span className="hidden lg:inline">Bounties</span>
                   </TabsTrigger>
-                  <TabsTrigger value="overview" className="hidden lg:flex data-[state=active]:bg-ink-raised data-[state=active]:bg-ink-raised data-[state=active]:bg-ink-raised data-[state=active]:border-ink-edge data-[state=active]:shadow-lg data-[state=active]:shadow-cyan-500/20 rounded-xl px-3 py-3 text-xs font-medium text-muted data-[state=active]:text-primary transition-all duration-300 border border-transparent">
+                  <TabsTrigger value="overview" className="hidden lg:flex data-[state=active]:bg-ink-raised data-[state=active]:bg-ink-raised data-[state=active]:bg-ink-raised data-[state=active]:border-ink-edge data-[state=active]:shadow-lg data-[state=active]:shadow-accent-core/20 rounded-xl px-3 py-3 text-xs font-medium text-muted data-[state=active]:text-primary transition-all duration-300 border border-transparent">
                     <Activity className="h-4 w-4 lg:mr-2" />
                     <span className="hidden lg:inline">Overview</span>
                   </TabsTrigger>
@@ -926,7 +926,7 @@ export default function Dashboard() {
                     <div className="mt-8 space-y-4">
                       <div className="flex items-center justify-between">
                         <h2 className="text-primary text-lg font-bold flex items-center gap-2">
-                          <TrendingUp className="h-5 w-5 text-green-400" />
+                          <TrendingUp className="h-5 w-5 text-gain" />
                           Trending Now
                         </h2>
                       </div>
@@ -938,7 +938,7 @@ export default function Dashboard() {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: idx * 0.1 }}
-                            className="bg-ink-raised backdrop-blur-lg rounded-xl border border-green-500/20 p-3"
+                            className="bg-ink-raised backdrop-blur-lg rounded-xl border border-gain/20 p-3"
                           >
                             <div className="flex items-center gap-2 mb-2">
                               <div className="relative">
@@ -949,18 +949,18 @@ export default function Dashboard() {
                                     <span className="text-primary font-bold text-sm">{avatar.name.charAt(0)}</span>
                                   )}
                                 </div>
-                                <div className="absolute -top-1 -right-1 bg-green-500 text-primary text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                <div className="absolute -top-1 -right-1 bg-gain text-primary text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                                   {idx + 1}
                                 </div>
                               </div>
                               <div className="flex-1 min-w-0">
                                 <h3 className="text-primary font-semibold text-sm truncate">{avatar.name}</h3>
-                                <p className="text-green-200/70 text-xs truncate">@{avatar.handle}</p>
+                                <p className="text-gain/70 text-xs truncate">@{avatar.handle}</p>
                               </div>
                             </div>
 
                             {avatar.portfolioRoi !== null && (
-                              <Badge variant="outline" className="bg-green-500/10 text-green-300 border-green-500/30 text-xs mb-2">
+                              <Badge variant="outline" className="bg-gain/10 text-gain border-gain/30 text-xs mb-2">
                                 {avatar.portfolioRoi > 0 ? '+' : ''}{avatar.portfolioRoi}% ROI
                               </Badge>
                             )}
@@ -1036,7 +1036,7 @@ export default function Dashboard() {
                                         variant="outline" 
                                         size="sm" 
                                         disabled={deleteSummaryMutation.isPending}
-                                        className="text-red-400 bg-red-500/10 border-ink-edge hover:bg-red-500/20 backdrop-blur-md transition-all duration-200 touch-manipulation py-2.5 px-3 disabled:opacity-50"
+                                        className="text-loss bg-loss/10 border-ink-edge hover:bg-loss/20 backdrop-blur-md transition-all duration-200 touch-manipulation py-2.5 px-3 disabled:opacity-50"
                                         data-testid={`button-delete-summary-${summary.id}`}
                                       >
                                         <Trash2 className="h-4 w-4" />
@@ -1055,7 +1055,7 @@ export default function Dashboard() {
                                         </AlertDialogCancel>
                                         <AlertDialogAction 
                                           onClick={() => deleteSummaryMutation.mutate(summary.id)}
-                                          className="bg-red-600 hover:bg-red-700 text-primary"
+                                          className="bg-loss hover:bg-loss text-primary"
                                         >
                                           Delete
                                         </AlertDialogAction>
@@ -1161,7 +1161,7 @@ export default function Dashboard() {
                                     <AlertDialogTrigger asChild>
                                       <button 
                                         disabled={deleteSummaryMutation.isPending}
-                                        className="hover:text-red-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="hover:text-loss transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                         data-testid={`button-delete-summary-desktop-${summary.id}`}
                                       >
                                         <Trash2 className="h-4 w-4" />
@@ -1180,7 +1180,7 @@ export default function Dashboard() {
                                         </AlertDialogCancel>
                                         <AlertDialogAction 
                                           onClick={() => deleteSummaryMutation.mutate(summary.id)}
-                                          className="bg-red-600 hover:bg-red-700 text-primary"
+                                          className="bg-loss hover:bg-loss text-primary"
                                         >
                                           Delete
                                         </AlertDialogAction>
@@ -1247,7 +1247,7 @@ export default function Dashboard() {
 
                       <div className="grid grid-cols-2 gap-4">
                         <Button 
-                          className="bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-400/30"
+                          className="bg-gain/20 hover:bg-gain/30 text-gain border border-gain/30"
                           onClick={() => {
                             toast({ 
                               title: "Deposit Feature", 
@@ -1312,7 +1312,7 @@ export default function Dashboard() {
                   {/* Browse Markets */}
                   <Link to="/markets">
                     <Button 
-                      className="w-full h-11 bg-emerald-500/20 hover:bg-emerald-500/30 border border-ink-edge text-accent-bright hover:text-primary backdrop-blur-sm transition-all duration-200 font-medium touch-manipulation text-sm"
+                      className="w-full h-11 bg-gain/20 hover:bg-gain/30 border border-ink-edge text-accent-bright hover:text-primary backdrop-blur-sm transition-all duration-200 font-medium touch-manipulation text-sm"
                       data-testid="button-browse-markets"
                     >
                       <TrendingUp className="h-4 w-4 mr-2 flex-shrink-0 text-accent-bright" />
@@ -1323,7 +1323,7 @@ export default function Dashboard() {
                   {/* Find Bounties */}
                   <Link to="/bounties">
                     <Button 
-                      className="w-full h-11 bg-amber-500/20 hover:bg-amber-500/30 border border-ink-edge text-accent-bright hover:text-primary backdrop-blur-sm transition-all duration-200 font-medium touch-manipulation text-sm"
+                      className="w-full h-11 bg-warn/20 hover:bg-warn/30 border border-ink-edge text-accent-bright hover:text-primary backdrop-blur-sm transition-all duration-200 font-medium touch-manipulation text-sm"
                       data-testid="button-find-bounties"
                     >
                       <Target className="h-4 w-4 mr-2 flex-shrink-0 text-accent-bright" />

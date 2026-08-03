@@ -122,7 +122,7 @@ export const PortfolioSimulator = memo(function PortfolioSimulator({ avatars }: 
       <Surface className="p-4 md:p-6">
         <div className="pb-4 md:pb-6">
           <SectionTitle className="flex items-center gap-2 text-lg md:text-xl">
-            <PieChart className="w-4 h-4 md:w-5 md:h-5 text-cyan-400" />
+            <PieChart className="w-4 h-4 md:w-5 md:h-5 text-accent-bright" />
             Portfolio Simulator
           </SectionTitle>
         </div>

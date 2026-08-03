@@ -377,7 +377,7 @@ export default function KnowledgeAvatarProfile() {
               
               {/* Live indicator */}
               <div className="absolute top-4 right-4 flex items-center gap-2">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50" />
+                <div className="w-2 h-2 bg-gain rounded-full animate-pulse shadow-lg shadow-gain/50" />
                 <span className="text-xs text-gain font-mono">LIVE</span>
               </div>
             </div>

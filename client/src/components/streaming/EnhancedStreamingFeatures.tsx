@@ -111,7 +111,7 @@ export function ViewerLeaderboard({ streamId }: { streamId: string }) {
     return (
       <Surface className="p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Trophy className="w-4 h-4 text-amber-400" />
+          <Trophy className="w-4 h-4 text-warn" />
           <h3 className="text-sm font-semibold text-white">Top Chatters</h3>
         </div>
         <div className="space-y-2">
@@ -128,11 +128,11 @@ export function ViewerLeaderboard({ streamId }: { streamId: string }) {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className="p-1.5 rounded-xl bg-warn/20">
-            <Trophy className="w-4 h-4 text-amber-400" />
+            <Trophy className="w-4 h-4 text-warn" />
           </div>
           <h3 className="text-sm font-semibold text-white">Top Chatters</h3>
         </div>
-        <Badge className="bg-amber-500/20 text-amber-400 text-[10px]">
+        <Badge className="bg-warn/20 text-warn text-[10px]">
           Live
         </Badge>
       </div>
@@ -179,7 +179,7 @@ export function ViewerLeaderboard({ streamId }: { streamId: string }) {
             </div>
             
             <div className="text-right">
-              <p className="text-sm font-bold text-amber-400">{entry.activityScore}</p>
+              <p className="text-sm font-bold text-warn">{entry.activityScore}</p>
               <p className="text-[10px] text-muted">pts</p>
             </div>
           </motion.div>
@@ -239,12 +239,12 @@ export function WatchTimeRewards({ streamId, userId }: { streamId: string; userI
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <div className="p-1.5 rounded-xl bg-gain/20">
-            <Timer className="w-3.5 h-3.5 text-emerald-400" />
+            <Timer className="w-3.5 h-3.5 text-gain" />
           </div>
-          <span className="text-xs font-medium text-emerald-400">Watch Rewards</span>
+          <span className="text-xs font-medium text-gain">Watch Rewards</span>
         </div>
         {rewards.bonusMultiplier > 1 && (
-          <Badge className="bg-emerald-500/20 text-emerald-400 text-[10px]">
+          <Badge className="bg-gain/20 text-gain text-[10px]">
             {rewards.bonusMultiplier.toFixed(1)}x bonus
           </Badge>
         )}
@@ -257,7 +257,7 @@ export function WatchTimeRewards({ streamId, userId }: { streamId: string; userI
         </div>
         <div className="flex-1 h-px bg-ink-edge" />
         <div className="text-center">
-          <p className="text-lg font-bold text-amber-400">+{rewards.pointsEarned}</p>
+          <p className="text-lg font-bold text-warn">+{rewards.pointsEarned}</p>
           <p className="text-[10px] text-secondary">STREAM</p>
         </div>
         <div className="text-center">
@@ -269,7 +269,7 @@ export function WatchTimeRewards({ streamId, userId }: { streamId: string; userI
       <div className="space-y-1">
         <div className="flex justify-between text-[10px]">
           <span className="text-secondary">Next reward in</span>
-          <span className="text-emerald-400">{rewards.nextRewardAt} min</span>
+          <span className="text-gain">{rewards.nextRewardAt} min</span>
         </div>
         <Progress value={progressPercent} className="h-1.5 bg-ink-edge" />
       </div>
@@ -307,7 +307,7 @@ export function StreamAchievementsPanel({ userId }: { userId?: string }) {
             className={cn(
               "p-3 rounded-xl border bg-ink-raised",
               RARITY_BORDERS[achievement.rarity],
-              achievement.isCompleted && "ring-1 ring-emerald-500/50"
+              achievement.isCompleted && "ring-1 ring-gain/50"
             )}
           >
             <div className="flex items-start gap-2 mb-2">
@@ -322,8 +322,8 @@ export function StreamAchievementsPanel({ userId }: { userId?: string }) {
                 </Badge>
               </div>
               {achievement.isCompleted && (
-                <div className="p-1 rounded-full bg-emerald-500/20">
-                  <Star className="w-3 h-3 text-emerald-400 fill-emerald-400" />
+                <div className="p-1 rounded-full bg-gain/20">
+                  <Star className="w-3 h-3 text-gain fill-gain" />
                 </div>
               )}
             </div>
@@ -380,7 +380,7 @@ export function ChatCommandsHelp({ onClose }: { onClose: () => void }) {
       <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
         {commands.map((cmd) => (
           <div key={cmd.command} className="p-2 rounded-xl bg-ink-raised border border-ink-edge">
-            <code className="text-xs font-bold text-cyan-400">{cmd.command}</code>
+            <code className="text-xs font-bold text-accent-bright">{cmd.command}</code>
             <p className="text-[10px] text-secondary mt-0.5">{cmd.description}</p>
             <p className="text-[9px] text-muted mt-0.5">e.g. {cmd.example}</p>
           </div>
@@ -441,7 +441,7 @@ export function PinnedMessagesBar({
             @{current.username}
           </span>
           {current.isAlpha && (
-            <Badge className="bg-amber-500/20 text-amber-400 text-[8px] px-1 py-0">
+            <Badge className="bg-warn/20 text-warn text-[8px] px-1 py-0">
               ALPHA
             </Badge>
           )}
@@ -509,7 +509,7 @@ export function StreamScheduleCard({ stream, onRemind }: { stream: ScheduledStre
             )}
           </div>
           {stream.isAvatarHost && (
-            <div className="absolute -bottom-0.5 -right-0.5 p-0.5 rounded-full bg-cyan-500">
+            <div className="absolute -bottom-0.5 -right-0.5 p-0.5 rounded-full bg-accent-core">
               <Bot className="w-2.5 h-2.5 text-white" />
             </div>
           )}
@@ -519,7 +519,7 @@ export function StreamScheduleCard({ stream, onRemind }: { stream: ScheduledStre
           <h4 className="text-sm font-semibold text-white line-clamp-1">{stream.title}</h4>
           <p className="text-xs text-secondary">@{stream.hostUsername}</p>
           <div className="flex items-center gap-2 mt-1">
-            <Badge variant="outline" className="border-amber-500/30 text-amber-400 text-[10px] px-1.5">
+            <Badge variant="outline" className="border-warn/30 text-warn text-[10px] px-1.5">
               <Clock className="w-2.5 h-2.5 mr-1" />
               {timeDisplay}
             </Badge>
@@ -538,12 +538,12 @@ export function StreamScheduleCard({ stream, onRemind }: { stream: ScheduledStre
           className={cn(
             "h-8",
             stream.hasReminder 
-              ? "border-emerald-500/30 text-emerald-400" 
+              ? "border-gain/30 text-gain" 
               : "bg-accent-core hover:bg-accent-deep"
           )}
           data-testid={`button-remind-${stream.id}`}
         >
-          <Bell className={cn("w-3.5 h-3.5", stream.hasReminder && "fill-emerald-400")} />
+          <Bell className={cn("w-3.5 h-3.5", stream.hasReminder && "fill-gain")} />
         </Button>
       </div>
     </motion.div>
@@ -593,7 +593,7 @@ export function MultiStreamView({
           </div>
           
           <div className="absolute top-2 left-2 flex items-center gap-1">
-            <Badge className="bg-red-500/90 text-white text-[10px] px-1.5">LIVE</Badge>
+            <Badge className="bg-loss/90 text-white text-[10px] px-1.5">LIVE</Badge>
             {primaryStreamId === stream.id && (
               <Badge className="bg-accent-core/90 text-primary text-[10px] px-1.5">
                 <Volume2 className="w-2.5 h-2.5" />
@@ -704,7 +704,7 @@ export function CreateClipButton({
       className={cn(
         "h-8 text-xs",
         isCreating 
-          ? "bg-red-500 hover:bg-red-400 animate-pulse" 
+          ? "bg-loss hover:bg-loss animate-pulse" 
           : "border-accent-core/30 text-accent-bright hover:bg-accent-core/10"
       )}
       data-testid="button-create-clip"
@@ -769,10 +769,10 @@ export function CoStreamPanel({
     <Surface className="p-4">
       <div className="flex items-center gap-2 mb-4">
         <div className="p-1.5 rounded-xl bg-accent-core/20">
-          <Users className="w-4 h-4 text-cyan-400" />
+          <Users className="w-4 h-4 text-accent-bright" />
         </div>
         <h3 className="text-sm font-semibold text-white">Co-Stream Panel</h3>
-        <Badge className="bg-cyan-500/20 text-cyan-400 text-[10px]">
+        <Badge className="bg-accent-core/20 text-accent-bright text-[10px]">
           {avatars.filter(a => a.isActive).length} Active
         </Badge>
       </div>
@@ -809,8 +809,8 @@ export function CoStreamPanel({
             
             {avatar.isActive && (
               <div className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] text-emerald-400">Speaking</span>
+                <div className="w-2 h-2 rounded-full bg-gain animate-pulse" />
+                <span className="text-[10px] text-gain">Speaking</span>
               </div>
             )}
           </div>
@@ -886,8 +886,8 @@ export function TipPanel({
       >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-amber-500/20">
-              <Gift className="w-5 h-5 text-amber-400" />
+            <div className="p-2 rounded-xl bg-warn/20">
+              <Gift className="w-5 h-5 text-warn" />
             </div>
             <div>
               <h3 className="text-lg font-bold text-white">Send a Tip</h3>
@@ -912,7 +912,7 @@ export function TipPanel({
                   className={cn(
                     "h-9 px-3",
                     amount === preset.toString()
-                      ? "border-amber-500 bg-amber-500/20 text-amber-400"
+                      ? "border-warn bg-warn/20 text-warn"
                       : "border-ink-edge text-body"
                   )}
                 >
@@ -1197,8 +1197,8 @@ export function RaidPanel({
   return (
     <Surface variant="raised" className="p-4 border border-warn/30">
       <div className="flex items-center gap-2 mb-4">
-        <div className="p-2 rounded-xl bg-orange-500/20">
-          <Zap className="w-5 h-5 text-orange-400" />
+        <div className="p-2 rounded-xl bg-warn/20">
+          <Zap className="w-5 h-5 text-warn" />
         </div>
         <div>
           <h3 className="font-semibold text-white">Raid Another Stream</h3>
@@ -1220,7 +1220,7 @@ export function RaidPanel({
           <Button
             variant="outline"
             onClick={cancelRaid}
-            className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+            className="border-loss/50 text-loss hover:bg-loss/10"
             data-testid="button-cancel-raid"
           >
             Cancel Raid
@@ -1239,7 +1239,7 @@ export function RaidPanel({
                   className={cn(
                     "p-3 rounded-xl border cursor-pointer transition-all",
                     selectedTarget === stream.id
-                      ? "border-orange-500 bg-orange-500/10"
+                      ? "border-warn bg-warn/10"
                       : "border-ink-edge/50 bg-ink-raised/30 hover:border-ink-edge"
                   )}
                   data-testid={`raid-target-${stream.id}`}
@@ -1264,7 +1264,7 @@ export function RaidPanel({
                       </div>
                     </div>
                     {selectedTarget === stream.id && (
-                      <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center">
+                      <div className="w-5 h-5 rounded-full bg-warn flex items-center justify-center">
                         <Zap className="w-3 h-3 text-white" />
                       </div>
                     )}
@@ -1345,15 +1345,15 @@ export function ChannelPointsPanel({
     <Surface variant="raised" className="p-4 border border-warn/30">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-xl bg-amber-500/20">
-            <Coins className="w-5 h-5 text-amber-400" />
+          <div className="p-2 rounded-xl bg-warn/20">
+            <Coins className="w-5 h-5 text-warn" />
           </div>
           <div>
             <h3 className="font-semibold text-white">Channel Points</h3>
             <p className="text-xs text-secondary">Earn by watching & chatting</p>
           </div>
         </div>
-        <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-sm px-3">
+        <Badge className="bg-warn/20 text-warn border-warn/30 text-sm px-3">
           <Coins className="w-3.5 h-3.5 mr-1" />
           {userPoints.toLocaleString()}
         </Badge>
@@ -1366,7 +1366,7 @@ export function ChannelPointsPanel({
             className={cn(
               "p-3 rounded-xl border transition-all",
               userPoints >= reward.cost
-                ? "border-amber-500/30 bg-ink-raised/50 hover:border-amber-500/50 cursor-pointer"
+                ? "border-warn/30 bg-ink-raised/50 hover:border-warn/50 cursor-pointer"
                 : "border-ink-edge/30 bg-ink-raised/30 opacity-60"
             )}
             onClick={() => userPoints >= reward.cost && redeemMutation.mutate(reward.id)}
@@ -1381,7 +1381,7 @@ export function ChannelPointsPanel({
               <Badge className={cn(
                 "text-xs",
                 userPoints >= reward.cost
-                  ? "bg-amber-500/20 text-amber-400"
+                  ? "bg-warn/20 text-warn"
                   : "bg-ink-edge/50 text-secondary"
               )}>
                 {reward.cost}
@@ -1394,11 +1394,11 @@ export function ChannelPointsPanel({
       <div className="mt-4 p-3 rounded-xl bg-ink-raised/40 border border-ink-edge/40">
         <div className="flex items-center justify-between text-xs">
           <span className="text-secondary">Earn rate</span>
-          <span className="text-amber-400">+10 points/min watching</span>
+          <span className="text-warn">+10 points/min watching</span>
         </div>
         <div className="flex items-center justify-between text-xs mt-1">
           <span className="text-secondary">Chat bonus</span>
-          <span className="text-green-400">+5 points/message</span>
+          <span className="text-gain">+5 points/message</span>
         </div>
       </div>
     </Surface>
@@ -1499,7 +1499,7 @@ export function ChatModerationPanel({
               setFollowerOnly(!followerOnly);
               updateModeMutation.mutate({ followerOnly: !followerOnly });
             }}
-            className={followerOnly ? "bg-green-500" : "border-ink-edge"}
+            className={followerOnly ? "bg-gain" : "border-ink-edge"}
             data-testid="toggle-follower-only"
           >
             {followerOnly ? 'On' : 'Off'}
@@ -1518,7 +1518,7 @@ export function ChatModerationPanel({
               setEmoteOnly(!emoteOnly);
               updateModeMutation.mutate({ emoteOnly: !emoteOnly });
             }}
-            className={emoteOnly ? "bg-amber-500" : "border-ink-edge"}
+            className={emoteOnly ? "bg-warn" : "border-ink-edge"}
             data-testid="toggle-emote-only"
           >
             {emoteOnly ? 'On' : 'Off'}
@@ -1532,7 +1532,7 @@ export function ChatModerationPanel({
           <Button
             size="sm"
             variant="outline"
-            className="text-xs border-red-500/30 text-red-400 hover:bg-red-500/10"
+            className="text-xs border-loss/30 text-loss hover:bg-loss/10"
             data-testid="button-clear-chat"
           >
             Clear Chat
@@ -1540,7 +1540,7 @@ export function ChatModerationPanel({
           <Button
             size="sm"
             variant="outline"
-            className="text-xs border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10"
+            className="text-xs border-warn/30 text-warn hover:bg-warn/10"
             data-testid="button-view-banned"
           >
             Banned Users
@@ -1630,7 +1630,7 @@ export function GiftSubscriptionPanel({
             <p className="text-lg font-bold text-white">{tier.label}</p>
             <p className="text-sm text-pink-400">{tier.price} STREAM</p>
             {tier.discount && (
-              <Badge className="mt-1 bg-green-500/20 text-green-400 text-[10px]">
+              <Badge className="mt-1 bg-gain/20 text-gain text-[10px]">
                 {tier.discount}
               </Badge>
             )}
@@ -1682,11 +1682,11 @@ export function StreamAnalyticsPanel({ streamId }: { streamId: string }) {
   });
 
   const stats = [
-    { label: 'Peak Viewers', value: data?.peakViewers || 0, icon: <TrendingUp className="w-4 h-4 text-green-400" />, color: 'green' },
+    { label: 'Peak Viewers', value: data?.peakViewers || 0, icon: <TrendingUp className="w-4 h-4 text-gain" />, color: 'green' },
     { label: 'Total Views', value: data?.totalViews || 0, icon: <Eye className="w-4 h-4 text-accent-bright" />, color: 'blue' },
     { label: 'Avg Watch Time', value: `${Math.round((data?.averageWatchTime || 0) / 60)}m`, icon: <Clock className="w-4 h-4 text-accent-bright" />, color: 'purple' },
-    { label: 'Chat Messages', value: data?.chatMessages || 0, icon: <MessageCircle className="w-4 h-4 text-cyan-400" />, color: 'cyan' },
-    { label: 'Tips Received', value: data?.tipsReceived || 0, icon: <Coins className="w-4 h-4 text-amber-400" />, color: 'amber', suffix: 'STREAM' },
+    { label: 'Chat Messages', value: data?.chatMessages || 0, icon: <MessageCircle className="w-4 h-4 text-accent-bright" />, color: 'cyan' },
+    { label: 'Tips Received', value: data?.tipsReceived || 0, icon: <Coins className="w-4 h-4 text-warn" />, color: 'amber', suffix: 'STREAM' },
     { label: 'New Followers', value: data?.newFollowers || 0, icon: <Users className="w-4 h-4 text-pink-400" />, color: 'pink' },
   ];
 

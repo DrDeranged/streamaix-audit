@@ -773,8 +773,8 @@ Array.from(recastedCasts).includes(cast.hash) || cast.isRecasted
             }}
             className={`flex items-center gap-2 transition-all duration-300 px-3 py-2 rounded-full hover:scale-105 ${
 Array.from(likedCasts).includes(cast.hash) || cast.isLiked
-                ? 'text-loss dark:text-loss bg-red-500/10' 
-                : 'text-secondary dark:text-secondary hover:text-loss dark:hover:text-loss hover:bg-red-500/10'
+                ? 'text-loss dark:text-loss bg-loss/10' 
+                : 'text-secondary dark:text-secondary hover:text-loss dark:hover:text-loss hover:bg-loss/10'
             }`}
             data-testid={`like-button-${cast.hash}`}
             title="Like this cast"

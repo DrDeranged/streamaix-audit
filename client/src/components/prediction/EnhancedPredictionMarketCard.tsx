@@ -184,7 +184,7 @@ export function EnhancedPredictionMarketCard({
           strokeDashoffset={`${2 * Math.PI * 28 * (1 - value / 100)}`}
           className={cn(
             "transition-all duration-500",
-            value >= 80 ? "text-green-500" : value >= 60 ? "text-yellow-500" : "text-orange-500"
+            value >= 80 ? "text-gain" : value >= 60 ? "text-warn" : "text-warn"
           )}
         />
       </svg>
@@ -217,7 +217,7 @@ export function EnhancedPredictionMarketCard({
                 </Badge>
                 <div className="flex items-center gap-1 text-xs text-secondary" data-testid="time-remaining">
                   <Clock className="w-3 h-3" />
-                  <span className={isExpiringSoon ? "text-orange-500 dark:text-orange-400 font-medium" : ""}>{timeUntilDeadline}</span>
+                  <span className={isExpiringSoon ? "text-warn dark:text-warn font-medium" : ""}>{timeUntilDeadline}</span>
                 </div>
               </div>
 
