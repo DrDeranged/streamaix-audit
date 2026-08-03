@@ -220,8 +220,8 @@ export function Navigation() {
                     <div className="absolute bottom-0 left-2 right-2 h-px bg-accent-core opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="relative flex items-center gap-1.5">
                       <div className="relative">
-                        <Radio className="w-4 h-4 text-loss group-hover:text-loss transition-colors drop-shadow-sm" />
-                        <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-loss animate-pulse" />
+                        <Radio className="w-4 h-4 text-live group-hover:text-live transition-colors drop-shadow-sm" />
+                        <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-live animate-pulse" />
                       </div>
                       <span className="font-medium text-sm">Streams</span>
                       <ChevronDown className="w-3 h-3 opacity-60" />
@@ -231,7 +231,7 @@ export function Navigation() {
                 <DropdownMenuContent className="w-56 bg-ink-surface border border-ink-edge rounded-xl shadow-2xl" align="start">
                   <DropdownMenuItem asChild>
                     <Link href="/streams/discover" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                      <Radio className="w-4 h-4 text-loss" />
+                      <Radio className="w-4 h-4 text-live" />
                       <div>
                         <span className="font-medium block">Browse All</span>
                         <span className="text-xs text-secondary">AI & creators live</span>
@@ -757,8 +757,8 @@ export function Navigation() {
             >
               <div className="flex flex-col space-y-1 px-4 max-h-[70vh] overflow-y-auto">
                 {/* Streams Section - Unified */}
-                <div className="text-xs font-semibold text-loss uppercase tracking-wider px-3 py-2 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-loss animate-pulse" />
+                <div className="text-xs font-semibold text-live uppercase tracking-wider px-3 py-2 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-live animate-pulse" />
                   Streams
                 </div>
                 <Link href="/streams/discover" className="block">
@@ -766,7 +766,7 @@ export function Navigation() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
-                    <Radio className="w-4 h-4 text-loss" />
+                    <Radio className="w-4 h-4 text-live" />
                     Browse All
                   </button>
                 </Link>

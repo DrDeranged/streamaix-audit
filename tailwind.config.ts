@@ -23,6 +23,7 @@ export default {
           divider: "var(--ink-divider)",
         },
         gain: "var(--gain)",
+        live: "var(--live)",
         loss: "var(--loss)",
         warn: "var(--warn)",
         body: "var(--text-body)",

@@ -1939,6 +1939,7 @@
   --accent-core: #8B7CF6;   /* buttons, active states */
   --accent-bright: #A99DF8; /* links, highlights on dark */
   --accent-deep: #6D5BE0;   /* pressed states */
+  --live: #FF6B81;
   --gain: #3DD68C;
   --loss: #FF7B7B;
   --warn: #FFB454;

@@ -724,7 +724,7 @@ function LeaderboardContent() {
   });
   const leaderboard = Array.isArray(leaderboardData) ? leaderboardData : [];
 
-  const crownColors = ['text-warn', 'text-body', 'text-warn'];
+  const crownColors = ['text-warn', 'text-body', 'text-warn/60'];
 
   return (
     <div>

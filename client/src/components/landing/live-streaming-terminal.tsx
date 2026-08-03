@@ -245,7 +245,7 @@ function RecentActivityFeed({ activities }: { activities: ActivityItem[] }) {
               <IconComponent className={cn(
                 "w-3 h-3",
                 activity.type === 'tip' ? 'text-warn' : 
-                activity.type === 'live' ? 'text-loss' : 'text-accent-bright'
+                activity.type === 'live' ? 'text-live' : 'text-accent-bright'
               )} />
               <span className="text-body truncate flex-1">
                 {activity.type === 'tip' ? (
@@ -318,10 +318,10 @@ const avatarBrandIcons: Record<string, { icon: any; color: string; bgColor: stri
   'Sam Altman': { icon: SiOpenai, color: 'text-gain', bgColor: 'bg-gain/20' },
   'Elon Musk': { icon: SiX, color: 'text-primary', bgColor: 'bg-ink-raised' },
   'Stani Kulechov': { icon: Zap, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
-  'Arthur Hayes': { icon: BarChart3, color: 'text-loss', bgColor: 'bg-loss/20' },
+  'Arthur Hayes': { icon: BarChart3, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
   'Andre Cronje': { icon: Rocket, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
   'Charles Hoskinson': { icon: SiCardano, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
-  'Justin Sun': { icon: Zap, color: 'text-loss', bgColor: 'bg-loss/20' },
+  'Justin Sun': { icon: Zap, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
   'Marc Andreessen': { icon: Globe, color: 'text-warn', bgColor: 'bg-warn/20' },
   'Chris Dixon': { icon: Globe, color: 'text-warn', bgColor: 'bg-warn/20' },
   'Anthony Pompliano': { icon: SiBitcoin, color: 'text-warn', bgColor: 'bg-warn/20' },
@@ -440,8 +440,8 @@ function StreamCard({ stream, isFeatured = false }: { stream: LiveStream; isFeat
               </div>
               {stream.status === 'live' && (
                 <div className="relative">
-                  <div className="absolute inset-0 bg-loss rounded-full blur-md opacity-60 animate-pulse" />
-                  <Badge className="relative bg-loss/90 text-white border-0 text-[10px] px-2.5 py-1 font-bold shadow-lg shadow-loss/40">
+                  <div className="absolute inset-0 bg-live rounded-full blur-md opacity-60 animate-pulse" />
+                  <Badge className="relative bg-live/90 text-white border-0 text-[10px] px-2.5 py-1 font-bold shadow-lg shadow-live/40">
                     <span className="relative flex h-1.5 w-1.5 mr-1.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white" />
@@ -745,13 +745,13 @@ export function LiveStreamingTerminal() {
                 
                 <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                   <div className="relative group">
-                    <div className="absolute -inset-1 bg-loss/30 rounded-xl blur-md opacity-60 group-hover:opacity-100 transition-opacity animate-pulse" />
-                    <div className="relative flex items-center gap-2 px-4 py-2.5 rounded-xl bg-loss/10 border border-loss/40 backdrop-blur-sm">
+                    <div className="absolute -inset-1 bg-live/30 rounded-xl blur-md opacity-60 group-hover:opacity-100 transition-opacity animate-pulse" />
+                    <div className="relative flex items-center gap-2 px-4 py-2.5 rounded-xl bg-live/10 border border-live/40 backdrop-blur-sm">
                       <div className="relative flex items-center justify-center">
-                        <span className="absolute w-4 h-4 rounded-full bg-loss animate-ping opacity-40" />
-                        <span className="relative w-2.5 h-2.5 rounded-full bg-loss shadow-lg shadow-loss/50" />
+                        <span className="absolute w-4 h-4 rounded-full bg-live animate-ping opacity-40" />
+                        <span className="relative w-2.5 h-2.5 rounded-full bg-live shadow-lg shadow-live/50" />
                       </div>
-                         <span className="text-sm font-bold text-loss">{totalLive} Live</span>
+                         <span className="text-sm font-bold text-live">{totalLive} Live</span>
                        </div>
                   </div>
                   

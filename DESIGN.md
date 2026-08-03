@@ -25,6 +25,7 @@ Enforced by `npm run design:lint` (see Enforcement below).
 | `--gain` | `#3DD68C` | `text-gain` | Positive numbers, gains, success. |
 | `--loss` | `#FF7B7B` | `text-loss` | Negative numbers, losses, errors. |
 | `--warn` | `#FFB454` | `text-warn` | Warnings, caution states. |
+| `--live` | `#FF6B81` | `text-live` | Live/broadcast status indicators (LIVE badges, pulse dots, stream counters). Not for errors — that is `loss`. |
 
 Note: the token CSS vars are additive; the legacy shadcn vars (`--primary`,
 `--accent`, …) still power the shadcn/ui components. The `text-primary`,

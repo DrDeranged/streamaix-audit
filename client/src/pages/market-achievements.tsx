@@ -62,7 +62,7 @@ export default function MarketAchievements() {
 
   const getTierColor = (tier: string) => {
     switch (tier) {
-      case 'bronze': return 'border-warn/60';
+      case 'bronze': return 'border-warn/40';
       case 'silver': return 'border-ink-edge';
       case 'gold': return 'border-warn';
       case 'platinum': return 'border-accent-core';
@@ -80,7 +80,7 @@ export default function MarketAchievements() {
   const getTierIcon = (tier: string, completed: boolean) => {
     const iconClass = completed ? "" : "opacity-30";
     switch (tier) {
-      case 'bronze': return <Award className={`w-8 h-8 text-warn ${iconClass}`} />;
+      case 'bronze': return <Award className={`w-8 h-8 text-warn/60 ${iconClass}`} />;
       case 'silver': return <Award className={`w-8 h-8 text-secondary ${iconClass}`} />;
       case 'gold': return <Trophy className={`w-8 h-8 text-warn ${iconClass}`} />;
       case 'platinum': return <Star className={`w-8 h-8 text-accent-bright ${iconClass}`} />;
