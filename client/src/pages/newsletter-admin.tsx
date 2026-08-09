@@ -560,7 +560,7 @@ export default function NewsletterAdmin() {
  </div>
  </div>
 
- <div className="relative group overflow-hidden rounded-xl bg-ink-surface border border-accent-core p-5 hover:border-pink-400/50 transition-all duration-300">
+ <div className="relative group overflow-hidden rounded-xl bg-ink-surface border border-accent-core p-5 hover:border-accent-core/50 transition-all duration-300">
  <div className="absolute inset-0 bg-ink-surface opacity-0 group-hover:opacity-100 transition-opacity" />
  <div className="relative flex items-center gap-4">
  <div className="p-3 rounded-xl bg-accent-core/10 border border-accent-core">

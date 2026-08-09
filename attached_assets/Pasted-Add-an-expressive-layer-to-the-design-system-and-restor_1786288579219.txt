@@ -1,0 +1,51 @@
+Add an "expressive layer" to the design system and restore the landing
+page's energy. This extends DESIGN.md — it does not loosen it. App/data
+surfaces stay exactly as they are.
+
+1. AURORA TOKENS — add to :root in index.css:
+   --aurora-cyan: #22D3EE;  --aurora-magenta: #E879F9;
+   (violet family already exists as accent-core/bright/deep). Map into
+   tailwind.config.ts. These are the ONLY chromatic accents beyond the ink
+   and semantic tokens, and they are restricted to the expressive layer.
+
+2. EXPRESSIVE UTILITIES — in index.css:
+   - .text-grad-signal: animated background-clip gradient text, violet →
+     magenta → violet (restore the old hero headline treatment, ~8s ease
+     loop). .text-grad-stream: static cyan → blue-cyan gradient text.
+   - .orb: shared base (absolute, rounded-full, blur-3xl) with variants
+     .orb-violet / .orb-cyan / .orb-magenta at /12 opacity, each animated
+     with a DRIFT keyframe — slow translate + scale wander (24-32s,
+     alternate, different delays per variant) — not just opacity pulse.
+     Movement must be perceptible: the orbs travel, they don't blink.
+   - .glow-cyan and .glow-magenta matching the existing .glow-accent.
+   - All motion wrapped in @media (prefers-reduced-motion: no-preference);
+     reduced-motion users get static orbs.
+
+3. AMBIENT BACKGROUND — create client/src/components/ds/AmbientBackground
+   .tsx: a fixed, pointer-events-none, -z layer rendering the three
+   drifting orbs (violet top-left, cyan bottom-right, magenta mid-right)
+   plus an extremely subtle ink dot-grid. Mount it on pages/landing.tsx
+   (and auth.tsx). Restore the hero's three orbs to the three DIFFERENT
+   aurora hues via the new orb classes.
+
+4. HEADLINE — in hero-section.tsx: first headline line gets
+   .text-grad-signal, second line stays text-primary white (the serif
+   stays). Restore the CTA's glow-accent.
+
+5. FEATURE CHIPS — the carousel feature buttons currently render mono
+   navy. Give each chip's ICON its category accent (rotate through
+   accent-bright / aurora-cyan / aurora-magenta / warn / gain — matching
+   the nav icons' existing colors where they correspond). Chip surfaces
+   stay ink; only icons and the active chip's border get color.
+
+6. GOVERNANCE — DESIGN.md gets an "Expressive layer" section: aurora
+   tokens + these utilities are allowed ONLY in client/src/components/
+   landing/, pages/landing.tsx, pages/auth.tsx, and single hero moments
+   approved case-by-case; never on data/trading surfaces. Extend design-
+   lint: raw cyan/fuchsia/magenta Tailwind utilities remain banned
+   everywhere (the tokens are the only path), and add a check that .orb-*
+   /.text-grad-* classes appear only under the allowed paths. Fixture-test
+   both rules.
+
+Zero logic changes. Gate: design:lint, tests, build, zero new tsc errors.
+Push and verify with git ls-remote.

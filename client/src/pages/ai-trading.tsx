@@ -1258,9 +1258,9 @@ function MyWatchlistSection() {
       <Surface className="overflow-hidden">
         <div className="pb-3">
           <SectionTitle as="h3" className="text-lg flex items-center gap-2">
-            <Star className="w-5 h-5 text-pink-400" />
+            <Star className="w-5 h-5 text-accent-bright" />
             My Custom Watchlist
-            <Badge variant="secondary" className="ml-2 bg-pink-500/20 text-pink-300">{watchlistItems.length}/5</Badge>
+            <Badge variant="secondary" className="ml-2 bg-accent-core/20 text-accent-bright">{watchlistItems.length}/5</Badge>
           </SectionTitle>
           <p className="text-sm text-secondary">Add up to 5 stocks or crypto for personalized AI analysis with full confluence scoring</p>
         </div>
@@ -1570,7 +1570,7 @@ export default function AITrading() {
                       <span className="flex items-center gap-1.5"><Building2 className="w-3 h-3 sm:w-4 sm:h-4" />Stocks <Badge variant="secondary" className="bg-accent-core/20 text-accent-bright text-xs">{stockSignals.length}</Badge></span>
                     </TabsTrigger>
                     <TabsTrigger value="watchlist" className="data-[state=active]:bg-accent-core data-[state=active]:text-white rounded-xl flex-shrink-0 text-xs sm:text-sm transition-all" data-testid="tab-watchlist">
-                      <span className="flex items-center gap-1.5"><Star className="w-3 h-3 sm:w-4 sm:h-4" />Favorites <Badge variant="secondary" className="bg-pink-500/20 text-pink-300 text-xs">{watchlist.size}</Badge></span>
+                      <span className="flex items-center gap-1.5"><Star className="w-3 h-3 sm:w-4 sm:h-4" />Favorites <Badge variant="secondary" className="bg-accent-core/20 text-accent-bright text-xs">{watchlist.size}</Badge></span>
                     </TabsTrigger>
                   </TabsList>
                 </div>

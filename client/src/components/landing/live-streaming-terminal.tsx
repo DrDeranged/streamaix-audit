@@ -251,7 +251,7 @@ function RecentActivityFeed({ activities }: { activities: ActivityItem[] }) {
                 {activity.type === 'tip' ? (
                   <><span className="text-warn font-medium">{activity.user}</span> tipped <span className="text-warn">${activity.amount}</span></>
                 ) : activity.type === 'live' ? (
-                  <><span className="text-fuchsia-400 font-medium">{activity.user}</span> went live</>
+                  <><span className="text-aurora-magenta font-medium">{activity.user}</span> went live</>
                 ) : (
                   <><span className="text-accent-bright font-medium">{activity.user}</span> joined {activity.stream}</>
                 )}
@@ -309,9 +309,9 @@ const streamTypeConfig = {
 };
 
 const avatarBrandIcons: Record<string, { icon: any; color: string; bgColor: string }> = {
-  'Hayden Adams': { icon: Hexagon, color: 'text-pink-400', bgColor: 'bg-pink-500/20' },
+  'Hayden Adams': { icon: Hexagon, color: 'text-aurora-magenta', bgColor: 'bg-aurora-magenta/20' },
   'Vitalik Buterin': { icon: SiEthereum, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
-  'Gavin Wood': { icon: SiPolkadot, color: 'text-pink-400', bgColor: 'bg-pink-500/20' },
+  'Gavin Wood': { icon: SiPolkadot, color: 'text-aurora-magenta', bgColor: 'bg-aurora-magenta/20' },
   'Anatoly Yakovenko': { icon: SiSolana, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
   'Brian Armstrong': { icon: SiCoinbase, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
   'Jesse Powell': { icon: Wallet, color: 'text-accent-bright', bgColor: 'bg-accent-core/20' },
@@ -470,7 +470,7 @@ function StreamCard({ stream, isFeatured = false }: { stream: LiveStream; isFeat
           </div>
           
           <h3 className={cn(
-            "font-semibold text-white text-sm mb-3 line-clamp-2 group-hover:text-fuchsia-100 transition-colors leading-snug",
+            "font-semibold text-white text-sm mb-3 line-clamp-2 group-hover:text-primary transition-colors leading-snug",
             isFeatured ? "text-base min-h-[3rem]" : "min-h-[2.5rem]"
           )}>
             {stream.title}
@@ -690,7 +690,7 @@ export function LiveStreamingTerminal() {
           <div className="absolute inset-0 grad-surface" />
           <div className="absolute inset-0 backdrop-blur-3xl" />
           
-          <div className="absolute top-20 -left-20 w-80 h-80 bg-fuchsia-600/20 rounded-full blur-[100px] animate-pulse" />
+          <div className="absolute top-20 -left-20 w-80 h-80 bg-aurora-magenta/20 rounded-full blur-[100px] animate-pulse" />
           <div className="absolute bottom-20 -right-20 w-96 h-96 bg-accent-core/15 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent-core/10 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '2s' }} />
           
@@ -918,7 +918,7 @@ export function LiveStreamingTerminal() {
                 </div>
                 <Surface variant="raised" className="relative overflow-hidden p-4">
                   <div className="flex items-center gap-2 mb-3">
-                    <Award className="w-4 h-4 text-fuchsia-400" />
+                    <Award className="w-4 h-4 text-aurora-magenta" />
                     <span className="text-xs font-semibold text-white">Top Earners</span>
                   </div>
                   {topEarners.length > 0 ? (

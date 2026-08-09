@@ -1345,7 +1345,7 @@ export default function Dashboard() {
                   {/* Explore Avatars */}
                   <Link to="/landing#knowledge-avatars">
                     <Button 
-                      className="w-full h-11 bg-pink-500/20 hover:bg-pink-500/30 border border-ink-edge text-accent-bright hover:text-primary backdrop-blur-sm transition-all duration-200 font-medium touch-manipulation text-sm"
+                      className="w-full h-11 bg-accent-core/20 hover:bg-accent-core/30 border border-ink-edge text-accent-bright hover:text-primary backdrop-blur-sm transition-all duration-200 font-medium touch-manipulation text-sm"
                       data-testid="button-explore-avatars"
                     >
                       <Users className="h-4 w-4 mr-2 flex-shrink-0 text-accent-bright" />

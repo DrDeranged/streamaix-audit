@@ -679,7 +679,7 @@ export default function CompletedBountyDetailModal({ bounty, isOpen, onClose }: 
                 size="sm"
                 onClick={() => likeMutation.mutate()}
                 disabled={likeMutation.isPending || !isAuthenticated}
-                className={`tap-target ${isLiked ? 'border-pink-500 bg-pink-500/20 text-loss' : 'border-loss/30 hover:bg-loss/10 hover:border-loss/50'}`}
+                className={`tap-target ${isLiked ? 'border-accent-core bg-accent-core/20 text-loss' : 'border-loss/30 hover:bg-loss/10 hover:border-loss/50'}`}
                 data-testid="button-like-bounty"
               >
                 <Heart className={`w-4 h-4 mr-1.5 ${isLiked ? 'fill-current' : ''}`} />

@@ -1605,8 +1605,8 @@ export function GiftSubscriptionPanel({
   return (
     <Surface variant="raised" className="p-4 border border-accent-core/30">
       <div className="flex items-center gap-2 mb-4">
-        <div className="p-2 rounded-xl bg-pink-500/20">
-          <Gift className="w-5 h-5 text-pink-400" />
+        <div className="p-2 rounded-xl bg-accent-core/20">
+          <Gift className="w-5 h-5 text-accent-bright" />
         </div>
         <div>
           <h3 className="font-semibold text-white">Gift Subscriptions</h3>
@@ -1622,13 +1622,13 @@ export function GiftSubscriptionPanel({
             className={cn(
               "p-3 rounded-xl border text-center cursor-pointer transition-all",
               giftCount === tier.count
-                ? "border-pink-500 bg-pink-500/10"
+                ? "border-accent-core bg-accent-core/10"
                 : "border-ink-edge/50 bg-ink-raised/30 hover:border-ink-edge"
             )}
             data-testid={`gift-tier-${tier.count}`}
           >
             <p className="text-lg font-bold text-white">{tier.label}</p>
-            <p className="text-sm text-pink-400">{tier.price} STREAM</p>
+            <p className="text-sm text-accent-bright">{tier.price} STREAM</p>
             {tier.discount && (
               <Badge className="mt-1 bg-gain/20 text-gain text-[10px]">
                 {tier.discount}
@@ -1687,7 +1687,7 @@ export function StreamAnalyticsPanel({ streamId }: { streamId: string }) {
     { label: 'Avg Watch Time', value: `${Math.round((data?.averageWatchTime || 0) / 60)}m`, icon: <Clock className="w-4 h-4 text-accent-bright" />, color: 'purple' },
     { label: 'Chat Messages', value: data?.chatMessages || 0, icon: <MessageCircle className="w-4 h-4 text-accent-bright" />, color: 'cyan' },
     { label: 'Tips Received', value: data?.tipsReceived || 0, icon: <Coins className="w-4 h-4 text-warn" />, color: 'amber', suffix: 'STREAM' },
-    { label: 'New Followers', value: data?.newFollowers || 0, icon: <Users className="w-4 h-4 text-pink-400" />, color: 'pink' },
+    { label: 'New Followers', value: data?.newFollowers || 0, icon: <Users className="w-4 h-4 text-accent-bright" />, color: 'pink' },
   ];
 
   return (

@@ -1675,9 +1675,9 @@ export default function StreamViewPage() {
                   </TabsTrigger>
                   <TabsTrigger
                     value="clips"
-                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-pink-500 data-[state=active]:bg-transparent text-xs"
+                    className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-accent-core data-[state=active]:bg-transparent text-xs"
                   >
-                    <Scissors className="w-3.5 h-3.5 mr-1 text-pink-400" />
+                    <Scissors className="w-3.5 h-3.5 mr-1 text-accent-bright" />
                     Clips
                   </TabsTrigger>
                   <TabsTrigger

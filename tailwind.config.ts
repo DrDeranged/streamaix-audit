@@ -24,6 +24,8 @@ export default {
         },
         gain: "var(--gain)",
         live: "var(--live)",
+        "aurora-cyan": "var(--aurora-cyan)",
+        "aurora-magenta": "var(--aurora-magenta)",
         loss: "var(--loss)",
         warn: "var(--warn)",
         body: "var(--text-body)",

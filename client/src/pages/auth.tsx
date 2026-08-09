@@ -11,6 +11,7 @@ import { Loader2, Wallet, Mail, User, Lock, Shield, ArrowLeft } from 'lucide-rea
 import { FaTwitter } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import Surface from '@/components/ds/Surface';
+import { AmbientBackground } from '@/components/ds/AmbientBackground';
 import SectionTitle from '@/components/ds/SectionTitle';
 
 export default function AuthPage() {
@@ -72,11 +73,7 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-[100dvh] bg-ink-page flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Quiet atmospheric accents keep the auth surface grounded in the ledger palette. */}
-      <div className="absolute inset-0 pointer-events-none opacity-20">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent-core/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent-deep/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-      </div>
+      <AmbientBackground />
       <div className="relative z-10 w-full flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}

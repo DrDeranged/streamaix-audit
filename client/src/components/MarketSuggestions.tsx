@@ -67,7 +67,7 @@ export function MarketSuggestions({ summaryId, onCreateMarket }: MarketSuggestio
       defi: 'bg-accent-deep/40 text-accent-bright border-accent-core/30',
       bounty: 'bg-gain/20 text-gain border-gain/30',
       realworld: 'bg-warn/20 text-warn border-warn/30',
-      community: 'bg-pink-500/20 text-pink-400 border-pink-500/30'
+      community: 'bg-accent-core/20 text-accent-bright border-accent-core/30'
     };
     return colors[category] || colors.community;
   };

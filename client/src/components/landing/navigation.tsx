@@ -288,7 +288,7 @@ export function Navigation() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/portfolio" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                      <Briefcase className="w-4 h-4 text-fuchsia-400" />
+                      <Briefcase className="w-4 h-4 text-aurora-magenta" />
                       <div>
                         <span className="font-medium block">Asset Portfolio</span>
                         <span className="text-xs text-muted">Track all your assets</span>
@@ -327,7 +327,7 @@ export function Navigation() {
                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl bg-ink-raised" />
                     <div className="absolute bottom-0 left-2 right-2 h-[1px] bg-ink-divider opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="relative flex items-center gap-1.5">
-                      <Target className="w-4 h-4 text-fuchsia-500 group-hover:text-fuchsia-400 transition-colors drop-shadow-sm" />
+                      <Target className="w-4 h-4 text-aurora-magenta group-hover:text-aurora-magenta transition-colors drop-shadow-sm" />
                       <span className="font-medium text-sm">Bounties</span>
                       <ChevronDown className="w-3 h-3 opacity-60" />
                     </div>
@@ -336,7 +336,7 @@ export function Navigation() {
                 <DropdownMenuContent className="w-56 bg-ink-surface border border-ink-edge rounded-xl shadow-2xl" align="start">
                   <DropdownMenuItem asChild>
                     <Link href="/bounties" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                      <Target className="w-4 h-4 text-fuchsia-400" />
+                      <Target className="w-4 h-4 text-aurora-magenta" />
                       <div>
                         <span className="font-medium block">Browse Bounties</span>
                         <span className="text-xs text-muted">Find opportunities</span>
@@ -560,7 +560,7 @@ export function Navigation() {
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link href="/wallet-dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                          <Wallet className="w-4 h-4 text-fuchsia-400" />
+                          <Wallet className="w-4 h-4 text-aurora-magenta" />
                           <span className="font-medium">Wallet</span>
                         </Link>
                       </DropdownMenuItem>
@@ -844,7 +844,7 @@ export function Navigation() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
-                    <Briefcase className="w-4 h-4 text-fuchsia-400" />
+                    <Briefcase className="w-4 h-4 text-aurora-magenta" />
                     Asset Portfolio
                   </button>
                 </Link>
@@ -856,7 +856,7 @@ export function Navigation() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm"
                   >
-                    <Target className="w-4 h-4 text-fuchsia-400" />
+                    <Target className="w-4 h-4 text-aurora-magenta" />
                     Browse Bounties
                   </button>
                 </Link>
@@ -956,7 +956,7 @@ export function Navigation() {
                     </div>
                     <Link href="/wallet-dashboard" className="block">
                       <button className="w-full flex items-center gap-3 text-left text-body hover:text-primary py-2.5 px-3 rounded-xl hover:bg-ink-raised transition-all duration-200 font-medium text-sm">
-                        <Wallet className="w-4 h-4 text-fuchsia-400" />
+                        <Wallet className="w-4 h-4 text-aurora-magenta" />
                         Wallet
                       </button>
                     </Link>

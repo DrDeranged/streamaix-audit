@@ -92,6 +92,29 @@ The following must not appear anywhere in `client/src`:
 - `rounded-lg`, `rounded-3xl`
 - any `from-*` / `to-*` gradient class outside the two sanctioned utilities
 
+## Expressive layer
+
+Aurora tokens and expressive utilities restore energy to brand surfaces
+without loosening the app contract:
+
+- Tokens: `--aurora-cyan` (`#22D3EE`), `--aurora-magenta` (`#E879F9`) —
+  mapped as `aurora-cyan` / `aurora-magenta` in Tailwind. Together with the
+  existing violet accents these are the ONLY chromatic accents beyond ink
+  and semantic tokens.
+- Utilities: `.text-grad-signal` (animated violet→magenta gradient text),
+  `.text-grad-stream` (static cyan gradient text), `.orb` +
+  `.orb-violet/.orb-cyan/.orb-magenta` (drifting blurred orbs),
+  `.glow-cyan` / `.glow-magenta`. All motion is wrapped in
+  `@media (prefers-reduced-motion: no-preference)`.
+- `AmbientBackground` (`client/src/components/ds/AmbientBackground.tsx`)
+  is the standard ambient backdrop for landing and auth.
+
+**Scope:** these tokens/utilities are allowed ONLY in
+`client/src/components/landing/`, `pages/landing.tsx`, `pages/auth.tsx`,
+and single hero moments approved case-by-case — never on data or trading
+surfaces. `design:lint` enforces this scope. Raw cyan/fuchsia/pink Tailwind
+utilities remain banned everywhere; the tokens are the only path.
+
 ## Enforcement
 
 `npm run design:lint` (`scripts/design-lint.sh`) greps **all of `client/src`**

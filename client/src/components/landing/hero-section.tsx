@@ -23,9 +23,9 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
   return (
     <section id="hero" className="min-h-screen flex items-center justify-center relative overflow-hidden pt-20 pb-16 bg-ink-page">
       {/* Floating orbs - techy accent */}
-      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-accent-core/10 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-bright/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-      <div className="absolute top-1/2 right-1/3 w-48 h-48 bg-accent-deep/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+      <div className="orb orb-violet top-1/4 left-1/4 w-64 h-64" />
+      <div className="orb orb-cyan bottom-1/4 right-1/4 w-96 h-96" />
+      <div className="orb orb-magenta top-1/2 right-1/3 w-48 h-48" />
       
       <div className="container mx-auto px-6 md:px-8 text-center relative z-10">
         <motion.div
@@ -36,7 +36,7 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
         >
           {/* Main headline */}
           <SectionTitle as="h1" className="mb-6 text-4xl font-bold tracking-tight leading-[1.1] sm:text-5xl md:text-6xl lg:text-7xl">
-            <span className="text-accent-bright">
+            <span className="text-grad-signal">
               Stream the Noise.
             </span>
             <br />
@@ -93,10 +93,10 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
                   variant="outline"
-                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-accent-core/50 hover:bg-ink-raised text-body hover:text-accent-bright transition-all duration-300 rounded-xl backdrop-blur-sm group"
+                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-aurora-cyan/50 hover:bg-ink-raised text-body hover:text-aurora-cyan transition-all duration-300 rounded-xl backdrop-blur-sm group"
                   data-testid="button-markets"
                 >
-                  <TrendingUp className="w-4 h-4 mr-2 text-accent-bright group-hover:text-primary" />
+                  <TrendingUp className="w-4 h-4 mr-2 text-aurora-cyan group-hover:text-aurora-cyan" />
                   Markets
                 </Button>
               </motion.div>
@@ -106,10 +106,10 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
                   variant="outline"
-                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-accent-core/50 hover:bg-ink-raised text-body hover:text-accent-bright transition-all duration-300 rounded-xl backdrop-blur-sm group"
+                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-aurora-magenta/50 hover:bg-ink-raised text-body hover:text-aurora-magenta transition-all duration-300 rounded-xl backdrop-blur-sm group"
                   data-testid="button-bounties"
                 >
-                  <Target className="w-4 h-4 mr-2 text-accent-bright group-hover:text-primary" />
+                  <Target className="w-4 h-4 mr-2 text-aurora-magenta group-hover:text-aurora-magenta" />
                   Bounties
                 </Button>
               </motion.div>
@@ -144,10 +144,10 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
               <Button 
                 variant="outline"
                 onClick={() => navigateToSection('social')}
-                className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-accent-core/50 hover:bg-ink-raised text-body hover:text-accent-bright transition-all duration-300 rounded-xl backdrop-blur-sm group"
+                className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-aurora-cyan/50 hover:bg-ink-raised text-body hover:text-aurora-cyan transition-all duration-300 rounded-xl backdrop-blur-sm group"
                 data-testid="button-social-feed"
               >
-                <Users className="w-4 h-4 mr-2 text-accent-bright group-hover:text-primary" />
+                <Users className="w-4 h-4 mr-2 text-aurora-cyan group-hover:text-aurora-cyan" />
                 Social Feed
               </Button>
             </motion.div>
@@ -168,10 +168,10 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
                   variant="outline"
-                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-accent-core/50 hover:bg-ink-raised text-body hover:text-accent-bright transition-all duration-300 rounded-xl backdrop-blur-sm group"
+                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-aurora-magenta/50 hover:bg-ink-raised text-body hover:text-aurora-magenta transition-all duration-300 rounded-xl backdrop-blur-sm group"
                   data-testid="button-learn"
                 >
-                  <GraduationCap className="w-4 h-4 mr-2 text-accent-bright group-hover:text-primary" />
+                  <GraduationCap className="w-4 h-4 mr-2 text-aurora-magenta group-hover:text-aurora-magenta" />
                   Learn
                 </Button>
               </motion.div>
@@ -181,10 +181,10 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
                   variant="outline"
-                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-accent-core/50 hover:bg-ink-raised text-body hover:text-accent-bright transition-all duration-300 rounded-xl backdrop-blur-sm group"
+                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-aurora-cyan/50 hover:bg-ink-raised text-body hover:text-aurora-cyan transition-all duration-300 rounded-xl backdrop-blur-sm group"
                   data-testid="button-bot-trading"
                 >
-                  <Sparkles className="w-4 h-4 mr-2 text-accent-bright group-hover:text-primary" />
+                  <Sparkles className="w-4 h-4 mr-2 text-aurora-cyan group-hover:text-aurora-cyan" />
                   Bot Trading
                 </Button>
               </motion.div>
@@ -194,10 +194,10 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
                   variant="outline"
-                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-accent-core/50 hover:bg-ink-raised text-body hover:text-accent-bright transition-all duration-300 rounded-xl backdrop-blur-sm group"
+                  className="px-5 sm:px-6 py-5 sm:py-6 text-sm font-medium bg-ink-surface border border-ink-edge hover:border-aurora-magenta/50 hover:bg-ink-raised text-body hover:text-aurora-magenta transition-all duration-300 rounded-xl backdrop-blur-sm group"
                   data-testid="button-portfolio"
                 >
-                  <Wallet className="w-4 h-4 mr-2 text-accent-bright group-hover:text-primary" />
+                  <Wallet className="w-4 h-4 mr-2 text-aurora-magenta group-hover:text-aurora-magenta" />
                   Portfolio
                 </Button>
               </motion.div>
@@ -225,7 +225,7 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
               <div className="absolute -inset-[1px] bg-accent-core rounded-xl opacity-60 group-hover:opacity-85 transition-opacity duration-300" />
               
               {/* Glass container - ultra compact */}
-              <Surface variant="raised" className="relative px-5 py-2.5 rounded-xl overflow-hidden">
+              <Surface variant="raised" className="relative px-5 py-2.5 rounded-xl overflow-hidden glow-accent">
                 {/* Top highlight */}
                 <div className="absolute top-0 left-2 right-2 h-[1px] bg-accent-bright/30" />
                 

@@ -417,7 +417,7 @@ function SeasonPassSurface({
 
         <div className="flex items-center gap-4 mb-4">
           <div className="flex-shrink-0">
-            <div className="w-12 h-12 rounded-xl bg-accent-core flex items-center justify-center border-2 border-fuchsia-400/50">
+            <div className="w-12 h-12 rounded-xl bg-accent-core flex items-center justify-center border-2 border-accent-core/50">
               <span className="text-lg font-bold text-primary tabular">
                 {seasonPass.currentTier}
               </span>
@@ -730,7 +730,7 @@ export default function GamificationPage() {
                                 className={cn(
                                   "w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all",
                                   isReached
-                                    ? "bg-accent-core border-fuchsia-400"
+                                    ? "bg-accent-core border-accent-core"
                                     : "bg-ink-raised border-ink-edge"
                                 )}
                               >

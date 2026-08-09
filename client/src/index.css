@@ -1943,6 +1943,86 @@
   --gain: #3DD68C;
   --loss: #FF7B7B;
   --warn: #FFB454;
+  /* Expressive layer — aurora accents (landing/auth only, see DESIGN.md) */
+  --aurora-cyan: #22D3EE;
+  --aurora-magenta: #E879F9;
+}
+
+/* ==========================================================================
+   Expressive layer — allowed ONLY on landing/auth surfaces per DESIGN.md.
+   ========================================================================== */
+
+.text-grad-stream {
+  background-image: linear-gradient(100deg, var(--aurora-cyan) 0%, #38BDF8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.text-grad-signal {
+  background-image: linear-gradient(100deg, var(--accent-bright) 0%, var(--aurora-magenta) 50%, var(--accent-bright) 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(64px);
+  pointer-events: none;
+}
+.orb-violet { background: color-mix(in srgb, var(--accent-core) 12%, transparent); }
+.orb-cyan { background: color-mix(in srgb, var(--aurora-cyan) 12%, transparent); }
+.orb-magenta { background: color-mix(in srgb, var(--aurora-magenta) 12%, transparent); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .text-grad-signal {
+    animation: grad-signal-pan 8s ease-in-out infinite;
+  }
+  .orb-violet {
+    animation: orb-drift-a 28s ease-in-out infinite alternate;
+  }
+  .orb-cyan {
+    animation: orb-drift-b 32s ease-in-out infinite alternate;
+    animation-delay: -8s;
+  }
+  .orb-magenta {
+    animation: orb-drift-c 24s ease-in-out infinite alternate;
+    animation-delay: -16s;
+  }
+}
+
+@keyframes grad-signal-pan {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes orb-drift-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(9vw, -6vh, 0) scale(1.15); }
+  to { transform: translate3d(-5vw, 7vh, 0) scale(0.92); }
+}
+@keyframes orb-drift-b {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-10vw, -8vh, 0) scale(0.9); }
+  to { transform: translate3d(6vw, 5vh, 0) scale(1.18); }
+}
+@keyframes orb-drift-c {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(7vw, 9vh, 0) scale(1.12); }
+  to { transform: translate3d(-8vw, -5vh, 0) scale(0.95); }
+}
+
+/* Expressive glows matching .glow-accent */
+.glow-cyan {
+  box-shadow: 0 0 24px rgba(34, 211, 238, 0.25);
+}
+.glow-magenta {
+  box-shadow: 0 0 24px rgba(232, 121, 249, 0.25);
 }
 
 /* Tabular numerals for all data contexts */

@@ -505,7 +505,7 @@ function BotDetailDialog({ botId, open, onClose }: { botId: string | null; open:
                   <div className="bg-ink-raised/30 rounded-xl border border-ink-edge/30 p-3 space-y-2">
                     {(() => {
                       const maxValue = Math.max(...portfolio.map((p: any) => Math.abs(p.currentValue || p.quantity * p.entryPrice)));
-                      const colors = ['bg-accent-core/500', 'bg-accent-core/500', 'bg-gain/500', 'bg-warn/500', 'bg-pink-500', 'bg-accent-core'];
+                      const colors = ['bg-accent-core/500', 'bg-accent-core/500', 'bg-gain/500', 'bg-warn/500', 'bg-accent-core', 'bg-accent-core'];
                       return portfolio.map((p: any, i: number) => {
                         const value = Math.abs(p.currentValue || p.quantity * p.entryPrice);
                         const pct = maxValue > 0 ? (value / maxValue) * 100 : 0;
