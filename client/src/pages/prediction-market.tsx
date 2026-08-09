@@ -1254,7 +1254,7 @@ export default function PredictionMarket() {
 
                 {/* Trade Button */}
                 <Button
-                  className="w-full grad-accent text-primary border-0 hover:shadow-lg hover:shadow-purple-500/50"
+                  className="w-full grad-accent text-primary border-0 hover:shadow-lg hover:shadow-accent-core/50"
                   onClick={handleTrade}
                   disabled={!amount || parseFloat(amount) <= 0 || tradeMutation.isPending}
                   data-testid="button-place-trade"

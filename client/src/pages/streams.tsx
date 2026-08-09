@@ -858,7 +858,7 @@ const TopStreamerBadge = memo(function TopStreamerBadge({ streamer, rank }: { st
  
  const getRankColor = () => {
  if (rank === 1) return 'ring-warn/60';
- if (rank === 2) return 'ring-slate-400/60';
+ if (rank === 2) return 'ring-ink-edge/60';
  if (rank === 3) return 'ring-warn/60';
  return 'ring-accent-core/30';
  };
@@ -1508,15 +1508,15 @@ export default function StreamsPage() {
 
  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
  <TabsList className="streaming-glass-panel p-1.5 w-full sm:w-auto grid grid-cols-3 sm:flex gap-1 rounded-2xl">
- <TabsTrigger value="discover" className="data-[state=active]:grad-surface   data-[state=active]:text-accent-bright data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/10 gap-1.5 rounded-xl transition-all">
+ <TabsTrigger value="discover" className="data-[state=active]:grad-surface   data-[state=active]:text-accent-bright data-[state=active]:shadow-lg data-[state=active]:shadow-accent-core/10 gap-1.5 rounded-xl transition-all">
  <Sparkles className="w-4 h-4" />
  <span className="hidden sm:inline">Discover</span>
  </TabsTrigger>
- <TabsTrigger value="browse" className="data-[state=active]:grad-surface   data-[state=active]:text-accent-bright data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/10 gap-1.5 rounded-xl transition-all">
+ <TabsTrigger value="browse" className="data-[state=active]:grad-surface   data-[state=active]:text-accent-bright data-[state=active]:shadow-lg data-[state=active]:shadow-accent-core/10 gap-1.5 rounded-xl transition-all">
  <Filter className="w-4 h-4" />
  <span className="hidden sm:inline">Browse</span>
  </TabsTrigger>
- <TabsTrigger value="upcoming" className="data-[state=active]:grad-surface   data-[state=active]:text-accent-bright data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/10 gap-1.5 rounded-xl transition-all">
+ <TabsTrigger value="upcoming" className="data-[state=active]:grad-surface   data-[state=active]:text-accent-bright data-[state=active]:shadow-lg data-[state=active]:shadow-accent-core/10 gap-1.5 rounded-xl transition-all">
  <Calendar className="w-4 h-4" />
  <span className="hidden sm:inline">Upcoming</span>
  </TabsTrigger>

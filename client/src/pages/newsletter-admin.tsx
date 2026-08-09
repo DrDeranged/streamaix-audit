@@ -986,7 +986,7 @@ export default function NewsletterAdmin() {
  border: 'border-ink-edge',
  badge: 'bg-ink-raised border-ink-edge text-body',
  icon: 'text-secondary',
- glow: 'shadow-slate-500/20'
+ glow: 'shadow-ink-edge/20'
  }
  };
 
@@ -1355,7 +1355,7 @@ export default function NewsletterAdmin() {
  <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-ink-surface" />
  <div className="pl-6 relative">
  <div className="absolute left-[-4px] top-3 w-2 h-2 rounded-full bg-accent-core/10 border-2 border-accent-core group-hover:scale-150 group-hover:bg-accent-core transition-all duration-300" />
- <div className="p-4 rounded-xl bg-ink-surface border border-accent-core hover:border-indigo-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10">
+ <div className="p-4 rounded-xl bg-ink-surface border border-accent-core hover:border-indigo-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-accent-core/10">
  <div className="flex items-start justify-between gap-4">
  <div className="flex-1 min-w-0">
  <div className="flex items-center gap-2 mb-2">

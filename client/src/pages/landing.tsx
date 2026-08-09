@@ -1,6 +1,5 @@
 import { lazy, Suspense, useMemo, useRef, useCallback, useEffect } from "react";
 import { Navigation } from "@/components/landing/navigation";
-import { AmbientBackground } from "@/components/ds/AmbientBackground";
 import { HeroSection } from "@/components/landing/hero-section";
 import { NeuralNetworkBackground } from "@/components/NeuralNetworkBackground";
 import { SlidingPageContainer, SectionWrapper, SlidingPageContainerHandle } from "@/components/sliding-page-container";
@@ -254,7 +253,6 @@ export default function Landing() {
 
   return (
     <div className="relative bg-ink-page text-body">
-      <AmbientBackground />
       <SlidingPageContainer ref={slidingRef} sections={sections} initialSection={4} />
     </div>
   );

@@ -229,7 +229,7 @@ function DiscoverFeed({ casts, isLoading, error, activeTab, selectedTopic }: {
           <Button
             onClick={() => setShowAll(true)}
             variant="outline"
-            className="w-full sm:w-auto bg-ink-surface dark:bg-ink-surface backdrop-blur-md border-ink-edge dark:border-accent-core/40 text-primary dark:text-body hover:bg-ink-raised dark:hover:bg-ink-raised hover:text-accent-bright dark:hover:text-primary hover:border-accent-core/60 hover:scale-105 transition-all duration-300 px-6 py-3 rounded-xl font-bold shadow-lg shadow-purple-500/20"
+            className="w-full sm:w-auto bg-ink-surface dark:bg-ink-surface backdrop-blur-md border-ink-edge dark:border-accent-core/40 text-primary dark:text-body hover:bg-ink-raised dark:hover:bg-ink-raised hover:text-accent-bright dark:hover:text-primary hover:border-accent-core/60 hover:scale-105 transition-all duration-300 px-6 py-3 rounded-xl font-bold shadow-lg shadow-accent-core/20"
             data-testid="show-more-posts"
           >
             Show {casts.length - initialCount} more posts
@@ -676,7 +676,7 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="bg-ink-surface dark:bg-ink-surface backdrop-blur-xl border border-accent-core/30 rounded-xl p-5 sm:p-7 hover:bg-ink-raised dark:hover:bg-ink-raised hover:border-accent-core/50 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-500 cursor-pointer group relative overflow-hidden"
+      className="bg-ink-surface dark:bg-ink-surface backdrop-blur-xl border border-accent-core/30 rounded-xl p-5 sm:p-7 hover:bg-ink-raised dark:hover:bg-ink-raised hover:border-accent-core/50 hover:shadow-2xl hover:shadow-accent-core/20 transition-all duration-500 cursor-pointer group relative overflow-hidden"
       data-testid={`feed-post-${index}`}
     >
       {/* Animated gradient overlay */}
@@ -687,7 +687,7 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
           <img
             src={cast.author.pfpUrl}
             alt={cast.author.displayName}
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-ink-edge dark:border-ink-edge shadow-lg ring-2 ring-purple-500/20 transition-all duration-300 group-hover:ring-purple-500/40 group-hover:scale-105"
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-ink-edge dark:border-ink-edge shadow-lg ring-2 ring-accent-core/20 transition-all duration-300 group-hover:ring-accent-core/40 group-hover:scale-105"
           />
           <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-ink-raised   rounded-full border-2 border-white dark:border-ink-surface animate-pulse" />
         </div>

@@ -684,7 +684,7 @@ export default function Dashboard() {
                     <Wallet className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Wallet</span>
                   </TabsTrigger>
-                  <TabsTrigger value="bounties" className="hidden lg:flex data-[state=active]:bg-ink-raised data-[state=active]:bg-ink-raised data-[state=active]:bg-ink-raised data-[state=active]:border-ink-edge data-[state=active]:shadow-lg data-[state=active]:shadow-pink-500/20 rounded-xl px-3 py-3 text-xs font-medium text-muted data-[state=active]:text-primary transition-all duration-300 border border-transparent">
+                  <TabsTrigger value="bounties" className="hidden lg:flex data-[state=active]:bg-ink-raised data-[state=active]:bg-ink-raised data-[state=active]:bg-ink-raised data-[state=active]:border-ink-edge data-[state=active]:shadow-lg data-[state=active]:shadow-accent-core/20 rounded-xl px-3 py-3 text-xs font-medium text-muted data-[state=active]:text-primary transition-all duration-300 border border-transparent">
                     <Target className="h-4 w-4 lg:mr-2" />
                     <span className="hidden lg:inline">Bounties</span>
                   </TabsTrigger>

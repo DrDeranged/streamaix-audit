@@ -8,7 +8,7 @@ export function AmbientBackground() {
   return (
     <div
       aria-hidden="true"
-      className="fixed inset-0 -z-10 pointer-events-none overflow-hidden"
+      className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
       data-testid="ambient-background"
     >
       {/* Subtle ink dot-grid */}

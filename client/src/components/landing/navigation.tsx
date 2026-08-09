@@ -522,7 +522,7 @@ export function Navigation() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56 bg-ink-surface border border-ink-edge rounded-xl shadow-2xl" align="end" forceMount>
                     <div className="flex items-center gap-3 p-3 border-b border-ink-edge">
-                      <Avatar className="h-10 w-10 ring-2 ring-purple-500/30">
+                      <Avatar className="h-10 w-10 ring-2 ring-accent-core/30">
                         <AvatarImage src={user?.avatar} alt={user?.username} />
                         <AvatarFallback className="bg-accent-core text-white text-sm">
                           {user?.username?.charAt(0).toUpperCase()}
@@ -946,7 +946,7 @@ export function Navigation() {
                 {isAuthenticated && (
                   <div className="space-y-1 pt-3 border-t border-ink-divider mt-3">
                     <div className="flex items-center gap-3 px-3 py-2.5 bg-accent-core/10 rounded-xl border border-accent-core/20">
-                      <Avatar className="h-7 w-7 ring-2 ring-purple-500/30">
+                      <Avatar className="h-7 w-7 ring-2 ring-accent-core/30">
                         <AvatarImage src={user?.avatar} alt={user?.username} />
                         <AvatarFallback className="bg-accent-core text-primary text-xs font-medium">
                           {user?.username?.charAt(0).toUpperCase()}

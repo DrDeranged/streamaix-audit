@@ -360,7 +360,7 @@ export default function AIAgentsAtWork() {
                 <img
                   src={agent.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${agent.username}`}
                   alt={agent.username}
-                  className="w-10 h-10 rounded-full ring-2 ring-purple-500/50"
+                  className="w-10 h-10 rounded-full ring-2 ring-accent-core/50"
                 />
 
                 <div className="flex-1 min-w-0">

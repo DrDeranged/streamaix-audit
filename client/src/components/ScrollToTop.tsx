@@ -39,7 +39,7 @@ export function ScrollToTop() {
           className="fixed bottom-6 right-6 z-50 p-3 rounded-full shadow-lg transition-all duration-300 
                      bg-accent-core
                      hover:bg-accent-bright
-                     hover:shadow-xl hover:shadow-purple-500/25
+                     hover:shadow-xl hover:shadow-accent-core/25
                      active:scale-95
                      md:bottom-8 md:right-8 md:p-4"
           aria-label="Scroll to top"

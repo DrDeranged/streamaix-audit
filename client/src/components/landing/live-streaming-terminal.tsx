@@ -503,7 +503,7 @@ function StreamCard({ stream, isFeatured = false }: { stream: LiveStream; isFeat
                   if (showBrandIcon && BrandIcon) {
                     return (
                       <div className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center shadow-lg ring-2 ring-slate-700/50 group-hover:ring-fuchsia-500/30 transition-all", 
+                        "w-8 h-8 rounded-full flex items-center justify-center shadow-lg ring-2 ring-ink-edge/50 group-hover:ring-aurora-magenta/30 transition-all", 
                         brandFallback.bgColor
                       )}>
                         <BrandIcon className={cn("w-4 h-4", brandFallback.color)} />
@@ -514,7 +514,7 @@ function StreamCard({ stream, isFeatured = false }: { stream: LiveStream; isFeat
                     <img 
                       src={getDiceBearAvatar(stream.hostUsername)} 
                       alt="" 
-                      className="w-8 h-8 rounded-full object-cover shadow-lg ring-2 ring-slate-700/50 group-hover:ring-fuchsia-500/30 transition-all"
+                      className="w-8 h-8 rounded-full object-cover shadow-lg ring-2 ring-ink-edge/50 group-hover:ring-aurora-magenta/30 transition-all"
                     />
                   );
                 })()}
@@ -548,7 +548,7 @@ function StreamCard({ stream, isFeatured = false }: { stream: LiveStream; isFeat
               className={cn(
                 "h-9 px-4 text-xs font-bold rounded-xl border-0 transition-all duration-300",
                 "grad-accent glow-accent",
-                "hover:bg-[position:100%_0] hover:shadow-xl hover:shadow-fuchsia-500/40 hover:scale-105",
+                "hover:bg-[position:100%_0] hover:shadow-xl hover:shadow-aurora-magenta/40 hover:scale-105",
                 "active:scale-95"
               )}
             >

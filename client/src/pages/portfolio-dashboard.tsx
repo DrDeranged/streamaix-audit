@@ -3641,7 +3641,7 @@ function AddAssetDialog({
                     placeholder="Type to search stocks or crypto..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 h-11 focus:border-accent-core focus:ring-1 focus:ring-purple-500/20"
+                    className="pl-10 h-11 focus:border-accent-core focus:ring-1 focus:ring-accent-core/20"
                     data-testid="input-asset-search"
                     autoFocus
                   />
@@ -5190,7 +5190,7 @@ export default function PortfolioDashboard() {
               {/* Premium Stats Row */}
               <StatGrid className="mb-6">
                 {/* Total Value Card - Primary */}
-                <Surface className="relative overflow-hidden bg-ink-raised    border-accent-core/20 p-5 hover:border-accent-core/40 transition-all hover:shadow-lg hover:shadow-purple-500/10">
+                <Surface className="relative overflow-hidden bg-ink-raised    border-accent-core/20 p-5 hover:border-accent-core/40 transition-all hover:shadow-lg hover:shadow-accent-core/10">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-ink-raised   rounded-full -translate-y-1/2 translate-x-1/2" />
                   <div className="relative">
                     <div className="flex items-center gap-2 mb-3">
@@ -6247,7 +6247,7 @@ export default function PortfolioDashboard() {
                 <Surface className="bg-ink-raised    border-accent-core/30 p-6">
                   <div className="flex items-center justify-between mb-5">
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-xl bg-ink-raised   shadow-lg shadow-purple-500/25">
+                      <div className="p-2.5 rounded-xl bg-ink-raised   shadow-lg shadow-accent-core/25">
                         <Brain className="w-5 h-5 text-primary" />
                       </div>
                       <div>

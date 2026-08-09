@@ -314,7 +314,7 @@ const ChatMessage = memo(function ChatMessageComponent({ msg }: { msg: ChatMessa
         "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold shadow-md transition-transform duration-200 group-hover:scale-105",
         msg.isAiAgent ? "bg-ink-raised shadow-accent-core/30" :
         msg.isModerator ? "bg-ink-raised shadow-gain/30" :
-        msg.isSubscriber ? "bg-ink-raised shadow-purple-500/30" :
+        msg.isSubscriber ? "bg-ink-raised shadow-accent-core/30" :
         "bg-ink-raised"
       )}>
         {msg.isAiAgent ? <Bot className="w-4 h-4 text-primary" /> : msg.username[0]?.toUpperCase()}
@@ -388,7 +388,7 @@ const StreamerCard = memo(function StreamerCard({ stream, isFollowing }: { strea
           <div className={cn(
             "w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg bg-accent-core ring-2",
             config.gradient,
-            "ring-purple-500/30"
+            "ring-accent-core/30"
           )}>
             {stream.hostAvatar ? (
               <img src={stream.hostAvatar} alt="" className="w-full h-full rounded-full object-cover" />
@@ -1414,7 +1414,7 @@ export default function StreamViewPage() {
                 />
                 <Button
                   onClick={() => setShowPredictionPanel(true)}
-                  className="bg-ink-raised   border-0 h-8 sm:h-10 min-h-0 sm:min-h-[44px] px-2 sm:px-4 text-xs sm:text-sm font-medium shadow-lg shadow-fuchsia-500/25 transition-all duration-200 hover:scale-105 active:scale-95"
+                  className="bg-ink-raised   border-0 h-8 sm:h-10 min-h-0 sm:min-h-[44px] px-2 sm:px-4 text-xs sm:text-sm font-medium shadow-lg shadow-accent-core/25 transition-all duration-200 hover:scale-105 active:scale-95"
                   data-testid="button-create-prediction"
                 >
                   <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-2" />
@@ -1763,7 +1763,7 @@ export default function StreamViewPage() {
                           value={message}
                           onChange={(e) => setMessage(e.target.value)}
                           onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                          className="bg-ink-raised/70 border-2 border-ink-edge/80 text-primary text-sm h-12 rounded-xl pl-4 pr-4 focus:border-accent-core/60 focus:ring-2 focus:ring-purple-500/20 transition-all duration-200"
+                          className="bg-ink-raised/70 border-2 border-ink-edge/80 text-primary text-sm h-12 rounded-xl pl-4 pr-4 focus:border-accent-core/60 focus:ring-2 focus:ring-accent-core/20 transition-all duration-200"
                           disabled={!isConnected}
                           data-testid="input-chat-message"
                         />
@@ -1772,7 +1772,7 @@ export default function StreamViewPage() {
                         size="icon"
                         onClick={handleSendMessage}
                         disabled={!isConnected || !message.trim()}
-                        className="bg-ink-raised   h-12 w-12 min-w-[48px] min-h-[48px] flex-shrink-0 rounded-xl shadow-lg shadow-purple-500/25 transition-all duration-200 disabled:opacity-50 disabled:shadow-none"
+                        className="bg-ink-raised   h-12 w-12 min-w-[48px] min-h-[48px] flex-shrink-0 rounded-xl shadow-lg shadow-accent-core/25 transition-all duration-200 disabled:opacity-50 disabled:shadow-none"
                         data-testid="button-send-message"
                       >
                         <Send className="w-5 h-5" />
@@ -1780,7 +1780,7 @@ export default function StreamViewPage() {
                     </div>
                   ) : (
                     <Link href="/auth">
-                      <Button className="w-full bg-ink-raised   h-12 rounded-xl shadow-lg shadow-purple-500/25 font-semibold">
+                      <Button className="w-full bg-ink-raised   h-12 rounded-xl shadow-lg shadow-accent-core/25 font-semibold">
                         Sign in to Chat
                       </Button>
                     </Link>

@@ -341,7 +341,7 @@ export function AIProcessor() {
         <div className="max-w-4xl mx-auto">
           {/* Input Section */}
           <div className="max-w-2xl mx-auto mb-12">
-            <div className="bg-ink-surface bg-ink-surface backdrop-blur-xl border border-ink-edge border-accent-core/30 rounded-2xl p-6 shadow-lg shadow-purple-500/10">
+            <div className="bg-ink-surface bg-ink-surface backdrop-blur-xl border border-ink-edge border-accent-core/30 rounded-2xl p-6 shadow-lg shadow-accent-core/10">
               <div className="flex flex-col sm:flex-row gap-4">
                 <Input
                   type="url"

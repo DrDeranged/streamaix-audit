@@ -966,7 +966,7 @@ export default function BotTradingPage() {
         >
           {[
             { icon: Coins, label: 'Total Staked', value: stats?.totalStaked ? `${(Number(stats.totalStaked) / 1000).toFixed(0)}k` : '0', sub: 'STREAM', iconBg: 'bg-accent-core/10', iconBorder: 'border-accent-core/20', iconColor: 'text-accent-bright', subColor: 'text-accent-bright/70', hoverBorder: 'hover:border-accent-core/40', glow: 'shadow-accent-core/10' },
-            { icon: Users, label: 'Active Traders', value: stats?.activeTraders ?? '0', sub: 'staking now', iconBg: 'bg-accent-core/10', iconBorder: 'border-accent-core/20', iconColor: 'text-accent-bright', subColor: 'text-accent-bright/70', hoverBorder: 'hover:border-accent-core/40', glow: 'shadow-purple-500/10' },
+            { icon: Users, label: 'Active Traders', value: stats?.activeTraders ?? '0', sub: 'staking now', iconBg: 'bg-accent-core/10', iconBorder: 'border-accent-core/20', iconColor: 'text-accent-bright', subColor: 'text-accent-bright/70', hoverBorder: 'hover:border-accent-core/40', glow: 'shadow-accent-core/10' },
             { icon: Trophy, label: 'Top Avatar', value: stats?.topBot?.name ?? '—', sub: stats?.topBot ? `${(stats.topBot.avgTradeRoi ?? 0).toFixed(1)}% ROI` : '', iconBg: 'bg-gain/10', iconBorder: 'border-gain/20', iconColor: 'text-gain', subColor: 'text-gain/70', hoverBorder: 'hover:border-gain/40', glow: 'shadow-gain/10', imageUrl: stats?.topBot?.imageUrl },
             { icon: Activity, label: 'Total Trades', value: stats?.totalTrades ?? '0', sub: 'executed', iconBg: 'bg-warn/10', iconBorder: 'border-warn/20', iconColor: 'text-warn', subColor: 'text-warn/70', hoverBorder: 'hover:border-warn/40', glow: 'shadow-warn/10' },
           ].map((item, i) => (

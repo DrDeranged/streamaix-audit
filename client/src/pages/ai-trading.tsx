@@ -181,7 +181,7 @@ function GlowingStatCard({ icon: Icon, label, value, subValue, color, delay = 0 
     purple: {
       bg: ' ',
       border: 'border-accent-core/30 hover:border-accent-core/50',
-      glow: 'shadow-purple-500/20 hover:shadow-purple-500/40',
+      glow: 'shadow-accent-core/20 hover:shadow-accent-core/40',
       icon: '  text-accent-bright',
       text: 'text-accent-bright',
       pulse: 'bg-accent-bright',
