@@ -1,0 +1,50 @@
+Upgrade the floating chat launcher in client/src/components/chat/
+ChatWidget.tsx — the launcher button, its tooltip bubble, and its
+positioning only. Do not modify the chat panel internals, message
+rendering, API calls, or any handlers/testids.
+
+Note: this file is in components/chat/, which is OUTSIDE the expressive-
+layer scope — use accent tokens and glow-accent only; no orb-*/aurora-*/
+text-grad-* classes.
+
+1. THE BUTTON: replace the flat rounded square with a 56px circular
+   launcher: grad-accent fill, glow-accent, no visible border (kill the
+   current dark outline), white icon. Interactions: hover scale 1.06 +
+   brighter glow; tap scale .96; when the panel is open, morph the icon to
+   an X with a 150ms rotate/fade transition. Add a small presence dot
+   (top-right of the button, bg-gain with a 1.5px ink-page ring) — it
+   reflects the actual connection/online state the widget already tracks,
+   not a hardcoded green.
+
+2. IDLE LIFE: a slow "breathing" ring — an absolutely-positioned ring that
+   scales 1→1.35 and fades out on a ~3s loop (accent-core at low opacity),
+   drawing the eye without being frantic. Wrap all motion (breathing ring,
+   morph, tooltip float) in prefers-reduced-motion: no-preference;
+   reduced-motion users get the static button.
+
+3. THE TOOLTIP: restyle the rotating-phrase bubble as an ink pill:
+   bg-ink-surface/90 backdrop-blur, border-ink-edge, rounded-xl,
+   text-primary, no tail triangle. Phrases crossfade (250ms) instead of
+   popping. Add a dismiss ✕ (text-muted, 16px hit area is fine inside a
+   larger padding) — dismissing hides the tooltip for the session
+   (sessionStorage), the button stays. Keep the existing phrase rotation
+   logic; keep it hidden on mobile as it is now.
+
+4. POSITIONING: bottom-right with safe-area padding —
+   bottom: max(1.25rem, env(safe-area-inset-bottom)); right 1.25rem. On
+   the landing page the launcher currently overlaps the carousel dots and
+   sits near the arrow — raise its z-index above page content but ensure
+   it does not intercept clicks outside its own bounds, and give it
+   bottom-24 on viewports where the carousel pagination occupies the
+   bottom edge if overlap is confirmed (check the landing layout; if the
+   dots are centered and clear of the corner, leave bottom as standard).
+
+5. ACCESSIBILITY: aria-label ("Chat with StreamAiX assistant" / "Close
+   chat" when open), aria-expanded, focus-visible ring using the ring
+   token, Escape closes the open panel (if not already bound). If the
+   widget receives a message while closed, show an unread badge (bg-loss
+   dot with count) on the launcher — only if message state is already
+   tracked; do not build new state machinery for it.
+
+Gate: design:lint, tests, build, zero new tsc errors vs baseline. Push
+and verify with git ls-remote.

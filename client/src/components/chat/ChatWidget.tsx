@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, Send, Sparkles, Loader2, LogIn, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -176,220 +176,103 @@ const AGENT_MESSAGES = [
   "I'm here to help",
 ];
 
-function EnergyOrbButton({ onClick }: { onClick: () => void }) {
+function LauncherButton({ isOpen, isOnline, onClick }: { isOpen: boolean; isOnline: boolean; onClick: () => void }) {
   const [messageIndex, setMessageIndex] = useState(0);
-  const [showMessage, setShowMessage] = useState(true);
+  const [tooltipDismissed, setTooltipDismissed] = useState(
+    () => typeof window !== 'undefined' && window.sessionStorage.getItem('streamaix-chat-tooltip-dismissed') === '1'
+  );
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setShowMessage(false);
-      setTimeout(() => {
-        setMessageIndex((prev) => (prev + 1) % AGENT_MESSAGES.length);
-        setShowMessage(true);
-      }, 300);
+      setMessageIndex((prev) => (prev + 1) % AGENT_MESSAGES.length);
     }, 4000);
     return () => clearInterval(interval);
   }, []);
 
+  const dismissTooltip = () => {
+    window.sessionStorage.setItem('streamaix-chat-tooltip-dismissed', '1');
+    setTooltipDismissed(true);
+  };
+
+  const showTooltip = !isOpen && !tooltipDismissed;
+
   return (
     <div className="relative">
-      {/* Speech Bubble - Hidden on mobile to prevent overlap */}
+      {/* Rotating-phrase tooltip — ink pill, hidden on mobile */}
       <AnimatePresence>
-        {showMessage && (
+        {showTooltip && (
           <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.8 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.8 }}
-            className="absolute -top-12 right-0 whitespace-nowrap hidden sm:block"
+            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: prefersReducedMotion ? 0 : -8 }}
+            className="absolute -top-12 right-0 whitespace-nowrap hidden sm:flex items-center gap-1 bg-ink-surface/90 backdrop-blur border border-ink-edge rounded-xl pl-4 pr-1.5 py-1.5"
           >
-            <div className="relative bg-ink-surface border border-ink-edge rounded-xl px-4 py-2 glow-accent">
-              <span className="text-sm font-medium text-accent-bright">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={messageIndex}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: prefersReducedMotion ? 0 : 0.25 }}
+                className="text-sm font-medium text-primary"
+              >
                 {AGENT_MESSAGES[messageIndex]}
-              </span>
-              {/* Speech bubble tail */}
-              <div className="absolute -bottom-2 right-6 w-4 h-4 bg-ink-surface border-r border-b border-ink-edge transform rotate-45" />
-            </div>
+              </motion.span>
+            </AnimatePresence>
+            <button
+              type="button"
+              onClick={dismissTooltip}
+              aria-label="Dismiss assistant tip"
+              className="p-1 text-muted hover:text-primary rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              data-testid="button-dismiss-chat-tooltip"
+            >
+              <X className="h-3 w-3" />
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Energy Orb Container - Smaller on mobile */}
+      {/* Breathing ring */}
+      {!prefersReducedMotion && !isOpen && (
+        <motion.div
+          aria-hidden="true"
+          className="absolute inset-0 rounded-full border-2 border-accent-core/40 pointer-events-none"
+          animate={{ scale: [1, 1.35], opacity: [0.5, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeOut' }}
+        />
+      )}
+
       <motion.button
+        type="button"
         onClick={onClick}
-        className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-xl cursor-pointer focus:outline-none group"
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        animate={{
-          y: [0, -4, 0],
-        }}
-        transition={{
-          y: {
-            duration: 3,
-            repeat: Infinity,
-            ease: "easeInOut",
-          },
-        }}
+        whileHover={prefersReducedMotion ? undefined : { scale: 1.06 }}
+        whileTap={prefersReducedMotion ? undefined : { scale: 0.96 }}
+        aria-label={isOpen ? 'Close chat' : 'Chat with StreamAiX assistant'}
+        aria-expanded={isOpen}
+        className="relative w-14 h-14 rounded-full grad-accent glow-accent border-0 text-primary flex items-center justify-center cursor-pointer transition-[filter] duration-300 hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-ink-page"
         data-testid="button-open-chat"
       >
-        {/* Outer Pulsing Glow Ring */}
-        <motion.div
-         className="absolute inset-0 rounded-xl bg-accent-core opacity-30 blur-xl"
-          animate={{
-            scale: [1, 1.4, 1],
-            opacity: [0.4, 0.2, 0.4],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+            key={isOpen ? 'close' : 'chat'}
+            initial={{ rotate: -90, opacity: 0 }}
+            animate={{ rotate: 0, opacity: 1 }}
+            exit={{ rotate: 90, opacity: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
+            className="flex items-center justify-center"
+          >
+            {isOpen ? <X className="h-6 w-6" /> : <Bot className="h-6 w-6" />}
+          </motion.span>
+        </AnimatePresence>
+
+        {/* Presence dot — reflects browser online state */}
+        <span
+          aria-hidden="true"
+          className={`absolute top-0.5 right-0.5 h-3 w-3 rounded-full ring-[1.5px] ring-ink-page ${isOnline ? 'bg-gain' : 'bg-ink-edge'}`}
+          data-testid="status-chat-presence"
         />
-
-        {/* Secondary Glow Ring */}
-        <motion.div
-           className="absolute inset-0 rounded-xl bg-accent-deep opacity-25 blur-lg"
-          animate={{
-            scale: [1.1, 1.3, 1.1],
-            opacity: [0.3, 0.15, 0.3],
-            rotate: [0, 180, 360],
-          }}
-          transition={{
-            duration: 4,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-        />
-
-        {/* Orbiting Particles */}
-        {[...Array(6)].map((_, i) => (
-          <motion.div
-            key={i}
-             className="absolute w-1.5 h-1.5 rounded-xl bg-accent-bright shadow-lg shadow-accent-core/50"
-            style={{
-              left: '50%',
-              top: '50%',
-              marginLeft: '-3px',
-              marginTop: '-3px',
-            }}
-            animate={{
-              x: [
-                Math.cos((i * 60 * Math.PI) / 180) * 28,
-                Math.cos(((i * 60 + 180) * Math.PI) / 180) * 28,
-                Math.cos(((i * 60 + 360) * Math.PI) / 180) * 28,
-              ],
-              y: [
-                Math.sin((i * 60 * Math.PI) / 180) * 28,
-                Math.sin(((i * 60 + 180) * Math.PI) / 180) * 28,
-                Math.sin(((i * 60 + 360) * Math.PI) / 180) * 28,
-              ],
-              opacity: [0.8, 0.4, 0.8],
-              scale: [1, 0.6, 1],
-            }}
-            transition={{
-              duration: 3 + i * 0.3,
-              repeat: Infinity,
-              ease: "linear",
-              delay: i * 0.2,
-            }}
-          />
-        ))}
-
-        {/* Inner Orbiting Ring */}
-        <motion.div
-           className="absolute inset-2 rounded-xl border border-accent-core/30"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-        >
-           <div className="absolute -top-0.5 left-1/2 w-1 h-1 rounded-xl bg-accent-bright -translate-x-1/2" />
-        </motion.div>
-
-        {/* Orb Base with Gradient */}
-         <div className="absolute inset-1 rounded-xl bg-ink-page border border-accent-core/50 shadow-inner overflow-hidden">
-          {/* Swirling Energy Effect */}
-          <motion.div
-            className="absolute inset-0 opacity-80"
-            style={{
-             background: '#8B7CF6',
-            }}
-            animate={{ rotate: 360 }}
-            transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-          />
-          
-          {/* Inner Glow */}
-           <div className="absolute inset-0 bg-accent-core/20" />
-          
-          {/* Core Energy */}
-          <motion.div
-             className="absolute inset-3 rounded-xl bg-accent-core/30 backdrop-blur-sm"
-            animate={{
-              scale: [1, 1.1, 1],
-              opacity: [0.6, 0.9, 0.6],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-
-          {/* AI Symbol - Stylized "S" or Neural Node */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <motion.div
-              className="relative"
-              animate={{
-                scale: [1, 1.05, 1],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            >
-              {/* Neural network node design */}
-               <svg viewBox="0 0 24 24" className="w-6 h-6 text-primary drop-shadow-lg" fill="none" stroke="currentColor" strokeWidth="1.5">
-                {/* Central node */}
-                <circle cx="12" cy="12" r="3" fill="currentColor" className="opacity-90" />
-                {/* Outer nodes */}
-                <circle cx="12" cy="4" r="1.5" fill="currentColor" className="opacity-70" />
-                <circle cx="19" cy="8" r="1.5" fill="currentColor" className="opacity-70" />
-                <circle cx="19" cy="16" r="1.5" fill="currentColor" className="opacity-70" />
-                <circle cx="12" cy="20" r="1.5" fill="currentColor" className="opacity-70" />
-                <circle cx="5" cy="16" r="1.5" fill="currentColor" className="opacity-70" />
-                <circle cx="5" cy="8" r="1.5" fill="currentColor" className="opacity-70" />
-                {/* Connection lines */}
-                <path d="M12 7 L12 9" strokeLinecap="round" className="opacity-60" />
-                <path d="M12 15 L12 17" strokeLinecap="round" className="opacity-60" />
-                <path d="M9 10.5 L7 9" strokeLinecap="round" className="opacity-60" />
-                <path d="M15 10.5 L17 9" strokeLinecap="round" className="opacity-60" />
-                <path d="M9 13.5 L7 15" strokeLinecap="round" className="opacity-60" />
-                <path d="M15 13.5 L17 15" strokeLinecap="round" className="opacity-60" />
-              </svg>
-            </motion.div>
-          </div>
-        </div>
-
-        {/* Scan Line Effect */}
-        <motion.div
-           className="absolute inset-1 rounded-xl overflow-hidden pointer-events-none"
-          style={{ mixBlendMode: 'overlay' }}
-        >
-          <motion.div
-             className="w-full h-1 bg-accent-bright/50"
-            animate={{
-              y: [0, 56, 0],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-          />
-        </motion.div>
-
-        {/* Hover Highlight */}
-         <div className="absolute inset-1 rounded-xl bg-primary/0 group-hover:bg-primary/10 transition-colors duration-300" />
       </motion.button>
-
     </div>
   );
 }
@@ -410,6 +293,29 @@ export function ChatWidget() {
   
   // Check if user is authenticated for personalized features
   const isAuthenticated = !!getAuthToken();
+
+  // Browser online state drives the launcher presence dot
+  const [isOnline, setIsOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine);
+  useEffect(() => {
+    const goOnline = () => setIsOnline(true);
+    const goOffline = () => setIsOnline(false);
+    window.addEventListener('online', goOnline);
+    window.addEventListener('offline', goOffline);
+    return () => {
+      window.removeEventListener('online', goOnline);
+      window.removeEventListener('offline', goOffline);
+    };
+  }, []);
+
+  // Escape closes the open panel
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isOpen]);
 
   // Fetch chat history (only for authenticated users)
   const { data: chatHistory, isLoading } = useQuery<{ messages: ChatMessage[] }>({
@@ -474,23 +380,25 @@ export function ChatWidget() {
 
   return (
     <>
-      {/* Energy Orb AI Agent Button */}
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50"
-          >
-            <EnergyOrbButton onClick={() => {
-              // Dispatch event to close any open avatar dialogs on mobile
-              window.dispatchEvent(new CustomEvent('streamaix-chat-open'));
-              setIsOpen(true);
-            }} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Floating chat launcher */}
+      <div
+        className="fixed z-50"
+        style={{ bottom: 'max(1.25rem, env(safe-area-inset-bottom))', right: '1.25rem' }}
+      >
+        <LauncherButton
+          isOpen={isOpen}
+          isOnline={isOnline}
+          onClick={() => {
+            if (isOpen) {
+              setIsOpen(false);
+              return;
+            }
+            // Dispatch event to close any open avatar dialogs on mobile
+            window.dispatchEvent(new CustomEvent('streamaix-chat-open'));
+            setIsOpen(true);
+          }}
+        />
+      </div>
 
       {/* Chat Panel */}
       <AnimatePresence>
@@ -499,7 +407,7 @@ export function ChatWidget() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-2 right-2 left-2 sm:left-auto sm:right-6 sm:bottom-6 z-50 w-auto sm:w-[360px] h-[55vh] sm:h-[480px] max-h-[500px] bg-ink-surface backdrop-blur-xl border border-ink-edge rounded-2xl flex flex-col overflow-hidden"
+            className="fixed bottom-2 right-2 left-2 sm:left-auto sm:right-6 sm:bottom-24 z-50 w-auto sm:w-[360px] h-[55vh] sm:h-[480px] max-h-[500px] bg-ink-surface backdrop-blur-xl border border-ink-edge rounded-2xl flex flex-col overflow-hidden"
             data-testid="chat-panel"
           >
             {/* Header */}
