@@ -18,7 +18,7 @@ export function Footer() {
   const isAdmin = user && ADMIN_USERNAMES.includes(user.username);
   
   return (
-    <footer className="relative overflow-hidden border-t border-ink-divider bg-ink-page py-20 text-body">
+    <footer className="relative overflow-hidden border-t border-ink-divider py-20 text-body">
       {/* Enhanced Background Pattern */}
       <div className="pointer-events-none absolute inset-0 opacity-10">
         <motion.div 

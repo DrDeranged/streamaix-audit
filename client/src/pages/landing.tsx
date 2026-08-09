@@ -4,6 +4,7 @@ import { HeroSection } from "@/components/landing/hero-section";
 import { NeuralNetworkBackground } from "@/components/NeuralNetworkBackground";
 import { SlidingPageContainer, SectionWrapper, SlidingPageContainerHandle } from "@/components/sliding-page-container";
 import { Loader2 } from "lucide-react";
+import { AmbientBackground } from "@/components/ds/AmbientBackground";
 
 const LiveStreamingTerminal = lazy(() => import("@/components/landing/live-streaming-terminal").then(m => ({ default: m.LiveStreamingTerminal })));
 const AIProcessor = lazy(() => import("@/components/landing/rebuilt-ai-demo").then(m => ({ default: m.AIProcessor })));
@@ -57,8 +58,7 @@ export default function Landing() {
       id: "discover",
       label: "Discover",
       component: (
-        <SectionWrapper className="relative bg-ink-page" fullHeight={false}>
-          <NeuralNetworkBackground />
+        <SectionWrapper className="relative" fullHeight={false}>
           <div className="relative z-10">
             <Suspense fallback={<SectionLoader />}>
               <DiscoverPage />
@@ -71,8 +71,7 @@ export default function Landing() {
       id: "bounties",
       label: "Bounties",
       component: (
-        <SectionWrapper className="relative bg-ink-page">
-          <NeuralNetworkBackground />
+        <SectionWrapper className="relative">
           <div className="relative z-10">
             <Navigation />
             <Suspense fallback={<SectionLoader />}>
@@ -86,8 +85,7 @@ export default function Landing() {
       id: "prediction-markets",
       label: "Prediction Markets",
       component: (
-        <SectionWrapper className="relative bg-ink-page">
-          <NeuralNetworkBackground />
+        <SectionWrapper className="relative">
           <div className="relative z-10">
             <Navigation />
             <Suspense fallback={<SectionLoader />}>
@@ -101,8 +99,7 @@ export default function Landing() {
       id: "social",
       label: "Social Feed",
       component: (
-        <SectionWrapper className="relative bg-ink-page">
-          <NeuralNetworkBackground />
+        <SectionWrapper className="relative">
           <div className="relative z-10">
             <Navigation />
             <Suspense fallback={<SectionLoader />}>
@@ -117,7 +114,6 @@ export default function Landing() {
       label: "Welcome",
       component: (
         <SectionWrapper className="relative" fullHeight={false}>
-          <NeuralNetworkBackground />
           <div className="relative z-10">
             <Navigation />
             <HeroSection onNavigateToSection={handleNavigateToSection} />
@@ -134,8 +130,7 @@ export default function Landing() {
       id: "live-streams",
       label: "Live Streams",
       component: (
-        <SectionWrapper className="relative bg-ink-page">
-          <NeuralNetworkBackground />
+        <SectionWrapper className="relative">
           <div className="relative z-10">
             <Navigation />
             <Suspense fallback={<SectionLoader />}>
@@ -149,8 +144,7 @@ export default function Landing() {
       id: "ai-processor",
       label: "AI Processing",
       component: (
-        <SectionWrapper className="relative bg-ink-page" fullHeight={false}>
-          <NeuralNetworkBackground />
+        <SectionWrapper className="relative" fullHeight={false}>
           <div className="relative z-10">
             <Navigation />
             <Suspense fallback={<SectionLoader />}>
@@ -165,8 +159,7 @@ export default function Landing() {
       id: "avatars",
       label: "Knowledge Avatars",
       component: (
-        <SectionWrapper className="relative bg-ink-page">
-          <NeuralNetworkBackground />
+        <SectionWrapper className="relative">
           <div className="relative z-10">
             <Navigation />
             <Suspense fallback={<SectionLoader />}>
@@ -180,8 +173,7 @@ export default function Landing() {
       id: "ai-suggestions",
       label: "AI Suggestions",
       component: (
-        <SectionWrapper className="relative bg-ink-page">
-          <NeuralNetworkBackground />
+        <SectionWrapper className="relative">
           <div className="relative z-10">
             <Navigation />
             <Suspense fallback={<SectionLoader />}>
@@ -195,8 +187,7 @@ export default function Landing() {
       id: "ai-trading",
       label: "AI Trading",
       component: (
-        <SectionWrapper className="relative bg-ink-page" fullHeight={false}>
-          <NeuralNetworkBackground />
+        <SectionWrapper className="relative" fullHeight={false}>
           <div className="relative z-10">
             <Suspense fallback={<SectionLoader />}>
               <AITradingPage />
@@ -209,8 +200,7 @@ export default function Landing() {
       id: "bot-trading",
       label: "Bot Trading",
       component: (
-        <SectionWrapper className="relative bg-ink-page" fullHeight={false}>
-          <NeuralNetworkBackground />
+        <SectionWrapper className="relative" fullHeight={false}>
           <div className="relative z-10">
             <Suspense fallback={<SectionLoader />}>
               <BotTradingPage />
@@ -223,8 +213,7 @@ export default function Landing() {
       id: "portfolio",
       label: "Portfolio",
       component: (
-        <SectionWrapper className="relative bg-ink-page" fullHeight={false}>
-          <NeuralNetworkBackground />
+        <SectionWrapper className="relative" fullHeight={false}>
           <div className="relative z-10">
             <Navigation />
             <Suspense fallback={<SectionLoader />}>
@@ -238,8 +227,7 @@ export default function Landing() {
       id: "learn",
       label: "Learning Hub",
       component: (
-        <SectionWrapper className="relative bg-ink-page" fullHeight={false}>
-          <NeuralNetworkBackground />
+        <SectionWrapper className="relative" fullHeight={false}>
           <div className="relative z-10">
             <Navigation />
             <Suspense fallback={<SectionLoader />}>
@@ -253,7 +241,13 @@ export default function Landing() {
 
   return (
     <div className="relative bg-ink-page text-body">
-      <SlidingPageContainer ref={slidingRef} sections={sections} initialSection={4} />
+      <div className="fixed inset-0 z-0 pointer-events-none" aria-hidden="true">
+        <NeuralNetworkBackground />
+        <AmbientBackground />
+      </div>
+      <div className="relative z-10">
+        <SlidingPageContainer ref={slidingRef} sections={sections} initialSection={4} />
+      </div>
     </div>
   );
 }

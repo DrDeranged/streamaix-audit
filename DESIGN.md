@@ -109,6 +109,16 @@ without loosening the app contract:
 - `AmbientBackground` (`client/src/components/ds/AmbientBackground.tsx`)
   is the standard ambient backdrop for landing and auth.
 
+**Continuous backdrop:** marketing pages (landing, auth) use ONE page-level
+fixed `AmbientBackground` (plus the particle network on landing) behind a
+`relative z-10` content wrapper; section shells are TRANSPARENT — opaque
+section backgrounds (`bg-ink-page`, `bg-ink-surface`, solid gradients on
+section shells) are banned on landing/auth. Sections needing emphasis may
+use `grad-surface` WITH fade masks, never an unmasked opaque block. If text
+needs extra contrast over the backdrop, use the `.scrim` utility
+(ink-page/70 + backdrop-blur), not an opaque background. Interior
+cards/panels keep their Surface styling.
+
 **Scope:** these tokens/utilities are allowed ONLY in
 `client/src/components/landing/`, `pages/landing.tsx`, `pages/auth.tsx`,
 and single hero moments approved case-by-case — never on data or trading

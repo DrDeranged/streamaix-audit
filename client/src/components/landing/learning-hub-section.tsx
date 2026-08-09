@@ -108,7 +108,7 @@ export function LearningHubSection() {
   const modules = modulesData?.modules?.slice(0, 6) || [];
 
   return (
-    <div className="pt-24 pb-16 px-4 min-h-[100dvh] bg-ink-page">
+    <div className="pt-24 pb-16 px-4 min-h-[100dvh]">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}

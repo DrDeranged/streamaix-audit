@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { AmbientBackground } from "@/components/ds/AmbientBackground";
 import { Brain, TrendingUp, Target, BarChart3, Sparkles, Users, Bot, Radio, LineChart, GraduationCap, Wallet } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
@@ -22,9 +21,8 @@ export function HeroSection({ onNavigateToSection }: HeroSectionProps) {
   };
 
   return (
-    <section id="hero" className="min-h-screen flex items-center justify-center relative overflow-hidden pt-20 pb-16 bg-ink-page">
+    <section id="hero" className="min-h-screen flex items-center justify-center relative overflow-hidden pt-20 pb-16">
       {/* Floating orbs - techy accent */}
-      <AmbientBackground />
       <div className="orb orb-violet top-1/4 left-1/4 w-64 h-64" />
       <div className="orb orb-cyan bottom-1/4 right-1/4 w-96 h-96" />
       <div className="orb orb-magenta top-1/2 right-1/3 w-48 h-48" />

@@ -2021,6 +2021,12 @@
 .glow-cyan {
   box-shadow: 0 0 24px rgba(34, 211, 238, 0.25);
 }
+.scrim {
+  background-color: color-mix(in srgb, var(--ink-page) 70%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
 .glow-magenta {
   box-shadow: 0 0 24px rgba(232, 121, 249, 0.25);
 }

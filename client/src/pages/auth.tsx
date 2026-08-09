@@ -73,7 +73,9 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-[100dvh] bg-ink-page flex items-center justify-center p-4 relative overflow-hidden">
-      <AmbientBackground />
+      <div className="fixed inset-0 z-0 pointer-events-none" aria-hidden="true">
+        <AmbientBackground />
+      </div>
       <div className="relative z-10 w-full flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
