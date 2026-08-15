@@ -5,6 +5,8 @@
 - [Typecheck incremental cache trap](typecheck-cache-trap.md) — `npm run check` can falsely pass via tsc incremental cache; delete tsbuildinfo for an authoritative run; many latent server errors exist. Baseline diffing must compare file(line,col) positions only: tsc flips TS2304<->TS2552 nondeterministically.
 - [Dormant real-money features](swap-rail.md) — SWAPS_ENABLED/SIGNALS_ENABLED fail-closed gates; chain-verified trade recording, cap-notional fail-safe, banned-advice validation on ALL model-visible signal fields.
 - [AI budget enforcement](ai-budget-enforcement.md) — every gateway call needs priority+tag; audio calls need enforceBudget+spend recording; partial-flush must never double-count.
-- [AI provider split](ai-provider-split.md) — text AI = Anthropic via modelGateway only; OpenAI = audio (whisper/tts) only; pause flags are provider-scoped.
+- [AI provider split](ai-provider-split.md) — OpenAI fully removed; text AI = Anthropic via modelGateway only.
+- [Caption & client speech](caption-and-client-speech.md) — transcription = yt-dlp captions (execFile, never shell); speech = client Web Speech API; server TTS = 410.
+- [tsc baseline line-shift trap](tsc-baseline-shift.md) — position-only diffs flag shifted pre-existing errors as new; match by (file,column) against removed entries.
 - [Replit lockfile proxy contamination](lockfile-proxy-contamination.md) — every npm install rewrites lockfile URLs to the firewall proxy; run `npm run lockfile:scrub` after each install.
 - [Design system migration](design-system-migration.md) — DESIGN.md contract, accent-core naming deviation, tsc 370-error baseline diffing, and the delegated-restyle className-corruption check.
