@@ -9,4 +9,6 @@
 - [Caption & client speech](caption-and-client-speech.md) — transcription = yt-dlp captions (execFile, never shell); speech = client Web Speech API; server TTS = 410.
 - [tsc baseline line-shift trap](tsc-baseline-shift.md) — position-only diffs flag shifted pre-existing errors as new; match by (file,column) against removed entries.
 - [Replit lockfile proxy contamination](lockfile-proxy-contamination.md) — every npm install rewrites lockfile URLs to the firewall proxy; run `npm run lockfile:scrub` after each install.
+- [drizzle-kit push interactivity](drizzle-push-interactive.md) — pty-driven preview, safe-vs-destructive statement split, destructive column drift still pending human approval.
+- [npm overrides $dep syntax](npm-override-syntax.md) — `"pkg": "$pkg"` fixes EOVERRIDE; ENOTEMPTY = stale node_modules temp dirs; npm audit fix broken.
 - [Design system migration](design-system-migration.md) — DESIGN.md contract, accent-core naming deviation, tsc 370-error baseline diffing, and the delegated-restyle className-corruption check.
