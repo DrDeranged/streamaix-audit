@@ -10,7 +10,8 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { WalletSelectionModal } from '@/components/wallet/WalletSelectionModal';
+import { WalletSelectionModal } from "@/components/wallet/WalletSelectionModal";
+import { ConnectWalletButton } from "@/components/trade/ConnectWalletButton";
 import { 
   Moon, 
   Sun, 
@@ -633,102 +634,9 @@ export function Navigation() {
               </Button>
             </motion.div>
             
-            {/* Web3 Wallet Connection */}
+            {/* Web3 Wallet Connection (wagmi + RainbowKit, Base) */}
             <div className="hidden md:block">
-              {isConnected && wallet ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <motion.div whileHover={{ scale: 1.02 }} className="relative group">
-                      <div className="absolute -inset-[1px] rounded-xl bg-accent-core opacity-70 group-hover:opacity-100 blur-[1px] transition-opacity duration-300" />
-                      <Button variant="outline" className="relative bg-ink-surface backdrop-blur-xl border-0 hover:bg-ink-raised transition-all duration-300 overflow-hidden">
-                        <div className="absolute inset-0 bg-ink-raised/40 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-                        <div className="relative flex items-center gap-2">
-                          <div className="relative">
-                            <Wallet className="w-4 h-4 text-accent-bright" />
-                            <motion.div 
-                              className="absolute -top-1 -right-1 w-2 h-2 bg-gain rounded-full"
-                              animate={{ scale: [1, 1.3, 1] }}
-                              transition={{ duration: 2, repeat: Infinity }}
-                            />
-                          </div>
-                          <span className="font-mono text-sm text-primary">{formatAddress(wallet.address)}</span>
-                        </div>
-                      </Button>
-                    </motion.div>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-64 bg-ink-surface border border-ink-edge rounded-xl shadow-2xl" align="end">
-                    <div className="p-4 border-b border-ink-edge">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-medium text-muted uppercase tracking-wider">Connected Wallet</span>
-                        <motion.div 
-                          className="flex items-center gap-1.5"
-                          animate={{ opacity: [0.5, 1, 0.5] }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                        >
-                          <div className="w-2 h-2 bg-gain rounded-full" />
-                          <span className="text-xs text-gain font-medium">Active</span>
-                        </motion.div>
-                      </div>
-                      <div className="text-sm text-primary font-mono bg-ink-raised px-3 py-2 rounded-xl border border-ink-edge">
-                        {formatAddress(wallet.address)}
-                      </div>
-                    </div>
-
-                    <div className="py-2">
-                      <DropdownMenuItem asChild>
-                        <Link href="/wallet-dashboard" className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                          <LayoutDashboard className="w-4 h-4 text-accent-bright" />
-                          <span className="font-medium">Dashboard</span>
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-body hover:text-primary hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1">
-                        <ExternalLink className="w-4 h-4 text-accent-bright" />
-                        <span className="font-medium">View on Explorer</span>
-                      </DropdownMenuItem>
-                    </div>
-
-                    <DropdownMenuSeparator className="bg-accent-core/15" />
-
-                    <div className="py-1">
-                      <DropdownMenuItem 
-                        className="cursor-pointer flex items-center gap-3 px-3 py-2.5 text-sm text-loss hover:text-loss hover:bg-ink-raised transition-all duration-200 rounded-xl mx-1"
-                        onClick={disconnect}
-                      >
-                        <LogOut className="w-4 h-4" />
-                        <span className="font-medium">Disconnect</span>
-                      </DropdownMenuItem>
-                    </div>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <motion.div 
-                  whileHover={{ scale: 1.03 }} 
-                  whileTap={{ scale: 0.97 }}
-                  className="relative group"
-                >
-                  {/* Animated gradient border */}
-                  <div className="absolute -inset-[1px] rounded-xl bg-accent-core opacity-80 group-hover:opacity-100 blur-[1px] animate-gradient-x transition-opacity duration-300" />
-                  <Button 
-                    onClick={() => setWalletModalOpen(true)}
-                    disabled={isConnecting}
-                    className="relative bg-ink-surface backdrop-blur-xl border-0 text-primary hover:bg-ink-raised transition-all duration-300 overflow-hidden px-4 py-2"
-                  >
-                    {/* Shimmer effect */}
-                    <div className="absolute inset-0 bg-ink-divider translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-                    {isConnecting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin text-accent-bright" />
-                        <span className="relative z-10 font-medium">Connecting...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Wallet className="w-4 h-4 mr-2 text-accent-bright" />
-                        <span className="relative z-10 font-medium">Connect Wallet</span>
-                      </>
-                    )}
-                  </Button>
-                </motion.div>
-              )}
+              <ConnectWalletButton />
             </div>
 
             {/* Mobile Menu Button */}

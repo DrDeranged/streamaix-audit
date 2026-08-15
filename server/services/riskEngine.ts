@@ -50,6 +50,10 @@ export type RiskCheckResult =
   | { allowed: true }
   | { allowed: false; reason: string; type: string };
 
+export type SwapRiskResult =
+  | { allowed: true }
+  | { allowed: false; reason: string; type: string; requiresConfirmation?: boolean };
+
 export class RiskEngine {
   /** When set and in the future, the trading engine is globally paused. */
   private globalPausedUntil: Date | null = null;
@@ -279,6 +283,81 @@ export class RiskEngine {
       .from(riskEvents)
       .orderBy(desc(riskEvents.createdAt))
       .limit(Math.min(limit, 500));
+  }
+
+  // ------------------------------------------------------------------
+  // Real-money swap checks (non-custodial swap rail on Base)
+  // ------------------------------------------------------------------
+
+  /** Per-wallet daily quote volume, in USD. In-memory (soft cap). */
+  private swapDailyVolume = new Map<string, { day: string; volumeUsd: number }>();
+
+  /** Test helper: reset the in-memory swap volume tracker. */
+  resetSwapVolumeTracker(): void {
+    this.swapDailyVolume.clear();
+  }
+
+  /**
+   * Pre-quote guard for user swaps. Checks:
+   *  1. Per-wallet daily quote-volume soft cap (SWAP_DAILY_QUOTE_CAP_USD, default 25000)
+   *  2. Price impact: hard block above 8%; 3-8% requires explicit override
+   * Logs a risk_events row for every rejection and every used override.
+   */
+  async checkSwap(input: {
+    wallet: string;
+    notionalUsd: number | null;
+    priceImpactPct: number | null;
+    overrideHighImpact?: boolean;
+  }): Promise<SwapRiskResult> {
+    const wallet = input.wallet.toLowerCase();
+    const day = this.now().toISOString().slice(0, 10);
+    const cap = envInt("SWAP_DAILY_QUOTE_CAP_USD", 25000);
+
+    // 1. Daily quote-volume soft cap
+    const entry = this.swapDailyVolume.get(wallet);
+    const usedToday = entry && entry.day === day ? entry.volumeUsd : 0;
+    const notional = input.notionalUsd ?? 0;
+    if (usedToday + notional > cap) {
+      await this.logEvent("swap_daily_cap", null, null, {
+        wallet,
+        usedTodayUsd: usedToday,
+        requestedUsd: notional,
+        capUsd: cap,
+      });
+      return {
+        allowed: false,
+        type: "swap_daily_cap",
+        reason: `Daily quote volume cap reached ($${cap}). Try again tomorrow.`,
+      };
+    }
+
+    // 2. Price impact rules
+    const impact = input.priceImpactPct;
+    if (impact !== null && Number.isFinite(impact)) {
+      if (impact > 8) {
+        await this.logEvent("swap_price_impact_block", null, null, { wallet, priceImpactPct: impact });
+        return {
+          allowed: false,
+          type: "swap_price_impact_block",
+          reason: `Price impact ${impact.toFixed(2)}% exceeds the 8% hard limit.`,
+        };
+      }
+      if (impact > 3) {
+        if (!input.overrideHighImpact) {
+          return {
+            allowed: false,
+            type: "swap_price_impact_confirm",
+            reason: `Price impact ${impact.toFixed(2)}% is high — explicit confirmation required.`,
+            requiresConfirmation: true,
+          };
+        }
+        await this.logEvent("swap_price_impact_override", null, null, { wallet, priceImpactPct: impact });
+      }
+    }
+
+    // Record the quoted volume against the wallet's daily total.
+    this.swapDailyVolume.set(wallet, { day, volumeUsd: usedToday + notional });
+    return { allowed: true };
   }
 
   private async reject(

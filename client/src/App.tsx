@@ -13,6 +13,10 @@ import { OnboardingTour } from "@/components/OnboardingTour";
 import { PWAInstallPrompt, PWAUpdatePrompt } from "@/components/pwa/PWAInstallPrompt";
 import { GlobalMobileHeader } from "@/components/GlobalMobileHeader";
 import { WidgetSettingsProvider } from "@/contexts/WidgetSettingsContext";
+import { WagmiProvider } from "wagmi";
+import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
+import { wagmiConfig } from "@/lib/wagmi";
+import "@rainbow-me/rainbowkit/styles.css";
 
 // Immediate load for critical pages
 import Landing from "@/pages/landing";
@@ -59,6 +63,7 @@ const PortfolioDashboard = React.lazy(() => import("@/pages/portfolio-dashboard"
 const NotificationSettings = React.lazy(() => import("@/pages/notification-settings"));
 const BotTrading = React.lazy(() => import("@/pages/bot-trading"));
 const AvatarFeed = React.lazy(() => import("@/pages/avatar-feed"));
+const Trade = React.lazy(() => import("@/pages/trade"));
 const StyleGuide = React.lazy(() => import("@/pages/style-guide"));
 function Router() {
   return (
@@ -79,6 +84,12 @@ function Router() {
         </Suspense>
       </Route>
       
+      <Route path="/trade">
+        <Suspense fallback={<TradingSkeleton />}>
+          <Trade />
+        </Suspense>
+      </Route>
+
       <Route path="/wallet-dashboard">
         <Suspense fallback={<DashboardSkeleton />}>
           <WalletDashboard />
@@ -359,7 +370,9 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
+      <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
+        <RainbowKitProvider theme={darkTheme({ accentColor: "#8B7CF6" })} modalSize="compact">
         <ThemeProvider defaultTheme="dark" storageKey="streamaix-theme">
           <WidgetSettingsProvider>
             <TooltipProvider>
@@ -374,7 +387,9 @@ function App() {
             </TooltipProvider>
           </WidgetSettingsProvider>
         </ThemeProvider>
+        </RainbowKitProvider>
       </QueryClientProvider>
+      </WagmiProvider>
     </ErrorBoundary>
   );
 }

@@ -7654,3 +7654,49 @@ export const jobRuns = pgTable("job_runs", {
 export const insertJobRunSchema = createInsertSchema(jobRuns);
 export type InsertJobRun = z.infer<typeof insertJobRunSchema>;
 export type JobRun = typeof jobRuns.$inferSelect;
+
+// ---------------------------------------------------------------------------
+// Non-custodial swap rail (Base). Dormant unless SWAPS_ENABLED=true.
+// ---------------------------------------------------------------------------
+
+// Server-side allowlist of tradeable tokens on Base. Quotes refuse anything
+// off this list.
+export const tradeableTokens = pgTable("tradeable_tokens", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  symbol: text("symbol").notNull().unique(),
+  name: text("name").notNull(),
+  // "ETH" sentinel address 0xeeee..eeee for the native asset
+  address: text("address").notNull().unique(),
+  decimals: integer("decimals").notNull(),
+  enabled: boolean("enabled").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertTradeableTokenSchema = createInsertSchema(tradeableTokens).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertTradeableToken = z.infer<typeof insertTradeableTokenSchema>;
+export type TradeableToken = typeof tradeableTokens.$inferSelect;
+
+// Record of every confirmed user swap (user's wallet signed & submitted).
+export const userTrades = pgTable("user_trades", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  walletAddress: text("wallet_address").notNull(),
+  sellToken: text("sell_token").notNull(),
+  buyToken: text("buy_token").notNull(),
+  sellAmount: text("sell_amount").notNull(), // base units, stringified bigint
+  buyAmount: text("buy_amount").notNull(),
+  txHash: text("tx_hash").notNull().unique(),
+  feeCollected: text("fee_collected"),
+  quotedPrice: text("quoted_price"),
+  executedPrice: text("executed_price"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertUserTradeSchema = createInsertSchema(userTrades).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertUserTrade = z.infer<typeof insertUserTradeSchema>;
+export type UserTrade = typeof userTrades.$inferSelect;

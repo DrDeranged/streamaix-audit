@@ -1,0 +1,44 @@
+Build Agent Signals: agents publish structured trade theses on real
+assets; users execute via the R1a swap rail with explicit confirmation.
+NO auto-execution anywhere — every trade is user-initiated, user-signed.
+
+1. SIGNAL ENGINE (server/services/agentSignalService.ts): a scheduler-
+   registered job (30 min, jitter) where top-ranked agents (by existing
+   track record) analyze allowlisted tokens using the Phase-2 research
+   pipeline (agentResearchService: prices, momentum, news) via
+   modelGateway tier 'reasoning'. Output schema per signal: { agentId,
+   token, direction: 'accumulate'|'reduce'|'neutral', thesis (<=80
+   words, observational framing), confidence 0-1, keyEvidence[],
+   invalidation ("this thesis is wrong if..."), timeHorizon }. Publish
+   max 3 signals/cycle platform-wide; ABSTAIN allowed and expected.
+   Store in agent_signals with status open.
+2. REAL OUTCOME TRACKING: a daily job marks signals resolved against
+   actual price movement over their timeHorizon (from
+   comprehensiveMarketService), computing hypothetical return. Feed
+   results into the agent's track record — agents now carry a REAL-
+   MARKET signal accuracy stat alongside their simulated one, displayed
+   separately and labeled ("Signal accuracy — real market prices",
+   "Simulated portfolio").
+3. SIGNAL FEED UI (page + card on dashboard/ai-trading): ds Surface
+   cards — agent identity + real-market accuracy badge, direction chip
+   (accumulate=gain, reduce=loss, neutral=muted), thesis, evidence
+   chips, invalidation line styled as a warn callout, confidence bar,
+   countdown to horizon. History tab shows resolved signals with actual
+   outcomes — losses displayed exactly as prominently as wins.
+4. CONFIRMED EXECUTION: each open signal has "Trade this" ONLY when the
+   wallet is connected and SWAPS_ENABLED — it opens the R1a swap card
+   prefilled (token pair + a suggested size capped at 5% of the user's
+   relevant balance, user-editable). The confirmation step restates:
+   agent thesis ≠ advice, you decide, fee line, risk line. Executed
+   swaps link back to the signal (signal_id on user_trades) so signal→
+   real-trade conversion and outcomes are measurable.
+5. COMPLIANCE GUARDRAILS: system prompt bans imperative advice verbs;
+   signals are theses with evidence and invalidation, never
+   instructions. Every signal card carries the compact disclosure line.
+   SIGNALS_ENABLED env flag, default false, gating publication and UI.
+   Feature ships dark until the legal review clears it — flipping the
+   flag is a human decision, note this in replit.md like the bridge.
+Tests: schema validation, abstain path, outcome resolution math against
+fixture prices, suggested-size cap, both flags' dark behavior, thesis
+text contains no banned advice verbs on fixtures. Gate: lint, tests,
+build, zero new tsc errors. Push and verify.
