@@ -130,3 +130,13 @@ utilities remain banned everywhere; the tokens are the only path.
 `npm run design:lint` (`scripts/design-lint.sh`) greps **all of `client/src`**
 for the banned classes and fails on any violation. Enforcement is global —
 there is no allowlist; every file must comply.
+
+The ban covers every color-bearing utility prefix, not just the common ones:
+`text- / bg- / border- / ring- / shadow-` **and** `via- / fill- / stroke- /
+divide- / outline- / decoration- / caret- / placeholder- / ring-offset- /
+accent-` with any raw Tailwind hue (red, rose, green, emerald, lime, amber,
+yellow, orange, cyan, sky, teal, blue, indigo, violet, purple, fuchsia, pink,
+slate, gray, zinc). Semantic states map to tokens: loss/danger → `loss`,
+gain/success → `gain`, caution → `warn`, emphasis/links → `accent-core` /
+`accent-bright`, structure → `ink-*`. The lint script is fixture-tested in
+both directions by `scripts/design-lint.test.ts`.

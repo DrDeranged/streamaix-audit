@@ -7693,7 +7693,7 @@ export default function PortfolioDashboard() {
                             [type]: parseInt(e.target.value),
                           }))
                         }
-                        className="flex-1 h-2 bg-ink-raised rounded-xl appearance-none cursor-pointer accent-red-500"
+                        className="flex-1 h-2 bg-ink-raised rounded-xl appearance-none cursor-pointer accent-loss"
                         data-testid={`slider-drop-${type}`}
                       />
                       <div className="flex items-center gap-1 w-16">

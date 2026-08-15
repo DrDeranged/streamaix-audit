@@ -40,7 +40,7 @@ export function TableSkeleton({ rows = 5 }: { rows?: number }) {
           <Skeleton className="h-4 w-28" />
         </div>
       </div>
-      <div className="divide-y divide-slate-700/30">
+      <div className="divide-y divide-ink-divider">
         {Array.from({ length: rows }).map((_, i) => (
           <div key={i} className="px-4 py-3 flex gap-4">
             <Skeleton className="h-4 w-24" />

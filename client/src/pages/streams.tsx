@@ -463,7 +463,7 @@ const StreamCard = memo(function StreamCard({
  "border border-ink-edge/50",
  "hover:border-accent-core/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)]",
  "transition-all duration-500",
- selectionMode && isSelected && "ring-2 ring-accent-core ring-offset-2 ring-offset-slate-950"
+ selectionMode && isSelected && "ring-2 ring-accent-core ring-offset-2 ring-offset-ink-page"
  )} 
  data-testid={`stream-card-${stream.id}`}
  onClick={handleClick}
