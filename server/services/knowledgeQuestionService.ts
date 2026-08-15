@@ -2,7 +2,7 @@ import { db } from '../db';
 import { bounties, users } from '../../shared/schema';
 import { eq } from 'drizzle-orm';
 import { modelGateway } from "../lib/modelGateway";
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
+
 
 interface KnowledgeQuestion {
   title: string;

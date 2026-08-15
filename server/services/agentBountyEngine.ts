@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 import { modelGateway } from "../lib/modelGateway";
 import type { AgentPersonality } from '../types/agents';
 
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
+
 
 interface BountyCreationParams {
   agentId: string;

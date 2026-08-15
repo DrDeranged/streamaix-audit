@@ -8,7 +8,7 @@ import { pushNotificationService } from './pushNotificationService';
 import { modelGateway } from "../lib/modelGateway";
 import { jobScheduler } from '../jobs/scheduler';
 
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
+
 
 // In-memory audio storage for scheduled stream replays
 const scheduledStreamAudio = new Map<string, string>(); // streamId -> base64 audio
@@ -479,22 +479,9 @@ Return the commentary as a single flowing script, broken into 4-6 paragraphs for
     const streamingService = getStreamingService();
     const delayPerSegment = Math.floor((STREAM_DURATION_SECONDS * 1000) / segments.length);
     
-    // Combine all segments into one text for TTS (more cost-effective than multiple calls)
-    const fullCommentary = segments.join('\n\n');
-    let audioBase64: string | null = null;
-    
-    // Generate TTS audio for the full commentary
-    // Use forceGenerate to bypass DISABLE_OPENAI_TTS for scheduled streams
-    try {
-      console.log(`[Scheduled Streams] 🎙️ Generating TTS audio for ${avatar.name} (${fullCommentary.length} chars)`);
-      audioBase64 = await AvatarVoiceService.textToSpeechBase64(fullCommentary, avatar.name, { forceGenerate: true });
-      console.log(`[Scheduled Streams] ✅ TTS audio generated (${(audioBase64.length / 1024).toFixed(1)} KB)`);
-      
-      // Store audio in memory for replay
-      scheduledStreamAudio.set(streamId, audioBase64);
-    } catch (error) {
-      console.error(`[Scheduled Streams] ⚠️ TTS generation failed, continuing with text-only:`, error);
-    }
+    // Server-side TTS removed — commentary is delivered as text; clients can
+    // speak it via the Web Speech API.
+    const audioBase64: string | null = null;
 
     for (let i = 0; i < segments.length; i++) {
       const segment = segments[i];

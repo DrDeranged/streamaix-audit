@@ -1,5 +1,5 @@
 import { modelGateway } from "../lib/modelGateway";
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
+
 
 export interface ExtractedPrediction {
   question: string;

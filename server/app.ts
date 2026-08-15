@@ -124,14 +124,6 @@ export async function initializeApp(
   } else {
     console.log(`✅ ANTHROPIC_API_KEY configured (${anthropicKey.length} characters)`);
   }
-  const openaiKey = process.env.OPENAI_API_KEY;
-  if (!openaiKey) {
-    console.error("❌ CRITICAL: OPENAI_API_KEY is NOT configured!");
-    console.error("📍 Audio features (Whisper transcription, TTS) will fail without this key.");
-    console.error("🔧 Please set OPENAI_API_KEY in your environment or .env file");
-  } else {
-    console.log(`✅ OPENAI_API_KEY configured (${openaiKey.length} characters, audio only)`);
-  }
   const duneKey = process.env.DUNE_API_KEY;
   if (duneKey) {
     console.log(`✅ DUNE_API_KEY configured (${duneKey.length} characters)`);
@@ -174,7 +166,7 @@ export async function initializeApp(
   const startupDelay = app.get("env") === "production" ? 10000 : 100;
   setTimeout(async () => {
     console.log("🔄 Starting background services...");
-    const openaiKey = process.env.OPENAI_API_KEY;
+    const aiKey = process.env.ANTHROPIC_API_KEY;
     try {
       // Helper: fire-and-forget wrapper for background services. We deliberately
       // do NOT await `starter()` because most background services run an
@@ -220,7 +212,7 @@ export async function initializeApp(
         console.log("⚠️  Newsletter scheduler disabled (RESEND_API_KEY not configured)");
       }
 
-      if (openaiKey) {
+      if (aiKey) {
         console.log("🤖 Starting autonomous AI agent service...");
         const { getAutonomousAgentService } = await import(
           "./services/autonomousAgentService"
@@ -230,10 +222,10 @@ export async function initializeApp(
           () => getAutonomousAgentService().start(),
         );
       } else {
-        console.log("⚠️  Autonomous AI agents disabled (requires OPENAI_API_KEY)");
+        console.log("⚠️  Autonomous AI agents disabled (requires ANTHROPIC_API_KEY)");
       }
 
-      if (openaiKey) {
+      if (aiKey) {
         console.log("💹 Starting AI trading bot service...");
         const { getTradingBotService } = await import(
           "./services/aiTradingBotService"
@@ -243,10 +235,10 @@ export async function initializeApp(
           () => getTradingBotService().start(),
         );
       } else {
-        console.log("⚠️  AI trading bots disabled (requires OPENAI_API_KEY)");
+        console.log("⚠️  AI trading bots disabled (requires ANTHROPIC_API_KEY)");
       }
 
-      if (openaiKey) {
+      if (aiKey) {
         console.log("\n🌐 ========== AUTONOMOUS ECOSYSTEM STARTUP ==========");
 
         const { aiMarketResolver } = await import("./services/aiMarketResolver");
@@ -302,7 +294,7 @@ export async function initializeApp(
 
         console.log("🚀 FULL AUTONOMOUS ECOSYSTEM OPERATIONAL\n");
       } else {
-        console.log("⚠️  Autonomous ecosystem disabled (requires OPENAI_API_KEY)");
+        console.log("⚠️  Autonomous ecosystem disabled (requires ANTHROPIC_API_KEY)");
       }
 
       console.log("🤖 Starting Bot Trading Simulator...");

@@ -2,10 +2,9 @@ import { db } from '../db';
 import { liveStreams, knowledgeAvatars, streamMessages } from '@shared/schema';
 import { eq, sql, desc, and, ne } from 'drizzle-orm';
 import { getStreamingService } from './streamingService';
-import { AvatarVoiceService } from './avatarVoiceService';
 import { AvatarPodcastEngine } from './avatarPodcastEngine';
 import { modelGateway } from "../lib/modelGateway";
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
+
 
 interface ActiveVoiceStream {
   streamId: string;
@@ -22,8 +21,8 @@ const STREAM_DURATION_MAX = 90;
 const STREAM_ROTATION_INTERVAL = 4 * 60 * 60 * 1000;
 const MAX_CONCURRENT_VOICE_STREAMS = 1; // Reduced to 1 for testing - saves API costs
 
-// Avatars allowed to use TTS even when PAUSE_OPENAI_API is true (for testing)
-// Uses avatar handles (lowercase, no spaces)
+// Avatars allowed to run voice-style streams (text broadcast; audio is
+// generated client-side with the Web Speech API). Uses avatar handles.
 const TTS_ENABLED_AVATARS = new Set([
   'haydenzadams',  // Hayden Adams - Uniswap founder
 ]);
@@ -44,7 +43,7 @@ export class AutonomousAvatarStreamService {
     // DISABLED BY DEFAULT: Background TTS is expensive and should only run when explicitly enabled
     // Set ENABLE_BACKGROUND_TTS=true to enable continuous avatar voice streaming
     const enableBackgroundTTS = process.env.ENABLE_BACKGROUND_TTS === 'true';
-    if (!enableBackgroundTTS || process.env.PAUSE_OPENAI_API === 'true' || process.env.DISABLE_OPENAI_TTS === 'true') {
+    if (!enableBackgroundTTS) {
       console.log('🎙️ [Avatar Voice] ⏸️ Background TTS disabled - voice streaming not started');
       console.log('   (Set ENABLE_BACKGROUND_TTS=true to enable continuous avatar voice streams)');
       return;
@@ -110,11 +109,6 @@ export class AutonomousAvatarStreamService {
   }
 
   private async startVoiceStream(avatar: any): Promise<string | null> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
-      console.log(`[Avatar Voice] ⏸️ OpenAI API paused - skipping voice stream for ${avatar.name}`);
-      return null;
-    }
-
     try {
       console.log(`[Avatar Voice] 🎙️ Starting voice stream for ${avatar.name}`);
 

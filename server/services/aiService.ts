@@ -1,99 +1,25 @@
-import OpenAI from 'openai';
-import { recordWhisperSpend } from './apiCostTracker';
-import { enforceBudget, modelGateway } from '../lib/modelGateway';
+import { modelGateway } from '../lib/modelGateway';
 import { ContentExtractor } from './contentExtractor';
-import { exec } from 'child_process';
-import { promises as fs, createReadStream, statSync } from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
+import { extractCaptionTranscript, NoCaptionsError } from './captionExtractor';
 
 export class AIService {
-  private static client: OpenAI | null = null;
-
-  private static getClient(): OpenAI {
-    if (!this.client) {
-      const apiKey = process.env.OPENAI_API_KEY;
-      if (!apiKey) {
-        throw new Error('OPENAI_API_KEY is required for AI processing');
-      }
-      this.client = new OpenAI({ apiKey });
-    }
-    return this.client;
-  }
-
   /**
-   * Extract audio from video URL and transcribe it
+   * Get a transcript for a video URL from its captions (human subs preferred,
+   * auto-captions fallback). Zero-cost replacement for the old Whisper path —
+   * same return shape, so everything downstream is unchanged.
+   *
+   * Throws NoCaptionsError (statusCode 422) with a user-facing message when
+   * the video has no captions in any handled language.
    */
   static async transcribeFromURL(videoUrl: string): Promise<{
     transcript: string;
     duration: number;
     language: string;
   }> {
-    if (process.env.PAUSE_OPENAI_API === 'true') {
-      throw new Error('OpenAI API is paused - transcription unavailable');
-    }
-    
-    try {
-      console.log('🎬 Extracting audio from URL:', videoUrl);
-      
-      // Step 1: Extract audio using ContentExtractor
-      const extractedContent = await ContentExtractor.extractContent(videoUrl);
-      console.log('✅ Audio extracted:', extractedContent.audioPath);
-      
-      // Step 2: Transcribe audio using OpenAI Whisper
-      const transcript = await this.transcribeAudioFile(extractedContent.audioPath);
-      console.log('✅ Transcription complete, length:', transcript.text.length, 'chars');
-      
-      // Step 3: Clean up temporary audio file
-      try {
-        await fs.unlink(extractedContent.audioPath);
-        console.log('🗑️ Cleaned up temp file:', extractedContent.audioPath);
-      } catch (cleanupError) {
-        console.warn('Failed to cleanup temp file:', cleanupError);
-      }
-      
-      return {
-        transcript: transcript.text,
-        duration: extractedContent.duration,
-        language: transcript.language || 'en'
-      };
-    } catch (error) {
-      console.error('❌ Transcription failed:', error);
-      throw new Error(`Transcription failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
-  /**
-   * Transcribe audio file using OpenAI Whisper
-   */
-  static async transcribeAudioFile(audioPath: string): Promise<{
-    text: string;
-    language: string;
-  }> {
-    const client = this.getClient();
-    
-    console.log('🎙️ Transcribing audio file with Whisper...');
-    
-    try {
-      const audioStream = createReadStream(audioPath);
-      
-      await enforceBudget('user', 'ai-service');
-      const transcription = await client.audio.transcriptions.create({
-        file: audioStream,
-        model: 'whisper-1',
-        language: 'en', // Auto-detect or specify language
-        response_format: 'verbose_json'
-      });
-      
-      recordWhisperSpend({ bytes: statSync(audioPath).size });
-      return {
-        text: transcription.text,
-        language: transcription.language || 'en'
-      };
-    } catch (error) {
-      console.error('Whisper API error:', error);
-      throw new Error(`Whisper transcription failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+    console.log('🎬 Extracting captions from URL:', videoUrl);
+    const result = await extractCaptionTranscript(videoUrl);
+    console.log('✅ Caption transcript ready, length:', result.transcript.length, 'chars');
+    return result;
   }
 
   /**
@@ -221,74 +147,6 @@ export class AIService {
   }
 
   /**
-   * Process content from URL (main pipeline)
-   */
-  /**
-   * Extract audio from video URL using yt-dlp
-   */
-  private static async extractAudioFromVideo(url: string): Promise<{ audioPath: string; title: string; duration: number }> {
-    try {
-      // Create temporary directory for audio files
-      const tempDir = join(tmpdir(), 'streamaix-audio');
-      await fs.mkdir(tempDir, { recursive: true });
-      
-      const outputPath = join(tempDir, `audio_${Date.now()}.mp3`);
-      
-      // Use yt-dlp to extract audio and get metadata
-      const command = `yt-dlp -x --audio-format mp3 --audio-quality 192K -o "${outputPath}" --print title --print duration "${url}"`;
-      
-      const result = await new Promise((resolve, reject) => {
-        exec(command, { timeout: 300000 }, (error: any, stdout: string, stderr: string) => {
-          if (error) {
-            console.error('yt-dlp error:', error);
-            reject(new Error(`Failed to extract audio: ${error.message}`));
-            return;
-          }
-          
-          const lines = stdout.trim().split('\n');
-          const title = lines[lines.length - 2] || 'Unknown Title';
-          const duration = parseFloat(lines[lines.length - 1]) || 0;
-          
-          resolve({ audioPath: outputPath, title, duration });
-        });
-      });
-      
-      return result as { audioPath: string; title: string; duration: number };
-    } catch (error) {
-      console.error('Audio extraction failed:', error);
-      throw new Error(`Audio extraction failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
-  /**
-   * Transcribe audio file using OpenAI Whisper (using ES modules)
-   */
-  private static async transcribeAudio(audioPath: string): Promise<{ text: string; segments?: any[] }> {
-    const client = this.getClient();
-    
-    try {
-      const audioFile = createReadStream(audioPath);
-      
-      await enforceBudget('user', 'ai-service');
-      const transcription = await client.audio.transcriptions.create({
-        file: audioFile,
-        model: 'whisper-1',
-        response_format: 'verbose_json',
-        timestamp_granularities: ['segment'],
-      });
-      recordWhisperSpend({ bytes: statSync(audioPath).size });
-      
-      return {
-        text: transcription.text,
-        segments: (transcription as any).segments || []
-      };
-    } catch (error) {
-      console.error('Transcription failed:', error);
-      throw new Error(`Transcription failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
-  /**
    * Process content from URL (main pipeline with real AI integration)
    */
   static async processContent(url: string, options: {
@@ -312,7 +170,7 @@ export class AIService {
       const extractedContent = await ContentExtractor.extractContent(url);
       console.log(`Audio extracted: ${extractedContent.title} (${extractedContent.duration}s)`);
       
-      // Step 2: Transcribe the audio using OpenAI Whisper
+      // Step 2: Build a transcript placeholder
       // For now, use mock transcription since the audio file handling needs proper file system integration
       const transcript = `This is a comprehensive summary of the video content: "${extractedContent.title}". 
       

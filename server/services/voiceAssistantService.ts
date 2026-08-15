@@ -1,11 +1,10 @@
-import { openai as lazyOpenai } from "../lib/openaiClient";
-import { recordTtsSpend, recordWhisperSpend } from './apiCostTracker';
-import { enforceBudget, modelGateway } from "../lib/modelGateway";
-const openai = lazyOpenai;
+import { modelGateway } from "../lib/modelGateway";
 import { z } from 'zod';
 import { marketDataService, type CryptoQuote } from './marketDataService';
 
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
+// Server-side speech (Whisper transcription + TTS) has been removed.
+// Speech synthesis now happens client-side via the Web Speech API
+// (SpeakButton component); audio uploads are no longer supported.
 
 export type VoiceIntentType =
   | 'navigate'
@@ -122,19 +121,6 @@ RULES
 }
 
 export class VoiceAssistantService {
-  async transcribe(audioBuffer: Buffer, mimeType: string): Promise<string> {
-    const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('ogg') ? 'ogg' : mimeType.includes('wav') ? 'wav' : 'webm';
-    const file = new File([audioBuffer], `voice.${ext}`, { type: mimeType || 'audio/webm' });
-    await enforceBudget('user', 'voice-assistant');
-    const transcription = await openai.audio.transcriptions.create({
-      file,
-      model: 'whisper-1',
-      language: 'en',
-    });
-    recordWhisperSpend({ bytes: audioBuffer.length });
-    return (transcription.text || '').trim();
-  }
-
   async respond(
     transcript: string,
     context: VoiceAssistantContext,
@@ -163,55 +149,52 @@ export class VoiceAssistantService {
     };
   }
 
-  async synthesize(text: string): Promise<Buffer> {
-    const safeText = text.slice(0, 600);
-    await enforceBudget('user', 'voice-assistant');
-    const response = await openai.audio.speech.create({
-      model: 'tts-1',
-      voice: 'nova',
-      input: safeText,
-      speed: 1.05,
-      response_format: 'mp3',
-    });
-    recordTtsSpend(safeText.length);
-    const arrayBuffer = await response.arrayBuffer();
-    return Buffer.from(arrayBuffer);
+  /**
+   * Legacy audio-upload entry point. Server-side transcription was removed
+   * along with OpenAI Whisper, so audio uploads get a graceful, explicit
+   * "not supported" response — never a crash, never an invented transcript.
+   */
+  async run(
+    _audioBuffer: Buffer,
+    _mimeType: string,
+    _context: VoiceAssistantContext,
+  ): Promise<VoiceAssistantResponse> {
+    return {
+      transcript: '',
+      spokenResponse: 'Audio transcription is not supported. Please type your question instead.',
+      displayResponse:
+        'Audio transcription is not supported on the server anymore. Please type your question instead.',
+      intent: { type: 'none' },
+      intentResult: null,
+      audioBase64: null,
+      audioMimeType: null,
+      modelUsed: 'none',
+    };
   }
 
-  async run(
-    audioBuffer: Buffer,
-    mimeType: string,
+  /**
+   * Text entry point: answer a typed/transcribed question. Responses are
+   * text-only; the client speaks them with the Web Speech API if desired.
+   */
+  async runText(
+    transcript: string,
     context: VoiceAssistantContext,
   ): Promise<VoiceAssistantResponse> {
-    if (process.env.PAUSE_OPENAI_API === 'true' || !process.env.OPENAI_API_KEY) {
-      return {
-        transcript: '',
-        spokenResponse: 'The voice assistant is paused right now.',
-        displayResponse:
-          'The voice assistant is temporarily paused. Please use the text chat instead.',
-        intent: { type: 'none' },
-        intentResult: null,
-        audioBase64: null,
-        audioMimeType: null,
-        modelUsed: 'paused',
-      };
-    }
-
-    const transcript = await this.transcribe(audioBuffer, mimeType);
-    if (!transcript) {
+    const trimmed = (transcript || '').trim();
+    if (!trimmed) {
       return {
         transcript: '',
         spokenResponse: "I didn't catch that. Try again.",
-        displayResponse: "I couldn't hear anything. Please try recording again.",
+        displayResponse: "I didn't receive a question. Please try again.",
         intent: { type: 'none' },
         intentResult: null,
         audioBase64: null,
         audioMimeType: null,
-        modelUsed: 'whisper-1',
+        modelUsed: 'none',
       };
     }
 
-    const initial = await this.respond(transcript, context);
+    const initial = await this.respond(trimmed, context);
     const executed = await this.executeIntent(initial.intent, context, transcript).catch(
       (err): { intentResult: VoiceIntentResult; spokenResponse?: string; displayResponse?: string } => {
         console.error('[VoiceAssistant] intent execution failed', err);
@@ -221,17 +204,16 @@ export class VoiceAssistantService {
 
     const spokenResponse = executed.spokenResponse ?? initial.spokenResponse;
     const displayResponse = executed.displayResponse ?? initial.displayResponse;
-    const audio = await this.synthesize(spokenResponse).catch(() => null);
 
     return {
-      transcript,
+      transcript: trimmed,
       spokenResponse,
       displayResponse,
       intent: initial.intent,
       intentResult: executed.intentResult,
-      audioBase64: audio ? audio.toString('base64') : null,
-      audioMimeType: audio ? 'audio/mpeg' : null,
-      modelUsed: 'whisper-1 + gpt-4o-mini + tts-1',
+      audioBase64: null,
+      audioMimeType: null,
+      modelUsed: 'anthropic-fast',
     };
   }
 

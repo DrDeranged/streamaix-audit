@@ -1,7 +1,5 @@
 import { DatabaseStorage } from '../storage';
-import { openai as lazyOpenai, hasOpenAIKey } from "../lib/openaiClient";
 import { modelGateway } from "../lib/modelGateway";
-const openai = lazyOpenai;
 interface VideoMetadata {
   title: string;
   description: string;
@@ -36,11 +34,8 @@ interface AIProcessingResult {
 export class CleanContentProcessor {
   private static instance: CleanContentProcessor;
   private storage: DatabaseStorage;
-  private openai: OpenAI | null;
-
   constructor() {
     this.storage = new DatabaseStorage();
-    this.openai = hasOpenAIKey() ? lazyOpenai : null;
   }
 
   static getInstance(): CleanContentProcessor {
@@ -57,10 +52,6 @@ export class CleanContentProcessor {
     
     console.log(`🚀 Starting CLEAN processing for URL: ${url}`);
     
-    if (!this.openai) {
-      throw new Error('OpenAI API key not configured - real processing unavailable');
-    }
-
     // Create initial summary record
     const summary = await this.storage.createSummary({
       originalUrl: url,
@@ -200,10 +191,6 @@ export class CleanContentProcessor {
   }
 
   private async generateAIAnalysis(metadata: VideoMetadata): Promise<AIProcessingResult> {
-    if (!this.openai) {
-      throw new Error('OpenAI not configured');
-    }
-
     const prompt = `
 Analyze this video content and provide comprehensive analysis:
 

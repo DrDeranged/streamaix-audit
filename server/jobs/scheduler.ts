@@ -67,6 +67,84 @@ interface JobState {
   cancelled: boolean;
 }
 
+// ---------------------------------------------------------------------------
+// Cron slot math (5-field expressions: min hour dom month dow).
+// No cron-parser dependency: we scan back minute-by-minute (max 8 days) for
+// the most recent matching slot. Exported for tests.
+// ---------------------------------------------------------------------------
+
+function parseCronField(field: string, min: number, max: number): Set<number> {
+  const out = new Set<number>();
+  for (const part of field.split(',')) {
+    const [rangePart, stepPart] = part.split('/');
+    const step = stepPart ? parseInt(stepPart, 10) : 1;
+    let lo = min;
+    let hi = max;
+    if (rangePart !== '*') {
+      if (rangePart.includes('-')) {
+        const [a, b] = rangePart.split('-').map((n) => parseInt(n, 10));
+        lo = a;
+        hi = b;
+      } else {
+        lo = hi = parseInt(rangePart, 10);
+        if (stepPart) hi = max; // "N/step" means start at N
+      }
+    }
+    for (let v = lo; v <= hi; v += step) out.add(v);
+  }
+  return out;
+}
+
+/** Date parts of `date` in `timezone` (defaults to server local). */
+function datePartsInZone(date: Date, timezone?: string): { minute: number; hour: number; dom: number; month: number; dow: number } {
+  if (!timezone) {
+    return { minute: date.getMinutes(), hour: date.getHours(), dom: date.getDate(), month: date.getMonth() + 1, dow: date.getDay() };
+  }
+  const fmt = new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone, minute: 'numeric', hour: 'numeric', hourCycle: 'h23',
+    day: 'numeric', month: 'numeric', weekday: 'short',
+  });
+  const parts: Record<string, string> = {};
+  for (const p of fmt.formatToParts(date)) parts[p.type] = p.value;
+  const dowMap: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+  return {
+    minute: parseInt(parts.minute, 10),
+    hour: parseInt(parts.hour, 10) % 24,
+    dom: parseInt(parts.day, 10),
+    month: parseInt(parts.month, 10),
+    dow: dowMap[parts.weekday] ?? 0,
+  };
+}
+
+/** Does `date` (interpreted in `timezone`) match the 5-field cron expression? */
+export function cronMatches(expression: string, date: Date, timezone?: string): boolean {
+  const fields = expression.trim().split(/\s+/);
+  if (fields.length !== 5) return false;
+  const [minF, hourF, domF, monF, dowF] = fields;
+  const p = datePartsInZone(date, timezone);
+  const minutes = parseCronField(minF, 0, 59);
+  const hours = parseCronField(hourF, 0, 23);
+  const doms = parseCronField(domF, 1, 31);
+  const months = parseCronField(monF, 1, 12);
+  const dows = new Set(Array.from(parseCronField(dowF, 0, 7)).map((d) => d % 7));
+  return minutes.has(p.minute) && hours.has(p.hour) && doms.has(p.dom) && months.has(p.month) && dows.has(p.dow);
+}
+
+/**
+ * Most recent scheduled slot strictly at-or-before `from` (exclusive of the
+ * current minute so an in-window boot doesn't self-trigger). Scans back up
+ * to 8 days; returns null if no slot found (e.g. rare monthly schedules).
+ */
+export function previousCronSlot(expression: string, from: Date, timezone?: string): Date | null {
+  const cursor = new Date(from.getTime());
+  cursor.setSeconds(0, 0);
+  for (let i = 1; i <= 8 * 24 * 60; i++) {
+    const candidate = new Date(cursor.getTime() - i * 60_000);
+    if (cronMatches(expression, candidate, timezone)) return candidate;
+  }
+  return null;
+}
+
 export class JobScheduler {
   private jobs = new Map<string, JobState>();
 
@@ -149,8 +227,58 @@ export class JobScheduler {
       opts.timezone ? { timezone: opts.timezone } : undefined,
     );
 
+    this.startCatchUpTimers();
+
     if (opts.runOnStart && opts.freshForMs) {
       void this.maybeRunOnBoot(job, opts.freshForMs, 0);
+    }
+  }
+
+  // ---------------------------------------------------------- cron catch-up
+
+  private catchUpTimersStarted = false;
+
+  /**
+   * Boot + hourly catch-up for cron jobs: if a job's last successful run is
+   * older than its most recent scheduled slot, run it once now. Guards
+   * against slots missed while the process was down. Job functions with
+   * side effects that must not repeat (e.g. newsletter sends) must be
+   * idempotent per-slot themselves.
+   */
+  private startCatchUpTimers(): void {
+    if (this.catchUpTimersStarted || process.env.NODE_ENV === 'test') return;
+    this.catchUpTimersStarted = true;
+    const boot = setTimeout(() => void this.runCatchUpCheck(), 90_000);
+    boot.unref?.();
+    const hourly = setInterval(() => void this.runCatchUpCheck(), 60 * 60 * 1000);
+    hourly.unref?.();
+  }
+
+  /** Public for tests and manual triggering. */
+  async runCatchUpCheck(now: Date = new Date()): Promise<void> {
+    for (const job of Array.from(this.jobs.values())) {
+      if (job.kind !== 'cron' || job.cancelled || job.running) continue;
+      try {
+        const slot = previousCronSlot(job.cronExpression!, now, job.opts.timezone);
+        if (!slot) continue;
+        // Hydrate persisted state so a fresh boot sees the last run.
+        await this.isStale(job, Number.MAX_SAFE_INTEGER).catch(() => undefined);
+        const lastSuccess =
+          job.lastStatus === 'success' && job.lastFinishedAt
+            ? new Date(job.lastFinishedAt).getTime()
+            : job.lastStartedAt
+              ? new Date(job.lastStartedAt).getTime()
+              : 0;
+        if (lastSuccess < slot.getTime()) {
+          console.log(
+            `[Scheduler] [catch-up] "${job.name}" missed its slot at ${slot.toISOString()} ` +
+              `(last run: ${lastSuccess ? new Date(lastSuccess).toISOString() : 'never'}) — running once now`,
+          );
+          await this.executeJob(job);
+        }
+      } catch (err) {
+        console.warn(`[Scheduler] catch-up check failed for "${job.name}":`, (err as Error).message);
+      }
     }
   }
 

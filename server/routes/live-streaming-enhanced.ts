@@ -237,46 +237,23 @@ export async function registerLiveStreamingEnhancedRoutes(app: Express): Promise
     res.json({ success });
   }));
 
-  // Test TTS with minimal cost (short phrases only)
-  app.post("/api/streams/test-tts", authenticateToken, requireAdmin, strictLimit, validateBody(testTtsSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { AvatarVoiceService } = await import('../services/avatarVoiceService');
-    const { avatarName = 'Vitalik Buterin', maxSegments = 3 } = req.body;
-    
-    console.log('[API] 🧪 Running TTS test mode...');
-    const result = await AvatarVoiceService.runTestMode(avatarName, Math.min(maxSegments, 5));
-    
-    res.json({ 
-      success: result.success, 
-      segments: result.segments,
-      totalCost: result.totalCost,
-      message: result.success 
-        ? `Test complete! Generated ${result.segments.length} audio segments.`
-        : 'Test failed - check server logs'
+  // Server-side TTS removed — these test endpoints are gone.
+  app.post("/api/streams/test-tts", authenticateToken, requireAdmin, strictLimit, validateBody(testTtsSchema), asyncHandler(async (_req: AuthRequest, res: Response) => {
+    res.status(410).json({
+      success: false,
+      error: 'Server-side TTS has been removed. Avatar speech is text-only; audio is generated client-side via the Web Speech API.',
     });
   }));
 
-  // Test single TTS phrase with audio response
-  app.post("/api/streams/test-tts-audio", authenticateToken, requireAdmin, strictLimit, validateBody(testTtsAudioSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { AvatarVoiceService } = await import('../services/avatarVoiceService');
-    const { avatarName = 'Vitalik Buterin', streamId = 'test' } = req.body;
-    
-    console.log('[API] 🎤 Running single TTS audio test...');
-    const result = await AvatarVoiceService.testStreamBroadcast(streamId, avatarName);
-    
-    res.json({ 
-      success: result.success, 
-      text: result.text,
-      audioBase64: result.audioBase64,
-      audioSize: result.audioBase64.length,
-      message: result.success 
-        ? 'Audio generated successfully! Base64 audio included in response.'
-        : 'Audio generation failed - check server logs'
+  app.post("/api/streams/test-tts-audio", authenticateToken, requireAdmin, strictLimit, validateBody(testTtsAudioSchema), asyncHandler(async (_req: AuthRequest, res: Response) => {
+    res.status(410).json({
+      success: false,
+      error: 'Server-side TTS has been removed. Avatar speech is text-only; audio is generated client-side via the Web Speech API.',
     });
   }));
 
   // Start a controlled live test stream for mobile testing (5 minutes, 3-4 segments)
   app.post("/api/streams/start-test-stream", authenticateToken, requireAdmin, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { AvatarVoiceService } = await import('../services/avatarVoiceService');
     const { getStreamingService } = await import('../services/streamingService');
     const { avatarName = 'Vitalik Buterin', durationMinutes = 5, maxSegments = 4 } = req.body;
 
@@ -358,8 +335,15 @@ export async function registerLiveStreamingEnhancedRoutes(app: Express): Promise
         await streamingService.createAvatarStreamSession(stream.id);
       }
 
-      // Generate and broadcast test segments in background
-      const testPhrases = AvatarVoiceService.TEST_PHRASES;
+      // Generate and broadcast test segments in background (text-only; the
+      // client speaks them via the Web Speech API).
+      const testPhrases = [
+        "Bitcoin looks bullish today, traders.",
+        "Ethereum breaking key resistance levels.",
+        "Markets showing strong momentum here.",
+        "Watch this support zone closely.",
+        "Big moves coming, stay alert.",
+      ];
       let segmentCount = 0;
       const segmentInterval = (durationMinutes * 60 * 1000) / maxSegments;
 
@@ -375,17 +359,15 @@ export async function registerLiveStreamingEnhancedRoutes(app: Express): Promise
 
         try {
           const phrase = testPhrases[segmentCount % testPhrases.length];
-          console.log(`[TEST STREAM] 🎤 Generating segment ${segmentCount + 1}/${maxSegments}: "${phrase}"`);
+          console.log(`[TEST STREAM] 🎤 Broadcasting segment ${segmentCount + 1}/${maxSegments}: "${phrase}"`);
 
-          const result = await AvatarVoiceService.testStreamBroadcast(stream.id, avatarName);
-          
-          if (result.success && streamingService) {
-            // Broadcast audio to connected clients
+          if (streamingService) {
+            // Broadcast text to connected clients (spoken client-side)
             streamingService.broadcastToStream(stream.id, {
               type: 'avatar_audio',
               avatarName,
-              text: result.text,
-              audioBase64: result.audioBase64,
+              text: phrase,
+              audioBase64: '',
               timestamp: new Date().toISOString(),
               segmentNumber: segmentCount + 1,
             });
@@ -560,7 +542,7 @@ export async function registerLiveStreamingEnhancedRoutes(app: Express): Promise
       res.json({ success: true, text: transcription });
     } catch (error: any) {
       console.error('[Conversation API] Transcription error:', error);
-      res.status(500).json({ success: false, error: error.message });
+      res.status(error?.statusCode || 500).json({ success: false, error: error.message });
     }
   }));
 

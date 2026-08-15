@@ -1,4 +1,4 @@
-import type { Express, Response } from "express";
+import type { Express, Response, Request, NextFunction } from "express";
 import { authenticateToken, type AuthRequest } from "../auth";
 import { requireAdmin, asyncHandler } from "./_shared";
 import { strictLimit, validateBody } from "../middleware/security";
@@ -10,16 +10,27 @@ import { bridgeService, bridgeEnabled, BridgeDisabledError } from "../services/b
  * Approval is an explicit human admin action, additionally gated by
  * ONCHAIN_WRITES_ENABLED. See replit.md "TOKEN BRIDGE" section.
  */
+/**
+ * Flag gate as middleware, mounted BEFORE validateBody so the dark route
+ * reveals nothing about its payload shape: while BRIDGE_ENABLED is off every
+ * request gets 403 — never a Zod 400.
+ */
+function requireBridgeEnabled(_req: Request, res: Response, next: NextFunction): void {
+  if (!bridgeEnabled()) {
+    res.status(403).json({ error: "bridge not yet enabled" });
+    return;
+  }
+  next();
+}
+
 export async function registerBridgeRoutes(app: Express): Promise<void> {
   app.post(
     "/api/bridge/withdraw",
     authenticateToken,
     strictLimit,
+    requireBridgeEnabled,
     validateBody(bridgeWithdrawSchema),
     asyncHandler(async (req: AuthRequest, res: Response) => {
-      if (!bridgeEnabled()) {
-        return res.status(403).json({ error: "bridge not yet enabled" });
-      }
       try {
         const request = await bridgeService.requestWithdrawal(req.user!.id, req.body.points);
         res.json({ success: true, request });

@@ -3,7 +3,7 @@ import { db } from "../db";
 import { predictionMarkets, users, type PredictionMarket, type User } from "@shared/schema";
 import { eq, and, sql, desc } from "drizzle-orm";
 
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
+
 
 export interface MarketAnalysis {
   shouldTrade: boolean;

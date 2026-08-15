@@ -4,7 +4,7 @@ import { predictionMarkets, users } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import crypto from 'crypto';
 
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
+
 
 interface NewsArticle {
   id: string;

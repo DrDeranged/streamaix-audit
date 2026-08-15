@@ -4,7 +4,7 @@ import { eq, sql, desc } from 'drizzle-orm';
 import { getStreamingService } from './streamingService';
 import { notificationDataValidator } from './notificationDataValidator';
 import { modelGateway } from "../lib/modelGateway";
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
+
 
 interface AvatarStreamConfig {
   avatarId: string;

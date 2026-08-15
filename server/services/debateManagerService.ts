@@ -220,14 +220,9 @@ export class DebateManagerService {
         const introText = await this.generateIntroductionText(avatar, debate.topic);
         if (!introText) continue;
 
-        let audioBase64: string | undefined;
-        if (debate.enableVoice && process.env.PAUSE_OPENAI_API !== 'true') {
-          try {
-            audioBase64 = await AvatarVoiceService.textToSpeechBase64(introText, avatar.name);
-          } catch (audioError) {
-            console.warn(`[DebateManager] TTS failed for intro ${avatar.name}:`, audioError);
-          }
-        }
+        // Server-side TTS removed — exchanges are text-only; clients speak
+        // them via the Web Speech API.
+        const audioBase64: string | undefined = undefined;
 
         const introExchange: DebateExchange = {
           speakerId: avatar.id,
@@ -319,14 +314,8 @@ Keep it to 1-2 short sentences. Mention why you're excited about today's topic.`
         return;
       }
 
-      let audioBase64: string | undefined;
-      if (debate.enableVoice && process.env.PAUSE_OPENAI_API !== 'true') {
-        try {
-          audioBase64 = await AvatarVoiceService.textToSpeechBase64(response, currentAvatar.name);
-        } catch (audioError) {
-          console.warn(`[DebateManager] TTS failed for ${currentAvatar.name}:`, audioError);
-        }
-      }
+      // Server-side TTS removed — exchanges are text-only.
+      const audioBase64: string | undefined = undefined;
 
       const exchange: DebateExchange = {
         speakerId: currentAvatar.id,

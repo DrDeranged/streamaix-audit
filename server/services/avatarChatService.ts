@@ -3,7 +3,7 @@ import { db } from '../db';
 import { knowledgeAvatars, avatarConversations, type KnowledgeAvatar, type AvatarConversation } from '@shared/schema';
 import { eq, and } from 'drizzle-orm';
 
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
+
 
 interface ChatMessage {
   role: 'user' | 'assistant';

@@ -66,7 +66,7 @@ import { CrossMarketSignalService } from "./services/crossMarketSignalService";
 import { VolatilityForecastingService } from "./services/volatilityForecastingService";
 import { marketEventModelingService } from "./services/marketEventModelingService";
 import { patternRecognitionService } from "./services/patternRecognitionService";
-import { RecommendationEngine } from "./recommendation-engine";
+import { getRecommendationEngine } from "./recommendation-engine";
 import { cryptoIntelligenceService } from "./services/cryptoIntelligenceService";
 import { macroDataService } from "./services/macroDataService";
 import { advancedMarketIntelService } from "./services/advancedMarketIntelService";
@@ -88,7 +88,7 @@ const marketDataService = MarketDataService.getInstance();
 const correlationAnalysisService = CorrelationAnalysisService.getInstance();
 const riskAssessmentService = RiskAssessmentService.getInstance();
 const predictiveAnalyticsService = new PredictiveAnalyticsService(storage as DatabaseStorage);
-const recommendationEngine = new RecommendationEngine(storage as DatabaseStorage);
+const recommendationEngine = getRecommendationEngine();
 import session from "express-session";
 import { 
   loginSchema, 

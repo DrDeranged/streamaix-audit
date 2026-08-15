@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
-import { Mic, MicOff, Loader2, X, Volume2, TrendingUp, TrendingDown, Wallet, Trophy, AlertTriangle } from "lucide-react";
+import { Mic, MicOff, Loader2, X, Volume2, TrendingUp, TrendingDown, Wallet, Trophy, AlertTriangle, Send } from "lucide-react";
 import Surface from "@/components/ds/Surface";
 import StatValue from "@/components/ds/StatValue";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 
-type Status = "idle" | "recording" | "processing" | "speaking" | "error";
+type Status = "idle" | "listening" | "processing" | "speaking" | "error";
 
 type IntentResult =
   | { kind: "market"; symbol: string; price: number; percentChange24h: number; source: "live" | "unavailable" }
@@ -23,8 +23,6 @@ interface VoiceResult {
   displayResponse: string;
   intent: { type: string; path?: string; symbol?: string; bountyId?: string };
   intentResult: IntentResult;
-  audioBase64: string | null;
-  audioMimeType: string | null;
 }
 
 function IntentResultCard({ result }: { result: IntentResult }) {
@@ -105,8 +103,28 @@ function IntentResultCard({ result }: { result: IntentResult }) {
   return null;
 }
 
-const MIN_RECORDING_MS = 350;
-const MAX_RECORDING_MS = 12_000;
+// Browser speech recognition (Web Speech API). Server-side transcription was
+// removed with OpenAI Whisper — speech-to-text now happens in the browser,
+// and users can always type instead.
+type SpeechRecognitionLike = {
+  lang: string;
+  interimResults: boolean;
+  maxAlternatives: number;
+  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+  onerror: ((event: { error?: string }) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+};
+
+function getSpeechRecognition(): (new () => SpeechRecognitionLike) | null {
+  const w = window as unknown as {
+    SpeechRecognition?: new () => SpeechRecognitionLike;
+    webkitSpeechRecognition?: new () => SpeechRecognitionLike;
+  };
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
+}
 
 export function VoiceAssistant() {
   const { isAuthenticated } = useAuth();
@@ -117,152 +135,129 @@ export function VoiceAssistant() {
   const [open, setOpen] = useState(false);
   const [result, setResult] = useState<VoiceResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [textInput, setTextInput] = useState("");
 
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const audioElRef = useRef<HTMLAudioElement | null>(null);
-  const recordStartRef = useRef<number>(0);
-  const autoStopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const gotResultRef = useRef(false);
+
+  const speechSynthesisSupported = typeof window !== "undefined" && "speechSynthesis" in window;
+  const speechRecognitionSupported = typeof window !== "undefined" && getSpeechRecognition() !== null;
 
   useEffect(() => {
     return () => {
-      cleanupStream();
-      if (autoStopTimerRef.current) clearTimeout(autoStopTimerRef.current);
-      if (audioElRef.current) {
-        audioElRef.current.pause();
-        audioElRef.current = null;
-      }
+      recognitionRef.current?.abort();
+      if (speechSynthesisSupported) window.speechSynthesis.cancel();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function cleanupStream() {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((t) => t.stop());
-      streamRef.current = null;
-    }
-  }
-
-  async function blobToBase64(blob: Blob): Promise<string> {
-    const buf = await blob.arrayBuffer();
-    let binary = "";
-    const bytes = new Uint8Array(buf);
-    const chunk = 0x8000;
-    for (let i = 0; i < bytes.length; i += chunk) {
-      const slice = bytes.subarray(i, i + chunk);
-      for (let j = 0; j < slice.length; j++) binary += String.fromCharCode(slice[j]);
-    }
-    return btoa(binary);
-  }
-
-  async function startRecording() {
+  function startListening() {
     if (!isAuthenticated) {
-      toast({ title: "Sign in required", description: "Log in to use the voice assistant.", variant: "destructive" });
+      toast({ title: "Sign in required", description: "Log in to use the assistant.", variant: "destructive" });
       return;
     }
-    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
-      toast({ title: "Voice not supported", description: "Your browser doesn't support voice input.", variant: "destructive" });
+    setErrorMsg(null);
+    setOpen(true);
+    const Ctor = getSpeechRecognition();
+    if (!Ctor) {
+      // No browser speech support: fall back to the text box.
+      setStatus("idle");
+      setErrorMsg("Voice input isn't supported in this browser — type your question below.");
       return;
     }
     try {
-      setErrorMsg(null);
-      setOpen(true);
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-      const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-        ? "audio/webm;codecs=opus"
-        : MediaRecorder.isTypeSupported("audio/mp4")
-        ? "audio/mp4"
-        : "";
-      const mr = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
-      mediaRecorderRef.current = mr;
-      chunksRef.current = [];
-      recordStartRef.current = Date.now();
-
-      mr.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) chunksRef.current.push(e.data);
-      };
-      mr.onstop = () => {
-        cleanupStream();
-        const elapsed = Date.now() - recordStartRef.current;
-        if (elapsed < MIN_RECORDING_MS || chunksRef.current.length === 0) {
+      const recognition = new Ctor();
+      recognition.lang = "en-US";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      gotResultRef.current = false;
+      recognition.onresult = (event) => {
+        const transcript = event.results[0]?.[0]?.transcript?.trim();
+        gotResultRef.current = true;
+        if (transcript) {
+          void sendTranscript(transcript);
+        } else {
           setStatus("idle");
-          setErrorMsg("Hold a bit longer and try again.");
-          return;
+          setErrorMsg("Didn't catch that — try again or type your question.");
         }
-        const blob = new Blob(chunksRef.current, { type: mr.mimeType || "audio/webm" });
-        void sendAudio(blob, mr.mimeType || "audio/webm");
       };
-      mr.start();
-      setStatus("recording");
-      autoStopTimerRef.current = setTimeout(() => {
-        if (mediaRecorderRef.current?.state === "recording") {
-          mediaRecorderRef.current.stop();
+      recognition.onerror = (event) => {
+        gotResultRef.current = true;
+        setStatus("idle");
+        setErrorMsg(
+          event.error === "not-allowed"
+            ? "Microphone access denied. Enable mic permission or type your question."
+            : "Didn't catch that — try again or type your question.",
+        );
+      };
+      recognition.onend = () => {
+        if (!gotResultRef.current) {
+          setStatus("idle");
+          setErrorMsg("Didn't catch that — try again or type your question.");
         }
-      }, MAX_RECORDING_MS);
+      };
+      recognitionRef.current = recognition;
+      recognition.start();
+      setStatus("listening");
     } catch (err) {
-      console.error("[VoiceAssistant] mic error", err);
+      console.error("[VoiceAssistant] speech recognition error", err);
       setStatus("error");
-      setErrorMsg("Microphone access denied. Enable mic permission and retry.");
+      setErrorMsg("Voice input failed to start — type your question instead.");
     }
   }
 
-  function stopRecording() {
-    if (autoStopTimerRef.current) {
-      clearTimeout(autoStopTimerRef.current);
-      autoStopTimerRef.current = null;
-    }
-    const mr = mediaRecorderRef.current;
-    if (mr && mr.state === "recording") {
-      mr.stop();
-    }
+  function stopListening() {
+    recognitionRef.current?.stop();
   }
 
-  async function sendAudio(blob: Blob, mimeType: string) {
+  async function sendTranscript(transcript: string) {
     setStatus("processing");
     try {
-      const audioBase64 = await blobToBase64(blob);
-      const data: { success: boolean } & VoiceResult = await apiRequest("/api/assistant/voice", {
+      const data: { success: boolean } & VoiceResult = await apiRequest("/api/assistant/text", {
         method: "POST",
         body: JSON.stringify({
-          audioBase64,
-          mimeType,
+          transcript,
           currentPath: window.location.pathname,
         }),
       });
-      setResult(data);
-      // Handle intent
+      setResult({ ...data, transcript: data.transcript || transcript });
       if (data.intent?.type === "navigate" && data.intent.path) {
         setTimeout(() => setLocation(data.intent.path!), 600);
       }
-      // Play TTS
-      if (data.audioBase64) {
-        const audio = new Audio(`data:${data.audioMimeType || "audio/mpeg"};base64,${data.audioBase64}`);
-        audioElRef.current = audio;
-        audio.onended = () => setStatus("idle");
-        audio.onerror = () => setStatus("idle");
+      // Speak the reply client-side (free, Web Speech API).
+      const spoken = data.spokenResponse || data.displayResponse;
+      if (speechSynthesisSupported && spoken) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(spoken);
+        utterance.onend = () => setStatus("idle");
+        utterance.onerror = () => setStatus("idle");
         setStatus("speaking");
-        await audio.play().catch(() => setStatus("idle"));
+        window.speechSynthesis.speak(utterance);
       } else {
         setStatus("idle");
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Voice request failed";
+      const msg = err instanceof Error ? err.message : "Assistant request failed";
       console.error("[VoiceAssistant] request failed", err);
       setStatus("error");
       setErrorMsg(msg);
     }
   }
 
+  function handleSendText() {
+    const t = textInput.trim();
+    if (!t || status === "processing") return;
+    setTextInput("");
+    setErrorMsg(null);
+    void sendTranscript(t);
+  }
+
   function dismissPanel() {
     setOpen(false);
     setResult(null);
     setErrorMsg(null);
-    if (audioElRef.current) {
-      audioElRef.current.pause();
-      audioElRef.current = null;
-    }
-    if (mediaRecorderRef.current?.state === "recording") stopRecording();
+    recognitionRef.current?.abort();
+    if (speechSynthesisSupported) window.speechSynthesis.cancel();
     setStatus("idle");
   }
 
@@ -273,11 +268,11 @@ export function VoiceAssistant() {
       {/* Floating mic button */}
       <button
         type="button"
-        onClick={status === "recording" ? stopRecording : startRecording}
-        aria-label={status === "recording" ? "Stop recording" : "Start voice assistant"}
+        onClick={status === "listening" ? stopListening : startListening}
+        aria-label={status === "listening" ? "Stop listening" : "Start assistant"}
         data-testid="button-voice-assistant"
          className={`fixed z-50 bottom-6 right-6 h-14 w-14 rounded-xl shadow-2xl flex items-center justify-center transition-all
-          ${status === "recording"
+          ${status === "listening"
              ? "bg-loss hover:bg-loss/80 animate-pulse ring-4 ring-loss/40"
              : "grad-accent glow-accent hover:scale-105 ring-2 ring-accent-bright/20"}
         `}
@@ -286,7 +281,7 @@ export function VoiceAssistant() {
           <Loader2 className="h-6 w-6 text-primary animate-spin" />
         ) : status === "speaking" ? (
           <Volume2 className="h-6 w-6 text-primary animate-pulse" />
-        ) : status === "recording" ? (
+        ) : status === "listening" ? (
           <MicOff className="h-6 w-6 text-primary" />
         ) : (
           <Mic className="h-6 w-6 text-primary" />
@@ -302,13 +297,13 @@ export function VoiceAssistant() {
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-2">
                <div className={`h-2 w-2 rounded-xl ${
-                 status === "recording" ? "bg-loss animate-pulse" :
+                 status === "listening" ? "bg-loss animate-pulse" :
                  status === "processing" ? "bg-warn animate-pulse" :
                  status === "speaking" ? "bg-accent-core animate-pulse" :
                  status === "error" ? "bg-loss" : "bg-gain"
               }`} />
                <span className="text-xs uppercase tracking-wide text-secondary">
-                {status === "recording" && "Listening..."}
+                {status === "listening" && "Listening..."}
                 {status === "processing" && "Thinking..."}
                 {status === "speaking" && "Speaking..."}
                 {status === "idle" && (result ? "Done" : "Ready")}
@@ -325,9 +320,9 @@ export function VoiceAssistant() {
             </button>
           </div>
 
-          {status === "recording" && (
+          {status === "listening" && (
              <p className="text-body text-xs">
-              Tap the mic again to send. (Auto-stops after 12s.)
+              Speak now — tap the mic again to stop.
             </p>
           )}
 
@@ -338,8 +333,8 @@ export function VoiceAssistant() {
           {result && (
             <div className="space-y-2">
               <div>
-                 <p className="text-[10px] uppercase tracking-wide text-muted">You said</p>
-                 <p className="text-body">{result.transcript || "(silence)"}</p>
+                 <p className="text-[10px] uppercase tracking-wide text-muted">You asked</p>
+                 <p className="text-body">{result.transcript || "(empty)"}</p>
               </div>
               <div>
                  <p className="text-[10px] uppercase tracking-wide text-muted">Assistant</p>
@@ -355,8 +350,32 @@ export function VoiceAssistant() {
           {!result && !errorMsg && status === "idle" && (
              <p className="text-secondary text-xs">
               Try: "What's BTC at?", "What's my balance?", "Summarize my last bounty", "Open prediction markets".
+              {!speechRecognitionSupported && " (Voice input isn't supported in this browser — type below.)"}
             </p>
           )}
+
+          {/* Text fallback input — always available */}
+          <div className="flex items-center gap-2 mt-3">
+            <input
+              type="text"
+              value={textInput}
+              onChange={(e) => setTextInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleSendText(); }}
+              placeholder="Type a question..."
+              data-testid="input-assistant-text"
+              className="flex-1 rounded-xl border border-ink-edge bg-ink-raised px-3 py-2 text-xs text-primary placeholder:text-muted focus:border-accent-core/50 focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={handleSendText}
+              disabled={!textInput.trim() || status === "processing"}
+              aria-label="Send question"
+              data-testid="button-assistant-send"
+              className="rounded-xl p-2 grad-accent disabled:opacity-40"
+            >
+              <Send className="h-4 w-4 text-primary" />
+            </button>
+          </div>
         </div>
       )}
 

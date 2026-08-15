@@ -3,7 +3,7 @@ import { db } from "../db";
 import { predictionMarkets } from "@shared/schema";
 import { isNull, eq } from "drizzle-orm";
 
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
+
 
 export class AIPredictionBackfillService {
   /**

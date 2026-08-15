@@ -1,7 +1,7 @@
 import type { Express, Response } from "express";
 import { authenticateToken, type AuthRequest } from "../auth";
 import { mediumLimit, validateBody } from "../middleware/security";
-import { voiceAssistantSchema } from "../middleware/validationSchemas";
+import { voiceAssistantSchema, voiceAssistantTextSchema } from "../middleware/validationSchemas";
 import { voiceAssistantService } from "../services/voiceAssistantService";
 import { storage } from "../storage";
 import { asyncHandler } from "./_shared";
@@ -51,6 +51,43 @@ export async function registerVoiceAssistantRoutes(app: Express): Promise<void> 
     }
 
     const result = await voiceAssistantService.run(audioBuffer, mimeType, {
+      currentPath,
+      username: req.user?.username ?? null,
+      summariesCount,
+      bountiesCount,
+      walletBalance,
+      recentBountyTitles,
+    });
+
+    res.json({ success: true, ...result });
+  }));
+
+  // Text entry point: the client now transcribes speech in the browser
+  // (Web Speech API) — or the user just types — and sends the transcript.
+  app.post("/api/assistant/text", mediumLimit, authenticateToken, validateBody(voiceAssistantTextSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { transcript, currentPath } = req.body as { transcript: string; currentPath?: string };
+
+    const userId = req.user?.id;
+    let summariesCount = 0;
+    let bountiesCount = 0;
+    let walletBalance = 0;
+    let recentBountyTitles: string[] = [];
+    if (userId) {
+      const [user, summaries, userBounties] = await Promise.all([
+        storage.getUser(userId).catch(() => undefined),
+        storage.getSummariesByUser(userId).catch(() => []),
+        storage.getBountiesByUser(userId).catch(() => []),
+      ]);
+      summariesCount = summaries.length;
+      bountiesCount = userBounties.length;
+      walletBalance = user?.streamPoints ?? 0;
+      recentBountyTitles = userBounties
+        .slice(0, 3)
+        .map((b: { title?: string | null }) => b.title ?? '')
+        .filter((t: string) => t.length > 0);
+    }
+
+    const result = await voiceAssistantService.runText(transcript, {
       currentPath,
       username: req.user?.username ?? null,
       summariesCount,

@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { SpeakButton } from "@/components/ui/speak-button";
 import SectionTitle from "@/components/ds/SectionTitle";
 
 interface ChatMessage {
@@ -262,9 +263,18 @@ export function AvatarChatDialog({ open, onOpenChange, avatar }: AvatarChatDialo
                       }`}
                     >
                       <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-                       <p className={`text-[10px] mt-1 ${msg.role === 'user' ? 'text-primary/70' : 'text-muted'}`}>
-                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </p>
+                      <div className="flex items-center justify-between mt-1 gap-2">
+                        <p className={`text-[10px] ${msg.role === 'user' ? 'text-primary/70' : 'text-muted'}`}>
+                          {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                        {msg.role === 'assistant' && (
+                          <SpeakButton
+                            text={msg.content}
+                            className="h-6 w-6 text-secondary hover:text-primary"
+                            data-testid={`button-speak-chat-${index}`}
+                          />
+                        )}
+                      </div>
                     </div>
                     {msg.role === 'user' && (
                        <div className="w-8 h-8 rounded-full bg-accent-deep flex items-center justify-center flex-shrink-0">

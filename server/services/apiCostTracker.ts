@@ -13,12 +13,6 @@ interface ApiCall {
 }
 
 interface ServiceCosts {
-  openai: {
-    gpt4o: { calls: number; inputTokens: number; outputTokens: number; cost: number };
-    gpt4oMini: { calls: number; inputTokens: number; outputTokens: number; cost: number };
-    whisper: { calls: number; minutes: number; cost: number };
-    tts: { calls: number; characters: number; cost: number };
-  };
   coingecko: { calls: number; cost: number };
   finnhub: { calls: number; cost: number };
   resend: { emails: number; cost: number };
@@ -43,13 +37,6 @@ class ApiCostTracker {
 
   // Pricing (as of 2024)
   private pricing = {
-    openai: {
-      'gpt-4o': { input: 0.005, output: 0.015 }, // per 1K tokens
-      'gpt-4o-mini': { input: 0.00015, output: 0.0006 }, // per 1K tokens
-      'whisper': 0.006, // per minute
-      'tts-1': 0.015, // per 1K characters
-      'tts-1-hd': 0.030 // per 1K characters
-    },
     coingecko: 0, // Pro plan is $129/month fixed
     finnhub: 0, // Free tier
     resend: 0.001, // ~$1 per 1000 emails
@@ -68,12 +55,6 @@ class ApiCostTracker {
 
   private getEmptyCosts(): ServiceCosts {
     return {
-      openai: {
-        gpt4o: { calls: 0, inputTokens: 0, outputTokens: 0, cost: 0 },
-        gpt4oMini: { calls: 0, inputTokens: 0, outputTokens: 0, cost: 0 },
-        whisper: { calls: 0, minutes: 0, cost: 0 },
-        tts: { calls: 0, characters: 0, cost: 0 }
-      },
       coingecko: { calls: 0, cost: 0 },
       finnhub: { calls: 0, cost: 0 },
       resend: { emails: 0, cost: 0 },
@@ -99,67 +80,6 @@ class ApiCostTracker {
       this.monthStart.setHours(0, 0, 0, 0);
       this.recentCalls = [];
     }
-  }
-
-  /**
-   * Track OpenAI GPT-4o call
-   */
-  trackGpt4o(inputTokens: number, outputTokens: number): void {
-    this.checkMonthReset();
-    const cost = (inputTokens / 1000) * this.pricing.openai['gpt-4o'].input +
-                 (outputTokens / 1000) * this.pricing.openai['gpt-4o'].output;
-    
-    this.costs.openai.gpt4o.calls++;
-    this.costs.openai.gpt4o.inputTokens += inputTokens;
-    this.costs.openai.gpt4o.outputTokens += outputTokens;
-    this.costs.openai.gpt4o.cost += cost;
-    
-    this.recordCall('openai', 'gpt-4o', cost, inputTokens + outputTokens);
-  }
-
-  /**
-   * Track OpenAI GPT-4o-mini call
-   */
-  trackGpt4oMini(inputTokens: number, outputTokens: number): void {
-    this.checkMonthReset();
-    const cost = (inputTokens / 1000) * this.pricing.openai['gpt-4o-mini'].input +
-                 (outputTokens / 1000) * this.pricing.openai['gpt-4o-mini'].output;
-    
-    this.costs.openai.gpt4oMini.calls++;
-    this.costs.openai.gpt4oMini.inputTokens += inputTokens;
-    this.costs.openai.gpt4oMini.outputTokens += outputTokens;
-    this.costs.openai.gpt4oMini.cost += cost;
-    
-    this.recordCall('openai', 'gpt-4o-mini', cost, inputTokens + outputTokens);
-  }
-
-  /**
-   * Track OpenAI Whisper call
-   */
-  trackWhisper(minutes: number): void {
-    this.checkMonthReset();
-    const cost = minutes * this.pricing.openai.whisper;
-    
-    this.costs.openai.whisper.calls++;
-    this.costs.openai.whisper.minutes += minutes;
-    this.costs.openai.whisper.cost += cost;
-    
-    this.recordCall('openai', 'whisper', cost);
-  }
-
-  /**
-   * Track OpenAI TTS call
-   */
-  trackTts(characters: number, hd: boolean = false): void {
-    this.checkMonthReset();
-    const rate = hd ? this.pricing.openai['tts-1-hd'] : this.pricing.openai['tts-1'];
-    const cost = (characters / 1000) * rate;
-    
-    this.costs.openai.tts.calls++;
-    this.costs.openai.tts.characters += characters;
-    this.costs.openai.tts.cost += cost;
-    
-    this.recordCall('openai', 'tts', cost);
   }
 
   /**
@@ -237,25 +157,18 @@ class ApiCostTracker {
     const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
     const daysElapsed = now.getDate();
     
-    // Estimate costs based on typical usage (from replit.md: $15-25/month for OpenAI)
-    // Newsletter: 2x daily = ~60 sends/month, each uses GPT-4o-mini (~1000 tokens input, 500 output)
-    // AI agents: Background activity uses GPT-4o-mini sparingly (QUIET_MODE often enabled)
-    // Scheduled streams: 2x daily market briefings use TTS (~2000 chars each)
-    
+    // Estimate costs based on typical usage.
+    // Newsletter: 2x daily; AI agents: background Anthropic activity via the
+    // persistent daily ledger (authoritative). This legacy tracker only
+    // estimates non-AI services now.
     const estimatedNewsletterCost = daysElapsed * 2 * 0.001; // ~$0.001 per newsletter generation
     const estimatedAgentCost = daysElapsed * 0.10; // ~$0.10/day for agent activity
-    const estimatedTtsCost = daysElapsed * 2 * 0.03; // ~$0.03 per stream TTS (2000 chars)
     const estimatedResendCost = this.costs.resend.emails * 0.001 || daysElapsed * 0.01;
-    
-    // Use tracked costs if available, otherwise use estimates
-    const gpt4oCost = this.costs.openai.gpt4o.cost || 0;
-    const gpt4oMiniCost = this.costs.openai.gpt4oMini.cost || estimatedNewsletterCost + estimatedAgentCost;
-    const whisperCost = this.costs.openai.whisper.cost || 0;
-    const ttsCost = this.costs.openai.tts.cost || estimatedTtsCost;
+
+    const aiCost = estimatedNewsletterCost + estimatedAgentCost;
     const resendCost = this.costs.resend.cost || estimatedResendCost;
-    
-    const openaiTotal = gpt4oCost + gpt4oMiniCost + whisperCost + ttsCost;
-    const variableTotal = openaiTotal + resendCost;
+
+    const variableTotal = aiCost + resendCost;
     
     // Project to full month
     const dailyVariableRate = daysElapsed > 0 ? variableTotal / daysElapsed : 0;
@@ -265,10 +178,7 @@ class ApiCostTracker {
       currentMonth: {
         total: variableTotal + 129, // Add CoinGecko fixed cost
         breakdown: {
-          'OpenAI GPT-4o': gpt4oCost,
-          'OpenAI GPT-4o-mini': gpt4oMiniCost,
-          'OpenAI Whisper': whisperCost,
-          'OpenAI TTS': ttsCost,
+          'Anthropic (estimated)': aiCost,
           'Resend': resendCost,
           'CoinGecko Pro': 129, // Fixed monthly cost
         }
@@ -289,9 +199,9 @@ class ApiCostTracker {
   /**
    * Get estimated monthly budget based on replit.md
    */
-  getEstimatedBudget(): { openai: number; coingecko: number; total: number } {
+  getEstimatedBudget(): { anthropic: number; coingecko: number; total: number } {
     return {
-      openai: 25, // $15-25 as per replit.md
+      anthropic: 25, // daily AI budget target; see dailyBudgetUsd()
       coingecko: 129,
       total: 154
     };
@@ -305,7 +215,7 @@ export const apiCostTracker = new ApiCostTracker();
 //
 // Spend is accumulated in memory and batch-flushed every 60s. checkBudget()
 // is the single source of truth for the enforcement tiers wired into
-// modelGateway and the audio (whisper/tts) call sites.
+// modelGateway. The ledger is Anthropic-only: OpenAI (audio) was removed.
 // ---------------------------------------------------------------------------
 
 import { db } from "../db";
@@ -318,26 +228,14 @@ function envRate(name: string, fallback: number): number {
   return Number.isFinite(v) && v >= 0 ? v : fallback;
 }
 
-export function tokenPricingPer1M(service: "anthropic" | "openai", model: string): { input: number; output: number } {
+export function tokenPricingPer1M(service: "anthropic", model: string): { input: number; output: number } {
   const m = model.toLowerCase();
-  if (service === "anthropic") {
-    if (m.includes("haiku")) {
-      return { input: envRate("PRICE_ANTHROPIC_HAIKU_IN_PER_M", 1), output: envRate("PRICE_ANTHROPIC_HAIKU_OUT_PER_M", 5) };
-    }
-    // sonnet default (also the fallback for unknown Anthropic models)
-    return { input: envRate("PRICE_ANTHROPIC_SONNET_IN_PER_M", 3), output: envRate("PRICE_ANTHROPIC_SONNET_OUT_PER_M", 15) };
+  if (m.includes("haiku")) {
+    return { input: envRate("PRICE_ANTHROPIC_HAIKU_IN_PER_M", 1), output: envRate("PRICE_ANTHROPIC_HAIKU_OUT_PER_M", 5) };
   }
-  if (m.includes("mini")) {
-    return { input: envRate("PRICE_OPENAI_MINI_IN_PER_M", 0.15), output: envRate("PRICE_OPENAI_MINI_OUT_PER_M", 0.6) };
-  }
-  return { input: envRate("PRICE_OPENAI_IN_PER_M", 2.5), output: envRate("PRICE_OPENAI_OUT_PER_M", 10) };
+  // sonnet default (also the fallback for unknown Anthropic models)
+  return { input: envRate("PRICE_ANTHROPIC_SONNET_IN_PER_M", 3), output: envRate("PRICE_ANTHROPIC_SONNET_OUT_PER_M", 15) };
 }
-
-/** Non-token audio rates (whisper per minute, tts per 1K chars). */
-export const AUDIO_PRICING = {
-  whisperPerMinute: () => envRate("PRICE_OPENAI_WHISPER_PER_MIN", 0.006),
-  ttsPer1kChars: (hd: boolean) => envRate(hd ? "PRICE_OPENAI_TTS_HD_PER_1K" : "PRICE_OPENAI_TTS_PER_1K", hd ? 0.03 : 0.015),
-};
 
 export interface BudgetStatus {
   allowed: boolean;
@@ -428,7 +326,7 @@ class DailyBudgetLedger {
   }
 
   /** Record spend (USD). Synchronous; persisted by the 60s batch flush. */
-  recordSpend(service: "anthropic" | "openai", model: string, costUsd: number): void {
+  recordSpend(service: "anthropic", model: string, costUsd: number): void {
     if (!(costUsd > 0)) return;
     const day = this.utcDay();
     if (this.loadedDay === day) this.spentToday += costUsd;
@@ -438,7 +336,7 @@ class DailyBudgetLedger {
   }
 
   /** Convenience: record token-based model spend. */
-  recordModelTokens(service: "anthropic" | "openai", model: string, inputTokens: number, outputTokens: number): number {
+  recordModelTokens(service: "anthropic", model: string, inputTokens: number, outputTokens: number): number {
     const rates = tokenPricingPer1M(service, model);
     const cost = (inputTokens / 1_000_000) * rates.input + (outputTokens / 1_000_000) * rates.output;
     this.recordSpend(service, model, cost);
@@ -529,17 +427,4 @@ export const dailyBudgetLedger = new DailyBudgetLedger();
 /** The spec'd entry point: current budget state for enforcement decisions. */
 export function checkBudget(): Promise<BudgetStatus> {
   return dailyBudgetLedger.checkBudget();
-}
-
-/** Record OpenAI TTS spend into the daily ledger (also feeds legacy tracker). */
-export function recordTtsSpend(characters: number, hd = false): void {
-  apiCostTracker.trackTts(characters, hd);
-  dailyBudgetLedger.recordSpend("openai", hd ? "tts-1-hd" : "tts-1", (characters / 1000) * AUDIO_PRICING.ttsPer1kChars(hd));
-}
-
-/** Record OpenAI Whisper spend. When only bytes are known, estimate ~240KB/min compressed audio. */
-export function recordWhisperSpend(opts: { minutes?: number; bytes?: number }): void {
-  const minutes = opts.minutes ?? Math.max(0.25, (opts.bytes ?? 0) / 240_000);
-  apiCostTracker.trackWhisper(minutes);
-  dailyBudgetLedger.recordSpend("openai", "whisper-1", minutes * AUDIO_PRICING.whisperPerMinute());
 }

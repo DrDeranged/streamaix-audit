@@ -63,13 +63,10 @@ export class AvatarPodcastEngine {
         return false;
       }
 
-      // Check if API is paused AND avatar is not TTS-enabled
+      // Podcast text generation runs on the Anthropic gateway — respect pause.
       if (process.env.PAUSE_ANTHROPIC_API === 'true') {
-        if (!AvatarVoiceService.isAvatarTtsEnabled(avatar.name)) {
-          console.log(`[Podcast] ⏸️ Anthropic API paused - podcast session disabled for ${avatar.name}`);
-          return false;
-        }
-        console.log(`[Podcast] 🎙️ ON-DEMAND: ${avatar.name} is TTS-enabled, starting podcast despite API pause`);
+        console.log(`[Podcast] ⏸️ Anthropic API paused - podcast session disabled for ${avatar.name}`);
+        return false;
       }
 
       const marketContext = await this.fetchMarketContext();

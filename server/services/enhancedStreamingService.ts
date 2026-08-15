@@ -1125,30 +1125,19 @@ Focus on: market insights, price predictions, important announcements, and viewe
     }).onConflictDoNothing();
   }
 
-  async generateWithCache(text: string, voice: string, avatarName: string): Promise<{ audioBase64: string; fromCache: boolean }> {
+  async generateWithCache(text: string, voice: string, _avatarName: string): Promise<{ audioBase64: string; fromCache: boolean }> {
     const cached = await this.getCachedPhrase(text, voice);
     if (cached) {
       console.log(`[Audio Cache] HIT: "${text.substring(0, 30)}..." (${voice})`);
       return { audioBase64: cached, fromCache: true };
     }
 
-    if (process.env.PAUSE_ANTHROPIC_API === 'true') {
-      throw new Error('OpenAI API is paused');
-    }
-
-    const audioBuffer = await AvatarVoiceService.textToSpeech(text, avatarName);
-    const audioBase64 = audioBuffer.toString('base64');
-
-    const commonPhraseTypes = ['intro', 'outro', 'transition', 'greeting', 'thanks'];
-    const isCommonPhrase = text.length < 100 && commonPhraseTypes.some(type => 
-      text.toLowerCase().includes(type === 'intro' ? 'welcome' : type)
+    // Server-side TTS removed — no new audio can be generated.
+    const err: Error & { statusCode?: number } = new Error(
+      'Server-side TTS has been removed. Avatar speech is text-only; audio is generated client-side via the Web Speech API.',
     );
-
-    if (isCommonPhrase) {
-      await this.cachePhrase(text, 'common', voice, audioBase64, text.length * 50);
-    }
-
-    return { audioBase64, fromCache: false };
+    err.statusCode = 410;
+    throw err;
   }
 
   // ==================== STREAM SCHEDULING ====================

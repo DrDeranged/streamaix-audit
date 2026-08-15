@@ -1,5 +1,4 @@
 import { DatabaseStorage } from '../storage';
-import OpenAI from 'openai';
 import { modelGateway } from "../lib/modelGateway";
 import { marketDataService } from './marketDataService';
 import { comprehensiveMarketService } from './comprehensiveMarketService';
@@ -44,21 +43,8 @@ interface ProcessingResult {
 export class RebuiltContentProcessor {
   private static instance: RebuiltContentProcessor;
   private storage: DatabaseStorage;
-  private openai: OpenAI | null;
-
   constructor() {
     this.storage = new DatabaseStorage();
-    
-    // Enhanced API key validation with detailed logging
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      console.error('❌ CRITICAL: OPENAI_API_KEY environment variable is not set!');
-      console.error('📍 Check your .env file or environment configuration');
-      this.openai = null;
-    } else {
-      console.log('✅ OpenAI API key detected (length:', apiKey.length, 'characters)');
-      this.openai = new OpenAI({ apiKey });
-    }
   }
 
   static getInstance(): RebuiltContentProcessor {
@@ -77,13 +63,6 @@ export class RebuiltContentProcessor {
     
     console.log(`🔄 Starting REBUILT processing for URL: ${url}`, options);
     console.log(`👤 User ID: ${userId || 'anonymous'}`);
-    console.log(`🔑 OpenAI instance: ${this.openai ? 'CONFIGURED ✓' : 'NOT CONFIGURED ✗'}`);
-    
-    if (!this.openai) {
-      const errorMsg = 'OpenAI API key not configured. Server admin must set OPENAI_API_KEY environment variable.';
-      console.error(`❌ ${errorMsg}`);
-      throw new Error(errorMsg);
-    }
 
     // Create initial summary record
     const summary = await this.storage.createSummary({
@@ -560,10 +539,6 @@ export class RebuiltContentProcessor {
   }
 
   private async generateComprehensiveAnalysis(metadata: any): Promise<any> {
-    if (!this.openai) {
-      throw new Error('OpenAI not configured');
-    }
-
     // Generate dynamic chapters based on actual video duration
     const dynamicChapters = this.generateDynamicChaptersForPrompt(metadata.duration);
     console.log(`📖 Generated dynamic chapters for prompt: ${dynamicChapters.substring(0, 200)}...`);

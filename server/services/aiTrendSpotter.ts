@@ -5,7 +5,7 @@ import { modelGateway } from "../lib/modelGateway";
 import axios from 'axios';
 import { jobScheduler } from '../jobs/scheduler';
 
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
+
 
 interface MarketIdea {
   question: string;
@@ -279,6 +279,7 @@ GUIDELINES:
       system: "You are a prediction market creator. Always return valid JSON array.",
       user: prompt,
       temperature: 0.7,
+      maxTokens: 2048,
     });
     const markets = response.markets || [];
 

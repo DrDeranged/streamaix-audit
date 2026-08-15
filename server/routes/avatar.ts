@@ -70,7 +70,7 @@ import { CrossMarketSignalService } from "../services/crossMarketSignalService";
 import { VolatilityForecastingService } from "../services/volatilityForecastingService";
 import { marketEventModelingService } from "../services/marketEventModelingService";
 import { patternRecognitionService } from "../services/patternRecognitionService";
-import { RecommendationEngine } from "../recommendation-engine";
+import { getRecommendationEngine } from "../recommendation-engine";
 import { cryptoIntelligenceService } from "../services/cryptoIntelligenceService";
 import { macroDataService } from "../services/macroDataService";
 import { advancedMarketIntelService } from "../services/advancedMarketIntelService";
@@ -168,7 +168,7 @@ export async function registerAvatarRoutes(app: Express): Promise<void> {
     const limit = parseInt(req.query.limit as string) || 6;
     
     try {
-      const trendingIds = await recommendationEngine.getTrendingAvatars(limit);
+      const trendingIds = await getRecommendationEngine().getTrendingAvatars(limit);
       
       // Fetch full avatar data
       const trending = await Promise.all(
@@ -377,7 +377,7 @@ export async function registerAvatarRoutes(app: Express): Promise<void> {
     const limit = parseInt(req.query.limit as string) || 5;
     
     try {
-      const recommendations = await recommendationEngine.generateRecommendations(userId, limit);
+      const recommendations = await getRecommendationEngine().generateRecommendations(userId, limit);
       
       // Enrich with avatar data
       const enriched = await Promise.all(
@@ -403,7 +403,7 @@ export async function registerAvatarRoutes(app: Express): Promise<void> {
     const limit = parseInt(req.query.limit as string) || 4;
     
     try {
-      const similar = await recommendationEngine.getSimilarAvatars(id, limit);
+      const similar = await getRecommendationEngine().getSimilarAvatars(id, limit);
       
       // Enrich with avatar data
       const enriched = await Promise.all(

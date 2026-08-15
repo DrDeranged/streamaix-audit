@@ -11,8 +11,9 @@ import { checkBudget, dailyBudgetLedger } from "../services/apiCostTracker";
  *
  * Text/reasoning calls are backed by the Anthropic Messages API. Model IDs
  * are read from env at call time (MODEL_REASONING / MODEL_FAST) so they can
- * be re-pointed without code changes. Audio (whisper-1 transcription, tts-1
- * speech) remains on OpenAI — Anthropic has no audio APIs.
+ * be re-pointed without code changes. There is no OpenAI dependency anymore:
+ * audio input is handled via video captions (captionExtractor) and speech
+ * output happens client-side with the Web Speech API.
  */
 
 export type ModelTier = "reasoning" | "fast";
@@ -78,6 +79,8 @@ export interface GatewayCompletionRequest {
 export interface GatewayCompletionResult {
   content: string;
   model: string;
+  /** Anthropic stop_reason (e.g. "end_turn", "max_tokens"). */
+  stopReason: string | null;
 }
 
 let _client: Anthropic | null = null;
@@ -215,23 +218,34 @@ export class ModelGateway {
     if (!content) {
       throw new Error(`Model gateway: empty completion from ${model}`);
     }
-    return { content, model };
+    return { content, model, stopReason: response.stop_reason ?? null };
   }
 
   /**
    * Complete and parse JSON output. Strips accidental markdown fences and, if
    * parsing/validation fails, retries once feeding the error back to the model.
+   * If the completion was truncated (stop_reason === "max_tokens"), retries
+   * ONCE with a doubled max-token cap before parsing — truncated JSON can
+   * never parse, so retrying the parse alone would be wasted.
    */
   async completeJson<T = unknown>(
     req: GatewayCompletionRequest,
     validate?: (parsed: unknown) => T,
   ): Promise<T & { _model: string }> {
+    let truncationRetried = false;
     const attempt = async (
       extraUser?: string,
     ): Promise<{ parsed: T; model: string }> => {
-      const { content, model } = await this.complete(
-        extraUser ? { ...req, user: `${req.user}\n\n${extraUser}` } : req,
-      );
+      const effectiveReq = extraUser ? { ...req, user: `${req.user}\n\n${extraUser}` } : req;
+      let { content, model, stopReason } = await this.complete(effectiveReq);
+      if (stopReason === "max_tokens" && !truncationRetried) {
+        truncationRetried = true;
+        const doubled = (effectiveReq.maxTokens ?? DEFAULT_MAX_TOKENS) * 2;
+        console.warn(
+          `[modelGateway] completeJson "${req.tag}" truncated at max_tokens — retrying once with maxTokens=${doubled}`,
+        );
+        ({ content, model } = await this.complete({ ...effectiveReq, maxTokens: doubled }));
+      }
       const cleaned = stripJsonFences(content);
       const parsed = JSON.parse(cleaned) as unknown;
       return { parsed: validate ? validate(parsed) : (parsed as T), model };

@@ -518,6 +518,33 @@ export function AIAvatarStream({
       return;
     }
 
+    // Server-side TTS was removed — avatar segments arrive text-only
+    // (audioBase64 === ''). Speak them client-side via the Web Speech API.
+    if (!item.audioBase64) {
+      setIsSpeaking(true);
+      setCurrentSpeechText(item.text);
+      setCurrentSegmentType(item.segmentType);
+      const finish = () => {
+        setIsPlayingAudio(false);
+        setIsSpeaking(false);
+        isProcessingRef.current = false;
+        setTimeout(() => setCurrentSpeechText(null), 2000);
+        playNextInQueue();
+      };
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(item.text);
+        utterance.onend = finish;
+        utterance.onerror = finish;
+        setIsPlayingAudio(true);
+        window.speechSynthesis.speak(utterance);
+      } else {
+        // No speech support: show the text for a reading-paced interval.
+        const readMs = Math.min(15000, Math.max(3000, item.text.length * 50));
+        setTimeout(finish, readMs);
+      }
+      return;
+    }
+
     try {
       const audioContext = initAudioContext();
       

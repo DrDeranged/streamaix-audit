@@ -130,7 +130,7 @@ describe("persistence across simulated restart", () => {
     seed(0);
     dailyBudgetLedger.recordSpend("anthropic", "claude-sonnet-4-6", 3.5);
     dailyBudgetLedger.recordSpend("anthropic", "claude-sonnet-4-6", 1.5);
-    dailyBudgetLedger.recordSpend("openai", "tts-1", 0.25);
+    dailyBudgetLedger.recordSpend("anthropic", "claude-haiku-4-5", 0.25);
     await dailyBudgetLedger.flush();
     expect(dbState.upserts.length).toBe(2); // batched per (day,service,model)
     const total = dbState.upserts.reduce((s, u) => s + u.values.costUsd, 0);
@@ -157,8 +157,8 @@ describe("persistence across simulated restart", () => {
   it("partial flush failure re-queues ONLY unapplied rows (no double-count)", async () => {
     seed(0);
     dailyBudgetLedger.recordSpend("anthropic", "claude-sonnet-4-6", 3); // row 0 succeeds
-    dailyBudgetLedger.recordSpend("openai", "tts-1", 1); // row 1 fails
-    dailyBudgetLedger.recordSpend("openai", "whisper-1", 0.5); // row 2 never attempted
+    dailyBudgetLedger.recordSpend("anthropic", "claude-haiku-4-5", 1); // row 1 fails
+    dailyBudgetLedger.recordSpend("anthropic", "claude-opus-4", 0.5); // row 2 never attempted
     dbState.failOnUpsertIndex = 1;
     await expect(dailyBudgetLedger.flush()).rejects.toThrow("mid-batch");
     expect(dbState.upserts.length).toBe(1); // only the sonnet row landed
@@ -168,8 +168,8 @@ describe("persistence across simulated restart", () => {
     const totals: Record<string, number> = {};
     for (const u of dbState.upserts) totals[u.values.model] = (totals[u.values.model] ?? 0) + u.values.costUsd;
     expect(totals["claude-sonnet-4-6"]).toBeCloseTo(3);
-    expect(totals["tts-1"]).toBeCloseTo(1);
-    expect(totals["whisper-1"]).toBeCloseTo(0.5);
+    expect(totals["claude-haiku-4-5"]).toBeCloseTo(1);
+    expect(totals["claude-opus-4"]).toBeCloseTo(0.5);
     expect(dbState.upserts.length).toBe(3);
   });
 

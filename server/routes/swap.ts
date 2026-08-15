@@ -1,4 +1,4 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import { db } from "../db";
 import { tradeableTokens, insertTradeableTokenSchema } from "@shared/schema";
@@ -78,6 +78,19 @@ function gate(res: Response): boolean {
   return true;
 }
 
+/**
+ * Express middleware form of the flag gate. Mounted BEFORE validateBody so a
+ * dark route reveals nothing about its expected payload shape: while the
+ * flag is off, every request gets 403 — never a Zod 400.
+ */
+function requireSwapsEnabled(_req: Request, res: Response, next: NextFunction): void {
+  if (!swapsEnabled()) {
+    res.status(403).json({ error: "swaps not yet enabled" });
+    return;
+  }
+  next();
+}
+
 function handleSwapError(res: Response, err: unknown): void {
   if (err instanceof SwapsDisabledError) {
     res.status(403).json({ error: "swaps not yet enabled" });
@@ -108,7 +121,7 @@ export async function registerSwapRoutes(app: Express): Promise<void> {
     }
   }));
 
-  app.post("/api/swap/quote", mediumLimit, validateBody(quoteBodySchema), asyncHandler(async (req: Request, res: Response) => {
+  app.post("/api/swap/quote", mediumLimit, requireSwapsEnabled, validateBody(quoteBodySchema), asyncHandler(async (req: Request, res: Response) => {
     if (!gate(res)) return;
     try {
       const quote = await swapQuoteService.getQuote(req.body);
@@ -118,7 +131,7 @@ export async function registerSwapRoutes(app: Express): Promise<void> {
     }
   }));
 
-  app.post("/api/swap/record", mediumLimit, validateBody(recordTradeBodySchema), asyncHandler(async (req: Request, res: Response) => {
+  app.post("/api/swap/record", mediumLimit, requireSwapsEnabled, validateBody(recordTradeBodySchema), asyncHandler(async (req: Request, res: Response) => {
     if (!gate(res)) return;
     try {
       const row = await swapQuoteService.recordTrade(req.body);

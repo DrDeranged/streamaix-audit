@@ -1,7 +1,5 @@
 import { DatabaseStorage } from '../storage';
-import { openai as lazyOpenai } from "../lib/openaiClient";
 import { modelGateway } from "../lib/modelGateway";
-const openai = lazyOpenai;
 interface VideoMetadata {
   title: string;
   description: string;
@@ -40,12 +38,10 @@ interface ProcessedContent {
 export class RealContentProcessor {
   private static instance: RealContentProcessor;
   private storage: DatabaseStorage;
-  private openai: OpenAI;
   private processingJobs = new Map<string, any>();
 
   constructor() {
     this.storage = new DatabaseStorage();
-    this.openai = lazyOpenai;
   }
 
   static getInstance(): RealContentProcessor {
@@ -234,11 +230,6 @@ export class RealContentProcessor {
   private async generateContextualAnalysis(metadata: VideoMetadata): Promise<ProcessedContent> {
     console.log(`🤖 Generating REAL AI analysis for: ${metadata.title}`);
     
-    if (!this.openai) {
-      console.warn('⚠️ OpenAI not configured, using enhanced mock analysis');
-      return this.generateEnhancedMockAnalysis(metadata);
-    }
-
     try {
       // Generate AI-powered analysis using real content
       const prompt = `

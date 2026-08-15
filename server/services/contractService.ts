@@ -47,6 +47,18 @@ export function logContractServiceBootState(): void {
       ? '🟢 BRIDGE_ENABLED=true — points-to-token bridge is ACTIVE'
       : '🔒 BRIDGE_ENABLED=false (default) — points-to-token bridge DORMANT BY DESIGN (see replit.md)'
   );
+  const swaps = process.env.SWAPS_ENABLED === 'true';
+  console.log(
+    swaps
+      ? '🟢 SWAPS_ENABLED=true — swap rail is ACTIVE'
+      : '🔒 SWAPS_ENABLED=false (default) — swap rail DORMANT BY DESIGN (quote/record routes return 403)'
+  );
+  const signals = process.env.SIGNALS_ENABLED === 'true';
+  console.log(
+    signals
+      ? '🟢 SIGNALS_ENABLED=true — agent signals publication is ACTIVE'
+      : '🔒 SIGNALS_ENABLED=false (default) — agent signals DORMANT BY DESIGN (publication is a no-op)'
+  );
   if (!process.env.SERVICE_SIGNER_PRIVATE_KEY && process.env.PRIVATE_KEY) {
     console.error(
       '❌ DEPRECATION: only PRIVATE_KEY is configured. Server-side contract writes now require SERVICE_SIGNER_PRIVATE_KEY (a limited MINTER_ROLE key). PRIVATE_KEY will NOT be used; writes will fail until SERVICE_SIGNER_PRIVATE_KEY is provisioned.'

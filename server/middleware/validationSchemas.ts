@@ -93,6 +93,11 @@ export const voiceAssistantSchema = z.object({
   currentPath: z.string().max(500).optional(),
 });
 
+export const voiceAssistantTextSchema = z.object({
+  transcript: z.string().min(1).max(2000),
+  currentPath: z.string().max(500).optional(),
+});
+
 // Forms / mutations
 export const streamWatchSchema = z.object({
   streamId: nonEmpty('streamId').max(100),

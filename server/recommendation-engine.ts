@@ -1,10 +1,21 @@
-import type { DatabaseStorage } from "./storage";
+import { storage, type DatabaseStorage } from "./storage";
 import memoizee from "memoizee";
 
 interface AvatarRecommendation {
   avatarId: string;
   score: number;
   reasons: string[];
+}
+
+// Lazily-constructed shared singleton — import this instead of constructing
+// per-module instances (a per-file `new RecommendationEngine(...)` in one
+// route file left other route files referencing an undefined instance).
+let _sharedEngine: RecommendationEngine | null = null;
+export function getRecommendationEngine(): RecommendationEngine {
+  if (!_sharedEngine) {
+    _sharedEngine = new RecommendationEngine(storage as DatabaseStorage);
+  }
+  return _sharedEngine;
 }
 
 export class RecommendationEngine {

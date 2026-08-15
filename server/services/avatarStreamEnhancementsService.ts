@@ -7,7 +7,7 @@ import {
 } from '@shared/schema';
 import { eq, and, desc, gt, sql } from 'drizzle-orm';
 import { modelGateway } from "../lib/modelGateway";
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
+
 
 // ================== SESSION MEMORY ==================
 interface SessionMemory {

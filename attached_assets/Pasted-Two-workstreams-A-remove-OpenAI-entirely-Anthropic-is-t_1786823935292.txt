@@ -1,0 +1,72 @@
+Two workstreams: (A) remove OpenAI entirely — Anthropic is the only AI
+API — with zero-cost replacements for audio; (B) the runtime-audit fixes.
+
+=== A. ANTHROPIC-ONLY MIGRATION ===
+
+A1. VERIFY THE TEXT SIDE IS CLEAN: confirm modelGateway routes every
+    tier to Anthropic and no code path can reach OpenAI chat. Remove
+    any dead OpenAI tier config.
+A2. TRANSCRIPTION → CAPTIONS: replace every Whisper call in the
+    summarization pipeline (realContentProcessor / streamProcessorV2 /
+    any yt-dlp path) with caption extraction: yt-dlp --write-auto-subs
+    --write-subs (prefer human subs over auto), parse the VTT/SRT into
+    the same transcript shape Whisper produced (strip timestamps/dupes)
+    so everything downstream is unchanged. If a video has no captions
+    in any language we handle, fail gracefully with a clear user-facing
+    message ("This video has no captions available to summarize") —
+    never a crash, never an invented transcript. Direct audio-file
+    uploads (if any route accepts them) return the same graceful
+    "transcription not supported" error.
+A3. TTS → BROWSER: remove all server-side TTS generation
+    (avatarVoiceService synthesis, stream audio backfill, voice
+    assistant audio replies). Client-side, add a ds/SpeakButton
+    component using the Web Speech API (speechSynthesis): speak/stop
+    toggle, picks a reasonable default voice, disabled with a tooltip
+    where the browser lacks support. Wire it wherever audio played
+    before: avatar chat replies, avatar stream text, voice-assistant
+    responses. Streams become text-first with optional client-side
+    voice — remove the boot-time TTS backfill job entirely (this also
+    kills the 10× boot-error spam permanently).
+A4. RIP OUT THE DEPENDENCY: delete server/lib/openaiClient.ts, remove
+    the openai package from package.json, remove OPENAI_API_KEY and
+    PAUSE_OPENAI_API from code and .env.example (note the removal in
+    replit.md). apiCostTracker: remove OpenAI/whisper/tts pricing and
+    recorders; the ledger now tracks Anthropic only. Search the entire
+    server/ tree for any remaining openai import — the final count
+    must be zero. Run npm run lockfile:scrub after the uninstall.
+A5. TESTS: caption-parse fixture (VTT → transcript), no-captions
+    graceful path, gateway-only-Anthropic assertion, budget ledger
+    without OpenAI entries. Update any test that mocked OpenAI.
+
+=== B. RUNTIME-AUDIT FIXES ===
+
+B1. AVATAR ROUTES REGRESSION (the dashboard 500): recommendation-engine
+    is instantiated only in server/routes.ts but referenced in
+    server/routes/avatar.ts (~lines 171/380/406). Export a lazily-
+    constructed singleton from server/recommendation-engine.ts, import
+    it in both files, remove the local construction. Verify
+    GET /api/avatars/trending returns 200; add a route test.
+B2. CRON CATCH-UP: on boot and hourly, if a registerCron job's last
+    successful run (job_runs) is older than its most recent scheduled
+    slot, run it once with a "[catch-up]" log line. Newsletter catch-up
+    must check the send log for the target date first — never double-
+    send. Tests: missed slot fires exactly once; sent date doesn't.
+B3. TREND-SPOTTER JSON TRUNCATION: raise that call's maxTokens (2048+),
+    and in modelGateway.completeJson, when stop_reason is max_tokens,
+    retry ONCE with double the cap before failing. Test with a mocked
+    truncated response.
+B4. BOOT VISIBILITY: print 🔒 boot-state lines for SWAPS_ENABLED and
+    SIGNALS_ENABLED matching the contractService pattern — all four
+    kill switches visible in every boot log.
+B5. FLAG-BEFORE-VALIDATION: in POST /api/swap/quote and any other
+    dark-flagged route, check the flag BEFORE Zod parsing so dormant
+    routes 403 without leaking schema shape. Test: invalid body still
+    gets 403 (not 400) while the flag is off.
+B6. INVESTIGATE (report only): market resolutions quiet since Aug 10.
+    Query markets past deadline with unresolved status; if any exist,
+    trace why ai-market-resolver skips them and report the exact
+    criteria mismatch. If none, state the pipeline is idle and close.
+
+Gate: lint, full tests, build, zero new tsc errors vs baseline. Push
+and verify with git ls-remote. In your summary: the zero-openai-imports
+proof, before/after package count, and the B6 report.

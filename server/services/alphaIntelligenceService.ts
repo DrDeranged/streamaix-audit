@@ -1,7 +1,7 @@
 import { modelGateway } from "../lib/modelGateway";
 import { marketDataService } from './marketDataService';
 
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
+
 
 interface NarrativeMomentum {
   narrative: string;

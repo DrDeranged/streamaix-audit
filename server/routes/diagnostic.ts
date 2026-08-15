@@ -33,7 +33,6 @@ import {
   avatarPredictSchema,
   testTtsSchema,
   testTtsAudioSchema,
-  generateReplayAudioSchema,
   emptyBodySchema,
   streamWatchSchema,
   voiceConversationSchema,
@@ -326,8 +325,8 @@ export async function registerDiagnosticRoutes(app: Express): Promise<void> {
       },
       flags: {
         quietMode: process.env.QUIET_MODE === 'true',
-        openaiPaused: process.env.PAUSE_OPENAI_API === 'true',
-        hasOpenaiKey: !!process.env.OPENAI_API_KEY
+        anthropicPaused: process.env.PAUSE_ANTHROPIC_API === 'true',
+        hasAnthropicKey: !!process.env.ANTHROPIC_API_KEY
       }
     });
   }));
@@ -348,8 +347,7 @@ export async function registerDiagnosticRoutes(app: Express): Promise<void> {
       timestamp: new Date().toISOString(),
       platform: process.platform,
       uptime: process.uptime(),
-      hasOpenAIKey: !!process.env.OPENAI_API_KEY,
-      openAIKeyLength: process.env.OPENAI_API_KEY?.length || 0,
+      hasAnthropicKey: !!process.env.ANTHROPIC_API_KEY,
       routesThatExist: [
         '/api/health',
         '/api/diagnostic-probe-v2',
@@ -431,133 +429,5 @@ export async function registerDiagnosticRoutes(app: Express): Promise<void> {
   }));
   console.log('✅ Admin reseed endpoint registered');
 
-  // Admin endpoint to retroactively generate TTS audio for existing stream replays
-  app.post('/api/admin/generate-replay-audio', authenticateToken, requireAdmin, strictLimit, validateBody(generateReplayAudioSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { count = 2 } = req.body;
-    try {
-      // Get streams that have recordings but no audio, ordered by most recent
-      const recordingsWithoutAudio = await db.select({
-        recordingId: streamRecordings.id,
-        streamId: streamRecordings.streamId,
-        streamTitle: liveStreams.title,
-        hostAvatarId: liveStreams.hostAvatarId,
-      })
-      .from(streamRecordings)
-      .innerJoin(liveStreams, eq(streamRecordings.streamId, liveStreams.id))
-      .where(and(
-        eq(streamRecordings.status, 'ready'),
-        isNull(streamRecordings.audioData)
-      ))
-      .orderBy(desc(streamRecordings.createdAt))
-      .limit(count);
-
-      if (recordingsWithoutAudio.length === 0) {
-        return res.json({ success: true, message: 'No recordings found that need audio generation', generated: [] });
-      }
-
-      const results: Array<{ streamId: string; title: string; success: boolean; error?: string }> = [];
-
-      for (const recording of recordingsWithoutAudio) {
-        try {
-          console.log(`[Retroactive TTS] Processing: ${recording.streamId} - ${recording.streamTitle}`);
-          
-          // Get messages for this stream
-          const messages = await db.select()
-            .from(streamMessages)
-            .where(eq(streamMessages.streamId, recording.streamId))
-            .orderBy(streamMessages.createdAt);
-
-          console.log(`[Retroactive TTS] Found ${messages.length} messages`);
-
-          if (messages.length === 0) {
-            results.push({ streamId: recording.streamId, title: recording.streamTitle || 'Unknown', success: false, error: 'No messages found' });
-            continue;
-          }
-
-          // Use default voice (voice column doesn't exist in knowledge_avatars)
-          const voice = 'onyx';
-          console.log(`[Retroactive TTS] Using voice: ${voice}`);
-
-          // Combine all messages into one text (filter null/empty content)
-          const fullText = messages
-            .filter(m => m.content && typeof m.content === 'string')
-            .map(m => m.content)
-            .join(' ')
-            .trim();
-          
-          console.log(`[Retroactive TTS] Text length: ${fullText.length}`);
-
-          if (!fullText || fullText.length < 10) {
-            results.push({ streamId: recording.streamId, title: recording.streamTitle || 'Unknown', success: false, error: 'Not enough text content' });
-            continue;
-          }
-
-          // Truncate to TTS limit (4096 characters) - split into chunks if needed
-          const maxLength = 4096;
-          const textForTTS = fullText.length > maxLength ? fullText.slice(0, maxLength) : fullText;
-
-          // Generate TTS audio using OpenAI
-          const openaiApiKey = process.env.OPENAI_API_KEY;
-          if (!openaiApiKey) {
-            results.push({ streamId: recording.streamId, title: recording.streamTitle || 'Unknown', success: false, error: 'OpenAI API key not configured' });
-            continue;
-          }
-
-          console.log(`[Retroactive TTS] Generating audio for: ${recording.streamTitle} (${textForTTS.length} chars, voice: ${voice})`);
-          
-          // Use fetch directly for more control
-          const ttsResponse = await fetch('https://api.openai.com/v1/audio/speech', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${openaiApiKey}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              model: 'tts-1',
-              input: textForTTS,
-              voice: voice,
-              response_format: 'mp3'
-            })
-          });
-
-          if (!ttsResponse.ok) {
-            const errorBody = await ttsResponse.text();
-            console.error(`[Retroactive TTS] API error for ${recording.streamId}: ${ttsResponse.status} - ${errorBody}`);
-            results.push({ streamId: recording.streamId, title: recording.streamTitle || 'Unknown', success: false, error: `TTS API error: ${ttsResponse.status}` });
-            continue;
-          }
-
-          // Convert to base64
-          const audioBuffer = await ttsResponse.arrayBuffer();
-          console.log(`[Retroactive TTS] Got ${audioBuffer.byteLength} bytes of audio`);
-          const audioBase64 = Buffer.from(audioBuffer).toString('base64');
-
-          // Save to database
-          await db.update(streamRecordings)
-            .set({ audioData: audioBase64 })
-            .where(eq(streamRecordings.id, recording.recordingId));
-
-          console.log(`[Retroactive TTS] ✅ Generated and saved audio for: ${recording.streamTitle}`);
-          results.push({ streamId: recording.streamId, title: recording.streamTitle || 'Unknown', success: true });
-
-        } catch (err: any) {
-          console.error(`[Retroactive TTS] Error for ${recording.streamId}:`, err.message);
-          results.push({ streamId: recording.streamId, title: recording.streamTitle || 'Unknown', success: false, error: err.message });
-        }
-      }
-
-      const successCount = results.filter(r => r.success).length;
-      res.json({ 
-        success: successCount > 0, 
-        message: `Generated audio for ${successCount}/${results.length} recordings`,
-        generated: results 
-      });
-
-    } catch (error: any) {
-      console.error('[Retroactive TTS] Error:', error.message);
-      res.status(500).json({ success: false, error: error.message });
-    }
-  }));
-  console.log('✅ Admin generate-replay-audio endpoint registered');
   
 }

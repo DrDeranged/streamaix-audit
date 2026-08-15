@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { marketDataService, type CryptoQuote } from './marketDataService';
 import { cacheService } from './cacheService';
 
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
+
 
 export interface ReasoningInsight {
   id: string;

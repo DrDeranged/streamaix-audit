@@ -3,7 +3,7 @@ import { summaries, bountyQualityScores, autonomousSystemLogs } from '@shared/sc
 import { eq, isNull, and } from 'drizzle-orm';
 import { modelGateway } from "../lib/modelGateway";
 import { jobScheduler } from '../jobs/scheduler';
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
+
 
 interface ModerationResult {
   qualityScore: number; // 0-100

@@ -59,6 +59,14 @@ class NewsletterScheduler {
    */
   private async sendNewsletter(day: string): Promise<void> {
     try {
+      // Per-slot idempotence: the scheduler's catch-up pass may re-invoke a
+      // missed slot, and a restart near the slot could double-fire. Skip if
+      // a newsletter was already sent within this slot's window today
+      // (morning slot = before 12:00 ET, market-close slot = after).
+      if (await this.alreadySentForSlot(day)) {
+        console.log(`📧 ${day} newsletter already sent for today's slot — skipping (idempotence guard)`);
+        return;
+      }
       const result = await newsletterService.sendToWaitlist(storage);
       
       if (result.success) {
@@ -71,6 +79,35 @@ class NewsletterScheduler {
       }
     } catch (error) {
       console.error(`❌ ${day} newsletter send failed:`, error);
+    }
+  }
+
+  /**
+   * Check the send log (newsletters table) for a newsletter already sent in
+   * today's slot window (America/New_York). Fail-open: if the check errors,
+   * we allow the send rather than silently dropping newsletters.
+   */
+  async alreadySentForSlot(day: string, now: Date = new Date()): Promise<boolean> {
+    try {
+      const { db } = await import('../db');
+      const { newsletters } = await import('@shared/schema');
+      const { and, gte, lt, eq } = await import('drizzle-orm');
+      // Compute today's ET midnight and noon as UTC instants.
+      const etNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+      const offsetMs = now.getTime() - etNow.getTime();
+      const etMidnight = new Date(etNow); etMidnight.setHours(0, 0, 0, 0);
+      const etNoon = new Date(etNow); etNoon.setHours(12, 0, 0, 0);
+      const windowStart = new Date((day === 'Morning' ? etMidnight : etNoon).getTime() + offsetMs);
+      const windowEnd = new Date((day === 'Morning' ? etNoon : new Date(etMidnight.getTime() + 24 * 3600_000)).getTime() + offsetMs);
+      const rows = await db
+        .select({ id: newsletters.id })
+        .from(newsletters)
+        .where(and(eq(newsletters.status, 'sent'), gte(newsletters.sentAt, windowStart), lt(newsletters.sentAt, windowEnd)))
+        .limit(1);
+      return rows.length > 0;
+    } catch (err) {
+      console.warn('⚠️ Newsletter sent-log check failed (allowing send):', (err as Error).message);
+      return false;
     }
   }
 

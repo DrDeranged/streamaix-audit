@@ -28,6 +28,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { SpeakButton } from '@/components/ui/speak-button';
 
 interface ConversationPanelProps {
   streamId: string;
@@ -45,38 +46,23 @@ export function ConversationPanel({
   className,
 }: ConversationPanelProps) {
   const [textInput, setTextInput] = useState('');
+  // Auto-speak avatar replies client-side (Web Speech API). Server-side TTS
+  // was removed — avatar responses arrive as text only.
   const [audioEnabled, setAudioEnabled] = useState(true);
-  const audioQueueRef = useRef<string[]>([]);
-  const isPlayingRef = useRef(false);
+  const audioEnabledRef = useRef(audioEnabled);
+  audioEnabledRef.current = audioEnabled;
+  const spokenIdsRef = useRef<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pointsAwardedRef = useRef(false);
   
   const awardVoiceConversation = useAwardVoiceConversation();
 
-  const handleAudioReceived = (audioBase64: string, speakerName: string) => {
-    if (!audioEnabled) return;
-    audioQueueRef.current.push(audioBase64);
-    playNextAudio();
-  };
+  const speechSupported = typeof window !== 'undefined' && 'speechSynthesis' in window;
 
-  const playNextAudio = async () => {
-    if (isPlayingRef.current || audioQueueRef.current.length === 0) return;
-    
-    isPlayingRef.current = true;
-    const audioBase64 = audioQueueRef.current.shift()!;
-    
-    try {
-      const audio = new Audio(`data:audio/mp3;base64,${audioBase64}`);
-      await audio.play();
-      audio.onended = () => {
-        isPlayingRef.current = false;
-        playNextAudio();
-      };
-    } catch (err) {
-      console.error('[ConversationPanel] Audio playback error:', err);
-      isPlayingRef.current = false;
-      playNextAudio();
-    }
+  const speakText = (text: string) => {
+    if (!speechSupported || !audioEnabledRef.current || !text.trim()) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    window.speechSynthesis.speak(utterance);
   };
 
   const {
@@ -101,7 +87,6 @@ export function ConversationPanel({
     avatarId,
     role: isHost ? 'host' : 'speaker',
     audioPreference: 'text_only',
-    onAudioReceived: handleAudioReceived,
   });
 
   const {
@@ -124,6 +109,25 @@ export function ConversationPanel({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Speak newly-arrived avatar messages aloud (client-side, free).
+  useEffect(() => {
+    for (const msg of messages) {
+      if (msg.speakerType !== 'avatar') continue;
+      if (spokenIdsRef.current.has(msg.id)) continue;
+      spokenIdsRef.current.add(msg.id);
+      speakText(msg.textContent);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages]);
+
+  // Stop any in-flight speech when audio is muted or on unmount.
+  useEffect(() => {
+    if (!speechSupported) return;
+    if (!audioEnabled) window.speechSynthesis.cancel();
+    return () => window.speechSynthesis.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audioEnabled]);
 
   const handleSendText = () => {
     if (textInput.trim()) {
@@ -230,7 +234,7 @@ export function ConversationPanel({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              {audioEnabled ? 'Mute audio' : 'Enable audio'}
+              {audioEnabled ? 'Mute read-aloud' : 'Enable read-aloud'}
             </TooltipContent>
           </Tooltip>
         </div>
@@ -507,9 +511,18 @@ function MessageBubble({
             <Mic className="h-3 w-3 text-muted" />
           )}
         </div>
-        <p className="text-sm text-body mt-0.5 whitespace-pre-wrap">
-          {message.textContent}
-        </p>
+        <div className="flex items-start gap-1">
+          <p className="text-sm text-body mt-0.5 whitespace-pre-wrap flex-1">
+            {message.textContent}
+          </p>
+          {isAvatar && (
+            <SpeakButton
+              text={message.textContent}
+              className="h-6 w-6 text-secondary hover:text-primary"
+              data-testid={`button-speak-${message.id}`}
+            />
+          )}
+        </div>
         {message.audioUrl && (
           <audio 
             src={message.audioUrl} 

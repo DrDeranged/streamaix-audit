@@ -135,7 +135,6 @@ export async function registerRealProcessingRoutes(app: Express): Promise<void> 
     const { url } = req.body;
     try {
       console.log(`✅ URL received: ${url}`);
-      console.log(`🔐 Environment check: OPENAI_API_KEY = ${process.env.OPENAI_API_KEY ? 'SET ✓' : 'MISSING ✗'}`);
       
       // Get current user ID from authenticated session
       // @ts-ignore - req.user is added by Passport.js authentication middleware

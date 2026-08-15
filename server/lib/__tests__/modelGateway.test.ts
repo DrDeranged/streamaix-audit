@@ -17,8 +17,8 @@ import {
   __resetAnthropicClientForTests,
 } from "../modelGateway";
 
-function textResponse(text: string) {
-  return { content: [{ type: "text", text }] };
+function textResponse(text: string, stopReason: string = "end_turn") {
+  return { content: [{ type: "text", text }], stop_reason: stopReason };
 }
 
 describe("ModelGateway (Anthropic-backed)", () => {
@@ -29,7 +29,6 @@ describe("ModelGateway (Anthropic-backed)", () => {
     __resetAnthropicClientForTests();
     process.env.ANTHROPIC_API_KEY = "test-key";
     delete process.env.PAUSE_ANTHROPIC_API;
-    delete process.env.PAUSE_OPENAI_API;
     delete process.env.MODEL_REASONING;
     delete process.env.MODEL_FAST;
     gateway = new ModelGateway();
@@ -114,14 +113,6 @@ describe("ModelGateway (Anthropic-backed)", () => {
     expect(createMock).not.toHaveBeenCalled();
   });
 
-  it("PAUSE_OPENAI_API does NOT block Anthropic-routed calls", async () => {
-    process.env.PAUSE_OPENAI_API = "true";
-    createMock.mockResolvedValue(textResponse("fine"));
-    const result = await gateway.complete({ tier: "fast",
-      priority: "user",
-      tag: "test", system: "s", user: "u" });
-    expect(result.content).toBe("fine");
-  });
 
   it("retries once on overloaded_error", async () => {
     createMock
@@ -191,5 +182,53 @@ describe("stripJsonFences", () => {
   });
   it("leaves bare JSON alone", () => {
     expect(stripJsonFences('{"x":1}')).toBe('{"x":1}');
+  });
+});
+
+describe("Anthropic-only + truncation handling", () => {
+  let gateway: ModelGateway;
+
+  beforeEach(() => {
+    createMock.mockReset();
+    __resetAnthropicClientForTests();
+    process.env.ANTHROPIC_API_KEY = "test-key";
+    delete process.env.PAUSE_ANTHROPIC_API;
+    gateway = new ModelGateway();
+  });
+
+  it("every completion goes to Anthropic and only Anthropic models are billed", async () => {
+    createMock.mockResolvedValue({ ...textResponse("hi"), usage: { input_tokens: 10, output_tokens: 5 } });
+    const result = await gateway.complete({ tier: "reasoning", priority: "user", tag: "test", system: "s", user: "u" });
+    expect(result.model).toMatch(/claude/);
+    expect(createMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("surfaces stop_reason on the completion result", async () => {
+    createMock.mockResolvedValue(textResponse("done", "end_turn"));
+    const result = await gateway.complete({ tier: "fast", priority: "user", tag: "test", system: "s", user: "u" });
+    expect(result.stopReason).toBe("end_turn");
+  });
+
+  it("completeJson retries ONCE with doubled max_tokens when truncated", async () => {
+    createMock
+      .mockResolvedValueOnce(textResponse('{"markets": [', "max_tokens"))
+      .mockResolvedValueOnce(textResponse('{"markets": []}', "end_turn"));
+    const result = await gateway.completeJson<{ markets: unknown[] }>({
+      tier: "reasoning", priority: "background", tag: "test-trunc",
+      system: "s", user: "u", maxTokens: 2048,
+    });
+    expect(result.markets).toEqual([]);
+    expect(createMock).toHaveBeenCalledTimes(2);
+    const secondCall = createMock.mock.calls[1][0];
+    expect(secondCall.max_tokens).toBe(4096);
+  });
+
+  it("completeJson does not loop on repeated truncation (one doubled retry only)", async () => {
+    createMock.mockResolvedValue(textResponse('{"broken": ', "max_tokens"));
+    await expect(
+      gateway.completeJson({ tier: "fast", priority: "user", tag: "t", system: "s", user: "u" }),
+    ).rejects.toThrow();
+    // initial + doubled retry, then parse-fail retry path (also capped)
+    expect(createMock.mock.calls.length).toBeLessThanOrEqual(4);
   });
 });

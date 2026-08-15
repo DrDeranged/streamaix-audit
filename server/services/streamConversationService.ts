@@ -8,11 +8,9 @@ import {
   users 
 } from '@shared/schema';
 import { eq, and, desc } from 'drizzle-orm';
-import { openai as lazyOpenai } from "../lib/openaiClient";
-const openai = lazyOpenai;
-import { recordTtsSpend, recordWhisperSpend } from './apiCostTracker';
-import { enforceBudget, modelGateway } from "../lib/modelGateway";
-// openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
+import { modelGateway } from "../lib/modelGateway";
+// Server-side TTS/transcription removed — avatar replies are broadcast as
+// text and spoken client-side via the Web Speech API (SpeakButton).
 
 interface ConversationParticipant {
   id: string;
@@ -84,15 +82,12 @@ export class StreamConversationService {
   private rooms = new Map<string, ConversationRoom>();
   private participantConnections = new Map<string, WebSocket>(); // participantId -> ws
   
-  private readonly PAUSE_OPENAI = process.env.PAUSE_OPENAI_API === 'true';
   private readonly PAUSE_ANTHROPIC = process.env.PAUSE_ANTHROPIC_API === 'true';
   private readonly QUIET_MODE = process.env.QUIET_MODE === 'true';
   private readonly MAX_CONTEXT_MESSAGES = 30;
-  private readonly TTS_WHITELIST = ['haydenzadams', 'hayden adams', 'Hayden Adams'];
-  
   constructor() {
     console.log('[StreamConversation] Service initialized');
-    console.log(`[StreamConversation] PAUSE_OPENAI_API: ${this.PAUSE_OPENAI}, QUIET_MODE: ${this.QUIET_MODE}`);
+    console.log(`[StreamConversation] QUIET_MODE: ${this.QUIET_MODE}`);
   }
 
   async handleConnection(
@@ -616,12 +611,6 @@ export class StreamConversationService {
 
       if (!avatar) return;
 
-      // Check TTS whitelist
-      const isTTSEnabled = this.TTS_WHITELIST.some(name => 
-        avatar.name.toLowerCase().includes(name.toLowerCase()) ||
-        avatar.handle?.toLowerCase().includes(name.toLowerCase())
-      );
-
       // Build conversation context
       const contextMessages = room.conversationHistory.slice(-this.MAX_CONTEXT_MESSAGES);
       const conversationContext = contextMessages.map(msg => 
@@ -694,54 +683,16 @@ Never break character. Respond naturally as if in a real conversation.`;
 
       room.conversationHistory.push(avatarMessage);
 
-      // Generate TTS if whitelisted
-      let audioUrl: string | undefined;
-      let audioDurationMs: number | undefined;
-
-      if (isTTSEnabled) {
-        try {
-          await enforceBudget('background', 'stream-conversation');
-          const ttsResponse = await openai.audio.speech.create({
-            model: 'tts-1',
-            voice: 'onyx',
-            input: responseText,
-          });
-          
-          recordTtsSpend(responseText.length);
-          const audioBuffer = Buffer.from(await ttsResponse.arrayBuffer());
-          const audioBase64 = audioBuffer.toString('base64');
-          
-          // Estimate duration (rough: ~150 words per minute)
-          const wordCount = responseText.split(' ').length;
-          audioDurationMs = Math.round((wordCount / 150) * 60 * 1000);
-
-          // Broadcast audio response
-          this.broadcastToRoom(room.streamId, {
-            type: 'avatar-response',
-            streamId: room.streamId,
-            data: {
-              message: avatarMessage,
-              audioBase64,
-              audioDurationMs,
-            },
-            timestamp: Date.now(),
-          });
-        } catch (ttsError) {
-          console.error('[StreamConversation] TTS generation failed:', ttsError);
-        }
-      }
-
-      // Broadcast text response (always)
-      if (!isTTSEnabled) {
-        this.broadcastToRoom(room.streamId, {
-          type: 'avatar-response',
-          streamId: room.streamId,
-          data: {
-            message: avatarMessage,
-          },
-          timestamp: Date.now(),
-        });
-      }
+      // Broadcast text response (always). Clients speak it with the Web
+      // Speech API if the viewer wants audio.
+      this.broadcastToRoom(room.streamId, {
+        type: 'avatar-response',
+        streamId: room.streamId,
+        data: {
+          message: avatarMessage,
+        },
+        timestamp: Date.now(),
+      });
 
       console.log(`[StreamConversation] Avatar ${avatar.name} responded: "${responseText.substring(0, 50)}..."`);
     } catch (error) {
@@ -862,26 +813,13 @@ Never break character. Respond naturally as if in a real conversation.`;
     };
   }
 
-  // Endpoint for Whisper transcription
-  async transcribeAudio(audioBuffer: Buffer): Promise<string> {
-    if (this.PAUSE_OPENAI) {
-      throw new Error('OpenAI API is paused');
-    }
-
-    try {
-      const file = new File([audioBuffer], 'audio.webm', { type: 'audio/webm' });
-      await enforceBudget('background', 'stream-conversation');
-      const transcription = await openai.audio.transcriptions.create({
-        file,
-        model: 'whisper-1',
-        language: 'en',
-      });
-      recordWhisperSpend({ bytes: audioBuffer.length });
-      return transcription.text;
-    } catch (error) {
-      console.error('[StreamConversation] Transcription error:', error);
-      throw error;
-    }
+  // Server-side transcription was removed with OpenAI Whisper.
+  async transcribeAudio(_audioBuffer: Buffer): Promise<string> {
+    const err: Error & { statusCode?: number } = new Error(
+      'Audio transcription is not supported. Please type your message instead.',
+    );
+    err.statusCode = 422;
+    throw err;
   }
 
   // Get room info for API
