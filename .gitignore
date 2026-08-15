@@ -68,3 +68,6 @@ replit.nix
 
 # Vercel
 .vercel
+# Agent artifacts / uploads
+attached_assets/
+*.tar.gz

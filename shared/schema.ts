@@ -7671,6 +7671,22 @@ export const apiSpendDaily = pgTable(
 
 export type ApiSpendDaily = typeof apiSpendDaily.$inferSelect;
 
+// Per-wallet daily swap quote volume (UTC days) — persists the riskEngine's
+// swap soft-cap meter across restarts (mirrors api_spend_daily).
+export const swapDailyVolume = pgTable(
+  "swap_daily_volume",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    wallet: text("wallet").notNull(), // lowercase 0x address
+    day: text("day").notNull(), // YYYY-MM-DD (UTC)
+    volumeUsd: doublePrecision("volume_usd").default(0).notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (t) => [uniqueIndex("swap_daily_volume_wallet_day_idx").on(t.wallet, t.day)],
+);
+
+export type SwapDailyVolume = typeof swapDailyVolume.$inferSelect;
+
 // ---------------------------------------------------------------------------
 // Non-custodial swap rail (Base). Dormant unless SWAPS_ENABLED=true.
 // ---------------------------------------------------------------------------

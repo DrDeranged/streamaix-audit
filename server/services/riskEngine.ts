@@ -7,6 +7,7 @@ import {
   riskEvents,
   marketPriceHistory,
   users,
+  swapDailyVolume,
 } from "@shared/schema";
 import { eq, and, gte, sql, inArray, desc } from "drizzle-orm";
 
@@ -289,12 +290,53 @@ export class RiskEngine {
   // Real-money swap checks (non-custodial swap rail on Base)
   // ------------------------------------------------------------------
 
-  /** Per-wallet daily quote volume, in USD. In-memory (soft cap). */
+  /**
+   * Per-wallet daily quote volume, in USD. In-memory cache over the
+   * swap_daily_volume table (persisted so the soft cap survives restarts).
+   */
   private swapDailyVolume = new Map<string, { day: string; volumeUsd: number }>();
 
   /** Test helper: reset the in-memory swap volume tracker. */
   resetSwapVolumeTracker(): void {
     this.swapDailyVolume.clear();
+  }
+
+  /**
+   * Load the persisted daily volume for a wallet/day, hydrating the cache.
+   * Fail-safe direction: on a read error we return the in-memory value (the
+   * cap is a soft cap — availability over strictness, matching its history).
+   */
+  private async loadSwapVolume(wallet: string, day: string): Promise<number> {
+    const cached = this.swapDailyVolume.get(wallet);
+    if (cached && cached.day === day) return cached.volumeUsd;
+    try {
+      const rows = await db
+        .select()
+        .from(swapDailyVolume)
+        .where(and(eq(swapDailyVolume.wallet, wallet), eq(swapDailyVolume.day, day)))
+        .limit(1);
+      const volumeUsd = rows[0]?.volumeUsd ?? 0;
+      this.swapDailyVolume.set(wallet, { day, volumeUsd });
+      return volumeUsd;
+    } catch (err) {
+      console.warn("[RiskEngine] swap_daily_volume read failed (using in-memory value):", (err as Error).message);
+      return cached && cached.day === day ? cached.volumeUsd : 0;
+    }
+  }
+
+  /** Persist the new daily total (upsert on wallet+day). Best-effort. */
+  private async persistSwapVolume(wallet: string, day: string, volumeUsd: number): Promise<void> {
+    try {
+      await db
+        .insert(swapDailyVolume)
+        .values({ wallet, day, volumeUsd })
+        .onConflictDoUpdate({
+          target: [swapDailyVolume.wallet, swapDailyVolume.day],
+          set: { volumeUsd, updatedAt: new Date() },
+        });
+    } catch (err) {
+      console.warn("[RiskEngine] swap_daily_volume persist failed (in-memory only):", (err as Error).message);
+    }
   }
 
   /**
@@ -313,9 +355,8 @@ export class RiskEngine {
     const day = this.now().toISOString().slice(0, 10);
     const cap = envInt("SWAP_DAILY_QUOTE_CAP_USD", 25000);
 
-    // 1. Daily quote-volume soft cap
-    const entry = this.swapDailyVolume.get(wallet);
-    const usedToday = entry && entry.day === day ? entry.volumeUsd : 0;
+    // 1. Daily quote-volume soft cap (persisted — survives restarts)
+    const usedToday = await this.loadSwapVolume(wallet, day);
     const notional = input.notionalUsd ?? 0;
     if (usedToday + notional > cap) {
       await this.logEvent("swap_daily_cap", null, null, {
@@ -355,8 +396,9 @@ export class RiskEngine {
       }
     }
 
-    // Record the quoted volume against the wallet's daily total.
+    // Record the quoted volume against the wallet's daily total (memory + db).
     this.swapDailyVolume.set(wallet, { day, volumeUsd: usedToday + notional });
+    await this.persistSwapVolume(wallet, day, usedToday + notional);
     return { allowed: true };
   }
 

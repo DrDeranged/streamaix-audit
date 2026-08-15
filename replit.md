@@ -71,3 +71,5 @@ Preferred communication style: Simple, everyday language.
 
 - Private GitHub mirror for auditing: `github.com/DrDeranged/streamaix-audit` (pushed via `GITHUB_PERSONAL_ACCESS_TOKEN` secret).
 - This file is the single source of truth. Root-level markdown files other than this one may be stale — do not trust them without verification.
+
+- **Document hygiene rule:** audit reports and pasted docs go in `docs/`, never `attached_assets/`. `attached_assets/` and `*.tar.gz` are gitignored; historical root .md files live in `docs/archive/`.
