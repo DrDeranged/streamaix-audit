@@ -24,8 +24,8 @@ function createLimiter({ windowMs, max, name, keyBy = 'ip' }: RateLimitOptions) 
 
   setInterval(() => {
     const cutoff = Date.now() - windowMs;
-    for (const [key, times] of buckets) {
-      const fresh = times.filter((t) => t > cutoff);
+    for (const [key, times] of Array.from(buckets.entries())) {
+      const fresh = times.filter((t: number) => t > cutoff);
       if (fresh.length === 0) buckets.delete(key);
       else buckets.set(key, fresh);
     }

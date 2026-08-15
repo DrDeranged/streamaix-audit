@@ -223,16 +223,16 @@ export class ResolutionService {
         
         if (existingPredictor) {
           // Update existing predictor
-          const newTotalPredictions = existingPredictor.totalPredictions + 1;
-          const newCorrectPredictions = existingPredictor.correctPredictions + (isCorrect ? 1 : 0);
+          const newTotalPredictions = (existingPredictor.totalPredictions ?? 0) + 1;
+          const newCorrectPredictions = (existingPredictor.correctPredictions ?? 0) + (isCorrect ? 1 : 0);
           const newAccuracyRate = (newCorrectPredictions / newTotalPredictions) * 100;
-          const newTotalVolume = existingPredictor.totalVolume + position.totalInvested;
-          const newTotalProfit = existingPredictor.totalProfit + (pnl > 0 ? pnl : 0);
-          const newTotalLoss = existingPredictor.totalLoss + (pnl < 0 ? Math.abs(pnl) : 0);
-          const newNetProfit = existingPredictor.netProfit + pnl;
+          const newTotalVolume = (existingPredictor.totalVolume ?? 0) + position.totalInvested;
+          const newTotalProfit = (existingPredictor.totalProfit ?? 0) + (pnl > 0 ? pnl : 0);
+          const newTotalLoss = (existingPredictor.totalLoss ?? 0) + (pnl < 0 ? Math.abs(pnl) : 0);
+          const newNetProfit = (existingPredictor.netProfit ?? 0) + pnl;
           const newRoi = newTotalVolume > 0 ? (newNetProfit / newTotalVolume) * 100 : 0;
-          const newStreak = isCorrect ? existingPredictor.currentStreak + 1 : 0;
-          const newLongestStreak = Math.max(newStreak, existingPredictor.longestStreak);
+          const newStreak = isCorrect ? (existingPredictor.currentStreak ?? 0) + 1 : 0;
+          const newLongestStreak = Math.max(newStreak, existingPredictor.longestStreak ?? 0);
           
           await db.update(marketPredictors)
             .set({
@@ -310,19 +310,19 @@ export class ResolutionService {
         const badges: string[] = predictor.badges as string[] || [];
         
         // Award badges based on achievements
-        if (predictor.totalPredictions >= 1 && !badges.includes('First Prediction')) {
+        if ((predictor.totalPredictions ?? 0) >= 1 && !badges.includes('First Prediction')) {
           badges.push('First Prediction');
         }
-        if (predictor.totalPredictions >= 10 && !badges.includes('Frequent Trader')) {
+        if ((predictor.totalPredictions ?? 0) >= 10 && !badges.includes('Frequent Trader')) {
           badges.push('Frequent Trader');
         }
-        if (predictor.accuracyRate >= 70 && predictor.totalPredictions >= 5 && !badges.includes('Sharp Mind')) {
+        if ((predictor.accuracyRate ?? 0) >= 70 && (predictor.totalPredictions ?? 0) >= 5 && !badges.includes('Sharp Mind')) {
           badges.push('Sharp Mind');
         }
-        if (predictor.longestStreak >= 5 && !badges.includes('Hot Streak')) {
+        if ((predictor.longestStreak ?? 0) >= 5 && !badges.includes('Hot Streak')) {
           badges.push('Hot Streak');
         }
-        if (predictor.netProfit >= 10000 && !badges.includes('Profit Master')) {
+        if ((predictor.netProfit ?? 0) >= 10000 && !badges.includes('Profit Master')) {
           badges.push('Profit Master');
         }
         if (predictor.rank && predictor.rank <= 10 && !badges.includes('Top 10')) {

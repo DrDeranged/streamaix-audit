@@ -236,7 +236,7 @@ export class AnalyticsEngine {
     charts: any[];
   }> {
     const analytics = await this.getTransactionAnalytics(address, '30d');
-    const holdings = []; // Would fetch actual holdings
+    const holdings: any[] = []; // Would fetch actual holdings
     const risk = await this.assessRisk(address, holdings);
 
     const summary = `Over the past 30 days, you've completed ${analytics.totalTransactions} transactions with a ${(analytics.successRate * 100).toFixed(1)}% success rate. Your average gas cost was $${analytics.averageGasCost}, saving you $${analytics.totalGasSaved} compared to network averages.`;

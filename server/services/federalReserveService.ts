@@ -186,21 +186,21 @@ export class FederalReserveService {
 
       // Merge and sort by date
       const allCommunications = [...speeches, ...pressReleases]
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .sort((a, b) => new Date(b.date ?? '').getTime() - new Date(a.date ?? '').getTime())
         .slice(0, limit);
 
       // Add sentiment analysis to each communication
       const analyzedCommunications = await Promise.all(
         allCommunications.map(async (comm) => {
-          const sentiment = await this.analyzeSentiment(comm.content || comm.title);
-          const policySignals = this.extractPolicySignals(comm.content || comm.title);
+          const sentiment = await this.analyzeSentiment(comm.content || comm.title || '');
+          const policySignals = this.extractPolicySignals(comm.content || comm.title || '');
           
           return {
             ...comm,
             sentiment,
             policySignals,
-            keyTopics: this.extractKeyTopics(comm.content || comm.title),
-            keyPhrases: this.extractKeyPhrases(comm.content || comm.title),
+            keyTopics: this.extractKeyTopics(comm.content || comm.title || ''),
+            keyPhrases: this.extractKeyPhrases(comm.content || comm.title || ''),
             marketRelevance: this.calculateMarketRelevance(comm),
             surpriseFactor: this.calculateSurpriseFactor(comm),
             isHighImpact: this.isHighImpactCommunication(comm)
@@ -210,7 +210,7 @@ export class FederalReserveService {
 
       this.setCacheWithTimeout(cacheKey, analyzedCommunications);
       console.log(`✅ Fetched ${analyzedCommunications.length} Fed communications`);
-      return analyzedCommunications;
+      return analyzedCommunications as FedCommunication[];
 
     } catch (error) {
       console.error('❌ Failed to fetch Fed communications:', error);
@@ -509,8 +509,8 @@ export class FederalReserveService {
           confidence: avgConfidence,
           numCommunications: comms.length,
           dominantStance: avgScore > 0.2 ? 'hawkish' : avgScore < -0.2 ? 'dovish' : 'neutral',
-          keyTopics: [...new Set(comms.flatMap(c => c.keyTopics))]
-        });
+          keyTopics: Array.from(new Set(comms.flatMap(c => c.keyTopics)))
+        } as unknown as FedSentimentTrend);
       });
       
       const sortedTrend = trend.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -648,7 +648,7 @@ export class FederalReserveService {
   private isHighImpactCommunication(comm: Partial<FedCommunication>): boolean {
     return comm.type === 'statement' || 
            comm.type === 'minutes' || 
-           (comm.officialName?.includes('Chair') && comm.type === 'speech');
+           ((comm.officialName?.includes('Chair') ?? false) && comm.type === 'speech');
   }
 
   private calculateSentimentDirection(trend: FedSentimentTrend[]): 'increasingly_hawkish' | 'increasingly_dovish' | 'stable' | 'mixed' {

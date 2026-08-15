@@ -468,7 +468,7 @@ export class AutonomousAgentService {
     const { getAgentSummarySubmitter } = await import('./agentSummarySubmitter');
     const submitter = getAgentSummarySubmitter();
     await submitter.submitSummary({
-      agentId: agent.id,
+      agentId: agent.id as unknown as number,
       username: agent.username,
       personality: agent.agentPersonality,
       streamPoints: agent.streamPoints,

@@ -406,7 +406,7 @@ export class MarketEventModelingService {
 
       // Get Fed events and economic calendar
       const [fedCommunications, economicEvents] = await Promise.all([
-        this.federalReserveService.getUpcomingEvents(timeframe),
+        this.federalReserveService.getUpcomingEvents(timeframe as unknown as number),
         this.getEconomicCalendarEvents(timeframe)
       ]);
 
@@ -653,7 +653,7 @@ export class MarketEventModelingService {
   private selectModelsForEvent(event: MarketEvent): EventImpactModel[] {
     const relevantModels: EventImpactModel[] = [];
     
-    for (const [_, model] of this.models) {
+    for (const [_, model] of Array.from(this.models.entries())) {
       if (model.isActive && 
           (model.eventTypes.includes(event.eventType) || 
            model.eventTypes.includes('all') ||
@@ -677,7 +677,7 @@ export class MarketEventModelingService {
       eventId: event.id,
       predictionType: 'price_movement',
       modelVersion: model.id,
-      algorithm: model.algorithm,
+      algorithm: model.algorithm as EventImpactPrediction['algorithm'],
       trainingDataSize: 10000,
       featureCount: model.features.length,
       lastTrainedAt: model.lastRetrained,
@@ -743,7 +743,7 @@ export class MarketEventModelingService {
           riskRewardRatio: Math.abs(assetPred.predictedMove) / 2,
           recommendedAllocation: Math.min(Math.abs(assetPred.predictedMove), 5),
           maxRisk: 2,
-          timeframe: '24h',
+          timeframe: '24h' as TradingSignal['timeframe'],
           validUntil: new Date(Date.now() + 86400000).toISOString(),
           urgency: event.timeToEvent && event.timeToEvent < 3600000 ? 'immediate' : 'within_24h',
           reasoning: [
@@ -869,7 +869,7 @@ export class MarketEventModelingService {
   }
 
   private async getEventImpactSummary(timeframe: string): Promise<EventImpactSummary> {
-    const upcomingEvents = await this.getUpcomingEvents(timeframe);
+    const upcomingEvents = await this.getUpcomingEvents(timeframe as '1d' | '7d' | '30d' | '90d');
     
     return {
       timeframe: timeframe as any,

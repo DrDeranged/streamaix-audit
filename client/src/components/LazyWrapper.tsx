@@ -194,7 +194,7 @@ export class IntelligentPreloader {
   }
   
   static preloadOnHover(element: HTMLElement, name: string, loader: () => Promise<any>) {
-    let timeoutId: number;
+    let timeoutId: ReturnType<typeof setTimeout>;
     
     const handleMouseEnter = () => {
       timeoutId = setTimeout(() => {

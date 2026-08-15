@@ -64,7 +64,7 @@ export class AgentMarketTrader {
     try {
       // Calculate shares based on AMM pricing
       const outcome = analysis.outcome;
-      const currentPrice = outcome === "YES" ? market.yesPrice : market.noPrice;
+      const currentPrice = (outcome === "YES" ? market.yesPrice : market.noPrice) ?? 0;
       const shares = Math.floor((positionSize * 10000) / currentPrice);
 
       if (shares <= 0) {

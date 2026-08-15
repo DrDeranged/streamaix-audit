@@ -61,7 +61,6 @@ import { AIService } from "../services/aiService";
 import { Web3Service } from "../services/web3Service";
 import { MarketDataService } from "../services/marketDataService";
 import { youtubeService } from "../services/youtubeService";
-import { PredictiveAnalyticsService } from "../services/predictiveAnalyticsService";
 import { onChainAnalyticsService } from "../services/onChainAnalyticsService";
 import { duneAnalyticsService } from "../services/duneAnalyticsService";
 import { federalReserveService } from "../services/federalReserveService";

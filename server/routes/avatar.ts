@@ -80,6 +80,7 @@ import { autonomousTradingEngine } from "../services/autonomousTradingEngine";
 import { pointsService } from "../services/pointsService";
 import { bountyHunterService } from "../services/bountyHunterService";
 import { qualityScorerService } from "../services/qualityScorerService";
+import * as avatarChatService from "../services/avatarChatService";
 import { db } from "../db";
 import * as schema from "../../shared/schema";
 import {

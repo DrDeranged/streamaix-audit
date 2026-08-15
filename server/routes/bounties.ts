@@ -138,7 +138,7 @@ export async function registerBountiesRoutes(app: Express): Promise<void> {
           ...bounty,
           summaryPreview,
           summaryTitle: summary?.title,
-          qualityScore: summary?.qualityScore,
+          qualityScore: (summary as (typeof summary) & { qualityScore?: number })?.qualityScore,
           completerUsername: completer?.username,
           completerAvatar: completer?.avatar,
           isAiCompleted: completer?.isAiAgent || false,
@@ -202,7 +202,7 @@ export async function registerBountiesRoutes(app: Express): Promise<void> {
       const dayEnd = new Date(date.setHours(23, 59, 59, 999));
       
       const dayBounties = bounties.filter(b => {
-        const created = new Date(b.createdAt);
+        const created = new Date(b.createdAt ?? 0);
         return created >= dayStart && created <= dayEnd;
       }).length;
       
@@ -222,9 +222,9 @@ export async function registerBountiesRoutes(app: Express): Promise<void> {
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
     
-    const thisWeekBounties = bounties.filter(b => new Date(b.createdAt) >= oneWeekAgo).length;
+    const thisWeekBounties = bounties.filter(b => new Date(b.createdAt ?? 0) >= oneWeekAgo).length;
     const lastWeekBounties = bounties.filter(b => {
-      const created = new Date(b.createdAt);
+      const created = new Date(b.createdAt ?? 0);
       return created >= twoWeeksAgo && created < oneWeekAgo;
     }).length;
     
@@ -416,7 +416,7 @@ export async function registerBountiesRoutes(app: Express): Promise<void> {
       status: 'claimed',
       blockchainTxHash,
       claimedAt: new Date()
-    });
+    } as Partial<typeof bounties.$inferInsert>);
 
     // Create or get hunter profile
     let hunter = await storage.getBountyHunterByUserId(req.user!.id);
@@ -428,12 +428,12 @@ export async function registerBountiesRoutes(app: Express): Promise<void> {
         level: 1,
         reputation: 0,
         totalBounties: 1,
-      });
+      } as typeof schema.bountyHunters.$inferInsert);
     } else {
       // Update total bounties claimed
       await storage.updateBountyHunter(hunter.id, {
         totalBounties: (hunter.totalBounties || 0) + 1,
-      });
+      } as Partial<typeof schema.bountyHunters.$inferInsert>);
     }
 
     // Track engagement (bounty claim is a type of engagement)
@@ -490,7 +490,7 @@ export async function registerBountiesRoutes(app: Express): Promise<void> {
       completionTxHash,
       status: 'completed',
       completedAt: new Date()
-    });
+    } as Partial<typeof bounties.$inferInsert>);
 
     // Get the hunter profile
     if (bounty.assigneeId) {
@@ -498,13 +498,17 @@ export async function registerBountiesRoutes(app: Express): Promise<void> {
       
       if (hunter) {
         // Calculate quality score for the submitted summary
-        const qualityScore = await qualityScorerService.calculateQualityScore(
+        const qualityScore = await (qualityScorerService as unknown as {
+          calculateQualityScore(bountyId: string, summaryId: string): Promise<{ overallScore?: number }>;
+        }).calculateQualityScore(
           req.params.id,
           summaryId
         );
 
         // Update hunter reputation with quality bonus
-        await bountyHunterService.updateAfterCompletion(
+        await (bountyHunterService as unknown as {
+          updateAfterCompletion(hunterId: string, bountyId: string, qualityScore: number): Promise<unknown>;
+        }).updateAfterCompletion(
           hunter.id,
           req.params.id,
           qualityScore.overallScore || 70
@@ -621,7 +625,7 @@ export async function registerBountiesRoutes(app: Express): Promise<void> {
     const newTipPool = (bounty.tipPool || 0) + parseInt(amount);
     const updatedBounty = await storage.updateBounty(req.params.id, {
       tipPool: newTipPool
-    });
+    } as Partial<typeof bounties.$inferInsert>);
 
     res.json({
       message: 'Tip added successfully',
@@ -666,7 +670,7 @@ export async function registerBountiesRoutes(app: Express): Promise<void> {
       await storage.updateBounty(req.params.id, {
         status: 'completed',
         completedAt: new Date()
-      });
+      } as Partial<typeof bounties.$inferInsert>);
 
       await pointsService.awardPoints({
         userId: req.user!.id,

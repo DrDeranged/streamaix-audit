@@ -191,7 +191,7 @@ class NewsletterScheduler {
         ));
 
       // Get unique user IDs
-      const userIds = [...new Set(subscriptions.map(s => s.userId).filter(Boolean))];
+      const userIds = Array.from(new Set(subscriptions.map(s => s.userId).filter(Boolean)));
       
       console.log(`📱 Sending weekly digest to ${userIds.length} users`);
 

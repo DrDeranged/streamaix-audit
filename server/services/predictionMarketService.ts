@@ -85,7 +85,7 @@ export class PredictionMarketService {
         
         // Get market ID from event
         const event = receipt.logs.find((log: any) => 
-          log.topics[0] === factoryContract.interface.getEvent('MarketCreatedWithLiquidity').topicHash
+          log.topics[0] === factoryContract.interface.getEvent('MarketCreatedWithLiquidity')?.topicHash
         );
         
         if (!event) {

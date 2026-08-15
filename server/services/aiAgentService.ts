@@ -378,7 +378,7 @@ Based on your ${agentPersonality.personality} personality, your ${agentPersonali
     }
 
     const outcome = prediction.prediction;
-    const price = outcome === "YES" ? market.yesPrice : market.noPrice;
+    const price = (outcome === "YES" ? market.yesPrice : market.noPrice) ?? 0;
     const streamAmount = Math.floor((shares * price) / 10000);
     const fee = Math.floor(streamAmount * 0.005);
 

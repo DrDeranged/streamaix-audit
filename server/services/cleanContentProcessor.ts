@@ -119,7 +119,7 @@ export class CleanContentProcessor {
       console.error(`❌ Processing error for ${summaryId}:`, error);
       await this.storage.updateSummary(summaryId, {
         processingStatus: 'failed',
-        summary: `Failed to process content: ${error.message}`,
+        summary: `Failed to process content: ${error instanceof Error ? error.message : String(error)}`,
         updatedAt: new Date()
       });
       throw error;

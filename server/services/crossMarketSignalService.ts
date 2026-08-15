@@ -310,7 +310,10 @@ export class CrossMarketSignalService {
     try {
       // Get upcoming events and their impact predictions
       const upcomingEvents = await this.marketEventService.getUpcomingEvents();
-      const dashboard = await this.marketEventService.getEventModelingDashboard();
+      const dashboard = await this.marketEventService.getEventModelingDashboard() as unknown as {
+        predictions?: any[];
+        alerts?: any[];
+      };
       
       return {
         upcomingEvents,
@@ -381,7 +384,7 @@ export class CrossMarketSignalService {
         correlationMatrix,
         marketRegime,
         riskSentiment,
-        strength: this.calculateCorrelationStrength(correlationMatrix, marketRegime)
+        strength: this.calculateCorrelationStrength(correlationMatrix as unknown as any[], marketRegime)
       };
     } catch (error) {
       console.error('❌ Error getting correlation analysis signals:', error);
@@ -515,7 +518,7 @@ export class CrossMarketSignalService {
         },
         entryStrategy: {
           preferredEntry: 0,
-          entryRange: { lower: 0, upper: 0 },
+          entryRange: { min: 0, max: 0 },
           timingAdvice: 'Wait for market data to become available'
         },
         riskManagement: {
@@ -525,7 +528,7 @@ export class CrossMarketSignalService {
           positionAdjustment: 'No position recommended without price data'
         },
         timeHorizon: 'short_term'
-      };
+      } as unknown as CrossMarketSignal['tradingRecommendations'];
     }
     
     // Determine primary action based on score and confidence
@@ -703,7 +706,8 @@ export class CrossMarketSignalService {
     if (cached) return cached;
     
     try {
-      const correlationMatrixResponse = await this.correlationAnalysisService.getCorrelationMatrix();
+      const correlationMatrixResponse: { data?: { matrix?: any[] }; matrix?: any[] } | any[] =
+        await this.correlationAnalysisService.getCorrelationMatrix();
       const marketRegime = await this.correlationAnalysisService.getMarketRegime();
       
       // Ensure correlationMatrix is an array - fix the critical frontend error

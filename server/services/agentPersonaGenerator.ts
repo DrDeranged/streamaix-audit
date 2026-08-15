@@ -1,4 +1,4 @@
-import type { AgentPersonality, AgentMetadata } from '../types/agents';
+import type { AgentPersonality, AgentMetadata, TradingStyle, ContentFocus } from '../types/agents';
 
 // Realistic first names
 const firstNames = [
@@ -68,10 +68,10 @@ const timezones = [
 ];
 
 // Trading styles
-const tradingStyles = ['scalper', 'swing', 'position', 'hodl', 'degen', 'conservative', 'balanced'];
+const tradingStyles: TradingStyle[] = ['scalper', 'swing', 'position', 'hodl', 'degen', 'conservative', 'balanced'];
 
 // Content focus areas
-const contentFocuses = ['technical', 'fundamental', 'narrative', 'onchain', 'sentiment', 'mixed'];
+const contentFocuses: ContentFocus[] = ['technical', 'fundamental', 'narrative', 'onchain', 'sentiment', 'mixed'];
 
 // Risk tolerance levels
 type RiskTolerance = 'very-low' | 'low' | 'medium' | 'high' | 'very-high';

@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Trophy, Clock, DollarSign, ArrowRight } from 'lucide-react';
 import type { Bounty } from '@shared/schema';
 
+type RelatedBounty = Bounty & { dueDate?: string | Date | null };
+
 interface RelatedBountiesWidgetProps {
   tags?: string[];
   category?: string;
@@ -14,7 +16,7 @@ interface RelatedBountiesWidgetProps {
 }
 
 export default function RelatedBountiesWidget({ tags = [], category, limit = 3 }: RelatedBountiesWidgetProps) {
-  const { data, isLoading } = useQuery<{ bounties: Bounty[] }>({
+  const { data, isLoading } = useQuery<{ bounties: RelatedBounty[] }>({
     queryKey: ['/api/bounties/related', tags.join(','), category],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -68,7 +70,7 @@ export default function RelatedBountiesWidget({ tags = [], category, limit = 3 }
     }
   };
 
-  const getTimeLeft = (dueDate?: string) => {
+  const getTimeLeft = (dueDate?: string | Date | null) => {
     if (!dueDate) return null;
     const now = new Date();
     const due = new Date(dueDate);

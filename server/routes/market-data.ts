@@ -373,7 +373,7 @@ export async function registerMarketDataRoutes(app: Express): Promise<void> {
     
     try {
       // This would typically query active alerts from the service
-      const alerts = []; // Placeholder - would get from marketEventModelingService.getActiveAlerts()
+      const alerts: any[] = []; // Placeholder - would get from marketEventModelingService.getActiveAlerts()
       
       res.json({
         success: true,

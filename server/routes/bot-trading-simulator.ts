@@ -122,6 +122,8 @@ import {
 import passport from "passport";
 import axios from "axios";
 import { ADMIN_USERNAMES, isAdmin, requireAdmin, validateRequest, asyncHandler } from "./_shared";
+import { getAvatarPersona } from "../services/avatarTradingPersonas";
+import { seedBotHistoricalTrades } from "../services/botTradingSimulator";
 
 export async function registerBotTradingSimulatorRoutes(app: Express): Promise<void> {
   // =============================================================================

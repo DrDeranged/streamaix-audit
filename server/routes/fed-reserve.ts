@@ -589,7 +589,7 @@ export async function registerFedReserveRoutes(app: Express): Promise<void> {
           severity,
           limit: 50 
         });
-        filteredAlerts = allStoredAlerts;
+        filteredAlerts = allStoredAlerts as unknown as typeof filteredAlerts;
       }
       
       res.json({

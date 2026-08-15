@@ -1,6 +1,7 @@
 import { storage } from '../storage';
 import { AgentContentCreator } from './agentContentCreator';
 import type { AgentPersonality, SkillLevel } from '../types/agents';
+import type { bounties as bountiesTable } from '../../shared/schema';
 
 export interface SubmitSummaryParams {
   agentId: number;
@@ -70,14 +71,14 @@ export class AgentSummarySubmitter {
         category: bounty.category,
         tags: bounty.tags || [],
         chapters: summaryContent.keyInsights,
-        creatorId: params.agentId,
+        creatorId: String(params.agentId),
         bountyId: bounty.id,
         metadata: {
           aiGenerated: true,
           agentUsername: params.username,
           qualityScore: summaryContent.quality,
         },
-      });
+      } as Parameters<typeof storage.createSummary>[0] & { tldrSummary?: string | null });
       
       console.log(`      ✅ Submitted summary (ID: ${summary.id}, quality: ${summaryContent.quality}/100)`);
       
@@ -92,7 +93,7 @@ export class AgentSummarySubmitter {
         completedAt: new Date(),
         summaryId: summary.id,
         assigneeId: String(params.agentId),
-      });
+      } as Partial<typeof bountiesTable.$inferInsert>);
       
       console.log(`      🎉 Bounty marked as completed`);
       
@@ -175,11 +176,12 @@ export class AgentSummarySubmitter {
    */
   private async attemptBountyClaim(bountyId: string, agentId: number): Promise<void> {
     try {
-      const storage = getStorage();
-      await storage.updateBounty(bountyId, {
+      const getStorage = (globalThis as unknown as { getStorage: () => typeof import('../storage').storage }).getStorage;
+      const scopedStorage = getStorage();
+      await scopedStorage.updateBounty(bountyId, {
         claimerId: agentId,
         status: 'in_progress',
-      });
+      } as Partial<typeof bountiesTable.$inferInsert>);
       console.log(`      🎯 Claimed bounty ${bountyId}`);
     } catch (error: any) {
       // Ignore claim errors (might be claimed by someone else)

@@ -133,18 +133,19 @@ export async function registerRealProcessingRoutes(app: Express): Promise<void> 
   app.post('/api/analyze-content', authenticateToken, strictLimit, validateBody(analyzeContentSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     console.log(`\n🔵 ========== ROUTE: POST /api/analyze-content ==========`);
     const { url } = req.body;
+    let userId: string | null = null;
     try {
       console.log(`✅ URL received: ${url}`);
       
       // Get current user ID from authenticated session
       // @ts-ignore - req.user is added by Passport.js authentication middleware
       const authenticatedUser = req.user;
-      let userId = authenticatedUser?.id || null;
+      userId = authenticatedUser?.id || null;
       
       // CRITICAL FIX: Verify user exists in database before using their ID
       // This prevents foreign key constraint violations from session/DB mismatches
       if (userId) {
-        console.log(`👤 Session has authenticated user: ${userId} (${authenticatedUser.username})`);
+        console.log(`👤 Session has authenticated user: ${userId} (${authenticatedUser?.username})`);
         console.log(`🔍 Verifying user exists in production database...`);
         
         try {
@@ -189,7 +190,7 @@ export async function registerRealProcessingRoutes(app: Express): Promise<void> 
       
       let result;
       try {
-        result = await processor.processContent(url, userId);
+        result = await processor.processContent(url, userId ?? undefined);
         console.log(`✅ Step 2 complete: Processing started, summary ID: ${result.summaryId}`);
       } catch (processingError: any) {
         console.error(`❌ STEP 2 FAILED: processContent() threw an error`);

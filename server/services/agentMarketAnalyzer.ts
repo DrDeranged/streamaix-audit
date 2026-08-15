@@ -145,7 +145,7 @@ Market: "${market.question}"
 ${market.description ? `Description: ${market.description}` : ''}
 Category: ${market.category}
 Deadline: ${new Date(market.deadline).toLocaleDateString()}
-Current Odds: YES ${(market.yesPrice / 100).toFixed(1)}% / NO ${(market.noPrice / 100).toFixed(1)}%
+Current Odds: YES ${((market.yesPrice ?? 0) / 100).toFixed(1)}% / NO ${((market.noPrice ?? 0) / 100).toFixed(1)}%
 Total Volume: ${market.totalVolume || 0} STREAM
 ${market.tags?.length ? `Tags: ${market.tags.join(', ')}` : ''}
 

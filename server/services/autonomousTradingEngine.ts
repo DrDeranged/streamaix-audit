@@ -112,7 +112,7 @@ class AutonomousTradingEngine {
 
       for (const market of selectedMarkets) {
         console.log(`\n🎯 Analyzing Market: "${market.question.substring(0, 80)}..."`);
-        console.log(`   Current Price: ${this.calculateMarketPrice(market.yesLiquidity, market.noLiquidity)}% YES`);
+        console.log(`   Current Price: ${this.calculateMarketPrice(market.yesLiquidity ?? 0, market.noLiquidity ?? 0)}% YES`);
 
         // Build research context ONCE per market per cycle; reused across agents.
         const researchContext = await agentResearchService.buildResearchContext(market);
@@ -363,7 +363,6 @@ class AutonomousTradingEngine {
         .set({
           totalVolume: agent.totalVolume + Math.round(amount),
           totalPredictions: agent.totalPredictions + 1,
-          streamPointsEarned: sql`COALESCE(${aiAgents.streamPointsEarned}, 0) + ${pointsEarned}`,
           updatedAt: new Date()
         })
         .where(eq(aiAgents.id, agent.id));

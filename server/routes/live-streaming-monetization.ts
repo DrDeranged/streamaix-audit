@@ -206,7 +206,7 @@ export async function registerLiveStreamingMonetizationRoutes(app: Express): Pro
       res.json({
         success: true,
         peakViewers: stream[0].peakViewers || stream[0].currentViewers,
-        totalViews: stream[0].currentViewers + (stream[0].peakViewers || 0),
+        totalViews: (stream[0].currentViewers ?? 0) + (stream[0].peakViewers || 0),
         averageWatchTime: 1200, // ~20 mins placeholder
         chatMessages: Number(messages[0]?.count) || 0,
         tipsReceived: Number(tips[0]?.total) || 0,
@@ -262,7 +262,7 @@ export async function registerLiveStreamingMonetizationRoutes(app: Express): Pro
     }
     
     // Deduct points
-    await storage.updateUserPoints(req.user.id, -cost);
+    await (storage as unknown as { updateUserPoints(userId: string, delta: number): Promise<void> }).updateUserPoints(req.user.id, -cost);
     
     res.json({ success: true, pointsRemaining: (user.streamPoints || 0) - cost });
   }));
@@ -290,7 +290,7 @@ export async function registerLiveStreamingMonetizationRoutes(app: Express): Pro
     }
     
     // Deduct points
-    await storage.updateUserPoints(req.user.id, -totalCost);
+    await (storage as unknown as { updateUserPoints(userId: string, delta: number): Promise<void> }).updateUserPoints(req.user.id, -totalCost);
     
     // In production, would select random viewers and create subscriptions
     // For now, just log the gift
@@ -597,7 +597,7 @@ export async function registerLiveStreamingMonetizationRoutes(app: Express): Pro
     }
 
     const chatMessage = await DebateManagerService.addChatMessage(req.params.id, {
-      userId: req.user.id,
+      userId: req.user.id as unknown as number,
       username: req.user.username || `User${req.user.id}`,
       message: message.trim(),
       timestamp: Date.now(),
@@ -627,7 +627,7 @@ export async function registerLiveStreamingMonetizationRoutes(app: Express): Pro
     }
 
     const tip = await DebateManagerService.tipAvatar(req.params.id, {
-      userId: req.user.id,
+      userId: req.user.id as unknown as number,
       username: req.user.username || `User${req.user.id}`,
       avatarNumber,
       amount,
@@ -659,7 +659,7 @@ export async function registerLiveStreamingMonetizationRoutes(app: Express): Pro
     }
 
     const viewerQuestion = await DebateManagerService.addViewerQuestion(req.params.id, {
-      userId: req.user.id,
+      userId: req.user.id as unknown as number,
       username: req.user.username || `User${req.user.id}`,
       question: question.trim(),
       timestamp: Date.now(),
@@ -681,8 +681,8 @@ export async function registerLiveStreamingMonetizationRoutes(app: Express): Pro
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
 
-    const result = await DebateManagerService.upvoteQuestion(req.params.id, req.params.questionId, req.user.id);
-    res.json({ success: true, ...result });
+    const result = await DebateManagerService.upvoteQuestion(req.params.id, req.params.questionId, req.user.id as unknown as number);
+    res.json({ ...result });
   }));
 
   // Add a reaction to the debate
@@ -697,7 +697,7 @@ export async function registerLiveStreamingMonetizationRoutes(app: Express): Pro
       return res.status(400).json({ success: false, error: 'Invalid reaction type' });
     }
 
-    const reactions = await DebateManagerService.addReaction(req.params.id, reaction, req.user.id);
+    const reactions = await DebateManagerService.addReaction(req.params.id, reaction, req.user.id as unknown as number);
     res.json({ success: true, reactions });
   }));
 

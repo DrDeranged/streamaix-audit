@@ -130,7 +130,7 @@ async function initializeAgents() {
       console.log(`      Risk Tolerance: ${agent.riskTolerance}`);
       console.log(`      Confidence Threshold: ${(agent.confidenceThreshold * 100).toFixed(0)}%`);
       console.log(`      Total Predictions: ${agent.totalPredictions}`);
-      console.log(`      Accuracy: ${(agent.accuracyRate * 100).toFixed(1)}%`);
+      console.log(`      Accuracy: ${((agent.accuracyRate ?? 0) * 100).toFixed(1)}%`);
       console.log(`      Status: ${agent.isActive ? '🟢 Active' : '🔴 Inactive'}`);
     });
 

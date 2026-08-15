@@ -334,15 +334,15 @@ export async function registerWaitlistRoutes(app: Express): Promise<void> {
     const recentHumans30d = realHumans.filter(u => u.createdAt && new Date(u.createdAt) >= thirtyDaysAgo);
     
     // Active users (based on lastLoginAt)
-    const activeHumans24h = realHumans.filter(u => u.lastLoginAt && new Date(u.lastLoginAt) >= oneDayAgo);
-    const activeHumans7d = realHumans.filter(u => u.lastLoginAt && new Date(u.lastLoginAt) >= sevenDaysAgo);
+    const activeHumans24h = realHumans.filter((u: typeof realHumans[number] & { lastLoginAt?: Date | string | null }) => u.lastLoginAt && new Date(u.lastLoginAt) >= oneDayAgo);
+    const activeHumans7d = realHumans.filter((u: typeof realHumans[number] & { lastLoginAt?: Date | string | null }) => u.lastLoginAt && new Date(u.lastLoginAt) >= sevenDaysAgo);
     
     // Get newsletter subscribers
     const subscriberCount = await storage.getSubscribedWaitlistCount();
     
     // Get waitlist entries with emails for newsletter subscribers
     const waitlistEntries = await storage.getWaitlistEntries(100, 0);
-    const subscribedEntries = waitlistEntries.filter(e => e.isSubscribed);
+    const subscribedEntries = waitlistEntries.filter((e: typeof waitlistEntries[number] & { isSubscribed?: boolean | null }) => e.isSubscribed);
     
     res.json({
       success: true,
@@ -355,7 +355,7 @@ export async function registerWaitlistRoutes(app: Express): Promise<void> {
           new30d: recentHumans30d.length,
           active24h: activeHumans24h.length,
           active7d: activeHumans7d.length,
-          users: realHumans.map(u => ({
+          users: realHumans.map((u: typeof realHumans[number] & { lastLoginAt?: Date | string | null; streamBalance?: number | null }) => ({
             id: u.id,
             username: u.username,
             email: u.email || 'N/A',

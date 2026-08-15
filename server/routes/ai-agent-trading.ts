@@ -810,11 +810,11 @@ export async function registerAiAgentTradingRoutes(app: Express): Promise<void> 
 
     const snapshot = await db.insert(marketPriceHistory).values({
       marketId,
-      yesPrice: market[0].yesPrice,
-      noPrice: market[0].noPrice,
-      yesLiquidity: market[0].yesLiquidity,
-      noLiquidity: market[0].noLiquidity,
-      totalVolume: market[0].totalVolume
+      yesPrice: market[0].yesPrice ?? 0,
+      noPrice: market[0].noPrice ?? 0,
+      yesLiquidity: market[0].yesLiquidity ?? 0,
+      noLiquidity: market[0].noLiquidity ?? 0,
+      totalVolume: market[0].totalVolume ?? 0
     }).returning();
 
     res.json({

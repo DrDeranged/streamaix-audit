@@ -147,7 +147,7 @@ export class AgentResearchService {
       const scored = all.map((a: any) => {
         const text = `${a.title} ${a.summary ?? ""}`.toLowerCase();
         let score = 0;
-        for (const kw of keywords) if (text.includes(kw)) score++;
+        for (const kw of Array.from(keywords)) if (text.includes(kw)) score++;
         return { article: a, score };
       });
       scored.sort((a, b) => b.score - a.score);
@@ -215,8 +215,8 @@ export class AgentResearchService {
       headlines: valueOf<ResearchHeadline[]>(1, []),
       stockMacroContext: valueOf<string | null>(2, null),
       amm: {
-        yesPrice: market.yesPrice,
-        noPrice: market.noPrice,
+        yesPrice: market.yesPrice ?? 0,
+        noPrice: market.noPrice ?? 0,
         totalLiquidity: (market.yesLiquidity ?? 0) + (market.noLiquidity ?? 0),
         volume24h: market.totalVolume ?? 0,
       },

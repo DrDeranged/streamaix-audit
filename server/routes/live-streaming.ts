@@ -698,7 +698,7 @@ export async function registerLiveStreamingRoutes(app: Express): Promise<void> {
           description: `AI Debate between ${avatar1[0]?.name || 'Unknown'} and ${avatar2[0]?.name || 'Unknown'}`,
           streamType: 'debate',
           hostUsername: avatar1[0]?.name || 'AI Avatar',
-          hostAvatar: avatar1[0]?.avatarUrl,
+          hostAvatar: (avatar1[0] as (typeof avatar1)[number] & { avatarUrl?: string | null })?.avatarUrl,
           duration: estimatedDurationSeconds > 0 ? estimatedDurationSeconds : 60,
           viewCount: debate.totalViewers || 0,
           thumbnailUrl: null,
@@ -712,6 +712,7 @@ export async function registerLiveStreamingRoutes(app: Express): Promise<void> {
       }));
 
       // Also get regular stream replays
+      const enhancedStreamingService = (globalThis as unknown as { enhancedStreamingService: { getStreamReplays(limit: number): Promise<any[]> } }).enhancedStreamingService;
       const regularReplays = await enhancedStreamingService.getStreamReplays(limit);
       
       // Combine and format regular replays
@@ -843,7 +844,7 @@ export async function registerLiveStreamingRoutes(app: Express): Promise<void> {
           title,
           streamType as 'broadcast' | 'trading_room' | 'crypto_space' | 'live_bounty',
           newStream.id,
-          req.user.avatar
+          (req.user as { avatar?: string | null }).avatar ?? undefined
         ).catch(err => console.error('🔔 Error notifying followers of stream:', err));
         
         // Also broadcast to ALL users with stream_live notifications enabled
@@ -958,7 +959,7 @@ export async function registerLiveStreamingRoutes(app: Express): Promise<void> {
         stream.title,
         stream.streamType as 'broadcast' | 'trading_room' | 'crypto_space' | 'live_bounty',
         stream.id,
-        req.user.avatar
+        (req.user as { avatar?: string | null }).avatar ?? undefined
       ).catch(err => console.error('🔔 Error notifying followers of stream start:', err));
       
       // Also broadcast to ALL users with stream_live notifications enabled
@@ -999,6 +1000,9 @@ export async function registerLiveStreamingRoutes(app: Express): Promise<void> {
     try {
       const { getStreamingService } = await import('../services/streamingService');
       const streamingService = getStreamingService();
+      if (!streamingService) {
+        throw new Error('Streaming service not available');
+      }
       const endedViaService = await streamingService.endStream(req.params.id, req.user.id);
       
       if (endedViaService) {

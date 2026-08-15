@@ -364,13 +364,13 @@ export async function registerLiveStreamingEnhancedRoutes(app: Express): Promise
           if (streamingService) {
             // Broadcast text to connected clients (spoken client-side)
             streamingService.broadcastToStream(stream.id, {
-              type: 'avatar_audio',
+              type: 'avatar-audio',
               avatarName,
               text: phrase,
               audioBase64: '',
-              timestamp: new Date().toISOString(),
+              timestamp: Date.now(),
               segmentNumber: segmentCount + 1,
-            });
+            } as unknown as Parameters<typeof streamingService.broadcastToStream>[1]);
             console.log(`[TEST STREAM] 📡 Broadcast segment ${segmentCount + 1}`);
           }
 
@@ -808,7 +808,7 @@ export async function registerLiveStreamingEnhancedRoutes(app: Express): Promise
       title: title || `Clip from ${new Date().toLocaleTimeString()}`,
       startTime: startTime || 0,
       durationSeconds: duration || 30,
-    }).returning();
+    } as unknown as typeof streamClips.$inferInsert).returning();
     
     res.json({ success: true, clip });
   }));
@@ -1154,7 +1154,9 @@ export async function registerLiveStreamingEnhancedRoutes(app: Express): Promise
     if (result) {
       // Award points if correct
       if (result.correct && result.points > 0) {
-        await storage.updateUserPoints(req.user.id, result.points);
+        await (storage as unknown as {
+          updateUserPoints(userId: string, points: number): Promise<unknown>;
+        }).updateUserPoints(req.user.id, result.points);
       }
       res.json({ success: true, ...result });
     } else {

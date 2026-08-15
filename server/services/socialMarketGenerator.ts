@@ -133,7 +133,6 @@ Format your response as JSON:
           email: 'ai-markets@streamaix.ai',
           password: '', // AI account doesn't need password
           isAiAgent: true,
-          pointsBalance: 1000000, // 1M STREAM for liquidity
         }).returning();
         aiCreator = newAiCreator;
       }

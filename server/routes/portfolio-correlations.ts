@@ -117,7 +117,7 @@ export async function registerPortfolioCorrelationsRoutes(app: Express): Promise
     
     const correlations: Record<string, Record<string, number>> = {};
     
-    const assetTypeCorrelations: Record<string, Record<string, number>> = {
+    const assetTypeCorrelations: Record<string, number> = {
       'crypto-crypto': 0.75,
       'crypto-stock': 0.30,
       'crypto-etf': 0.35,

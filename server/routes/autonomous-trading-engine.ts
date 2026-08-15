@@ -208,7 +208,7 @@ export async function registerAutonomousTradingEngineRoutes(app: Express): Promi
             avatarId: avatarTradesTable.avatarId,
             avatarName: knowledgeAvatars.name,
             avatarImageUrl: knowledgeAvatars.imageUrl,
-            tradingPersona: avatarTradesTable.tradingPersona,
+            tradingPersona: (avatarTradesTable as unknown as { tradingPersona: typeof avatarTradesTable.tradingStyle }).tradingPersona,
             marketId: avatarTradesTable.marketId,
             marketQuestion: predictionMarkets.question,
             marketCategory: predictionMarkets.category,
@@ -217,9 +217,9 @@ export async function registerAutonomousTradingEngineRoutes(app: Express): Promi
             streamAmount: avatarTradesTable.streamAmount,
             shares: avatarTradesTable.shares,
             price: avatarTradesTable.price,
-            fee: avatarTradesTable.fee,
+            fee: (avatarTradesTable as unknown as { fee: typeof avatarTradesTable.price }).fee,
             reasoning: avatarTradesTable.reasoning,
-            confidence: avatarTradesTable.confidence,
+            confidence: (avatarTradesTable as unknown as { confidence: typeof avatarTradesTable.price }).confidence,
             createdAt: avatarTradesTable.createdAt
           })
           .from(avatarTradesTable)
@@ -375,7 +375,7 @@ export async function registerAutonomousTradingEngineRoutes(app: Express): Promi
         summaryId: req.params.id,
         userId: req.user.id,
         content: content.trim(),
-        rating: null
+        rating: null as unknown as number | undefined
       });
       res.status(201).json({ comment });
     } catch (error) {

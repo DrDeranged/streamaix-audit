@@ -55,7 +55,7 @@ import { StreamProcessorV2 } from "../services/streamProcessorV2";
 import RebuiltContentProcessor from "../services/rebuiltContentProcessor";
 import { AIService } from "../services/aiService";
 import { Web3Service } from "../services/web3Service";
-import { MarketDataService } from "../services/marketDataService";
+import { MarketDataService, marketDataService } from "../services/marketDataService";
 import { youtubeService } from "../services/youtubeService";
 import { PredictiveAnalyticsService } from "../services/predictiveAnalyticsService";
 import { onChainAnalyticsService } from "../services/onChainAnalyticsService";

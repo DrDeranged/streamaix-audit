@@ -84,7 +84,7 @@ export class AILeagueManager {
 
         const eligibleAgents = aiAgents
           .filter(a => !participantIds.has(a.id))
-          .filter(a => a.streamPoints >= (league.entryFee || 0))
+          .filter(a => (a.streamPoints ?? 0) >= (league.entryFee || 0))
           .sort(() => Math.random() - 0.5)
           .slice(0, aiToJoin);
 

@@ -298,7 +298,7 @@ export async function registerPredictionMarketsRoutes(app: Express): Promise<voi
     const isBuy = tradeType.toLowerCase() === 'buy';
 
     // Calculate the trade using AMM
-    let quote;
+    let quote: ReturnType<typeof ammService.calculateBuyTokens> | ReturnType<typeof ammService.calculateSellTokens>;
     if (isBuy) {
       // Check user has enough STREAM points
       if ((user.streamPoints || 0) < amount) {
@@ -341,8 +341,8 @@ export async function registerPredictionMarketsRoutes(app: Express): Promise<voi
     // Execute the trade
     // For buy: tokensOut is shares received, amount is STREAM spent
     // For sell: amount is shares sold, amountOut is STREAM received
-    const sharesTraded = isBuy ? quote.tokensOut : amount;
-    const streamAmount = isBuy ? amount : quote.amountOut;
+    const sharesTraded = 'tokensOut' in quote ? quote.tokensOut : amount;
+    const streamAmount = 'amountOut' in quote ? quote.amountOut : amount;
     
     const tradeResult = await predictionMarketService.executeTrade({
       userId,
@@ -364,28 +364,29 @@ export async function registerPredictionMarketsRoutes(app: Express): Promise<voi
         description: `Bought ${sharesTraded.toFixed(2)} ${isYes ? 'YES' : 'NO'} shares`,
         referenceId: marketId,
         referenceType: 'prediction_market',
-        metadata: { outcome: isYes ? 'YES' : 'NO', shares: sharesTraded, price: quote.effectivePrice }
+        metadata: { outcome: isYes ? 'YES' : 'NO', shares: sharesTraded, price: (quote as ReturnType<typeof ammService.calculateBuyTokens> & { effectivePrice?: number }).effectivePrice }
       });
     } else {
       await pointsService.awardPoints({
         userId,
-        amount: quote.amountOut,
+        amount: 'amountOut' in quote ? quote.amountOut : 0,
         source: 'market_trade',
         type: 'earn',
         description: `Sold ${sharesTraded.toFixed(2)} ${isYes ? 'YES' : 'NO'} shares`,
         referenceId: marketId,
         referenceType: 'prediction_market',
-        metadata: { outcome: isYes ? 'YES' : 'NO', shares: sharesTraded, amountOut: quote.amountOut }
+        metadata: { outcome: isYes ? 'YES' : 'NO', shares: sharesTraded, amountOut: 'amountOut' in quote ? quote.amountOut : 0 }
       });
     }
 
     // Update market liquidity and prices
+    const sellAmountOut = 'amountOut' in quote ? quote.amountOut : 0;
     const newYesLiquidity = isBuy 
       ? (isYes ? market.yesLiquidity + amount : market.yesLiquidity)
-      : (isYes ? market.yesLiquidity - quote.amountOut : market.yesLiquidity);
+      : (isYes ? market.yesLiquidity - sellAmountOut : market.yesLiquidity);
     const newNoLiquidity = isBuy 
       ? (isYes ? market.noLiquidity : market.noLiquidity + amount)
-      : (isYes ? market.noLiquidity : market.noLiquidity - quote.amountOut);
+      : (isYes ? market.noLiquidity : market.noLiquidity - sellAmountOut);
 
     // Calculate new prices based on liquidity
     const totalLiquidity = newYesLiquidity + newNoLiquidity;
@@ -409,8 +410,8 @@ export async function registerPredictionMarketsRoutes(app: Express): Promise<voi
       trade: tradeResult,
       position: updatedPosition,
       quote: {
-        sharesReceived: isBuy ? quote.tokensOut : amount,
-        streamReceived: isBuy ? 0 : quote.amountOut,
+        sharesReceived: 'tokensOut' in quote ? quote.tokensOut : amount,
+        streamReceived: 'amountOut' in quote ? quote.amountOut : 0,
         priceImpact: quote.priceImpact,
         fee: quote.fee
       },
@@ -420,7 +421,7 @@ export async function registerPredictionMarketsRoutes(app: Express): Promise<voi
       },
       remainingBalance: isBuy 
         ? (user.streamPoints || 0) - amount 
-        : (user.streamPoints || 0) + quote.amountOut
+        : (user.streamPoints || 0) + sellAmountOut
     });
   }));
 
@@ -497,7 +498,7 @@ export async function registerPredictionMarketsRoutes(app: Express): Promise<voi
     
     for (const trade of allTrades) {
       const amount = trade.streamAmount || 0;
-      const tradeDate = new Date(trade.createdAt);
+      const tradeDate = new Date(trade.createdAt ?? 0);
       
       if (trade.outcome === 'YES') {
         yesVolume += amount;
@@ -520,7 +521,7 @@ export async function registerPredictionMarketsRoutes(app: Express): Promise<voi
 
     // Get recent trades (last 10)
     const recentTrades = allTrades
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime())
       .slice(0, 10)
       .map(t => ({
         id: t.id,
@@ -710,12 +711,12 @@ export async function registerPredictionMarketsRoutes(app: Express): Promise<voi
       .orderBy(desc(marketTrades.createdAt))
       .limit(limit);
 
-    const userIds = [...new Set(trades.map(t => t.userId).filter(Boolean))];
+    const userIds = Array.from(new Set(trades.map(t => t.userId).filter(Boolean)));
     const usernames: Record<string, string> = {};
     for (const userId of userIds) {
       const user = await storage.getUser(userId as string);
       if (user) {
-        usernames[userId as string] = user.displayName || user.username || 'Anonymous';
+        usernames[userId as string] = (user as typeof user & { displayName?: string }).displayName || user.username || 'Anonymous';
       }
     }
 
@@ -745,7 +746,8 @@ export async function registerPredictionMarketsRoutes(app: Express): Promise<voi
       .limit(limit);
 
     const enrichedWhales = await Promise.all(topTraders.map(async (whale) => {
-      const user = await storage.getUser(whale.userId);
+      const whaleUserId = whale.userId ?? '';
+      const user = await storage.getUser(whaleUserId);
       
       const positions = await db
         .select({
@@ -760,7 +762,7 @@ export async function registerPredictionMarketsRoutes(app: Express): Promise<voi
         .from(marketPositions)
         .leftJoin(predictionMarkets, eq(marketPositions.marketId, predictionMarkets.id))
         .where(and(
-          eq(marketPositions.userId, whale.userId),
+          eq(marketPositions.userId, whaleUserId),
           sql`${marketPositions.shares} > 0`
         ))
         .orderBy(desc(marketPositions.totalInvested))
@@ -768,7 +770,7 @@ export async function registerPredictionMarketsRoutes(app: Express): Promise<voi
 
       return {
         userId: whale.userId,
-        username: user?.displayName || user?.username || 'Anonymous',
+        username: (user as (typeof user & { displayName?: string }) | undefined)?.displayName || user?.username || 'Anonymous',
         isAiAgent: user?.isAiAgent || false,
         totalInvested: whale.totalInvested,
         totalShares: whale.totalShares,

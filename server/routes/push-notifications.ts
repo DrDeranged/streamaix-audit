@@ -133,7 +133,7 @@ export async function registerPushNotificationsRoutes(app: Express): Promise<voi
       deviceInfo
     );
 
-    res.json({ success: true, ...result });
+    res.json({ ...result });
   }));
 
   // Unsubscribe from push notifications
@@ -149,7 +149,7 @@ export async function registerPushNotificationsRoutes(app: Express): Promise<voi
     }
 
     const result = await pushNotificationService.removeSubscription(endpoint);
-    res.json({ success: true, ...result });
+    res.json({ ...result });
   }));
 
   // Get user's push subscriptions
@@ -161,7 +161,9 @@ export async function registerPushNotificationsRoutes(app: Express): Promise<voi
     const subscriptions = await pushNotificationService.getSubscriptions(req.user.id);
     res.json({ 
       success: true, 
-      subscriptions: subscriptions.map(s => ({
+      subscriptions: subscriptions.map((sub) => {
+        const s = sub as (typeof sub) & { volumeSpikes?: boolean | null; weeklyPreview?: boolean | null };
+        return {
         id: s.id,
         deviceInfo: s.deviceInfo,
         marketResolutions: s.marketResolutions,
@@ -175,7 +177,7 @@ export async function registerPushNotificationsRoutes(app: Express): Promise<voi
         marketMovers: s.marketMovers,
         macroAlerts: s.macroAlerts,
         breakingNews: s.breakingNews,
-        coinDeskNews: s.coinDeskNews,
+        coinDeskNews: s.coindeskNews,
         fundingRateAlerts: s.fundingRateAlerts,
         liquidationAlerts: s.liquidationAlerts,
         whaleAlerts: s.whaleAlerts,
@@ -186,7 +188,8 @@ export async function registerPushNotificationsRoutes(app: Express): Promise<voi
         streamMilestones: s.streamMilestones,
         streamReminders: s.streamReminders,
         lastUsed: s.lastUsed,
-      }))
+        };
+      })
     });
   }));
 
@@ -228,7 +231,7 @@ export async function registerPushNotificationsRoutes(app: Express): Promise<voi
       streamReminders,
     });
 
-    res.json({ success: true, ...result });
+    res.json({ ...result });
   }));
 
   // Test push notification (for debugging)
@@ -254,13 +257,12 @@ export async function registerPushNotificationsRoutes(app: Express): Promise<voi
 
     if (result.sent === 0 && result.success) {
       return res.json({ 
-        success: false, 
         error: 'No active subscriptions found. Please enable notifications first.',
         ...result 
       });
     }
 
-    res.json({ success: true, ...result });
+    res.json({ ...result });
   }));
 
   // Comprehensive push notification diagnostics endpoint

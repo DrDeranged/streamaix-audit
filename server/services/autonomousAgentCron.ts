@@ -80,7 +80,7 @@ export class AutonomousAgentCron {
       const agentService = getAutonomousAgentService();
       
       // Start the agent service if not already running
-      if (!agentService.isRunning) {
+      if (!agentService.getStats().isRunning) {
         agentService.start();
       }
       

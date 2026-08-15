@@ -28,7 +28,7 @@ async function seedLiquidity() {
 
     for (const market of markets) {
       // Skip if market already has liquidity
-      if (market.yesLiquidity > 0 || market.noLiquidity > 0) {
+      if ((market.yesLiquidity ?? 0) > 0 || (market.noLiquidity ?? 0) > 0) {
         console.log(`⏭️  Skipping "${market.question.substring(0, 50)}..." - already has liquidity`);
         skippedCount++;
         continue;

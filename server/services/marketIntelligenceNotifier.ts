@@ -1811,11 +1811,11 @@ class MarketIntelligenceNotifier {
 
   private cleanupExpiredHashes(): void {
     const now = Date.now();
-    for (const [hash, timestamp] of this.sentNotificationHashes.entries()) {
+    Array.from(this.sentNotificationHashes.entries()).forEach(([hash, timestamp]) => {
       if (now - timestamp > this.NOTIFICATION_DEDUPE_TTL) {
         this.sentNotificationHashes.delete(hash);
       }
-    }
+    });
   }
 
   private formatLargeNumber(num: number): string {

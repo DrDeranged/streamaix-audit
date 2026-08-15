@@ -370,7 +370,7 @@ export async function registerPriceAlertsRoutes(app: Express): Promise<void> {
     ];
     
     try {
-      const cryptoData = await marketDataService.getCryptoData();
+      const cryptoData = await (marketDataService as unknown as { getCryptoData(): Promise<any[]> }).getCryptoData();
       
       if (!cryptoData || cryptoData.length === 0) {
         return res.json({ success: true, signals: fallbackSignals });
@@ -426,7 +426,7 @@ export async function registerPriceAlertsRoutes(app: Express): Promise<void> {
     ];
     
     try {
-      const cryptoData = await marketDataService.getCryptoData();
+      const cryptoData = await (marketDataService as unknown as { getCryptoData(): Promise<any[]> }).getCryptoData();
       
       if (!cryptoData || cryptoData.length === 0) {
         return res.json({ success: true, movements: fallbackMovements });
@@ -471,7 +471,7 @@ export async function registerPriceAlertsRoutes(app: Express): Promise<void> {
     ];
     
     try {
-      const cryptoData = await marketDataService.getCryptoData();
+      const cryptoData = await (marketDataService as unknown as { getCryptoData(): Promise<any[]> }).getCryptoData();
       
       if (!cryptoData || cryptoData.length === 0) {
         return res.json({ success: true, sentiments: fallbackSentiments });

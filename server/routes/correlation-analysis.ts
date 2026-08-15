@@ -128,6 +128,8 @@ export async function registerCorrelationAnalysisRoutes(app: Express): Promise<v
   // CORRELATION ANALYSIS ROUTES
   // =============================================================================
 
+  const correlationAnalysisService = CorrelationAnalysisService.getInstance();
+
   // Get correlation matrix between crypto and traditional assets
   app.get('/api/correlation/matrix', asyncHandler(async (req: Request, res: Response) => {
     console.log('🔥 CORRELATION ENDPOINT HIT - SIMPLE TEST');
@@ -210,7 +212,7 @@ export async function registerCorrelationAnalysisRoutes(app: Express): Promise<v
   // Get specific asset pair correlations with detailed analysis
   app.get('/api/correlation/pairs/:asset1/:asset2', asyncHandler(async (req: Request, res: Response) => {
     const { asset1, asset2 } = req.params;
-    const timeframes = req.query.timeframes 
+    const timeframes: Array<'7d' | '30d' | '90d'> = req.query.timeframes 
       ? (req.query.timeframes as string).split(',') as Array<'7d' | '30d' | '90d'>
       : ['7d', '30d', '90d'];
     

@@ -92,26 +92,26 @@ export class BountyHunterService {
     }
 
     // Calculate new stats
-    const newCompletedBounties = hunter.completedBounties + 1;
-    const newTotalEarned = hunter.totalEarned + bountyData.reward;
-    const newCompletionRate = ((newCompletedBounties / (hunter.totalBounties + 1)) * 100);
+    const newCompletedBounties = (hunter.completedBounties ?? 0) + 1;
+    const newTotalEarned = (hunter.totalEarned ?? 0) + bountyData.reward;
+    const newCompletionRate = ((newCompletedBounties / ((hunter.totalBounties ?? 0) + 1)) * 100);
 
     // Calculate average quality if score provided
     let newAverageQuality = hunter.averageQuality;
     if (bountyData.qualityScore) {
-      newAverageQuality = ((hunter.averageQuality * hunter.completedBounties) + bountyData.qualityScore) / newCompletedBounties;
+      newAverageQuality = (((hunter.averageQuality ?? 0) * (hunter.completedBounties ?? 0)) + bountyData.qualityScore) / newCompletedBounties;
     }
 
     // Calculate average completion time
     const newAvgCompletionTime = hunter.averageCompletionTime
-      ? ((hunter.averageCompletionTime * hunter.completedBounties) + bountyData.completionTimeHours) / newCompletedBounties
+      ? ((hunter.averageCompletionTime * (hunter.completedBounties ?? 0)) + bountyData.completionTimeHours) / newCompletedBounties
       : bountyData.completionTimeHours;
 
     // Update streak
     const now = new Date();
     const lastCompleted = hunter.lastCompletedAt;
-    let newCurrentStreak = hunter.currentStreak;
-    let newLongestStreak = hunter.longestStreak;
+    let newCurrentStreak = hunter.currentStreak ?? 0;
+    let newLongestStreak = hunter.longestStreak ?? 0;
 
     if (lastCompleted) {
       const hoursSinceLastCompletion = (now.getTime() - lastCompleted.getTime()) / (1000 * 60 * 60);
@@ -133,7 +133,7 @@ export class BountyHunterService {
       streak: newCurrentStreak
     });
 
-    const newReputation = hunter.reputation + reputationGain;
+    const newReputation = (hunter.reputation ?? 0) + reputationGain;
     const newLevel = this.calculateLevel(newReputation);
 
     // Track specializations
@@ -162,7 +162,7 @@ export class BountyHunterService {
       .update(bountyHunters)
       .set({
         completedBounties: newCompletedBounties,
-        totalBounties: hunter.totalBounties + 1,
+        totalBounties: (hunter.totalBounties ?? 0) + 1,
         totalEarned: newTotalEarned,
         completionRate: newCompletionRate,
         averageQuality: newAverageQuality,
@@ -389,9 +389,10 @@ export class BountyHunterService {
       .limit(10);
 
     // Calculate next level progress
-    const currentLevelThreshold = LEVEL_THRESHOLDS[hunter.level - 1] || 0;
-    const nextLevelThreshold = LEVEL_THRESHOLDS[hunter.level] || LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1];
-    const progressToNextLevel = ((hunter.reputation - currentLevelThreshold) / (nextLevelThreshold - currentLevelThreshold)) * 100;
+    const hunterLevel = hunter.level ?? 1;
+    const currentLevelThreshold = LEVEL_THRESHOLDS[hunterLevel - 1] || 0;
+    const nextLevelThreshold = LEVEL_THRESHOLDS[hunterLevel] || LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1];
+    const progressToNextLevel = (((hunter.reputation ?? 0) - currentLevelThreshold) / (nextLevelThreshold - currentLevelThreshold)) * 100;
 
     return {
       ...hunter,

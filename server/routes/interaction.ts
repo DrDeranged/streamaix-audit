@@ -90,7 +90,7 @@ import {
   streamRecordings, streamAchievements, userStreamAchievements, streamChatCommands,
   streamChatCommandLogs, streamViewerLeaderboard, knowledgeAvatars, bounties, summaries,
   avatarTrades as avatarTradesTable, avatarPositions, streamConversationMessages, pointsTransactions, dailyLoginStreak,
-  scheduledDebates, botStakes, botSimTrades, botPerformanceSnapshots
+  scheduledDebates, botStakes, botSimTrades, botPerformanceSnapshots, bountyEngagements
 } from "../../shared/schema";
 import { eq, and, desc, gte, lte, sql, asc, isNotNull, isNull, inArray, count } from "drizzle-orm";
 import * as validators from "../validators";
@@ -159,7 +159,10 @@ export async function registerInteractionRoutes(app: Express): Promise<void> {
   // Get user's interactions
   app.get('/api/users/me/interactions', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     const summaryId = req.query.summaryId as string;
-    const interactions = await storage.getUserInteractions(req.user!.id, summaryId);
+    const interactions = await storage.getUserInteractions(
+      req.user!.id,
+      summaryId as unknown as { summaryId?: string; limit?: number; targetType?: string; since?: Date }
+    );
 
     res.json({ interactions });
   }));

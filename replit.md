@@ -35,7 +35,8 @@ Stack: Node.js/Express + TypeScript, Vite, PostgreSQL (Neon) with Drizzle ORM, O
 6. **Run `npm run check` and `npm test`** before declaring any task complete.
 7. **After any npm install, run `npm run lockfile:scrub` before committing** — Replit's proxy contaminates resolved URLs and breaks builds outside Replit.
 8. **After committing, always push to origin main and verify with git ls-remote origin main** — commits left unpushed are invisible to external audits and backups.
-9. **All UI work must follow DESIGN.md.** Banned classes are enforced globally across all of `client/src` by `npm run design:lint` — there is no allowlist.
+9. **Zero TypeScript errors.** `npm run check` (plain strict `tsc`) must exit clean — the error baseline was burned down to zero on 2026-08-15 and `.local/tsc-baseline.log` is empty. No new errors may be introduced; no `@ts-ignore`/`@ts-expect-error`/`as any` to silence them. Known runtime bugs surfaced by the burn-down are catalogued in `docs/runtime-bugs-tsc-burndown.md`.
+10. **All UI work must follow DESIGN.md.** Banned classes are enforced globally across all of `client/src` by `npm run design:lint` — there is no allowlist.
 
 ## Current Phase Tracker
 

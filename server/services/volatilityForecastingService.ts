@@ -945,7 +945,7 @@ export class VolatilityForecastingService {
     };
   }
 
-  private getAssetType(symbol: string): 'crypto' | 'stock' | 'commodity' | 'currency' {
+  private getAssetType(symbol: string): 'crypto' | 'stock' {
     const cryptoAssets = ['BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'ADA', 'AVAX', 'DOT', 'MATIC', 'LINK'];
     return cryptoAssets.includes(symbol) ? 'crypto' : 'stock';
   }
@@ -1653,10 +1653,10 @@ export class VolatilityForecastingService {
 
     // Simulate historical backtest results
     const backtestPeriods = ['1M', '3M', '6M', '1Y'];
-    const backtestResults = {};
+    const backtestResults: Record<string, Record<string, any>> = {};
 
     for (const period of backtestPeriods) {
-      const periodResults = {};
+      const periodResults: Record<string, any> = {};
       
       for (const [modelName, model] of Object.entries(models)) {
         // Simulate backtest metrics for each model
@@ -1772,7 +1772,7 @@ export class VolatilityForecastingService {
   }
 
   private rankModels(backtestResults: any): any[] {
-    const modelScores = {};
+    const modelScores: Record<string, number[]> = {};
     
     // Calculate composite scores for model ranking
     Object.entries(backtestResults).forEach(([period, results]: [string, any]) => {
@@ -1824,10 +1824,10 @@ export class VolatilityForecastingService {
       recovery: { sentiment_indicators: 0.4, macro_environment: 0.3, volume_profile: 0.3 }
     };
 
-    const regimeWeights = weights[regime] || weights.risk_on;
+    const regimeWeights = (weights as Record<string, Record<string, number>>)[regime] || weights.risk_on;
     let probability = 0;
 
-    Object.entries(regimeWeights).forEach(([feature, weight]: [string, number]) => {
+    Object.entries(regimeWeights).forEach(([feature, weight]) => {
       probability += features[feature] * weight;
     });
 
@@ -1835,7 +1835,7 @@ export class VolatilityForecastingService {
   }
 
   private calculateRegimeStability(probabilities: any): number {
-    const values = Object.values(probabilities);
+    const values = Object.values(probabilities) as number[];
     const max = Math.max(...values);
     const secondMax = values.sort((a, b) => b - a)[1];
     return ((max - secondMax) / max) * 100; // Higher = more stable

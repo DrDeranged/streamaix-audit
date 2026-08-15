@@ -123,6 +123,12 @@ import passport from "passport";
 import axios from "axios";
 import { ADMIN_USERNAMES, isAdmin, requireAdmin, validateRequest, asyncHandler } from "./_shared";
 
+declare module "express-session" {
+  interface SessionData {
+    user?: { id: string };
+  }
+}
+
 export async function registerAlphaIntelligenceRoutes(app: Express): Promise<void> {
   // ============================================================
   // ALPHA INTELLIGENCE ENDPOINTS
@@ -825,7 +831,7 @@ export async function registerAlphaIntelligenceRoutes(app: Express): Promise<voi
     try {
       const [smartMoney, fundFlows, sentiment, positioning, walletAnalysis] = await Promise.allSettled([
         institutionalFlowService.getSmartMoneyMovements(assets),
-        institutionalFlowService.getInstitutionalFundFlows(timeframe === '1d' ? '24h' : timeframe),
+        institutionalFlowService.getInstitutionalFundFlows((timeframe === '1d' ? '24h' : timeframe) as Parameters<typeof institutionalFlowService.getInstitutionalFundFlows>[0]),
         institutionalFlowService.getInstitutionalSentiment(timeframe),
         institutionalFlowService.getInstitutionalPositioning(assets),
         institutionalFlowService.getWalletAnalysis()
@@ -930,7 +936,7 @@ export async function registerAlphaIntelligenceRoutes(app: Express): Promise<voi
         'view': 0.2
       };
 
-      const weight = (interactionWeights[interaction.interactionType] || 0.5) * recencyWeight;
+      const weight = (interactionWeights[interaction.interactionType as keyof typeof interactionWeights] || 0.5) * recencyWeight;
 
       // Track sector interests
       if (interaction.targetType === 'sector' && interaction.targetId) {
@@ -1010,13 +1016,13 @@ export async function registerAlphaIntelligenceRoutes(app: Express): Promise<voi
       const marketData = MarketDataService.getInstance();
       const [marketOverview, trendingData, sectorsData] = await Promise.all([
         marketData.getTopCryptos(25),
-        marketData.getTrendingContent(timeFilter),
-        marketData.getSectorPerformance(timeFilter)
+        (marketData as unknown as { getTrendingContent(timeFilter: string): Promise<any> }).getTrendingContent(timeFilter),
+        (marketData as unknown as { getSectorPerformance(timeFilter: string): Promise<any> }).getSectorPerformance(timeFilter)
       ]);
 
       let responseData = {
         market: {
-          movers: marketOverview.slice(0, 6).map(crypto => ({
+          movers: marketOverview.slice(0, 6).map((crypto: any) => ({
             symbol: crypto.symbol,
             name: crypto.name,
             price: crypto.currentPrice,
@@ -1168,7 +1174,7 @@ export async function registerAlphaIntelligenceRoutes(app: Express): Promise<voi
       const { volatilityForecastingService } = await import('../services/volatilityForecastingService');
       
       const forecasts = await Promise.all(
-        symbols.map(symbol => 
+        symbols.map((symbol: string) => 
           volatilityForecastingService.generateVolatilityForecast(symbol, horizons)
         )
       );

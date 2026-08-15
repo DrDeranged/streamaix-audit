@@ -505,7 +505,7 @@ Focus on: market insights, price predictions, important announcements, and viewe
           avatar: users.avatar,
         })
         .from(users)
-        .where(eq(users.id, coHost.userId))
+        .where(eq(users.id, coHost.userId ?? ''))
         .limit(1);
 
         return {

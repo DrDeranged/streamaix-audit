@@ -117,7 +117,9 @@ export class StreamProcessorV2 {
 
       // Step 1: Extract content with immediate progress update (Real Content Extraction)
       console.log(`[ProcessorV2] Step 1: Extracting content for ${job.id}`);
-      const contentResult = await ContentExtractor.extractContent(job.url);
+      const contentResult: Awaited<ReturnType<typeof ContentExtractor.extractContent>>
+        & { contentType?: 'podcast' | 'video' | 'livestream'; platform?: string } =
+        await ContentExtractor.extractContent(job.url);
       
       job.progress = 25;
       job.lastUpdate = new Date();
@@ -125,11 +127,13 @@ export class StreamProcessorV2 {
       
       // Step 2: Process with AI with immediate progress update (Real AI Processing)
       console.log(`[ProcessorV2] Step 2: AI processing for ${job.id}`);
-      const aiResult = await AIService.processContent(job.url, {
-        title: contentResult.title,
-        contentType: contentResult.contentType,
-        platform: contentResult.platform
-      });
+      const aiResult: Awaited<ReturnType<typeof AIService.processContent>>
+        & { tldrSummary?: any; blogPost?: any; marketAnalysis?: any; rawData?: any } =
+        await AIService.processContent(job.url, {
+          title: contentResult.title,
+          contentType: contentResult.contentType as 'podcast' | 'video' | 'livestream',
+          platform: contentResult.platform as string
+        });
       
       job.progress = 70;
       job.lastUpdate = new Date();

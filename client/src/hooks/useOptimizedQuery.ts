@@ -17,7 +17,7 @@ function trackQueryPerformance(queryKey: string, duration: number, success: bool
 
 // Optimized query hook with background updates
 export function useOptimizedQuery<T>(
-  queryKey: (string | number)[],
+  queryKey: (string | number | undefined)[],
   queryFn: () => Promise<T>,
   options: Omit<UseQueryOptions<T>, 'queryKey' | 'queryFn'> & {
     backgroundUpdate?: boolean;
@@ -121,7 +121,7 @@ export function useOptimizedMutation<T, V>(
 
   return useMutation({
     mutationFn,
-    onMutate: async (variables) => {
+    onMutate: async (variables, context) => {
       // Optimistic update
       if (options.optimisticUpdate) {
         await queryClient.cancelQueries({ queryKey: options.optimisticUpdate.queryKey });
@@ -136,17 +136,18 @@ export function useOptimizedMutation<T, V>(
         return { previousData };
       }
       
-      return options.onMutate?.(variables);
+      return options.onMutate?.(variables, context);
     },
-    onError: (error, variables, context: any) => {
+    onError: (error, variables, onMutateResult, context) => {
       // Rollback optimistic update
-      if (options.optimisticUpdate && context?.previousData !== undefined) {
-        queryClient.setQueryData(options.optimisticUpdate.queryKey, context.previousData);
+      const rollback = onMutateResult as { previousData?: unknown } | undefined;
+      if (options.optimisticUpdate && rollback?.previousData !== undefined) {
+        queryClient.setQueryData(options.optimisticUpdate.queryKey, rollback.previousData);
       }
       
-      options.onError?.(error, variables, context);
+      options.onError?.(error, variables, onMutateResult, context);
     },
-    onSuccess: (data, variables, context) => {
+    onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate related queries
       if (options.invalidateQueries) {
         options.invalidateQueries.forEach(queryKey => {
@@ -154,15 +155,15 @@ export function useOptimizedMutation<T, V>(
         });
       }
       
-      options.onSuccess?.(data, variables, context);
+      options.onSuccess?.(data, variables, onMutateResult, context);
     },
-    onSettled: (data, error, variables, context) => {
+    onSettled: (data, error, variables, onMutateResult, context) => {
       // Always refetch after mutation settles
       if (options.optimisticUpdate) {
         queryClient.invalidateQueries({ queryKey: options.optimisticUpdate.queryKey });
       }
       
-      options.onSettled?.(data, error, variables, context);
+      options.onSettled?.(data, error, variables, onMutateResult, context);
     },
   });
 }

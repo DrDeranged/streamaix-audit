@@ -1,9 +1,6 @@
 import {
-  ChartPattern,
-  TrendAnalysis,
-  MarketCycle,
-  PatternAlert,
-  AiTradingSetup,
+  patternAlerts,
+  aiTradingSetups,
   PatternRecognitionConfig,
   PatternDetectionResult,
   PatternBacktestResults,
@@ -14,6 +11,51 @@ import {
   PatternAlertSummary,
   PatternRecognitionDashboard
 } from '@shared/schema';
+
+type PatternAlertRow = typeof patternAlerts.$inferSelect;
+type AiTradingSetupRow = typeof aiTradingSetups.$inferSelect;
+
+// Local structural types for pattern-recognition domain objects.
+// The corresponding tables were pruned from the shared schema, but these
+// runtime shapes are still constructed (and cast) throughout this service.
+// Index signatures preserve the existing loose property access without
+// altering any runtime behavior.
+interface ChartPattern {
+  patternType: string;
+  symbol: string;
+  confidence?: number;
+  createdAt?: string;
+  trendAlignment?: boolean;
+  volumeConfirmation?: boolean;
+  currentPrice: number;
+  targetPrice?: number;
+  targetDirection?: string;
+  stopLoss?: number;
+  assetType?: string;
+  timeframe?: string;
+  id?: string;
+  [key: string]: any;
+}
+
+interface TrendAnalysis {
+  [key: string]: any;
+}
+
+interface MarketCycle {
+  [key: string]: any;
+}
+
+interface PatternAlert {
+  symbol?: string;
+  alertType?: string;
+  triggeredAt?: string;
+  createdAt?: string;
+  [key: string]: any;
+}
+
+interface AiTradingSetup {
+  [key: string]: any;
+}
 import { MarketDataService, CryptoQuote, StockQuote } from './marketDataService';
 import { CorrelationAnalysisService } from './correlationAnalysisService';
 import { FederalReserveService } from './federalReserveService';
@@ -519,7 +561,7 @@ export class PatternRecognitionService {
 
     // Find potential peaks for head and shoulders
     const peaks = this.findPeaks(data.map(d => d.high), 5);
-    const troughs = this.findPeaks(data.map(d => d.low).map(x => -x), 5).map(x => -x);
+    const troughs = this.findPeaks(data.map(d => d.low).map(x => -x), 5).map(x => -x) as unknown as Array<{ value: number; index: number }>;
 
     if (peaks.length >= 3) {
       // Look for head and shoulders pattern (left shoulder, head, right shoulder)
@@ -1366,10 +1408,10 @@ export class PatternRecognitionService {
           averageConfidence: recentPatterns.reduce((sum, p) => sum + (p.confidence || 0), 0) / recentPatterns.length
         },
         recentPatterns: recentPatterns.slice(0, 10),
-        topAlerts: activeAlerts as PatternAlert[],
+        topAlerts: activeAlerts as unknown as PatternAlertRow[],
         trendAnalysis,
         marketCycles,
-        tradingSetups: tradingSetups as AiTradingSetup[],
+        tradingSetups: tradingSetups as unknown as AiTradingSetupRow[],
         performance: {
           dailySuccess: Array.from({length: 7}, (_, i) => ({
             date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
@@ -1390,7 +1432,7 @@ export class PatternRecognitionService {
           totalAlerts: activeAlerts.length + 50,
           activeAlerts: activeAlerts.length,
           criticalAlerts: activeAlerts.filter(a => a.severity === 'critical').length,
-          recentAlerts: activeAlerts.slice(0, 5) as PatternAlert[],
+          recentAlerts: activeAlerts.slice(0, 5) as unknown as PatternAlertRow[],
           alertsByType: {
             'pattern_detected': 15,
             'pattern_completion': 8,
@@ -1500,7 +1542,7 @@ export class PatternRecognitionService {
     const tolerance = 0.02; // 2% tolerance for level clustering
     
     // Find peaks/troughs
-    const extremes = this.findPeaks(type === 'resistance' ? data : data.map(x => -x));
+    const extremes = this.findPeaks(type === 'resistance' ? data : data.map(x => -x), undefined as unknown as number);
     const values = extremes.map(e => type === 'resistance' ? e.value : -e.value);
     
     // Cluster similar levels
@@ -1851,7 +1893,7 @@ export class PatternRecognitionService {
       }
     }
     
-    for (const [symbol, pattern] of bestPatternBySymbol) {
+    for (const [symbol, pattern] of Array.from(bestPatternBySymbol.entries())) {
       const alertId = `alert_${pattern.symbol}_${pattern.patternType}_${Date.now()}`;
       
       // Check cooldown period PER SYMBOL (regardless of pattern type)

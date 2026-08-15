@@ -158,7 +158,8 @@ export class SocialTradingService {
     let query = db
       .select()
       .from(tradingSignals)
-      .where(eq(tradingSignals.status, 'active'));
+      .where(eq(tradingSignals.status, 'active'))
+      .$dynamic();
 
     if (traderId) {
       query = query.where(and(

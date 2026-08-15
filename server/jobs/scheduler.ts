@@ -18,6 +18,7 @@
  *    a broken DB never breaks the jobs themselves.
  */
 import cron from 'node-cron';
+import type { ScheduledTask } from 'node-cron';
 import { db } from '../db';
 import { jobRuns } from '@shared/schema';
 import { eq, sql } from 'drizzle-orm';
@@ -63,7 +64,7 @@ interface JobState {
   lastError: string | null;
   nextRunAt: Date | null;
   timer: NodeJS.Timeout | null;
-  cronTask: cron.ScheduledTask | null;
+  cronTask: ScheduledTask | null;
   cancelled: boolean;
 }
 

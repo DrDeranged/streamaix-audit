@@ -13,7 +13,7 @@ const router = Router();
 router.post('/api/trading/traders', async (req, res) => {
   try {
     const data = insertTraderSchema.parse(req.body);
-    const trader = await socialTradingService.createTrader(data);
+    const trader = await socialTradingService.createTrader(data as Parameters<typeof socialTradingService.createTrader>[0]);
     res.json(trader);
   } catch (error: any) {
     console.error('❌ Create trader error:', error);
@@ -104,7 +104,7 @@ router.get('/api/trading/leaderboard', async (req, res) => {
 router.post('/api/trading/signals', async (req, res) => {
   try {
     const data = insertTradingSignalSchema.parse(req.body);
-    const signal = await socialTradingService.createSignal(data);
+    const signal = await socialTradingService.createSignal(data as Parameters<typeof socialTradingService.createSignal>[0]);
     res.json(signal);
   } catch (error: any) {
     console.error('❌ Create signal error:', error);
@@ -188,7 +188,7 @@ router.post('/api/trading/signals/:id/engage/:type', async (req, res) => {
 router.post('/api/trading/copy-positions', async (req, res) => {
   try {
     const data = insertCopyTradingPositionSchema.parse(req.body);
-    const position = await socialTradingService.createCopyPosition(data);
+    const position = await socialTradingService.createCopyPosition(data as Parameters<typeof socialTradingService.createCopyPosition>[0]);
     res.json(position);
   } catch (error: any) {
     console.error('❌ Create copy position error:', error);

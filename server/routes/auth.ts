@@ -204,7 +204,7 @@ export async function registerAuthRoutes(app: Express): Promise<void> {
           email: user.email,
           createdAt: user.createdAt,
           streamBalance: signupBonusAmount.toString()
-        });
+        } as unknown as Parameters<typeof adminWebSocketService.broadcastNewUser>[0]);
       } catch (wsError) {
         console.error('Failed to broadcast new user:', wsError);
       }
@@ -255,7 +255,7 @@ export async function registerAuthRoutes(app: Express): Promise<void> {
     }
 
     // Verify password
-    const isValidPassword = await AuthService.comparePassword(password, user.password);
+    const isValidPassword = await AuthService.comparePassword(password, user.password ?? '');
     if (!isValidPassword) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }

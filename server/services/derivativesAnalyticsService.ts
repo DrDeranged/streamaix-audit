@@ -693,8 +693,8 @@ export class DerivativesAnalyticsService {
     }
     
     const termStructure = [];
-    for (const [expiry, points] of expiryGroups) {
-      const avgIV = points.reduce((sum, p) => sum + (p.callIV + p.putIV) / 2, 0) / points.length;
+    for (const [expiry, points] of Array.from(expiryGroups.entries())) {
+      const avgIV = points.reduce((sum: number, p: any) => sum + (p.callIV + p.putIV) / 2, 0) / points.length;
       const daysToExpiry = points[0]?.daysToExpiry || 0;
       
       termStructure.push({
@@ -800,9 +800,9 @@ export class DerivativesAnalyticsService {
     let maxPain = 0;
     let minValue = Infinity;
 
-    for (const [strike] of strikeMap) {
+    for (const strike of Array.from(strikeMap.keys())) {
       let value = 0;
-      for (const [otherStrike, data] of strikeMap) {
+      for (const [otherStrike, data] of Array.from(strikeMap.entries())) {
         if (strike > otherStrike) {
           value += data.call * (strike - otherStrike);
         }
@@ -911,7 +911,7 @@ export class DerivativesAnalyticsService {
     const below = liquidationLevels.filter(l => l.price <= currentPrice).sort((a, b) => b.price - a.price);
     
     // Enhanced heatmap with professional clustering
-    const heatmap = [];
+    const heatmap: Array<{ price: number; intensity: number; amount: number; side: 'long' | 'short' }> = [];
     const priceRange = currentPrice * 0.15; // 15% range for better precision
     const steps = 30; // More granular
     

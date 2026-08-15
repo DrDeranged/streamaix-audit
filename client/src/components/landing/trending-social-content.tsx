@@ -556,7 +556,7 @@ function WhoToFollowWidget() {
 
   const handleFollow = async (fid: number, username: string) => {
     // Optimistic update
-    setFollowedUsers(prev => new Set([...prev, fid]));
+    setFollowedUsers(prev => new Set([...Array.from(prev), fid]));
     
     try {
       await followMutation.mutateAsync({ fid, username });
@@ -625,7 +625,7 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
   const [recastedCasts, setRecastedCasts] = useState<Set<string>>(new Set());
 
   const handleLike = async (castHash: string) => {
-    setLikedCasts(prev => new Set([...prev, castHash]));
+    setLikedCasts(prev => new Set([...Array.from(prev), castHash]));
     try {
       await likeMutation.mutateAsync({ castHash });
     } catch (error) {
@@ -638,7 +638,7 @@ function FeedPostCard({ cast, index }: { cast: TrendingCast; index: number }) {
   };
 
   const handleRecast = async (castHash: string) => {
-    setRecastedCasts(prev => new Set([...prev, castHash]));
+    setRecastedCasts(prev => new Set([...Array.from(prev), castHash]));
     try {
       await recastMutation.mutateAsync({ castHash });
     } catch (error) {

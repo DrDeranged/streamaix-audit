@@ -28,6 +28,7 @@ import SectionTitle from '@/components/ds/SectionTitle';
 import BountyCard from '@/components/bounty/BountyCard';
 import { FollowUserButton, FollowCategoryButton } from '@/components/FollowButton';
 import { useAuth } from '@/hooks/useAuth';
+import type { Bounty } from '@shared/schema';
 
 interface FollowReason {
   isFromFollowedUser: boolean;
@@ -37,39 +38,32 @@ interface FollowReason {
   isAiAgent?: boolean;
 }
 
-interface EnrichedBounty {
-  id: string;
-  title: string;
-  description: string;
-  reward: number;
-  category?: string;
-  status: string;
-  createdAt: string;
+type EnrichedBounty = Bounty & {
   followReason: FollowReason;
   [key: string]: any;
-}
+};
 
 export default function FollowingFeed() {
   const { user, isAuthenticated } = useAuth();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [filterBy, setFilterBy] = useState<'all' | 'users' | 'categories'>('all');
 
-  const { data: feedData, isLoading: feedLoading } = useQuery({
+  const { data: feedData, isLoading: feedLoading } = useQuery<{ bounties?: EnrichedBounty[] }>({
     queryKey: ['/api/bounties/following'],
     enabled: isAuthenticated,
   });
 
-  const { data: followedUsers } = useQuery({
+  const { data: followedUsers } = useQuery<{ users?: any[] }>({
     queryKey: ['/api/me/followed-users'],
     enabled: isAuthenticated,
   });
 
-  const { data: followedCategories } = useQuery({
+  const { data: followedCategories } = useQuery<{ categories?: string[] }>({
     queryKey: ['/api/me/followed-categories'],
     enabled: isAuthenticated,
   });
 
-  const { data: categoriesData } = useQuery({
+  const { data: categoriesData } = useQuery<{ categories?: any[] }>({
     queryKey: ['/api/bounty-categories'],
   });
 
@@ -173,7 +167,7 @@ export default function FollowingFeed() {
               <div>
                 <StatValue
                   label="New Today"
-                  value={bounties.filter(b => new Date(b.createdAt) > new Date(Date.now() - 24*60*60*1000)).length}
+                  value={bounties.filter(b => new Date(b.createdAt ?? 0) > new Date(Date.now() - 24*60*60*1000)).length}
                 />
               </div>
             </div>

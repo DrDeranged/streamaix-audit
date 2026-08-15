@@ -126,7 +126,6 @@ Format your response as JSON array:
           email: 'ai-markets@streamaix.ai',
           password: '',
           isAiAgent: true,
-          pointsBalance: 1000000,
         }).returning();
         aiCreator = newAiCreator;
       }

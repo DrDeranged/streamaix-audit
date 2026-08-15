@@ -34,9 +34,9 @@ import {
   type InsertAvatarInsight,
   // Entrepreneur Predictions Types
   // Pattern Recognition Types
-  type PatternAlert,
+  type PatternAlertData as PatternAlert,
   type InsertPatternAlert,
-  type AiTradingSetup,
+  type AiTradingSetupData as AiTradingSetup,
   type InsertAiTradingSetup,
   // Referral System Types
   type ReferralCode,
@@ -273,15 +273,6 @@ export interface IStorage {
   
 
   // Pattern Recognition operations
-  
-  // Chart Pattern operations
-  deleteChartPattern(id: string): Promise<boolean>;
-
-  // Trend Analysis operations
-  deleteTrendAnalysis(id: string): Promise<boolean>;
-
-  // Market Cycle operations
-  deleteMarketCycle(id: string): Promise<boolean>;
 
   // Pattern Alert operations
   getPatternAlert(id: string): Promise<PatternAlert | undefined>;
@@ -321,13 +312,6 @@ export interface IStorage {
   deleteAiTradingSetup(id: string): Promise<boolean>;
 
   // Entrepreneur prediction operations
-  getEntrepreneurAccuracyStats(entrepreneurName: string): Promise<{
-    totalPredictions: number;
-    evaluatedPredictions: number;
-    averageAccuracy: number;
-    accuracyByCategory: Record<string, number>;
-    recentAccuracy: number;
-  }>;
 
   // Referral System operations
   generateUniqueReferralCode(): Promise<string>;
@@ -930,7 +914,8 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(userInteractions)
       .where(and(...conditions))
-      .orderBy(desc(userInteractions.createdAt));
+      .orderBy(desc(userInteractions.createdAt))
+      .$dynamic();
       
     if (options?.limit) {
       query = query.limit(options.limit);
@@ -1059,7 +1044,7 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(summaries)
-      .where(inArray(summaries.id, trendingIds.map(t => t.summaryId)))
+      .where(inArray(summaries.id, trendingIds.map(t => t.summaryId).filter((id): id is string => id !== null)))
       .orderBy(desc(summaries.createdAt));
   }
 
@@ -1487,7 +1472,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Build dynamic query for bounties from followed creators OR followed categories
-    let query = db.select().from(bounties);
+    let query = db.select().from(bounties).$dynamic();
     
     if (followedUserIds.length > 0 && followedCategories.length > 0) {
       query = query.where(
@@ -1563,7 +1548,7 @@ export class DatabaseStorage implements IStorage {
   async updateAvatarInsight(id: string, updates: Partial<InsertAvatarInsight>): Promise<AvatarInsight | undefined> {
     const [insight] = await db
       .update(avatarInsights)
-      .set({ ...updates, updatedAt: new Date() })
+      .set({ ...updates })
       .where(eq(avatarInsights.id, id))
       .returning();
     return insight || undefined;
@@ -1643,7 +1628,8 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(patternAlerts)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(desc(patternAlerts.triggeredAt));
+      .orderBy(desc(patternAlerts.triggeredAt))
+      .$dynamic();
 
     if (options?.limit) {
       query = query.limit(options.limit);
@@ -1754,7 +1740,8 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(aiTradingSetups)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(desc(aiTradingSetups.createdAt));
+      .orderBy(desc(aiTradingSetups.createdAt))
+      .$dynamic();
 
     if (options?.limit) {
       query = query.limit(options.limit);
@@ -1965,7 +1952,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getBountyTemplates(options?: { category?: string; difficulty?: string; limit?: number }): Promise<BountyTemplate[]> {
-    let query = db.select().from(bountyTemplates).where(eq(bountyTemplates.isPublic, true));
+    let query = db.select().from(bountyTemplates).where(eq(bountyTemplates.isPublic, true)).$dynamic();
 
     const conditions = [];
     if (options?.category) {
@@ -2037,7 +2024,8 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(users, eq(conversations.authorId, users.id))
       .where(eq(conversations.isPublic, true))
       .limit(options.limit)
-      .offset(options.offset);
+      .offset(options.offset)
+      .$dynamic();
 
     // Filter by topic if provided
     if (options.topic) {
@@ -2320,7 +2308,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(conversations.id, conversationId));
 
       const [conversation] = await db.select().from(conversations).where(eq(conversations.id, conversationId));
-      return { liked: false, likesCount: conversation.likesCount };
+      return { liked: false, likesCount: conversation.likesCount ?? 0 };
     } else {
       // Like
       await db.insert(conversationLikes)
@@ -2332,7 +2320,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(conversations.id, conversationId));
 
       const [conversation] = await db.select().from(conversations).where(eq(conversations.id, conversationId));
-      return { liked: true, likesCount: conversation.likesCount };
+      return { liked: true, likesCount: conversation.likesCount ?? 0 };
     }
   }
 
@@ -2408,8 +2396,10 @@ export class DatabaseStorage implements IStorage {
     
     // Fetch prediction markets
     if (types.includes('market')) {
-      const markets = await this.getPredictionMarkets({ limit: options.limit, offset: options.offset });
-      feedItems.push(...markets.map(m => ({
+      const markets = await (this as unknown as {
+        getPredictionMarkets(options: { limit?: number; offset?: number }): Promise<Array<{ createdAt: Date | null }>>;
+      }).getPredictionMarkets({ limit: options.limit, offset: options.offset });
+      feedItems.push(...markets.map((m) => ({
         ...m,
         type: 'market',
         timestamp: m.createdAt

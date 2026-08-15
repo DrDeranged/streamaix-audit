@@ -399,7 +399,7 @@ export async function registerDiagnosticRoutes(app: Express): Promise<void> {
     console.log('🔄 Admin reseed endpoint hit!');
     // Import and run auto-seed
     try {
-      const { autoSeedDatabase } = await import('./auto-seed');
+      const { autoSeedDatabase } = await import('../auto-seed');
       
       console.log('🌱 Starting manual reseed...');
       const startTime = Date.now();

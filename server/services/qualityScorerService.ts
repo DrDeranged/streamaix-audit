@@ -150,7 +150,9 @@ Respond ONLY with valid JSON in this exact format:
 }`;
 
     try {
-      const response = await this.aiService.chat(prompt, {
+      const response = await (this.aiService as unknown as {
+        chat(prompt: string, options: { model: string; temperature: number; maxTokens: number }): Promise<string>;
+      }).chat(prompt, {
         model: 'gpt-4o-mini', // Fast and cost-effective for scoring
         temperature: 0.3,
         maxTokens: 300
@@ -216,8 +218,8 @@ Respond ONLY with valid JSON in this exact format:
       const existingWords = new Set(existingText.split(/\s+/).filter(w => w.length > 3));
 
       // Calculate Jaccard similarity
-      const intersection = new Set([...summaryWords].filter(x => existingWords.has(x)));
-      const union = new Set([...summaryWords, ...existingWords]);
+      const intersection = new Set(Array.from(summaryWords).filter(x => existingWords.has(x)));
+      const union = new Set([...Array.from(summaryWords), ...Array.from(existingWords)]);
       const similarity = intersection.size / union.size;
 
       maxSimilarity = Math.max(maxSimilarity, similarity);
@@ -243,7 +245,7 @@ Respond ONLY with valid JSON in this exact format:
   // Check if summary passes quality threshold
   async passesQualityThreshold(bountyId: string, threshold: number = 60): Promise<boolean> {
     const score = await this.getQualityScore(bountyId);
-    return score ? score.overallScore >= threshold : false;
+    return score ? (score.overallScore ?? 0) >= threshold : false;
   }
 
   // Get quality distribution stats
@@ -262,14 +264,14 @@ Respond ONLY with valid JSON in this exact format:
       };
     }
 
-    const avgScore = allScores.reduce((sum, s) => sum + s.overallScore, 0) / allScores.length;
+    const avgScore = allScores.reduce((sum, s) => sum + (s.overallScore ?? 0), 0) / allScores.length;
 
     return {
       averageScore: Math.round(avgScore),
-      highQuality: allScores.filter(s => s.overallScore >= 90).length,
-      goodQuality: allScores.filter(s => s.overallScore >= 70 && s.overallScore < 90).length,
-      fair: allScores.filter(s => s.overallScore >= 50 && s.overallScore < 70).length,
-      poor: allScores.filter(s => s.overallScore < 50).length,
+      highQuality: allScores.filter(s => (s.overallScore ?? 0) >= 90).length,
+      goodQuality: allScores.filter(s => (s.overallScore ?? 0) >= 70 && (s.overallScore ?? 0) < 90).length,
+      fair: allScores.filter(s => (s.overallScore ?? 0) >= 50 && (s.overallScore ?? 0) < 70).length,
+      poor: allScores.filter(s => (s.overallScore ?? 0) < 50).length,
       totalScored: allScores.length
     };
   }

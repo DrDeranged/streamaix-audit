@@ -21,7 +21,7 @@ export class PerformanceMonitor {
     // Monitor Web Vitals
     const observer = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
-        this.recordMetric(entry.name, entry.duration || entry.value);
+        this.recordMetric(entry.name, entry.duration || (entry as PerformanceEntry & { value?: number }).value || 0);
       }
     });
 
@@ -115,14 +115,14 @@ export class PerformanceMonitor {
     memory: any;
   } {
     const report = {
-      webVitals: {},
-      components: {},
-      web3: {},
+      webVitals: {} as Record<string, any>,
+      components: {} as Record<string, any>,
+      web3: {} as Record<string, any>,
       memory: this.getMemoryInfo(),
     };
 
     // Group metrics by category
-    for (const [name, _] of this.metrics) {
+    for (const [name, _] of Array.from(this.metrics)) {
       const metrics = this.getMetrics(name);
       if (!metrics) continue;
 
@@ -225,7 +225,7 @@ export class Web3ConnectionPool {
       // Execute all calls in parallel
       const results = await Promise.all(
         batch.flatMap(({ call }) => 
-          call.map(({ contract, method, args }) => 
+          call.map(({ contract, method, args }: { contract: any; method: string; args: any[] }) => 
             contract[method](...args)
           )
         )

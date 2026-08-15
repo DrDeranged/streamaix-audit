@@ -214,7 +214,7 @@ export async function registerPortfolioNewsRoutes(app: Express): Promise<void> {
         return titleLower.includes(symbolLower) || titleLower.includes(symbolLower.slice(0, 3));
       }) || symbols[0] || '';
       
-      const timeAgo = getTimeAgo(new Date(article.published));
+      const timeAgo = (globalThis as unknown as { getTimeAgo(d: Date): string }).getTimeAgo(new Date(article.published));
       
       return {
         symbol: matchedSymbol,
@@ -273,7 +273,7 @@ export async function registerPortfolioNewsRoutes(app: Express): Promise<void> {
       return {
         title: article.title,
         source: article.source,
-        time: getTimeAgo(new Date(article.published)),
+        time: (globalThis as unknown as { getTimeAgo(d: Date): string }).getTimeAgo(new Date(article.published)),
         sentiment,
         url: article.url,
       };

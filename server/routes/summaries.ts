@@ -49,6 +49,7 @@ import {
   channelPointsRedeemSchema,
 } from "../middleware/validationSchemas";
 import { cacheService } from "../services/cacheService";
+import RebuiltContentProcessor from "../services/rebuiltContentProcessor";
 import { AIService } from "../services/aiService";
 import { Web3Service } from "../services/web3Service";
 import { youtubeService } from "../services/youtubeService";
