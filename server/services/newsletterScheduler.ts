@@ -63,10 +63,34 @@ class NewsletterScheduler {
       // missed slot, and a restart near the slot could double-fire. Skip if
       // a newsletter was already sent within this slot's window today
       // (morning slot = before 12:00 ET, market-close slot = after).
-      if (await this.alreadySentForSlot(day)) {
-        console.log(`📧 ${day} newsletter already sent for today's slot — skipping (idempotence guard)`);
+      // Atomic slot claim: take a Postgres advisory lock keyed on the slot so
+      // two concurrent invocations (cron + catch-up, or two instances sharing
+      // the DB) cannot both pass the sent-log check and double-send.
+      const { db } = await import('../db');
+      const { sql } = await import('drizzle-orm');
+      const lockKey = `newsletter:${day}:${new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' })}`;
+      const lockRes = await db.execute(sql`SELECT pg_try_advisory_lock(hashtext(${lockKey})) AS locked`);
+      const locked = (lockRes as any).rows?.[0]?.locked === true;
+      if (!locked) {
+        console.log(`📧 ${day} newsletter slot is being handled by another sender — skipping`);
         return;
       }
+      try {
+        if (await this.alreadySentForSlot(day)) {
+          console.log(`📧 ${day} newsletter already sent for today's slot — skipping (idempotence guard)`);
+          return;
+        }
+        await this.doSend(day);
+      } finally {
+        await db.execute(sql`SELECT pg_advisory_unlock(hashtext(${lockKey}))`).catch(() => {});
+      }
+    } catch (error) {
+      console.error(`❌ ${day} newsletter send failed:`, error);
+    }
+  }
+
+  private async doSend(day: string): Promise<void> {
+    try {
       const result = await newsletterService.sendToWaitlist(storage);
       
       if (result.success) {

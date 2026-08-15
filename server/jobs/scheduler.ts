@@ -261,8 +261,15 @@ export class JobScheduler {
       try {
         const slot = previousCronSlot(job.cronExpression!, now, job.opts.timezone);
         if (!slot) continue;
-        // Hydrate persisted state so a fresh boot sees the last run.
-        await this.isStale(job, Number.MAX_SAFE_INTEGER).catch(() => undefined);
+        // Hydrate persisted state so a fresh boot sees the last run. If the
+        // persisted state cannot be read (isStale returns false on DB errors
+        // without hydrating), fail SAFE: skip catch-up rather than re-running
+        // every cron job's side effects during a DB outage.
+        const hydrated = await this.isStale(job, Number.MAX_SAFE_INTEGER).catch(() => undefined);
+        if (hydrated === false && !job.lastStartedAt && !job.lastFinishedAt) {
+          console.warn(`[Scheduler] [catch-up] "${job.name}" — persisted state unavailable, skipping catch-up (fail-safe)`);
+          continue;
+        }
         const lastSuccess =
           job.lastStatus === 'success' && job.lastFinishedAt
             ? new Date(job.lastFinishedAt).getTime()

@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
@@ -28,9 +28,11 @@ const SUB_LANGS = 'en.*,en';
 
 const YTDLP_TIMEOUT_MS = 120_000;
 
-function execP(command: string, timeout = YTDLP_TIMEOUT_MS): Promise<{ stdout: string; stderr: string }> {
+function execFileP(file: string, args: string[], timeout = YTDLP_TIMEOUT_MS): Promise<{ stdout: string; stderr: string }> {
   return new Promise((resolve, reject) => {
-    exec(command, { timeout, maxBuffer: 32 * 1024 * 1024 }, (error, stdout, stderr) => {
+    // execFile (not exec): no shell is involved, so URL contents can never be
+    // interpreted as shell syntax ($(...), backticks, ;, etc.).
+    execFile(file, args, { timeout, maxBuffer: 32 * 1024 * 1024 }, (error, stdout, stderr) => {
       if (error) reject(Object.assign(error, { stdout, stderr }));
       else resolve({ stdout, stderr });
     });
@@ -100,14 +102,27 @@ export async function extractCaptionTranscript(videoUrl: string): Promise<Captio
   try {
     // --write-subs (human) AND --write-auto-subs (fallback); yt-dlp prefers
     // human subs when both exist for a requested language.
-    const cmd =
-      `yt-dlp --skip-download --write-subs --write-auto-subs ` +
-      `--sub-langs "${SUB_LANGS}" --sub-format "vtt/srt/best" ` +
-      `--print-to-file duration "${join(workDir, 'duration.txt')}" ` +
-      `-o "${outTemplate}" "${videoUrl.replace(/"/g, '')}"`;
+    // Only http(s) URLs are ever handed to yt-dlp.
+    let parsed: URL;
+    try {
+      parsed = new URL(videoUrl);
+    } catch {
+      throw new NoCaptionsError('Invalid video URL');
+    }
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      throw new NoCaptionsError('Only http(s) video URLs are supported');
+    }
+
+    const args = [
+      '--skip-download', '--write-subs', '--write-auto-subs',
+      '--sub-langs', SUB_LANGS, '--sub-format', 'vtt/srt/best',
+      '--print-to-file', 'duration', join(workDir, 'duration.txt'),
+      '-o', outTemplate,
+      '--', parsed.toString(),
+    ];
 
     try {
-      await execP(cmd);
+      await execFileP('yt-dlp', args);
     } catch (err) {
       // yt-dlp exits non-zero for unavailable videos; caption absence usually
       // still exits 0. Either way, decide based on what landed on disk.

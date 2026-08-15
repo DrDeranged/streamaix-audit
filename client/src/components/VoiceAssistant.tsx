@@ -210,7 +210,12 @@ export function VoiceAssistant() {
     recognitionRef.current?.stop();
   }
 
+  // Guard against overlapping requests: only the latest one may update state
+  // or speak. Stale responses are dropped silently.
+  const requestIdRef = useRef(0);
+
   async function sendTranscript(transcript: string) {
+    const requestId = ++requestIdRef.current;
     setStatus("processing");
     try {
       const data: { success: boolean } & VoiceResult = await apiRequest("/api/assistant/text", {
@@ -220,6 +225,7 @@ export function VoiceAssistant() {
           currentPath: window.location.pathname,
         }),
       });
+      if (requestId !== requestIdRef.current) return; // a newer request superseded this one
       setResult({ ...data, transcript: data.transcript || transcript });
       if (data.intent?.type === "navigate" && data.intent.path) {
         setTimeout(() => setLocation(data.intent.path!), 600);
@@ -229,14 +235,15 @@ export function VoiceAssistant() {
       if (speechSynthesisSupported && spoken) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(spoken);
-        utterance.onend = () => setStatus("idle");
-        utterance.onerror = () => setStatus("idle");
+        utterance.onend = () => { if (requestId === requestIdRef.current) setStatus("idle"); };
+        utterance.onerror = () => { if (requestId === requestIdRef.current) setStatus("idle"); };
         setStatus("speaking");
         window.speechSynthesis.speak(utterance);
       } else {
         setStatus("idle");
       }
     } catch (err) {
+      if (requestId !== requestIdRef.current) return;
       const msg = err instanceof Error ? err.message : "Assistant request failed";
       console.error("[VoiceAssistant] request failed", err);
       setStatus("error");
