@@ -1,0 +1,39 @@
+Deep security audit of every value-bearing path. REPORT ONLY, evidence
+required for every claim.
+
+1. CUSTODY INVARIANT: prove no server code path can sign or send a
+   transaction in the swap/signal flow: grep the trade/signal/swap
+   services and routes for privateKey, Wallet, sendTransaction,
+   signTransaction. The ONLY permitted signer usage is contractService
+   (bridge/mint, dual-flag gated) — show its gating.
+2. FEE INTEGRITY: show that swap quotes always include feeRecipient +
+   fee bps from env, that a missing TREASURY_ADDRESS throws rather than
+   silently zero-fees, and that the 0x API key appears nowhere under
+   client/.
+3. INPUT TRUST: for each money-adjacent route (swap quote, swap record,
+   signals, bridge), show its Zod schema and confirm no client-supplied
+   value can set fees, override the allowlist, or write another wallet's
+   records. Specifically: can a client record a trade with someone
+   else's tx_hash or an unverified hash? Show the on-chain verification
+   code path.
+4. RISK ENGINE: enumerate every check in riskEngine (agent caps,
+   drawdown, concentration, global breaker, swap volume cap, price
+   impact tiers) with its threshold source (env/default) and its test.
+   Flag any check with in-memory-only state that resets on restart.
+5. RESOLUTION INTEGRITY: confirm every market resolution path (AI and
+   admin) writes market_resolutions_audit; confirm below-threshold or
+   citation-less AI resolutions escalate to pending_review instead of
+   resolving; show the tests.
+6. AUTH SURFACE: list every /api/admin/* route and confirm each has the
+   admin guard; list any route mutating user data without auth
+   middleware; confirm JWT config refuses to boot without a secret in
+   production.
+7. RATE LIMITS: list which limiters are in-memory vs persistent; flag
+   expensive endpoints (summarize, transcribe, AI chat) whose limits
+   reset on restart.
+8. ADVICE-LANGUAGE COMPLIANCE: show the BANNED_ADVICE_PATTERNS list,
+   which fields it validates (thesis, keyEvidence), and its tests. Then
+   check the OTHER user-facing AI systems (chat widget, avatar chat,
+   newsletter agentsBrief) for equivalent no-advice constraints — flag
+   any AI surface generating market commentary without one.
+End with findings ranked by severity, each with file:line evidence.

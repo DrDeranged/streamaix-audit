@@ -1,0 +1,38 @@
+Run a complete evidence-based audit of this codebase. REPORT ONLY — do not
+modify, fix, delete, or commit anything. Every finding must include the
+command you ran and its literal output; no claims from memory. Structure
+the report in these sections:
+
+1. GATES: run npm test, npm run build, npm run design:lint, and npx tsc
+   --noEmit (report error count vs .local/tsc-baseline.log). Paste
+   pass/fail lines.
+2. GIT STATE: git status, git log --oneline -5, git ls-remote origin main
+   vs local HEAD. Flag any uncommitted work or unpushed commits.
+3. LOCKFILE: grep -c "package-firewall" package-lock.json (must be 0).
+4. SECRETS: scan the tree (excluding node_modules) for live-looking keys
+   (sk-ant-, sk-proj-, AKIA, 0x-prefixed 64-hex private keys, JWT secrets
+   in code). Report file:line of anything suspicious.
+5. KILL SWITCHES: for each of SWAPS_ENABLED, SIGNALS_ENABLED,
+   BRIDGE_ENABLED, ONCHAIN_WRITES_ENABLED — show the code that reads it,
+   confirm fail-closed default (unset = off), confirm the route returns
+   403 when off, and confirm .env.example documents it. Report any flag
+   missing any of the four properties.
+6. DEAD CODE: list every page in client/src/pages not reachable from
+   App.tsx routing; every service in server/services imported by nothing;
+   every route file not registered in server/routes.ts. Commands + output.
+7. SCHEDULER: list every jobScheduler.register call (name, interval) and
+   every raw setInterval outside tests/housekeeping. Flag business logic
+   still self-scheduling.
+8. BUDGET COVERAGE: list every file that calls the OpenAI client or
+   modelGateway; for each, confirm the call is budget-enforced (gateway
+   path or explicit enforceBudget BEFORE the API call). Flag any AI/audio
+   call site with no pre-call guard — especially Whisper transcription in
+   realContentProcessor / streamProcessorV2.
+9. DEPENDENCIES: npm audit --omit=dev summary counts (critical/high/
+   moderate/low), plus the names of every critical/high package and
+   whether each is a direct or transitive dependency.
+10. REPO WEIGHT: du -sh of the 5 largest tracked directories; count of
+    root-level .md files and tarballs; whether attached_assets is in the
+    git index (git ls-files attached_assets | wc -l).
+End with a prioritized findings table: CRITICAL / HIGH / MEDIUM / LOW,
+one line each, no fixes proposed yet.
