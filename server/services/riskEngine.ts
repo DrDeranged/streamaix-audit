@@ -324,18 +324,55 @@ export class RiskEngine {
     }
   }
 
-  /** Persist the new daily total (upsert on wallet+day). Best-effort. */
-  private async persistSwapVolume(wallet: string, day: string, volumeUsd: number): Promise<void> {
+  /**
+   * Atomically reserve `deltaUsd` of daily quote volume for wallet/day,
+   * enforcing the cap inside a single statement so concurrent quotes (or
+   * multiple app instances) cannot each pass the check and undercount.
+   *
+   * Returns:
+   *  - { ok: true, newTotal }  — reserved; newTotal is the post-reserve total
+   *  - { ok: false, usedUsd }  — cap would be exceeded; nothing was written
+   *  - null                    — DB unavailable (caller falls back in-memory)
+   */
+  private async reserveSwapVolume(
+    wallet: string,
+    day: string,
+    deltaUsd: number,
+    capUsd: number
+  ): Promise<{ ok: true; newTotal: number } | { ok: false; usedUsd: number } | null> {
     try {
-      await db
-        .insert(swapDailyVolume)
-        .values({ wallet, day, volumeUsd })
-        .onConflictDoUpdate({
-          target: [swapDailyVolume.wallet, swapDailyVolume.day],
-          set: { volumeUsd, updatedAt: new Date() },
-        });
+      const reserved = await db.execute(sql`
+        INSERT INTO swap_daily_volume (wallet, day, volume_usd)
+        VALUES (${wallet}, ${day}, ${deltaUsd})
+        ON CONFLICT (wallet, day) DO UPDATE
+          SET volume_usd = swap_daily_volume.volume_usd + EXCLUDED.volume_usd,
+              updated_at = now()
+          WHERE swap_daily_volume.volume_usd + EXCLUDED.volume_usd <= ${capUsd}
+        RETURNING volume_usd
+      `);
+      const row = (reserved as unknown as { rows: Array<{ volume_usd: number | string }> }).rows?.[0];
+      if (row) return { ok: true, newTotal: Number(row.volume_usd) };
+      // Conflict row exists but the cap WHERE clause rejected the increment.
+      const usedUsd = await this.loadSwapVolumeFresh(wallet, day);
+      return { ok: false, usedUsd };
     } catch (err) {
-      console.warn("[RiskEngine] swap_daily_volume persist failed (in-memory only):", (err as Error).message);
+      console.warn("[RiskEngine] swap_daily_volume reserve failed (falling back in-memory):", (err as Error).message);
+      return null;
+    }
+  }
+
+  /** Read the persisted total, bypassing the cache (used after a cap rejection). */
+  private async loadSwapVolumeFresh(wallet: string, day: string): Promise<number> {
+    try {
+      const rows = await db
+        .select()
+        .from(swapDailyVolume)
+        .where(and(eq(swapDailyVolume.wallet, wallet), eq(swapDailyVolume.day, day)))
+        .limit(1);
+      return rows[0]?.volumeUsd ?? 0;
+    } catch {
+      const cached = this.swapDailyVolume.get(wallet);
+      return cached && cached.day === day ? cached.volumeUsd : 0;
     }
   }
 
@@ -355,7 +392,9 @@ export class RiskEngine {
     const day = this.now().toISOString().slice(0, 10);
     const cap = envInt("SWAP_DAILY_QUOTE_CAP_USD", 25000);
 
-    // 1. Daily quote-volume soft cap (persisted — survives restarts)
+    // 1. Daily quote-volume soft cap (persisted — survives restarts).
+    // Pre-check against the loaded total for a fast rejection; the
+    // authoritative check happens atomically at reserve time below.
     const usedToday = await this.loadSwapVolume(wallet, day);
     const notional = input.notionalUsd ?? 0;
     if (usedToday + notional > cap) {
@@ -396,9 +435,29 @@ export class RiskEngine {
       }
     }
 
-    // Record the quoted volume against the wallet's daily total (memory + db).
-    this.swapDailyVolume.set(wallet, { day, volumeUsd: usedToday + notional });
-    await this.persistSwapVolume(wallet, day, usedToday + notional);
+    // Atomically reserve the quoted volume (cap enforced in the same
+    // statement, so concurrent quotes cannot undercount the cap).
+    const reservation = await this.reserveSwapVolume(wallet, day, notional, cap);
+    if (reservation === null) {
+      // DB unavailable — soft cap fails open by design; track in-memory only.
+      this.swapDailyVolume.set(wallet, { day, volumeUsd: usedToday + notional });
+      return { allowed: true };
+    }
+    if (!reservation.ok) {
+      this.swapDailyVolume.set(wallet, { day, volumeUsd: reservation.usedUsd });
+      await this.logEvent("swap_daily_cap", null, null, {
+        wallet,
+        usedTodayUsd: reservation.usedUsd,
+        requestedUsd: notional,
+        capUsd: cap,
+      });
+      return {
+        allowed: false,
+        type: "swap_daily_cap",
+        reason: `Daily quote volume cap reached ($${cap}). Try again tomorrow.`,
+      };
+    }
+    this.swapDailyVolume.set(wallet, { day, volumeUsd: reservation.newTotal });
     return { allowed: true };
   }
 

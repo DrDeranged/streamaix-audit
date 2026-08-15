@@ -55,6 +55,10 @@ describe("design-lint banned classes (positive: must fail)", () => {
     `<div className="bg-gradient-to-r from-cyan-500 to-blue-600" />`,
     `<p className="decoration-pink-400 placeholder-gray-500" />`,
     `<div className="rounded-lg" />`,
+    `<svg className="fill-[#ef4444]" />`,
+    `<div className="bg-gradient-to-r from-[#06b6d4] via-[#a855f7] to-[#ec4899]" />`,
+    `<div className="text-[rgb(239,68,68)] border-[hsl(160,84%,39%)]" />`,
+    `<div className="bg-[oklch(0.7_0.15_150)] ring-[color:red]" />`,
   ];
   banned.forEach((snippet, i) => {
     it(`flags: ${snippet.slice(15, 60)}`, () => {
@@ -75,6 +79,8 @@ describe("design-lint token classes (negative: must pass)", () => {
     `<div className="ring-offset-2 ring-offset-ink-page" />`,
     `<div className="text-warn bg-ink-raised rounded-2xl" />`,
     `<div data-motion="data-[motion=from-end]:slide-in" className="rounded-xl" />`,
+    `<div className="w-[42px] max-h-[80vh] grid-cols-[1fr_2fr]" />`,
+    `<div className="bg-[var(--ink-surface)] text-[length:14px]" />`,
   ];
   allowed.forEach((snippet, i) => {
     it(`passes: ${snippet.slice(15, 60)}`, () => {
