@@ -91,6 +91,30 @@ export class SwapQuoteService {
   /** Injectable fetch for tests. */
   fetchImpl: typeof fetch = (...args) => fetch(...args);
 
+  /**
+   * Injectable on-chain tx verifier (Base RPC). Returns the sender and
+   * receipt status for a tx hash, or null when not found/confirmed.
+   */
+  txVerifier: (txHash: string) => Promise<{ from: string; status: "success" | "reverted" } | null> =
+    async (txHash) => {
+      const { createPublicClient, http: viemHttp } = await import("viem");
+      const { base } = await import("viem/chains");
+      const client = createPublicClient({
+        chain: base,
+        transport: viemHttp(process.env.BASE_RPC_URL || "https://mainnet.base.org"),
+      });
+      try {
+        const [tx, receipt] = await Promise.all([
+          client.getTransaction({ hash: txHash as `0x${string}` }),
+          client.getTransactionReceipt({ hash: txHash as `0x${string}` }),
+        ]);
+        if (!tx || !receipt) return null;
+        return { from: tx.from, status: receipt.status };
+      } catch {
+        return null;
+      }
+    };
+
   async getAllowedTokens(): Promise<TradeableToken[]> {
     assertSwapsEnabled();
     return db.select().from(tradeableTokens).where(eq(tradeableTokens.enabled, true));
@@ -167,7 +191,7 @@ export class SwapQuoteService {
     const priceImpactPct = parsePriceImpact(quote);
 
     // Risk checks (daily volume soft cap + price impact rules)
-    const notionalUsd = parseNotionalUsd(quote, sellToken, params.sellAmount);
+    const notionalUsd = estimateNotionalUsd(quote, sellToken, params.sellAmount, buyToken, buyAmount);
     const risk = await riskEngine.checkSwap({
       wallet: params.takerAddress,
       notionalUsd,
@@ -209,9 +233,20 @@ export class SwapQuoteService {
     };
   }
 
-  /** Record a confirmed on-chain swap the user's wallet executed. */
+  /**
+   * Record a confirmed on-chain swap. The tx is verified against Base before
+   * insert: it must exist, have succeeded, and have been sent by the claimed
+   * wallet — the ledger cannot be forged with client-supplied data alone.
+   */
   async recordTrade(trade: InsertUserTrade) {
     assertSwapsEnabled();
+    const onchain = await this.txVerifier(trade.txHash);
+    if (!onchain || onchain.status !== "success") {
+      throw new SwapValidationError("Transaction not found or not confirmed on Base");
+    }
+    if (onchain.from.toLowerCase() !== trade.walletAddress.toLowerCase()) {
+      throw new SwapValidationError("Transaction sender does not match wallet address");
+    }
     const [row] = await db.insert(userTrades).values(trade).returning();
     return row;
   }
@@ -234,14 +269,28 @@ function parsePriceImpact(quote: any): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-/** Best-effort USD notional from the 0x response (null when unavailable). */
-function parseNotionalUsd(quote: any, sellToken: TradeableToken, sellAmount: string): number | null {
+/**
+ * USD notional for the daily quote-volume cap. Never returns a value that
+ * lets the cap be bypassed: prefers explicit USD fields from 0x, then a
+ * USDC leg (1 USDC ~ $1), and otherwise charges a conservative per-quote
+ * amount (SWAP_UNKNOWN_NOTIONAL_USD, default 1000) so unknown-value quotes
+ * still consume cap budget instead of counting as $0.
+ */
+function estimateNotionalUsd(
+  quote: any,
+  sellToken: TradeableToken,
+  sellAmount: string,
+  buyToken: TradeableToken,
+  buyAmount: string
+): number {
   const raw = quote.sellAmountUsd ?? quote.estimatedSellAmountUsd ?? null;
   if (raw !== null && raw !== undefined) {
     const n = Number(raw);
-    if (Number.isFinite(n)) return n;
+    if (Number.isFinite(n) && n >= 0) return n;
   }
-  return null;
+  if (sellToken.symbol === "USDC") return Number(sellAmount) / 10 ** sellToken.decimals;
+  if (buyToken.symbol === "USDC") return Number(buyAmount) / 10 ** buyToken.decimals;
+  return clampInt(process.env.SWAP_UNKNOWN_NOTIONAL_USD, 1000, 1, 1_000_000);
 }
 
 /** Decimal-adjusted a/b as a fixed string. */

@@ -87,6 +87,7 @@ beforeEach(() => {
   svc = new SwapQuoteService();
   fetchMock = vi.fn(async () => zeroExResponse());
   svc.fetchImpl = fetchMock as any;
+  svc.txVerifier = async () => ({ from: TAKER, status: "success" });
   riskEngine.resetSwapVolumeTracker();
   delete process.env.SWAPS_ENABLED;
   process.env.ZEROEX_API_KEY = "test-key";
@@ -232,8 +233,37 @@ describe("risk checks", () => {
   });
 });
 
+describe("daily-cap notional fail-safe", () => {
+  beforeEach(() => {
+    process.env.SWAPS_ENABLED = "true";
+  });
+
+  it("derives notional from the USDC leg when 0x omits USD fields", async () => {
+    process.env.SWAP_DAILY_QUOTE_CAP_USD = "5000";
+    // buyAmount is 3000 USDC and no sellAmountUsd -> counts 3000 toward the cap
+    dbState.selectResults.push(TOKENS, TOKENS);
+    await svc.getQuote(quoteParams());
+    dbState.selectResults.push(TOKENS, TOKENS);
+    const err = await svc.getQuote(quoteParams()).catch((e) => e);
+    expect(err).toBeInstanceOf(SwapRiskError);
+    expect(err.type).toBe("swap_daily_cap");
+  });
+
+  it("charges a conservative default when notional is unknown (no USD fields, no USDC leg)", async () => {
+    process.env.SWAP_DAILY_QUOTE_CAP_USD = "1500";
+    // ETH -> DEGEN-like pair with no USDC leg: enable DEGEN for this test
+    const tokensAllEnabled = TOKENS.map((t) => ({ ...t, enabled: true }));
+    dbState.selectResults.push(tokensAllEnabled, tokensAllEnabled);
+    await svc.getQuote(quoteParams({ buyToken: "DEGEN" })); // charges default 1000
+    dbState.selectResults.push(tokensAllEnabled, tokensAllEnabled);
+    const err = await svc.getQuote(quoteParams({ buyToken: "DEGEN" })).catch((e) => e);
+    expect(err).toBeInstanceOf(SwapRiskError);
+    expect(err.type).toBe("swap_daily_cap");
+  });
+});
+
 describe("recordTrade", () => {
-  it("inserts a user_trades row when enabled", async () => {
+  it("inserts a user_trades row when enabled and tx verifies on-chain", async () => {
     process.env.SWAPS_ENABLED = "true";
     const row = await svc.recordTrade({
       walletAddress: TAKER,
@@ -249,5 +279,37 @@ describe("recordTrade", () => {
     expect(row.txHash).toBe("0x" + "a".repeat(64));
     const rows = dbState.inserted.filter((i) => i.table === userTrades);
     expect(rows.length).toBe(1);
+  });
+
+  it("rejects when the tx is missing/unconfirmed on Base", async () => {
+    process.env.SWAPS_ENABLED = "true";
+    svc.txVerifier = async () => null;
+    await expect(
+      svc.recordTrade({
+        walletAddress: TAKER,
+        sellToken: "ETH",
+        buyToken: "USDC",
+        sellAmount: "1",
+        buyAmount: "1",
+        txHash: "0x" + "b".repeat(64),
+      } as any)
+    ).rejects.toThrow(/not found or not confirmed/i);
+    expect(dbState.inserted.filter((i) => i.table === userTrades).length).toBe(0);
+  });
+
+  it("rejects when the tx sender does not match the claimed wallet", async () => {
+    process.env.SWAPS_ENABLED = "true";
+    svc.txVerifier = async () => ({ from: "0x9999999999999999999999999999999999999999", status: "success" });
+    await expect(
+      svc.recordTrade({
+        walletAddress: TAKER,
+        sellToken: "ETH",
+        buyToken: "USDC",
+        sellAmount: "1",
+        buyAmount: "1",
+        txHash: "0x" + "c".repeat(64),
+      } as any)
+    ).rejects.toThrow(/sender does not match/i);
+    expect(dbState.inserted.filter((i) => i.table === userTrades).length).toBe(0);
   });
 });
