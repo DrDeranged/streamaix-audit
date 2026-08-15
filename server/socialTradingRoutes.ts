@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { socialTradingService } from './services/socialTradingService';
-import { insertTraderSchema, insertTradingSignalSchema, insertCopyTradingPositionSchema, insertTradingAlertSchema } from '../shared/schema';
+import { insertTraderSchema, insertTradingSignalSchema, insertCopyTradingPositionSchema } from '../shared/schema';
 import { z } from 'zod';
 
 const router = Router();

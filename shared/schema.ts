@@ -260,34 +260,6 @@ export const conversations = pgTable("conversations", {
 });
 
 // Blog posts for crypto news/stories
-export const blogPosts = pgTable("blog_posts", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  title: text("title").notNull(),
-  content: text("content").notNull(), // markdown or rich text
-  summary: text("summary"), // short preview text
-  coverImage: text("cover_image"), // optional cover image URL
-  category: text("category").notNull(), // News, Analysis, Tutorial, Market Update, etc
-  tags: text("tags").array(), // ["Bitcoin", "DeFi", "Layer2"]
-  authorId: varchar("author_id").references(() => users.id).notNull(),
-  
-  // External source info (if aggregated from external news)
-  sourceUrl: text("source_url"), // original article URL
-  sourceName: text("source_name"), // CoinDesk, Cointelegraph, etc
-  
-  // Engagement metrics
-  viewsCount: integer("views_count").default(0),
-  likesCount: integer("likes_count").default(0),
-  commentsCount: integer("comments_count").default(0),
-  sharesCount: integer("shares_count").default(0),
-  
-  // Publishing
-  isPublished: boolean("is_published").default(true),
-  isFeatured: boolean("is_featured").default(false), // featured on homepage
-  publishedAt: timestamp("published_at").defaultNow(),
-  
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
 export const conversationLikes = pgTable("conversation_likes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -361,25 +333,10 @@ export const categoryFollows = pgTable("category_follows", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const summaryComments = pgTable("summary_comments", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  summaryId: varchar("summary_id").references(() => summaries.id).notNull(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
-  content: text("content").notNull(),
-  parentCommentId: varchar("parent_comment_id").references((): AnyPgColumn => summaryComments.id), // for replies
-  likesCount: integer("likes_count").default(0),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-export const commentLikes = pgTable("comment_likes", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  commentId: varchar("comment_id").references(() => summaryComments.id).notNull(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-});
 
 // Real-time Collaboration
+
 export const bountyCollaborators = pgTable("bounty_collaborators", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   bountyId: varchar("bounty_id").references(() => bounties.id).notNull(),
@@ -391,6 +348,19 @@ export const bountyCollaborators = pgTable("bounty_collaborators", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const insertBountyCollaboratorSchema = createInsertSchema(bountyCollaborators).pick({
+  bountyId: true,
+  userId: true,
+  role: true,
+  rewardShare: true,
+  status: true,
+  invitedBy: true,
+});
+
+export type InsertBountyCollaborator = z.infer<typeof insertBountyCollaboratorSchema>;
+
+export type BountyCollaborator = typeof bountyCollaborators.$inferSelect;
+
 export const collaborationSessions = pgTable("collaboration_sessions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   bountyId: varchar("bounty_id").references(() => bounties.id).notNull(),
@@ -400,64 +370,9 @@ export const collaborationSessions = pgTable("collaboration_sessions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const cryptoLeaders = pgTable("crypto_leaders", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  fid: integer("fid").notNull().unique(), // Farcaster ID
-  username: text("username").notNull(),
-  displayName: text("display_name"),
-  bio: text("bio"),
-  pfpUrl: text("pfp_url"),
-  followerCount: integer("follower_count"),
-  followingCount: integer("following_count"),
-  powerBadge: boolean("power_badge").default(false),
-  verifiedAddresses: jsonb("verified_addresses"), // ENS, onchain addresses
-  ecosystem: text("ecosystem").array(), // ["ethereum", "base", "farcaster"]
-  role: text("role"), // "Ethereum Founder", "Farcaster Co-founder", etc
-  keyTakeaways: text("key_takeaways").array(), // Curated learning points
-  expertise: text("expertise").array(), // ["L2 scaling", "social protocols"]
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-export const curatedCasts = pgTable("curated_casts", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  leaderId: varchar("leader_id").references(() => cryptoLeaders.id).notNull(),
-  castHash: text("cast_hash").notNull().unique(),
-  castText: text("cast_text").notNull(),
-  publishedAt: timestamp("published_at").notNull(),
-  likesCount: integer("likes_count").default(0),
-  recastsCount: integer("recasts_count").default(0),
-  repliesCount: integer("replies_count").default(0),
-  whyItMatters: text("why_it_matters").notNull(), // Educational context
-  concepts: text("concepts").array(), // Related learning concepts
-  priority: integer("priority").default(1), // 1=highest, 5=lowest
-  createdAt: timestamp("created_at").defaultNow(),
-});
 
-export const topicTags = pgTable("topic_tags", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: text("name").notNull().unique(),
-  definition: text("definition").notNull(),
-  category: text("category").notNull(), // "technology", "market", "governance"
-  relatedLeaderIds: text("related_leader_ids").array(), // Leaders who discuss this
-  resourceLinks: jsonb("resource_links"), // Links to learn more
-  difficulty: text("difficulty").default("beginner"), // beginner, intermediate, advanced
-  createdAt: timestamp("created_at").defaultNow(),
-});
 
-export const learningResources = pgTable("learning_resources", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  leaderId: varchar("leader_id").references(() => cryptoLeaders.id).notNull(),
-  title: text("title").notNull(),
-  url: text("url").notNull(),
-  description: text("description"),
-  resourceType: text("resource_type").notNull(), // "article", "talk", "thread", "website"
-  difficulty: text("difficulty").default("beginner"),
-  priority: integer("priority").default(3), // 1=must read, 5=optional
-  topics: text("topics").array(), // Related topic tags
-  createdAt: timestamp("created_at").defaultNow(),
-});
 
 // Knowledge Avatars System - Enhanced with Deep Alpha Intelligence
 export const knowledgeAvatars = pgTable("knowledge_avatars", {
@@ -568,43 +483,6 @@ export const avatarInsights = pgTable("avatar_insights", {
 });
 
 // Entrepreneur predictions tracking table
-export const entrepreneurPredictions = pgTable("entrepreneur_predictions", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  entrepreneurId: varchar("entrepreneur_id").notNull(), // Links to knowledge_avatars
-  entrepreneurName: text("entrepreneur_name").notNull(), // Naval Ravikant, Vitalik Buterin, etc
-  
-  // Prediction details
-  predictionText: text("prediction_text").notNull(), // Original prediction content
-  predictionType: text("prediction_type").notNull(), // price_target, market_direction, adoption_timeline, regulatory_outcome
-  category: text("category").notNull(), // crypto, stocks, technology, regulation, market_timing
-  
-  // Target information
-  targetAsset: text("target_asset"), // BTC, ETH, TSLA, etc
-  targetPrice: real("target_price"), // Specific price target if applicable
-  targetTimeframe: text("target_timeframe").notNull(), // 1w, 1m, 3m, 6m, 1y, 2y
-  targetDate: timestamp("target_date"), // Specific date if mentioned
-  
-  // Source and credibility
-  sourceUrl: text("source_url"), // Tweet, interview, blog post URL
-  sourceType: text("source_type").notNull(), // twitter, interview, podcast, blog, conference
-  confidence: integer("confidence"), // Entrepreneur's stated confidence 0-100
-  
-  // Prediction tracking
-  status: text("status").notNull().default("active"), // active, expired, evaluated, invalidated
-  actualOutcome: text("actual_outcome"), // What actually happened
-  accuracyScore: integer("accuracy_score"), // 0-100 how accurate the prediction was
-  evaluatedAt: timestamp("evaluated_at"), // When we measured the outcome
-  
-  // Context and metadata
-  marketContext: jsonb("market_context"), // Market conditions when prediction was made
-  relatedEvents: jsonb("related_events"), // Events that may have influenced outcome
-  notes: text("notes"), // Additional evaluation notes
-  
-  // Timestamps
-  predictionMadeAt: timestamp("prediction_made_at").notNull(), // When they made the prediction
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
 // ====================
 // SOCIAL TRADING PLATFORM TABLES
@@ -682,6 +560,7 @@ export const bountyTemplates = pgTable("bounty_templates", {
 });
 
 // Trading Signals - Individual signals posted by traders
+
 export const tradingSignals = pgTable("trading_signals", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   traderId: varchar("trader_id").references(() => traders.id).notNull(),
@@ -727,6 +606,85 @@ export const tradingSignals = pgTable("trading_signals", {
   updatedAt: timestamp("updated_at").defaultNow(),
   expiresAt: timestamp("expires_at"), // Signal expiration time
 });
+
+export const insertTradingSignalSchema = createInsertSchema(tradingSignals).pick({
+  traderId: true,
+  asset: true,
+  pair: true,
+  direction: true,
+  signalType: true,
+  entryPrice: true,
+  targetPrice: true,
+  stopLoss: true,
+  currentPrice: true,
+  leverage: true,
+  positionSize: true,
+  confidence: true,
+  timeframe: true,
+  reasoning: true,
+  technicalIndicators: true,
+  tags: true,
+  expiresAt: true,
+});
+
+export type InsertTradingSignal = z.infer<typeof insertTradingSignalSchema>;
+export type DbTradingSignal = typeof tradingSignals.$inferSelect;
+
+export type TradingSignal = {
+  id: string;
+  eventId?: string;
+  predictionId?: string;
+  
+  // Signal Details
+  signalType: 'entry' | 'exit' | 'hedge' | 'risk_management' | 'position_sizing';
+  action: 'buy' | 'sell' | 'hold' | 'reduce' | 'increase';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  
+  // Asset Information
+  symbol: string;
+  assetType: 'crypto' | 'stock' | 'commodity' | 'currency';
+  currentPrice: number;
+  
+  // Signal Specifics
+  direction: 'long' | 'short' | 'neutral';
+  strength: number; // 0-100 signal strength
+  conviction: number; // 0-100 conviction level
+  
+  // Entry/Exit Levels
+  entryPrice?: number;
+  targetPrice?: number;
+  stopLoss?: number;
+  riskRewardRatio?: number;
+  
+  // Position Sizing
+  recommendedAllocation?: number; // percentage of portfolio
+  maxRisk?: number; // maximum risk percentage
+  positionSize?: number; // suggested position size
+  
+  // Timing
+  timeframe: '5m' | '15m' | '1h' | '4h' | '1d' | '1w' | 'long_term';
+  validUntil: string;
+  urgency: 'immediate' | 'within_1h' | 'within_24h' | 'within_week';
+  
+  // Rationale and Context
+  reasoning: string[];
+  catalysts: string[]; // What's driving this signal
+  risks: string[]; // Potential risks to consider
+  marketContext: string;
+  
+  // Performance Tracking
+  isExecuted?: boolean;
+  executedAt?: string;
+  executionPrice?: number;
+  outcome?: 'profitable' | 'loss' | 'breakeven' | 'pending';
+  realizedPnL?: number;
+  
+  // Metadata
+  confidence: number; // 0-100 confidence in signal
+  source: 'model_prediction' | 'manual_analysis' | 'hybrid' | 'risk_management';
+  createdAt: string;
+  lastUpdated: string;
+};
 
 // Copy Trading Positions - Active copy trading relationships
 export const copyTradingPositions = pgTable("copy_trading_positions", {
@@ -814,34 +772,6 @@ export const traderPerformance = pgTable("trader_performance", {
 });
 
 // Trading Alerts - User alert configurations
-export const tradingAlerts = pgTable("trading_alerts", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id).notNull(),
-  traderId: varchar("trader_id").references(() => traders.id), // Alert for specific trader
-  
-  // Alert Configuration
-  alertType: text("alert_type").notNull(), // new_signal, position_closed, price_target, stop_loss
-  asset: text("asset"), // BTC, ETH, etc. (null for all)
-  direction: text("direction"), // long, short (null for both)
-  
-  // Conditions
-  minConfidence: integer("min_confidence"), // Minimum signal confidence
-  minWinRate: real("min_win_rate"), // Minimum trader win rate
-  priceThreshold: real("price_threshold"), // Alert when price crosses
-  
-  // Notification Settings
-  notifyEmail: boolean("notify_email").default(false),
-  notifyPush: boolean("notify_push").default(true),
-  notifyInApp: boolean("notify_in_app").default(true),
-  
-  // Status
-  isActive: boolean("is_active").default(true),
-  triggeredCount: integer("triggered_count").default(0),
-  lastTriggered: timestamp("last_triggered"),
-  
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
 // Push Notification Subscriptions
 export const pushSubscriptions = pgTable("push_subscriptions", {
@@ -913,9 +843,6 @@ export const usersRelations = relations(users, ({ many }) => ({
   referrals: many(referralSignups, { relationName: "referrer" }),
   followers: many(userFollows, { relationName: "following" }),
   following: many(userFollows, { relationName: "follower" }),
-  comments: many(summaryComments),
-  commentLikes: many(commentLikes),
-  bountyCollaborations: many(bountyCollaborators),
 }));
 
 export const summariesRelations = relations(summaries, ({ one, many }) => ({
@@ -972,24 +899,8 @@ export const userNotesRelations = relations(userNotes, ({ one }) => ({
   // Removed summary relation since summaryId can now be journal entries
 }));
 
-export const cryptoLeadersRelations = relations(cryptoLeaders, ({ many }) => ({
-  curatedCasts: many(curatedCasts),
-  resources: many(learningResources),
-}));
 
-export const curatedCastsRelations = relations(curatedCasts, ({ one }) => ({
-  leader: one(cryptoLeaders, {
-    fields: [curatedCasts.leaderId],
-    references: [cryptoLeaders.id],
-  }),
-}));
 
-export const learningResourcesRelations = relations(learningResources, ({ one }) => ({
-  leader: one(cryptoLeaders, {
-    fields: [learningResources.leaderId],
-    references: [cryptoLeaders.id],
-  }),
-}));
 
 // Knowledge Avatar Relations
 export const knowledgeAvatarsRelations = relations(knowledgeAvatars, ({ many }) => ({
@@ -1208,22 +1119,7 @@ export const insertConversationShareSchema = createInsertSchema(conversationShar
 });
 
 // Blog Posts Schemas
-export const insertBlogPostSchema = createInsertSchema(blogPosts).pick({
-  title: true,
-  content: true,
-  summary: true,
-  coverImage: true,
-  category: true,
-  tags: true,
-  authorId: true,
-  sourceUrl: true,
-  sourceName: true,
-  isPublished: true,
-  isFeatured: true,
-});
 
-export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
-export type BlogPost = typeof blogPosts.$inferSelect;
 
 export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
   id: true,
@@ -1254,27 +1150,9 @@ export const insertCategoryFollowSchema = createInsertSchema(categoryFollows).pi
   category: true,
 });
 
-export const insertSummaryCommentSchema = createInsertSchema(summaryComments).pick({
-  summaryId: true,
-  userId: true,
-  content: true,
-  parentCommentId: true,
-});
 
-export const insertCommentLikeSchema = createInsertSchema(commentLikes).pick({
-  commentId: true,
-  userId: true,
-});
 
 // Collaboration Schemas
-export const insertBountyCollaboratorSchema = createInsertSchema(bountyCollaborators).pick({
-  bountyId: true,
-  userId: true,
-  role: true,
-  rewardShare: true,
-  status: true,
-  invitedBy: true,
-});
 
 export const insertCollaborationSessionSchema = createInsertSchema(collaborationSessions).pick({
   bountyId: true,
@@ -1282,55 +1160,9 @@ export const insertCollaborationSessionSchema = createInsertSchema(collaboration
   contentSnapshot: true,
 });
 
-export const insertCryptoLeaderSchema = createInsertSchema(cryptoLeaders).pick({
-  fid: true,
-  username: true,
-  displayName: true,
-  bio: true,
-  pfpUrl: true,
-  followerCount: true,
-  followingCount: true,
-  powerBadge: true,
-  verifiedAddresses: true,
-  ecosystem: true,
-  role: true,
-  keyTakeaways: true,
-  expertise: true,
-  isActive: true,
-});
 
-export const insertCuratedCastSchema = createInsertSchema(curatedCasts).pick({
-  leaderId: true,
-  castHash: true,
-  castText: true,
-  publishedAt: true,
-  likesCount: true,
-  recastsCount: true,
-  repliesCount: true,
-  whyItMatters: true,
-  concepts: true,
-  priority: true,
-});
 
-export const insertTopicTagSchema = createInsertSchema(topicTags).pick({
-  name: true,
-  definition: true,
-  category: true,
-  relatedLeaderIds: true,
-  resourceLinks: true,
-  difficulty: true,
-});
 
-export const insertLearningResourceSchema = createInsertSchema(learningResources).pick({
-  leaderId: true,
-  title: true,
-  url: true,
-  description: true,
-  resourceType: true,
-  difficulty: true,
-  priority: true,
-  topics: true,
-});
 
 export const insertKnowledgeAvatarSchema = createInsertSchema(knowledgeAvatars).pick({
   name: true,
@@ -1386,22 +1218,6 @@ export const insertAvatarInsightSchema = createInsertSchema(avatarInsights).pick
   publishedAt: true,
 });
 
-export const insertEntrepreneurPredictionSchema = createInsertSchema(entrepreneurPredictions).pick({
-  entrepreneurId: true,
-  entrepreneurName: true,
-  predictionText: true,
-  predictionType: true,
-  category: true,
-  targetAsset: true,
-  targetPrice: true,
-  targetTimeframe: true,
-  targetDate: true,
-  sourceUrl: true,
-  sourceType: true,
-  confidence: true,
-  marketContext: true,
-  predictionMadeAt: true,
-});
 
 // Social Trading Insert Schemas
 export const insertTraderSchema = createInsertSchema(traders).pick({
@@ -1420,25 +1236,6 @@ export const insertTraderSchema = createInsertSchema(traders).pick({
   tradingPairs: true,
 });
 
-export const insertTradingSignalSchema = createInsertSchema(tradingSignals).pick({
-  traderId: true,
-  asset: true,
-  pair: true,
-  direction: true,
-  signalType: true,
-  entryPrice: true,
-  targetPrice: true,
-  stopLoss: true,
-  currentPrice: true,
-  leverage: true,
-  positionSize: true,
-  confidence: true,
-  timeframe: true,
-  reasoning: true,
-  technicalIndicators: true,
-  tags: true,
-  expiresAt: true,
-});
 
 export const insertCopyTradingPositionSchema = createInsertSchema(copyTradingPositions).pick({
   copierId: true,
@@ -1455,20 +1252,6 @@ export const insertCopyTradingPositionSchema = createInsertSchema(copyTradingPos
   initialRisk: true,
 });
 
-export const insertTradingAlertSchema = createInsertSchema(tradingAlerts).pick({
-  userId: true,
-  traderId: true,
-  alertType: true,
-  asset: true,
-  direction: true,
-  minConfidence: true,
-  minWinRate: true,
-  priceThreshold: true,
-  notifyEmail: true,
-  notifyPush: true,
-  notifyInApp: true,
-  isActive: true,
-});
 
 // Pattern Recognition Insert Schemas moved after table definitions
 
@@ -1536,29 +1319,15 @@ export type UserFollow = typeof userFollows.$inferSelect;
 export type InsertCategoryFollow = z.infer<typeof insertCategoryFollowSchema>;
 export type CategoryFollow = typeof categoryFollows.$inferSelect;
 
-export type InsertSummaryComment = z.infer<typeof insertSummaryCommentSchema>;
-export type SummaryComment = typeof summaryComments.$inferSelect;
 
-export type InsertCommentLike = z.infer<typeof insertCommentLikeSchema>;
-export type CommentLike = typeof commentLikes.$inferSelect;
 
-export type InsertBountyCollaborator = z.infer<typeof insertBountyCollaboratorSchema>;
-export type BountyCollaborator = typeof bountyCollaborators.$inferSelect;
 
 export type InsertCollaborationSession = z.infer<typeof insertCollaborationSessionSchema>;
 export type CollaborationSession = typeof collaborationSessions.$inferSelect;
 
-export type InsertCryptoLeader = z.infer<typeof insertCryptoLeaderSchema>;
-export type CryptoLeader = typeof cryptoLeaders.$inferSelect;
 
-export type InsertCuratedCast = z.infer<typeof insertCuratedCastSchema>;
-export type CuratedCast = typeof curatedCasts.$inferSelect;
 
-export type InsertTopicTag = z.infer<typeof insertTopicTagSchema>;
-export type TopicTag = typeof topicTags.$inferSelect;
 
-export type InsertLearningResource = z.infer<typeof insertLearningResourceSchema>;
-export type LearningResource = typeof learningResources.$inferSelect;
 
 export type InsertKnowledgeAvatar = z.infer<typeof insertKnowledgeAvatarSchema>;
 export type KnowledgeAvatar = typeof knowledgeAvatars.$inferSelect;
@@ -1575,14 +1344,10 @@ export type AvatarContentInteraction = typeof avatarContentInteractions.$inferSe
 export type InsertAvatarInsight = z.infer<typeof insertAvatarInsightSchema>;
 export type AvatarInsight = typeof avatarInsights.$inferSelect;
 
-export type InsertEntrepreneurPrediction = z.infer<typeof insertEntrepreneurPredictionSchema>;
-export type EntrepreneurPrediction = typeof entrepreneurPredictions.$inferSelect;
 
 export type InsertTrader = z.infer<typeof insertTraderSchema>;
 export type Trader = typeof traders.$inferSelect;
 
-export type InsertTradingSignal = z.infer<typeof insertTradingSignalSchema>;
-export type DbTradingSignal = typeof tradingSignals.$inferSelect;
 
 export type InsertCopyTradingPosition = z.infer<typeof insertCopyTradingPositionSchema>;
 export type CopyTradingPosition = typeof copyTradingPositions.$inferSelect;
@@ -1590,8 +1355,6 @@ export type CopyTradingPosition = typeof copyTradingPositions.$inferSelect;
 export type InsertTraderPerformance = typeof traderPerformance.$inferSelect;
 export type TraderPerformance = typeof traderPerformance.$inferSelect;
 
-export type InsertTradingAlert = z.infer<typeof insertTradingAlertSchema>;
-export type TradingAlert = typeof tradingAlerts.$inferSelect;
 
 // Cross-Market Signal Generation Types - Phase 3 Final Feature
 export type CrossMarketSignal = {
@@ -1886,10 +1649,10 @@ export type CrossMarketCorrelationData = {
 
 // Educational response types
 export type LeaderEducationData = {
-  profile: CryptoLeader;
-  notableCasts: CuratedCast[];
-  resources: LearningResource[];
-  topics: TopicTag[];
+  profile: Record<string, any>; // (legacy: crypto_leaders table pruned)
+  notableCasts: Record<string, any>[]; // (legacy: curated_casts table pruned)
+  resources: Record<string, any>[]; // (legacy: learning_resources table pruned)
+  topics: Record<string, any>[]; // (legacy: topic_tags table pruned)
   engagement: {
     avgLikes: number;
     avgRecasts: number;
@@ -2205,154 +1968,22 @@ export type InstitutionalAnalytics = {
 };
 
 // Chart Configuration Tables
-export const chartConfigurations = pgTable("chart_configurations", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id).notNull(),
-  name: text("name").notNull(), // User-defined name for the chart layout
-  symbols: text("symbols").array().notNull(), // Primary and comparison symbols
-  assetTypes: jsonb("asset_types").notNull(), // { "BTC": "crypto", "AAPL": "stock" }
-  timeframe: text("timeframe").notNull().default("1d"), // 1m, 5m, 15m, 1h, 4h, 1d, 1w
-  indicators: text("indicators").array().default(sql`'{}'::text[]`), // Active indicators
-  overlays: text("overlays").array().default(sql`'{}'::text[]`), // Chart overlays
-  layout: jsonb("layout"), // Chart layout preferences (panels, sizes, positions)
-  isDefault: boolean("is_default").default(false), // User's default chart
-  isPublic: boolean("is_public").default(false), // Share with other users
-  tags: text("tags").array(), // User tags for organization
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-export const chartWatchlists = pgTable("chart_watchlists", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id).notNull(),
-  name: text("name").notNull(), // Watchlist name (e.g., "DeFi Tokens", "Tech Stocks")
-  symbols: text("symbols").array().notNull(), // Array of symbols
-  assetTypes: jsonb("asset_types").notNull(), // Asset type mapping for each symbol
-  color: text("color"), // UI color theme for the watchlist
-  isDefault: boolean("is_default").default(false),
-  sortOrder: integer("sort_order").default(0), // User-defined ordering
-  alertsEnabled: boolean("alerts_enabled").default(false), // Price alerts for watchlist
-  alertConditions: jsonb("alert_conditions"), // Alert configuration
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-export const chartDataCache = pgTable("chart_data_cache", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  cacheKey: text("cache_key").notNull().unique(), // Composite key: symbol_timeframe_indicators
-  symbol: text("symbol").notNull(),
-  assetType: text("asset_type").notNull(), // crypto, stock, bond, commodity, currency
-  timeframe: text("timeframe").notNull(),
-  indicators: text("indicators").array(),
-  chartData: jsonb("chart_data").notNull(), // Cached ChartDataPoint[] and indicators
-  dataPoints: integer("data_points").notNull(), // Number of data points
-  lastPrice: real("last_price"), // Latest price for quick reference
-  priceChange24h: real("price_change_24h"), // 24h price change percentage
-  volume24h: real("volume_24h"), // 24h volume
-  marketCap: real("market_cap"), // Market cap (if available)
-  correlation: jsonb("correlation"), // Correlation data with other assets
-  expiresAt: timestamp("expires_at").notNull(), // Cache expiration
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-export const chartUserPreferences = pgTable("chart_user_preferences", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id).notNull().unique(),
-  defaultTimeframe: text("default_timeframe").default("1d"),
-  defaultIndicators: text("default_indicators").array().default(sql`'{rsi,macd,movingAverages}'::text[]`),
-  theme: text("theme").default("dark"), // dark, light, auto
-  candlestickStyle: text("candlestick_style").default("candles"), // candles, bars, line
-  volumeVisible: boolean("volume_visible").default(true),
-  gridVisible: boolean("grid_visible").default(true),
-  crosshairEnabled: boolean("crosshair_enabled").default(true),
-  autoSync: boolean("auto_sync").default(true), // Auto-sync timeframes across charts
-  realTimeUpdates: boolean("real_time_updates").default(true),
-  alertsEnabled: boolean("alerts_enabled").default(true),
-  layout: jsonb("layout"), // Panel layout preferences
-  favoriteSymbols: text("favorite_symbols").array().default(sql`'{}'::text[]`), // Quick access symbols
-  recentSymbols: text("recent_symbols").array().default(sql`'{}'::text[]`), // Recently viewed
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
 // Chart Relations
-export const chartConfigurationsRelations = relations(chartConfigurations, ({ one }) => ({
-  user: one(users, {
-    fields: [chartConfigurations.userId],
-    references: [users.id],
-  }),
-}));
 
-export const chartWatchlistsRelations = relations(chartWatchlists, ({ one }) => ({
-  user: one(users, {
-    fields: [chartWatchlists.userId],
-    references: [users.id],
-  }),
-}));
 
-export const chartUserPreferencesRelations = relations(chartUserPreferences, ({ one }) => ({
-  user: one(users, {
-    fields: [chartUserPreferences.userId],
-    references: [users.id],
-  }),
-}));
 
 // Chart Insert Schemas
-export const insertChartConfigurationSchema = createInsertSchema(chartConfigurations).pick({
-  userId: true,
-  name: true,
-  symbols: true,
-  assetTypes: true,
-  timeframe: true,
-  indicators: true,
-  overlays: true,
-  layout: true,
-  isDefault: true,
-  isPublic: true,
-  tags: true,
-});
 
-export const insertChartWatchlistSchema = createInsertSchema(chartWatchlists).pick({
-  userId: true,
-  name: true,
-  symbols: true,
-  assetTypes: true,
-  color: true,
-  isDefault: true,
-  sortOrder: true,
-  alertsEnabled: true,
-  alertConditions: true,
-});
 
-export const insertChartUserPreferencesSchema = createInsertSchema(chartUserPreferences).pick({
-  userId: true,
-  defaultTimeframe: true,
-  defaultIndicators: true,
-  theme: true,
-  candlestickStyle: true,
-  volumeVisible: true,
-  gridVisible: true,
-  crosshairEnabled: true,
-  autoSync: true,
-  realTimeUpdates: true,
-  alertsEnabled: true,
-  layout: true,
-  favoriteSymbols: true,
-  recentSymbols: true,
-});
 
 // Chart Types
-export type InsertChartConfiguration = z.infer<typeof insertChartConfigurationSchema>;
-export type ChartConfiguration = typeof chartConfigurations.$inferSelect;
 
-export type InsertChartWatchlist = z.infer<typeof insertChartWatchlistSchema>;
-export type ChartWatchlist = typeof chartWatchlists.$inferSelect;
 
-export type InsertChartUserPreferences = z.infer<typeof insertChartUserPreferencesSchema>;
-export type ChartUserPreferences = typeof chartUserPreferences.$inferSelect;
 
-export type ChartDataCache = typeof chartDataCache.$inferSelect;
 
 // Chart API Response Types
 export type ChartApiResponse = {
@@ -2488,7 +2119,7 @@ export type RiskMetrics = {
 // StressTestScenario type is defined later from schema inference
 
 export type StressTestResult = {
-  scenario: StressTestScenario;
+  scenario: Record<string, any>; // (legacy: stress_test_scenarios table pruned)
   portfolioImpact: {
     totalLoss: number; // absolute loss amount
     totalLossPercent: number; // percentage loss
@@ -2751,61 +2382,6 @@ export type EventImpactModel = {
   updatedAt: string;
 };
 
-export type TradingSignal = {
-  id: string;
-  eventId?: string;
-  predictionId?: string;
-  
-  // Signal Details
-  signalType: 'entry' | 'exit' | 'hedge' | 'risk_management' | 'position_sizing';
-  action: 'buy' | 'sell' | 'hold' | 'reduce' | 'increase';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  
-  // Asset Information
-  symbol: string;
-  assetType: 'crypto' | 'stock' | 'commodity' | 'currency';
-  currentPrice: number;
-  
-  // Signal Specifics
-  direction: 'long' | 'short' | 'neutral';
-  strength: number; // 0-100 signal strength
-  conviction: number; // 0-100 conviction level
-  
-  // Entry/Exit Levels
-  entryPrice?: number;
-  targetPrice?: number;
-  stopLoss?: number;
-  riskRewardRatio?: number;
-  
-  // Position Sizing
-  recommendedAllocation?: number; // percentage of portfolio
-  maxRisk?: number; // maximum risk percentage
-  positionSize?: number; // suggested position size
-  
-  // Timing
-  timeframe: '5m' | '15m' | '1h' | '4h' | '1d' | '1w' | 'long_term';
-  validUntil: string;
-  urgency: 'immediate' | 'within_1h' | 'within_24h' | 'within_week';
-  
-  // Rationale and Context
-  reasoning: string[];
-  catalysts: string[]; // What's driving this signal
-  risks: string[]; // Potential risks to consider
-  marketContext: string;
-  
-  // Performance Tracking
-  isExecuted?: boolean;
-  executedAt?: string;
-  executionPrice?: number;
-  outcome?: 'profitable' | 'loss' | 'breakeven' | 'pending';
-  realizedPnL?: number;
-  
-  // Metadata
-  confidence: number; // 0-100 confidence in signal
-  source: 'model_prediction' | 'manual_analysis' | 'hybrid' | 'risk_management';
-  createdAt: string;
-  lastUpdated: string;
-};
 
 export type HistoricalImpactAnalysis = {
   id: string;
@@ -3018,9 +2594,9 @@ export type PatternRecognitionConfig = {
 };
 
 export type PatternDetectionResult = {
-  patterns: (typeof chartPatterns.$inferSelect)[];
-  trendAnalysis: (typeof trendAnalysis.$inferSelect)[];
-  marketCycles: (typeof marketCycles.$inferSelect)[];
+  patterns: Record<string, any>[]; // (legacy: chart_patterns table pruned)
+  trendAnalysis: Record<string, any>[]; // (legacy: trend_analysis table pruned)
+  marketCycles: Record<string, any>[]; // (legacy: market_cycles table pruned)
   confidence: number;
   processingTime: number;
   dataQuality: 'excellent' | 'good' | 'fair' | 'poor';
@@ -3231,7 +2807,7 @@ export type PatternRecognitionDashboard = {
     successRate: number;
     averageConfidence: number;
   };
-  recentPatterns: (typeof chartPatterns.$inferSelect)[];
+  recentPatterns: Record<string, any>[]; // (legacy: chart_patterns table pruned)
   topAlerts: (typeof patternAlerts.$inferSelect)[];
   trendAnalysis: TrendAnalysisResult[];
   marketCycles: MarketCycleAnalysis[];
@@ -3256,272 +2832,8 @@ export type PatternRecognitionDashboard = {
 };
 
 // Pattern Recognition and Technical Analysis Tables - Phase 3 Feature
-export const chartPatterns = pgTable("chart_patterns", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  symbol: text("symbol").notNull(), // BTC, ETH, AAPL, etc.
-  assetType: text("asset_type").notNull(), // crypto, stock, commodity
-  
-  // Pattern Classification
-  patternType: text("pattern_type").notNull(), // triangle, head_shoulders, channel, flag, pennant, etc.
-  patternSubtype: text("pattern_subtype"), // ascending_triangle, descending_triangle, symmetrical_triangle
-  patternCategory: text("pattern_category").notNull(), // continuation, reversal, bilateral
-  
-  // Pattern Geometry and Detection
-  detectionAlgorithm: text("detection_algorithm").notNull(), // ml_cnn, geometric_rules, hybrid
-  confidence: real("confidence").notNull(), // 0-1 ML confidence score
-  patternQuality: text("pattern_quality").notNull(), // excellent, good, fair, poor
-  
-  // Price Data and Levels
-  startPrice: real("start_price").notNull(),
-  endPrice: real("end_price").notNull(),
-  highPrice: real("high_price").notNull(),
-  lowPrice: real("low_price").notNull(),
-  currentPrice: real("current_price").notNull(),
-  
-  // Support and Resistance Levels
-  supportLevels: jsonb("support_levels").notNull(), // Array of {price: number, strength: number}
-  resistanceLevels: jsonb("resistance_levels").notNull(),
-  keyLevels: jsonb("key_levels"), // Additional significant levels
-  
-  // Time Analysis
-  startTime: timestamp("start_time").notNull(),
-  endTime: timestamp("end_time"), // Null if pattern is still forming
-  timeframe: text("timeframe").notNull(), // 5m, 15m, 1h, 4h, 1d, 1w
-  duration: integer("duration"), // Pattern duration in minutes
-  
-  // Pattern Dimensions
-  height: real("height").notNull(), // Price range of pattern (high - low)
-  width: integer("width").notNull(), // Time span of pattern in bars
-  volume: real("volume"), // Average volume during pattern formation
-  volumeProfile: jsonb("volume_profile"), // Volume analysis data
-  
-  // Prediction and Targets
-  targetDirection: text("target_direction").notNull(), // bullish, bearish, neutral
-  targetPrice: real("target_price"), // Projected target price
-  stopLoss: real("stop_loss"), // Suggested stop loss level
-  riskRewardRatio: real("risk_reward_ratio"),
-  probabilitySuccess: real("probability_success"), // Historical success rate for this pattern type
-  
-  // Completion Status
-  isComplete: boolean("is_complete").default(false),
-  isConfirmed: boolean("is_confirmed").default(false), // Breakout confirmed
-  breakoutDirection: text("breakout_direction"), // up, down, failed
-  breakoutPrice: real("breakout_price"),
-  breakoutTime: timestamp("breakout_time"),
-  
-  // Market Context
-  marketRegime: text("market_regime"), // bull, bear, sideways, volatile
-  trendAlignment: boolean("trend_alignment"), // Pattern aligned with broader trend
-  volumeConfirmation: boolean("volume_confirmation"), // Volume supports pattern
-  
-  // Technical Indicators Context
-  indicatorSignals: jsonb("indicator_signals"), // RSI, MACD, etc. at pattern formation
-  movingAveragePosition: text("ma_position"), // above_all, below_all, mixed
-  volatilityEnvironment: text("volatility_environment"), // low, normal, high, extreme
-  
-  // Performance Tracking
-  actualOutcome: text("actual_outcome"), // success, failure, partial
-  actualTargetReached: boolean("actual_target_reached"),
-  maxFavorableExcursion: real("max_favorable_excursion"),
-  maxAdverseExcursion: real("max_adverse_excursion"),
-  finalPnL: real("final_pnl"), // If position was taken
-  
-  // Alert and Notification
-  alertGenerated: boolean("alert_generated").default(false),
-  alertSent: boolean("alert_sent").default(false),
-  alertTime: timestamp("alert_time"),
-  userInteractions: jsonb("user_interactions"), // User acknowledgments, notes, etc.
-  
-  // Metadata
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-  lastValidated: timestamp("last_validated").defaultNow(),
-  tags: text("tags").array(),
-});
 
-export const trendAnalysis = pgTable("trend_analysis", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  symbol: text("symbol").notNull(),
-  assetType: text("asset_type").notNull(),
-  
-  // Trend Classification
-  primaryTrend: text("primary_trend").notNull(), // bullish, bearish, sideways
-  secondaryTrend: text("secondary_trend"), // For multi-timeframe analysis
-  trendStrength: real("trend_strength").notNull(), // 0-1 strength score
-  trendQuality: text("trend_quality").notNull(), // strong, moderate, weak
-  
-  // Trend Metrics
-  trendDuration: integer("trend_duration").notNull(), // Days in current trend
-  trendAngle: real("trend_angle"), // Angle of trend line in degrees
-  slopeCoefficient: real("slope_coefficient"), // Linear regression slope
-  rSquared: real("r_squared"), // R² of trend line fit (0-1)
-  
-  // Price Momentum Analysis
-  momentum: real("momentum").notNull(), // Current momentum score (-1 to 1)
-  acceleration: real("acceleration"), // Rate of change in momentum
-  momentumDivergence: boolean("momentum_divergence"), // Momentum vs price divergence
-  
-  // Technical Trend Indicators
-  adx: real("adx"), // Average Directional Index (trend strength)
-  adxTrend: text("adx_trend"), // strengthening, weakening, neutral
-  pdi: real("pdi"), // Positive Directional Indicator
-  ndi: real("ndi"), // Negative Directional Indicator
-  
-  // Moving Average Analysis
-  maConfiguration: jsonb("ma_configuration").notNull(), // MA periods and types used
-  maAlignment: text("ma_alignment").notNull(), // bullish, bearish, mixed
-  priceVsMAs: jsonb("price_vs_mas"), // Price position relative to each MA
-  maSlope: jsonb("ma_slope"), // Slope of each moving average
-  maSpread: real("ma_spread"), // Spread between fast and slow MA
-  
-  // Trend Lines and Channels
-  trendLines: jsonb("trend_lines").notNull(), // Support/resistance trend lines
-  channelBounds: jsonb("channel_bounds"), // Upper and lower channel bounds
-  channelWidth: real("channel_width"), // Current channel width
-  channelPosition: real("channel_position"), // Price position in channel (0-1)
-  
-  // Volume Analysis
-  volumeTrend: text("volume_trend").notNull(), // increasing, decreasing, flat
-  volumeConfirmation: boolean("volume_confirmation"), // Volume confirms price trend
-  onBalanceVolume: real("on_balance_volume"), // OBV indicator
-  volumeMovingAverage: real("volume_moving_average"),
-  
-  // Volatility and Strength
-  volatilityTrend: text("volatility_trend"), // expanding, contracting, stable
-  atr: real("atr"), // Average True Range
-  atrPercent: real("atr_percent"), // ATR as percentage of price
-  volatilityRank: real("volatility_rank"), // Current vol vs historical (0-1)
-  
-  // Fibonacci Levels
-  fibonacciLevels: jsonb("fibonacci_levels"), // Key fib retracement/extension levels
-  currentFibLevel: text("current_fib_level"), // Which fib level price is at
-  fibSupport: real("fib_support"), // Nearest fib support
-  fibResistance: real("fib_resistance"), // Nearest fib resistance
-  
-  // Trend Signals and Predictions
-  trendSignal: text("trend_signal").notNull(), // buy, sell, hold, wait
-  signalStrength: real("signal_strength").notNull(), // 0-1 signal strength
-  entryLevel: real("entry_level"), // Suggested entry level
-  stopLoss: real("stop_loss"), // Suggested stop loss
-  targetLevels: jsonb("target_levels"), // Array of profit target levels
-  
-  // Reversal Analysis
-  reversalProbability: real("reversal_probability"), // 0-1 probability of trend reversal
-  reversalSignals: jsonb("reversal_signals"), // Early reversal warning signals
-  supportingPatterns: text("supporting_patterns").array(), // Chart patterns supporting trend
-  
-  // Time Analysis
-  timeframe: text("timeframe").notNull(), // Analysis timeframe
-  analysisTime: timestamp("analysis_time").notNull(),
-  nextUpdate: timestamp("next_update"), // When analysis should be refreshed
-  
-  // Historical Context
-  historicalTrendStats: jsonb("historical_trend_stats"), // Historical trend statistics
-  similarPeriods: jsonb("similar_periods"), // Similar historical periods
-  seasonalityFactor: real("seasonality_factor"), // Seasonal bias (-1 to 1)
-  
-  // Performance Tracking
-  predictionAccuracy: real("prediction_accuracy"), // Historical accuracy for this asset
-  lastPredictionResult: text("last_prediction_result"), // success, failure, partial
-  
-  // Metadata
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-  algorithmVersion: text("algorithm_version").default("v1.0"),
-  dataQuality: text("data_quality").default("good"), // good, fair, poor
-});
 
-export const marketCycles = pgTable("market_cycles", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  symbol: text("symbol").notNull(),
-  assetType: text("asset_type").notNull(),
-  
-  // Cycle Classification
-  cycleType: text("cycle_type").notNull(), // bull_market, bear_market, accumulation, distribution
-  cyclePhase: text("cycle_phase").notNull(), // early, mid, late, transition
-  cycleStage: text("cycle_stage").notNull(), // emerging, developing, mature, ending
-  
-  // Cycle Timing
-  cycleStart: timestamp("cycle_start").notNull(),
-  cycleEnd: timestamp("cycle_end"), // Null if cycle is ongoing
-  cycleDuration: integer("cycle_duration"), // Duration in days
-  estimatedTimeRemaining: integer("estimated_time_remaining"), // Days until cycle end
-  
-  // Cycle Metrics
-  cycleStrength: real("cycle_strength").notNull(), // 0-1 strength of current cycle
-  cycleMomentum: real("cycle_momentum"), // Current momentum within cycle (-1 to 1)
-  cycleConfidence: real("cycle_confidence").notNull(), // 0-1 confidence in cycle identification
-  
-  // Price Analysis
-  startPrice: real("start_price").notNull(),
-  currentPrice: real("current_price").notNull(),
-  peakPrice: real("peak_price"), // Highest price in cycle
-  troughPrice: real("trough_price"), // Lowest price in cycle
-  priceChange: real("price_change"), // Total price change from cycle start
-  priceChangePercent: real("price_change_percent"),
-  
-  // Cycle Characteristics
-  volatilityProfile: jsonb("volatility_profile").notNull(), // Volatility across cycle phases
-  volumeProfile: jsonb("volume_profile").notNull(), // Volume patterns across cycle
-  participationRate: real("participation_rate"), // Market breadth/participation
-  sentimentProfile: jsonb("sentiment_profile"), // Sentiment indicators across cycle
-  
-  // Technical Analysis
-  supportLevels: jsonb("support_levels").notNull(),
-  resistanceLevels: jsonb("resistance_levels").notNull(),
-  keyLevels: jsonb("key_levels"), // Critical levels for cycle continuation/reversal
-  trendStrength: real("trend_strength"), // Underlying trend strength
-  
-  // Market Structure
-  marketStructure: text("market_structure").notNull(), // trending, ranging, breaking_out, breaking_down
-  structureQuality: text("structure_quality"), // clean, messy, deteriorating
-  structureShifts: jsonb("structure_shifts"), // Major structure changes in cycle
-  
-  // Institutional Activity
-  institutionalFlow: text("institutional_flow"), // accumulating, distributing, neutral
-  smartMoneyBehavior: text("smart_money_behavior"), // buying, selling, waiting
-  retailSentiment: text("retail_sentiment"), // euphoric, fearful, neutral, FOMO
-  
-  // Cycle Predictions
-  nextPhaseTarget: text("next_phase_target"), // What phase is coming next
-  nextPhaseProbability: real("next_phase_probability"), // Probability of transition
-  nextPhaseTimeframe: text("next_phase_timeframe"), // When transition might occur
-  reversalRisk: real("reversal_risk"), // 0-1 risk of cycle reversal
-  
-  // Historical Context
-  historicalComparisons: jsonb("historical_comparisons"), // Similar historical cycles
-  cycleDevelopment: jsonb("cycle_development"), // How cycle has evolved
-  anomalies: text("anomalies").array(), // Unusual aspects of this cycle
-  
-  // Economic Context
-  macroEnvironment: jsonb("macro_environment"), // Macro conditions during cycle
-  catalysts: text("catalysts").array(), // Key drivers of current cycle
-  headwinds: text("headwinds").array(), // Factors working against cycle
-  tailwinds: text("tailwinds").array(), // Factors supporting cycle
-  
-  // Cross-Asset Analysis
-  correlatedAssets: jsonb("correlated_assets"), // Other assets in similar cycles
-  sectorRotation: jsonb("sector_rotation"), // Sector performance patterns
-  riskOnOff: text("risk_on_off"), // Risk-on or risk-off environment
-  
-  // Alert Thresholds
-  alertTriggers: jsonb("alert_triggers"), // Conditions that trigger alerts
-  warningSignals: jsonb("warning_signals"), // Early warning indicators
-  confirmationSignals: jsonb("confirmation_signals"), // Signals that confirm cycle phase
-  
-  // Performance Metrics
-  sharpeRatio: real("sharpe_ratio"), // Risk-adjusted return for cycle
-  maxDrawdown: real("max_drawdown"), // Maximum drawdown in cycle
-  winRate: real("win_rate"), // Success rate of cycle-based signals
-  
-  // Metadata
-  detectionAlgorithm: text("detection_algorithm").default("hybrid_ml"),
-  modelVersion: text("model_version").default("v1.0"),
-  dataQuality: text("data_quality").default("good"),
-  lastValidated: timestamp("last_validated").defaultNow(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
 export const patternAlerts = pgTable("pattern_alerts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -3533,9 +2845,9 @@ export const patternAlerts = pgTable("pattern_alerts", {
   priority: text("priority").notNull(), // low, normal, high, urgent
   
   // Related Entities
-  patternId: varchar("pattern_id").references(() => chartPatterns.id),
-  trendId: varchar("trend_id").references(() => trendAnalysis.id),
-  cycleId: varchar("cycle_id").references(() => marketCycles.id),
+  patternId: varchar("pattern_id"), // (legacy: referenced chart_patterns, pruned)
+  trendId: varchar("trend_id"), // (legacy: referenced trend_analysis, pruned)
+  cycleId: varchar("cycle_id"), // (legacy: referenced market_cycles, pruned)
   
   // Asset Information
   symbol: text("symbol").notNull(),
@@ -3615,9 +2927,9 @@ export const aiTradingSetups = pgTable("ai_trading_setups", {
   riskProfile: text("risk_profile").notNull(), // conservative, moderate, aggressive, speculative
   
   // Related Analysis
-  patternId: varchar("pattern_id").references(() => chartPatterns.id),
-  trendId: varchar("trend_id").references(() => trendAnalysis.id),
-  cycleId: varchar("cycle_id").references(() => marketCycles.id),
+  patternId: varchar("pattern_id"), // (legacy: referenced chart_patterns, pruned)
+  trendId: varchar("trend_id"), // (legacy: referenced trend_analysis, pruned)
+  cycleId: varchar("cycle_id"), // (legacy: referenced market_cycles, pruned)
   alertId: varchar("alert_id").references(() => patternAlerts.id),
   
   // Asset Information
@@ -3733,34 +3045,10 @@ export const aiTradingSetups = pgTable("ai_trading_setups", {
 // PATTERN RECOGNITION RELATIONS - Added after table definitions
 // =============================================================================
 
-export const chartPatternsRelations = relations(chartPatterns, ({ many }) => ({
-  alerts: many(patternAlerts),
-  tradingSetups: many(aiTradingSetups),
-}));
 
-export const trendAnalysisRelations = relations(trendAnalysis, ({ many }) => ({
-  alerts: many(patternAlerts),
-  tradingSetups: many(aiTradingSetups),
-}));
 
-export const marketCyclesRelations = relations(marketCycles, ({ many }) => ({
-  alerts: many(patternAlerts),
-  tradingSetups: many(aiTradingSetups),
-}));
 
 export const patternAlertsRelations = relations(patternAlerts, ({ one, many }) => ({
-  pattern: one(chartPatterns, {
-    fields: [patternAlerts.patternId],
-    references: [chartPatterns.id],
-  }),
-  trend: one(trendAnalysis, {
-    fields: [patternAlerts.trendId],
-    references: [trendAnalysis.id],
-  }),
-  cycle: one(marketCycles, {
-    fields: [patternAlerts.cycleId],
-    references: [marketCycles.id],
-  }),
   parentAlert: one(patternAlerts, {
     fields: [patternAlerts.parentAlertId],
     references: [patternAlerts.id],
@@ -3770,18 +3058,6 @@ export const patternAlertsRelations = relations(patternAlerts, ({ one, many }) =
 }));
 
 export const aiTradingSetupsRelations = relations(aiTradingSetups, ({ one }) => ({
-  pattern: one(chartPatterns, {
-    fields: [aiTradingSetups.patternId],
-    references: [chartPatterns.id],
-  }),
-  trend: one(trendAnalysis, {
-    fields: [aiTradingSetups.trendId],
-    references: [trendAnalysis.id],
-  }),
-  cycle: one(marketCycles, {
-    fields: [aiTradingSetups.cycleId],
-    references: [marketCycles.id],
-  }),
   alert: one(patternAlerts, {
     fields: [aiTradingSetups.alertId],
     references: [patternAlerts.id],
@@ -3792,161 +3068,8 @@ export const aiTradingSetupsRelations = relations(aiTradingSetups, ({ one }) => 
 // PATTERN RECOGNITION INSERT SCHEMAS - Added after table definitions
 // =============================================================================
 
-export const insertChartPatternSchema = createInsertSchema(chartPatterns).pick({
-  symbol: true,
-  assetType: true,
-  patternType: true,
-  patternSubtype: true,
-  patternCategory: true,
-  detectionAlgorithm: true,
-  confidence: true,
-  patternQuality: true,
-  startPrice: true,
-  endPrice: true,
-  highPrice: true,
-  lowPrice: true,
-  currentPrice: true,
-  supportLevels: true,
-  resistanceLevels: true,
-  keyLevels: true,
-  startTime: true,
-  endTime: true,
-  timeframe: true,
-  duration: true,
-  height: true,
-  width: true,
-  volume: true,
-  volumeProfile: true,
-  targetDirection: true,
-  targetPrice: true,
-  stopLoss: true,
-  riskRewardRatio: true,
-  probabilitySuccess: true,
-  marketRegime: true,
-  trendAlignment: true,
-  volumeConfirmation: true,
-  indicatorSignals: true,
-  movingAveragePosition: true,
-  volatilityEnvironment: true,
-  tags: true,
-});
 
-export const insertTrendAnalysisSchema = createInsertSchema(trendAnalysis).pick({
-  symbol: true,
-  assetType: true,
-  primaryTrend: true,
-  secondaryTrend: true,
-  trendStrength: true,
-  trendQuality: true,
-  trendDuration: true,
-  trendAngle: true,
-  slopeCoefficient: true,
-  rSquared: true,
-  momentum: true,
-  acceleration: true,
-  momentumDivergence: true,
-  adx: true,
-  adxTrend: true,
-  pdi: true,
-  ndi: true,
-  maConfiguration: true,
-  maAlignment: true,
-  priceVsMAs: true,
-  maSlope: true,
-  maSpread: true,
-  trendLines: true,
-  channelBounds: true,
-  channelWidth: true,
-  channelPosition: true,
-  volumeTrend: true,
-  volumeConfirmation: true,
-  onBalanceVolume: true,
-  volumeMovingAverage: true,
-  volatilityTrend: true,
-  atr: true,
-  atrPercent: true,
-  volatilityRank: true,
-  fibonacciLevels: true,
-  currentFibLevel: true,
-  fibSupport: true,
-  fibResistance: true,
-  trendSignal: true,
-  signalStrength: true,
-  entryLevel: true,
-  stopLoss: true,
-  targetLevels: true,
-  reversalProbability: true,
-  reversalSignals: true,
-  supportingPatterns: true,
-  timeframe: true,
-  analysisTime: true,
-  nextUpdate: true,
-  historicalTrendStats: true,
-  similarPeriods: true,
-  seasonalityFactor: true,
-  predictionAccuracy: true,
-  lastPredictionResult: true,
-  algorithmVersion: true,
-  dataQuality: true,
-});
 
-export const insertMarketCycleSchema = createInsertSchema(marketCycles).pick({
-  symbol: true,
-  assetType: true,
-  cycleType: true,
-  cyclePhase: true,
-  cycleStage: true,
-  cycleStart: true,
-  cycleEnd: true,
-  cycleDuration: true,
-  estimatedTimeRemaining: true,
-  cycleStrength: true,
-  cycleMomentum: true,
-  cycleConfidence: true,
-  startPrice: true,
-  currentPrice: true,
-  peakPrice: true,
-  troughPrice: true,
-  priceChange: true,
-  priceChangePercent: true,
-  volatilityProfile: true,
-  volumeProfile: true,
-  participationRate: true,
-  sentimentProfile: true,
-  supportLevels: true,
-  resistanceLevels: true,
-  keyLevels: true,
-  trendStrength: true,
-  marketStructure: true,
-  structureQuality: true,
-  structureShifts: true,
-  institutionalFlow: true,
-  smartMoneyBehavior: true,
-  retailSentiment: true,
-  nextPhaseTarget: true,
-  nextPhaseProbability: true,
-  nextPhaseTimeframe: true,
-  reversalRisk: true,
-  historicalComparisons: true,
-  cycleDevelopment: true,
-  anomalies: true,
-  macroEnvironment: true,
-  catalysts: true,
-  headwinds: true,
-  tailwinds: true,
-  correlatedAssets: true,
-  sectorRotation: true,
-  riskOnOff: true,
-  alertTriggers: true,
-  warningSignals: true,
-  confirmationSignals: true,
-  sharpeRatio: true,
-  maxDrawdown: true,
-  winRate: true,
-  detectionAlgorithm: true,
-  modelVersion: true,
-  dataQuality: true,
-});
 
 export const insertPatternAlertSchema = createInsertSchema(patternAlerts).pick({
   alertType: true,
@@ -4058,14 +3181,8 @@ export const insertAiTradingSetupSchema = createInsertSchema(aiTradingSetups).pi
 });
 
 // Pattern Recognition Types
-export type InsertChartPattern = z.infer<typeof insertChartPatternSchema>;
-export type ChartPatternData = typeof chartPatterns.$inferSelect;
 
-export type InsertTrendAnalysis = z.infer<typeof insertTrendAnalysisSchema>;
-export type TrendAnalysisData = typeof trendAnalysis.$inferSelect;
 
-export type InsertMarketCycle = z.infer<typeof insertMarketCycleSchema>;
-export type MarketCycleData = typeof marketCycles.$inferSelect;
 
 export type InsertPatternAlert = z.infer<typeof insertPatternAlertSchema>;
 export type PatternAlertData = typeof patternAlerts.$inferSelect;
@@ -4077,508 +3194,52 @@ export type AiTradingSetupData = typeof aiTradingSetups.$inferSelect;
 // VOLATILITY FORECASTING AND STRESS INDICATORS TABLES - Phase 3 Feature
 // =============================================================================
 
-export const volatilityForecasts = pgTable("volatility_forecasts", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  symbol: text("symbol").notNull(),
-  assetType: text("asset_type").notNull(), // crypto, stock, commodity, currency
-  forecastType: text("forecast_type").notNull(), // garch, ml_ensemble, regime_switching, stochastic
-  
-  // Current volatility metrics
-  currentVolatility: jsonb("current_volatility").notNull(), // { realized1d, realized7d, realized30d, impliedVolatility, percentile }
-  
-  // Volatility predictions
-  predictions: jsonb("predictions").notNull(), // Array of prediction objects
-  
-  // Model performance metrics
-  modelPerformance: jsonb("model_performance").notNull(), // { accuracy, mape, lastCalibrated, backtestPeriod }
-  
-  // Risk metrics
-  riskMetrics: jsonb("risk_metrics").notNull(), // { var95, var99, expectedShortfall, maxDrawdownProbability }
-  
-  // Market context
-  marketContext: jsonb("market_context").notNull(), // { stressLevel, regime, correlationEnvironment, liquidityConditions }
-  
-  confidence: integer("confidence").notNull(), // 0-100 overall forecast confidence
-  accuracy: real("accuracy"), // Historical accuracy percentage
-  
-  createdAt: timestamp("created_at").defaultNow(),
-  lastUpdated: timestamp("last_updated").defaultNow(),
-  nextUpdate: timestamp("next_update").notNull(),
-  
-  // Metadata
-  dataQuality: text("data_quality"), // excellent, good, fair, poor
-  calibrationDate: timestamp("calibration_date"),
-  expiresAt: timestamp("expires_at"),
-});
 
-export const stressIndicators = pgTable("stress_indicators", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: text("name").notNull(),
-  category: text("category").notNull(), // market_stress, liquidity_stress, volatility_stress, correlation_stress
-  
-  currentValue: real("current_value").notNull(),
-  normalizedValue: real("normalized_value").notNull(), // 0-100 scale
-  
-  // Stress level classification
-  level: text("level").notNull(), // normal, elevated, high, extreme
-  
-  // Thresholds
-  thresholds: jsonb("thresholds").notNull(), // { elevated, high, extreme }
-  
-  // Historical context
-  percentile: real("percentile").notNull(), // Historical percentile
-  zScore: real("z_score").notNull(), // Z-score from historical mean
-  
-  // Time series data (last 30 days)
-  history: jsonb("history"), // Array of historical values
-  
-  // Impact assessment
-  impact: jsonb("impact").notNull(), // { severity, affectedAssets, expectedDuration, previousOccurrences }
-  
-  description: text("description").notNull(),
-  interpretation: text("interpretation").notNull(),
-  actionableInsights: jsonb("actionable_insights"), // Array of insights
-  
-  createdAt: timestamp("created_at").defaultNow(),
-  lastUpdated: timestamp("last_updated").defaultNow(),
-  
-  // Alert configuration
-  alertEnabled: boolean("alert_enabled").default(true),
-  alertThreshold: real("alert_threshold"),
-  lastAlertAt: timestamp("last_alert_at"),
-});
 
-export const riskRegimes = pgTable("risk_regimes", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  regime: text("regime").notNull(), // accumulation, risk_on, risk_off, distribution, crisis, recovery
-  confidence: integer("confidence").notNull(), // 0-100 confidence in regime classification
-  
-  // Regime characteristics
-  characteristics: jsonb("characteristics").notNull(), // { averageVolatility, correlationLevel, liquidityConditions, sentimentScore, momentumStrength }
-  
-  // Regime duration and transition
-  duration: jsonb("duration").notNull(), // { current, typical, remaining }
-  
-  // Transition probabilities
-  transitions: jsonb("transitions"), // Array of transition objects
-  
-  // Historical analysis
-  historical: jsonb("historical").notNull(), // { frequency, averageDuration, returnCharacteristics }
-  
-  // Strategic implications
-  implications: jsonb("implications").notNull(), // { recommendedAction, riskTolerance, assetAllocation, positionSizing }
-  
-  detectedAt: timestamp("detected_at").defaultNow(),
-  lastUpdated: timestamp("last_updated").defaultNow(),
-  
-  // Regime tracking
-  isActive: boolean("is_active").default(true),
-  previousRegime: text("previous_regime"),
-  regimeStartDate: timestamp("regime_start_date"),
-  expectedEndDate: timestamp("expected_end_date"),
-});
 
-export const crisisIndicators = pgTable("crisis_indicators", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: text("name").notNull(),
-  type: text("type").notNull(), // market_crash, liquidity_crisis, correlation_breakdown, volatility_spike, systemic_risk
-  
-  // Crisis probability
-  probability: real("probability").notNull(), // 0-100 probability of crisis
-  timeframe: text("timeframe").notNull(), // 1d, 7d, 30d, 90d
-  severity: text("severity").notNull(), // minor, moderate, major, systemic
-  
-  // Early warning signals
-  signals: jsonb("signals").notNull(), // Array of signal objects
-  
-  // Crisis characteristics
-  characteristics: jsonb("characteristics").notNull(), // { expectedDuration, expectedImpact, recoveryTime }
-  
-  // Historical precedents
-  precedents: jsonb("precedents"), // Array of historical precedent objects
-  
-  // Mitigation strategies
-  mitigation: jsonb("mitigation").notNull(), // { hedging, positioning, monitoring }
-  
-  confidence: integer("confidence").notNull(), // 0-100 confidence in indicator
-  
-  createdAt: timestamp("created_at").defaultNow(),
-  lastUpdated: timestamp("last_updated").defaultNow(),
-  
-  // Crisis tracking
-  isActive: boolean("is_active").default(true),
-  triggeredAt: timestamp("triggered_at"),
-  resolvedAt: timestamp("resolved_at"),
-});
 
-export const volatilitySurfaces = pgTable("volatility_surfaces", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  symbol: text("symbol").notNull(),
-  assetType: text("asset_type").notNull(), // crypto, stock
-  
-  // Surface data points
-  surface: jsonb("surface").notNull(), // Array of surface points
-  
-  // Surface characteristics
-  characteristics: jsonb("characteristics").notNull(), // { atmVolatility, skew, termStructure, smile }
-  
-  // Model fit metrics
-  modelFit: jsonb("model_fit").notNull(), // { method, r_squared, rmse, parameters }
-  
-  createdAt: timestamp("created_at").defaultNow(),
-  lastUpdated: timestamp("last_updated").defaultNow(),
-  nextUpdate: timestamp("next_update").notNull(),
-  
-  // Data quality
-  dataPoints: integer("data_points"),
-  fitQuality: text("fit_quality"), // excellent, good, fair, poor
-  lastCalibrated: timestamp("last_calibrated"),
-});
 
-export const stressTestScenarios = pgTable("stress_test_scenarios", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: text("name").notNull(),
-  description: text("description").notNull(),
-  category: text("category").notNull(), // historical, hypothetical, regulatory, extreme
-  severity: text("severity").notNull(), // mild, moderate, severe, extreme
-  
-  // Scenario parameters
-  parameters: jsonb("parameters").notNull(), // { marketShock, volatilityMultiplier, correlationIncrease, liquidityDryup, duration }
-  
-  // Asset-specific shocks
-  assetShocks: jsonb("asset_shocks"), // Array of asset shock objects
-  
-  // Historical basis
-  historicalBasis: jsonb("historical_basis"), // { date, event, actualImpact }
-  
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-  lastUsed: timestamp("last_used"),
-  
-  // Usage tracking
-  usageCount: integer("usage_count").default(0),
-  averageImpact: real("average_impact"),
-});
 
-export const tailRiskMetrics = pgTable("tail_risk_metrics", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  metric: text("metric").notNull(), // expected_shortfall, tail_expectation, extreme_value, peak_over_threshold
-  symbol: text("symbol").notNull(),
-  timeframe: text("timeframe").notNull(), // 1d, 7d, 30d
-  
-  // Risk measurements
-  value: real("value").notNull(),
-  confidence: real("confidence").notNull(), // Confidence level (95%, 99%, etc.)
-  
-  // Tail characteristics
-  tailShape: jsonb("tail_shape").notNull(), // { heaviness, asymmetry, extremeEvents }
-  
-  // Historical context
-  historical: jsonb("historical").notNull(), // { average, maximum, percentile, exceedances }
-  
-  calculatedAt: timestamp("calculated_at").defaultNow(),
-  lastUpdated: timestamp("last_updated").defaultNow(),
-  
-  // Model parameters
-  modelType: text("model_type"), // GPD, EVT, POT
-  parameters: jsonb("parameters"),
-  fitQuality: real("fit_quality"),
-});
 
-export const volatilityAlerts = pgTable("volatility_alerts", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  alertType: text("alert_type").notNull(), // volatility_spike, regime_change, stress_threshold, crisis_warning, model_drift
-  severity: text("severity").notNull(), // low, medium, high, critical
-  
-  title: text("title").notNull(),
-  description: text("description").notNull(),
-  
-  // Alert details
-  symbol: text("symbol"),
-  metric: text("metric").notNull(),
-  currentValue: real("current_value").notNull(),
-  thresholdValue: real("threshold_value").notNull(),
-  deviationPercent: real("deviation_percent").notNull(),
-  
-  // Context
-  context: jsonb("context").notNull(), // { timeframe, historicalContext, implications }
-  
-  // Recommendations
-  recommendations: jsonb("recommendations").notNull(), // { immediate, shortTerm, monitoring }
-  
-  createdAt: timestamp("created_at").defaultNow(),
-  expiresAt: timestamp("expires_at").notNull(),
-  
-  // Alert lifecycle
-  isActive: boolean("is_active").default(true),
-  acknowledgedAt: timestamp("acknowledged_at"),
-  acknowledgedBy: text("acknowledged_by"),
-  
-  // Delivery tracking
-  deliveryChannels: jsonb("delivery_channels"), // Array of delivery channels
-  deliveredAt: jsonb("delivered_at"), // Delivery timestamps by channel
-  
-  // Alert classification
-  priority: text("priority").default('medium'), // low, medium, high, urgent
-  category: text("category"), // market, portfolio, technical, fundamental
-  tags: text("tags").array(),
-});
 
-export const volatilityModelCalibrations = pgTable("volatility_model_calibrations", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  modelId: text("model_id").notNull(),
-  modelType: text("model_type").notNull(), // garch, stochastic_vol, jump_diffusion, regime_switching
-  symbol: text("symbol").notNull(),
-  
-  // Model parameters
-  parameters: jsonb("parameters").notNull(),
-  
-  // Calibration metrics
-  calibration: jsonb("calibration").notNull(), // { method, logLikelihood, aic, bic, convergence }
-  
-  // Performance metrics
-  performance: jsonb("performance").notNull(), // { insampleR2, oosampleR2, forecastAccuracy, volatilityForecastMape }
-  
-  calibrationDate: timestamp("calibration_date").defaultNow(),
-  validUntil: timestamp("valid_until").notNull(),
-  
-  // Model versioning
-  version: text("version").notNull(),
-  previousVersion: text("previous_version"),
-  
-  // Quality metrics
-  dataQuality: real("data_quality"), // 0-100
-  convergenceStatus: boolean("convergence_status"),
-  outlierCount: integer("outlier_count"),
-  
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-});
 
 // =============================================================================
 // VOLATILITY FORECASTING RELATIONS
 // =============================================================================
 
-export const volatilityForecastsRelations = relations(volatilityForecasts, ({ many }) => ({
-  alerts: many(volatilityAlerts),
-  tailRiskMetrics: many(tailRiskMetrics),
-}));
 
-export const stressIndicatorsRelations = relations(stressIndicators, ({ many }) => ({
-  alerts: many(volatilityAlerts),
-}));
 
-export const riskRegimesRelations = relations(riskRegimes, ({ many }) => ({
-  alerts: many(volatilityAlerts),
-}));
 
-export const crisisIndicatorsRelations = relations(crisisIndicators, ({ many }) => ({
-  alerts: many(volatilityAlerts),
-}));
 
-export const volatilitySurfacesRelations = relations(volatilitySurfaces, ({ one }) => ({
-  forecast: one(volatilityForecasts, {
-    fields: [volatilitySurfaces.symbol],
-    references: [volatilityForecasts.symbol],
-  }),
-}));
 
-export const tailRiskMetricsRelations = relations(tailRiskMetrics, ({ one }) => ({
-  forecast: one(volatilityForecasts, {
-    fields: [tailRiskMetrics.symbol],
-    references: [volatilityForecasts.symbol],
-  }),
-}));
 
-export const volatilityAlertsRelations = relations(volatilityAlerts, ({ one }) => ({
-  forecast: one(volatilityForecasts, {
-    fields: [volatilityAlerts.symbol],
-    references: [volatilityForecasts.symbol],
-  }),
-  stressIndicator: one(stressIndicators),
-  riskRegime: one(riskRegimes),
-  crisisIndicator: one(crisisIndicators),
-}));
 
-export const volatilityModelCalibrationsRelations = relations(volatilityModelCalibrations, ({ one }) => ({
-  forecast: one(volatilityForecasts, {
-    fields: [volatilityModelCalibrations.symbol],
-    references: [volatilityForecasts.symbol],
-  }),
-}));
 
 // =============================================================================
 // VOLATILITY FORECASTING INSERT SCHEMAS
 // =============================================================================
 
-export const insertVolatilityForecastSchema = createInsertSchema(volatilityForecasts).pick({
-  symbol: true,
-  assetType: true,
-  forecastType: true,
-  currentVolatility: true,
-  predictions: true,
-  modelPerformance: true,
-  riskMetrics: true,
-  marketContext: true,
-  confidence: true,
-  accuracy: true,
-  nextUpdate: true,
-  dataQuality: true,
-  calibrationDate: true,
-  expiresAt: true,
-});
 
-export const insertStressIndicatorSchema = createInsertSchema(stressIndicators).pick({
-  name: true,
-  category: true,
-  currentValue: true,
-  normalizedValue: true,
-  level: true,
-  thresholds: true,
-  percentile: true,
-  zScore: true,
-  history: true,
-  impact: true,
-  description: true,
-  interpretation: true,
-  actionableInsights: true,
-  alertEnabled: true,
-  alertThreshold: true,
-});
 
-export const insertRiskRegimeSchema = createInsertSchema(riskRegimes).pick({
-  regime: true,
-  confidence: true,
-  characteristics: true,
-  duration: true,
-  transitions: true,
-  historical: true,
-  implications: true,
-  isActive: true,
-  previousRegime: true,
-  regimeStartDate: true,
-  expectedEndDate: true,
-});
 
-export const insertCrisisIndicatorSchema = createInsertSchema(crisisIndicators).pick({
-  name: true,
-  type: true,
-  probability: true,
-  timeframe: true,
-  severity: true,
-  signals: true,
-  characteristics: true,
-  precedents: true,
-  mitigation: true,
-  confidence: true,
-  isActive: true,
-  triggeredAt: true,
-});
 
-export const insertVolatilitySurfaceSchema = createInsertSchema(volatilitySurfaces).pick({
-  symbol: true,
-  assetType: true,
-  surface: true,
-  characteristics: true,
-  modelFit: true,
-  nextUpdate: true,
-  dataPoints: true,
-  fitQuality: true,
-  lastCalibrated: true,
-});
 
-export const insertStressTestScenarioSchema = createInsertSchema(stressTestScenarios).pick({
-  name: true,
-  description: true,
-  category: true,
-  severity: true,
-  parameters: true,
-  assetShocks: true,
-  historicalBasis: true,
-  isActive: true,
-  usageCount: true,
-  averageImpact: true,
-});
 
-export const insertTailRiskMetricSchema = createInsertSchema(tailRiskMetrics).pick({
-  metric: true,
-  symbol: true,
-  timeframe: true,
-  value: true,
-  confidence: true,
-  tailShape: true,
-  historical: true,
-  modelType: true,
-  parameters: true,
-  fitQuality: true,
-});
 
-export const insertVolatilityAlertSchema = createInsertSchema(volatilityAlerts).pick({
-  alertType: true,
-  severity: true,
-  title: true,
-  description: true,
-  symbol: true,
-  metric: true,
-  currentValue: true,
-  thresholdValue: true,
-  deviationPercent: true,
-  context: true,
-  recommendations: true,
-  expiresAt: true,
-  acknowledgedBy: true,
-  deliveryChannels: true,
-  priority: true,
-  category: true,
-  tags: true,
-});
 
-export const insertVolatilityModelCalibrationSchema = createInsertSchema(volatilityModelCalibrations).pick({
-  modelId: true,
-  modelType: true,
-  symbol: true,
-  parameters: true,
-  calibration: true,
-  performance: true,
-  validUntil: true,
-  version: true,
-  previousVersion: true,
-  dataQuality: true,
-  convergenceStatus: true,
-  outlierCount: true,
-  isActive: true,
-});
 
 // =============================================================================
 // VOLATILITY FORECASTING TYPES
 // =============================================================================
 
-export type InsertVolatilityForecast = z.infer<typeof insertVolatilityForecastSchema>;
-export type VolatilityForecast = typeof volatilityForecasts.$inferSelect;
 
-export type InsertStressIndicator = z.infer<typeof insertStressIndicatorSchema>;
-export type StressIndicator = typeof stressIndicators.$inferSelect;
 
-export type InsertRiskRegime = z.infer<typeof insertRiskRegimeSchema>;
-export type RiskRegime = typeof riskRegimes.$inferSelect;
 
-export type InsertCrisisIndicator = z.infer<typeof insertCrisisIndicatorSchema>;
-export type CrisisIndicator = typeof crisisIndicators.$inferSelect;
 
-export type InsertVolatilitySurface = z.infer<typeof insertVolatilitySurfaceSchema>;
-export type VolatilitySurface = typeof volatilitySurfaces.$inferSelect;
 
-export type InsertStressTestScenario = z.infer<typeof insertStressTestScenarioSchema>;
-export type StressTestScenario = typeof stressTestScenarios.$inferSelect;
 
-export type InsertTailRiskMetric = z.infer<typeof insertTailRiskMetricSchema>;
-export type TailRiskMetric = typeof tailRiskMetrics.$inferSelect;
 
-export type InsertVolatilityAlert = z.infer<typeof insertVolatilityAlertSchema>;
-export type VolatilityAlert = typeof volatilityAlerts.$inferSelect;
 
-export type InsertVolatilityModelCalibration = z.infer<typeof insertVolatilityModelCalibrationSchema>;
-export type VolatilityModelCalibration = typeof volatilityModelCalibrations.$inferSelect;
 
 // =============================================================================
 // VOLATILITY FORECASTING DASHBOARD TYPES
@@ -4594,11 +3255,11 @@ export type VolatilityForecastingDashboard = {
     totalForecasts: number;
   };
   
-  volatilityForecasts: VolatilityForecast[];
-  stressIndicators: StressIndicator[];
-  riskRegime: RiskRegime;
-  crisisIndicators: CrisisIndicator[];
-  activeAlerts: VolatilityAlert[];
+  volatilityForecasts: Record<string, any>[]; // (legacy: volatility_forecasts table pruned)
+  stressIndicators: Record<string, any>[]; // (legacy: stress_indicators table pruned)
+  riskRegime: Record<string, any>; // (legacy: risk_regimes table pruned)
+  crisisIndicators: Record<string, any>[]; // (legacy: crisis_indicators table pruned)
+  activeAlerts: Record<string, any>[]; // (legacy: volatility_alerts table pruned)
   
   marketContext: {
     overallVolatility: number;
@@ -5220,14 +3881,6 @@ export const userTradingStats = pgTable("user_trading_stats", {
 });
 
 // Leaderboard snapshots for historical tracking
-export const leaderboardSnapshots = pgTable("leaderboard_snapshots", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  period: text("period").notNull(), // daily, weekly, monthly, all_time
-  periodStart: timestamp("period_start").notNull(),
-  periodEnd: timestamp("period_end").notNull(),
-  rankings: jsonb("rankings").notNull(), // [{ userId, rank, score, metric }]
-  createdAt: timestamp("created_at").defaultNow(),
-});
 
 export const insertMarketPriceHistorySchema = createInsertSchema(marketPriceHistory).omit({
   id: true,
@@ -5251,10 +3904,6 @@ export const insertUserTradingStatsSchema = createInsertSchema(userTradingStats)
   updatedAt: true,
 });
 
-export const insertLeaderboardSnapshotSchema = createInsertSchema(leaderboardSnapshots).omit({
-  id: true,
-  createdAt: true,
-});
 
 export type InsertMarketPriceHistory = z.infer<typeof insertMarketPriceHistorySchema>;
 export type MarketPriceHistory = typeof marketPriceHistory.$inferSelect;
@@ -5268,8 +3917,6 @@ export type UserAchievement = typeof userAchievements.$inferSelect;
 export type InsertUserTradingStats = z.infer<typeof insertUserTradingStatsSchema>;
 export type UserTradingStats = typeof userTradingStats.$inferSelect;
 
-export type InsertLeaderboardSnapshot = z.infer<typeof insertLeaderboardSnapshotSchema>;
-export type LeaderboardSnapshot = typeof leaderboardSnapshots.$inferSelect;
 
 // =============================================================================
 // PREDICTION LEAGUES - COMPETITIVE TRADING COMPETITIONS

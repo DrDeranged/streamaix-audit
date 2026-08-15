@@ -21,17 +21,8 @@ import {
   type InsertUserNote,
   type ChatMessage,
   type InsertChatMessage,
-  type CryptoLeader,
-  type InsertCryptoLeader,
-  type CuratedCast,
-  type InsertCuratedCast,
-  type TopicTag,
-  type InsertTopicTag,
-  type LearningResource,
-  type InsertLearningResource,
   type UserPreferences,
   type InsertUserPreferences,
-  type LeaderEducationData,
   // Knowledge Avatar Types
   type KnowledgeAvatar,
   type InsertKnowledgeAvatar,
@@ -42,15 +33,7 @@ import {
   type AvatarInsight,
   type InsertAvatarInsight,
   // Entrepreneur Predictions Types
-  type EntrepreneurPrediction,
-  type InsertEntrepreneurPrediction,
   // Pattern Recognition Types
-  type ChartPattern,
-  type InsertChartPattern,
-  type TrendAnalysis,
-  type InsertTrendAnalysis,
-  type MarketCycle,
-  type InsertMarketCycle,
   type PatternAlert,
   type InsertPatternAlert,
   type AiTradingSetup,
@@ -76,10 +59,6 @@ import {
   knowledgeStacks,
   userNotes,
   chatMessages,
-  cryptoLeaders,
-  curatedCasts,
-  topicTags,
-  learningResources,
   userPreferences,
   // Knowledge Avatar Tables
   knowledgeAvatars,
@@ -87,11 +66,7 @@ import {
   avatarContentInteractions,
   avatarInsights,
   // Entrepreneur Predictions Tables
-  entrepreneurPredictions,
   // Pattern Recognition Tables
-  chartPatterns,
-  trendAnalysis,
-  marketCycles,
   patternAlerts,
   aiTradingSetups,
   // Referral System Tables
@@ -118,9 +93,6 @@ import {
   type ConversationComment,
   type ConversationShare,
   // Blog Posts
-  blogPosts,
-  type BlogPost,
-  type InsertBlogPost,
   // Waitlist
   waitlist,
   type Waitlist,
@@ -295,67 +267,20 @@ export interface IStorage {
   deleteAvatarInsight(id: string): Promise<boolean>;
 
   // Educational content operations
-  getCryptoLeader(id: string): Promise<CryptoLeader | undefined>;
-  getCryptoLeaderByFid(fid: number): Promise<CryptoLeader | undefined>;
-  getCryptoLeaders(limit?: number): Promise<CryptoLeader[]>;
-  createCryptoLeader(leader: InsertCryptoLeader): Promise<CryptoLeader>;
-  updateCryptoLeader(id: string, updates: Partial<InsertCryptoLeader>): Promise<CryptoLeader | undefined>;
   
-  getCuratedCast(id: string): Promise<CuratedCast | undefined>;
-  getCuratedCastsByLeader(leaderId: string): Promise<CuratedCast[]>;
-  createCuratedCast(cast: InsertCuratedCast): Promise<CuratedCast>;
   
-  getTopicTag(id: string): Promise<TopicTag | undefined>;
-  getTopicTags(category?: string): Promise<TopicTag[]>;
-  createTopicTag(tag: InsertTopicTag): Promise<TopicTag>;
   
-  getLearningResource(id: string): Promise<LearningResource | undefined>;
-  getLearningResourcesByLeader(leaderId: string): Promise<LearningResource[]>;
-  createLearningResource(resource: InsertLearningResource): Promise<LearningResource>;
   
-  getLeaderEducationData(leaderId: string): Promise<LeaderEducationData | undefined>;
 
   // Pattern Recognition operations
   
   // Chart Pattern operations
-  getChartPattern(id: string): Promise<ChartPattern | undefined>;
-  getChartPatterns(options?: {
-    symbol?: string;
-    assetType?: string;
-    patternType?: string;
-    timeframe?: string;
-    minConfidence?: number;
-    isComplete?: boolean;
-    limit?: number;
-    offset?: number;
-  }): Promise<ChartPattern[]>;
-  getChartPatternsBySymbol(symbol: string, timeframe?: string): Promise<ChartPattern[]>;
-  createChartPattern(pattern: InsertChartPattern): Promise<ChartPattern>;
-  updateChartPattern(id: string, updates: Partial<InsertChartPattern>): Promise<ChartPattern | undefined>;
   deleteChartPattern(id: string): Promise<boolean>;
 
   // Trend Analysis operations
-  getTrendAnalysis(id: string): Promise<TrendAnalysis | undefined>;
-  getTrendAnalysesBySymbol(symbol: string, timeframe?: string): Promise<TrendAnalysis[]>;
-  getLatestTrendAnalysis(symbol: string, timeframe?: string): Promise<TrendAnalysis | undefined>;
-  createTrendAnalysis(analysis: InsertTrendAnalysis): Promise<TrendAnalysis>;
-  updateTrendAnalysis(id: string, updates: Partial<InsertTrendAnalysis>): Promise<TrendAnalysis | undefined>;
   deleteTrendAnalysis(id: string): Promise<boolean>;
 
   // Market Cycle operations
-  getMarketCycle(id: string): Promise<MarketCycle | undefined>;
-  getMarketCycles(options?: {
-    symbol?: string;
-    assetType?: string;
-    cycleType?: string;
-    isActive?: boolean;
-    limit?: number;
-    offset?: number;
-  }): Promise<MarketCycle[]>;
-  getMarketCyclesBySymbol(symbol: string): Promise<MarketCycle[]>;
-  getActiveMarketCycles(): Promise<MarketCycle[]>;
-  createMarketCycle(cycle: InsertMarketCycle): Promise<MarketCycle>;
-  updateMarketCycle(id: string, updates: Partial<InsertMarketCycle>): Promise<MarketCycle | undefined>;
   deleteMarketCycle(id: string): Promise<boolean>;
 
   // Pattern Alert operations
@@ -396,19 +321,6 @@ export interface IStorage {
   deleteAiTradingSetup(id: string): Promise<boolean>;
 
   // Entrepreneur prediction operations
-  getEntrepreneurPrediction(id: string): Promise<EntrepreneurPrediction | undefined>;
-  getEntrepreneurPredictions(options?: {
-    entrepreneurName?: string;
-    status?: string;
-    category?: string;
-    limit?: number;
-    offset?: number;
-  }): Promise<EntrepreneurPrediction[]>;
-  getActivePredictions(entrepreneurName?: string): Promise<EntrepreneurPrediction[]>;
-  getPredictionsByTimeframe(timeframe: string): Promise<EntrepreneurPrediction[]>;
-  createEntrepreneurPrediction(prediction: InsertEntrepreneurPrediction): Promise<EntrepreneurPrediction>;
-  updateEntrepreneurPrediction(id: string, updates: Partial<EntrepreneurPrediction>): Promise<EntrepreneurPrediction | undefined>;
-  evaluatePrediction(id: string, outcome: string, accuracyScore: number): Promise<EntrepreneurPrediction | undefined>;
   getEntrepreneurAccuracyStats(entrepreneurName: string): Promise<{
     totalPredictions: number;
     evaluatedPredictions: number;
@@ -432,6 +344,9 @@ export interface IStorage {
   // Collaboration operations
   addCollaborator(data: { bountyId: string; userId: string; role: string; rewardShare: number; status: string; invitedBy: string }): Promise<any>;
   updateCollaboratorShare(bountyId: string, userId: string, rewardShare: number): Promise<any>;
+  addCollaborator(data: { bountyId: string; userId: string; role: string; rewardShare: number; status: string; invitedBy: string }): Promise<any>;
+  updateCollaboratorShare(bountyId: string, userId: string, rewardShare: number): Promise<any>;
+  getCollaborators(bountyId: string): Promise<any[]>;
   updateCollaborationSession(data: { bountyId: string; activeUsers: any[]; contentSnapshot: string; lastActivity: Date }): Promise<any>;
   getCollaborationSession(bountyId: string): Promise<any>;
   getCollaborators(bountyId: string): Promise<any[]>;
@@ -480,25 +395,6 @@ export interface IStorage {
   }): Promise<any | undefined>;
   deleteConversation(id: string, userId: string): Promise<boolean>;
   toggleConversationLike(conversationId: string, userId: string): Promise<{ liked: boolean; likesCount: number }>;
-  
-  // Blog Post operations
-  getBlogPost(id: string): Promise<any | undefined>;
-  getBlogPosts(options?: { limit?: number; offset?: number; category?: string; isFeatured?: boolean }): Promise<any[]>;
-  createBlogPost(data: {
-    title: string;
-    content: string;
-    summary?: string;
-    coverImage?: string;
-    category: string;
-    tags?: string[];
-    authorId: string;
-    sourceUrl?: string;
-    sourceName?: string;
-    isPublished?: boolean;
-    isFeatured?: boolean;
-  }): Promise<any>;
-  updateBlogPost(id: string, updates: any): Promise<any | undefined>;
-  deleteBlogPost(id: string): Promise<boolean>;
   
   // Unified Social Feed
   getUnifiedSocialFeed(options: {
@@ -1281,138 +1177,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Educational content operations
-  async getCryptoLeader(id: string): Promise<CryptoLeader | undefined> {
-    const [leader] = await db.select().from(cryptoLeaders).where(eq(cryptoLeaders.id, id));
-    return leader || undefined;
-  }
 
-  async getCryptoLeaderByFid(fid: number): Promise<CryptoLeader | undefined> {
-    const [leader] = await db.select().from(cryptoLeaders).where(eq(cryptoLeaders.fid, fid));
-    return leader || undefined;
-  }
 
-  async getCryptoLeaders(limit = 50): Promise<CryptoLeader[]> {
-    return await db
-      .select()
-      .from(cryptoLeaders)
-      .where(eq(cryptoLeaders.isActive, true))
-      .orderBy(desc(cryptoLeaders.followerCount))
-      .limit(limit);
-  }
 
-  async createCryptoLeader(insertLeader: InsertCryptoLeader): Promise<CryptoLeader> {
-    const [leader] = await db
-      .insert(cryptoLeaders)
-      .values(insertLeader)
-      .returning();
-    return leader;
-  }
 
-  async updateCryptoLeader(id: string, updates: Partial<InsertCryptoLeader>): Promise<CryptoLeader | undefined> {
-    const [leader] = await db
-      .update(cryptoLeaders)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(cryptoLeaders.id, id))
-      .returning();
-    return leader || undefined;
-  }
 
-  async getCuratedCast(id: string): Promise<CuratedCast | undefined> {
-    const [cast] = await db.select().from(curatedCasts).where(eq(curatedCasts.id, id));
-    return cast || undefined;
-  }
 
-  async getCuratedCastsByLeader(leaderId: string): Promise<CuratedCast[]> {
-    return await db
-      .select()
-      .from(curatedCasts)
-      .where(eq(curatedCasts.leaderId, leaderId))
-      .orderBy(desc(curatedCasts.priority), desc(curatedCasts.publishedAt))
-      .limit(10);
-  }
 
-  async createCuratedCast(insertCast: InsertCuratedCast): Promise<CuratedCast> {
-    const [cast] = await db
-      .insert(curatedCasts)
-      .values(insertCast)
-      .returning();
-    return cast;
-  }
 
-  async getTopicTag(id: string): Promise<TopicTag | undefined> {
-    const [tag] = await db.select().from(topicTags).where(eq(topicTags.id, id));
-    return tag || undefined;
-  }
 
-  async getTopicTags(category?: string): Promise<TopicTag[]> {
-    const conditions = category ? [eq(topicTags.category, category)] : [];
-    return await db
-      .select()
-      .from(topicTags)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(topicTags.name);
-  }
 
-  async createTopicTag(insertTag: InsertTopicTag): Promise<TopicTag> {
-    const [tag] = await db
-      .insert(topicTags)
-      .values(insertTag)
-      .returning();
-    return tag;
-  }
 
-  async getLearningResource(id: string): Promise<LearningResource | undefined> {
-    const [resource] = await db.select().from(learningResources).where(eq(learningResources.id, id));
-    return resource || undefined;
-  }
 
-  async getLearningResourcesByLeader(leaderId: string): Promise<LearningResource[]> {
-    return await db
-      .select()
-      .from(learningResources)
-      .where(eq(learningResources.leaderId, leaderId))
-      .orderBy(desc(learningResources.priority), learningResources.title)
-      .limit(10);
-  }
 
-  async createLearningResource(insertResource: InsertLearningResource): Promise<LearningResource> {
-    const [resource] = await db
-      .insert(learningResources)
-      .values(insertResource)
-      .returning();
-    return resource;
-  }
 
-  async getLeaderEducationData(leaderId: string): Promise<LeaderEducationData | undefined> {
-    const leader = await this.getCryptoLeader(leaderId);
-    if (!leader) return undefined;
-
-    const [notableCasts, resources] = await Promise.all([
-      this.getCuratedCastsByLeader(leaderId),
-      this.getLearningResourcesByLeader(leaderId)
-    ]);
-
-    // Get topic tags related to this leader
-    const relatedTopics = await db
-      .select()
-      .from(topicTags)
-      .where(sql`${topicTags.relatedLeaderIds} @> ${JSON.stringify([leaderId])}`);
-
-    // Calculate engagement metrics
-    const engagement = {
-      avgLikes: notableCasts.length > 0 ? Math.round(notableCasts.reduce((sum, cast) => sum + (cast.likesCount || 0), 0) / notableCasts.length) : 0,
-      avgRecasts: notableCasts.length > 0 ? Math.round(notableCasts.reduce((sum, cast) => sum + (cast.recastsCount || 0), 0) / notableCasts.length) : 0,
-      totalEngagement: notableCasts.reduce((sum, cast) => sum + (cast.likesCount || 0) + (cast.recastsCount || 0) + (cast.repliesCount || 0), 0)
-    };
-
-    return {
-      profile: leader,
-      notableCasts,
-      resources,
-      topics: relatedTopics,
-      engagement
-    };
-  }
 
   // Knowledge Avatar implementations
   async getKnowledgeAvatar(id: string): Promise<KnowledgeAvatar | undefined> {
@@ -1799,242 +1577,26 @@ export class DatabaseStorage implements IStorage {
   // Pattern Recognition implementations
 
   // Chart Pattern operations
-  async getChartPattern(id: string): Promise<ChartPattern | undefined> {
-    const [pattern] = await db.select().from(chartPatterns).where(eq(chartPatterns.id, id));
-    return pattern || undefined;
-  }
 
-  async getChartPatterns(options?: {
-    symbol?: string;
-    assetType?: string;
-    patternType?: string;
-    timeframe?: string;
-    minConfidence?: number;
-    isComplete?: boolean;
-    limit?: number;
-    offset?: number;
-  }): Promise<ChartPattern[]> {
-    const conditions = [];
-    
-    if (options?.symbol) {
-      conditions.push(eq(chartPatterns.symbol, options.symbol));
-    }
-    if (options?.assetType) {
-      conditions.push(eq(chartPatterns.assetType, options.assetType));
-    }
-    if (options?.patternType) {
-      conditions.push(eq(chartPatterns.patternType, options.patternType));
-    }
-    if (options?.timeframe) {
-      conditions.push(eq(chartPatterns.timeframe, options.timeframe));
-    }
-    if (options?.minConfidence) {
-      conditions.push(sql`${chartPatterns.confidence} >= ${options.minConfidence}`);
-    }
-    if (options?.isComplete !== undefined) {
-      conditions.push(eq(chartPatterns.isComplete, options.isComplete));
-    }
 
-    let query = db
-      .select()
-      .from(chartPatterns)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(desc(chartPatterns.createdAt));
 
-    if (options?.limit) {
-      query = query.limit(options.limit);
-    }
-    if (options?.offset) {
-      query = query.offset(options.offset);
-    }
 
-    return await query;
-  }
 
-  async getChartPatternsBySymbol(symbol: string, timeframe?: string): Promise<ChartPattern[]> {
-    const conditions = [eq(chartPatterns.symbol, symbol)];
-    
-    if (timeframe) {
-      conditions.push(eq(chartPatterns.timeframe, timeframe));
-    }
-
-    return await db
-      .select()
-      .from(chartPatterns)
-      .where(and(...conditions))
-      .orderBy(desc(chartPatterns.createdAt))
-      .limit(20);
-  }
-
-  async createChartPattern(insertPattern: InsertChartPattern): Promise<ChartPattern> {
-    const [pattern] = await db
-      .insert(chartPatterns)
-      .values(insertPattern)
-      .returning();
-    return pattern;
-  }
-
-  async updateChartPattern(id: string, updates: Partial<InsertChartPattern>): Promise<ChartPattern | undefined> {
-    const [pattern] = await db
-      .update(chartPatterns)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(chartPatterns.id, id))
-      .returning();
-    return pattern || undefined;
-  }
-
-  async deleteChartPattern(id: string): Promise<boolean> {
-    const result = await db.delete(chartPatterns).where(eq(chartPatterns.id, id));
-    return result.rowCount !== null && result.rowCount > 0;
-  }
 
   // Trend Analysis operations
-  async getTrendAnalysis(id: string): Promise<TrendAnalysis | undefined> {
-    const [analysis] = await db.select().from(trendAnalysis).where(eq(trendAnalysis.id, id));
-    return analysis || undefined;
-  }
 
-  async getTrendAnalysesBySymbol(symbol: string, timeframe?: string): Promise<TrendAnalysis[]> {
-    const conditions = [eq(trendAnalysis.symbol, symbol)];
-    
-    if (timeframe) {
-      conditions.push(eq(trendAnalysis.timeframe, timeframe));
-    }
 
-    return await db
-      .select()
-      .from(trendAnalysis)
-      .where(and(...conditions))
-      .orderBy(desc(trendAnalysis.createdAt))
-      .limit(10);
-  }
 
-  async getLatestTrendAnalysis(symbol: string, timeframe?: string): Promise<TrendAnalysis | undefined> {
-    const conditions = [eq(trendAnalysis.symbol, symbol)];
-    
-    if (timeframe) {
-      conditions.push(eq(trendAnalysis.timeframe, timeframe));
-    }
 
-    const [latest] = await db
-      .select()
-      .from(trendAnalysis)
-      .where(and(...conditions))
-      .orderBy(desc(trendAnalysis.analysisTime))
-      .limit(1);
 
-    return latest || undefined;
-  }
-
-  async createTrendAnalysis(insertAnalysis: InsertTrendAnalysis): Promise<TrendAnalysis> {
-    const [analysis] = await db
-      .insert(trendAnalysis)
-      .values(insertAnalysis)
-      .returning();
-    return analysis;
-  }
-
-  async updateTrendAnalysis(id: string, updates: Partial<InsertTrendAnalysis>): Promise<TrendAnalysis | undefined> {
-    const [analysis] = await db
-      .update(trendAnalysis)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(trendAnalysis.id, id))
-      .returning();
-    return analysis || undefined;
-  }
-
-  async deleteTrendAnalysis(id: string): Promise<boolean> {
-    const result = await db.delete(trendAnalysis).where(eq(trendAnalysis.id, id));
-    return result.rowCount !== null && result.rowCount > 0;
-  }
 
   // Market Cycle operations
-  async getMarketCycle(id: string): Promise<MarketCycle | undefined> {
-    const [cycle] = await db.select().from(marketCycles).where(eq(marketCycles.id, id));
-    return cycle || undefined;
-  }
 
-  async getMarketCycles(options?: {
-    symbol?: string;
-    assetType?: string;
-    cycleType?: string;
-    isActive?: boolean;
-    limit?: number;
-    offset?: number;
-  }): Promise<MarketCycle[]> {
-    const conditions = [];
-    
-    if (options?.symbol) {
-      conditions.push(eq(marketCycles.symbol, options.symbol));
-    }
-    if (options?.assetType) {
-      conditions.push(eq(marketCycles.assetType, options.assetType));
-    }
-    if (options?.cycleType) {
-      conditions.push(eq(marketCycles.cycleType, options.cycleType));
-    }
-    if (options?.isActive !== undefined) {
-      if (options.isActive) {
-        conditions.push(sql`${marketCycles.cycleEnd} IS NULL`);
-      } else {
-        conditions.push(sql`${marketCycles.cycleEnd} IS NOT NULL`);
-      }
-    }
 
-    let query = db
-      .select()
-      .from(marketCycles)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(desc(marketCycles.createdAt));
 
-    if (options?.limit) {
-      query = query.limit(options.limit);
-    }
-    if (options?.offset) {
-      query = query.offset(options.offset);
-    }
 
-    return await query;
-  }
 
-  async getMarketCyclesBySymbol(symbol: string): Promise<MarketCycle[]> {
-    return await db
-      .select()
-      .from(marketCycles)
-      .where(eq(marketCycles.symbol, symbol))
-      .orderBy(desc(marketCycles.cycleStart))
-      .limit(10);
-  }
 
-  async getActiveMarketCycles(): Promise<MarketCycle[]> {
-    return await db
-      .select()
-      .from(marketCycles)
-      .where(sql`${marketCycles.cycleEnd} IS NULL`)
-      .orderBy(desc(marketCycles.cycleStart));
-  }
-
-  async createMarketCycle(insertCycle: InsertMarketCycle): Promise<MarketCycle> {
-    const [cycle] = await db
-      .insert(marketCycles)
-      .values(insertCycle)
-      .returning();
-    return cycle;
-  }
-
-  async updateMarketCycle(id: string, updates: Partial<InsertMarketCycle>): Promise<MarketCycle | undefined> {
-    const [cycle] = await db
-      .update(marketCycles)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(marketCycles.id, id))
-      .returning();
-    return cycle || undefined;
-  }
-
-  async deleteMarketCycle(id: string): Promise<boolean> {
-    const result = await db.delete(marketCycles).where(eq(marketCycles.id, id));
-    return result.rowCount !== null && result.rowCount > 0;
-  }
 
   // Pattern Alert operations
   async getPatternAlert(id: string): Promise<PatternAlert | undefined> {
@@ -2244,140 +1806,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Entrepreneur prediction operations
-  async getEntrepreneurPrediction(id: string): Promise<EntrepreneurPrediction | undefined> {
-    const [prediction] = await db.select().from(entrepreneurPredictions).where(eq(entrepreneurPredictions.id, id));
-    return prediction || undefined;
-  }
 
-  async getEntrepreneurPredictions(options?: {
-    entrepreneurName?: string;
-    status?: string;
-    category?: string;
-    limit?: number;
-    offset?: number;
-  }): Promise<EntrepreneurPrediction[]> {
-    const conditions = [];
-    
-    if (options?.entrepreneurName) {
-      conditions.push(eq(entrepreneurPredictions.entrepreneurName, options.entrepreneurName));
-    }
-    if (options?.status) {
-      conditions.push(eq(entrepreneurPredictions.status, options.status));
-    }
-    if (options?.category) {
-      conditions.push(eq(entrepreneurPredictions.category, options.category));
-    }
-    
-    let query = db
-      .select()
-      .from(entrepreneurPredictions)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(desc(entrepreneurPredictions.predictionMadeAt));
-    
-    if (options?.limit) {
-      query = query.limit(options.limit);
-    }
-    if (options?.offset) {
-      query = query.offset(options.offset);
-    }
-    
-    return await query;
-  }
 
-  async getActivePredictions(entrepreneurName?: string): Promise<EntrepreneurPrediction[]> {
-    const conditions = [eq(entrepreneurPredictions.status, 'active')];
-    
-    if (entrepreneurName) {
-      conditions.push(eq(entrepreneurPredictions.entrepreneurName, entrepreneurName));
-    }
-    
-    return await db.select().from(entrepreneurPredictions)
-      .where(and(...conditions))
-      .orderBy(desc(entrepreneurPredictions.predictionMadeAt));
-  }
 
-  async getPredictionsByTimeframe(timeframe: string): Promise<EntrepreneurPrediction[]> {
-    return await db.select().from(entrepreneurPredictions)
-      .where(eq(entrepreneurPredictions.targetTimeframe, timeframe))
-      .orderBy(desc(entrepreneurPredictions.predictionMadeAt));
-  }
 
-  async createEntrepreneurPrediction(prediction: InsertEntrepreneurPrediction): Promise<EntrepreneurPrediction> {
-    const [newPrediction] = await db.insert(entrepreneurPredictions).values(prediction).returning();
-    return newPrediction;
-  }
 
-  async updateEntrepreneurPrediction(id: string, updates: Partial<EntrepreneurPrediction>): Promise<EntrepreneurPrediction | undefined> {
-    const [updated] = await db.update(entrepreneurPredictions)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(entrepreneurPredictions.id, id))
-      .returning();
-    return updated || undefined;
-  }
 
-  async evaluatePrediction(id: string, outcome: string, accuracyScore: number): Promise<EntrepreneurPrediction | undefined> {
-    const [updated] = await db.update(entrepreneurPredictions)
-      .set({
-        status: 'evaluated',
-        actualOutcome: outcome,
-        accuracyScore: accuracyScore,
-        evaluatedAt: new Date(),
-        updatedAt: new Date()
-      })
-      .where(eq(entrepreneurPredictions.id, id))
-      .returning();
-    return updated || undefined;
-  }
 
-  async getEntrepreneurAccuracyStats(entrepreneurName: string): Promise<{
-    totalPredictions: number;
-    evaluatedPredictions: number;
-    averageAccuracy: number;
-    accuracyByCategory: Record<string, number>;
-    recentAccuracy: number;
-  }> {
-    // Get all predictions for this entrepreneur
-    const allPredictions = await db.select().from(entrepreneurPredictions)
-      .where(eq(entrepreneurPredictions.entrepreneurName, entrepreneurName));
-    
-    const evaluatedPredictions = allPredictions.filter(p => p.status === 'evaluated' && p.accuracyScore !== null);
-    
-    // Calculate average accuracy
-    const averageAccuracy = evaluatedPredictions.length > 0 
-      ? evaluatedPredictions.reduce((sum, p) => sum + (p.accuracyScore || 0), 0) / evaluatedPredictions.length
-      : 0;
-    
-    // Calculate accuracy by category
-    const accuracyByCategory: Record<string, number> = {};
-    const categorizedPredictions = evaluatedPredictions.reduce((acc, p) => {
-      if (!acc[p.category]) acc[p.category] = [];
-      acc[p.category].push(p);
-      return acc;
-    }, {} as Record<string, typeof evaluatedPredictions>);
-    
-    for (const [category, predictions] of Object.entries(categorizedPredictions)) {
-      accuracyByCategory[category] = predictions.reduce((sum, p) => sum + (p.accuracyScore || 0), 0) / predictions.length;
-    }
-    
-    // Calculate recent accuracy (last 10 evaluated predictions)
-    const recentPredictions = evaluatedPredictions
-      .sort((a, b) => new Date(b.evaluatedAt!).getTime() - new Date(a.evaluatedAt!).getTime())
-      .slice(0, 10);
-    
-    const recentAccuracy = recentPredictions.length > 0
-      ? recentPredictions.reduce((sum, p) => sum + (p.accuracyScore || 0), 0) / recentPredictions.length
-      : 0;
-    
-    return {
-      totalPredictions: allPredictions.length,
-      evaluatedPredictions: evaluatedPredictions.length,
-      averageAccuracy: Math.round(averageAccuracy),
-      accuracyByCategory: Object.fromEntries(
-        Object.entries(accuracyByCategory).map(([k, v]) => [k, Math.round(v)])
-      ),
-      recentAccuracy: Math.round(recentAccuracy)
-    };
-  }
 
   // Referral System operations
   async generateUniqueReferralCode(): Promise<string> {
@@ -2461,7 +1896,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Collaboration operations
-  async addCollaborator(data: { bountyId: string; userId: string; role: string; rewardShare: number; status: string; invitedBy: string }) {
+
+
+   async addCollaborator(data: { bountyId: string; userId: string; role: string; rewardShare: number; status: string; invitedBy: string }) {
     const [collaborator] = await db.insert(bountyCollaborators)
       .values(data as any)
       .returning();
@@ -2479,7 +1916,13 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
-  async updateCollaborationSession(data: { bountyId: string; activeUsers: any[]; contentSnapshot: string; lastActivity: Date }) {
+  async getCollaborators(bountyId: string) {
+    return await db.select()
+      .from(bountyCollaborators)
+      .where(eq(bountyCollaborators.bountyId, bountyId));
+  }
+
+ async updateCollaborationSession(data: { bountyId: string; activeUsers: any[]; contentSnapshot: string; lastActivity: Date }) {
     const existing = await this.getCollaborationSession(data.bountyId);
     
     if (existing) {
@@ -2512,11 +1955,6 @@ export class DatabaseStorage implements IStorage {
     return session || undefined;
   }
 
-  async getCollaborators(bountyId: string) {
-    return await db.select()
-      .from(bountyCollaborators)
-      .where(eq(bountyCollaborators.bountyId, bountyId));
-  }
 
   // Bounty Template operations
   async getBountyTemplate(id: string): Promise<BountyTemplate | undefined> {
@@ -2945,98 +2383,6 @@ export class DatabaseStorage implements IStorage {
     return share;
   }
 
-  // Blog Post operations
-  async getBlogPost(id: string): Promise<any | undefined> {
-    const [result] = await db
-      .select({
-        post: blogPosts,
-        author: {
-          id: users.id,
-          username: users.username,
-          avatar: users.avatar
-        }
-      })
-      .from(blogPosts)
-      .leftJoin(users, eq(blogPosts.authorId, users.id))
-      .where(eq(blogPosts.id, id));
-    
-    if (!result) return undefined;
-    return { ...result.post, author: result.author };
-  }
-
-  async getBlogPosts(options?: { limit?: number; offset?: number; category?: string; isFeatured?: boolean }): Promise<any[]> {
-    const limit = options?.limit || 20;
-    const offset = options?.offset || 0;
-    
-    let query = db
-      .select({
-        post: blogPosts,
-        author: {
-          id: users.id,
-          username: users.username,
-          avatar: users.avatar
-        }
-      })
-      .from(blogPosts)
-      .leftJoin(users, eq(blogPosts.authorId, users.id))
-      .where(eq(blogPosts.isPublished, true));
-    
-    if (options?.category) {
-      query = query.where(and(eq(blogPosts.isPublished, true), eq(blogPosts.category, options.category)));
-    }
-    
-    if (options?.isFeatured !== undefined) {
-      query = query.where(and(eq(blogPosts.isPublished, true), eq(blogPosts.isFeatured, options.isFeatured)));
-    }
-    
-    const results = await query
-      .orderBy(desc(blogPosts.publishedAt))
-      .limit(limit)
-      .offset(offset);
-    
-    return results.map(r => ({ ...r.post, author: r.author }));
-  }
-
-  async createBlogPost(data: {
-    title: string;
-    content: string;
-    summary?: string;
-    coverImage?: string;
-    category: string;
-    tags?: string[];
-    authorId: string;
-    sourceUrl?: string;
-    sourceName?: string;
-    isPublished?: boolean;
-    isFeatured?: boolean;
-  }): Promise<any> {
-    const [post] = await db
-      .insert(blogPosts)
-      .values(data)
-      .returning();
-    
-    const author = await this.getUser(data.authorId);
-    return { ...post, author: { id: author?.id, username: author?.username, avatar: author?.avatar } };
-  }
-
-  async updateBlogPost(id: string, updates: any): Promise<any | undefined> {
-    const [post] = await db
-      .update(blogPosts)
-      .set({ ...updates, updatedAt: sql`now()` })
-      .where(eq(blogPosts.id, id))
-      .returning();
-    
-    if (!post) return undefined;
-    
-    const author = await this.getUser(post.authorId);
-    return { ...post, author: { id: author?.id, username: author?.username, avatar: author?.avatar } };
-  }
-
-  async deleteBlogPost(id: string): Promise<boolean> {
-    const result = await db.delete(blogPosts).where(eq(blogPosts.id, id));
-    return (result as any).rowCount > 0;
-  }
-
   // Unified Social Feed
   async getUnifiedSocialFeed(options: {
     types?: ('blog' | 'bounty' | 'market' | 'summary')[];
@@ -3048,16 +2394,8 @@ export class DatabaseStorage implements IStorage {
     const feedItems: any[] = [];
     const types = options.types || ['blog', 'bounty', 'market', 'summary'];
     
-    // Fetch blog posts
-    if (types.includes('blog')) {
-      const posts = await this.getBlogPosts({ limit: options.limit, offset: options.offset, category: options.category });
-      feedItems.push(...posts.map(p => ({
-        ...p,
-        type: 'blog',
-        timestamp: p.publishedAt
-      })));
-    }
-    
+    // (blog feed removed: blog_posts table pruned)
+
     // Fetch bounties
     if (types.includes('bounty')) {
       const bounties = await this.getBounties(options.limit, options.offset);
