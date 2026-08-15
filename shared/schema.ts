@@ -7691,6 +7691,8 @@ export const userTrades = pgTable("user_trades", {
   feeCollected: text("fee_collected"),
   quotedPrice: text("quoted_price"),
   executedPrice: text("executed_price"),
+  // Optional link back to the agent signal that motivated this user-signed trade
+  signalId: varchar("signal_id"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -7700,3 +7702,35 @@ export const insertUserTradeSchema = createInsertSchema(userTrades).omit({
 });
 export type InsertUserTrade = z.infer<typeof insertUserTradeSchema>;
 export type UserTrade = typeof userTrades.$inferSelect;
+
+// ============================================
+// AGENT SIGNALS (dormant behind SIGNALS_ENABLED)
+// Agents publish structured trade THESES on real assets. Never advice,
+// never auto-executed — users trade only via the swap rail, wallet-signed.
+// ============================================
+
+export const agentSignals = pgTable("agent_signals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id").notNull(), // knowledge_avatars.id
+  token: text("token").notNull(), // allowlisted tradeable_tokens symbol
+  direction: text("direction").notNull(), // accumulate | reduce | neutral
+  thesis: text("thesis").notNull(), // <=80 words, observational framing
+  confidence: real("confidence").notNull(), // 0-1
+  keyEvidence: jsonb("key_evidence").notNull(), // string[]
+  invalidation: text("invalidation").notNull(), // "this thesis is wrong if..."
+  timeHorizon: text("time_horizon").notNull(), // 24h | 3d | 7d
+  entryPrice: real("entry_price").notNull(), // real market price at publication
+  status: text("status").notNull().default("open"), // open | resolved
+  resolvePrice: real("resolve_price"),
+  hypotheticalReturnPct: real("hypothetical_return_pct"),
+  correct: boolean("correct"),
+  resolvedAt: timestamp("resolved_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertAgentSignalSchema = createInsertSchema(agentSignals).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertAgentSignal = z.infer<typeof insertAgentSignalSchema>;
+export type AgentSignal = typeof agentSignals.$inferSelect;

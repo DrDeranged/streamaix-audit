@@ -58,16 +58,25 @@ function fmt(amount: string, decimals: number, dp = 6): string {
   return n.toLocaleString(undefined, { maximumFractionDigits: dp });
 }
 
-export function SwapCard() {
+export interface SwapCardProps {
+  /** Optional prefill (e.g. from an agent signal). User-editable. */
+  initialSell?: string;
+  initialBuy?: string;
+  initialAmount?: string;
+  /** Link an executed swap back to the agent signal that motivated it. */
+  signalId?: string;
+}
+
+export function SwapCard({ initialSell, initialBuy, initialAmount, signalId }: SwapCardProps = {}) {
   const { address, isConnected, balances, refetchBalances } = useWallet();
   const { toast } = useToast();
   const publicClient = usePublicClient({ chainId: base.id });
   const { writeContractAsync } = useWriteContract();
   const { sendTransactionAsync } = useSendTransaction();
 
-  const [sellSymbol, setSellSymbol] = useState("ETH");
-  const [buySymbol, setBuySymbol] = useState("USDC");
-  const [sellInput, setSellInput] = useState("");
+  const [sellSymbol, setSellSymbol] = useState(initialSell || "ETH");
+  const [buySymbol, setBuySymbol] = useState(initialBuy || "USDC");
+  const [sellInput, setSellInput] = useState(initialAmount || "");
   const [quote, setQuote] = useState<SwapQuote | null>(null);
   const [quoteError, setQuoteError] = useState<string | null>(null);
   const [needsOverride, setNeedsOverride] = useState(false);
@@ -203,6 +212,7 @@ export function SwapCard() {
           txHash,
           feeCollected: q.fee.buyTokenFeeAmount ?? undefined,
           quotedPrice: q.price,
+          signalId: signalId || undefined,
         }),
       });
     } catch {

@@ -55,6 +55,14 @@ The points-to-token bridge (`server/services/bridgeService.ts`, `server/routes/b
 - Server writes sign with `SERVICE_SIGNER_PRIVATE_KEY` (limited MINTER_ROLE key). The legacy `PRIVATE_KEY` (admin key) is deprecated for server-side writes.
 - Every attempted write (success or failure) is audited in the `onchain_actions` table.
 
+## AGENT SIGNALS: dormant by design
+
+Agent Signals (`server/services/agentSignalService.ts`, `server/routes/signals.ts`, `agent_signals` table) ship dark behind `SIGNALS_ENABLED=false` (default). Flipping the flag is a **human decision pending legal review — not a bug to fix**, same discipline as the bridge and swap rail (`SWAPS_ENABLED`).
+
+- `SIGNALS_ENABLED=false`: `/api/signals*` returns 403, the generation job is a no-op, and the UI hides all signal surfaces.
+- Signals are observational theses (evidence + invalidation), never advice — the system prompt bans imperative advice verbs and validation rejects violations. There is NO auto-execution anywhere: users trade only through the swap rail, wallet-signed, with explicit confirmation ("Trade this" merely prefills the swap card, capped at 5% of balance, user-editable).
+- Outcomes are resolved daily against real market prices; real-market signal accuracy is displayed separately from simulated stats.
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.

@@ -64,6 +64,7 @@ const NotificationSettings = React.lazy(() => import("@/pages/notification-setti
 const BotTrading = React.lazy(() => import("@/pages/bot-trading"));
 const AvatarFeed = React.lazy(() => import("@/pages/avatar-feed"));
 const Trade = React.lazy(() => import("@/pages/trade"));
+const Signals = React.lazy(() => import("@/pages/signals"));
 const StyleGuide = React.lazy(() => import("@/pages/style-guide"));
 function Router() {
   return (
@@ -87,6 +88,12 @@ function Router() {
       <Route path="/trade">
         <Suspense fallback={<TradingSkeleton />}>
           <Trade />
+        </Suspense>
+      </Route>
+
+      <Route path="/signals">
+        <Suspense fallback={<TradingSkeleton />}>
+          <Signals />
         </Suspense>
       </Route>
 

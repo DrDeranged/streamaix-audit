@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+import { useSearch } from "wouter";
 import { Navigation } from "@/components/landing/navigation";
 import { SwapCard } from "@/components/trade/SwapCard";
 import { DisclosureModal } from "@/components/trade/DisclosureModal";
@@ -6,6 +8,17 @@ import { useWallet } from "@/hooks/useWallet";
 
 export default function TradePage() {
   const { isConnected, balances } = useWallet();
+  const search = useSearch();
+  // Optional prefill from an agent signal ("Trade this"). Always user-editable.
+  const prefill = useMemo(() => {
+    const qs = new URLSearchParams(search);
+    return {
+      sell: qs.get("sell") || undefined,
+      buy: qs.get("buy") || undefined,
+      amount: qs.get("amount") || undefined,
+      signalId: qs.get("signal") || undefined,
+    };
+  }, [search]);
 
   return (
     <div className="min-h-screen bg-ink-page">
@@ -24,7 +37,19 @@ export default function TradePage() {
           </div>
         </header>
 
-        <SwapCard />
+        {prefill.signalId && (
+          <div className="mb-4 bg-ink-surface border border-ink-edge rounded-2xl px-4 py-3 text-xs text-muted" data-testid="signal-context-note">
+            Prefilled from an agent signal. The agent's thesis is <span className="text-primary font-medium">not advice — you decide</span>.
+            You confirm and sign every transaction; quotes include a 0.3% platform fee and prices can move against you.
+          </div>
+        )}
+        <SwapCard
+          key={`${prefill.sell ?? ""}-${prefill.buy ?? ""}-${prefill.signalId ?? ""}`}
+          initialSell={prefill.sell}
+          initialBuy={prefill.buy}
+          initialAmount={prefill.amount}
+          signalId={prefill.signalId}
+        />
 
         {isConnected && (
           <div className="mt-4 bg-ink-surface border border-ink-edge rounded-2xl p-4" data-testid="wallet-balances">

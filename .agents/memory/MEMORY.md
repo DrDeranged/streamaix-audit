@@ -2,7 +2,8 @@
 - [Vitest testing setup](vitest-testing.md) — offline test harness conventions: mock db/websocket modules, set JWT_SECRET before importing auth, limiter buckets are module-level.
 - [Job scheduler conventions](job-scheduler.md) — all background work must go through jobScheduler; db:push blocked by blog_posts drift; admin-secret trick for testing guarded routes.
 - [PWA service worker vs Vite dev](pwa-sw-dev-cache.md) — SW must never cache dev module URLs; stale caches caused duplicate-React preview crashes.
-- [Typecheck incremental cache trap](typecheck-cache-trap.md) — `npm run check` can falsely pass via tsc incremental cache; delete tsbuildinfo for an authoritative run; many latent server errors exist.
+- [Typecheck incremental cache trap](typecheck-cache-trap.md) — `npm run check` can falsely pass via tsc incremental cache; delete tsbuildinfo for an authoritative run; many latent server errors exist. Baseline diffing must compare file(line,col) positions only: tsc flips TS2304<->TS2552 nondeterministically.
+- [Swap rail dormant discipline](swap-rail.md) — SWAPS_ENABLED fail-closed gate, env knobs to enable, chain-verified trade recording, cap-notional fail-safe.
 - [AI provider split](ai-provider-split.md) — text AI = Anthropic via modelGateway only; OpenAI = audio (whisper/tts) only; pause flags are provider-scoped.
 - [Replit lockfile proxy contamination](lockfile-proxy-contamination.md) — every npm install rewrites lockfile URLs to the firewall proxy; run `npm run lockfile:scrub` after each install.
 - [Design system migration](design-system-migration.md) — DESIGN.md contract, accent-core naming deviation, tsc 370-error baseline diffing, and the delegated-restyle className-corruption check.

@@ -18,6 +18,7 @@ import { PageHeader } from '@/components/PageHeader';
 import Surface from '@/components/ds/Surface';
 import SectionTitle from '@/components/ds/SectionTitle';
 import { ReasoningFeed } from '@/components/prediction/ReasoningFeed';
+import { SignalsWidget } from '@/components/signals/SignalsWidget';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -1548,6 +1549,10 @@ export default function AITrading() {
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <ReasoningFeed />
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+          <SignalsWidget />
         </motion.div>
 
         {mainView === 'signals' && (

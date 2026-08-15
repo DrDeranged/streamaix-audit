@@ -44,6 +44,7 @@ const recordTradeBodySchema = z.object({
   feeCollected: z.string().optional(),
   quotedPrice: z.string().optional(),
   executedPrice: z.string().optional(),
+  signalId: z.string().max(64).optional(),
 });
 
 const DEFAULT_BASE_TOKENS = [
