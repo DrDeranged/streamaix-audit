@@ -11,3 +11,9 @@ ALTER TABLE public.swap_daily_volume OWNER TO postgres;
 ALTER TABLE ONLY public.swap_daily_volume
     ADD CONSTRAINT swap_daily_volume_pkey PRIMARY KEY (id);
 CREATE UNIQUE INDEX IF NOT EXISTS swap_daily_volume_wallet_day_idx ON public.swap_daily_volume USING btree (wallet, day);
+
+-- Newsletter claim-then-send columns (duplicate-send fix, 2026-08-15).
+ALTER TABLE newsletters ADD COLUMN IF NOT EXISTS edition_date text;
+ALTER TABLE newsletters ADD COLUMN IF NOT EXISTS edition text;
+ALTER TABLE newsletters ADD COLUMN IF NOT EXISTS sent_by text;
+CREATE UNIQUE INDEX IF NOT EXISTS newsletters_edition_date_edition_idx ON newsletters (edition_date, edition);

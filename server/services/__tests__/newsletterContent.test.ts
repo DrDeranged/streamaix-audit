@@ -199,12 +199,126 @@ describe("generateNewsletterHTML", () => {
     newsStories: [],
   };
 
-  it("contains both color-scheme meta tags and no #ffffff page background", () => {
+  it("contains both color-scheme meta tags", () => {
     const html = generateNewsletterHTML(content, "tok123");
     expect(html).toContain('<meta name="color-scheme" content="light dark">');
     expect(html).toContain('<meta name="supported-color-schemes" content="light dark">');
-    expect(html.toLowerCase()).not.toContain("#ffffff");
     expect(html).toContain("color-scheme: light dark");
+  });
+
+  it("is light-first: page background is the light page color, cards are white", () => {
+    const html = generateNewsletterHTML(content, "tok123");
+    // Page stays a light off-white (NOT pure white).
+    expect(html).toContain('bgcolor="#F6F7FB"');
+    expect(html).toContain("background-color:#F6F7FB");
+    // Cards are now pure white by design (the old "no #ffffff" rule is retired).
+    expect(html).toContain('bgcolor="#FFFFFF"');
+    expect(html).toContain("background-color:#FFFFFF");
+  });
+
+  // A fully-populated variant so every colored element (gain/loss/markets)
+  // renders and its inline color can be asserted.
+  const fullContent: NewsletterContent = {
+    ...content,
+    topGainers: [{ symbol: "BTC", name: "Bitcoin", price: 64334, changePercent: 2.5 } as any],
+    topLosers: [{ symbol: "XRP", name: "XRP", price: 0.5, changePercent: -3.1 } as any],
+    stockGainers: [{ symbol: "NVDA", price: 900, changePercent: 1.2 } as any],
+    stockLosers: [{ symbol: "TSLA", price: 200, changePercent: -1.8 } as any],
+    hotMarkets: [
+      { question: "Will BTC top $80k?", yesPercent: 62, volume: 100000, traders: 100, resolves: "Sep 30" } as any,
+    ],
+    upcomingStreams: [{ title: "Morning brief", time: "8:00 AM ET" } as any],
+    newsStories: [
+      { title: "Headline", url: "https://x.com", source: "Src", published: "2026-07-31T12:00:00Z" } as any,
+    ],
+  };
+
+  it("emits the light palette hexes as inline defaults", () => {
+    const html = generateNewsletterHTML(fullContent, "tok123");
+    const lightInline = [
+      "#F6F7FB", // page
+      "#FFFFFF", // card
+      "#E3E7F2", // border
+      "#ECEFF6", // divider
+      "#10162A", // primary text
+      "#2A3350", // body text
+      "#5B6378", // secondary text
+      "#6A7185", // muted (AA-adjusted)
+      "#6D5BE0", // accent (also used as button bg)
+      "#188250", // gain (AA-adjusted)
+      "#C84157", // loss (AA-adjusted)
+      "#9F6519", // warn (AA-adjusted)
+    ];
+    for (const hex of lightInline) {
+      expect(html).toContain(hex);
+    }
+  });
+
+  it("puts the dark ink palette only inside a prefers-color-scheme:dark block with !important", () => {
+    const html = generateNewsletterHTML(content, "tok123");
+    expect(html).toContain("@media (prefers-color-scheme: dark)");
+
+    const darkBlock = html.slice(html.indexOf("@media (prefers-color-scheme: dark)"));
+    const darkInk = ["#080B14", "#10162A", "#232B45", "#1A2138", "#F2F4FA", "#3DD68C", "#FF7B7B", "#FFB454"];
+    for (const hex of darkInk) {
+      expect(darkBlock).toContain(hex);
+      // each dark ink color must be an !important override
+      const re = new RegExp(hex + "[^;{}]*!important");
+      expect(darkBlock).toMatch(re);
+    }
+  });
+
+  it("never uses a dark page/card hex as an INLINE default background", () => {
+    const html = generateNewsletterHTML(fullContent, "tok123");
+    // Strip ALL <style>...</style> blocks: dark hexes are only allowed there.
+    const inlineHtml = html.replace(/<style>[\s\S]*?<\/style>/g, "");
+
+    // #080B14 is a pure dark-only color: it must not appear inline at all.
+    expect(inlineHtml).not.toContain("#080B14");
+    // #10162A doubles as the LIGHT primary text; assert it is never used as a
+    // background inline (bgcolor attr or background-color declaration).
+    expect(inlineHtml).not.toContain('bgcolor="#10162A"');
+    expect(inlineHtml).not.toContain("background-color:#10162A");
+  });
+
+  it("meets WCAG AA (>= 4.5:1) for the key light text/background pairs", () => {
+    const relLum = (hex: string): number => {
+      const c = hex.replace("#", "");
+      const chan = [0, 2, 4]
+        .map((i) => parseInt(c.substr(i, 2), 16) / 255)
+        .map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+      return 0.2126 * chan[0] + 0.7152 * chan[1] + 0.0722 * chan[2];
+    };
+    const contrast = (a: string, b: string): number => {
+      const l1 = relLum(a);
+      const l2 = relLum(b);
+      const hi = Math.max(l1, l2);
+      const lo = Math.min(l1, l2);
+      return (hi + 0.05) / (lo + 0.05);
+    };
+
+    const page = "#F6F7FB";
+    const card = "#FFFFFF";
+    const accent = "#6D5BE0";
+    const pairs: Array<[string, string, string]> = [
+      ["primary/page", "#10162A", page],
+      ["body/page", "#2A3350", page],
+      ["secondary/page", "#5B6378", page],
+      ["muted/page", "#6A7185", page],
+      ["accent/page", accent, page],
+      ["accentDeep/card", "#5B49D6", card],
+      ["gain/card", "#188250", card],
+      ["loss/card", "#C84157", card],
+      ["warn/card", "#9F6519", card],
+      ["gain/page", "#188250", page],
+      ["loss/page", "#C84157", page],
+      ["warn/page", "#9F6519", page],
+      ["buttonText/accent", "#FFFFFF", accent],
+    ];
+    for (const [name, fg, bg] of pairs) {
+      const ratio = contrast(fg, bg);
+      expect(ratio, `${name} = ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(4.5);
+    }
   });
 
   it("skips empty sections cleanly", () => {

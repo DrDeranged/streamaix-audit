@@ -199,18 +199,27 @@ export async function registerWaitlistRoutes(app: Express): Promise<void> {
   // =============================================================================
 
   app.post("/api/newsletter/send", authenticateToken, requireAdmin, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { newsletterService } = await import('../services/newsletterService');
-    
+    const { newsletterScheduler } = await import('../services/newsletterScheduler');
+
     console.log('📧 Manual newsletter send initiated by admin:', req.user?.username);
-    const result = await newsletterService.sendToWaitlist(storage);
-    
-    res.json({
-      success: result.success,
-      sentCount: result.sentCount,
-      failedCount: result.failedCount,
-      newsletterId: result.newsletterId,
-      errors: result.errors
-    });
+    // Manual sends go through the same claim-then-send path (sent_by='manual')
+    // so an admin cannot double-send a slot that cron already delivered.
+    const etHour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'America/New_York', hour12: false, hour: '2-digit' }).format(new Date()));
+    const day = etHour < 12 ? 'Morning' : 'Market Close';
+    const result = await newsletterScheduler.sendNewsletter(day, 'manual');
+
+    if (!result.sent) {
+      return res.status(result.reason === 'already-claimed' ? 409 : 500).json({
+        success: false,
+        sentCount: result.sentCount ?? 0,
+        failedCount: result.failedCount ?? 0,
+        errors: result.errors,
+        error: result.reason === 'already-claimed'
+          ? `The ${day} edition for today (America/New_York) was already sent.`
+          : 'Newsletter send failed — check server logs.',
+      });
+    }
+    res.json({ success: true, sentCount: result.sentCount ?? 0, failedCount: result.failedCount ?? 0 });
   }));
 
   app.post("/api/newsletter/test", authenticateToken, requireAdmin, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {

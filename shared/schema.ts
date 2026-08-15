@@ -3720,17 +3720,27 @@ export const insertWaitlistSchema = createInsertSchema(waitlist).omit({
 export type InsertWaitlist = z.infer<typeof insertWaitlistSchema>;
 export type Waitlist = typeof waitlist.$inferSelect;
 
-// Newsletter tracking table
-export const newsletters = pgTable("newsletters", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  subject: text("subject").notNull(),
-  content: text("content").notNull(), // HTML content
-  marketData: jsonb("market_data"), // Cached market data used in newsletter
-  sentAt: timestamp("sent_at").defaultNow(),
-  recipientCount: integer("recipient_count").default(0),
-  scheduledFor: timestamp("scheduled_for"),
-  status: text("status").notNull().default("draft"), // draft, scheduled, sent, failed
-});
+// Newsletter tracking table.
+// Sends are claim-then-send: a 'sending' claim row is inserted FIRST, keyed
+// by (edition_date, edition) with a UNIQUE constraint so a slot can never be
+// sent twice regardless of scheduler bugs. Slot math is America/New_York.
+export const newsletters = pgTable(
+  "newsletters",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    subject: text("subject").notNull(),
+    content: text("content").notNull(), // HTML content
+    marketData: jsonb("market_data"), // Cached market data used in newsletter
+    sentAt: timestamp("sent_at").defaultNow(),
+    recipientCount: integer("recipient_count").default(0),
+    scheduledFor: timestamp("scheduled_for"),
+    status: text("status").notNull().default("draft"), // draft, scheduled, sending, sent, failed
+    editionDate: text("edition_date"), // YYYY-MM-DD in America/New_York
+    edition: text("edition"), // 'morning' | 'market_close'
+    sentBy: text("sent_by"), // 'cron' | 'catch-up' | 'manual'
+  },
+  (t) => [uniqueIndex("newsletters_edition_date_edition_idx").on(t.editionDate, t.edition)],
+);
 
 export const insertNewsletterSchema = createInsertSchema(newsletters).omit({
   id: true,

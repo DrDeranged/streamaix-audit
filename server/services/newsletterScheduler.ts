@@ -55,83 +55,119 @@ class NewsletterScheduler {
   }
 
   /**
-   * Send newsletter to all subscribers
+   * Slot identity for a send attempt. All slot math is explicitly
+   * America/New_York: the edition date is the ET calendar date, regardless
+   * of server timezone or how late a catch-up send actually dispatches.
    */
-  private async sendNewsletter(day: string): Promise<void> {
+  slotFor(day: string, now: Date = new Date()): { editionDate: string; edition: 'morning' | 'market_close' } {
+    return {
+      editionDate: now.toLocaleDateString('en-CA', { timeZone: 'America/New_York' }),
+      edition: day === 'Morning' ? 'morning' : 'market_close',
+    };
+  }
+
+  /** 'cron' if we are within 5 minutes of the slot's scheduled ET time, else 'catch-up'. */
+  private inferSentBy(edition: 'morning' | 'market_close', now: Date = new Date()): 'cron' | 'catch-up' {
+    const [h, m] = new Intl.DateTimeFormat('en-GB', { timeZone: 'America/New_York', hour12: false, hour: '2-digit', minute: '2-digit' })
+      .format(now)
+      .split(':')
+      .map(Number);
+    const slotHour = edition === 'morning' ? 8 : 16;
+    return h === slotHour && m < 5 ? 'cron' : 'catch-up';
+  }
+
+  /**
+   * Atomically claim a slot in the send log: INSERT a 'sending' claim row
+   * keyed by the UNIQUE (edition_date, edition) constraint. Returns the
+   * claim row id, or null if the slot is already claimed/sent (or the DB is
+   * unreachable — we fail CLOSED here: without a recorded claim a send could
+   * never be deduplicated, so we do not send).
+   * A crashed claim (still 'sending' after 1 hour) may be reclaimed.
+   */
+  private async claimSlot(editionDate: string, edition: string, sentBy: string): Promise<string | null> {
+    const { db } = await import('../db');
+    const { sql } = await import('drizzle-orm');
     try {
-      // Per-slot idempotence: the scheduler's catch-up pass may re-invoke a
-      // missed slot, and a restart near the slot could double-fire. Skip if
-      // a newsletter was already sent within this slot's window today
-      // (morning slot = before 12:00 ET, market-close slot = after).
-      // Atomic slot claim: take a Postgres advisory lock keyed on the slot so
-      // two concurrent invocations (cron + catch-up, or two instances sharing
-      // the DB) cannot both pass the sent-log check and double-send.
-      const { db } = await import('../db');
-      const { sql } = await import('drizzle-orm');
-      const lockKey = `newsletter:${day}:${new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' })}`;
-      const lockRes = await db.execute(sql`SELECT pg_try_advisory_lock(hashtext(${lockKey})) AS locked`);
-      const locked = (lockRes as any).rows?.[0]?.locked === true;
-      if (!locked) {
-        console.log(`📧 ${day} newsletter slot is being handled by another sender — skipping`);
-        return;
-      }
-      try {
-        if (await this.alreadySentForSlot(day)) {
-          console.log(`📧 ${day} newsletter already sent for today's slot — skipping (idempotence guard)`);
-          return;
-        }
-        await this.doSend(day);
-      } finally {
-        await db.execute(sql`SELECT pg_advisory_unlock(hashtext(${lockKey}))`).catch(() => {});
-      }
-    } catch (error) {
-      console.error(`❌ ${day} newsletter send failed:`, error);
+      const ins = await db.execute(sql`
+        INSERT INTO newsletters (subject, content, status, edition_date, edition, sent_by, sent_at, recipient_count)
+        VALUES (${`[claim] ${edition} ${editionDate}`}, '', 'sending', ${editionDate}, ${edition}, ${sentBy}, now(), 0)
+        ON CONFLICT (edition_date, edition) DO NOTHING
+        RETURNING id
+      `);
+      const claimed = (ins as any).rows?.[0]?.id;
+      if (claimed) return claimed;
+      // Slot already claimed. Reclaim only if the prior claim crashed mid-send
+      // (still 'sending' after 1 hour).
+      const rec = await db.execute(sql`
+        UPDATE newsletters SET sent_at = now(), sent_by = ${sentBy}
+        WHERE edition_date = ${editionDate} AND edition = ${edition}
+          AND status = 'sending' AND sent_at < now() - interval '1 hour'
+        RETURNING id
+      `);
+      return (rec as any).rows?.[0]?.id ?? null;
+    } catch (err) {
+      console.error('❌ Newsletter slot claim failed (not sending — fail closed):', (err as Error).message);
+      return null;
     }
   }
 
-  private async doSend(day: string): Promise<void> {
+  /**
+   * Send newsletter to all subscribers — claim-then-send. The UNIQUE
+   * (edition_date, edition) constraint makes double-sends structurally
+   * impossible: the claim row is inserted BEFORE any email is built or
+   * dispatched, and a conflicting claim aborts silently as already-sent.
+   */
+  async sendNewsletter(
+    day: string,
+    sentBy?: 'cron' | 'catch-up' | 'manual',
+  ): Promise<{ sent: boolean; reason?: string; sentCount?: number; failedCount?: number; errors?: string[] }> {
     try {
-      const result = await newsletterService.sendToWaitlist(storage);
-      
+      const { editionDate, edition } = this.slotFor(day);
+      const by = sentBy ?? this.inferSentBy(edition);
+      const claimId = await this.claimSlot(editionDate, edition, by);
+      if (!claimId) {
+        console.log(`📧 ${day} newsletter ${editionDate} already sent/claimed — skipping (unique-slot guard)`);
+        return { sent: false, reason: 'already-claimed' };
+      }
+      const result = await this.doSend(day, claimId);
+      if (!result) return { sent: false, reason: 'error' };
+      if (!result.success) {
+        return { sent: false, reason: 'send-errors', sentCount: result.sentCount, failedCount: result.failedCount, errors: result.errors };
+      }
+      return { sent: true, sentCount: result.sentCount, failedCount: result.failedCount };
+    } catch (error) {
+      console.error(`❌ ${day} newsletter send failed:`, error);
+      return { sent: false, reason: 'error' };
+    }
+  }
+
+  private async doSend(day: string, claimId: string): Promise<import('./newsletterService').NewsletterSendResult | null> {
+    try {
+      const result = await newsletterService.sendToWaitlist(storage, { claimId });
+
       if (result.success) {
         console.log(`✅ ${day} newsletter sent successfully to ${result.sentCount} recipients`);
       } else {
+        // The service finalizes the claim as 'failed' for any non-success
+        // result; 'failed' rows are never reclaimed, so a partially delivered
+        // edition cannot be auto re-sent.
         console.error(`❌ ${day} newsletter had errors: ${result.failedCount} failed`);
         if (result.errors) {
           console.error('Errors:', result.errors);
         }
       }
+      return result;
     } catch (error) {
       console.error(`❌ ${day} newsletter send failed:`, error);
-    }
-  }
-
-  /**
-   * Check the send log (newsletters table) for a newsletter already sent in
-   * today's slot window (America/New_York). Fail-open: if the check errors,
-   * we allow the send rather than silently dropping newsletters.
-   */
-  async alreadySentForSlot(day: string, now: Date = new Date()): Promise<boolean> {
-    try {
-      const { db } = await import('../db');
-      const { newsletters } = await import('@shared/schema');
-      const { and, gte, lt, eq } = await import('drizzle-orm');
-      // Compute today's ET midnight and noon as UTC instants.
-      const etNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
-      const offsetMs = now.getTime() - etNow.getTime();
-      const etMidnight = new Date(etNow); etMidnight.setHours(0, 0, 0, 0);
-      const etNoon = new Date(etNow); etNoon.setHours(12, 0, 0, 0);
-      const windowStart = new Date((day === 'Morning' ? etMidnight : etNoon).getTime() + offsetMs);
-      const windowEnd = new Date((day === 'Morning' ? etNoon : new Date(etMidnight.getTime() + 24 * 3600_000)).getTime() + offsetMs);
-      const rows = await db
-        .select({ id: newsletters.id })
-        .from(newsletters)
-        .where(and(eq(newsletters.status, 'sent'), gte(newsletters.sentAt, windowStart), lt(newsletters.sentAt, windowEnd)))
-        .limit(1);
-      return rows.length > 0;
-    } catch (err) {
-      console.warn('⚠️ Newsletter sent-log check failed (allowing send):', (err as Error).message);
-      return false;
+      // Mark the claim failed so forensics see it and the slot stays claimed;
+      // 'failed' is terminal (not reclaimable). Only a hard crash that leaves
+      // the row in 'sending' is eligible for the 1h reclaim.
+      try {
+        const { db } = await import('../db');
+        const { sql } = await import('drizzle-orm');
+        await db.execute(sql`UPDATE newsletters SET status = 'failed' WHERE id = ${claimId} AND status = 'sending'`);
+      } catch { /* best effort */ }
+      return null;
     }
   }
 

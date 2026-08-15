@@ -20,7 +20,7 @@ class NewsletterService {
   /**
    * Generate and send newsletter to all subscribed waitlist users
    */
-  async sendToWaitlist(storage: any): Promise<NewsletterSendResult> {
+  async sendToWaitlist(storage: any, opts: { claimId?: string } = {}): Promise<NewsletterSendResult> {
     try {
       console.log('📧 Generating newsletter content...');
       
@@ -34,23 +34,30 @@ class NewsletterService {
       
       if (recipients.length === 0) {
         console.log('⚠️ No recipients found');
+        if (opts.claimId) await this.finalizeClaim(opts.claimId, content, 0, 'sent');
         return {
           success: true,
           sentCount: 0,
-          failedCount: 0
+          failedCount: 0,
+          newsletterId: opts.claimId,
         };
       }
 
       console.log(`📨 Sending newsletter to ${recipients.length} recipients...`);
 
-      // Save newsletter to database
-      const newsletter = await storage.createNewsletter({
-        subject: content.subject,
-        content: JSON.stringify(content),
-        marketData: content,
-        recipientCount: recipients.length,
-        status: 'sent'
-      });
+      // Claim-then-send: when the scheduler already inserted a claim row
+      // ('sending'), the email is dispatched first and the claim row is
+      // finalized to 'sent' afterwards. Only claimless (legacy) callers
+      // insert a fresh row here.
+      const newsletter = opts.claimId
+        ? { id: opts.claimId }
+        : await storage.createNewsletter({
+            subject: content.subject,
+            content: JSON.stringify(content),
+            marketData: content,
+            recipientCount: recipients.length,
+            status: 'sent'
+          });
 
       // Send emails in batches (Resend allows up to 100 recipients per email)
       const batchSize = 100;
@@ -80,6 +87,13 @@ class NewsletterService {
 
       console.log(`✅ Newsletter sent: ${results.sentCount} successful, ${results.failedCount} failed`);
 
+      // Any delivery failure finalizes the claim as 'failed' — never 'sent'.
+      // 'failed' rows are NOT reclaimable (only crashed 'sending' rows are),
+      // so partially delivered editions can never be auto re-sent in full.
+      if (opts.claimId) {
+        await this.finalizeClaim(opts.claimId, content, results.sentCount, results.failedCount === 0 ? 'sent' : 'failed');
+      }
+
       return {
         success: results.failedCount === 0,
         sentCount: results.sentCount,
@@ -90,6 +104,23 @@ class NewsletterService {
     } catch (error) {
       console.error('❌ Newsletter send failed:', error);
       throw error;
+    }
+  }
+
+  /** Finalize a claim row after dispatch, filling in the real content. */
+  private async finalizeClaim(claimId: string, content: any, recipientCount: number, status: 'sent' | 'failed'): Promise<void> {
+    try {
+      const { db } = await import('../db');
+      const { sql } = await import('drizzle-orm');
+      await db.execute(sql`
+        UPDATE newsletters
+        SET subject = ${content.subject}, content = ${JSON.stringify(content)},
+            market_data = ${JSON.stringify(content)}::jsonb,
+            recipient_count = ${recipientCount}, status = ${status}, sent_at = now()
+        WHERE id = ${claimId}
+      `);
+    } catch (err) {
+      console.error('⚠️ Failed to finalize newsletter claim row:', (err as Error).message);
     }
   }
 
