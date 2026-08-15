@@ -10,6 +10,8 @@ export const SIGNAL_DIRECTIONS = ["accumulate", "reduce", "neutral"] as const;
 export type SignalDirection = (typeof SIGNAL_DIRECTIONS)[number];
 
 export const MAX_THESIS_WORDS = 80;
+export const MAX_EVIDENCE_ITEMS = 6;
+export const MAX_EVIDENCE_ITEM_CHARS = 120;
 export const MAX_SIGNALS_PER_CYCLE = 3;
 /** |price move| below this % counts a "neutral" thesis as correct. */
 export const NEUTRAL_BAND_PCT = 2;
@@ -84,8 +86,21 @@ export function validateSignalPayload(p: Partial<SignalPayload>): string[] {
   if (typeof p.confidence !== "number" || !Number.isFinite(p.confidence) || p.confidence < 0 || p.confidence > 1) {
     errors.push("confidence must be a number in [0,1]");
   }
-  if (!Array.isArray(p.keyEvidence) || p.keyEvidence.length === 0 || !p.keyEvidence.every((e) => typeof e === "string")) {
-    errors.push("keyEvidence must be a non-empty string array");
+  if (
+    !Array.isArray(p.keyEvidence) ||
+    p.keyEvidence.length === 0 ||
+    p.keyEvidence.length > MAX_EVIDENCE_ITEMS ||
+    !p.keyEvidence.every((e) => typeof e === "string" && e.trim().length > 0 && e.length <= MAX_EVIDENCE_ITEM_CHARS)
+  ) {
+    errors.push(`keyEvidence must be 1-${MAX_EVIDENCE_ITEMS} non-empty strings of <=${MAX_EVIDENCE_ITEM_CHARS} chars`);
+  } else {
+    for (const e of p.keyEvidence) {
+      const banned = findBannedAdvice(e);
+      if (banned) {
+        errors.push(`keyEvidence contains banned advice phrasing: "${banned}"`);
+        break;
+      }
+    }
   }
   if (!p.invalidation || typeof p.invalidation !== "string") {
     errors.push("invalidation missing");

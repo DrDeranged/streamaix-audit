@@ -176,6 +176,28 @@ describe("schema validation (shared)", () => {
     expect(validateSignalPayload(goodSignal())).toEqual([]);
   });
 
+  it("rejects banned advice phrasing in keyEvidence (adversarial)", () => {
+    const errors = validateSignalPayload(goodSignal({ keyEvidence: ["7d +5%", "Buy ETH now"] }));
+    expect(errors.some((e) => /keyEvidence contains banned advice/.test(e))).toBe(true);
+  });
+
+  it("rejects oversized or empty keyEvidence items", () => {
+    expect(validateSignalPayload(goodSignal({ keyEvidence: ["x".repeat(200)] })).length).toBeGreaterThan(0);
+    expect(validateSignalPayload(goodSignal({ keyEvidence: ["  "] })).length).toBeGreaterThan(0);
+    expect(validateSignalPayload(goodSignal({ keyEvidence: Array(7).fill("ok") })).length).toBeGreaterThan(0);
+  });
+
+  it("generation drops signals whose evidence contains advice (never inserted)", async () => {
+    process.env.SIGNALS_ENABLED = "true";
+    dbState.selectResults.push(AGENTS, TOKENS);
+    svc.completeJson = async () => ({
+      signals: [goodSignal({ keyEvidence: ["take profit here"] })],
+    });
+    const out = await svc.generateSignals();
+    expect(out).toEqual([]);
+    expect(dbState.inserted.length).toBe(0);
+  });
+
   it("flags advice verbs on fixtures", () => {
     expect(findBannedAdvice("Accumulation continued while funding cooled.")).toBeNull();
     expect(findBannedAdvice("Buy this dip")).toBeTruthy();
