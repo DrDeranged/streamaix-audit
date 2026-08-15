@@ -159,6 +159,8 @@ Respond in JSON format:
 
       const data = await modelGateway.completeJson<any>({
         tier: "fast",
+        priority: "background",
+        tag: "knowledge-question-service",
         system: 'You are a helpful assistant that generates crypto education bounty questions. Always respond with valid JSON.',
         user: prompt,
         temperature: 0.7,
@@ -237,6 +239,8 @@ Be fair but rigorous. Partial credit is acceptable for answers that demonstrate 
 
       const result = await modelGateway.completeJson<any>({
         tier: "fast",
+        priority: "background",
+        tag: "knowledge-question-service",
         system: 'You are a fair and knowledgeable crypto educator evaluating student answers. Respond only with valid JSON.',
         user: prompt,
         temperature: 0.3,

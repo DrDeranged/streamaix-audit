@@ -168,6 +168,8 @@ Respond in JSON format:
 
       const data = await modelGateway.completeJson<any>({
         tier: "fast",
+        priority: "background",
+        tag: "agent-bounty-engine",
         system: 'You are a helpful assistant that generates realistic bounty requests for crypto, stocks, and macro economics content. Always respond with valid JSON.',
         user: prompt,
         temperature: 0.8,

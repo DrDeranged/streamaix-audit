@@ -181,6 +181,8 @@ GUIDELINES:
 
     const response = await modelGateway.completeJson<any>({
       tier: "fast",
+      priority: "background",
+      tag: "ai-liquidity-provider",
       system: "You are a liquidity provider. Always return valid JSON.",
       user: prompt,
       temperature: 0.5,

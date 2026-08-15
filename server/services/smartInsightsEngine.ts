@@ -224,6 +224,8 @@ Respond with EXACT JSON (no markdown):
       const parsed = await modelGateway.completeJson(
         {
           tier: 'reasoning',
+          priority: 'background',
+          tag: 'smart-insights-engine',
           system:
             'You are a senior crypto market strategist. You always show reasoning step by step using the exact numbers given. Output strict JSON only.',
           user: prompt,

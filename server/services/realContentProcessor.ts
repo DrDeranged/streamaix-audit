@@ -269,6 +269,8 @@ Format as JSON with these fields:
 
       const result = await modelGateway.completeJson<any>({
         tier: "reasoning",
+        priority: "background",
+        tag: "real-content-processor",
         system: "You are an expert content analyst. Provide detailed, contextual analysis based on the actual video content provided.",
         user: prompt,
         maxTokens: 2000,

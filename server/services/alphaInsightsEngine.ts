@@ -119,6 +119,8 @@ Be specific, avoid generic statements. Reference actual levels and patterns.`;
 
       const insight = await modelGateway.completeJson<PriceAlertInsight>({
         tier: 'reasoning',
+        priority: 'background',
+        tag: 'alpha-insights-engine',
         system: 'You are a helpful assistant.',
         user: prompt,
         maxTokens: 300,
@@ -198,6 +200,8 @@ Be specific with levels and setups. No generic advice.`;
 
       const insight = await modelGateway.completeJson<MorningBriefingInsight>({
         tier: 'reasoning',
+        priority: 'background',
+        tag: 'alpha-insights-engine',
         system: 'You are a helpful assistant.',
         user: prompt,
         maxTokens: 400,
@@ -271,6 +275,8 @@ Be specific about levels, not vague. Reference actual price action.`;
 
       const insight = await modelGateway.completeJson<EveningRecapInsight>({
         tier: 'reasoning',
+        priority: 'background',
+        tag: 'alpha-insights-engine',
         system: 'You are a helpful assistant.',
         user: prompt,
         maxTokens: 350,
@@ -341,6 +347,8 @@ Focus on actionable advice, avoid generic statements.`;
 
       const insight = await modelGateway.completeJson<TradingSignalInsight>({
         tier: 'reasoning',
+        priority: 'background',
+        tag: 'alpha-insights-engine',
         system: 'You are a helpful assistant.',
         user: prompt,
         maxTokens: 300,
@@ -395,6 +403,8 @@ Be bold but responsible. This is high-conviction alpha.`;
 
       const insight = await modelGateway.completeJson<AlphaInsight>({
         tier: 'reasoning',
+        priority: 'background',
+        tag: 'alpha-insights-engine',
         system: 'You are a helpful assistant.',
         user: prompt,
         maxTokens: 350,
@@ -446,6 +456,8 @@ This is high-conviction alpha from multiple signals aligning. Be specific with l
 
       const insight = await modelGateway.completeJson<{ recommendation: string; timeframe: string; riskReward: string }>({
         tier: 'reasoning',
+        priority: 'background',
+        tag: 'alpha-insights-engine',
         system: 'You are a helpful assistant.',
         user: prompt,
         maxTokens: 200,

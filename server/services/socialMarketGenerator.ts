@@ -76,6 +76,8 @@ Format your response as JSON:
 
       const result = await modelGateway.completeJson<any>({
         tier: "reasoning",
+        priority: "background",
+        tag: "social-market-generator",
         system: 'You are an expert at creating engaging, tradeable prediction markets from news articles. Create questions that traders will want to bet on.',
         user: prompt,
         temperature: 0.8,

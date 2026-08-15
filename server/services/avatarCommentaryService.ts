@@ -94,6 +94,8 @@ async function generateBody(
   try {
     const r = await modelGateway.complete({
       tier: "fast",
+      priority: "background",
+      tag: "avatar-commentary",
       system,
       user,
       temperature: 0.85,

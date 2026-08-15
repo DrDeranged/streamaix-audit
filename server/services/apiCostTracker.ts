@@ -299,3 +299,223 @@ class ApiCostTracker {
 }
 
 export const apiCostTracker = new ApiCostTracker();
+
+// ---------------------------------------------------------------------------
+// Persistent daily AI budget (api_spend_daily) — survives restarts.
+//
+// Spend is accumulated in memory and batch-flushed every 60s. checkBudget()
+// is the single source of truth for the enforcement tiers wired into
+// modelGateway and the audio (whisper/tts) call sites.
+// ---------------------------------------------------------------------------
+
+import { db } from "../db";
+import { apiSpendDaily } from "@shared/schema";
+import { and, eq, gte, sql as dsql } from "drizzle-orm";
+
+/** Per-1M-token USD rates, overridable via env. */
+function envRate(name: string, fallback: number): number {
+  const v = parseFloat(process.env[name] || "");
+  return Number.isFinite(v) && v >= 0 ? v : fallback;
+}
+
+export function tokenPricingPer1M(service: "anthropic" | "openai", model: string): { input: number; output: number } {
+  const m = model.toLowerCase();
+  if (service === "anthropic") {
+    if (m.includes("haiku")) {
+      return { input: envRate("PRICE_ANTHROPIC_HAIKU_IN_PER_M", 1), output: envRate("PRICE_ANTHROPIC_HAIKU_OUT_PER_M", 5) };
+    }
+    // sonnet default (also the fallback for unknown Anthropic models)
+    return { input: envRate("PRICE_ANTHROPIC_SONNET_IN_PER_M", 3), output: envRate("PRICE_ANTHROPIC_SONNET_OUT_PER_M", 15) };
+  }
+  if (m.includes("mini")) {
+    return { input: envRate("PRICE_OPENAI_MINI_IN_PER_M", 0.15), output: envRate("PRICE_OPENAI_MINI_OUT_PER_M", 0.6) };
+  }
+  return { input: envRate("PRICE_OPENAI_IN_PER_M", 2.5), output: envRate("PRICE_OPENAI_OUT_PER_M", 10) };
+}
+
+/** Non-token audio rates (whisper per minute, tts per 1K chars). */
+export const AUDIO_PRICING = {
+  whisperPerMinute: () => envRate("PRICE_OPENAI_WHISPER_PER_MIN", 0.006),
+  ttsPer1kChars: (hd: boolean) => envRate(hd ? "PRICE_OPENAI_TTS_HD_PER_1K" : "PRICE_OPENAI_TTS_PER_1K", hd ? 0.03 : 0.015),
+};
+
+export interface BudgetStatus {
+  allowed: boolean;
+  spentToday: number;
+  budgetUsd: number;
+  ratio: number;
+  degraded: boolean;
+}
+
+export function dailyBudgetUsd(): number {
+  return envRate("DAILY_AI_BUDGET_USD", 25);
+}
+
+const FLUSH_INTERVAL_MS = 60_000;
+
+class DailyBudgetLedger {
+  /** pending un-flushed deltas keyed by `${day}|${service}|${model}` */
+  private pending = new Map<string, number>();
+  /** in-memory running total for today's UTC day (seeded from db) */
+  private spentToday = 0;
+  private loadedDay: string | null = null;
+  private loadPromise: Promise<void> | null = null;
+  private flushTimer: ReturnType<typeof setInterval> | null = null;
+
+  /** Test hooks */
+  __resetForTests(): void {
+    this.pending.clear();
+    this.spentToday = 0;
+    this.loadedDay = null;
+    this.loadPromise = null;
+    if (this.flushTimer) { clearInterval(this.flushTimer); this.flushTimer = null; }
+  }
+
+  utcDay(now: Date = new Date()): string {
+    return now.toISOString().slice(0, 10);
+  }
+
+  private async ensureLoaded(): Promise<void> {
+    const day = this.utcDay();
+    if (this.loadedDay === day) return;
+    if (!this.loadPromise) {
+      this.loadPromise = (async () => {
+        const rows = await db
+          .select({ total: dsql<number>`coalesce(sum(${apiSpendDaily.costUsd}), 0)` })
+          .from(apiSpendDaily)
+          .where(eq(apiSpendDaily.day, day));
+        // keep any pending deltas for today that accrued while loading
+        let pendingToday = 0;
+        for (const [key, delta] of Array.from(this.pending.entries())) {
+          if (key.startsWith(`${day}|`)) pendingToday += delta;
+        }
+        this.spentToday = Number(rows[0]?.total ?? 0) + pendingToday;
+        this.loadedDay = day;
+        this.loadPromise = null;
+      })().catch((err) => {
+        this.loadPromise = null;
+        throw err;
+      });
+    }
+    await this.loadPromise;
+  }
+
+  private startFlushTimer(): void {
+    if (this.flushTimer || process.env.NODE_ENV === "test") return;
+    this.flushTimer = setInterval(() => {
+      this.flush().catch((err) => console.error("[budget] flush failed:", err));
+    }, FLUSH_INTERVAL_MS);
+    if (typeof this.flushTimer.unref === "function") this.flushTimer.unref();
+  }
+
+  /** Record spend (USD). Synchronous; persisted by the 60s batch flush. */
+  recordSpend(service: "anthropic" | "openai", model: string, costUsd: number): void {
+    if (!(costUsd > 0)) return;
+    const day = this.utcDay();
+    if (this.loadedDay === day) this.spentToday += costUsd;
+    const key = `${day}|${service}|${model}`;
+    this.pending.set(key, (this.pending.get(key) ?? 0) + costUsd);
+    this.startFlushTimer();
+  }
+
+  /** Convenience: record token-based model spend. */
+  recordModelTokens(service: "anthropic" | "openai", model: string, inputTokens: number, outputTokens: number): number {
+    const rates = tokenPricingPer1M(service, model);
+    const cost = (inputTokens / 1_000_000) * rates.input + (outputTokens / 1_000_000) * rates.output;
+    this.recordSpend(service, model, cost);
+    return cost;
+  }
+
+  /** Upsert-increment pending deltas into api_spend_daily. */
+  async flush(): Promise<void> {
+    if (this.pending.size === 0) return;
+    const batch = Array.from(this.pending.entries());
+    this.pending.clear();
+    try {
+      for (const [key, delta] of batch) {
+        const [day, service, model] = key.split("|");
+        await db
+          .insert(apiSpendDaily)
+          .values({ day, service, model, costUsd: delta })
+          .onConflictDoUpdate({
+            target: [apiSpendDaily.day, apiSpendDaily.service, apiSpendDaily.model],
+            set: {
+              costUsd: dsql`${apiSpendDaily.costUsd} + ${delta}`,
+              updatedAt: dsql`now()`,
+            },
+          });
+      }
+    } catch (err) {
+      // Re-queue on failure so spend is never silently dropped.
+      for (const [key, delta] of batch) {
+        this.pending.set(key, (this.pending.get(key) ?? 0) + delta);
+      }
+      throw err;
+    }
+  }
+
+  async checkBudget(): Promise<BudgetStatus> {
+    await this.ensureLoaded();
+    const budgetUsd = dailyBudgetUsd();
+    const spentToday = this.spentToday;
+    const ratio = budgetUsd > 0 ? spentToday / budgetUsd : Infinity;
+    return {
+      allowed: ratio < 1.5,
+      spentToday,
+      budgetUsd,
+      ratio,
+      degraded: ratio >= 0.8,
+    };
+  }
+
+  /** Admin view: today's spend by service+model plus 7-day history. */
+  async adminSummary(): Promise<{
+    today: { day: string; byServiceModel: Array<{ service: string; model: string; costUsd: number }>; total: number };
+    budget: BudgetStatus;
+    history: Array<{ day: string; total: number }>;
+  }> {
+    await this.flush();
+    const today = this.utcDay();
+    const sevenDaysAgo = this.utcDay(new Date(Date.now() - 7 * 86_400_000));
+    const todayRows = await db
+      .select({ service: apiSpendDaily.service, model: apiSpendDaily.model, costUsd: apiSpendDaily.costUsd })
+      .from(apiSpendDaily)
+      .where(eq(apiSpendDaily.day, today));
+    const historyRows = await db
+      .select({ day: apiSpendDaily.day, total: dsql<number>`sum(${apiSpendDaily.costUsd})` })
+      .from(apiSpendDaily)
+      .where(gte(apiSpendDaily.day, sevenDaysAgo))
+      .groupBy(apiSpendDaily.day)
+      .orderBy(apiSpendDaily.day);
+    const budget = await this.checkBudget();
+    return {
+      today: {
+        day: today,
+        byServiceModel: todayRows.map((r) => ({ ...r, costUsd: Number(r.costUsd) })),
+        total: todayRows.reduce((s, r) => s + Number(r.costUsd), 0),
+      },
+      budget,
+      history: historyRows.map((r) => ({ day: r.day, total: Number(r.total) })),
+    };
+  }
+}
+
+export const dailyBudgetLedger = new DailyBudgetLedger();
+
+/** The spec'd entry point: current budget state for enforcement decisions. */
+export function checkBudget(): Promise<BudgetStatus> {
+  return dailyBudgetLedger.checkBudget();
+}
+
+/** Record OpenAI TTS spend into the daily ledger (also feeds legacy tracker). */
+export function recordTtsSpend(characters: number, hd = false): void {
+  apiCostTracker.trackTts(characters, hd);
+  dailyBudgetLedger.recordSpend("openai", hd ? "tts-1-hd" : "tts-1", (characters / 1000) * AUDIO_PRICING.ttsPer1kChars(hd));
+}
+
+/** Record OpenAI Whisper spend. When only bytes are known, estimate ~240KB/min compressed audio. */
+export function recordWhisperSpend(opts: { minutes?: number; bytes?: number }): void {
+  const minutes = opts.minutes ?? Math.max(0.25, (opts.bytes ?? 0) / 240_000);
+  apiCostTracker.trackWhisper(minutes);
+  dailyBudgetLedger.recordSpend("openai", "whisper-1", minutes * AUDIO_PRICING.whisperPerMinute());
+}

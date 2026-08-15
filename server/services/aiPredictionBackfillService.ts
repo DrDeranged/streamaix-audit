@@ -37,6 +37,8 @@ Format your response as JSON:
 
       const result = await modelGateway.completeJson<any>({
         tier: "reasoning",
+        priority: "background",
+        tag: "ai-prediction-backfill-service",
         system: 'You are an expert prediction analyst. Provide probability assessments based on current trends, data, and logical reasoning.',
         user: prompt,
         temperature: 0.7,

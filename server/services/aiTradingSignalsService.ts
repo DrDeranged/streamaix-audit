@@ -609,6 +609,8 @@ Respond in this exact JSON format:
 
     const analysis = await modelGateway.completeJson<any>({
       tier: "reasoning",
+      priority: "background",
+      tag: "ai-trading-signals-service",
       system: 'You are an elite quantitative trading analyst. Provide institutional-grade trade signals with precise entry/exit levels, proper risk management, and multi-factor confluence analysis. Your signals should be actionable and include proper position sizing recommendations.',
       user: prompt,
       maxTokens: 1000,

@@ -233,6 +233,8 @@ Focus on the actual content and provide meaningful, specific insights.
     try {
       const result = await modelGateway.completeJson<any>({
         tier: "reasoning",
+        priority: "background",
+        tag: "clean-content-processor",
         system: "You are an expert content analyst. Provide detailed, accurate analysis based on the video metadata provided.",
         user: prompt,
         maxTokens: 2500,

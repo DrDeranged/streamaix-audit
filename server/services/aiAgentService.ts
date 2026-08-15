@@ -178,6 +178,8 @@ Based on your ${agentPersonality.personality} personality, your ${agentPersonali
         wouldChangeMindIf: string;
       }>({
         tier: "reasoning",
+        priority: "background",
+        tag: "ai-agent-service",
         system: systemPrompt,
         user: userPrompt,
         temperature: agentPersonality.personality === "contrarian" ? 0.9 : 0.7,

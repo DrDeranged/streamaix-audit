@@ -127,6 +127,7 @@ import { registerSocialFeedRoutes } from "./routes/social-feed";
 import { registerFollowRoutes } from "./routes/follow";
 import { registerBountiesRoutes } from "./routes/bounties";
 import { registerJobsRoutes } from "./routes/jobs";
+import { registerAdminCostsRoutes } from "./routes/admin-costs";
 import { registerAdminResolutionsRoutes } from "./routes/admin-resolutions";
 import { registerAdminRiskRoutes } from "./routes/admin-risk";
 import { registerBridgeRoutes } from "./routes/bridge";
@@ -259,6 +260,7 @@ export async function registerRoutes(app: Express, existingServer?: Server): Pro
   await registerBountiesRoutes(app);
   // ▶ Job scheduler admin routes (Phase 1)
   await registerJobsRoutes(app);
+  await registerAdminCostsRoutes(app);
 
   await registerAdminResolutionsRoutes(app);
   await registerAdminRiskRoutes(app);

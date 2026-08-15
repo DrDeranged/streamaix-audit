@@ -450,6 +450,8 @@ Return the commentary as a single flowing script, broken into 4-6 paragraphs for
     try {
       const result = await modelGateway.complete({
         tier: "reasoning",
+        priority: "background",
+        tag: "scheduled-market-stream-service",
         system: "You are a helpful assistant.",
         user: prompt,
         maxTokens: 800,

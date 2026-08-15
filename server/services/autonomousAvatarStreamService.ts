@@ -186,6 +186,8 @@ export class AutonomousAvatarStreamService {
     try {
       const response = await modelGateway.complete({
         tier: 'fast',
+        priority: 'background',
+        tag: 'autonomous-avatar-stream-service',
         system: `You are creating a topic for a crypto live stream by ${avatar.name}.
 Their expertise: ${avatar.expertise || 'crypto markets'}
 Their investment thesis: ${avatar.investmentThesis || 'strategic investing'}

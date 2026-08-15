@@ -82,6 +82,8 @@ Generate a brief, engaging market update (2-3 sentences max) that would be relev
 
       const response = await modelGateway.complete({
         tier: 'fast',
+        priority: 'background',
+        tag: 'enhanced-streaming-service',
         system: 'You are a helpful assistant.',
         user: prompt,
         maxTokens: 150,
@@ -227,6 +229,8 @@ Create a concise 3-4 sentence summary highlighting the main topics discussed, ke
 
       const response = await modelGateway.complete({
         tier: 'fast',
+        priority: 'background',
+        tag: 'enhanced-streaming-service',
         system: 'You are a helpful assistant.',
         user: prompt,
         maxTokens: 250,
@@ -272,6 +276,8 @@ Focus on: market insights, price predictions, important announcements, and viewe
 
       const response = await modelGateway.complete({
         tier: 'fast',
+        priority: 'background',
+        tag: 'enhanced-streaming-service',
         system: 'You are a helpful assistant.',
         user: prompt,
         maxTokens: 500,
@@ -1325,6 +1331,8 @@ Focus on: market insights, price predictions, important announcements, and viewe
 
     const response = await modelGateway.complete({
       tier: 'fast',
+      priority: 'background',
+      tag: 'enhanced-streaming-service',
       system: `You are ${avatarName}, a crypto expert. Give a brief, insightful 1-2 sentence reaction to this price movement. Be specific and actionable.`,
       user: `${symbol} just ${direction} ${Math.abs(priceChange).toFixed(1)}% to $${currentPrice.toLocaleString()}. Give your quick take.`,
       maxTokens: 100,

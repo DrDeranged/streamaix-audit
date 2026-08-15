@@ -274,6 +274,8 @@ GUIDELINES:
 
     const response = await modelGateway.completeJson<any>({
       tier: "reasoning",
+      priority: "background",
+      tag: "ai-trend-spotter",
       system: "You are a prediction market creator. Always return valid JSON array.",
       user: prompt,
       temperature: 0.7,

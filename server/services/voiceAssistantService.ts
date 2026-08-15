@@ -1,5 +1,6 @@
 import { openai as lazyOpenai } from "../lib/openaiClient";
-import { modelGateway } from "../lib/modelGateway";
+import { recordTtsSpend, recordWhisperSpend } from './apiCostTracker';
+import { enforceBudget, modelGateway } from "../lib/modelGateway";
 const openai = lazyOpenai;
 import { z } from 'zod';
 import { marketDataService, type CryptoQuote } from './marketDataService';
@@ -124,11 +125,13 @@ export class VoiceAssistantService {
   async transcribe(audioBuffer: Buffer, mimeType: string): Promise<string> {
     const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('ogg') ? 'ogg' : mimeType.includes('wav') ? 'wav' : 'webm';
     const file = new File([audioBuffer], `voice.${ext}`, { type: mimeType || 'audio/webm' });
+    await enforceBudget('user', 'voice-assistant');
     const transcription = await openai.audio.transcriptions.create({
       file,
       model: 'whisper-1',
       language: 'en',
     });
+    recordWhisperSpend({ bytes: audioBuffer.length });
     return (transcription.text || '').trim();
   }
 
@@ -143,6 +146,8 @@ export class VoiceAssistantService {
     const parsed = await modelGateway.completeJson(
       {
         tier: 'fast',
+        priority: 'user',
+        tag: 'voice-assistant',
         system: buildSystemPrompt(context, market),
         user: transcript,
         maxTokens: 500,
@@ -160,6 +165,7 @@ export class VoiceAssistantService {
 
   async synthesize(text: string): Promise<Buffer> {
     const safeText = text.slice(0, 600);
+    await enforceBudget('user', 'voice-assistant');
     const response = await openai.audio.speech.create({
       model: 'tts-1',
       voice: 'nova',
@@ -167,6 +173,7 @@ export class VoiceAssistantService {
       speed: 1.05,
       response_format: 'mp3',
     });
+    recordTtsSpend(safeText.length);
     const arrayBuffer = await response.arrayBuffer();
     return Buffer.from(arrayBuffer);
   }

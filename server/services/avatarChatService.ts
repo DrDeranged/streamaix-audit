@@ -129,6 +129,8 @@ export async function generateAvatarChatResponse(
 
     const result = await modelGateway.complete({
       tier: "reasoning",
+      priority: "user",
+      tag: "avatar-chat",
       system: buildAvatarSystemPrompt(avatar),
       user: conversationText,
       temperature: 0.8,

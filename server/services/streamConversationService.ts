@@ -10,7 +10,8 @@ import {
 import { eq, and, desc } from 'drizzle-orm';
 import { openai as lazyOpenai } from "../lib/openaiClient";
 const openai = lazyOpenai;
-import { modelGateway } from "../lib/modelGateway";
+import { recordTtsSpend, recordWhisperSpend } from './apiCostTracker';
+import { enforceBudget, modelGateway } from "../lib/modelGateway";
 // openai client provided by lib/openaiClient (lazy, throws clear error if OPENAI_API_KEY missing)
 
 interface ConversationParticipant {
@@ -635,6 +636,8 @@ Never break character. Respond naturally as if in a real conversation.`;
 
       const response = await modelGateway.complete({
         tier: "reasoning",
+        priority: "background",
+        tag: "stream-conversation",
         system: systemPrompt,
         user: `Recent conversation:\n${conversationContext}\n\nRespond to the latest message from ${triggerMessage.speakerName}.`,
         maxTokens: 200,
@@ -697,12 +700,14 @@ Never break character. Respond naturally as if in a real conversation.`;
 
       if (isTTSEnabled) {
         try {
+          await enforceBudget('background', 'stream-conversation');
           const ttsResponse = await openai.audio.speech.create({
             model: 'tts-1',
             voice: 'onyx',
             input: responseText,
           });
           
+          recordTtsSpend(responseText.length);
           const audioBuffer = Buffer.from(await ttsResponse.arrayBuffer());
           const audioBase64 = audioBuffer.toString('base64');
           
@@ -865,11 +870,13 @@ Never break character. Respond naturally as if in a real conversation.`;
 
     try {
       const file = new File([audioBuffer], 'audio.webm', { type: 'audio/webm' });
+      await enforceBudget('background', 'stream-conversation');
       const transcription = await openai.audio.transcriptions.create({
         file,
         model: 'whisper-1',
         language: 'en',
       });
+      recordWhisperSpend({ bytes: audioBuffer.length });
       return transcription.text;
     } catch (error) {
       console.error('[StreamConversation] Transcription error:', error);

@@ -1017,6 +1017,8 @@ export async function registerLiveStreamingEnhancedRoutes(app: Express): Promise
           const { modelGateway } = await import("../lib/modelGateway");
           const completion = await modelGateway.complete({
             tier: "fast",
+            priority: "user",
+            tag: "live-streaming",
             system: "You are a helpful assistant.",
             user: cmd.promptTemplate || 'Provide a brief crypto market insight.',
             maxTokens: 150,

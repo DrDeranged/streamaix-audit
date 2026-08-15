@@ -1,8 +1,9 @@
 import OpenAI from 'openai';
-import { modelGateway } from '../lib/modelGateway';
+import { recordWhisperSpend } from './apiCostTracker';
+import { enforceBudget, modelGateway } from '../lib/modelGateway';
 import { ContentExtractor } from './contentExtractor';
 import { exec } from 'child_process';
-import { promises as fs, createReadStream } from 'fs';
+import { promises as fs, createReadStream, statSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
@@ -76,6 +77,7 @@ export class AIService {
     try {
       const audioStream = createReadStream(audioPath);
       
+      await enforceBudget('user', 'ai-service');
       const transcription = await client.audio.transcriptions.create({
         file: audioStream,
         model: 'whisper-1',
@@ -83,6 +85,7 @@ export class AIService {
         response_format: 'verbose_json'
       });
       
+      recordWhisperSpend({ bytes: statSync(audioPath).size });
       return {
         text: transcription.text,
         language: transcription.language || 'en'
@@ -132,6 +135,8 @@ export class AIService {
         // Generate main summary
         modelGateway.complete({
           tier: 'fast',
+          priority: 'user',
+          tag: 'ai-service',
           system: `You are an expert content summarizer specializing in ${options.contentType} content. ${lengthGuidance[targetLength]}. Focus on practical insights and actionable takeaways.`,
           user: `Please summarize this ${options.contentType} titled "${options.title}":\n\n${transcript}`,
           temperature: 0.3,
@@ -141,6 +146,8 @@ export class AIService {
         // Extract key insights
         modelGateway.complete({
           tier: 'fast',
+          priority: 'user',
+          tag: 'ai-service',
           system: 'Extract 5-8 key insights from this content. Rate each insight as high, medium, or low importance. Return as JSON array.',
           user: `Extract key insights from: ${transcript.slice(0, 12000)}...`,
           temperature: 0.2,
@@ -150,6 +157,8 @@ export class AIService {
         // Generate chapter breakdown
         modelGateway.complete({
           tier: 'fast',
+          priority: 'user',
+          tag: 'ai-service',
           system: 'Break this ENTIRE content into comprehensive logical chapters with accurate timestamps covering the FULL duration. Create detailed chapters for the complete content, not just the beginning. Return as JSON array with title, startTime, endTime, and summary for each chapter. Include all sections and ensure timestamps span the entire content length.',
           user: `Create chapters for: ${transcript.slice(0, 15000)}...`,
           temperature: 0.2,
@@ -159,6 +168,8 @@ export class AIService {
         // Generate relevant tags
         modelGateway.complete({
           tier: 'fast',
+          priority: 'user',
+          tag: 'ai-service',
           system: 'Generate 5-10 relevant tags for this content. Return as JSON array of strings.',
           user: `Generate tags for "${options.title}": ${transcript.slice(0, 8000)}...`,
           temperature: 0.3,
@@ -258,12 +269,14 @@ export class AIService {
     try {
       const audioFile = createReadStream(audioPath);
       
+      await enforceBudget('user', 'ai-service');
       const transcription = await client.audio.transcriptions.create({
         file: audioFile,
         model: 'whisper-1',
         response_format: 'verbose_json',
         timestamp_granularities: ['segment'],
       });
+      recordWhisperSpend({ bytes: statSync(audioPath).size });
       
       return {
         text: transcription.text,
@@ -392,6 +405,8 @@ This transcript represents ${extractedContent.duration} seconds of processed aud
     try {
       const result = await modelGateway.completeJson<{ chapters?: any[] }>({
         tier: 'fast',
+        priority: 'user',
+        tag: 'ai-service',
         system: 'Generate chapter markers from the transcript. Return as JSON array with title, start_time, end_time, and summary for each chapter. Aim for 5-8 chapters.',
         user: `Transcript: ${transcript.substring(0, 4000)}...`,
         temperature: 0.3,
@@ -419,6 +434,8 @@ This transcript represents ${extractedContent.duration} seconds of processed aud
     try {
       const response = await modelGateway.complete({
         tier: 'fast',
+        priority: 'user',
+        tag: 'ai-service',
         system: 'Generate personalized content recommendations based on user interests and recent activity. Return as JSON array.',
         user: `User interests: ${userInterests.join(', ')}\nRecent summaries: ${JSON.stringify(recentSummaries.slice(0, 3))}`,
         temperature: 0.4,
@@ -481,6 +498,8 @@ This transcript represents ${extractedContent.duration} seconds of processed aud
     try {
       const result = await modelGateway.completeJson<any>({
         tier: 'reasoning',
+        priority: 'user',
+        tag: 'ai-service',
         system: `Extract ALL comprehensive intelligence from content in a single analysis. Include:
 
 CONTENT ANALYSIS:
@@ -598,6 +617,8 @@ Return comprehensive JSON with ALL analysis in one response to maximize efficien
     try {
       const result = await modelGateway.completeJson<any>({
         tier: 'fast',
+        priority: 'user',
+        tag: 'ai-service',
         system: `Analyze the market sentiment, identify conflicting viewpoints, and provide overall market outlook. 
             
             Extract:
@@ -640,6 +661,8 @@ Return comprehensive JSON with ALL analysis in one response to maximize efficien
     try {
       const result = await modelGateway.completeJson<any>({
         tier: 'fast',
+        priority: 'user',
+        tag: 'ai-service',
         system: `Assess the credibility of the speaker/source based on:
             1. Track record mentions
             2. Specific credentials or achievements

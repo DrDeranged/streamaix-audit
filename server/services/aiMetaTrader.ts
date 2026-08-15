@@ -192,6 +192,8 @@ Respond with JSON:
 
     const response = await modelGateway.completeJson<any>({
       tier: "reasoning",
+      priority: "background",
+      tag: "ai-meta-trader",
       system: "You are an arbitrage expert. Always return valid JSON.",
       user: prompt,
       temperature: 0.2,

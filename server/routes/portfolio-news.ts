@@ -309,6 +309,8 @@ ${context.assets.slice(0, 5).map((a: any) => `- ${a.symbol} (${a.assetType}): $$
       
       const completion = await modelGateway.complete({
         tier: "reasoning",
+        priority: "user",
+        tag: "portfolio-news",
         system: `You are a helpful AI financial advisor for StreamAiX, a decentralized investment platform. Provide concise, actionable advice based on the user's portfolio. Be friendly but professional. Focus on:
 - Risk management and diversification
 - Tax optimization strategies

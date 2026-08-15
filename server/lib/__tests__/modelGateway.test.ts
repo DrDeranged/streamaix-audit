@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 const createMock = vi.fn();
 
+vi.mock("../../db", () => ({ db: { select: () => ({ from: () => ({ where: async () => [{ total: 0 }] }) }), insert: () => ({ values: () => ({ onConflictDoUpdate: async () => undefined }) }) } }));
+
 vi.mock("@anthropic-ai/sdk", () => {
   class MockAnthropic {
     messages = { create: createMock };
@@ -43,6 +45,8 @@ describe("ModelGateway (Anthropic-backed)", () => {
     createMock.mockResolvedValue(textResponse("hello"));
     const result = await gateway.complete({
       tier: "reasoning",
+      priority: "user",
+      tag: "test",
       system: "sys",
       user: "hi",
     });
@@ -54,7 +58,9 @@ describe("ModelGateway (Anthropic-backed)", () => {
 
   it("routes fast tier to the default Haiku model with required max_tokens", async () => {
     createMock.mockResolvedValue(textResponse("ok"));
-    await gateway.complete({ tier: "fast", system: "s", user: "u" });
+    await gateway.complete({ tier: "fast",
+      priority: "user",
+      tag: "test", system: "s", user: "u" });
     expect(createMock).toHaveBeenCalledWith(
       expect.objectContaining({
         model: "claude-haiku-4-5-20251001",
@@ -66,7 +72,9 @@ describe("ModelGateway (Anthropic-backed)", () => {
   it("reads model IDs from env at call time", async () => {
     process.env.MODEL_REASONING = "claude-opus-test";
     createMock.mockResolvedValue(textResponse("x"));
-    await gateway.complete({ tier: "reasoning", system: "s", user: "u" });
+    await gateway.complete({ tier: "reasoning",
+      priority: "user",
+      tag: "test", system: "s", user: "u" });
     expect(createMock).toHaveBeenCalledWith(
       expect.objectContaining({ model: "claude-opus-test" }),
     );
@@ -74,7 +82,9 @@ describe("ModelGateway (Anthropic-backed)", () => {
 
   it("honors per-call maxTokens override", async () => {
     createMock.mockResolvedValue(textResponse("x"));
-    await gateway.complete({ tier: "fast", system: "s", user: "u", maxTokens: 42 });
+    await gateway.complete({ tier: "fast",
+      priority: "user",
+      tag: "test", system: "s", user: "u", maxTokens: 42 });
     expect(createMock).toHaveBeenCalledWith(
       expect.objectContaining({ max_tokens: 42 }),
     );
@@ -88,14 +98,18 @@ describe("ModelGateway (Anthropic-backed)", () => {
         { type: "text", text: "part2" },
       ],
     });
-    const result = await gateway.complete({ tier: "fast", system: "s", user: "u" });
+    const result = await gateway.complete({ tier: "fast",
+      priority: "user",
+      tag: "test", system: "s", user: "u" });
     expect(result.content).toBe("part1 part2");
   });
 
   it("throws when PAUSE_ANTHROPIC_API=true", async () => {
     process.env.PAUSE_ANTHROPIC_API = "true";
     await expect(
-      gateway.complete({ tier: "fast", system: "s", user: "u" }),
+      gateway.complete({ tier: "fast",
+      priority: "user",
+      tag: "test", system: "s", user: "u" }),
     ).rejects.toThrow(/PAUSE_ANTHROPIC_API/);
     expect(createMock).not.toHaveBeenCalled();
   });
@@ -103,7 +117,9 @@ describe("ModelGateway (Anthropic-backed)", () => {
   it("PAUSE_OPENAI_API does NOT block Anthropic-routed calls", async () => {
     process.env.PAUSE_OPENAI_API = "true";
     createMock.mockResolvedValue(textResponse("fine"));
-    const result = await gateway.complete({ tier: "fast", system: "s", user: "u" });
+    const result = await gateway.complete({ tier: "fast",
+      priority: "user",
+      tag: "test", system: "s", user: "u" });
     expect(result.content).toBe("fine");
   });
 
@@ -111,7 +127,9 @@ describe("ModelGateway (Anthropic-backed)", () => {
     createMock
       .mockRejectedValueOnce({ status: 529, error: { type: "overloaded_error" } })
       .mockResolvedValueOnce(textResponse("recovered"));
-    const result = await gateway.complete({ tier: "fast", system: "s", user: "u" });
+    const result = await gateway.complete({ tier: "fast",
+      priority: "user",
+      tag: "test", system: "s", user: "u" });
     expect(result.content).toBe("recovered");
     expect(createMock).toHaveBeenCalledTimes(2);
   });
@@ -119,7 +137,9 @@ describe("ModelGateway (Anthropic-backed)", () => {
   it("does not retry on non-retryable errors", async () => {
     createMock.mockRejectedValue({ status: 400, error: { type: "invalid_request_error" } });
     await expect(
-      gateway.complete({ tier: "fast", system: "s", user: "u" }),
+      gateway.complete({ tier: "fast",
+      priority: "user",
+      tag: "test", system: "s", user: "u" }),
     ).rejects.toBeTruthy();
     expect(createMock).toHaveBeenCalledTimes(1);
   });
@@ -128,6 +148,8 @@ describe("ModelGateway (Anthropic-backed)", () => {
     createMock.mockResolvedValue(textResponse('```json\n{"a":1}\n```'));
     const result = await gateway.completeJson<{ a: number }>({
       tier: "fast",
+      priority: "user",
+      tag: "test",
       system: "s",
       user: "u",
       jsonSchema: { name: "test", schema: { type: "object" } },
@@ -141,6 +163,8 @@ describe("ModelGateway (Anthropic-backed)", () => {
       .mockResolvedValueOnce(textResponse('{"b":2}'));
     const result = await gateway.completeJson<{ b: number }>({
       tier: "fast",
+      priority: "user",
+      tag: "test",
       system: "s",
       user: "u",
     });
@@ -153,7 +177,9 @@ describe("ModelGateway (Anthropic-backed)", () => {
   it("completeJson throws after the repair retry also fails", async () => {
     createMock.mockResolvedValue(textResponse("still not json"));
     await expect(
-      gateway.completeJson({ tier: "fast", system: "s", user: "u" }),
+      gateway.completeJson({ tier: "fast",
+      priority: "user",
+      tag: "test", system: "s", user: "u" }),
     ).rejects.toBeTruthy();
     expect(createMock).toHaveBeenCalledTimes(2);
   });

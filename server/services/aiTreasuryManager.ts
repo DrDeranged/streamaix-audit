@@ -145,6 +145,8 @@ GUIDELINES:
 
     const response = await modelGateway.completeJson<any>({
       tier: "fast",
+      priority: "background",
+      tag: "ai-treasury-manager",
       system: "You are a treasury manager. Always return valid JSON.",
       user: prompt,
       temperature: 0.3,

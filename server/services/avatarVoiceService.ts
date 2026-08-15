@@ -1,6 +1,7 @@
 import { openai as lazyOpenai } from "../lib/openaiClient";
 const openai = lazyOpenai;
-import { modelGateway } from "../lib/modelGateway";
+import { modelGateway, enforceBudget } from "../lib/modelGateway";
+import { recordTtsSpend } from "./apiCostTracker";
 import { db } from '../db';
 import { knowledgeAvatars } from '@shared/schema';
 import { eq } from 'drizzle-orm';
@@ -126,6 +127,7 @@ export class AvatarVoiceService {
     try {
       console.log(`[TTS] Generating speech for ${avatarName} (voice: ${voiceConfig.voice}, speed: ${voiceConfig.speed})`);
       
+      await enforceBudget('background', 'avatar-voice');
       const response = await openai.audio.speech.create({
         model: 'tts-1',
         voice: voiceConfig.voice,
@@ -133,6 +135,7 @@ export class AvatarVoiceService {
         speed: voiceConfig.speed,
         response_format: 'mp3',
       });
+      recordTtsSpend(text.length);
 
       const arrayBuffer = await response.arrayBuffer();
       const audioBuffer = Buffer.from(arrayBuffer);
@@ -168,13 +171,15 @@ export class AvatarVoiceService {
     
     console.log(`[TTS] Streaming speech for ${avatarName}`);
     
-    const response = await openai.audio.speech.create({
+    await enforceBudget('background', 'avatar-voice');
+      const response = await openai.audio.speech.create({
       model: 'tts-1',
       voice: voiceConfig.voice,
       input: text,
       speed: voiceConfig.speed,
       response_format: 'mp3',
     });
+      recordTtsSpend(text.length);
 
     return response.body as unknown as ReadableStream<Uint8Array>;
   }
@@ -198,6 +203,8 @@ export class AvatarVoiceService {
     try {
       const completion = await modelGateway.complete({
         tier: 'fast',
+        priority: 'background',
+        tag: 'avatar-voice-service',
         system: `You are ${avatarName}. Speak naturally as if on a live podcast. Use conversational language, occasional filler words for authenticity, and your signature phrases. Never break character. Do not use markdown or formatting - just natural speech.`,
         user: prompts[segmentType],
         maxTokens: 300,
@@ -233,6 +240,8 @@ export class AvatarVoiceService {
     try {
       const completion = await modelGateway.complete({
         tier: 'fast',
+        priority: 'background',
+        tag: 'avatar-voice-service',
         system: `You are ${avatarName}, hosting a live crypto podcast stream. Speak naturally and conversationally. Your style: ${voiceConfig.style}. Continue the conversation naturally, referencing previous points when relevant. Keep responses to 2-3 sentences (15-30 seconds of speech). Never use markdown.`,
         user: `Topic: ${topic}\nMarket: ${marketContext}\n${previousContext ? `Previous: ${previousContext}\n` : ''}Continue your live commentary...`,
         maxTokens: 150,
@@ -260,6 +269,8 @@ export class AvatarVoiceService {
     try {
       const completion = await modelGateway.complete({
         tier: 'fast',
+        priority: 'background',
+        tag: 'avatar-voice-service',
         system: `You are ${avatarName} on a live stream. A viewer named ${viewerName} just asked a question. Acknowledge them by name, then answer thoughtfully in your authentic voice. Style: ${voiceConfig.style}. Keep response to 30-45 seconds. No markdown.`,
         user: `Viewer ${viewerName} asks: "${question}"\n\nMarket context: ${marketContext}`,
         maxTokens: 200,
@@ -289,6 +300,8 @@ export class AvatarVoiceService {
     try {
       const completion = await modelGateway.complete({
         tier: 'fast',
+        priority: 'background',
+        tag: 'avatar-voice-service',
         system: `You are ${avatarName} reacting live to a market move. Be authentic, show appropriate emotion for the magnitude of the move. Style: ${voiceConfig.style}. Keep it brief - 10-20 seconds. No markdown.`,
         user: `${urgency.toUpperCase()}: ${asset} is ${direction}! ${priceChange > 0 ? '+' : ''}${priceChange.toFixed(2)}% to $${currentPrice.toLocaleString()}. React and provide quick analysis.`,
         maxTokens: 100,
@@ -338,13 +351,15 @@ export class AvatarVoiceService {
         console.log(`[TTS TEST] 🎤 Segment ${i + 1}/${maxSegments}: "${phrase}"`);
         const startTime = Date.now();
 
-        const response = await openai.audio.speech.create({
+        await enforceBudget('background', 'avatar-voice');
+      const response = await openai.audio.speech.create({
           model: 'tts-1',
           voice: voiceConfig.voice,
           input: phrase,
           speed: voiceConfig.speed,
           response_format: 'mp3',
         });
+      recordTtsSpend(phrase.length);
 
         const arrayBuffer = await response.arrayBuffer();
         const audioBuffer = Buffer.from(arrayBuffer);
@@ -392,6 +407,7 @@ export class AvatarVoiceService {
     try {
       const voiceConfig = this.getVoiceForAvatar(avatarName);
       
+      await enforceBudget('background', 'avatar-voice');
       const response = await openai.audio.speech.create({
         model: 'tts-1',
         voice: voiceConfig.voice,
@@ -399,6 +415,7 @@ export class AvatarVoiceService {
         speed: voiceConfig.speed,
         response_format: 'mp3',
       });
+      recordTtsSpend(phrase.length);
 
       const arrayBuffer = await response.arrayBuffer();
       const audioBase64 = Buffer.from(arrayBuffer).toString('base64');

@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer, jsonb, boolean, real, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, jsonb, boolean, real, doublePrecision, uniqueIndex, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -7654,6 +7654,22 @@ export const jobRuns = pgTable("job_runs", {
 export const insertJobRunSchema = createInsertSchema(jobRuns);
 export type InsertJobRun = z.infer<typeof insertJobRunSchema>;
 export type JobRun = typeof jobRuns.$inferSelect;
+
+// Daily AI spend ledger (UTC days) — persists the budget meter across restarts.
+export const apiSpendDaily = pgTable(
+  "api_spend_daily",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    day: text("day").notNull(), // YYYY-MM-DD (UTC)
+    service: text("service").notNull(), // anthropic | openai
+    model: text("model").notNull(),
+    costUsd: doublePrecision("cost_usd").default(0).notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (t) => [uniqueIndex("api_spend_daily_day_service_model_idx").on(t.day, t.service, t.model)],
+);
+
+export type ApiSpendDaily = typeof apiSpendDaily.$inferSelect;
 
 // ---------------------------------------------------------------------------
 // Non-custodial swap rail (Base). Dormant unless SWAPS_ENABLED=true.

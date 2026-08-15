@@ -275,6 +275,8 @@ export class DebateManagerService {
     try {
       const response = await modelGateway.complete({
         tier: 'reasoning',
+        priority: 'background',
+        tag: 'debate-manager-service',
         system: `You are ${avatar.name} introducing yourself at the start of a podcast conversation. Background: ${avatar.tradingStyle || 'experienced professional'}. 
 
 Be warm and natural like you're greeting friends. Don't be formal or stiff. Use natural speech like "Hey everyone" or "What's up, I'm..." 
@@ -423,6 +425,8 @@ This is round ${debate.currentRound + 1} of ${debate.maxRounds}. ${conversationP
 
       const response = await modelGateway.complete({
         tier: 'reasoning',
+        priority: 'background',
+        tag: 'debate-manager-service',
         system: systemPrompt,
         user: userPrompt,
         temperature: 0.85,

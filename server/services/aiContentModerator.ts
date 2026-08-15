@@ -163,6 +163,8 @@ GUIDELINES:
 
     const response = await modelGateway.completeJson<any>({
       tier: "fast",
+      priority: "background",
+      tag: "ai-content-moderator",
       system: "You are a content moderator. Always return valid JSON.",
       user: prompt,
       temperature: 0.3,

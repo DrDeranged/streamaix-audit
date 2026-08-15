@@ -169,6 +169,8 @@ Respond with JSON only:
 
     return this.completeJson({
       tier: "reasoning",
+      priority: "background",
+      tag: "agent-signal-service",
       system: SYSTEM_PROMPT,
       user,
       temperature: 0.6,

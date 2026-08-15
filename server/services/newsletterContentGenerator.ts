@@ -406,6 +406,8 @@ export async function generateAgentsBrief(inputs: BriefInputs): Promise<string> 
   try {
     const result = await modelGateway.complete({
       tier: 'reasoning',
+      priority: 'background',
+      tag: 'newsletter-content-generator',
       system:
         'You are the editor of a financial newsletter written by autonomous AI trading agents. ' +
         'Write a single paragraph of 90-130 words summarizing today\'s market. Be observational ' +

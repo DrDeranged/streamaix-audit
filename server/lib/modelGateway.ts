@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { checkBudget, dailyBudgetLedger } from "../services/apiCostTracker";
 
 /**
  * Model Gateway
@@ -31,8 +32,34 @@ function modelForTier(tier: ModelTier): string {
 const DEFAULT_MAX_TOKENS = 1024;
 const REQUEST_TIMEOUT_MS = 60_000;
 
+export type CallPriority = "user" | "background";
+
+/**
+ * Tags whose calls are purely cosmetic ambience — first to be shed when the
+ * daily AI budget degrades (>=80%).
+ */
+export const COSMETIC_TAGS = new Set([
+  "avatar-commentary",
+  "social-chatter",
+  "community-manager",
+  "stream-conversation",
+]);
+
+/** Thrown when the daily AI budget blocks a call. Routes map this to 503. */
+export class BudgetExceededError extends Error {
+  readonly statusCode = 503;
+  constructor(message: string) {
+    super(message);
+    this.name = "BudgetExceededError";
+  }
+}
+
 export interface GatewayCompletionRequest {
   tier: ModelTier;
+  /** Who asked: a live user request, or a background job. Drives budget shedding. */
+  priority: CallPriority;
+  /** Stable call-site label (e.g. "avatar-commentary") for cost attribution + shedding. */
+  tag: string;
   system: string;
   user: string;
   temperature?: number;
@@ -98,11 +125,51 @@ export function stripJsonFences(raw: string): string {
   return text;
 }
 
+/**
+ * Daily budget enforcement tiers:
+ * - >=80%: background calls with cosmetic tags are shed (logged warning).
+ * - >=100%: ALL background calls are blocked.
+ * - >=150%: user-initiated calls are blocked too (routes surface a 503).
+ * Fail-open on ledger errors: a broken meter must not take down AI features.
+ */
+export async function enforceBudget(priority: CallPriority, tag: string): Promise<void> {
+  let status;
+  try {
+    status = await checkBudget();
+  } catch (err) {
+    console.error("[budget] checkBudget failed — allowing call:", err);
+    return;
+  }
+  const pct = Math.round(status.ratio * 100);
+  if (priority === "background") {
+    if (status.ratio >= 1) {
+      console.warn(`[budget] blocked background call "${tag}" — daily AI budget at ${pct}%`);
+      throw new BudgetExceededError(
+        `Daily AI budget exhausted (${pct}% of $${status.budgetUsd}); background call "${tag}" blocked`,
+      );
+    }
+    if (status.ratio >= 0.8 && COSMETIC_TAGS.has(tag)) {
+      console.warn(`[budget] skipped cosmetic call "${tag}" — daily AI budget at ${pct}% (degraded)`);
+      throw new BudgetExceededError(
+        `Daily AI budget degraded (${pct}% of $${status.budgetUsd}); cosmetic call "${tag}" skipped`,
+      );
+    }
+    return;
+  }
+  if (status.ratio >= 1.5) {
+    console.warn(`[budget] blocked user call "${tag}" — daily AI budget at ${pct}%`);
+    throw new BudgetExceededError(
+      `AI features are temporarily unavailable: daily AI budget exceeded (${pct}% of $${status.budgetUsd}). Try again tomorrow.`,
+    );
+  }
+}
+
 export class ModelGateway {
   async complete(req: GatewayCompletionRequest): Promise<GatewayCompletionResult> {
     if (process.env.PAUSE_ANTHROPIC_API === "true") {
       throw new Error("Anthropic API paused (PAUSE_ANTHROPIC_API=true)");
     }
+    await enforceBudget(req.priority, req.tag);
     const model = modelForTier(req.tier);
     const client = getAnthropicClient();
 
@@ -129,6 +196,16 @@ export class ModelGateway {
       // One retry with backoff + jitter on 429/5xx/overloaded_error.
       await sleep(1000 + Math.random() * 1000);
       response = await doRequest();
+    }
+
+    const usage = response.usage;
+    if (usage) {
+      dailyBudgetLedger.recordModelTokens(
+        "anthropic",
+        model,
+        usage.input_tokens ?? 0,
+        usage.output_tokens ?? 0,
+      );
     }
 
     const content = response.content

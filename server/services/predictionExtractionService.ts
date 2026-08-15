@@ -167,6 +167,8 @@ Return ONLY valid JSON in this exact format:
 
     const result = await modelGateway.completeJson<PredictionExtractionResult>({
       tier: "reasoning",
+      priority: "background",
+      tag: "prediction-extraction-service",
       system: 'You are a prediction market expert that extracts verifiable claims from content and formats them as binary prediction markets. Always return valid JSON.',
       user: prompt,
       temperature: 0.3,

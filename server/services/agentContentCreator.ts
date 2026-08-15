@@ -39,6 +39,8 @@ export class AgentContentCreator {
       
       const response = await modelGateway.complete({
         tier: 'fast',
+        priority: 'background',
+        tag: 'social-chatter',
         system: this.getSummarySystemPrompt(params.skillLevel),
         user: prompt,
         temperature: this.getTemperatureForSkill(params.skillLevel),
@@ -83,6 +85,8 @@ export class AgentContentCreator {
       
       const response = await modelGateway.complete({
         tier: 'fast',
+        priority: 'background',
+        tag: 'social-chatter',
         system: 'You are a crypto community member leaving thoughtful comments. Be concise, authentic, and add value. 1-3 sentences max.',
         user: prompt,
         temperature: 0.9,
@@ -120,6 +124,8 @@ Provide a brief, data-driven rationale (2-3 sentences). Consider your trading st
 
       const response = await modelGateway.complete({
         tier: 'fast',
+        priority: 'background',
+        tag: 'social-chatter',
         system: 'You are a crypto trader explaining your market predictions. Be concise and analytical.',
         user: prompt,
         temperature: 0.7,

@@ -169,6 +169,8 @@ Respond in JSON format:
     try {
       const analysis = await modelGateway.completeJson<any>({
         tier: "reasoning",
+        priority: "background",
+        tag: "agent-market-analyzer",
         system: systemPrompt,
         user: userPrompt,
         temperature: 0.7,

@@ -202,6 +202,8 @@ Provide your analysis in JSON format:
     try {
       const analysis = await modelGateway.completeJson<any>({
         tier: "reasoning",
+        priority: "background",
+        tag: "ai-trading-bot-service",
         system: systemPrompt,
         user: userPrompt,
         temperature: bot.personality === 'contrarian' ? 0.9 : 0.7,

@@ -287,6 +287,8 @@ Do NOT use hashtags. Keep it conversational but packed with alpha.`;
 
       const response = await modelGateway.complete({
         tier: "reasoning",
+        priority: "background",
+        tag: "avatar-alpha-stream-service",
         system: systemPrompt,
         user: `${marketContext}\n\nShare an alpha insight about ${randomTopic} in your stream.`,
         maxTokens: 150,

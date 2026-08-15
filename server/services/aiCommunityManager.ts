@@ -163,6 +163,8 @@ Keep it natural and conversational. Don't be overly formal or robotic.`;
 
     const completion = await modelGateway.complete({
       tier: "fast",
+      priority: "background",
+      tag: "community-manager",
       system: "You are a helpful community manager. Be friendly and concise.",
       user: prompt,
       maxTokens: 150,

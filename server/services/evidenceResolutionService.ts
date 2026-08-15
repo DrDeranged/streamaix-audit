@@ -236,6 +236,8 @@ export class EvidenceResolutionService {
 
     const result = await modelGateway.completeJson<EvidenceAssessment>({
       tier: "reasoning",
+      priority: "background",
+      tag: "evidence-resolution-service",
       system:
         "You resolve binary prediction markets strictly from the numbered evidence provided. " +
         "You must cite the evidence item indices that justify your outcome in citedEvidence. " +

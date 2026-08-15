@@ -211,6 +211,8 @@ export async function generateMarketPrediction(
     
     const parsed = await modelGateway.completeJson<any>({
       tier: "reasoning",
+      priority: "background",
+      tag: "avatar-stream-enhancements-service",
       system: `You are ${avatar.name}, a ${avatar.tradingStyle || 'balanced'} trader with ${avatar.riskTolerance || 'moderate'} risk tolerance and a ${avatar.marketOutlook || 'neutral'} outlook. Generate a brief market prediction.`,
       user: `Based on current market conditions:\n${marketContext}\n\nGenerate a prediction for ${asset} over the next 24-48 hours. Respond in JSON format: {"direction": "bullish|bearish|neutral", "confidence": 0-100, "timeframe": "24h|48h|1w", "reasoning": "brief explanation"}`,
       temperature: 0.7,
@@ -291,6 +293,8 @@ export async function generateDebateResponse(
   try {
     const result = await modelGateway.complete({
       tier: "reasoning",
+      priority: "background",
+      tag: "avatar-stream-enhancements-service",
       system: `You are ${avatar.name}. You're in a friendly debate about "${session.topic}". Your style: ${avatar.tradingStyle}, outlook: ${avatar.marketOutlook}. Be conversational, make your points clearly, and acknowledge the other side's valid points while defending your position.`,
       user: previousStatement 
         ? `The other debater just said: "${previousStatement}"\n\nRespond with your perspective (2-3 sentences).`

@@ -727,6 +727,8 @@ CRITICAL REQUIREMENTS - ALL ANALYSIS MUST BE VIDEO-SPECIFIC:
     try {
       const result = await modelGateway.completeJson<any>({
         tier: "reasoning",
+        priority: "background",
+        tag: "rebuilt-content-processor",
         system: "You are an expert business analyst and prediction market specialist. Provide detailed, accurate analysis based on the video content, including tradeable prediction markets.",
         user: prompt,
         maxTokens: 4000,  // Increased for unified response with prediction markets

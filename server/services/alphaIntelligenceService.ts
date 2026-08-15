@@ -983,6 +983,8 @@ class AlphaIntelligenceService {
     try {
       const response = await modelGateway.complete({
         tier: "reasoning",
+        priority: "background",
+        tag: "alpha-intelligence-service",
         system: `You are an expert crypto trading analyst. Generate 3 actionable trade ideas based on REAL current market prices provided. For each trade, provide entry, target, stop loss, and reasoning. Focus on risk/reward > 2:1. Return JSON array only.`,
         user: `Generate 3 crypto trade ideas using these LIVE CoinGecko prices:
             - BTC: $${btcPrice.toLocaleString()}

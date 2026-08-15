@@ -97,6 +97,8 @@ export async function generateChatResponse(
 
     const response = await modelGateway.complete({
       tier: 'fast',
+      priority: 'user',
+      tag: 'chat',
       system: systemContent,
       user: userContent,
       temperature: 0.7,
@@ -128,6 +130,8 @@ export async function generateStreamingChatResponse(
 
     const response = await modelGateway.complete({
       tier: 'fast',
+      priority: 'user',
+      tag: 'chat',
       system: systemContent,
       user: userContent,
       temperature: 0.7,
