@@ -380,10 +380,29 @@ class DailyBudgetLedger {
     if (this.loadedDay === day) return;
     if (!this.loadPromise) {
       this.loadPromise = (async () => {
-        const rows = await db
-          .select({ total: dsql<number>`coalesce(sum(${apiSpendDaily.costUsd}), 0)` })
-          .from(apiSpendDaily)
-          .where(eq(apiSpendDaily.day, day));
+        const loadTotal = () =>
+          db
+            .select({ total: dsql<number>`coalesce(sum(${apiSpendDaily.costUsd}), 0)` })
+            .from(apiSpendDaily)
+            .where(eq(apiSpendDaily.day, day));
+        let rows;
+        try {
+          rows = await loadTotal();
+        } catch {
+          // Fresh database (db:push is blocked by unrelated drift): bootstrap
+          // the ledger table idempotently, then retry once.
+          await db.execute(dsql`CREATE TABLE IF NOT EXISTS api_spend_daily (
+            id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+            day text NOT NULL,
+            service text NOT NULL,
+            model text NOT NULL,
+            cost_usd double precision NOT NULL DEFAULT 0,
+            updated_at timestamp NOT NULL DEFAULT now()
+          )`);
+          await db.execute(dsql`CREATE UNIQUE INDEX IF NOT EXISTS api_spend_daily_day_service_model_idx
+            ON api_spend_daily (day, service, model)`);
+          rows = await loadTotal();
+        }
         // keep any pending deltas for today that accrued while loading
         let pendingToday = 0;
         for (const [key, delta] of Array.from(this.pending.entries())) {
@@ -426,14 +445,19 @@ class DailyBudgetLedger {
     return cost;
   }
 
-  /** Upsert-increment pending deltas into api_spend_daily. */
+  /**
+   * Upsert-increment pending deltas into api_spend_daily.
+   * Rows are removed from the batch as each upsert succeeds, so a partial
+   * failure re-queues ONLY the unapplied rows — never double-counts.
+   */
   async flush(): Promise<void> {
     if (this.pending.size === 0) return;
     const batch = Array.from(this.pending.entries());
     this.pending.clear();
-    try {
-      for (const [key, delta] of batch) {
-        const [day, service, model] = key.split("|");
+    for (let i = 0; i < batch.length; i++) {
+      const [key, delta] = batch[i];
+      const [day, service, model] = key.split("|");
+      try {
         await db
           .insert(apiSpendDaily)
           .values({ day, service, model, costUsd: delta })
@@ -444,13 +468,13 @@ class DailyBudgetLedger {
               updatedAt: dsql`now()`,
             },
           });
+      } catch (err) {
+        // Re-queue only the failed row and the not-yet-attempted remainder.
+        for (const [k, d] of batch.slice(i)) {
+          this.pending.set(k, (this.pending.get(k) ?? 0) + d);
+        }
+        throw err;
       }
-    } catch (err) {
-      // Re-queue on failure so spend is never silently dropped.
-      for (const [key, delta] of batch) {
-        this.pending.set(key, (this.pending.get(key) ?? 0) + delta);
-      }
-      throw err;
     }
   }
 

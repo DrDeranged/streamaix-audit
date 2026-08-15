@@ -7,7 +7,9 @@ const dbState: {
   persistedTotal: number;
   upserts: Array<{ values: any; setDelta?: number }>;
   failFlush: boolean;
-} = { persistedTotal: 0, upserts: [], failFlush: false };
+  failOnUpsertIndex: number | null;
+  upsertAttempts: number;
+} = { persistedTotal: 0, upserts: [], failFlush: false, failOnUpsertIndex: null, upsertAttempts: 0 };
 
 vi.mock("../../db", () => ({
   db: {
@@ -25,7 +27,11 @@ vi.mock("../../db", () => ({
     insert: () => ({
       values: (values: any) => ({
         onConflictDoUpdate: async () => {
+          const idx = dbState.upsertAttempts++;
           if (dbState.failFlush) throw new Error("db down");
+          if (dbState.failOnUpsertIndex !== null && idx === dbState.failOnUpsertIndex) {
+            throw new Error("db down mid-batch");
+          }
           dbState.upserts.push({ values });
         },
       }),
@@ -60,6 +66,8 @@ function seed(persistedTotal: number, budget = 100) {
   dbState.persistedTotal = persistedTotal;
   dbState.upserts = [];
   dbState.failFlush = false;
+  dbState.failOnUpsertIndex = null;
+  dbState.upsertAttempts = 0;
   process.env.DAILY_AI_BUDGET_USD = String(budget);
 }
 
@@ -144,6 +152,25 @@ describe("persistence across simulated restart", () => {
     await dailyBudgetLedger.flush();
     expect(dbState.upserts.length).toBe(1);
     expect(dbState.upserts[0].values.costUsd).toBeCloseTo(2);
+  });
+
+  it("partial flush failure re-queues ONLY unapplied rows (no double-count)", async () => {
+    seed(0);
+    dailyBudgetLedger.recordSpend("anthropic", "claude-sonnet-4-6", 3); // row 0 succeeds
+    dailyBudgetLedger.recordSpend("openai", "tts-1", 1); // row 1 fails
+    dailyBudgetLedger.recordSpend("openai", "whisper-1", 0.5); // row 2 never attempted
+    dbState.failOnUpsertIndex = 1;
+    await expect(dailyBudgetLedger.flush()).rejects.toThrow("mid-batch");
+    expect(dbState.upserts.length).toBe(1); // only the sonnet row landed
+    dbState.failOnUpsertIndex = null;
+    await dailyBudgetLedger.flush();
+    // sonnet row must NOT be re-upserted; the two failed rows land exactly once
+    const totals: Record<string, number> = {};
+    for (const u of dbState.upserts) totals[u.values.model] = (totals[u.values.model] ?? 0) + u.values.costUsd;
+    expect(totals["claude-sonnet-4-6"]).toBeCloseTo(3);
+    expect(totals["tts-1"]).toBeCloseTo(1);
+    expect(totals["whisper-1"]).toBeCloseTo(0.5);
+    expect(dbState.upserts.length).toBe(3);
   });
 
   it("counts unflushed in-memory spend toward today's total", async () => {
