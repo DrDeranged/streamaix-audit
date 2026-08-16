@@ -402,6 +402,12 @@ export const knowledgeAvatars = pgTable("knowledge_avatars", {
   recentThoughts: text("recent_thoughts").array(),
   netWorth: text("net_worth"),
   portfolioRoi: real("portfolio_roi"),
+  // Legacy performance stats (kept per 2026-08-16 drift verdict; seeded by auto-seed)
+  sharpeRatio: real("sharpe_ratio"),
+  alphaGenerated: real("alpha_generated"),
+  totalInvestments: integer("total_investments"),
+  successfulExits: integer("successful_exits"),
+  activeProjects: integer("active_projects"),
   accuracyPercentage: real("accuracy_percentage"),
   influenceScore: real("influence_score"),
   investmentCount: integer("investment_count"),

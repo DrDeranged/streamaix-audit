@@ -6,7 +6,7 @@ import { seedPredictionAndMacroLessons } from './seed-learning-content-part2';
 import { seedLearningQuizzes } from './seed-learning-quizzes';
 import { seedBotHistoricalTrades, updateAvatarTradingStats, seedAgentStakesOnAvatars } from './services/botTradingSimulator';
 
-const avatarSeedData = [
+export const avatarSeedData = [
   {
     name: 'Marc Andreessen',
     handle: 'pmarca',
