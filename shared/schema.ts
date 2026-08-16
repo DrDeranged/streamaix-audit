@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer, jsonb, boolean, real, doublePrecision, uniqueIndex, unique, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, jsonb, boolean, real, doublePrecision, uniqueIndex, unique, foreignKey, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -263,7 +263,7 @@ export const conversations = pgTable("conversations", {
 
 export const conversationLikes = pgTable("conversation_likes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  conversationId: varchar("conversation_id").references(() => conversations.id).notNull(),
+  conversationId: varchar("conversation_id").references(() => conversations.id, { onDelete: "cascade" }).notNull(),
   userId: varchar("user_id").references(() => users.id).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
@@ -273,18 +273,21 @@ export const conversationLikes = pgTable("conversation_likes", {
 
 export const conversationComments = pgTable("conversation_comments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  conversationId: varchar("conversation_id").references(() => conversations.id).notNull(),
+  conversationId: varchar("conversation_id").references(() => conversations.id, { onDelete: "cascade" }).notNull(),
   userId: varchar("user_id").references(() => users.id).notNull(),
   content: text("content").notNull(),
-  parentCommentId: varchar("parent_comment_id").references((): AnyPgColumn => conversationComments.id), // for nested replies
+  parentCommentId: varchar("parent_comment_id"), // for nested replies (self-FK declared below with explicit name)
   likesCount: integer("likes_count").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  // Name matches the DB constraint (Postgres truncates identifiers to 63 chars)
+  parentCommentFk: foreignKey({ columns: [table.parentCommentId], foreignColumns: [table.id], name: "conversation_comments_parent_comment_id_conversation_comments_i" }),
+}));
 
 export const conversationShares = pgTable("conversation_shares", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  conversationId: varchar("conversation_id").references(() => conversations.id).notNull(),
+  conversationId: varchar("conversation_id").references(() => conversations.id, { onDelete: "cascade" }).notNull(),
   userId: varchar("user_id").references(() => users.id).notNull(),
   platform: text("platform"), // 'twitter', 'lens', 'farcaster', 'internal'
   createdAt: timestamp("created_at").defaultNow(),
@@ -446,8 +449,8 @@ export const avatarConversations = pgTable("avatar_conversations", {
 // Avatar Following System
 export const avatarFollows = pgTable("avatar_follows", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id).notNull(),
-  avatarId: varchar("avatar_id").references(() => knowledgeAvatars.id).notNull(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  avatarId: varchar("avatar_id").references(() => knowledgeAvatars.id, { onDelete: "cascade" }).notNull(),
   followedAt: timestamp("followed_at").defaultNow(),
   notificationsEnabled: boolean("notifications_enabled").default(true),
   // Ensure unique user-avatar pairs (name matches existing DB constraint)
@@ -458,8 +461,8 @@ export const avatarFollows = pgTable("avatar_follows", {
 // Avatar Content Interactions
 export const avatarContentInteractions = pgTable("avatar_content_interactions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id).notNull(),
-  avatarId: varchar("avatar_id").references(() => knowledgeAvatars.id).notNull(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  avatarId: varchar("avatar_id").references(() => knowledgeAvatars.id, { onDelete: "cascade" }).notNull(),
   contentId: text("content_id").notNull(), // ID of specific content piece
   interactionType: text("interaction_type").notNull(), // like, bookmark, share, comment
   metadata: jsonb("metadata"), // Additional interaction data
@@ -469,7 +472,7 @@ export const avatarContentInteractions = pgTable("avatar_content_interactions", 
 // Avatar Insights & Analytics
 export const avatarInsights = pgTable("avatar_insights", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  avatarId: varchar("avatar_id").references(() => knowledgeAvatars.id).notNull(),
+  avatarId: varchar("avatar_id").references(() => knowledgeAvatars.id, { onDelete: "cascade" }).notNull(),
   insightType: text("insight_type").notNull(), // thought, prediction, analysis, recommendation
   title: text("title").notNull(),
   content: text("content").notNull(),
@@ -4220,12 +4223,12 @@ export const streamParticipants = pgTable("stream_participants", {
 export const streamConversationMessages = pgTable("stream_conversation_messages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   streamId: varchar("stream_id").references(() => liveStreams.id).notNull(),
-  participantId: varchar("participant_id").references(() => streamParticipants.id).notNull(),
+  participantId: varchar("participant_id").notNull(), // FK declared below with explicit (truncated) name
   
   // Speaker info (denormalized for quick access)
   speakerType: text("speaker_type").notNull(), // user, avatar
   speakerUserId: varchar("speaker_user_id").references(() => users.id),
-  speakerAvatarId: varchar("speaker_avatar_id").references(() => knowledgeAvatars.id),
+  speakerAvatarId: varchar("speaker_avatar_id"), // FK declared below with explicit (truncated) name
   speakerName: text("speaker_name").notNull(),
   
   // Message content
@@ -4244,7 +4247,11 @@ export const streamConversationMessages = pgTable("stream_conversation_messages"
   isDeleted: boolean("is_deleted").default(false),
   
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  // Names match the DB constraints (Postgres truncates identifiers to 63 chars)
+  participantFk: foreignKey({ columns: [table.participantId], foreignColumns: [streamParticipants.id], name: "stream_conversation_messages_participant_id_stream_participants" }),
+  speakerAvatarFk: foreignKey({ columns: [table.speakerAvatarId], foreignColumns: [knowledgeAvatars.id], name: "stream_conversation_messages_speaker_avatar_id_knowledge_avatar" }),
+}));
 
 export const streamTips = pgTable("stream_tips", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -5349,7 +5356,7 @@ export const streamAchievements = pgTable("stream_achievements", {
 export const userStreamAchievements = pgTable("user_stream_achievements", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").references(() => users.id).notNull(),
-  achievementId: varchar("achievement_id").references(() => streamAchievements.id).notNull(),
+  achievementId: varchar("achievement_id").notNull(), // FK declared below with explicit (truncated) name
   
   // Progress tracking
   currentProgress: integer("current_progress").default(0),
@@ -5361,7 +5368,10 @@ export const userStreamAchievements = pgTable("user_stream_achievements", {
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  // Name matches the DB constraint (Postgres truncates identifiers to 63 chars)
+  achievementFk: foreignKey({ columns: [table.achievementId], foreignColumns: [streamAchievements.id], name: "user_stream_achievements_achievement_id_stream_achievements_id_" }),
+}));
 
 // Viewer Watch Rewards - Earn STREAM for watching
 export const viewerWatchRewards = pgTable("viewer_watch_rewards", {
