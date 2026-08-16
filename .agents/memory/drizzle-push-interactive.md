@@ -1,29 +1,35 @@
 ---
 name: drizzle-kit push interactivity & drift safety
-description: How to preview drizzle-kit push SQL non-interactively and the destructive-drift approval workflow.
+description: How to preview drizzle-kit push SQL safely and the drift-resolution conventions for this project.
 ---
 
-- `drizzle-kit push` prompts are a TUI needing a real TTY; piping newlines or `script -qec` does NOT advance them. Working recipe: Python `pty.fork()` driving the process, sending `\r` when the ❯ selector or "created or renamed" appears; Enter picks the highlighted first option (create / "No, abort" at the final approval).
-- **Why:** with `--strict --verbose` the full proposed SQL prints before the final approval prompt; pressing Enter there aborts safely, so you can capture every statement without applying anything.
-- **How to apply:** capture output, strip ANSI, split statements into safe CREATE TABLE + new-table FK ALTERs (apply via psql) vs column-level drift (data-loss type changes / DROP COLUMN — never apply without human approval; see docs/schema-drift-pending-approval.sql). Large column drift on existing tables remains outstanding in this project.
-- Manual provisioning DDL for tables created outside migrations lives in `migrations/manual/` — new environments must run those (drizzle journal is empty; project uses push, not migrate).
+## Push safety (CRITICAL)
+- `drizzle-kit push` prompts ONLY when it detects destructive statements. A
+  non-destructive pending diff (index churn, ADD CONSTRAINT, ADD COLUMN) is
+  applied IMMEDIATELY with no prompt — any "preview" run silently becomes apply.
+  `--verbose` prints statements but ALSO applies.
+- **The only safe preview is `push --strict`** — it prompts before ALL
+  statements; the highlighted first option is "No, abort".
+- **Why:** an unguarded preview run once dropped 4 live indexes and
+  half-applied FKs before erroring on an orphaned FK.
+- **How to apply:** prompts are a TUI needing a real TTY (pipes/`script -qec`
+  don't advance them). Use Python `pty.fork()`, send `\r` at the ❯ selector to
+  pick the highlighted "No, abort". Never blind-Enter at "created or renamed"
+  prompts when applying — it selects rename mappings.
 
-## 2026-08-16 reconciliation status
-- Constraint-name drift (_key/_fkey vs drizzle _unique/_fk) is RESOLVED: 206 idempotent, table-scoped renames in `migrations/manual/2026-08-16-constraint-renames.sql` (applied to dev; MUST run on prod with other manual migrations before any prod drizzle push).
-- Missing composite uniques were added to schema.ts *named to match existing DB constraint names* — naming schema constraints after the live DB name is the zero-churn trick.
-- Permanent residual churn: 4 FK names >63 chars — Postgres truncates, drizzle-kit compares untruncated → it will forever propose drop/add for these. Harmless; ignore.
-- Destructive remainder awaiting human sign-off: `docs/schema-drops-approved-pending.sql` (audited-dead columns + orphan achievement_definitions table); full residual diff snapshot in `docs/schema-drift-remaining-2026-08-16.sql`.
-- pty recipe hazard: the "created or renamed" prompt handler blindly sends Enter, which *selects* rename mappings (e.g. generated_by › holding_period) in the previewed SQL — fine for preview-then-abort, NEVER reuse the script to actually apply.
-
-## CRITICAL hazard (2026-08-16)
-- `drizzle-kit push` only prompts when it detects DESTRUCTIVE statements. If the
-  pending diff is non-destructive (index churn, ADD CONSTRAINT), push applies
-  IMMEDIATELY with no prompt — the pty preview-then-abort recipe silently becomes
-  apply. `--verbose` prints statements but ALSO applies. The only safe preview of
-  a non-destructive diff is `push --strict` (prompts before ALL statements; first
-  option "No, abort"). Incident: a preview run dropped 4 live indexes and half-applied
-  FKs before erroring; repaired via migrations/manual/2026-08-16-index-repair.sql.
-- 63-char FK truncation churn is RESOLVED: declare table-level foreignKey({name})
-  with the exact Postgres-truncated name (not permanent churn as noted earlier).
-- Backup/archive tables must live outside `public` (e.g. schema drift_backup) or
-  push proposes dropping them.
+## Drift conventions (durable)
+- Zero-churn trick: name schema.ts constraints/indexes after the exact live DB
+  names (`unique("<db_name>").on(...)`, `index("<db_name>")`).
+- FK names >63 chars: declare table-level `foreignKey({ name })` with the exact
+  Postgres-truncated 63-char name — kills permanent drop/add churn.
+- DESC indexes: drizzle emits `DESC NULLS LAST`; create DB indexes that way or
+  push churns them.
+- Same-name FK drop/add pairs in a diff are often NOT renames — compare
+  `ON DELETE` behavior in pg_constraint; declare `onDelete` to match the DB.
+- Archive/backup tables must live outside `public` (this project uses schema
+  `drift_backup`) or push proposes dropping them.
+- Manual DDL lives in `migrations/manual/` (drizzle journal empty; project uses
+  push, not migrate). Production has NOT run any of them — they must be applied
+  in filename order before any prod push (tracked as a project task).
+- Residual parked items live in `docs/schema-drift-final-parked-2026-08-16.md`
+  (2 FKs blocked by avatar-ids stored in user columns).
