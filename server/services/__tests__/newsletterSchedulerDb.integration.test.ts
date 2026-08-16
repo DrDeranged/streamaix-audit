@@ -15,8 +15,10 @@ if (!hasDb) {
   );
 }
 
-// Synthetic slot far in the past so we can never collide with a real edition.
-const EDITION_DATE = "1999-01-01";
+// Per-run namespace: edition_date is text, so a unique non-date marker can
+// never collide with a real edition (always YYYY-MM-DD) or a concurrent run.
+const EDITION_DATE = `test-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+const insertedIds: string[] = [];
 
 describe.skipIf(!hasDb)("newsletters unique-slot constraint (live DB)", () => {
   let db: typeof import("../../db").db;
@@ -26,12 +28,14 @@ describe.skipIf(!hasDb)("newsletters unique-slot constraint (live DB)", () => {
     // Guarded dynamic import: server/db.ts throws at module load without DATABASE_URL.
     ({ db } = await import("../../db"));
     ({ sql } = await import("drizzle-orm"));
-    await db.execute(sql`DELETE FROM newsletters WHERE edition_date = ${EDITION_DATE}`);
   });
 
   afterAll(async () => {
     if (!hasDb) return;
-    await db.execute(sql`DELETE FROM newsletters WHERE edition_date = ${EDITION_DATE}`);
+    // Delete only the rows this run inserted, by captured id.
+    for (const id of insertedIds) {
+      await db.execute(sql`DELETE FROM newsletters WHERE id = ${id} AND subject = '[test-claim]'`);
+    }
   });
 
   it("second claim for the same (edition_date, edition) hits ON CONFLICT and returns no row", async () => {
@@ -44,6 +48,7 @@ describe.skipIf(!hasDb)("newsletters unique-slot constraint (live DB)", () => {
       `);
     const first = await claim();
     const second = await claim();
+    for (const r of [first, second]) for (const row of (r as any).rows) insertedIds.push(row.id);
     expect((first as any).rows).toHaveLength(1);
     expect((second as any).rows).toHaveLength(0);
   });
@@ -57,6 +62,7 @@ describe.skipIf(!hasDb)("newsletters unique-slot constraint (live DB)", () => {
         RETURNING id
       `);
     const results = await Promise.all([claim(), claim(), claim()]);
+    for (const r of results) for (const row of (r as any).rows) insertedIds.push(row.id);
     const winners = results.filter((r) => (r as any).rows.length === 1);
     expect(winners).toHaveLength(1);
   });
