@@ -7,3 +7,10 @@ description: How to preview drizzle-kit push SQL non-interactively and the destr
 - **Why:** with `--strict --verbose` the full proposed SQL prints before the final approval prompt; pressing Enter there aborts safely, so you can capture every statement without applying anything.
 - **How to apply:** capture output, strip ANSI, split statements into safe CREATE TABLE + new-table FK ALTERs (apply via psql) vs column-level drift (data-loss type changes / DROP COLUMN — never apply without human approval; see docs/schema-drift-pending-approval.sql). Large column drift on existing tables remains outstanding in this project.
 - Manual provisioning DDL for tables created outside migrations lives in `migrations/manual/` — new environments must run those (drizzle journal is empty; project uses push, not migrate).
+
+## 2026-08-16 reconciliation status
+- Constraint-name drift (_key/_fkey vs drizzle _unique/_fk) is RESOLVED: 206 idempotent, table-scoped renames in `migrations/manual/2026-08-16-constraint-renames.sql` (applied to dev; MUST run on prod with other manual migrations before any prod drizzle push).
+- Missing composite uniques were added to schema.ts *named to match existing DB constraint names* — naming schema constraints after the live DB name is the zero-churn trick.
+- Permanent residual churn: 4 FK names >63 chars — Postgres truncates, drizzle-kit compares untruncated → it will forever propose drop/add for these. Harmless; ignore.
+- Destructive remainder awaiting human sign-off: `docs/schema-drops-approved-pending.sql` (audited-dead columns + orphan achievement_definitions table); full residual diff snapshot in `docs/schema-drift-remaining-2026-08-16.sql`.
+- pty recipe hazard: the "created or renamed" prompt handler blindly sends Enter, which *selects* rename mappings (e.g. generated_by › holding_period) in the previewed SQL — fine for preview-then-abort, NEVER reuse the script to actually apply.
