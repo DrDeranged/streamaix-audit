@@ -1,4 +1,10 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+
+// cronMatches/previousCronSlot are pure functions, but ../scheduler imports
+// server/db.ts at module top-level, which throws without DATABASE_URL.
+// Mock it so this file runs anywhere (no real database needed).
+vi.mock("../../db", () => ({ db: { execute: async () => ({ rows: [] }) }, pool: {} }));
+
 import { cronMatches, previousCronSlot } from "../scheduler";
 
 // Aug 15 2026 is a Saturday. Times below are constructed in UTC and checked

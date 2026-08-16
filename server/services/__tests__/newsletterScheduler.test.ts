@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // ---- db mock: simulates the UNIQUE (edition_date, edition) constraint -------
 const dbState: {
@@ -61,6 +61,13 @@ beforeEach(() => {
   dbState.nowMs = Date.parse("2026-08-15T20:00:00Z");
   dbState.failExecute = false;
   sendToWaitlist.mockClear();
+  // Pin Date to the mock-db clock: the scheduler keys slots off new Date(),
+  // so without this the tests silently depend on the real calendar date.
+  vi.useFakeTimers({ now: dbState.nowMs, toFake: ["Date"] });
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 describe("newsletter claim-then-send (UNIQUE edition_date+edition)", () => {
@@ -130,6 +137,7 @@ describe("newsletter claim-then-send (UNIQUE edition_date+edition)", () => {
     expect(r.failedCount).toBe(2);
     // Even >1h later, a 'failed' claim is not reclaimed.
     dbState.nowMs += 2 * 3_600_000;
+    vi.setSystemTime(dbState.nowMs);
     const r2 = await newsletterScheduler.sendNewsletter("Market Close", "catch-up");
     expect(r2).toEqual({ sent: false, reason: "already-claimed" });
     expect(sendToWaitlist).toHaveBeenCalledTimes(1);
@@ -148,6 +156,48 @@ describe("newsletter claim-then-send (UNIQUE edition_date+edition)", () => {
     const r = await newsletterScheduler.sendNewsletter("Morning", "cron");
     expect(r.sent).toBe(false);
     expect(sendToWaitlist).not.toHaveBeenCalled();
+  });
+});
+
+describe("slot-date keying math (pure, no DB)", () => {
+  it("maps UTC boot times to the correct ET edition_date", () => {
+    // EDT (UTC-4): 12:00 UTC = 8:00 ET, morning slot, same date
+    expect(newsletterScheduler.slotFor("Morning", new Date("2026-08-15T12:00:00Z")))
+      .toEqual({ editionDate: "2026-08-15", edition: "morning" });
+    // The 20:00-UTC edge: 16:00 ET, still the SAME ET date
+    expect(newsletterScheduler.slotFor("Market Close", new Date("2026-08-15T20:00:00Z")))
+      .toEqual({ editionDate: "2026-08-15", edition: "market_close" });
+    // Late-evening UTC past midnight UTC: 02:00Z on the 16th = 22:00 ET on the 15th
+    expect(newsletterScheduler.slotFor("Morning", new Date("2026-08-16T02:00:00Z")).editionDate)
+      .toBe("2026-08-15");
+    // Just before the ET midnight boundary: 03:59Z = 23:59 ET previous day
+    expect(newsletterScheduler.slotFor("Morning", new Date("2026-08-16T03:59:00Z")).editionDate)
+      .toBe("2026-08-15");
+    // At/after ET midnight it rolls: 04:00Z = 00:00 ET on the 16th
+    expect(newsletterScheduler.slotFor("Morning", new Date("2026-08-16T04:00:00Z")).editionDate)
+      .toBe("2026-08-16");
+    // Winter (EST, UTC-5): 04:59Z = 23:59 ET previous day; 05:00Z rolls
+    expect(newsletterScheduler.slotFor("Morning", new Date("2026-01-16T04:59:00Z")).editionDate)
+      .toBe("2026-01-15");
+    expect(newsletterScheduler.slotFor("Morning", new Date("2026-01-16T05:00:00Z")).editionDate)
+      .toBe("2026-01-16");
+  });
+
+  it("keys edition purely off the day label", () => {
+    const now = new Date("2026-08-15T12:00:00Z");
+    expect(newsletterScheduler.slotFor("Morning", now).edition).toBe("morning");
+    expect(newsletterScheduler.slotFor("Market Close", now).edition).toBe("market_close");
+  });
+});
+
+describe("reclaim-age threshold decision (mocked ON CONFLICT)", () => {
+  it("exactly at the 1h boundary is NOT reclaimed; just past it is", async () => {
+    // 60min old: not strictly older than 1h → no reclaim
+    dbState.claims.set(`${today()}|morning`, { id: "b", status: "sending", sentBy: "cron", claimedAtMs: dbState.nowMs - 3_600_000 });
+    expect((await newsletterScheduler.sendNewsletter("Morning", "catch-up")).sent).toBe(false);
+    // 61min old: reclaimed and re-sent
+    dbState.claims.set(`${today()}|morning`, { id: "b", status: "sending", sentBy: "cron", claimedAtMs: dbState.nowMs - 3_660_000 });
+    expect((await newsletterScheduler.sendNewsletter("Morning", "catch-up")).sent).toBe(true);
   });
 });
 
