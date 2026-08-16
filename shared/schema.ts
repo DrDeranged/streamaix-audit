@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer, jsonb, boolean, real, doublePrecision, uniqueIndex, unique, foreignKey, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, jsonb, boolean, real, doublePrecision, uniqueIndex, unique, index, foreignKey, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -27,7 +27,10 @@ export const users = pgTable("users", {
   streamPoints: integer("stream_points").default(0), // Points balance for future airdrop
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  usernameIdx: index("idx_users_username").on(table.username),
+  walletAddressIdx: index("idx_users_wallet_address").on(table.walletAddress),
+}));
 
 export const summaries = pgTable("summaries", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -77,7 +80,10 @@ export const summaries = pgTable("summaries", {
   analysisAnswers: jsonb("analysis_answers"), // Answers to bounty analysis questions: [{ questionId, answer }]
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  createdAtIdx: index("idx_summaries_created_at").on(table.createdAt),
+  creatorIdIdx: index("idx_summaries_creator_id").on(table.creatorId),
+}));
 
 export const bounties = pgTable("bounties", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -113,7 +119,11 @@ export const bounties = pgTable("bounties", {
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  createdAtIdx: index("idx_bounties_created_at").on(table.createdAt),
+  creatorIdIdx: index("idx_bounties_creator_id").on(table.creatorId),
+  statusIdx: index("idx_bounties_status").on(table.status),
+}));
 
 export const tipContributions = pgTable("tip_contributions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -185,7 +195,11 @@ export const userInteractions = pgTable("user_interactions", {
   targetId: text("target_id"), // ID of the target (sector name, story ID, etc.)
   metadata: jsonb("metadata"), // additional interaction data
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  createdAtIdx: index("idx_user_interactions_created_at").on(table.createdAt),
+  userIdIdx: index("idx_user_interactions_user_id").on(table.userId),
+  targetTypeIdx: index("idx_user_interactions_target_type").on(table.targetType),
+}));
 
 export const userPreferences = pgTable("user_preferences", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -3322,7 +3336,10 @@ export const predictionMarkets = pgTable("prediction_markets", {
   aiReasoning: text("ai_reasoning"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  createdAtIdx: index("idx_prediction_markets_created_at").on(table.createdAt),
+  statusIdx: index("idx_prediction_markets_status").on(table.status),
+}));
 
 export const marketPositions = pgTable("market_positions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -3353,7 +3370,10 @@ export const marketTrades = pgTable("market_trades", {
   fee: integer("fee").notNull(),
   blockchainTxHash: text("blockchain_tx_hash"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  createdAtIdx: index("idx_market_trades_created_at").on(table.createdAt),
+  marketIdIdx: index("idx_market_trades_market_id").on(table.marketId),
+}));
 
 export const marketResolutions = pgTable("market_resolutions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -3387,7 +3407,9 @@ export const agentSuspensions = pgTable("agent_suspensions", {
   detail: jsonb("detail"),
   suspendedUntil: timestamp("suspended_until").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  agentIdx: index("idx_agent_suspensions_agent").on(table.agentId, table.suspendedUntil),
+}));
 
 export const insertAgentSuspensionSchema = createInsertSchema(agentSuspensions).omit({
   id: true,
@@ -3403,7 +3425,9 @@ export const riskEvents = pgTable("risk_events", {
   marketId: varchar("market_id"),
   detail: jsonb("detail"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  createdAtIdx: index("idx_risk_events_created_at").on(table.createdAt),
+}));
 
 export const insertRiskEventSchema = createInsertSchema(riskEvents).omit({
   id: true,
@@ -3500,7 +3524,10 @@ export const avatarTrades = pgTable("avatar_trades", {
   reasoning: text("reasoning"), // AI-generated reasoning for the trade
   tradingStyle: text("trading_style"), // avatar's trading style at time of trade
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  avatarIdx: index("idx_avatar_trades_avatar").on(table.avatarId),
+  marketIdx: index("idx_avatar_trades_market").on(table.marketId),
+}));
 
 export const avatarPositions = pgTable("avatar_positions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -3512,7 +3539,10 @@ export const avatarPositions = pgTable("avatar_positions", {
   totalInvested: integer("total_invested").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  marketIdx: index("idx_avatar_positions_market").on(table.marketId),
+  avatarIdx: index("idx_avatar_positions_avatar").on(table.avatarId),
+}));
 
 export type AvatarTrade = typeof avatarTrades.$inferSelect;
 export type InsertAvatarTrade = typeof avatarTrades.$inferInsert;
@@ -3534,7 +3564,11 @@ export const avatarPosts = pgTable("avatar_posts", {
   parentPostId: varchar("parent_post_id"),
   authorUserId: varchar("author_user_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  parentIdx: index("idx_avatar_posts_parent").on(table.parentPostId),
+  createdAtIdx: index("idx_avatar_posts_created_at").on(table.createdAt.desc()),
+  avatarIdx: index("idx_avatar_posts_avatar").on(table.avatarId),
+}));
 
 export const avatarPostReactions = pgTable("avatar_post_reactions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -3578,7 +3612,9 @@ export const aiAgents = pgTable("ai_agents", {
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  isActiveIdx: index("idx_ai_agents_is_active").on(table.isActive),
+}));
 
 export const aiPredictions = pgTable("ai_predictions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -3627,7 +3663,11 @@ export const aiTrades = pgTable("ai_trades", {
   reasoning: text("reasoning"),
   probability: real("probability"), // AI confidence score 0-100
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  createdAtIdx: index("idx_ai_trades_created_at").on(table.createdAt),
+  agentIdIdx: index("idx_ai_trades_agent_id").on(table.agentId),
+  marketIdIdx: index("idx_ai_trades_market_id").on(table.marketId),
+}));
 
 export const agentMemory = pgTable("agent_memory", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -3641,7 +3681,10 @@ export const agentMemory = pgTable("agent_memory", {
   reasoningSummary: varchar("reasoning_summary", { length: 500 }),
   createdAt: timestamp("created_at").defaultNow(),
   resolvedAt: timestamp("resolved_at"),
-});
+}, (table) => ({
+  agentIdx: index("idx_agent_memory_agent").on(table.agentId, table.createdAt.desc()),
+  marketOpenIdx: index("idx_agent_memory_market_open").on(table.marketId).where(sql`outcome = 'open'`),
+}));
 
 export const insertAgentMemorySchema = createInsertSchema(agentMemory).omit({
   id: true,
@@ -6146,7 +6189,9 @@ export const priceAlerts = pgTable("price_alerts", {
   isActive: boolean("is_active").default(true),
   notificationSent: boolean("notification_sent").default(false),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  userIdIdx: index("idx_price_alerts_user_id").on(table.userId),
+}));
 
 // Watchlist - track assets without owning them
 export const watchlistItems = pgTable("watchlist_items", {
@@ -6163,7 +6208,9 @@ export const watchlistItems = pgTable("watchlist_items", {
   notes: text("notes"),
   logoUrl: text("logo_url"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  userIdIdx: index("idx_watchlist_items_user_id").on(table.userId),
+}));
 
 // Portfolio Goals - user financial goals
 export const portfolioGoals = pgTable("portfolio_goals", {
@@ -6184,7 +6231,9 @@ export const portfolioGoals = pgTable("portfolio_goals", {
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  userIdIdx: index("idx_portfolio_goals_user_id").on(table.userId),
+}));
 
 // Asset Price History - for sparklines and performance charts
 export const assetPriceHistory = pgTable("asset_price_history", {
@@ -6264,7 +6313,10 @@ export const botStakes = pgTable("bot_stakes", {
   status: text("status").notNull().default("active"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  statusIdx: index("idx_bot_stakes_status").on(table.status),
+  userIdIdx: index("idx_bot_stakes_user_id").on(table.userId),
+}));
 
 export const botSimTrades = pgTable("bot_sim_trades", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -6282,7 +6334,9 @@ export const botSimTrades = pgTable("bot_sim_trades", {
   reasoning: text("reasoning"),
   closedAt: timestamp("closed_at"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  statusIdx: index("idx_bot_sim_trades_status").on(table.status),
+}));
 
 export const botPerformanceSnapshots = pgTable("bot_performance_snapshots", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
