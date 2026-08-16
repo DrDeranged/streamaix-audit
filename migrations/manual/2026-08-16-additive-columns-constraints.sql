@@ -12,7 +12,7 @@ ALTER TABLE "ai_trading_setups" ADD COLUMN "correlation_analysis" jsonb;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "drawdown_expectation" real;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "entry_executed" boolean DEFAULT false;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "entry_timing" text;
-ALTER TABLE "ai_trading_setups" ADD COLUMN "entry_type" text NOT NULL;
+ALTER TABLE "ai_trading_setups" ADD COLUMN "entry_type" text;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "entry_zone" jsonb;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "exit_executed" boolean DEFAULT false;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "expected_return" real;
@@ -21,7 +21,7 @@ ALTER TABLE "ai_trading_setups" ADD COLUMN "expected_value" real;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "feature_importance" jsonb;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "fibonacci_levels" jsonb;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "historical_performance" jsonb;
-ALTER TABLE "ai_trading_setups" ADD COLUMN "holding_period" text NOT NULL;
+ALTER TABLE "ai_trading_setups" ADD COLUMN "holding_period" text;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "is_bookmarked" boolean DEFAULT false;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "is_triggered" boolean DEFAULT false;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "kelly_percentage" real;
@@ -29,8 +29,8 @@ ALTER TABLE "ai_trading_setups" ADD COLUMN "last_validated" timestamp DEFAULT no
 ALTER TABLE "ai_trading_setups" ADD COLUMN "liquidity_assessment" text;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "market_conditions" jsonb;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "max_drawdown" real;
-ALTER TABLE "ai_trading_setups" ADD COLUMN "max_risk" real NOT NULL;
-ALTER TABLE "ai_trading_setups" ADD COLUMN "model_confidence" real NOT NULL;
+ALTER TABLE "ai_trading_setups" ADD COLUMN "max_risk" real;
+ALTER TABLE "ai_trading_setups" ADD COLUMN "model_confidence" real;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "model_version" text DEFAULT 'v1.0';
 ALTER TABLE "ai_trading_setups" ADD COLUMN "news_analysis" jsonb;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "optimal_execution" jsonb;
@@ -40,14 +40,14 @@ ALTER TABLE "ai_trading_setups" ADD COLUMN "probability_method" text;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "resistance_levels" jsonb;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "seasonality_bias" real;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "sector_strength" real;
-ALTER TABLE "ai_trading_setups" ADD COLUMN "setup_strength" real NOT NULL;
+ALTER TABLE "ai_trading_setups" ADD COLUMN "setup_strength" real;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "sharing_level" text DEFAULT 'private';
 ALTER TABLE "ai_trading_setups" ADD COLUMN "similar_setups" text[];
 ALTER TABLE "ai_trading_setups" ADD COLUMN "slippage_expectation" real;
-ALTER TABLE "ai_trading_setups" ADD COLUMN "stop_loss" real NOT NULL;
+ALTER TABLE "ai_trading_setups" ADD COLUMN "stop_loss" real;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "stop_type" text DEFAULT 'fixed';
-ALTER TABLE "ai_trading_setups" ADD COLUMN "strategy" text NOT NULL;
-ALTER TABLE "ai_trading_setups" ADD COLUMN "success_probability" real NOT NULL;
+ALTER TABLE "ai_trading_setups" ADD COLUMN "strategy" text;
+ALTER TABLE "ai_trading_setups" ADD COLUMN "success_probability" real;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "supporting_indicators" jsonb;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "support_levels" jsonb;
 ALTER TABLE "ai_trading_setups" ADD COLUMN "tags" text[];
@@ -83,4 +83,19 @@ ALTER TABLE "stream_tips" ADD CONSTRAINT "stream_tips_recipient_id_users_id_fk" 
 ALTER TABLE "stream_tips" ADD CONSTRAINT "stream_tips_stream_id_live_streams_id_fk" FOREIGN KEY ("stream_id") REFERENCES "public"."live_streams"("id") ON DELETE no action ON UPDATE no action;
 ALTER TABLE "stream_tips" ADD CONSTRAINT "stream_tips_tipper_id_users_id_fk" FOREIGN KEY ("tipper_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
 ALTER TABLE "users" ADD CONSTRAINT "users_twitter_id_unique" UNIQUE("twitter_id");
+
+-- Staged NOT NULL enforcement: only when no rows violate it. On a nonempty
+-- production table with NULLs, this raises so a human backfills first
+-- (writers in aiTradingSetupService supply all eight fields on insert).
+DO $$
+DECLARE col text; bad int;
+BEGIN
+  FOREACH col IN ARRAY ARRAY['entry_type','holding_period','max_risk','model_confidence','setup_strength','stop_loss','strategy','success_probability'] LOOP
+    EXECUTE format('SELECT count(*) FROM ai_trading_setups WHERE %I IS NULL', col) INTO bad;
+    IF bad > 0 THEN
+      RAISE EXCEPTION 'ai_trading_setups.% has % NULL rows - backfill before SET NOT NULL', col, bad;
+    END IF;
+    EXECUTE format('ALTER TABLE ai_trading_setups ALTER COLUMN %I SET NOT NULL', col);
+  END LOOP;
+END $$;
 COMMIT;

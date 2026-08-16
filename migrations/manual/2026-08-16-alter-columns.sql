@@ -13,7 +13,16 @@ ALTER TABLE "avatar_follows" ALTER COLUMN "followed_at" DROP NOT NULL;
 ALTER TABLE "avatar_follows" ALTER COLUMN "notifications_enabled" DROP NOT NULL;
 ALTER TABLE "avatar_insights" ALTER COLUMN "category" DROP NOT NULL;
 ALTER TABLE "avatar_insights" ALTER COLUMN "category" SET DATA TYPE text;
-ALTER TABLE "avatar_insights" ALTER COLUMN "confidence" SET DATA TYPE integer USING round(confidence * 100)::integer; -- rescale 0-1 -> 0-100 (18 rows, all 0.85-0.95)
+-- Guarded rescale: only 0-1 scale values are multiplied; any value outside
+-- [0,1] (other than NULL) aborts because it indicates mixed scales in prod.
+DO $$
+DECLARE bad int;
+BEGIN
+  SELECT count(*) INTO bad FROM avatar_insights WHERE confidence IS NOT NULL AND (confidence < 0 OR confidence > 1) AND confidence <> round(confidence);
+  IF bad > 0 THEN RAISE EXCEPTION 'avatar_insights.confidence has % rows with fractional values outside [0,1] - resolve scale manually', bad; END IF;
+END $$;
+UPDATE avatar_insights SET confidence = round(confidence * 100) WHERE confidence IS NOT NULL AND confidence >= 0 AND confidence <= 1;
+ALTER TABLE "avatar_insights" ALTER COLUMN "confidence" SET DATA TYPE integer USING round(confidence)::integer;
 ALTER TABLE "avatar_insights" ALTER COLUMN "confidence" SET DEFAULT 50;
 ALTER TABLE "avatar_insights" ALTER COLUMN "created_at" DROP NOT NULL;
 ALTER TABLE "avatar_insights" ALTER COLUMN "insight_type" DROP DEFAULT;
