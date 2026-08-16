@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer, jsonb, boolean, real, doublePrecision, uniqueIndex, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, jsonb, boolean, real, doublePrecision, uniqueIndex, unique, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -238,7 +238,7 @@ export const conversations = pgTable("conversations", {
   
   // Optional relationships to entities (null = standalone post)
   linkedSummaryId: varchar("linked_summary_id").references(() => summaries.id),
-  linkedMarketId: varchar("linked_market_id"), // references predictionMarkets
+  linkedMarketId: varchar("linked_market_id").references(() => predictionMarkets.id),
   linkedBountyId: varchar("linked_bounty_id").references(() => bounties.id),
   
   // Engagement metrics
@@ -266,7 +266,10 @@ export const conversationLikes = pgTable("conversation_likes", {
   conversationId: varchar("conversation_id").references(() => conversations.id).notNull(),
   userId: varchar("user_id").references(() => users.id).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  // One like per user per conversation (name matches existing DB constraint)
+  uniqueConversationUser: unique("conversation_likes_conversation_id_user_id_key").on(table.conversationId, table.userId),
+}));
 
 export const conversationComments = pgTable("conversation_comments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -447,12 +450,9 @@ export const avatarFollows = pgTable("avatar_follows", {
   avatarId: varchar("avatar_id").references(() => knowledgeAvatars.id).notNull(),
   followedAt: timestamp("followed_at").defaultNow(),
   notificationsEnabled: boolean("notifications_enabled").default(true),
-  // Ensure unique user-avatar pairs
+  // Ensure unique user-avatar pairs (name matches existing DB constraint)
 }, (table) => ({
-  uniqueUserAvatar: {
-    name: "unique_user_avatar",
-    columns: [table.userId, table.avatarId],
-  },
+  uniqueUserAvatar: unique("avatar_follows_user_id_avatar_id_key").on(table.userId, table.avatarId),
 }));
 
 // Avatar Content Interactions
@@ -3533,7 +3533,10 @@ export const avatarPostReactions = pgTable("avatar_post_reactions", {
   userId: varchar("user_id").references(() => users.id).notNull(),
   reactionType: text("reaction_type").notNull().default("like"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  // One reaction of each type per user per post (name matches existing DB constraint)
+  uniquePostUserReaction: unique("avatar_post_reactions_post_id_user_id_reaction_type_key").on(table.postId, table.userId, table.reactionType),
+}));
 
 export type AvatarPost = typeof avatarPosts.$inferSelect;
 export type InsertAvatarPost = typeof avatarPosts.$inferInsert;
@@ -3844,7 +3847,10 @@ export const userAchievements = pgTable("user_achievements", {
   completedAt: timestamp("completed_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  // One row per user per achievement (name matches existing DB constraint)
+  uniqueUserAchievement: unique("user_achievements_user_achievement_unique").on(table.userId, table.achievementId),
+}));
 
 // Enhanced user trading stats for leaderboards
 export const userTradingStats = pgTable("user_trading_stats", {
