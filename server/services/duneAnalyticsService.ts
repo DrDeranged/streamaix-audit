@@ -59,7 +59,7 @@ interface DEXMetrics {
   }>;
 }
 
-interface ExchangeFlow {
+export interface ExchangeFlow {
   exchange_name: string;
   token_symbol: string;
   inflow_24h: number;
@@ -69,6 +69,8 @@ interface ExchangeFlow {
   large_transactions: number;
   timestamp: string;
 }
+
+export type ExchangeFlowTimeframe = '1h' | '24h' | '7d' | '30d';
 
 interface NetworkMetrics {
   network_name: string;
@@ -235,16 +237,25 @@ export class DuneAnalyticsService {
   /**
    * Get exchange inflow/outflow data
    */
-  async getExchangeFlows(exchanges: string[] = ['Binance', 'Coinbase', 'Kraken', 'OKX']): Promise<ExchangeFlow[]> {
-    const cacheKey = `exchange_flows_${exchanges.join(',').toLowerCase()}`;
+  async getExchangeFlows(
+    exchanges: string[] = ['Binance', 'Coinbase', 'Kraken', 'OKX'],
+    timeframe: ExchangeFlowTimeframe = '24h',
+  ): Promise<ExchangeFlow[]> {
+    const cacheKey = `exchange_flows_${timeframe}_${exchanges.join(',').toLowerCase()}`;
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
 
     try {
       const queryId = 1745824; // Exchange flow tracking query
-      const result = await this.executeQuery(queryId, { 
+      const timeRange: Record<ExchangeFlowTimeframe, string> = {
+        '1h': '1 hour',
+        '24h': '24 hours',
+        '7d': '7 days',
+        '30d': '30 days',
+      };
+      const result = await this.executeQuery(queryId, {
         exchanges,
-        time_range: '24 hours'
+        time_range: timeRange[timeframe],
       });
 
       const flows: ExchangeFlow[] = result?.result?.rows?.map(row => ({

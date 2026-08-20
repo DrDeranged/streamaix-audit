@@ -50,6 +50,7 @@ import {
   convertToMarketSchema,
   transcribeSchema,
   channelPointsRedeemSchema,
+  giftSubscriptionsSchema,
 } from "../middleware/validationSchemas";
 import { cacheService } from "../services/cacheService";
 import { StreamProcessor } from "../services/streamProcessor";
@@ -254,43 +255,81 @@ export async function registerLiveStreamingMonetizationRoutes(app: Express): Pro
     if (!cost) {
       return res.status(400).json({ success: false, error: 'Invalid reward' });
     }
-    
-    // Check user has enough points
-    const user = await storage.getUser(req.user.id);
-    if (!user || (user.streamPoints || 0) < cost) {
-      return res.status(400).json({ success: false, error: 'Not enough channel points' });
+
+    const [stream] = await db
+      .select({ id: liveStreams.id })
+      .from(liveStreams)
+      .where(eq(liveStreams.id, req.params.id))
+      .limit(1);
+    if (!stream) {
+      return res.status(404).json({ success: false, error: 'Stream not found' });
+    }
+
+    const spend = await pointsService.spendPoints({
+      userId: req.user.id,
+      amount: cost,
+      source: 'channel_reward',
+      description: `Redeemed stream reward ${rewardId}`,
+      referenceId: req.params.id,
+      referenceType: 'stream',
+      metadata: { streamId: req.params.id, rewardId },
+    });
+    if (!spend.success) {
+      const status = spend.error === 'Transaction failed' ? 500 : 400;
+      return res.status(status).json({ success: false, error: spend.error });
     }
     
-    // Deduct points
-    await (storage as unknown as { updateUserPoints(userId: string, delta: number): Promise<void> }).updateUserPoints(req.user.id, -cost);
-    
-    res.json({ success: true, pointsRemaining: (user.streamPoints || 0) - cost });
+    res.json({
+      success: true,
+      pointsSpent: cost,
+      pointsRemaining: spend.balance,
+      transaction: spend.transaction,
+    });
   }));
 
   // =============================================================================
   // GIFT SUBSCRIPTIONS - Gift subs to community
   // =============================================================================
 
-  app.post("/api/streams/:id/gift-subs", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/streams/:id/gift-subs", authenticateToken, validateBody(giftSubscriptionsSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
     
     const { count, targetUserId } = req.body;
-    const giftCount = Math.min(Math.max(1, count || 1), 100);
+    const giftCount = count;
     
     // Cost per gift sub (in STREAM points)
     const costPerSub = 100;
     const totalCost = giftCount * costPerSub;
     
-    // Check user has enough points
-    const user = await storage.getUser(req.user.id);
-    if (!user || (user.streamPoints || 0) < totalCost) {
-      return res.status(400).json({ success: false, error: 'Not enough STREAM points' });
+    const [stream] = await db
+      .select({ id: liveStreams.id })
+      .from(liveStreams)
+      .where(eq(liveStreams.id, req.params.id))
+      .limit(1);
+    if (!stream) {
+      return res.status(404).json({ success: false, error: 'Stream not found' });
     }
-    
-    // Deduct points
-    await (storage as unknown as { updateUserPoints(userId: string, delta: number): Promise<void> }).updateUserPoints(req.user.id, -totalCost);
+
+    const spend = await pointsService.spendPoints({
+      userId: req.user.id,
+      amount: totalCost,
+      source: 'gift_subscription',
+      description: `Gifted ${giftCount} stream subscription${giftCount === 1 ? '' : 's'}`,
+      referenceId: req.params.id,
+      referenceType: 'stream',
+      metadata: {
+        streamId: req.params.id,
+        count: giftCount,
+        targetUserId: targetUserId ?? null,
+        costPerSub,
+      },
+    });
+    if (!spend.success) {
+      const status = spend.error === 'Transaction failed' ? 500 : 400;
+      return res.status(status).json({ success: false, error: spend.error });
+    }
     
     // In production, would select random viewers and create subscriptions
     // For now, just log the gift
@@ -298,7 +337,8 @@ export async function registerLiveStreamingMonetizationRoutes(app: Express): Pro
       success: true, 
       gifted: giftCount,
       pointsSpent: totalCost,
-      pointsRemaining: (user.streamPoints || 0) - totalCost,
+      pointsRemaining: spend.balance,
+      transaction: spend.transaction,
     });
   }));
 

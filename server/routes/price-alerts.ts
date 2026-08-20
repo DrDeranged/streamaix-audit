@@ -17,6 +17,11 @@ import {
 } from "../middleware/security";
 import * as schemas from "../middleware/validationSchemas";
 import { marketDataService } from "../services/marketDataService";
+import {
+  buildMarketMovements,
+  buildMarketSentiments,
+  buildMarketSignals,
+} from "./market-intelligence-mappers";
 import { portfolios, portfolioAssets } from "@shared/schema";
 import {
   followBodySchema,
@@ -370,44 +375,13 @@ export async function registerPriceAlertsRoutes(app: Express): Promise<void> {
     ];
     
     try {
-      const cryptoData = await (marketDataService as unknown as { getCryptoData(): Promise<any[]> }).getCryptoData();
+      const cryptoData = await marketDataService.getTopCryptos(10);
       
       if (!cryptoData || cryptoData.length === 0) {
         return res.json({ success: true, signals: fallbackSignals });
       }
       
-      const signals = cryptoData.slice(0, 10).map((coin: any) => {
-        const change = coin.price_change_percentage_24h || 0;
-        const type = change > 3 ? 'bullish' : change < -3 ? 'bearish' : 'neutral';
-        const strength = Math.min(100, Math.abs(change) * 10);
-        
-        let signal = '';
-        let reasoning = '';
-        
-        if (type === 'bullish') {
-          signal = change > 8 ? 'Strong Buy Signal' : 'Momentum Building';
-          reasoning = `${coin.name} showing ${change.toFixed(1)}% gains with ${coin.market_cap_change_percentage_24h?.toFixed(1) || 0}% market cap growth`;
-        } else if (type === 'bearish') {
-          signal = change < -8 ? 'Caution: Sharp Decline' : 'Short-term Weakness';
-          reasoning = `${coin.name} down ${Math.abs(change).toFixed(1)}%, watch for support levels`;
-        } else {
-          signal = 'Consolidating';
-          reasoning = `${coin.name} trading sideways, potential breakout incoming`;
-        }
-        
-        return {
-          id: coin.id,
-          type,
-          strength: Math.round(strength),
-          asset: coin.name,
-          price: coin.current_price,
-          change24h: change,
-          signal,
-          reasoning,
-          confidence: Math.min(95, 60 + Math.abs(change) * 3),
-          timestamp: new Date().toISOString(),
-        };
-      });
+      const signals = buildMarketSignals(cryptoData);
       
       res.json({ success: true, signals: signals.length > 0 ? signals : fallbackSignals });
     } catch (error: any) {
@@ -415,47 +389,26 @@ export async function registerPriceAlertsRoutes(app: Express): Promise<void> {
     }
   }));
 
-  // Get whale movements (simulated from on-chain patterns)
+  // Get market-cap movement estimates (synthetic, not observed on-chain txs)
   app.get("/api/market-intelligence/whales", asyncHandler(async (req: Request, res: Response) => {
-    const fallbackMovements = [
-      { id: 'whale-btc-1', type: 'accumulation' as const, asset: 'BTC', amount: 2500, amountUsd: 241250000, from: '0x1234567890abcdef1234567890abcdef12345678', to: '0xabcdef1234567890abcdef1234567890abcdef12', timestamp: new Date(Date.now() - 1800000).toISOString(), significance: 'high' as const },
-      { id: 'whale-eth-1', type: 'transfer' as const, asset: 'ETH', amount: 15000, amountUsd: 53700000, from: '0x2345678901abcdef2345678901abcdef23456789', to: '0xbcdef12345678901abcdef12345678901abcdef2', timestamp: new Date(Date.now() - 2700000).toISOString(), significance: 'medium' as const },
-      { id: 'whale-sol-1', type: 'distribution' as const, asset: 'SOL', amount: 125000, amountUsd: 28125000, from: '0x3456789012abcdef3456789012abcdef34567890', to: '0xcdef123456789012abcdef123456789012abcdef', timestamp: new Date(Date.now() - 3600000).toISOString(), significance: 'high' as const },
-      { id: 'whale-btc-2', type: 'accumulation' as const, asset: 'BTC', amount: 1800, amountUsd: 173700000, from: '0x4567890123abcdef4567890123abcdef45678901', to: '0xdef1234567890123abcdef1234567890123abcde', timestamp: new Date(Date.now() - 5400000).toISOString(), significance: 'high' as const },
-      { id: 'whale-xrp-1', type: 'transfer' as const, asset: 'XRP', amount: 50000000, amountUsd: 117500000, from: '0x5678901234abcdef5678901234abcdef56789012', to: '0xef12345678901234abcdef12345678901234abcd', timestamp: new Date(Date.now() - 7200000).toISOString(), significance: 'medium' as const },
-    ];
+    const provenance = {
+      kind: 'synthetic_estimate' as const,
+      source: 'top_cryptos' as const,
+      observedOnChain: false,
+    };
     
     try {
-      const cryptoData = await (marketDataService as unknown as { getCryptoData(): Promise<any[]> }).getCryptoData();
+      const cryptoData = await marketDataService.getTopCryptos(5);
       
       if (!cryptoData || cryptoData.length === 0) {
-        return res.json({ success: true, movements: fallbackMovements });
+        return res.json({ success: true, movements: [], provenance });
       }
       
-      const movements = cryptoData.slice(0, 5).map((coin: any, index: number) => {
-        const types = ['accumulation', 'distribution', 'transfer'] as const;
-        const type = types[index % 3];
-        const significance = coin.price_change_percentage_24h > 5 ? 'high' : 
-                            coin.price_change_percentage_24h > 2 ? 'medium' : 'low';
-        
-        const amount = Math.round(coin.market_cap / coin.current_price * 0.001);
-        
-        return {
-          id: `whale-${coin.id}-${Date.now()}`,
-          type,
-          asset: coin.symbol.toUpperCase(),
-          amount,
-          amountUsd: amount * coin.current_price,
-          from: `0x${Math.random().toString(16).slice(2, 42)}`,
-          to: `0x${Math.random().toString(16).slice(2, 42)}`,
-          timestamp: new Date(Date.now() - Math.random() * 3600000).toISOString(),
-          significance,
-        };
-      });
+      const movements = buildMarketMovements(cryptoData);
       
-      res.json({ success: true, movements: movements.length > 0 ? movements : fallbackMovements });
+      res.json({ success: true, movements, provenance });
     } catch (error: any) {
-      res.json({ success: true, movements: fallbackMovements });
+      res.json({ success: true, movements: [], provenance });
     }
   }));
 
@@ -471,25 +424,13 @@ export async function registerPriceAlertsRoutes(app: Express): Promise<void> {
     ];
     
     try {
-      const cryptoData = await (marketDataService as unknown as { getCryptoData(): Promise<any[]> }).getCryptoData();
+      const cryptoData = await marketDataService.getTopCryptos(6);
       
       if (!cryptoData || cryptoData.length === 0) {
         return res.json({ success: true, sentiments: fallbackSentiments });
       }
       
-      const sentiments = cryptoData.slice(0, 6).map((coin: any) => {
-        const change = coin.price_change_percentage_24h || 0;
-        const overall = Math.min(100, Math.max(0, 50 + change * 5));
-        
-        return {
-          asset: coin.name,
-          overall: Math.round(overall),
-          social: Math.round(overall + (Math.random() - 0.5) * 20),
-          news: Math.round(overall + (Math.random() - 0.5) * 15),
-          technical: Math.round(overall + (Math.random() - 0.5) * 10),
-          trend: change > 2 ? 'rising' : change < -2 ? 'falling' : 'stable',
-        };
-      });
+      const sentiments = buildMarketSentiments(cryptoData);
       
       res.json({ success: true, sentiments: sentiments.length > 0 ? sentiments : fallbackSentiments });
     } catch (error: any) {

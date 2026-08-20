@@ -11,6 +11,5 @@ All background work must go through `jobScheduler` (`server/jobs/scheduler.ts`):
 **How to apply:** New jobs pick a unique kebab-case name; runOnStart only fires if last_started_at is older than the interval (or `freshForMs` for crons). 5 consecutive failures → 4x interval backoff. Engines' stop() should call `jobScheduler.cancel(name)`.
 
 # Gotchas
-- `npm run db:push` hangs on an interactive rename prompt due to pre-existing `blog_posts` drift; `--force` doesn't bypass it. Applied `CREATE TABLE` via executeSql instead — keep schema.ts and SQL in sync manually until drift is resolved.
 - To verify admin-guarded endpoints in dev: boot a throwaway server with `PORT=... ADMIN_RESEED_SECRET=... ENABLE_ADMIN_SECRET_OVERRIDE=true` and use the `x-admin-secret` header.
 - `npm run check` fails on pre-existing `client/src/pages/governance.tsx` JSX errors — unrelated to server work; filter it out when typechecking.

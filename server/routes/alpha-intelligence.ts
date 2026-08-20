@@ -721,7 +721,7 @@ export async function registerAlphaIntelligenceRoutes(app: Express): Promise<voi
 
   // Get institutional fund flows
   app.get('/api/institutional/fund-flows', asyncHandler(async (req: Request, res: Response) => {
-    const timeframe = (req.query.timeframe as '1h' | '24h' | '7d') || '24h';
+    const timeframe = (req.query.timeframe as '1h' | '24h' | '7d' | '30d') || '24h';
     
     console.log(`💰 API Call: GET /api/institutional/fund-flows - Timeframe: ${timeframe}`);
     
@@ -831,7 +831,7 @@ export async function registerAlphaIntelligenceRoutes(app: Express): Promise<voi
     try {
       const [smartMoney, fundFlows, sentiment, positioning, walletAnalysis] = await Promise.allSettled([
         institutionalFlowService.getSmartMoneyMovements(assets),
-        institutionalFlowService.getInstitutionalFundFlows((timeframe === '1d' ? '24h' : timeframe) as Parameters<typeof institutionalFlowService.getInstitutionalFundFlows>[0]),
+        institutionalFlowService.getInstitutionalFundFlows(timeframe === '1d' ? '24h' : timeframe),
         institutionalFlowService.getInstitutionalSentiment(timeframe),
         institutionalFlowService.getInstitutionalPositioning(assets),
         institutionalFlowService.getWalletAnalysis()

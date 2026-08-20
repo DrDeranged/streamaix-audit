@@ -16,6 +16,18 @@ description: How to preview drizzle-kit push SQL safely and the drift-resolution
   don't advance them). Use Python `pty.fork()`, send `\r` at the ❯ selector to
   pick the highlighted "No, abort". Never blind-Enter at "created or renamed"
   prompts when applying — it selects rename mappings.
+- Publish compares the development database schema to production; editing the
+  Drizzle schema alone is not enough in a direct Build session with no task
+  merge. Strict-preview the development push, confirm the SQL is safe, then
+  apply it so Publish can carry the same diff to production.
+
+**Why:** Replit Publish introspects the development and production databases;
+the automatic development push normally happens after a task merge, which does
+not run for direct Build sessions.
+
+**How to apply:** Never compensate with production DDL or deploy/startup
+migrations. Synchronize development only after a strict preview shows no
+unexpected destructive statements, then leave production changes to Publish.
 
 ## Drift conventions (durable)
 - Zero-churn trick: name schema.ts constraints/indexes after the exact live DB

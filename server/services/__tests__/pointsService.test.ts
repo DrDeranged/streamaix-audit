@@ -3,6 +3,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // pointsService imports the db and the WebSocket broadcaster at module load.
 // Mock both so no database or network connection is required.
 let streamWatchEarnedToday = 0;
+const debitState = vi.hoisted(() => ({
+  updatedBalance: null as number | null,
+  failLedgerInsert: false,
+  ledgerValues: null as Record<string, unknown> | null,
+  insertCalls: 0,
+}));
 
 vi.mock("../../db", () => {
   const makeChain = () => {
@@ -17,7 +23,10 @@ vi.mock("../../db", () => {
     chain.returning = vi.fn(() => chain);
     // Awaiting the chain resolves to the configured rows.
     chain.then = (resolve: any, reject: any) =>
-      Promise.resolve(chain.__rows ?? []).then(resolve, reject);
+      (chain.__error
+        ? Promise.reject(chain.__error)
+        : Promise.resolve(chain.__rows ?? [])
+      ).then(resolve, reject);
     chain.__rows = [];
     return chain;
   };
@@ -33,6 +42,39 @@ vi.mock("../../db", () => {
       }),
       update: vi.fn(() => makeChain()),
       insert: vi.fn(() => makeChain()),
+      transaction: vi.fn(async (fn: (tx: unknown) => Promise<unknown>) => {
+        const tx = {
+          update: vi.fn(() => {
+            const chain = makeChain();
+            chain.__rows =
+              debitState.updatedBalance == null
+                ? []
+                : [{ balance: debitState.updatedBalance }];
+            return chain;
+          }),
+          insert: vi.fn(() => {
+            debitState.insertCalls += 1;
+            const chain = makeChain();
+            chain.values = vi.fn((values: Record<string, unknown>) => {
+              debitState.ledgerValues = values;
+              if (debitState.failLedgerInsert) {
+                chain.__error = new Error("ledger insert failed");
+              } else {
+                chain.__rows = [
+                  {
+                    id: "tx-1",
+                    ...values,
+                    createdAt: new Date("2026-08-20T00:00:00Z"),
+                  },
+                ];
+              }
+              return chain;
+            });
+            return chain;
+          }),
+        };
+        return fn(tx);
+      }),
     },
   };
 });
@@ -87,6 +129,13 @@ describe("awardPoints input validation", () => {
 });
 
 describe("spendPoints input validation", () => {
+  beforeEach(() => {
+    debitState.updatedBalance = null;
+    debitState.failLedgerInsert = false;
+    debitState.ledgerValues = null;
+    debitState.insertCalls = 0;
+  });
+
   it("rejects zero and negative amounts", async () => {
     expect(
       await pointsService.spendPoints({ userId: "u1", amount: 0, source: "market_trade" }),
@@ -94,6 +143,66 @@ describe("spendPoints input validation", () => {
     expect(
       await pointsService.spendPoints({ userId: "u1", amount: -50, source: "market_trade" }),
     ).toEqual({ success: false, error: "Invalid amount" });
+  });
+
+  it("rejects fractional amounts before opening a transaction", async () => {
+    expect(
+      await pointsService.spendPoints({
+        userId: "u1",
+        amount: 1.5,
+        source: "market_trade",
+      }),
+    ).toEqual({ success: false, error: "Invalid amount" });
+  });
+
+  it("returns insufficient balance when the conditional debit updates no row", async () => {
+    debitState.updatedBalance = null;
+
+    const result = await pointsService.spendPoints({
+      userId: "u1",
+      amount: 100,
+      source: "channel_reward",
+    });
+
+    expect(result).toEqual({ success: false, error: "Insufficient balance" });
+    expect(debitState.insertCalls).toBe(0);
+  });
+
+  it("commits a negative ledger entry with exact before/after balances", async () => {
+    debitState.updatedBalance = 400;
+
+    const result = await pointsService.spendPoints({
+      userId: "u1",
+      amount: 100,
+      source: "gift_subscription",
+      referenceId: "stream-1",
+      referenceType: "stream",
+    });
+
+    expect(result.success).toBe(true);
+    if (!result.success) throw new Error("expected successful debit");
+    expect(result.balance).toBe(400);
+    expect(debitState.ledgerValues).toMatchObject({
+      userId: "u1",
+      amount: -100,
+      type: "spend",
+      source: "gift_subscription",
+      balanceBefore: 500,
+      balanceAfter: 400,
+    });
+  });
+
+  it("reports transaction failure when the ledger insert fails", async () => {
+    debitState.updatedBalance = 400;
+    debitState.failLedgerInsert = true;
+
+    const result = await pointsService.spendPoints({
+      userId: "u1",
+      amount: 100,
+      source: "channel_reward",
+    });
+
+    expect(result).toEqual({ success: false, error: "Transaction failed" });
   });
 });
 

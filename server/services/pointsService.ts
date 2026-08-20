@@ -45,6 +45,8 @@ export type PointsSource =
   | 'market_trade'
   | 'league_entry'
   | 'subscription'
+  | 'channel_reward'
+  | 'gift_subscription'
   | 'stream_comment'
   | 'admin_adjustment';
 
@@ -152,52 +154,77 @@ class PointsService {
     }
   }
 
-  async spendPoints(params: SpendPointsParams): Promise<{ success: boolean; transaction?: PointsTransaction; error?: string }> {
+  async spendPoints(params: SpendPointsParams): Promise<
+    | { success: true; transaction: PointsTransaction; balance: number }
+    | { success: false; error: string }
+  > {
     const { userId, amount, source, description, referenceId, referenceType, metadata } = params;
 
-    if (amount <= 0) {
+    if (!Number.isFinite(amount) || !Number.isInteger(amount) || amount <= 0) {
       return { success: false, error: 'Invalid amount' };
     }
 
     try {
-      const currentBalance = await this.getBalance(userId);
-      
-      if (currentBalance < amount) {
+      const committed = await db.transaction(async (tx) => {
+        // Conditional arithmetic update is the balance authority. Two
+        // concurrent spends cannot both overdraw the same account.
+        const [updated] = await tx
+          .update(users)
+          .set({
+            streamPoints: sql`${users.streamPoints} - ${amount}`,
+            updatedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(users.id, userId),
+              sql`${users.streamPoints} >= ${amount}`,
+            ),
+          )
+          .returning({ balance: users.streamPoints });
+
+        if (!updated) return null;
+        if (updated.balance == null) {
+          throw new Error('Conditional points debit returned a null balance');
+        }
+
+        const newBalance = updated.balance;
+        const currentBalance = newBalance + amount;
+        const [transaction] = await tx
+          .insert(pointsTransactions)
+          .values({
+            userId,
+            amount: -amount,
+            type: 'spend',
+            source,
+            referenceId,
+            referenceType,
+            balanceBefore: currentBalance,
+            balanceAfter: newBalance,
+            description:
+              description ?? `Spent ${amount} STREAM points on ${source}`,
+            metadata,
+          })
+          .returning();
+
+        return { transaction, balance: newBalance, currentBalance };
+      });
+
+      if (!committed) {
         return { success: false, error: 'Insufficient balance' };
       }
 
-      const newBalance = currentBalance - amount;
-
-      // Update user balance
-      await db.update(users)
-        .set({ 
-          streamPoints: newBalance,
-          updatedAt: new Date()
-        })
-        .where(eq(users.id, userId));
-
-      // Record transaction (negative amount for spending)
-      const [transaction] = await db.insert(pointsTransactions)
-        .values({
-          userId,
-          amount: -amount,
-          type: 'spend',
-          source,
-          referenceId,
-          referenceType,
-          balanceBefore: currentBalance,
-          balanceAfter: newBalance,
-          description: description ?? `Spent ${amount} STREAM points on ${source}`,
-          metadata,
-        })
-        .returning();
-
-      console.log(`[Points] User ${userId} spent ${amount} on ${source}. Balance: ${currentBalance} → ${newBalance}`);
+      console.log(
+        `[Points] User ${userId} spent ${amount} on ${source}. Balance: ${committed.currentBalance} → ${committed.balance}`,
+      );
       
-      // Broadcast real-time update via WebSocket
-      this.broadcastPointsUpdate(userId, transaction);
+      // Broadcast only after the balance and ledger row commit together.
+      this.broadcastPointsUpdate(userId, committed.transaction);
       
-      return { success: true, transaction };
+      return {
+        success: true,
+        transaction: committed.transaction,
+        balance: committed.balance,
+      };
     } catch (error) {
       console.error('[Points] Error spending points:', error);
       return { success: false, error: 'Transaction failed' };

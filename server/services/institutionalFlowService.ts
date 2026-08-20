@@ -1,7 +1,10 @@
 import axios from 'axios';
 import { MarketDataService } from './marketDataService';
 import { onChainAnalyticsService } from './onChainAnalyticsService';
-import { duneAnalyticsService } from './duneAnalyticsService';
+import {
+  duneAnalyticsService,
+  type ExchangeFlow,
+} from './duneAnalyticsService';
 
 // Institutional wallet categorization
 interface InstitutionalWallet {
@@ -51,6 +54,36 @@ interface FundFlow {
   institutionalScore: number; // How likely this is institutional
   significance: 'minor' | 'moderate' | 'major' | 'critical';
   marketTiming: 'pre_pump' | 'during_pump' | 'post_pump' | 'accumulation' | 'distribution';
+}
+
+interface NormalizedExchangeFlow {
+  from_exchange?: string;
+  to_exchange?: string;
+  symbol: string;
+  amount: number;
+  value_usd: number;
+  timestamp: string;
+}
+
+export function normalizeExchangeFlow(
+  flow: ExchangeFlow,
+): NormalizedExchangeFlow | null {
+  const netValue = Number(flow.net_flow_24h ?? 0);
+  const valueUsd = Math.abs(netValue);
+  if (!Number.isFinite(valueUsd) || valueUsd <= 0) return null;
+
+  const exchange = flow.exchange_name || 'Unknown exchange';
+  return {
+    ...(netValue >= 0
+      ? { to_exchange: exchange }
+      : { from_exchange: exchange }),
+    symbol: flow.token_symbol || 'ETH',
+    // Dune's exchange aggregate has USD totals but no token-unit quantity.
+    // Keep amount honest rather than deriving a fictitious token amount.
+    amount: 0,
+    value_usd: valueUsd,
+    timestamp: flow.timestamp || new Date().toISOString(),
+  };
 }
 
 // Institutional sentiment analysis
@@ -253,33 +286,37 @@ export class InstitutionalFlowService {
   /**
    * Track institutional fund flows between exchanges
    */
-  async getInstitutionalFundFlows(timeframe: '1h' | '24h' | '7d' = '24h'): Promise<FundFlow[]> {
+  async getInstitutionalFundFlows(timeframe: '1h' | '24h' | '7d' | '30d' = '24h'): Promise<FundFlow[]> {
     const cacheKey = `fund_flows_${timeframe}`;
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
 
     try {
       // Get exchange flows from Dune Analytics
-      const exchangeFlows = await duneAnalyticsService.getExchangeFlows();
+      const exchangeFlows = await duneAnalyticsService.getExchangeFlows(
+        undefined,
+        timeframe,
+      );
       const fundFlows: FundFlow[] = [];
 
       // Analyze flows for institutional patterns
       for (const flow of exchangeFlows || []) {
-        const flowData = flow as any; // Type assertion for dynamic Dune data
+        const flowData = normalizeExchangeFlow(flow);
+        if (!flowData) continue;
         const institutionalScore = this.calculateInstitutionalScore(flowData);
         
         if (institutionalScore > 50) { // Only include likely institutional flows
           fundFlows.push({
             id: `flow_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            sourceExchange: flowData.from_exchange || flowData.source || 'Unknown',
-            destinationExchange: flowData.to_exchange || flowData.destination || 'Unknown',
-            asset: flowData.symbol || flowData.token || 'ETH',
-            amount: flowData.amount || 0,
-            value: flowData.value_usd || flowData.value || 0,
+            sourceExchange: flowData.from_exchange || 'Unknown',
+            destinationExchange: flowData.to_exchange || 'Unknown',
+            asset: flowData.symbol,
+            amount: flowData.amount,
+            value: flowData.value_usd,
             timestamp: flowData.timestamp || new Date().toISOString(),
             flowType: this.determineFlowType(flowData),
             institutionalScore,
-            significance: this.determineSignificance(flowData.value_usd || flowData.value || 0),
+            significance: this.determineSignificance(flowData.value_usd),
             marketTiming: this.analyzeMarketTiming(flowData.timestamp || '', flowData.symbol || 'ETH')
           });
         }
@@ -304,8 +341,8 @@ export class InstitutionalFlowService {
     if (cached) return cached;
 
     try {
-      // Convert timeframe for fund flows API (only supports 1h, 24h, 7d)
-      const fundFlowTimeframe: '1h' | '24h' | '7d' = timeframe === '1d' ? '24h' : timeframe === '30d' ? '7d' : timeframe;
+      const fundFlowTimeframe: '24h' | '7d' | '30d' =
+        timeframe === '1d' ? '24h' : timeframe;
       
       const [smartMoney, fundFlows, whaleMovements] = await Promise.all([
         this.getSmartMoneyMovements(),
@@ -541,7 +578,12 @@ export class InstitutionalFlowService {
     }
     
     // Round number factor (institutions often use round numbers)
-    if (flow.amount % 1000 === 0 || flow.amount % 100 === 0) score += 10;
+    if (
+      flow.amount > 0 &&
+      (flow.amount % 1000 === 0 || flow.amount % 100 === 0)
+    ) {
+      score += 10;
+    }
     
     return Math.min(100, score);
   }

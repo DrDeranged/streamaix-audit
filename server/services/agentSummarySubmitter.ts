@@ -4,7 +4,7 @@ import type { AgentPersonality, SkillLevel } from '../types/agents';
 import type { bounties as bountiesTable } from '../../shared/schema';
 
 export interface SubmitSummaryParams {
-  agentId: number;
+  agentId: string;
   username: string;
   personality: AgentPersonality;
   streamPoints: number;
@@ -71,7 +71,7 @@ export class AgentSummarySubmitter {
         category: bounty.category,
         tags: bounty.tags || [],
         chapters: summaryContent.keyInsights,
-        creatorId: String(params.agentId),
+        creatorId: params.agentId,
         bountyId: bounty.id,
         metadata: {
           aiGenerated: true,
@@ -92,7 +92,7 @@ export class AgentSummarySubmitter {
         status: 'completed',
         completedAt: new Date(),
         summaryId: summary.id,
-        assigneeId: String(params.agentId),
+        assigneeId: params.agentId,
       } as Partial<typeof bountiesTable.$inferInsert>);
       
       console.log(`      🎉 Bounty marked as completed`);
@@ -174,10 +174,10 @@ export class AgentSummarySubmitter {
   /**
    * Attempt to claim a bounty
    */
-  private async attemptBountyClaim(bountyId: string, agentId: number): Promise<void> {
+  private async attemptBountyClaim(bountyId: string, agentId: string): Promise<void> {
     try {
       await storage.updateBounty(bountyId, {
-        assigneeId: String(agentId),
+        assigneeId: agentId,
         status: 'in_progress',
       } as Partial<typeof bountiesTable.$inferInsert>);
       console.log(`      🎯 Claimed bounty ${bountyId}`);

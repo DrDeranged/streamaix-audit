@@ -829,6 +829,8 @@ export const pushSubscriptions = pgTable("push_subscriptions", {
   whaleAlerts: boolean("whale_alerts").default(true),
   liquidationAlerts: boolean("liquidation_alerts").default(true),
   fundingRateAlerts: boolean("funding_rate_alerts").default(true),
+  volumeSpikes: boolean("volume_spikes").default(true),
+  weeklyPreview: boolean("weekly_preview").default(true),
   
   // Streaming notifications
   streamLive: boolean("stream_live").default(true), // When someone you follow goes live

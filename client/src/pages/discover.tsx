@@ -141,14 +141,19 @@ interface MarketSignal {
 
 interface WhaleMovement {
   id: string;
-  type: 'accumulation' | 'distribution' | 'transfer';
+  type: 'market_cap_estimate';
   asset: string;
   amount: number;
   amountUsd: number;
-  from: string;
-  to: string;
+  change24h: number;
   timestamp: string;
   significance: 'low' | 'medium' | 'high';
+  provenance: {
+    kind: 'synthetic_estimate';
+    source: 'top_cryptos';
+    methodology: string;
+    observedOnChain: false;
+  };
 }
 
 interface SentimentData {
@@ -235,9 +240,7 @@ function SignalCard({ signal }: { signal: MarketSignal }) {
 
 function WhaleMovementCard({ movement }: { movement: WhaleMovement }) {
   const typeColors = {
-    accumulation: { bg: 'bg-gain/20', text: 'text-gain', border: 'border-gain/30' },
-    distribution: { bg: 'bg-loss/20', text: 'text-loss', border: 'border-loss/30' },
-    transfer: { bg: 'bg-accent-core/20', text: 'text-accent-bright', border: 'border-accent-core/30' },
+    market_cap_estimate: { bg: 'bg-accent-core/20', text: 'text-accent-bright', border: 'border-accent-core/30' },
   };
   
   const colors = typeColors[movement.type];
@@ -256,7 +259,7 @@ function WhaleMovementCard({ movement }: { movement: WhaleMovement }) {
           <Droplet className={cn("w-4 h-4", colors.text)} />
           <span className="font-semibold text-primary text-sm">{movement.asset}</span>
           <Badge className={cn("text-[10px]", colors.bg, colors.text, colors.border)}>
-            {movement.type}
+            Market-cap estimate
           </Badge>
         </div>
         <Badge className={cn(
@@ -271,18 +274,19 @@ function WhaleMovementCard({ movement }: { movement: WhaleMovement }) {
       
       <div className="flex items-center justify-between text-xs">
         <div>
-          <p className="text-secondary">Amount</p>
+          <p className="text-secondary">Estimated 0.1% supply</p>
           <p className="text-primary font-medium">{movement.amount?.toLocaleString()} {movement.asset}</p>
           <p className="text-muted">${movement.amountUsd?.toLocaleString()}</p>
         </div>
         <div className="text-right">
-          <p className="text-secondary">From → To</p>
-          <p className="text-body font-mono text-[10px]">
-            {movement.from?.slice(0, 6)}...{movement.from?.slice(-4)}
+          <p className="text-secondary">24h change</p>
+          <p className={cn(
+            "font-medium",
+            movement.change24h >= 0 ? "text-gain" : "text-loss",
+          )}>
+            {movement.change24h >= 0 ? '+' : ''}{movement.change24h.toFixed(2)}%
           </p>
-          <p className="text-body font-mono text-[10px]">
-            {movement.to?.slice(0, 6)}...{movement.to?.slice(-4)}
-          </p>
+          <p className="text-muted text-[10px]">Synthetic · not on-chain</p>
         </div>
       </div>
     </motion.div>

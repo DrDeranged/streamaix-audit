@@ -160,6 +160,11 @@ export const channelPointsRedeemSchema = z.object({
   rewardId: nonEmpty('rewardId').max(100),
 }).passthrough();
 
+export const giftSubscriptionsSchema = z.object({
+  count: z.number().int().min(1).max(100).default(1),
+  targetUserId: z.string().min(1).max(100).nullable().optional(),
+}).passthrough();
+
 export const debateNextSchema = z.object({
   previousStatement: z.string().max(4000).optional(),
   prompt: z.string().max(2000).optional(),
