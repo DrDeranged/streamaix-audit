@@ -1,7 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Mock the db module so no real Postgres is touched.
-const dbState: { rows: any[]; failReads: boolean } = { rows: [], failReads: false };
+const dbState: {
+  rows: any[];
+  failReads: boolean;
+  // Advisory-lock controls (consumed by the mocked pool client below).
+  lockHeld: boolean;         // pg_try_advisory_lock returns false (held elsewhere)
+  connectFails: boolean;     // pool.connect() throws (lock infra unavailable)
+  unlockCalls: number;       // count of pg_advisory_unlock invocations
+  releaseCalls: number;      // count of client.release() invocations
+} = { rows: [], failReads: false, lockHeld: false, connectFails: false, unlockCalls: 0, releaseCalls: 0 };
 
 vi.mock('../../db', () => {
   const select = () => ({
@@ -19,7 +27,25 @@ vi.mock('../../db', () => {
       onConflictDoUpdate: async () => undefined,
     }),
   });
-  return { db: { select, insert } };
+  const pool = {
+    connect: async () => {
+      if (dbState.connectFails) throw new Error('no connection');
+      return {
+        query: async (text: string) => {
+          if (text.includes('pg_try_advisory_lock')) {
+            return { rows: [{ locked: !dbState.lockHeld }] };
+          }
+          if (text.includes('pg_advisory_unlock')) {
+            dbState.unlockCalls++;
+            return { rows: [{ pg_advisory_unlock: true }] };
+          }
+          return { rows: [] };
+        },
+        release: () => { dbState.releaseCalls++; },
+      };
+    },
+  };
+  return { db: { select, insert }, pool };
 });
 
 vi.mock('node-cron', () => ({
@@ -39,6 +65,10 @@ describe('JobScheduler', () => {
     vi.useFakeTimers();
     dbState.rows = [];
     dbState.failReads = false;
+    dbState.lockHeld = false;
+    dbState.connectFails = false;
+    dbState.unlockCalls = 0;
+    dbState.releaseCalls = 0;
   });
   afterEach(() => {
     vi.useRealTimers();
@@ -220,5 +250,103 @@ describe('JobScheduler', () => {
     await flush();
     await vi.advanceTimersByTimeAsync(1000);
     expect(fn).not.toHaveBeenCalled();
+  });
+
+  // ------------------------------------------------------------ advisory lock
+
+  it('acquires and releases the advisory lock around each run', async () => {
+    const s = new JobScheduler();
+    const fn = vi.fn();
+    s.register('a', HOUR, fn, { runOnStart: true });
+    await flush();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(fn).toHaveBeenCalledTimes(1);
+    // The lock must be released (unlock + client.release) after the run.
+    expect(dbState.unlockCalls).toBe(1);
+    expect(dbState.releaseCalls).toBe(1);
+  });
+
+  it('silently skips the run when the advisory lock is held by another instance', async () => {
+    dbState.lockHeld = true;
+    const s = new JobScheduler();
+    const fn = vi.fn();
+    s.register('a', HOUR, fn, { runOnStart: true });
+    await flush();
+    await vi.advanceTimersByTimeAsync(0);
+    // Body did NOT run because the lock is held elsewhere...
+    expect(fn).not.toHaveBeenCalled();
+    // ...and we did not acquire it, so there is nothing to unlock, but the
+    // checked-out client is still released.
+    expect(dbState.unlockCalls).toBe(0);
+    expect(dbState.releaseCalls).toBe(1);
+    const st = s.getStatus().find((j) => j.name === 'a')!;
+    expect(st.lastStatus).toBe('skipped-locked');
+    // A held lock is not a failure — no backoff accrual.
+    expect(st.consecutiveFailures).toBe(0);
+  });
+
+  it('releases the advisory lock even when the job body throws', async () => {
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const s = new JobScheduler();
+    const fn = vi.fn(async () => { throw new Error('boom'); });
+    s.register('a', HOUR, fn, { runOnStart: true });
+    await flush();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(fn).toHaveBeenCalledTimes(1);
+    expect(dbState.unlockCalls).toBe(1);
+    expect(dbState.releaseCalls).toBe(1);
+    const st = s.getStatus().find((j) => j.name === 'a')!;
+    expect(st.lastStatus).toBe('failure');
+    errSpy.mockRestore();
+  });
+
+  it('fails closed when the lock connection is unavailable', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    dbState.connectFails = true;
+    const s = new JobScheduler();
+    const fn = vi.fn();
+    s.register('a', HOUR, fn, { runOnStart: true });
+    await flush();
+    await vi.advanceTimersByTimeAsync(0);
+    // Never run side effects without the cross-instance lock.
+    expect(fn).not.toHaveBeenCalled();
+    const st = s.getStatus().find((j) => j.name === 'a')!;
+    expect(st.lastStatus).toBe('lock-unavailable');
+    expect(st.lastStartedAt).toBeNull();
+    warnSpy.mockRestore();
+  });
+
+  // ------------------------------------------------------- catch-up fail-safe
+
+  it('catch-up SKIPS a job whose persisted state cannot be read (fail-safe)', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const s = new JobScheduler();
+    const fn = vi.fn();
+    // Register a daily cron; no persisted row exists yet.
+    s.registerCron('c', '0 8 * * *', fn, { timezone: 'America/New_York' });
+    await flush();
+    // Now simulate the DB read failing during the catch-up check.
+    dbState.failReads = true;
+    await s.runCatchUpCheck(new Date('2026-08-15T20:00:00Z'));
+    // Fail-safe: do NOT run side effects when persisted state is unavailable.
+    expect(fn).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
+
+  it('catch-up runs a genuinely missed slot when persisted state is readable', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    dbState.rows = []; // readable, but no prior run recorded → missed slot
+    const s = new JobScheduler();
+    const fn = vi.fn();
+    s.registerCron('c', '0 8 * * *', fn, { timezone: 'America/New_York' });
+    await flush();
+    await s.runCatchUpCheck(new Date('2026-08-15T20:00:00Z'));
+    await flush();
+    expect(fn).toHaveBeenCalledTimes(1);
+    // Catch-up goes through executeJob, so it acquires and releases the exact
+    // same job-name advisory lock as the normal cron callback.
+    expect(dbState.unlockCalls).toBe(1);
+    expect(dbState.releaseCalls).toBe(1);
+    logSpy.mockRestore();
   });
 });

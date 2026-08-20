@@ -1,6 +1,6 @@
 import { db } from '../db';
-import { liveStreams, knowledgeAvatars, streamRecordings, streamConversationMessages } from '@shared/schema';
-import { eq, desc } from 'drizzle-orm';
+import { liveStreams, knowledgeAvatars, streamRecordings, streamConversationMessages, streamParticipants } from '@shared/schema';
+import { eq, desc, and } from 'drizzle-orm';
 import { getStreamingService } from './streamingService';
 import { MarketDataService } from './marketDataService';
 import { AvatarVoiceService } from './avatarVoiceService';
@@ -57,33 +57,11 @@ export class ScheduledMarketStreamService {
     this.marketDataService = MarketDataService.getInstance();
   }
 
-  private async ensureSchema(): Promise<void> {
-    try {
-      await db.execute(`
-        ALTER TABLE stream_recordings 
-        ADD COLUMN IF NOT EXISTS ipfs_hash TEXT;
-      `);
-      await db.execute(`
-        ALTER TABLE stream_recordings 
-        ADD COLUMN IF NOT EXISTS arweave_id TEXT;
-      `);
-      await db.execute(`
-        ALTER TABLE stream_recordings 
-        ADD COLUMN IF NOT EXISTS is_clip BOOLEAN DEFAULT false;
-      `);
-      console.log('[Scheduled Streams] ✅ Database schema verified');
-    } catch (error) {
-      console.log('[Scheduled Streams] Schema check completed (columns may already exist)');
-    }
-  }
-
   async start() {
     if (this.isRunning) {
       console.log('[Scheduled Streams] Already running');
       return;
     }
-
-    await this.ensureSchema();
 
     this.isRunning = true;
     console.log('📅 Scheduled Market Stream Service started');
@@ -102,79 +80,9 @@ export class ScheduledMarketStreamService {
 
     console.log('[Scheduled Streams] ✅ Cron jobs scheduled');
 
-    // Check for missed streams on startup (runs in background)
-    setImmediate(() => this.checkAndRunMissedStreams());
-  }
-
-  private async checkAndRunMissedStreams(): Promise<void> {
-    try {
-      // Get current time in EST
-      const now = new Date();
-      const estFormatter = new Intl.DateTimeFormat('en-US', {
-        timeZone: 'America/New_York',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      });
-      const estParts = estFormatter.formatToParts(now);
-      const estHour = parseInt(estParts.find(p => p.type === 'hour')?.value || '0');
-      const estMinute = parseInt(estParts.find(p => p.type === 'minute')?.value || '0');
-      const dayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
-
-      // Skip weekends
-      if (dayOfWeek === 0 || dayOfWeek === 6) {
-        console.log('[Scheduled Streams] 📅 Weekend - skipping missed stream check');
-        return;
-      }
-
-      console.log(`[Scheduled Streams] 🔍 Checking for missed streams (EST: ${estHour}:${estMinute.toString().padStart(2, '0')})`);
-
-      // Get today's date in EST for database lookup
-      const estDateStr = `${estParts.find(p => p.type === 'year')?.value}-${estParts.find(p => p.type === 'month')?.value}-${estParts.find(p => p.type === 'day')?.value}`;
-
-      // Check today's streams in database
-      const todayStart = new Date(estDateStr + 'T00:00:00-05:00');
-      const todayEnd = new Date(estDateStr + 'T23:59:59-05:00');
-
-      const todayStreams = await db.select()
-        .from(liveStreams)
-        .where(eq(liveStreams.category, 'market_update'));
-
-      const todayMarketStreams = todayStreams.filter(s => {
-        const streamDate = new Date(s.actualStart || s.scheduledStart || s.createdAt || new Date());
-        return streamDate >= todayStart && streamDate <= todayEnd;
-      });
-
-      const hasMorningStream = todayMarketStreams.some(s => 
-        s.title?.toLowerCase().includes('morning') || s.tags?.includes('morning_update')
-      );
-      const hasCloseStream = todayMarketStreams.some(s => 
-        s.title?.toLowerCase().includes('close') || s.title?.toLowerCase().includes('recap') || s.tags?.includes('market_close')
-      );
-
-      // Morning update: If it's past 8am EST and before 4pm, and no morning stream exists
-      if (estHour >= 8 && estHour < 16 && !hasMorningStream) {
-        console.log('[Scheduled Streams] 🌅 RECOVERY: Running missed Morning Update');
-        await this.runScheduledStream('morning_update');
-      } else if (hasMorningStream) {
-        console.log('[Scheduled Streams] ✅ Morning Update already ran today');
-      }
-
-      // Market close: If it's past 4pm EST and no close stream exists  
-      if (estHour >= 16 && !hasCloseStream) {
-        console.log('[Scheduled Streams] 🌙 RECOVERY: Running missed Market Close Update');
-        await this.runScheduledStream('market_close');
-      } else if (hasCloseStream) {
-        console.log('[Scheduled Streams] ✅ Market Close already ran today');
-      }
-
-      console.log('[Scheduled Streams] 🔍 Missed stream check complete');
-    } catch (error) {
-      console.error('[Scheduled Streams] Error checking missed streams:', error);
-    }
+    // JobScheduler owns boot/hourly catch-up for these cron registrations.
+    // Keeping recovery on that single path means the catch-up and normal cron
+    // use the exact same job name, durable state, and advisory lock.
   }
 
   stop() {
@@ -475,6 +383,40 @@ Return the commentary as a single flowing script, broken into 4-6 paragraphs for
     }
   }
 
+  /**
+   * Resolve the stream_participants row id for this scheduled stream's host
+   * avatar, creating one if it does not exist. stream_conversation_messages.
+   * participant_id is a FK to stream_participants.id, so the previous code
+   * (which stored the avatar's knowledge_avatars.id there) produced FK
+   * violations in production. This registers the avatar as the stream host
+   * participant — its intended identity — and returns a valid participant id.
+   * The FK is preserved; no rows are deleted.
+   */
+  private async ensureAvatarParticipant(streamId: string, avatar: any): Promise<string> {
+    // Reuse an existing host-avatar participant row for this stream if present.
+    const existing = await db.select({ id: streamParticipants.id })
+      .from(streamParticipants)
+      .where(and(
+        eq(streamParticipants.streamId, streamId),
+        eq(streamParticipants.avatarId, avatar.id),
+      ))
+      .limit(1);
+
+    if (existing[0]?.id) return existing[0].id;
+
+    const [participant] = await db.insert(streamParticipants).values({
+      streamId,
+      avatarId: avatar.id,
+      participantType: 'avatar',
+      role: 'host',
+      audioPreference: 'tts',
+      speakingStatus: 'speaking',
+      isActive: true,
+    }).returning({ id: streamParticipants.id });
+
+    return participant.id;
+  }
+
   private async deliverCommentary(streamId: string, avatar: any, segments: string[]): Promise<string | null> {
     const streamingService = getStreamingService();
     const delayPerSegment = Math.floor((STREAM_DURATION_SECONDS * 1000) / segments.length);
@@ -482,6 +424,15 @@ Return the commentary as a single flowing script, broken into 4-6 paragraphs for
     // Server-side TTS removed — commentary is delivered as text; clients can
     // speak it via the Web Speech API.
     const audioBase64: string | null = null;
+
+    // Register (or reuse) the host-avatar participant so message inserts
+    // satisfy the participant_id FK to stream_participants.
+    let participantId: string | null = null;
+    try {
+      participantId = await this.ensureAvatarParticipant(streamId, avatar);
+    } catch (err) {
+      console.error('[Scheduled Streams] Error ensuring avatar participant (messages will be skipped):', err);
+    }
 
     for (let i = 0; i < segments.length; i++) {
       const segment = segments[i];
@@ -491,19 +442,22 @@ Return the commentary as a single flowing script, broken into 4-6 paragraphs for
         streamingService.sendAiMessage(streamId, avatar.id, avatar.name, segment);
       }
 
-      // Save message to database for replay
-      try {
-        await db.insert(streamConversationMessages).values({
-          streamId,
-          participantId: avatar.id,
-          speakerType: 'avatar',
-          speakerAvatarId: avatar.id,
-          speakerName: avatar.name,
-          textContent: segment,
-          sourceType: 'scheduled_stream',
-        });
-      } catch (err) {
-        console.error('[Scheduled Streams] Error saving message to DB:', err);
+      // Save message to database for replay (only when we have a valid
+      // participant row to reference — never violate the FK).
+      if (participantId) {
+        try {
+          await db.insert(streamConversationMessages).values({
+            streamId,
+            participantId,
+            speakerType: 'avatar',
+            speakerAvatarId: avatar.id,
+            speakerName: avatar.name,
+            textContent: segment,
+            sourceType: 'scheduled_stream',
+          });
+        } catch (err) {
+          console.error('[Scheduled Streams] Error saving message to DB:', err);
+        }
       }
 
       if (this.activeStream) {

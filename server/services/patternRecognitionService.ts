@@ -561,7 +561,7 @@ export class PatternRecognitionService {
 
     // Find potential peaks for head and shoulders
     const peaks = this.findPeaks(data.map(d => d.high), 5);
-    const troughs = this.findPeaks(data.map(d => d.low).map(x => -x), 5).map(x => -x) as unknown as Array<{ value: number; index: number }>;
+    const troughs = this.findPeaks(data.map(d => d.low).map(x => -x), 5).map(x => ({ ...x, value: -x.value }));
 
     if (peaks.length >= 3) {
       // Look for head and shoulders pattern (left shoulder, head, right shoulder)
@@ -1542,7 +1542,7 @@ export class PatternRecognitionService {
     const tolerance = 0.02; // 2% tolerance for level clustering
     
     // Find peaks/troughs
-    const extremes = this.findPeaks(type === 'resistance' ? data : data.map(x => -x), undefined as unknown as number);
+    const extremes = this.findPeaks(type === 'resistance' ? data : data.map(x => -x), 5);
     const values = extremes.map(e => type === 'resistance' ? e.value : -e.value);
     
     // Cluster similar levels

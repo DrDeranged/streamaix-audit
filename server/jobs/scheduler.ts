@@ -22,6 +22,7 @@ import type { ScheduledTask } from 'node-cron';
 import { db } from '../db';
 import { jobRuns } from '@shared/schema';
 import { eq, sql } from 'drizzle-orm';
+import { withJobLock } from './advisoryLock';
 
 const MAX_CONSECUTIVE_FAILURES = 5;
 const BACKOFF_MULTIPLIER = 4;
@@ -312,6 +313,38 @@ export class JobScheduler {
     return !!job && !job.cancelled;
   }
 
+  /**
+   * Graceful shutdown helper: cancel every job (stop timers/cron so no NEW
+   * runs start) and wait up to `timeoutMs` for any currently in-flight runs to
+   * finish. Returns the number of jobs still running when the wait ends.
+   */
+  async stopAll(timeoutMs = 10_000): Promise<number> {
+    for (const name of Array.from(this.jobs.keys())) {
+      this.cancel(name);
+    }
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+      const running = this.runningCount();
+      if (running === 0) return 0;
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    return this.runningCount();
+  }
+
+  /** Count of jobs whose function is currently executing. */
+  runningCount(): number {
+    let n = 0;
+    for (const job of Array.from(this.jobs.values())) if (job.running) n += 1;
+    return n;
+  }
+
+  /** Total registered (non-cancelled) job count — for health reporting. */
+  jobCount(): number {
+    let n = 0;
+    for (const job of Array.from(this.jobs.values())) if (!job.cancelled) n += 1;
+    return n;
+  }
+
   getStatus(): Array<{
     name: string;
     kind: 'interval' | 'cron';
@@ -437,11 +470,28 @@ export class JobScheduler {
       return;
     }
     job.running = true;
-    job.lastStartedAt = new Date();
-    await this.persistStart(job);
+    let acquired = false;
 
     try {
-      await job.fn();
+      // Cross-instance guard: hold a Postgres advisory lock keyed by job name
+      // for the whole body. If another process/instance already holds it, the
+      // lock is skipped silently and this tick is treated as a no-op success
+      // (the other instance is running it). The lock is always released.
+      const outcome = await withJobLock(job.name, async () => {
+        acquired = true;
+        job.lastStartedAt = new Date();
+        await this.persistStart(job);
+        return job.fn();
+      });
+      if (!outcome.ran) {
+        // Contention and lock-infrastructure outages are both fail-closed, but
+        // only the latter is an operational error. Neither may advance
+        // persisted last-run state, because no job body ran.
+        job.lastStatus =
+          outcome.reason === 'held' ? 'skipped-locked' : 'lock-unavailable';
+        job.lastError = outcome.error ?? null;
+        return;
+      }
       job.runCount += 1;
       job.consecutiveFailures = 0;
       job.lastStatus = 'success';
@@ -459,10 +509,16 @@ export class JobScheduler {
       } else {
         console.error(`[Scheduler] Job "${job.name}" failed:`, job.lastError);
       }
+      // Durable, best-effort visibility (Phase 1). Never throws / recurses.
+      void import('../services/serverErrorRecorder')
+        .then((m) => m.recordServerErrorSafe(err, { tag: job.name, source: 'job' }))
+        .catch(() => {});
     } finally {
       job.running = false;
-      job.lastFinishedAt = new Date();
-      await this.persistFinish(job);
+      if (acquired) {
+        job.lastFinishedAt = new Date();
+        await this.persistFinish(job);
+      }
     }
   }
 

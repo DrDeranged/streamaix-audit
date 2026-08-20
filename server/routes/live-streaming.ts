@@ -80,6 +80,7 @@ import { autonomousTradingEngine } from "../services/autonomousTradingEngine";
 import { pointsService } from "../services/pointsService";
 import { bountyHunterService } from "../services/bountyHunterService";
 import { qualityScorerService } from "../services/qualityScorerService";
+import { getEnhancedStreamingService } from "../services/enhancedStreamingService";
 import { db } from "../db";
 import * as schema from "../../shared/schema";
 import {
@@ -698,7 +699,7 @@ export async function registerLiveStreamingRoutes(app: Express): Promise<void> {
           description: `AI Debate between ${avatar1[0]?.name || 'Unknown'} and ${avatar2[0]?.name || 'Unknown'}`,
           streamType: 'debate',
           hostUsername: avatar1[0]?.name || 'AI Avatar',
-          hostAvatar: (avatar1[0] as (typeof avatar1)[number] & { avatarUrl?: string | null })?.avatarUrl,
+          hostAvatar: avatar1[0]?.imageUrl,
           duration: estimatedDurationSeconds > 0 ? estimatedDurationSeconds : 60,
           viewCount: debate.totalViewers || 0,
           thumbnailUrl: null,
@@ -712,8 +713,10 @@ export async function registerLiveStreamingRoutes(app: Express): Promise<void> {
       }));
 
       // Also get regular stream replays
-      const enhancedStreamingService = (globalThis as unknown as { enhancedStreamingService: { getStreamReplays(limit: number): Promise<any[]> } }).enhancedStreamingService;
-      const regularReplays = await enhancedStreamingService.getStreamReplays(limit);
+      const enhancedStreamingService = getEnhancedStreamingService();
+      const regularReplays = enhancedStreamingService
+        ? await enhancedStreamingService.getStreamReplays(limit)
+        : [];
       
       // Combine and format regular replays
       const formattedReplays = regularReplays.map((replay: any) => ({

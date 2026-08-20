@@ -176,10 +176,8 @@ export class AgentSummarySubmitter {
    */
   private async attemptBountyClaim(bountyId: string, agentId: number): Promise<void> {
     try {
-      const getStorage = (globalThis as unknown as { getStorage: () => typeof import('../storage').storage }).getStorage;
-      const scopedStorage = getStorage();
-      await scopedStorage.updateBounty(bountyId, {
-        claimerId: agentId,
+      await storage.updateBounty(bountyId, {
+        assigneeId: String(agentId),
         status: 'in_progress',
       } as Partial<typeof bountiesTable.$inferInsert>);
       console.log(`      🎯 Claimed bounty ${bountyId}`);

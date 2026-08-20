@@ -3,6 +3,7 @@ import { bountyQualityScores, summaries, bounties } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import type { BountyQualityScore, Summary } from "@shared/schema";
 import { AIService } from "./aiService";
+import { modelGateway } from "../lib/modelGateway";
 
 export class QualityScorerService {
   private aiService: AIService;
@@ -150,13 +151,16 @@ Respond ONLY with valid JSON in this exact format:
 }`;
 
     try {
-      const response = await (this.aiService as unknown as {
-        chat(prompt: string, options: { model: string; temperature: number; maxTokens: number }): Promise<string>;
-      }).chat(prompt, {
-        model: 'gpt-4o-mini', // Fast and cost-effective for scoring
+      const result = await modelGateway.complete({
+        tier: 'fast', // Fast and cost-effective for scoring
+        priority: 'user',
+        tag: 'quality-scorer',
+        system: 'You are an expert content quality evaluator. Respond ONLY with valid JSON.',
+        user: prompt,
         temperature: 0.3,
         maxTokens: 300
       });
+      const response = result.content || '';
 
       // Parse AI response
       const jsonMatch = response.match(/\{[\s\S]*\}/);

@@ -159,6 +159,48 @@ describe("newsletter claim-then-send (UNIQUE edition_date+edition)", () => {
   });
 });
 
+describe("NEWSLETTER_ENABLED kill switch", () => {
+  afterEach(() => {
+    delete process.env.NEWSLETTER_ENABLED;
+  });
+
+  it("default (unset) is ENABLED — sends normally", async () => {
+    const r = await newsletterScheduler.sendNewsletter("Morning", "cron");
+    expect(r.sent).toBe(true);
+    expect(sendToWaitlist).toHaveBeenCalledTimes(1);
+  });
+
+  it("NEWSLETTER_ENABLED=false returns before claim/send and dispatches nothing", async () => {
+    process.env.NEWSLETTER_ENABLED = "false";
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const r = await newsletterScheduler.sendNewsletter("Morning", "cron");
+    expect(r).toEqual({ sent: false, reason: "disabled" });
+    // Never claimed a slot, never dispatched.
+    expect(dbState.claims.size).toBe(0);
+    expect(sendToWaitlist).not.toHaveBeenCalled();
+    // Exactly one concise skip log for this path.
+    const skips = logSpy.mock.calls.filter((c) => String(c[0]).includes("NEWSLETTER_ENABLED=false"));
+    expect(skips.length).toBe(1);
+    logSpy.mockRestore();
+  });
+
+  it("NEWSLETTER_ENABLED=false blocks the catch-up path too", async () => {
+    process.env.NEWSLETTER_ENABLED = "false";
+    const r = await newsletterScheduler.sendNewsletter("Market Close", "catch-up");
+    expect(r.sent).toBe(false);
+    expect(r.reason).toBe("disabled");
+    expect(dbState.claims.size).toBe(0);
+    expect(sendToWaitlist).not.toHaveBeenCalled();
+  });
+
+  it("any non-'false' value (e.g. 'true') keeps sending enabled", async () => {
+    process.env.NEWSLETTER_ENABLED = "true";
+    const r = await newsletterScheduler.sendNewsletter("Morning", "cron");
+    expect(r.sent).toBe(true);
+    expect(sendToWaitlist).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe("slot-date keying math (pure, no DB)", () => {
   it("maps UTC boot times to the correct ET edition_date", () => {
     // EDT (UTC-4): 12:00 UTC = 8:00 ET, morning slot, same date

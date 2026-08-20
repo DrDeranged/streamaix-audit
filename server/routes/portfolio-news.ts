@@ -99,6 +99,18 @@ import passport from "passport";
 import axios from "axios";
 import { ADMIN_USERNAMES, isAdmin, requireAdmin, validateRequest, asyncHandler } from "./_shared";
 
+// Format a date as a relative "time ago" string (e.g. "5m ago", "2h ago").
+function getTimeAgo(date: Date): string {
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (!Number.isFinite(seconds) || seconds < 60) return 'just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
 export async function registerPortfolioNewsRoutes(app: Express): Promise<void> {
   // =============================================================================
   // PORTFOLIO NEWS API
@@ -214,7 +226,7 @@ export async function registerPortfolioNewsRoutes(app: Express): Promise<void> {
         return titleLower.includes(symbolLower) || titleLower.includes(symbolLower.slice(0, 3));
       }) || symbols[0] || '';
       
-      const timeAgo = (globalThis as unknown as { getTimeAgo(d: Date): string }).getTimeAgo(new Date(article.published));
+      const timeAgo = getTimeAgo(new Date(article.published));
       
       return {
         symbol: matchedSymbol,
@@ -273,7 +285,7 @@ export async function registerPortfolioNewsRoutes(app: Express): Promise<void> {
       return {
         title: article.title,
         source: article.source,
-        time: (globalThis as unknown as { getTimeAgo(d: Date): string }).getTimeAgo(new Date(article.published)),
+        time: getTimeAgo(new Date(article.published)),
         sentiment,
         url: article.url,
       };

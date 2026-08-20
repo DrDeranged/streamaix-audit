@@ -123,6 +123,7 @@ export async function registerBountiesRoutes(app: Express): Promise<void> {
       if (bounty.status === 'completed' && bounty.summaryId) {
         const summary = await storage.getSummary(bounty.summaryId);
         const completer = bounty.assigneeId ? await storage.getUser(bounty.assigneeId) : null;
+        const qualityScoreRecord = await qualityScorerService.getQualityScore(bounty.id);
         
         // Extract preview from summary text - split into sentences and take first 3
         let summaryPreview: string[] = [];
@@ -138,7 +139,7 @@ export async function registerBountiesRoutes(app: Express): Promise<void> {
           ...bounty,
           summaryPreview,
           summaryTitle: summary?.title,
-          qualityScore: (summary as (typeof summary) & { qualityScore?: number })?.qualityScore,
+          qualityScore: qualityScoreRecord?.overallScore ?? undefined,
           completerUsername: completer?.username,
           completerAvatar: completer?.avatar,
           isAiCompleted: completer?.isAiAgent || false,
@@ -498,21 +499,22 @@ export async function registerBountiesRoutes(app: Express): Promise<void> {
       
       if (hunter) {
         // Calculate quality score for the submitted summary
-        const qualityScore = await (qualityScorerService as unknown as {
-          calculateQualityScore(bountyId: string, summaryId: string): Promise<{ overallScore?: number }>;
-        }).calculateQualityScore(
+        const qualityScore = await qualityScorerService.scoreSummary(
           req.params.id,
           summaryId
         );
 
+        // Derive completion time (hours) from claim → completion timestamps
+        const claimedAtMs = bounty.claimedAt ? new Date(bounty.claimedAt).getTime() : Date.now();
+        const completionTimeHours = Math.max(0, (Date.now() - claimedAtMs) / (1000 * 60 * 60));
+
         // Update hunter reputation with quality bonus
-        await (bountyHunterService as unknown as {
-          updateAfterCompletion(hunterId: string, bountyId: string, qualityScore: number): Promise<unknown>;
-        }).updateAfterCompletion(
-          hunter.id,
-          req.params.id,
-          qualityScore.overallScore || 70
-        );
+        await bountyHunterService.updateHunterAfterCompletion(hunter.id, {
+          reward: bounty.reward + (bounty.tipPool || 0),
+          completionTimeHours,
+          qualityScore: qualityScore.overallScore ?? 70,
+          category: bounty.category ?? undefined,
+        });
 
         // Award STREAM points to the bounty completer
         const totalReward = bounty.reward + (bounty.tipPool || 0);

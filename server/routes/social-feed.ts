@@ -131,7 +131,7 @@ export async function registerSocialFeedRoutes(app: Express): Promise<void> {
       // Get all content to calculate topic counts
       const bounties = await storage.getBounties(1000, 0);
       const summaries = await storage.getSummaries();
-      const markets = await (storage as unknown as { getPredictionMarkets(limit: number, offset: number): Promise<Array<{ category?: string | null; tags?: string[] | null }>> }).getPredictionMarkets(1000, 0);
+      const markets = await storage.getPredictionMarkets(1000, 0);
 
       // Count by category and tags
       const topicCounts = new Map<string, number>();

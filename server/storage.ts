@@ -115,6 +115,7 @@ import {
   watchlistItems,
   type WatchlistItem,
   type InsertWatchlistItem,
+  type PredictionMarket,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, inArray, gte } from "drizzle-orm";
@@ -142,6 +143,7 @@ export interface IStorage {
   // Bounty operations
   getBounty(id: string): Promise<Bounty | undefined>;
   getBounties(limit?: number, offset?: number): Promise<Bounty[]>;
+  getPredictionMarkets(limitOrOptions?: number | { limit?: number; offset?: number }, offsetArg?: number): Promise<PredictionMarket[]>;
   getBountiesByUser(userId: string): Promise<Bounty[]>;
   createBounty(bounty: InsertBounty): Promise<Bounty>;
   updateBounty(id: string, updates: Partial<InsertBounty>): Promise<Bounty | undefined>;
@@ -608,6 +610,33 @@ export class DatabaseStorage implements IStorage {
 
     return await query
       .orderBy(desc(bounties.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  // Query prediction markets ordered by newest first. Accepts either positional
+  // (limit, offset) args or a single { limit?, offset? } options object so that
+  // both existing call sites (social feed route + unified social feed helper)
+  // resolve to a real query instead of throwing.
+  async getPredictionMarkets(
+    limitOrOptions?: number | { limit?: number; offset?: number },
+    offsetArg?: number
+  ): Promise<PredictionMarket[]> {
+    const { predictionMarkets } = await import('@shared/schema');
+    let limit = 50;
+    let offset = 0;
+    if (typeof limitOrOptions === 'number') {
+      limit = limitOrOptions;
+      offset = offsetArg ?? 0;
+    } else if (limitOrOptions && typeof limitOrOptions === 'object') {
+      limit = limitOrOptions.limit ?? 50;
+      offset = limitOrOptions.offset ?? 0;
+    }
+
+    return await db
+      .select()
+      .from(predictionMarkets)
+      .orderBy(desc(predictionMarkets.createdAt))
       .limit(limit)
       .offset(offset);
   }
@@ -2396,9 +2425,7 @@ export class DatabaseStorage implements IStorage {
     
     // Fetch prediction markets
     if (types.includes('market')) {
-      const markets = await (this as unknown as {
-        getPredictionMarkets(options: { limit?: number; offset?: number }): Promise<Array<{ createdAt: Date | null }>>;
-      }).getPredictionMarkets({ limit: options.limit, offset: options.offset });
+      const markets = await this.getPredictionMarkets({ limit: options.limit, offset: options.offset });
       feedItems.push(...markets.map((m) => ({
         ...m,
         type: 'market',

@@ -208,7 +208,7 @@ export async function registerAutonomousTradingEngineRoutes(app: Express): Promi
             avatarId: avatarTradesTable.avatarId,
             avatarName: knowledgeAvatars.name,
             avatarImageUrl: knowledgeAvatars.imageUrl,
-            tradingPersona: (avatarTradesTable as unknown as { tradingPersona: typeof avatarTradesTable.tradingStyle }).tradingPersona,
+            tradingStyle: avatarTradesTable.tradingStyle,
             marketId: avatarTradesTable.marketId,
             marketQuestion: predictionMarkets.question,
             marketCategory: predictionMarkets.category,
@@ -217,9 +217,7 @@ export async function registerAutonomousTradingEngineRoutes(app: Express): Promi
             streamAmount: avatarTradesTable.streamAmount,
             shares: avatarTradesTable.shares,
             price: avatarTradesTable.price,
-            fee: (avatarTradesTable as unknown as { fee: typeof avatarTradesTable.price }).fee,
             reasoning: avatarTradesTable.reasoning,
-            confidence: (avatarTradesTable as unknown as { confidence: typeof avatarTradesTable.price }).confidence,
             createdAt: avatarTradesTable.createdAt
           })
           .from(avatarTradesTable)
@@ -232,7 +230,7 @@ export async function registerAutonomousTradingEngineRoutes(app: Express): Promi
           id: t.id,
           agentId: t.avatarId,
           agentName: t.avatarName || 'Unknown Avatar',
-          agentPersonality: t.tradingPersona || 'balanced',
+          agentPersonality: t.tradingStyle || 'balanced',
           marketId: t.marketId,
           marketQuestion: t.marketQuestion,
           marketCategory: t.marketCategory,
@@ -241,9 +239,9 @@ export async function registerAutonomousTradingEngineRoutes(app: Express): Promi
           streamAmount: t.streamAmount,
           shares: t.shares,
           price: t.price,
-          fee: t.fee,
+          fee: 0,
           reasoning: t.reasoning,
-          probability: t.confidence,
+          probability: null,
           createdAt: t.createdAt,
           traderType: 'avatar' as const,
           avatarImageUrl: t.avatarImageUrl

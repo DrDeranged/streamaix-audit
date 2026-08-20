@@ -3,6 +3,17 @@ import { storage } from '../storage';
 import { jobScheduler } from '../jobs/scheduler';
 
 /**
+ * Global kill switch for all automated newsletter/push sends.
+ * Default ENABLED. Set NEWSLETTER_ENABLED=false to disable: every cron body,
+ * catch-up run, and the weekly push digest logs exactly one concise skip and
+ * returns BEFORE any slot claim or email/push dispatch. Manual admin sends
+ * flow through sendNewsletter and are also covered.
+ */
+export function isNewsletterEnabled(): boolean {
+  return process.env.NEWSLETTER_ENABLED !== 'false';
+}
+
+/**
  * Newsletter scheduler service
  * Sends automated market alpha newsletters twice daily at 8am and 4pm EST
  * Also sends weekly push digest to subscribed users on Sundays
@@ -23,18 +34,30 @@ class NewsletterScheduler {
 
     // Morning newsletter at 8am EST - Pre-market alpha
     jobScheduler.registerCron('newsletter-morning', '0 8 * * *', async () => {
+      if (!isNewsletterEnabled()) {
+        console.log('📧 [newsletter] NEWSLETTER_ENABLED=false — skipping morning edition (kill switch)');
+        return;
+      }
       console.log('📧 Morning market alpha newsletter starting...');
       await this.sendNewsletter('Morning');
     }, { timezone: 'America/New_York' });
 
     // Afternoon newsletter at 4pm EST - Market close recap
     jobScheduler.registerCron('newsletter-market-close', '0 16 * * *', async () => {
+      if (!isNewsletterEnabled()) {
+        console.log('📧 [newsletter] NEWSLETTER_ENABLED=false — skipping market-close edition (kill switch)');
+        return;
+      }
       console.log('📧 Market close newsletter starting...');
       await this.sendNewsletter('Market Close');
     }, { timezone: 'America/New_York' });
 
     // Sunday at 10am EST - Weekly push notification digest
     jobScheduler.registerCron('newsletter-sunday-digest', '0 10 * * 0', async () => {
+      if (!isNewsletterEnabled()) {
+        console.log('📱 [newsletter] NEWSLETTER_ENABLED=false — skipping Sunday push digest (kill switch)');
+        return;
+      }
       console.log('📱 Sunday weekly push digest starting...');
       await this.sendWeeklyPushDigest();
     }, { timezone: 'America/New_York' });
@@ -121,6 +144,11 @@ class NewsletterScheduler {
     day: string,
     sentBy?: 'cron' | 'catch-up' | 'manual',
   ): Promise<{ sent: boolean; reason?: string; sentCount?: number; failedCount?: number; errors?: string[] }> {
+    // Kill switch chokepoint: return BEFORE claiming a slot or sending anything.
+    if (!isNewsletterEnabled()) {
+      console.log(`📧 [newsletter] NEWSLETTER_ENABLED=false — skipping ${day} send (kill switch)`);
+      return { sent: false, reason: 'disabled' };
+    }
     try {
       const { editionDate, edition } = this.slotFor(day);
       const by = sentBy ?? this.inferSentBy(edition);
@@ -211,6 +239,10 @@ class NewsletterScheduler {
    * Send weekly push notification digest to all users
    */
   private async sendWeeklyPushDigest(): Promise<void> {
+    if (!isNewsletterEnabled()) {
+      console.log('📱 [newsletter] NEWSLETTER_ENABLED=false — skipping weekly push digest (kill switch)');
+      return;
+    }
     try {
       const { pushNotificationService } = await import('./pushNotificationService');
       const { db } = await import('../db');

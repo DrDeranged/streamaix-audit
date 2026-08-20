@@ -1016,8 +1016,8 @@ export async function registerAlphaIntelligenceRoutes(app: Express): Promise<voi
       const marketData = MarketDataService.getInstance();
       const [marketOverview, trendingData, sectorsData] = await Promise.all([
         marketData.getTopCryptos(25),
-        (marketData as unknown as { getTrendingContent(timeFilter: string): Promise<any> }).getTrendingContent(timeFilter),
-        (marketData as unknown as { getSectorPerformance(timeFilter: string): Promise<any> }).getSectorPerformance(timeFilter)
+        marketData.getTrendingCoins(),
+        marketData.getCategoryPerformance()
       ]);
 
       let responseData = {
@@ -1046,7 +1046,7 @@ export async function registerAlphaIntelligenceRoutes(app: Express): Promise<voi
         
         // Rerank sectors based on user interactions
         if (interests.sectors && Object.keys(interests.sectors).length > 0) {
-          responseData.sectors.sectors = responseData.sectors.sectors.sort((a: any, b: any) => {
+          responseData.sectors.categories = responseData.sectors.categories.sort((a: any, b: any) => {
             const aScore = interests.sectors[a.name] || 0;
             const bScore = interests.sectors[b.name] || 0;
             return bScore - aScore;

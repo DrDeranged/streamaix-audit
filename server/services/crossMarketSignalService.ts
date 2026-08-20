@@ -311,15 +311,15 @@ export class CrossMarketSignalService {
       // Get upcoming events and their impact predictions
       const upcomingEvents = await this.marketEventService.getUpcomingEvents();
       const dashboard = await this.marketEventService.getEventModelingDashboard() as unknown as {
-        predictions?: any[];
+        activePredictions?: any[];
         alerts?: any[];
       };
       
       return {
         upcomingEvents,
-        impactPredictions: dashboard.predictions || [],
+        impactPredictions: dashboard.activePredictions || [],
         activeAlerts: dashboard.alerts || [],
-        strength: this.calculateEventStrength(upcomingEvents, dashboard.predictions || [])
+        strength: this.calculateEventStrength(upcomingEvents, dashboard.activePredictions || [])
       };
     } catch (error) {
       console.error('❌ Error getting event modeling signals:', error);
@@ -523,11 +523,10 @@ export class CrossMarketSignalService {
         },
         riskManagement: {
           stopLoss: 0,
-          takeProfit: 0,
-          trailingStop: 0,
-          positionAdjustment: 'No position recommended without price data'
+          takeProfit: [],
+          maxDrawdown: 0
         },
-        timeHorizon: 'short_term'
+        timeHorizon: 'swing'
       } as unknown as CrossMarketSignal['tradingRecommendations'];
     }
     

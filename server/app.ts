@@ -19,6 +19,9 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { autoSeedDatabase } from "./auto-seed";
 import { requireJsonObjectBody } from "./middleware/security";
+import { recordServerErrorSafe } from "./services/serverErrorRecorder";
+import { installLifecycleHooks } from "./lifecycle";
+import { registerDeepHealth } from "./health/deepHealth";
 
 export interface InitializeAppResult {
   /**
@@ -32,6 +35,14 @@ export async function initializeApp(
   httpServer: HttpServer,
   bootStartedAt: number,
 ): Promise<InitializeAppResult> {
+  // Earliest safe point in real app init: validate the environment. In
+  // production a missing DATABASE_URL / JWT_SECRET / ANTHROPIC_API_KEY (or a
+  // half-configured money rail) throws here, which the bootstrap's
+  // "FATAL during dynamic app import" path turns into a loud exit. In
+  // dev/test it only warns.
+  const { validateEnv } = await import("./config/validateEnv");
+  validateEnv();
+
   const app = express();
 
   app.use(
@@ -113,25 +124,6 @@ export async function initializeApp(
     next();
   });
 
-  // Boot-time env validation (loud, but never throws — boot-killing throws
-  // would defeat the whole point of the bootstrap).
-  console.log("\n🔐 ========== ENVIRONMENT VALIDATION ==========");
-  const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  if (!anthropicKey) {
-    console.error("❌ CRITICAL: ANTHROPIC_API_KEY is NOT configured!");
-    console.error("📍 AI text/reasoning features (model gateway) will fail without this key.");
-    console.error("🔧 Please set ANTHROPIC_API_KEY in your environment or .env file");
-  } else {
-    console.log(`✅ ANTHROPIC_API_KEY configured (${anthropicKey.length} characters)`);
-  }
-  const duneKey = process.env.DUNE_API_KEY;
-  if (duneKey) {
-    console.log(`✅ DUNE_API_KEY configured (${duneKey.length} characters)`);
-  } else {
-    console.log(`⚠️  DUNE_API_KEY not configured (optional, for advanced analytics)`);
-  }
-  console.log("========================================\n");
-
   // Boot-time on-chain / bridge flag state (loud, never throws).
   try {
     const { logContractServiceBootState } = await import("./services/contractService");
@@ -139,6 +131,15 @@ export async function initializeApp(
   } catch (e: any) {
     console.error("Failed to log on-chain/bridge flag state:", e?.message);
   }
+
+  // Deep health check (unauthenticated, 30s in-process cache). Registered
+  // BEFORE registerRoutes so it can't be shadowed by a catch-all, and kept
+  // separate from the fast /health above.
+  registerDeepHealth(app);
+
+  // Lifecycle hardening: durable process-error recording, graceful SIGTERM,
+  // and the nightly server_errors prune job.
+  installLifecycleHooks(httpServer);
 
   await registerRoutes(app, httpServer);
 
@@ -148,13 +149,21 @@ export async function initializeApp(
     serveStatic(app);
   }
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
     res.status(status).json({ message });
     // Log but DO NOT re-throw — re-throwing inside an Express error handler
     // triggers our uncaughtException trap and would kill the process.
     console.error("[express] error handler caught:", err);
+    // Durable, best-effort record. Only genuine server faults (5xx) are
+    // recorded; client errors (4xx) are expected traffic. Never throws.
+    if (status >= 500) {
+      recordServerErrorSafe(err, {
+        tag: (req.route?.path as string) || req.path || "unknown",
+        source: "route",
+      });
+    }
   });
 
   console.log(

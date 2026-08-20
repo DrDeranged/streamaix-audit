@@ -3805,6 +3805,61 @@ export const insertNewsletterSchema = createInsertSchema(newsletters).omit({
 export type InsertNewsletter = z.infer<typeof insertNewsletterSchema>;
 export type Newsletter = typeof newsletters.$inferSelect;
 
+// ---------------------------------------------------------------------------
+// Phase 1 data-repair framework.
+//
+// `repair_runs` records every preflight and run of a named repair operation so
+// they are auditable and idempotent (a successful run is refused a second time
+// unless force=true). `newsletters_dedup_backup` archives the exact rows a
+// destructive newsletter dedup deletes, so a repair is always reversible.
+//
+// NOTE: these tables are declared here for `db push` at deploy time only. The
+// repair endpoints run DML only (INSERT/UPDATE/DELETE) inside a transaction —
+// they never emit CREATE/ALTER at runtime.
+// ---------------------------------------------------------------------------
+export const repairRuns = pgTable("repair_runs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  repairId: text("repair_id").notNull(), // 'repair-001' | 'repair-002' | 'repair-003'
+  phase: text("phase").notNull(), // 'preflight' | 'run'
+  status: text("status").notNull(), // 'not_needed' | 'ok' | 'refused' | 'error'
+  preflight: jsonb("preflight"), // preflight report captured for this operation
+  result: jsonb("result"), // run result (counts, affected ids, etc.)
+  runBy: text("run_by"), // authenticated admin username
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertRepairRunSchema = createInsertSchema(repairRuns).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertRepairRun = z.infer<typeof insertRepairRunSchema>;
+export type RepairRun = typeof repairRuns.$inferSelect;
+
+// Full newsletters shape (mirrors `newsletters`) plus backup metadata so a
+// dedup delete can be inspected and, if ever necessary, hand-restored.
+export const newslettersDedupBackup = pgTable("newsletters_dedup_backup", {
+  // Backup row identity (distinct from the original newsletter id).
+  backupId: varchar("backup_id").primaryKey().default(sql`gen_random_uuid()`),
+  // --- exact newsletters shape -------------------------------------------
+  id: varchar("id").notNull(), // original newsletters.id
+  subject: text("subject").notNull(),
+  content: text("content").notNull(),
+  marketData: jsonb("market_data"),
+  sentAt: timestamp("sent_at"),
+  recipientCount: integer("recipient_count"),
+  scheduledFor: timestamp("scheduled_for"),
+  status: text("status").notNull(),
+  editionDate: text("edition_date"),
+  edition: text("edition"),
+  sentBy: text("sent_by"),
+  // --- backup metadata ----------------------------------------------------
+  source: text("source").notNull().default("repair-001"), // which repair archived it
+  backedUpBy: text("backed_up_by"), // admin username who ran the repair
+  backedUpAt: timestamp("backed_up_at").defaultNow().notNull(),
+});
+
+export type NewsletterDedupBackup = typeof newslettersDedupBackup.$inferSelect;
+
 export type InsertPredictionMarket = z.infer<typeof insertPredictionMarketSchema>;
 export type PredictionMarket = typeof predictionMarkets.$inferSelect;
 
@@ -4180,7 +4235,9 @@ export const liveStreams = pgTable("live_streams", {
   streamType: text("stream_type").notNull().default("broadcast"), // broadcast, trading_room, audio_space, live_bounty
   
   // Host information
-  hostId: varchar("host_id").references(() => users.id).notNull(),
+  // PARKED: legacy rows store knowledge_avatars.id here. Do not restore the
+  // users FK until the Phase 3 split in docs/schema-drift-final-parked-2026-08-16.md.
+  hostId: varchar("host_id").notNull(),
   hostAvatarId: varchar("host_avatar_id").references(() => knowledgeAvatars.id), // If Knowledge Avatar is hosting
   
   // Stream state
@@ -4321,7 +4378,9 @@ export const streamTips = pgTable("stream_tips", {
 export const streamMessages = pgTable("stream_messages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   streamId: varchar("stream_id").references(() => liveStreams.id).notNull(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  // PARKED: legacy rows store knowledge_avatars.id here. Do not restore the
+  // users FK until the Phase 3 split in docs/schema-drift-final-parked-2026-08-16.md.
+  userId: varchar("user_id").notNull(),
   
   // Message content
   content: text("content").notNull(),
@@ -6387,6 +6446,46 @@ export const jobRuns = pgTable("job_runs", {
 export const insertJobRunSchema = createInsertSchema(jobRuns);
 export type InsertJobRun = z.infer<typeof insertJobRunSchema>;
 export type JobRun = typeof jobRuns.$inferSelect;
+
+// ---------------------------------------------------------------------------
+// Phase 1 production visibility — durable server error recorder.
+//
+// Every unexpected server error (Express error handler, uncaughtException,
+// unhandledRejection, background jobs) is deduplicated by
+// (stackHash + hourBucket) and increment-counted here. This gives an admin a
+// grouped, low-cardinality view of what is actually failing in production
+// without unbounded row growth.
+//
+// NOTE: declared here for `db push` at deploy time ONLY. The recorder writes
+// DML only (INSERT ... ON CONFLICT DO UPDATE) at runtime — it NEVER emits
+// CREATE/ALTER. A nightly prune deletes rows older than 14 days (DML).
+// ---------------------------------------------------------------------------
+export const serverErrors = pgTable(
+  "server_errors",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    // Where the error came from: an Express route path, a job name, or a
+    // process tag ("uncaughtException" | "unhandledRejection").
+    tag: text("tag").notNull(),
+    // "route" | "job" | "process"
+    source: text("source").notNull().default("route"),
+    message: text("message").notNull(),
+    // SHA-256 of the normalized stack (dedup key within an hour bucket).
+    stackHash: text("stack_hash").notNull(),
+    stack: text("stack"),
+    // UTC hour bucket, e.g. "2025-01-01T13" — deduplication window.
+    hourBucket: text("hour_bucket").notNull(),
+    count: integer("count").default(1).notNull(),
+    firstSeenAt: timestamp("first_seen_at").defaultNow().notNull(),
+    lastSeenAt: timestamp("last_seen_at").defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("server_errors_hash_hour_idx").on(t.stackHash, t.hourBucket),
+    index("server_errors_last_seen_idx").on(t.lastSeenAt),
+  ],
+);
+
+export type ServerError = typeof serverErrors.$inferSelect;
 
 // Daily AI spend ledger (UTC days) — persists the budget meter across restarts.
 export const apiSpendDaily = pgTable(

@@ -127,11 +127,13 @@ import { registerSocialFeedRoutes } from "./routes/social-feed";
 import { registerFollowRoutes } from "./routes/follow";
 import { registerBountiesRoutes } from "./routes/bounties";
 import { registerJobsRoutes } from "./routes/jobs";
+import { registerAdminErrorsRoutes } from "./routes/admin-errors";
 import { registerAdminCostsRoutes } from "./routes/admin-costs";
 import { registerAdminResolutionsRoutes } from "./routes/admin-resolutions";
 import { registerAdminRiskRoutes } from "./routes/admin-risk";
 import { registerBridgeRoutes } from "./routes/bridge";
 import { registerSwapRoutes } from "./routes/swap";
+import { registerRepairsRoutes } from "./routes/repairs";
 import { registerSignalRoutes } from "./routes/signals";
 import { registerCollaborationRoutes } from "./routes/collaboration";
 import { registerBountyTemplatesRoutes } from "./routes/bounty-templates";
@@ -260,12 +262,16 @@ export async function registerRoutes(app: Express, existingServer?: Server): Pro
   await registerBountiesRoutes(app);
   // ▶ Job scheduler admin routes (Phase 1)
   await registerJobsRoutes(app);
+  // ▶ Durable server error visibility (Phase 1)
+  await registerAdminErrorsRoutes(app);
   await registerAdminCostsRoutes(app);
 
   await registerAdminResolutionsRoutes(app);
   await registerAdminRiskRoutes(app);
   await registerBridgeRoutes(app);
   await registerSwapRoutes(app);
+  // ▶ Phase 1 data-repair framework (admin-guarded, strict-limited)
+  await registerRepairsRoutes(app);
   registerSignalRoutes(app);
   // ▶ Collaboration routes extracted to server/routes/collaboration.ts
   await registerCollaborationRoutes(app);

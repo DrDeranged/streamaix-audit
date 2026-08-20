@@ -29,7 +29,7 @@ Stack: Node.js/Express + TypeScript, Vite, PostgreSQL (Neon) with Drizzle ORM, O
 
 1. **`server/index.ts` is frozen.** No new imports, ever. The bootstrap guarantee depends on it.
 2. **All new endpoints require a Zod schema** in `server/middleware/validationSchemas.ts`.
-3. **All new background work must go through the job scheduler** (added in Phase 1) — never a raw `setInterval`.
+3. **All new background work must go through the job scheduler** (added in Phase 1) — never a raw `setInterval`. Every scheduled body and catch-up must acquire its job-name PostgreSQL advisory lock and fail closed when lock state is unavailable.
 4. **All AI calls must go through the model gateway** (added in Phase 2) — never instantiate a raw OpenAI/Anthropic client.
 5. **Never touch `process.env.PRIVATE_KEY` handling** without explicit human approval.
 6. **Run `npm run check` and `npm test`** before declaring any task complete.
@@ -37,6 +37,10 @@ Stack: Node.js/Express + TypeScript, Vite, PostgreSQL (Neon) with Drizzle ORM, O
 8. **After committing, always push to origin main and verify with git ls-remote origin main** — commits left unpushed are invisible to external audits and backups.
 9. **Zero TypeScript errors.** `npm run check` (plain strict `tsc`) must exit clean — the error baseline was burned down to zero on 2026-08-15 and `.local/tsc-baseline.log` is empty. No new errors may be introduced; no `@ts-ignore`/`@ts-expect-error`/`as any` to silence them. Known runtime bugs surfaced by the burn-down are catalogued in `docs/runtime-bugs-tsc-burndown.md`.
 10. **All UI work must follow DESIGN.md.** Banned classes are enforced globally across all of `client/src` by `npm run design:lint` — there is no allowlist.
+11. **Before telling Arslan to publish, push `main` and verify the remote hash with `git ls-remote origin main`.** A local-only fix does not count as a publish handoff.
+12. **Any new unique constraint/index over an existing table requires a read-only production duplicate-count preflight.** If data is dirty, ship an explicit admin DML repair one publish before the constraint.
+13. **Any new foreign key over existing data requires a read-only production orphan-count preflight.** If orphans exist, ship an explicit admin DML repair one publish before the FK.
+14. **Production schema changes happen only through Replit Publish; production data repairs happen only through explicit, admin-guarded repair endpoints.** Never run startup/boot DDL or automatic boot-time data repair.
 
 ## Current Phase Tracker
 

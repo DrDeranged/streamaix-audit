@@ -807,6 +807,7 @@ export async function registerLiveStreamingEnhancedRoutes(app: Express): Promise
       creatorId: req.user.id,
       title: title || `Clip from ${new Date().toLocaleTimeString()}`,
       startTime: startTime || 0,
+      endTime: (startTime || 0) + (duration || 30),
       durationSeconds: duration || 30,
     } as unknown as typeof streamClips.$inferInsert).returning();
     
@@ -1154,9 +1155,14 @@ export async function registerLiveStreamingEnhancedRoutes(app: Express): Promise
     if (result) {
       // Award points if correct
       if (result.correct && result.points > 0) {
-        await (storage as unknown as {
-          updateUserPoints(userId: string, points: number): Promise<unknown>;
-        }).updateUserPoints(req.user.id, result.points);
+        await pointsService.awardPoints({
+          userId: req.user.id,
+          amount: result.points,
+          source: 'stream_watch',
+          description: 'Correct trivia answer',
+          referenceId: req.params.triviaId,
+          referenceType: 'trivia',
+        });
       }
       res.json({ success: true, ...result });
     } else {

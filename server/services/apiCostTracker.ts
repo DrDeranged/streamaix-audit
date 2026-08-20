@@ -283,24 +283,9 @@ class DailyBudgetLedger {
             .select({ total: dsql<number>`coalesce(sum(${apiSpendDaily.costUsd}), 0)` })
             .from(apiSpendDaily)
             .where(eq(apiSpendDaily.day, day));
-        let rows;
-        try {
-          rows = await loadTotal();
-        } catch {
-          // Fresh database (db:push is blocked by unrelated drift): bootstrap
-          // the ledger table idempotently, then retry once.
-          await db.execute(dsql`CREATE TABLE IF NOT EXISTS api_spend_daily (
-            id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
-            day text NOT NULL,
-            service text NOT NULL,
-            model text NOT NULL,
-            cost_usd double precision NOT NULL DEFAULT 0,
-            updated_at timestamp NOT NULL DEFAULT now()
-          )`);
-          await db.execute(dsql`CREATE UNIQUE INDEX IF NOT EXISTS api_spend_daily_day_service_model_idx
-            ON api_spend_daily (day, service, model)`);
-          rows = await loadTotal();
-        }
+        // Schema is managed exclusively by Replit's publish-time schema sync.
+        // Missing tables must fail visibly rather than being created at runtime.
+        const rows = await loadTotal();
         // keep any pending deltas for today that accrued while loading
         let pendingToday = 0;
         for (const [key, delta] of Array.from(this.pending.entries())) {

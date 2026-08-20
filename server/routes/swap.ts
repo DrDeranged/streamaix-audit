@@ -47,7 +47,7 @@ const recordTradeBodySchema = z.object({
   signalId: z.string().max(64).optional(),
 });
 
-const DEFAULT_BASE_TOKENS = [
+export const DEFAULT_BASE_TOKENS = [
   { symbol: "ETH", name: "Ether", address: NATIVE_ETH_ADDRESS, decimals: 18 },
   { symbol: "WETH", name: "Wrapped Ether", address: "0x4200000000000000000000000000000000000006", decimals: 18 },
   { symbol: "USDC", name: "USD Coin", address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", decimals: 6 },

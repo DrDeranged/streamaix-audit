@@ -404,9 +404,12 @@ export class MarketEventModelingService {
     try {
       console.log(`📅 Fetching upcoming events for timeframe: ${timeframe}`);
 
-      // Get Fed events and economic calendar
+      // Get Fed events and economic calendar.
+      // federalReserveService.getUpcomingEvents expects a numeric limit, not a
+      // timeframe string — map the timeframe to a sensible event count.
+      const fedEventLimit = timeframe === '1d' ? 3 : timeframe === '7d' ? 5 : timeframe === '30d' ? 15 : 30;
       const [fedCommunications, economicEvents] = await Promise.all([
-        this.federalReserveService.getUpcomingEvents(timeframe as unknown as number),
+        this.federalReserveService.getUpcomingEvents(fedEventLimit),
         this.getEconomicCalendarEvents(timeframe)
       ]);
 
@@ -743,7 +746,7 @@ export class MarketEventModelingService {
           riskRewardRatio: Math.abs(assetPred.predictedMove) / 2,
           recommendedAllocation: Math.min(Math.abs(assetPred.predictedMove), 5),
           maxRisk: 2,
-          timeframe: '24h' as TradingSignal['timeframe'],
+          timeframe: '1d',
           validUntil: new Date(Date.now() + 86400000).toISOString(),
           urgency: event.timeToEvent && event.timeToEvent < 3600000 ? 'immediate' : 'within_24h',
           reasoning: [

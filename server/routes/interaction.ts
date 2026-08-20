@@ -158,10 +158,10 @@ export async function registerInteractionRoutes(app: Express): Promise<void> {
 
   // Get user's interactions
   app.get('/api/users/me/interactions', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
-    const summaryId = req.query.summaryId as string;
+    const summaryId = req.query.summaryId as string | undefined;
     const interactions = await storage.getUserInteractions(
       req.user!.id,
-      summaryId as unknown as { summaryId?: string; limit?: number; targetType?: string; since?: Date }
+      summaryId ? { summaryId } : undefined
     );
 
     res.json({ interactions });
