@@ -120,7 +120,15 @@ export function validateEnv(): ValidateEnvResult {
   }
 
   if (!fatal) {
-    console.log("✅ [env] environment validation passed");
+    const flags = [
+      `ONCHAIN_WRITES_ENABLED=${isTrue(process.env.ONCHAIN_WRITES_ENABLED)}`,
+      `BRIDGE_ENABLED=${isTrue(process.env.BRIDGE_ENABLED)}`,
+      `SWAPS_ENABLED=${isTrue(process.env.SWAPS_ENABLED)}`,
+      `SIGNALS_ENABLED=${isTrue(process.env.SIGNALS_ENABLED)}`,
+    ].join(",");
+    console.info(
+      `[env] validated: ${REQUIRED.length} required present, flags: ${flags}`,
+    );
   } else {
     console.warn(
       "⚠️  [env] environment validation found problems but continuing (non-production)",

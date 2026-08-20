@@ -21,6 +21,16 @@ import { recordServerErrorSafe, pruneOldServerErrors } from "./services/serverEr
 
 let installed = false;
 let shuttingDown = false;
+let jobsRegistered = false;
+
+interface LifecycleJobScheduler {
+  registerCron(
+    name: string,
+    expression: string,
+    job: () => Promise<void>,
+    opts: { timezone: string },
+  ): void;
+}
 
 export function installLifecycleHooks(httpServer: HttpServer): void {
   if (installed) return;
@@ -46,30 +56,46 @@ export function installLifecycleHooks(httpServer: HttpServer): void {
   process.on("SIGTERM", onSignal);
   process.on("SIGINT", onSignal);
 
-  // --- 3. Nightly prune of old server_errors (DML only) ------------------
-  // Registered lazily so tests that never start the scheduler are unaffected.
-  void (async () => {
-    try {
-      const { jobScheduler } = await import("./jobs/scheduler");
-      // Run once ~03:15 UTC daily.
-      jobScheduler.registerCron(
-        "server-errors-prune",
-        "15 3 * * *",
-        async () => {
-          const deleted = await pruneOldServerErrors();
-          if (deleted > 0) {
-            console.log(`[lifecycle] pruned ${deleted} server_errors rows (>14d)`);
-          }
-        },
-        { timezone: "UTC" },
-      );
-    } catch (err) {
-      console.warn(
-        "[lifecycle] could not register server_errors prune job:",
-        (err as Error)?.message,
-      );
-    }
-  })();
+  console.info(
+    "[lifecycle] installed: process-errors=on signals=SIGTERM,SIGINT scheduler-jobs=post-ready",
+  );
+}
+
+/** Register lifecycle-owned scheduler work from the post-ready batch. */
+export async function registerLifecycleJobs(
+  scheduler?: LifecycleJobScheduler,
+): Promise<void> {
+  if (jobsRegistered || shuttingDown) return;
+  try {
+    const jobScheduler =
+      scheduler ?? (await import("./jobs/scheduler")).jobScheduler;
+    if (shuttingDown) return;
+    jobsRegistered = true;
+    jobScheduler.registerCron(
+      "server-errors-prune",
+      "15 3 * * *",
+      async () => {
+        const deleted = await pruneOldServerErrors();
+        if (deleted > 0) {
+          console.log(`[lifecycle] pruned ${deleted} server_errors rows (>14d)`);
+        }
+      },
+      { timezone: "UTC" },
+    );
+  } catch (err) {
+    jobsRegistered = false;
+    console.warn(
+      "[lifecycle] could not register server_errors prune job:",
+      (err as Error)?.message,
+    );
+  }
+}
+
+/** Test-only state reset. Process listeners should be mocked by callers. */
+export function __resetLifecycleForTests(): void {
+  installed = false;
+  shuttingDown = false;
+  jobsRegistered = false;
 }
 
 /**

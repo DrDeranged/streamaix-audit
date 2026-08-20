@@ -21,8 +21,9 @@ import cron from 'node-cron';
 import type { ScheduledTask } from 'node-cron';
 import { db } from '../db';
 import { jobRuns } from '@shared/schema';
-import { eq, sql } from 'drizzle-orm';
+import { inArray, sql } from 'drizzle-orm';
 import { withJobLock } from './advisoryLock';
+import { startBootPhase } from '../bootTiming';
 
 const MAX_CONSECUTIVE_FAILURES = 5;
 const BACKOFF_MULTIPLIER = 4;
@@ -67,6 +68,8 @@ interface JobState {
   timer: NodeJS.Timeout | null;
   cronTask: ScheduledTask | null;
   cancelled: boolean;
+  hydrationStatus: 'pending' | 'available' | 'unavailable';
+  bootstrapped: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -149,6 +152,12 @@ export function previousCronSlot(expression: string, from: Date, timezone?: stri
 
 export class JobScheduler {
   private jobs = new Map<string, JobState>();
+  private acceptingRegistrations = true;
+  private pendingBootstrap = new Set<string>();
+  private registrationBatchDepth = 0;
+  private automaticFlushQueued = false;
+  private registrationFlush: Promise<void> | null = null;
+  private lastRegistrationAt = 0;
 
   /**
    * Register an interval job. Replaces an engine's internal
@@ -160,6 +169,10 @@ export class JobScheduler {
     fn: () => unknown | Promise<unknown>,
     opts: RegisterOptions = {},
   ): void {
+    if (!this.acceptingRegistrations) {
+      console.warn(`[Scheduler] Ignoring late registration for "${name}" during shutdown`);
+      return;
+    }
     if (this.jobs.has(name)) {
       console.warn(`[Scheduler] Job "${name}" already registered — ignoring duplicate`);
       return;
@@ -181,10 +194,12 @@ export class JobScheduler {
       timer: null,
       cronTask: null,
       cancelled: false,
+      hydrationStatus: 'pending',
+      bootstrapped: false,
     };
     this.jobs.set(name, job);
 
-    void this.bootstrapIntervalJob(job);
+    this.queueBootstrap(job);
   }
 
   /**
@@ -199,6 +214,10 @@ export class JobScheduler {
     fn: () => unknown | Promise<unknown>,
     opts: RegisterCronOptions = {},
   ): void {
+    if (!this.acceptingRegistrations) {
+      console.warn(`[Scheduler] Ignoring late registration for "${name}" during shutdown`);
+      return;
+    }
     if (this.jobs.has(name)) {
       console.warn(`[Scheduler] Job "${name}" already registered — ignoring duplicate`);
       return;
@@ -220,6 +239,8 @@ export class JobScheduler {
       timer: null,
       cronTask: null,
       cancelled: false,
+      hydrationStatus: 'pending',
+      bootstrapped: false,
     };
     this.jobs.set(name, job);
 
@@ -229,10 +250,75 @@ export class JobScheduler {
       opts.timezone ? { timezone: opts.timezone } : undefined,
     );
 
-    this.startCatchUpTimers();
+    this.queueBootstrap(job);
+  }
 
-    if (opts.runOnStart && opts.freshForMs) {
-      void this.maybeRunOnBoot(job, opts.freshForMs, 0);
+  /**
+   * Hold scheduler boot decisions while a group of services registers jobs.
+   * endRegistrationBatch() hydrates every queued name in one query.
+   */
+  beginRegistrationBatch(): void {
+    this.registrationBatchDepth += 1;
+  }
+
+  async endRegistrationBatch(
+    quietMs = 0,
+    maxWaitMs = 2_000,
+  ): Promise<void> {
+    if (this.registrationBatchDepth > 0) {
+      if (this.registrationBatchDepth === 1 && quietMs > 0) {
+        await this.waitForRegistrationQuietPeriod(quietMs, maxWaitMs);
+      }
+      this.registrationBatchDepth -= 1;
+    }
+    if (this.registrationBatchDepth === 0) {
+      await this.flushStartupRegistrations();
+    }
+  }
+
+  /**
+   * Hydrate and bootstrap all jobs registered since the previous flush.
+   * Public for the post-ready coordinator and focused tests.
+   */
+  async flushStartupRegistrations(): Promise<void> {
+    if (this.registrationFlush) {
+      await this.registrationFlush;
+      if (this.pendingBootstrap.size > 0 && this.registrationBatchDepth === 0) {
+        await this.flushStartupRegistrations();
+      }
+      return;
+    }
+    if (this.pendingBootstrap.size === 0 || this.registrationBatchDepth > 0) {
+      return;
+    }
+
+    const names = Array.from(this.pendingBootstrap);
+    this.pendingBootstrap.clear();
+    const jobs = names
+      .map((name) => this.jobs.get(name))
+      .filter((job): job is JobState => !!job && !job.cancelled);
+    const finishTiming = startBootPhase('schedulerRegistration');
+
+    this.registrationFlush = (async () => {
+      const hydrated = await this.hydrateJobs(jobs);
+      if (hydrated) {
+        console.info(
+          `[Scheduler] hydrated ${jobs.length} startup job state(s) in one query`,
+        );
+      }
+      for (const job of jobs) {
+        this.bootstrapHydratedJob(job);
+      }
+      if (jobs.some((job) => job.kind === 'cron')) {
+        this.startCatchUpTimers();
+      }
+    })();
+
+    try {
+      await this.registrationFlush;
+    } finally {
+      this.registrationFlush = null;
+      finishTiming();
     }
   }
 
@@ -258,17 +344,18 @@ export class JobScheduler {
 
   /** Public for tests and manual triggering. */
   async runCatchUpCheck(now: Date = new Date()): Promise<void> {
-    for (const job of Array.from(this.jobs.values())) {
-      if (job.kind !== 'cron' || job.cancelled || job.running) continue;
+    await this.flushStartupRegistrations();
+    const cronJobs = Array.from(this.jobs.values()).filter(
+      (job) => job.kind === 'cron' && !job.cancelled,
+    );
+    await this.hydrateJobs(cronJobs);
+
+    for (const job of cronJobs) {
+      if (job.running) continue;
       try {
         const slot = previousCronSlot(job.cronExpression!, now, job.opts.timezone);
         if (!slot) continue;
-        // Hydrate persisted state so a fresh boot sees the last run. If the
-        // persisted state cannot be read (isStale returns false on DB errors
-        // without hydrating), fail SAFE: skip catch-up rather than re-running
-        // every cron job's side effects during a DB outage.
-        const hydrated = await this.isStale(job, Number.MAX_SAFE_INTEGER).catch(() => undefined);
-        if (hydrated === false && !job.lastStartedAt && !job.lastFinishedAt) {
+        if (job.hydrationStatus === 'unavailable') {
           console.warn(`[Scheduler] [catch-up] "${job.name}" — persisted state unavailable, skipping catch-up (fail-safe)`);
           continue;
         }
@@ -319,6 +406,7 @@ export class JobScheduler {
    * finish. Returns the number of jobs still running when the wait ends.
    */
   async stopAll(timeoutMs = 10_000): Promise<number> {
+    this.acceptingRegistrations = false;
     for (const name of Array.from(this.jobs.keys())) {
       this.cancel(name);
     }
@@ -381,11 +469,51 @@ export class JobScheduler {
 
   // ---------------------------------------------------------------- internal
 
-  private async bootstrapIntervalJob(job: JobState): Promise<void> {
+  private queueBootstrap(job: JobState): void {
+    this.lastRegistrationAt = Date.now();
+    this.pendingBootstrap.add(job.name);
+    if (this.registrationBatchDepth > 0 || this.automaticFlushQueued) return;
+    this.automaticFlushQueued = true;
+    queueMicrotask(() => {
+      this.automaticFlushQueued = false;
+      void this.flushStartupRegistrations();
+    });
+  }
+
+  private async waitForRegistrationQuietPeriod(
+    quietMs: number,
+    maxWaitMs: number,
+  ): Promise<void> {
+    const startedAt = Date.now();
+    // Always yield for at least one full quiet period so async service starts
+    // can reach their synchronous jobScheduler.register() calls.
+    this.lastRegistrationAt = startedAt;
+    while (Date.now() - startedAt < maxWaitMs) {
+      const elapsedSinceRegistration = Date.now() - this.lastRegistrationAt;
+      if (elapsedSinceRegistration >= quietMs) return;
+      await new Promise((resolve) =>
+        setTimeout(resolve, quietMs - elapsedSinceRegistration),
+      );
+    }
+  }
+
+  private bootstrapHydratedJob(job: JobState): void {
+    if (job.bootstrapped || job.cancelled) return;
+    job.bootstrapped = true;
+    if (job.kind === 'interval') {
+      this.bootstrapIntervalJob(job);
+      return;
+    }
+    if (job.opts.runOnStart && job.opts.freshForMs) {
+      this.maybeRunOnBoot(job, job.opts.freshForMs, 0);
+    }
+  }
+
+  private bootstrapIntervalJob(job: JobState): void {
     const stagger = job.opts.staggerMs ?? 0;
 
     if (job.opts.runOnStart) {
-      const shouldRunNow = await this.isStale(job, job.intervalMs!);
+      const shouldRunNow = this.isHydratedStale(job, job.intervalMs!);
       if (shouldRunNow) {
         this.scheduleIn(job, stagger);
         return;
@@ -402,8 +530,8 @@ export class JobScheduler {
    * than maxAgeMs. On DB failure we treat the job as NOT stale — failing safe
    * against the restart herd this scheduler exists to prevent.
    */
-  private async maybeRunOnBoot(job: JobState, freshForMs: number, stagger: number): Promise<void> {
-    const stale = await this.isStale(job, freshForMs);
+  private maybeRunOnBoot(job: JobState, freshForMs: number, stagger: number): void {
+    const stale = this.isHydratedStale(job, freshForMs);
     if (stale && !job.cancelled) {
       job.timer = setTimeout(() => void this.executeJob(job), stagger);
       job.timer.unref?.();
@@ -414,31 +542,51 @@ export class JobScheduler {
     }
   }
 
-  private async isStale(job: JobState, maxAgeMs: number): Promise<boolean> {
+  private async hydrateJobs(jobs: JobState[]): Promise<boolean> {
+    if (jobs.length === 0) return true;
     try {
       const rows = await db
         .select()
         .from(jobRuns)
-        .where(eq(jobRuns.name, job.name))
-        .limit(1);
-      const row = rows[0];
-      if (!row) return true;
-      // Hydrate in-memory state from persistence
-      job.lastStartedAt = row.lastStartedAt;
-      job.lastFinishedAt = row.lastFinishedAt;
-      job.lastStatus = row.lastStatus;
-      job.lastError = row.lastError;
-      job.runCount = row.runCount ?? 0;
-      job.consecutiveFailures = row.consecutiveFailures ?? 0;
-      if (!row.lastStartedAt) return true;
-      return Date.now() - new Date(row.lastStartedAt).getTime() > maxAgeMs;
+        .where(inArray(jobRuns.name, jobs.map((job) => job.name)));
+      const byName = new Map(rows.map((row) => [row.name, row]));
+      for (const job of jobs) {
+        const row = byName.get(job.name);
+        job.hydrationStatus = 'available';
+        if (!row) {
+          job.lastStartedAt = null;
+          job.lastFinishedAt = null;
+          job.lastStatus = null;
+          job.lastError = null;
+          job.runCount = 0;
+          job.consecutiveFailures = 0;
+          continue;
+        }
+        job.lastStartedAt = row.lastStartedAt;
+        job.lastFinishedAt = row.lastFinishedAt;
+        job.lastStatus = row.lastStatus;
+        job.lastError = row.lastError;
+        job.runCount = row.runCount ?? 0;
+        job.consecutiveFailures = row.consecutiveFailures ?? 0;
+      }
+      return true;
     } catch (err) {
+      for (const job of jobs) {
+        job.hydrationStatus = 'unavailable';
+      }
       console.warn(
-        `[Scheduler] Could not read job_runs for "${job.name}" (treating as recently-run to avoid boot herd):`,
+        `[Scheduler] Could not batch-read job_runs for ${jobs.length} job(s) ` +
+          `(treating all as recently-run to avoid boot herd):`,
         (err as Error).message,
       );
       return false;
     }
+  }
+
+  private isHydratedStale(job: JobState, maxAgeMs: number): boolean {
+    if (job.hydrationStatus !== 'available') return false;
+    if (!job.lastStartedAt) return true;
+    return Date.now() - new Date(job.lastStartedAt).getTime() > maxAgeMs;
   }
 
   /** Delay until the next tick: interval (backed off if failing) + jitter. */

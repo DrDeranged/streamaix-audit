@@ -15,6 +15,12 @@ export interface CryptoQuote {
   lastUpdated: string;
 }
 
+export function getCoinGeckoErrorCode(error: unknown): number | null {
+  const value = (error as any)?.response?.data?.error_code;
+  const parsed = typeof value === "string" ? Number(value) : value;
+  return Number.isFinite(parsed) ? Number(parsed) : null;
+}
+
 export interface StockQuote {
   symbol: string;
   name: string;
@@ -93,6 +99,8 @@ export class MarketDataService {
   // Error suppression to prevent rate limit spam
   private errorLog = new Map<string, number>(); // Track last error log time
   private errorLogCooldown = 3600000; // 1 hour cooldown for same error type
+  private coingeckoDemoDisabled = false;
+  private coingeckoProDisabled = false;
   
   // Crypto-related stocks list - expanded to 25+ symbols
   private cryptoStocks = [
@@ -194,7 +202,7 @@ export class MarketDataService {
    * Check if CoinGecko Pro API is available and under limit
    */
   isCoingeckoProAvailable(): boolean {
-    if (!this.coingeckoProApiKey) return false;
+    if (!this.coingeckoProApiKey || this.coingeckoProDisabled) return false;
     
     const stats = this.apiCallCounts.get('coingecko_pro');
     if (!stats) return true;
@@ -225,6 +233,43 @@ export class MarketDataService {
         console.error(message);
       }
       this.errorLog.set(errorKey, now);
+    }
+  }
+
+  /**
+   * Error 10010 means the configured key cannot use the requested CoinGecko
+   * endpoint/plan. Disable that provider for this process and let the existing
+   * fallback chain continue, with one warning instead of repeated error spam.
+   */
+  private degradeCoinGeckoProvider(
+    provider: "Pro" | "Demo",
+    error: unknown,
+  ): boolean {
+    if (getCoinGeckoErrorCode(error) !== 10010) return false;
+    const alreadyDisabled =
+      provider === "Pro"
+        ? this.coingeckoProDisabled
+        : this.coingeckoDemoDisabled;
+    if (provider === "Pro") {
+      this.coingeckoProDisabled = true;
+    } else {
+      this.coingeckoDemoDisabled = true;
+    }
+    if (!alreadyDisabled) {
+      console.warn(
+        `[CoinGecko ${provider}] disabled for this process after error_code=10010; using fallback providers`,
+      );
+    }
+    return true;
+  }
+
+  private logCoinGeckoProError(
+    errorKey: string,
+    message: string,
+    error: unknown,
+  ): void {
+    if (!this.degradeCoinGeckoProvider("Pro", error)) {
+      this.logErrorOnce(errorKey, message, (error as any)?.message);
     }
   }
 
@@ -286,17 +331,21 @@ export class MarketDataService {
         quotes = await this.getCryptoQuotesFromCoinGeckoPro(symbols);
         dataSource = 'CoinGecko Pro';
       } catch (error: any) {
-        console.warn('⚠️ [Tier 1] CoinGecko Pro failed:', error.message);
+        if (!this.coingeckoProDisabled) {
+          console.warn('⚠️ [Tier 1] CoinGecko Pro failed:', error.message);
+        }
       }
     }
 
     // Tier 2: CoinGecko Demo (fallback)
-    if (this.coingeckoApiKey && quotes.length === 0) {
+    if (this.coingeckoApiKey && !this.coingeckoDemoDisabled && quotes.length === 0) {
       try {
         quotes = await this.getCryptoQuotesFromCoinGecko(symbols);
         dataSource = 'CoinGecko Demo';
       } catch (error) {
-        console.warn('⚠️ [Tier 2] CoinGecko Demo failed, trying next fallback');
+        if (!this.coingeckoDemoDisabled) {
+          console.warn('⚠️ [Tier 2] CoinGecko Demo failed, trying next fallback');
+        }
       }
     }
 
@@ -465,7 +514,11 @@ export class MarketDataService {
       
       return quotes;
     } catch (error: any) {
-      this.logErrorOnce('coingecko_pro_error', '❌ [CoinGecko Pro] API error:', error.message);
+      this.logCoinGeckoProError(
+        'coingecko_pro_error',
+        '❌ [CoinGecko Pro] API error:',
+        error,
+      );
       throw error;
     }
   }
@@ -719,7 +772,9 @@ export class MarketDataService {
       return quotes;
       
     } catch (error: any) {
-      this.logErrorOnce('coingecko_error', '❌ CoinGecko API error:', error.response?.data || error.message);
+      if (!this.degradeCoinGeckoProvider("Demo", error)) {
+        this.logErrorOnce('coingecko_error', '❌ CoinGecko API error:', error.response?.data || error.message);
+      }
       throw error;
     }
   }
@@ -1940,7 +1995,7 @@ export class MarketDataService {
       console.log(`📊 [CoinGecko Pro] Fetched ${trending.length} trending coins`);
       return result;
     } catch (error: any) {
-      this.logErrorOnce('coingecko_pro_trending', '❌ [CoinGecko Pro] Trending error:', error.message);
+      this.logCoinGeckoProError('coingecko_pro_trending', '❌ [CoinGecko Pro] Trending error:', error);
       return { trending: [], mostVisited: [] };
     }
   }
@@ -1990,7 +2045,7 @@ export class MarketDataService {
       console.log(`📊 [CoinGecko Pro] Fetched global market data`);
       return result;
     } catch (error: any) {
-      this.logErrorOnce('coingecko_pro_global', '❌ [CoinGecko Pro] Global data error:', error.message);
+      this.logCoinGeckoProError('coingecko_pro_global', '❌ [CoinGecko Pro] Global data error:', error);
       return null;
     }
   }
@@ -2047,7 +2102,7 @@ export class MarketDataService {
       console.log(`📊 [CoinGecko Pro] Fetched top ${limit} gainers and losers`);
       return result;
     } catch (error: any) {
-      this.logErrorOnce('coingecko_pro_movers', '❌ [CoinGecko Pro] Top movers error:', error.message);
+      this.logCoinGeckoProError('coingecko_pro_movers', '❌ [CoinGecko Pro] Top movers error:', error);
       return { gainers: [], losers: [] };
     }
   }
@@ -2145,7 +2200,7 @@ export class MarketDataService {
       console.log(`📊 [CoinGecko Pro] Fetched details for ${coinId}`);
       return result;
     } catch (error: any) {
-      this.logErrorOnce(`coingecko_pro_coin_${coinId}`, `❌ [CoinGecko Pro] Coin details error:`, error.message);
+      this.logCoinGeckoProError(`coingecko_pro_coin_${coinId}`, `❌ [CoinGecko Pro] Coin details error:`, error);
       return null;
     }
   }
@@ -2192,7 +2247,7 @@ export class MarketDataService {
       console.log(`📊 [CoinGecko Pro] Fetched ${result.length} OHLC candles for ${coinId}`);
       return result;
     } catch (error: any) {
-      this.logErrorOnce(`coingecko_pro_ohlc_${coinId}`, `❌ [CoinGecko Pro] OHLC error:`, error.message);
+      this.logCoinGeckoProError(`coingecko_pro_ohlc_${coinId}`, `❌ [CoinGecko Pro] OHLC error:`, error);
       return [];
     }
   }
@@ -2246,7 +2301,7 @@ export class MarketDataService {
       console.log(`📊 [CoinGecko Pro] Search found ${result.coins.length} coins for "${query}"`);
       return result;
     } catch (error: any) {
-      this.logErrorOnce('coingecko_pro_search', '❌ [CoinGecko Pro] Search error:', error.message);
+      this.logCoinGeckoProError('coingecko_pro_search', '❌ [CoinGecko Pro] Search error:', error);
       return { coins: [], exchanges: [], categories: [] };
     }
   }
@@ -2293,7 +2348,7 @@ export class MarketDataService {
       console.log(`📊 [CoinGecko Pro] Fetched DeFi market data`);
       return result;
     } catch (error: any) {
-      this.logErrorOnce('coingecko_pro_defi', '❌ [CoinGecko Pro] DeFi data error:', error.message);
+      this.logCoinGeckoProError('coingecko_pro_defi', '❌ [CoinGecko Pro] DeFi data error:', error);
       return null;
     }
   }
@@ -2341,7 +2396,7 @@ export class MarketDataService {
       console.log(`📊 [CoinGecko Pro] Fetched ${result.nfts.length} NFT collections`);
       return result;
     } catch (error: any) {
-      this.logErrorOnce('coingecko_pro_nft', '❌ [CoinGecko Pro] NFT data error:', error.message);
+      this.logCoinGeckoProError('coingecko_pro_nft', '❌ [CoinGecko Pro] NFT data error:', error);
       return { nfts: [] };
     }
   }
@@ -2393,7 +2448,7 @@ export class MarketDataService {
       console.log(`📊 [CoinGecko Pro] Fetched ${result.length} exchanges`);
       return result;
     } catch (error: any) {
-      this.logErrorOnce('coingecko_pro_exchanges', '❌ [CoinGecko Pro] Exchanges error:', error.message);
+      this.logCoinGeckoProError('coingecko_pro_exchanges', '❌ [CoinGecko Pro] Exchanges error:', error);
       return [];
     }
   }
@@ -2495,7 +2550,7 @@ export class MarketDataService {
       console.log(`📊 [CoinGecko Pro] Fetched ${derivativesTickers.length} derivatives tickers`);
       return result;
     } catch (error: any) {
-      this.logErrorOnce('coingecko_pro_derivatives', '❌ [CoinGecko Pro] Derivatives error:', error.message);
+      this.logCoinGeckoProError('coingecko_pro_derivatives', '❌ [CoinGecko Pro] Derivatives error:', error);
       return {
         totalOpenInterest: 0,
         openInterestChange24h: 0,
@@ -2722,7 +2777,7 @@ export class MarketDataService {
       console.log(`📊 [CoinGecko Pro] Fetched ${categories.length} category performance data`);
       return result;
     } catch (error: any) {
-      this.logErrorOnce('category_performance', '❌ [CoinGecko Pro] Category performance error:', error.message);
+      this.logCoinGeckoProError('category_performance', '❌ [CoinGecko Pro] Category performance error:', error);
       return { categories: [], sectorRotation: 'unknown', hotSector: '', coldSector: '' };
     }
   }

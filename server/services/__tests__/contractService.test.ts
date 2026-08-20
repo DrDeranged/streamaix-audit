@@ -54,7 +54,11 @@ vi.mock("../../db", () => ({
   },
 }));
 
-import { ContractService, getServiceSignerKey } from "../contractService";
+import {
+  ContractService,
+  getServiceSignerKey,
+  logContractServiceBootState,
+} from "../contractService";
 import { onchainActions } from "@shared/schema";
 
 const addresses = {
@@ -113,6 +117,23 @@ describe("ONCHAIN_WRITES_ENABLED kill switch", () => {
     await expect(svc.completeBountyOnChain(1)).rejects.toThrow(/On-chain writes disabled/);
     await expect(svc.unstake("100")).rejects.toThrow(/On-chain writes disabled/);
     await expect(svc.mintSummaryNFT("0xr", "ipfs", "ar")).rejects.toThrow(/On-chain writes disabled/);
+  });
+});
+
+describe("boot-state markers", () => {
+  it("prints all four dormant feature markers at info level", () => {
+    const info = vi.spyOn(console, "info").mockImplementation(() => {});
+    logContractServiceBootState();
+    const lines = info.mock.calls.map((call) => String(call[0]));
+    expect(lines).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("🔒 ONCHAIN_WRITES_ENABLED=false"),
+        expect.stringContaining("🔒 BRIDGE_ENABLED=false"),
+        expect.stringContaining("🔒 SWAPS_ENABLED=false"),
+        expect.stringContaining("🔒 SIGNALS_ENABLED=false"),
+      ]),
+    );
+    info.mockRestore();
   });
 });
 

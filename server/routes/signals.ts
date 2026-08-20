@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { db } from "../db";
 import { agentSignals, knowledgeAvatars } from "@shared/schema";
 import { desc, eq, inArray } from "drizzle-orm";
-import { agentSignalService, signalsEnabled, registerAgentSignalJobs } from "../services/agentSignalService";
+import { agentSignalService, signalsEnabled } from "../services/agentSignalService";
 import { asyncHandler } from "./_shared";
 
 /**
@@ -47,8 +47,6 @@ async function attachAgents(rows: (typeof agentSignals.$inferSelect)[]) {
 }
 
 export function registerSignalRoutes(app: Express): void {
-  registerAgentSignalJobs();
-
   app.get("/api/signals", asyncHandler(async (_req: Request, res: Response) => {
     if (!gate(res)) return;
     const rows = await db

@@ -215,7 +215,12 @@ async function seedBotHistoricalTrades() {
   await seedAvatarTrades();
 }
 
-export async function registerRoutes(app: Express, existingServer?: Server): Promise<Server> {
+export interface RegisteredRoutes {
+  server: Server;
+  startPostReady: () => Promise<void>;
+}
+
+export async function registerRoutes(app: Express, existingServer?: Server): Promise<RegisteredRoutes> {
   console.log('\n🚀 ========== STARTING ROUTE REGISTRATION ==========');
   console.log('📂 Current working directory:', process.cwd());
   console.log('🌍 NODE_ENV:', process.env.NODE_ENV);
@@ -712,16 +717,12 @@ export async function registerRoutes(app: Express, existingServer?: Server): Pro
       }
     });
   });
-  // Seed the feed once at startup if it's empty so investors landing on the
-  // page see history immediately (deterministic, no LLM cost).
-  backfillFromRecentTrades().catch(() => {});
-
   // =============================================================================
   // AVATAR LEADERBOARD WEBSOCKET SERVER (live $10K simulator races)
   // =============================================================================
   const leaderboardWss = new WebSocketServer({ noServer: true });
   const leaderboardClients = new Set<WebSocket>();
-  const { setLeaderboardBroadcaster, computeLeaderboard, startLeaderboardTicker } =
+  const { setLeaderboardBroadcaster, computeLeaderboard, startLeaderboardTicker, stopLeaderboardTicker } =
     await import('./services/avatarLeaderboardService');
   leaderboardWss.on('connection', async (ws: WebSocket) => {
     leaderboardClients.add(ws);
@@ -740,10 +741,6 @@ export async function registerRoutes(app: Express, existingServer?: Server): Pro
       }
     });
   });
-  // Re-broadcast on a 30s timer so mark-to-market price moves on open
-  // positions surface in the leaderboard between trade events.
-  startLeaderboardTicker(30_000);
-
   // =============================================================================
   // PORTFOLIO PRICES WEBSOCKET SERVER (Real-time price updates)
   // =============================================================================
@@ -904,10 +901,10 @@ export async function registerRoutes(app: Express, existingServer?: Server): Pro
     });
   });
   
-  const priceUpdateInterval = setInterval(broadcastPriceUpdates, 60000); // 60 seconds - reduced for performance
+  let priceUpdateInterval: NodeJS.Timeout | null = null;
   
   httpServer.on('close', () => {
-    clearInterval(priceUpdateInterval);
+    if (priceUpdateInterval) clearInterval(priceUpdateInterval);
     priceSubscribers.clear();
   });
 
@@ -972,31 +969,13 @@ export async function registerRoutes(app: Express, existingServer?: Server): Pro
     }
   });
 
-  // Start AI Agent Streaming Service
-  const { initAIAgentStreamingService } = await import('./services/aiAgentStreamingService');
-  const aiStreamingService = initAIAgentStreamingService();
-  aiStreamingService.scheduleAIStreams();
-
-  // Start Knowledge Avatar Alpha Streaming Service (text-based chat)
-  const { initAvatarAlphaStreamService } = await import('./services/avatarAlphaStreamService');
-  const avatarAlphaService = initAvatarAlphaStreamService();
-  avatarAlphaService.scheduleAvatarStreams();
-  console.log('🎙️ Knowledge Avatar Alpha Streaming Service initialized');
-
-  // Start Autonomous Avatar Voice Streaming Service (with TTS audio)
-  const { initAutonomousAvatarStreamService } = await import('./services/autonomousAvatarStreamService');
-  const autonomousVoiceService = initAutonomousAvatarStreamService();
-  autonomousVoiceService.start();
-  console.log('🎤 Autonomous Avatar Voice Streaming Service initialized');
-
-  // Start enhanced real-time updates with multiple intervals
-  const marketUpdateInterval = setInterval(broadcastMarketUpdates, 60000); // Every 60 seconds for market data
-  const volatilityAlertInterval = setInterval(broadcastVolatilityAlerts, 120000); // Every 2 minutes for volatility alerts
+  let marketUpdateInterval: NodeJS.Timeout | null = null;
+  let volatilityAlertInterval: NodeJS.Timeout | null = null;
   
   // Cleanup on server close
   httpServer.on('close', () => {
-    clearInterval(marketUpdateInterval);
-    clearInterval(volatilityAlertInterval);
+    if (marketUpdateInterval) clearInterval(marketUpdateInterval);
+    if (volatilityAlertInterval) clearInterval(volatilityAlertInterval);
     clients.clear();
   });
   
@@ -1006,20 +985,81 @@ export async function registerRoutes(app: Express, existingServer?: Server): Pro
   console.log('🌐 Server ready to accept requests');
   console.log('==================================================\n');
 
-  setTimeout(async () => {
-    try {
-      const [tradeCount] = await db.select({ count: sql<number>`COUNT(*)::int` }).from(botSimTrades);
-      if (Number(tradeCount?.count || 0) === 0) {
-        console.log('[Auto-Seed] No bot trades found, seeding historical data...');
-        await seedBotHistoricalTrades();
-        console.log('[Auto-Seed] Historical bot trade seeding complete');
-      } else {
-        console.log(`[Auto-Seed] Bot trades already exist (${tradeCount.count}), skipping seed`);
-      }
-    } catch (err) {
-      console.error('[Auto-Seed] Error during auto-seed:', err);
-    }
-  }, 5000);
+  let postReadyStarted = false;
+  let autoSeedTimer: NodeJS.Timeout | null = null;
+  const startPostReady = async (): Promise<void> => {
+    if (postReadyStarted) return;
+    postReadyStarted = true;
+    if (!httpServer.listening) return;
 
-  return httpServer;
+    const runOptional = async (
+      label: string,
+      starter: () => void | Promise<void>,
+    ): Promise<void> => {
+      if (!httpServer.listening) return;
+      try {
+        await starter();
+      } catch (error) {
+        console.error(
+          `⚠️  ${label} failed to start (non-fatal, server continues):`,
+          error,
+        );
+      }
+    };
+
+    // Startup data work and recurring tickers are deliberately deferred until
+    // the bootstrap has installed the real request handler.
+    void backfillFromRecentTrades().catch(() => {});
+    startLeaderboardTicker(30_000);
+    priceUpdateInterval = setInterval(broadcastPriceUpdates, 60_000);
+
+    await runOptional('AI Agent Streaming Service', async () => {
+      const { initAIAgentStreamingService } = await import('./services/aiAgentStreamingService');
+      if (!httpServer.listening) return;
+      const aiStreamingService = initAIAgentStreamingService();
+      aiStreamingService.scheduleAIStreams();
+    });
+
+    await runOptional('Knowledge Avatar Alpha Streaming Service', async () => {
+      const { initAvatarAlphaStreamService } = await import('./services/avatarAlphaStreamService');
+      if (!httpServer.listening) return;
+      const avatarAlphaService = initAvatarAlphaStreamService();
+      avatarAlphaService.scheduleAvatarStreams();
+      console.log('🎙️ Knowledge Avatar Alpha Streaming Service initialized');
+    });
+
+    await runOptional('Autonomous Avatar Voice Streaming Service', async () => {
+      const { initAutonomousAvatarStreamService } = await import('./services/autonomousAvatarStreamService');
+      if (!httpServer.listening) return;
+      const autonomousVoiceService = initAutonomousAvatarStreamService();
+      autonomousVoiceService.start();
+      console.log('🎤 Autonomous Avatar Voice Streaming Service initialized');
+    });
+
+    if (!httpServer.listening) return;
+    marketUpdateInterval = setInterval(broadcastMarketUpdates, 60_000);
+    volatilityAlertInterval = setInterval(broadcastVolatilityAlerts, 120_000);
+
+    autoSeedTimer = setTimeout(async () => {
+      try {
+        const [tradeCount] = await db.select({ count: sql<number>`COUNT(*)::int` }).from(botSimTrades);
+        if (Number(tradeCount?.count || 0) === 0) {
+          console.log('[Auto-Seed] No bot trades found, seeding historical data...');
+          await seedBotHistoricalTrades();
+          console.log('[Auto-Seed] Historical bot trade seeding complete');
+        } else {
+          console.log(`[Auto-Seed] Bot trades already exist (${tradeCount.count}), skipping seed`);
+        }
+      } catch (err) {
+        console.error('[Auto-Seed] Error during auto-seed:', err);
+      }
+    }, 5000);
+  };
+
+  httpServer.on('close', () => {
+    stopLeaderboardTicker();
+    if (autoSeedTimer) clearTimeout(autoSeedTimer);
+  });
+
+  return { server: httpServer, startPostReady };
 }

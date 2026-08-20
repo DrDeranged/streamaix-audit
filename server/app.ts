@@ -20,8 +20,13 @@ import { setupVite, serveStatic, log } from "./vite";
 import { autoSeedDatabase } from "./auto-seed";
 import { requireJsonObjectBody } from "./middleware/security";
 import { recordServerErrorSafe } from "./services/serverErrorRecorder";
-import { installLifecycleHooks } from "./lifecycle";
+import { installLifecycleHooks, registerLifecycleJobs } from "./lifecycle";
 import { registerDeepHealth } from "./health/deepHealth";
+import {
+  formatBootTimingLine,
+  schedulePostReadyWork,
+  startBootPhase,
+} from "./bootTiming";
 
 export interface InitializeAppResult {
   /**
@@ -29,6 +34,8 @@ export interface InitializeAppResult {
    * The bootstrap swaps this in once the promise resolves.
    */
   handler: Express;
+  /** Queue background engines only after the bootstrap marks ready. */
+  startPostReady: () => void;
 }
 
 export async function initializeApp(
@@ -40,8 +47,13 @@ export async function initializeApp(
   // half-configured money rail) throws here, which the bootstrap's
   // "FATAL during dynamic app import" path turns into a loud exit. In
   // dev/test it only warns.
-  const { validateEnv } = await import("./config/validateEnv");
-  validateEnv();
+  const finishEnvValidation = startBootPhase("validateEnv");
+  try {
+    const { validateEnv } = await import("./config/validateEnv");
+    validateEnv();
+  } finally {
+    finishEnvValidation();
+  }
 
   const app = express();
 
@@ -141,7 +153,13 @@ export async function initializeApp(
   // and the nightly server_errors prune job.
   installLifecycleHooks(httpServer);
 
-  await registerRoutes(app, httpServer);
+  const finishRoutes = startBootPhase("routes");
+  let registeredRoutes: Awaited<ReturnType<typeof registerRoutes>>;
+  try {
+    registeredRoutes = await registerRoutes(app, httpServer);
+  } finally {
+    finishRoutes();
+  }
 
   if (app.get("env") === "development") {
     await setupVite(app, httpServer);
@@ -173,10 +191,57 @@ export async function initializeApp(
   // Background services kick off after a delay in production so they can't
   // affect the deploy's readiness window. Their failures are non-fatal.
   const startupDelay = app.get("env") === "production" ? 10000 : 100;
-  setTimeout(async () => {
-    console.log("🔄 Starting background services...");
-    const aiKey = process.env.ANTHROPIC_API_KEY;
-    try {
+  let postReadyQueued = false;
+  let postReadyTimer: NodeJS.Timeout | null = null;
+  httpServer.on("close", () => {
+    if (postReadyTimer) {
+      clearTimeout(postReadyTimer);
+      postReadyTimer = null;
+    }
+  });
+  const startPostReady = (): void => {
+    if (postReadyQueued) return;
+    postReadyQueued = true;
+    postReadyTimer = schedulePostReadyWork(async () => {
+      postReadyTimer = null;
+      if (!httpServer.listening) return;
+      console.log("🔄 Starting background services...");
+      const finishEngineStarts = startBootPhase("engineStarts");
+      let batchedScheduler:
+        | typeof import("./jobs/scheduler").jobScheduler
+        | null = null;
+      const aiKey = process.env.ANTHROPIC_API_KEY;
+      try {
+        const { jobScheduler } = await import("./jobs/scheduler");
+        if (!httpServer.listening) return;
+        batchedScheduler = jobScheduler;
+        jobScheduler.beginRegistrationBatch();
+
+        // Required scheduler-owned jobs register before optional engines so a
+        // stream initializer failure cannot silently skip lifecycle work.
+        await registerLifecycleJobs(jobScheduler);
+        try {
+          const { registerAgentSignalJobs } = await import(
+            "./services/agentSignalService"
+          );
+          if (httpServer.listening) {
+            registerAgentSignalJobs();
+          }
+        } catch (error) {
+          console.error(
+            "⚠️  Agent signal jobs failed to register (non-fatal):",
+            error,
+          );
+        }
+        try {
+          await registeredRoutes.startPostReady();
+        } catch (error) {
+          console.error(
+            "⚠️  Route-owned background services failed to start (non-fatal):",
+            error,
+          );
+        }
+
       // Helper: fire-and-forget wrapper for background services. We deliberately
       // do NOT await `starter()` because most background services run an
       // infinite loop inside .start() (e.g. `while (this.isRunning) { ... }`)
@@ -191,6 +256,10 @@ export async function initializeApp(
         label: string,
         starter: () => unknown | Promise<unknown>,
       ): void => {
+        if (!httpServer.listening) {
+          console.log(`⏹️ ${label} not started because the server is closing`);
+          return;
+        }
         try {
           const result = starter();
           Promise.resolve(result).catch((err) => {
@@ -321,10 +390,20 @@ export async function initializeApp(
             error.message,
           ),
         );
-    } catch (error) {
-      console.error("⚠️  Error starting background services (non-fatal):", error);
-    }
-  }, startupDelay);
+      } catch (error) {
+        console.error("⚠️  Error starting background services (non-fatal):", error);
+      } finally {
+        if (batchedScheduler) {
+          // A few legacy starters register after their first resolved promise.
+          // Wait for a brief quiet window so all startup jobs share one state
+          // hydration query instead of issuing follow-up reads.
+          await batchedScheduler.endRegistrationBatch(250, 2_000);
+        }
+        finishEngineStarts();
+        console.info(formatBootTimingLine());
+      }
+    }, startupDelay);
+  };
 
-  return { handler: app };
+  return { handler: app, startPostReady };
 }

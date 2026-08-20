@@ -52,6 +52,8 @@ describe("deepHealth", () => {
     expect(r.checks.budget).toMatchObject({ ok: true, spentToday: 3, budgetUsd: 25 });
     expect(typeof r.gitSha).toBe("string");
     expect(typeof r.uptime).toBe("number");
+    expect(r.boot.phases).toHaveProperty("appImport");
+    expect(r.boot.phases).toHaveProperty("schedulerRegistration");
   });
 
   it("returns 503/unhealthy when the DB roundtrip fails (critical)", async () => {
@@ -66,7 +68,8 @@ describe("deepHealth", () => {
     const first = await getDeepHealth(); // populates cache
     state.dbFail = true; // would flip to 503 if recomputed
     const second = await getDeepHealth(); // served from cache
-    expect(second).toBe(first);
+    expect(second.checks).toBe(first.checks);
     expect(second.httpStatus).toBe(200);
+    expect(second.boot).toBeDefined();
   });
 });

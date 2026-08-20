@@ -24,8 +24,15 @@
 // =====================================================================
 
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import {
+  formatBootTimingLine,
+  initializeBootTiming,
+  markBootReady,
+  startBootPhase,
+} from "./bootTiming";
 
 const __bootStartedAt = Date.now();
+initializeBootTiming(__bootStartedAt);
 
 // Synchronous stderr write — survives even if the process is killed
 // before a normal `console.log` flush would happen.
@@ -126,19 +133,28 @@ httpServer.listen({ port: PORT, host: "0.0.0.0", reusePort: true }, () => {
   // A throw anywhere in this import graph now leaves the bootstrap
   // server alive and answering 503 / health, instead of killing the
   // process silently before any port is open.
+  const finishAppImport = startBootPhase("appImport");
   import("./app")
     .then(async ({ initializeApp }) => {
-      const { handler } = await initializeApp(httpServer, __bootStartedAt);
+      finishAppImport();
+      const { handler, startPostReady } = await initializeApp(
+        httpServer,
+        __bootStartedAt,
+      );
       realHandler = handler as unknown as (
         req: IncomingMessage,
         res: ServerResponse,
       ) => void;
       appReady = true;
+      const timing = markBootReady();
       process.stderr.write(
         `[boot] app ready at boot+${Date.now() - __bootStartedAt}ms\n`,
       );
+      process.stderr.write(`${formatBootTimingLine(timing)}\n`);
+      startPostReady();
     })
     .catch((err: unknown) => {
+      finishAppImport();
       const stack = (err as Error)?.stack ?? String(err);
       process.stderr.write(`[boot] FATAL during dynamic app import: ${stack}\n`);
       // Keep the bootstrap server alive briefly so the platform's log

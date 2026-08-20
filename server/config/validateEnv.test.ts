@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { validateEnv } from "./validateEnv";
 
 // A known-checksummed address (mixed case) and its all-lowercase form.
@@ -46,6 +46,7 @@ describe("validateEnv", () => {
   });
 
   it("passes when all core secrets present (dev)", () => {
+    const info = vi.spyOn(console, "info").mockImplementation(() => {});
     process.env.NODE_ENV = "development";
     process.env.DATABASE_URL = "postgres://x";
     process.env.JWT_SECRET = "s";
@@ -54,6 +55,10 @@ describe("validateEnv", () => {
     expect(r.ok).toBe(true);
     expect(r.missing).toHaveLength(0);
     expect(r.errors).toHaveLength(0);
+    expect(info).toHaveBeenCalledExactlyOnceWith(
+      "[env] validated: 3 required present, flags: ONCHAIN_WRITES_ENABLED=false,BRIDGE_ENABLED=false,SWAPS_ENABLED=false,SIGNALS_ENABLED=false",
+    );
+    info.mockRestore();
   });
 
   it("SWAPS_ENABLED requires ZEROX_API_KEY and checksummed TREASURY_ADDRESS", () => {

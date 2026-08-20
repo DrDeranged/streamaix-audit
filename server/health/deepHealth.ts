@@ -20,6 +20,7 @@ import { execSync } from "node:child_process";
 import { db } from "../db";
 import { sql, desc } from "drizzle-orm";
 import { repairRuns } from "@shared/schema";
+import { getBootTimingSnapshot, type BootTimingSnapshot } from "../bootTiming";
 
 const CACHE_TTL_MS = 30_000;
 
@@ -50,6 +51,7 @@ interface DeepHealthResult {
   uptime: number;
   gitSha: string;
   timestamp: string;
+  boot: BootTimingSnapshot;
   checks: {
     db: { ok: boolean; latencyMs?: number; error?: string };
     scheduler: { ok: boolean; running: number; jobs: number; error?: string };
@@ -162,6 +164,7 @@ async function computeDeepHealth(): Promise<DeepHealthResult> {
     uptime: process.uptime(),
     gitSha: GIT_SHA,
     timestamp: new Date().toISOString(),
+    boot: getBootTimingSnapshot(),
     checks,
   };
 }
@@ -172,7 +175,9 @@ export async function getDeepHealth(
 ): Promise<DeepHealthResult> {
   const now = Date.now();
   if (!force && cache && now - cache.at < CACHE_TTL_MS) {
-    return cache.result;
+    // DB/provider checks are cached, but startup timing is live during the
+    // first post-ready seconds while scheduler and engine phases complete.
+    return { ...cache.result, boot: getBootTimingSnapshot() };
   }
   const result = await computeDeepHealth();
   cache = { result, at: now };

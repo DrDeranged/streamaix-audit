@@ -4,22 +4,22 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 const dbState: {
   rows: any[];
   failReads: boolean;
+  readCalls: number;
   // Advisory-lock controls (consumed by the mocked pool client below).
   lockHeld: boolean;         // pg_try_advisory_lock returns false (held elsewhere)
   connectFails: boolean;     // pool.connect() throws (lock infra unavailable)
   unlockCalls: number;       // count of pg_advisory_unlock invocations
   releaseCalls: number;      // count of client.release() invocations
-} = { rows: [], failReads: false, lockHeld: false, connectFails: false, unlockCalls: 0, releaseCalls: 0 };
+} = { rows: [], failReads: false, readCalls: 0, lockHeld: false, connectFails: false, unlockCalls: 0, releaseCalls: 0 };
 
 vi.mock('../../db', () => {
   const select = () => ({
     from: () => ({
-      where: () => ({
-        limit: async () => {
-          if (dbState.failReads) throw new Error('db down');
-          return dbState.rows;
-        },
-      }),
+      where: async () => {
+        dbState.readCalls++;
+        if (dbState.failReads) throw new Error('db down');
+        return dbState.rows;
+      },
     }),
   });
   const insert = () => ({
@@ -65,6 +65,7 @@ describe('JobScheduler', () => {
     vi.useFakeTimers();
     dbState.rows = [];
     dbState.failReads = false;
+    dbState.readCalls = 0;
     dbState.lockHeld = false;
     dbState.connectFails = false;
     dbState.unlockCalls = 0;
@@ -229,6 +230,48 @@ describe('JobScheduler', () => {
     s.register('a', HOUR, vi.fn());
     s.register('a', HOUR, vi.fn());
     expect(s.getStatus()).toHaveLength(1);
+    warnSpy.mockRestore();
+  });
+
+  it('hydrates a registration batch with one DB read and no sequential per-job awaits', async () => {
+    const s = new JobScheduler();
+    s.beginRegistrationBatch();
+    s.register('a', HOUR, vi.fn(), { runOnStart: true });
+    s.register('b', HOUR, vi.fn(), { runOnStart: true });
+    s.registerCron('c', '0 8 * * *', vi.fn(), {
+      runOnStart: true,
+      freshForMs: HOUR,
+    });
+
+    expect(dbState.readCalls).toBe(0);
+    await s.endRegistrationBatch();
+    expect(dbState.readCalls).toBe(1);
+  });
+
+  it('includes async starter registrations that arrive during the batch quiet period', async () => {
+    const s = new JobScheduler();
+    s.beginRegistrationBatch();
+    s.register('first', HOUR, vi.fn());
+    setTimeout(() => s.register('late', HOUR, vi.fn()), 50);
+
+    const done = s.endRegistrationBatch(100);
+    await vi.advanceTimersByTimeAsync(200);
+    await done;
+
+    expect(s.jobCount()).toBe(2);
+    expect(dbState.readCalls).toBe(1);
+  });
+
+  it('rejects registrations that arrive after shutdown has started', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const s = new JobScheduler();
+    await s.stopAll(0);
+    s.register('late-interval', HOUR, vi.fn());
+    s.registerCron('late-cron', '0 8 * * *', vi.fn());
+    expect(s.jobCount()).toBe(0);
+    expect(s.has('late-interval')).toBe(false);
+    expect(s.has('late-cron')).toBe(false);
+    expect(warnSpy).toHaveBeenCalledTimes(2);
     warnSpy.mockRestore();
   });
 
