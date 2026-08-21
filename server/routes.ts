@@ -167,6 +167,7 @@ import { registerOnChainAnalyticsRoutes } from "./routes/on-chain-analytics";
 import { registerEconomicCalendarRoutes } from "./routes/economic-calendar";
 import { registerFedReserveRoutes } from "./routes/fed-reserve";
 import { registerDiagnosticRoutes } from "./routes/diagnostic";
+import { registerTradingWatchlistRoutes } from "./routes/trading-watchlist";
 import { registerRealProcessingRoutes } from "./routes/real-processing";
 import { registerMarketDataApiRoutes } from "./routes/market-data-api";
 import { registerTechAiStocksRoutes } from "./routes/tech-ai-stocks";
@@ -333,6 +334,8 @@ export async function registerRoutes(app: Express, existingServer?: Server): Pro
   await registerEconomicCalendarRoutes(app);
   // ▶ FedReserve routes extracted to server/routes/fed-reserve.ts
   await registerFedReserveRoutes(app);
+  // ▶ Trading watchlist routes extracted to server/routes/trading-watchlist.ts
+  await registerTradingWatchlistRoutes(app);
   // ▶ Diagnostic routes extracted to server/routes/diagnostic.ts
   await registerDiagnosticRoutes(app);
   // ▶ RealProcessing routes extracted to server/routes/real-processing.ts

@@ -13,3 +13,4 @@
 - [npm overrides $dep syntax](npm-override-syntax.md) — `"pkg": "$pkg"` fixes EOVERRIDE; ENOTEMPTY = stale node_modules temp dirs; npm audit fix broken.
 - [Scheduled-send slot idempotence](slot-idempotence.md) — dedup scheduled side effects via explicit slot-keyed claim rows + UNIQUE, never timestamp-window inference; prod needs manual DDL.
 - [Design system migration](design-system-migration.md) — DESIGN.md contract, accent-core naming deviation, tsc 370-error baseline diffing, and the delegated-restyle className-corruption check.
+- [GitHub push via Git Data API](github-push-git-data-api.md) — Git CLI broken; Octokit updateRef also fails (objects don't exist remotely); use full blob→tree→commit→ref flow via proxyFetch.

@@ -146,13 +146,14 @@ function AnimatedCounter({ value, suffix = '', prefix = '' }: { value: number; s
   return <span className="font-mono tabular-nums">{prefix}{displayValue}{suffix}</span>;
 }
 
-function GlowingStatCard({ icon: Icon, label, value, subValue, color, delay = 0 }: { 
+function GlowingStatCard({ icon: Icon, label, value, subValue, color, delay = 0, isLoading = false }: { 
   icon: any; 
   label: string; 
   value: number | string; 
   subValue?: string;
   color: 'cyan' | 'emerald' | 'red' | 'purple' | 'amber';
   delay?: number;
+  isLoading?: boolean;
 }) {
   const colorClasses = {
     cyan: {
@@ -223,7 +224,11 @@ function GlowingStatCard({ icon: Icon, label, value, subValue, color, delay = 0 
         <div className="flex-1">
           <p className="text-xs text-muted uppercase tracking-wider font-medium">{label}</p>
           <p className="text-2xl font-bold text-primary tabular mt-0.5">
-            {typeof value === 'number' ? <AnimatedCounter value={value} /> : value}
+            {isLoading
+              ? <span className="text-muted animate-pulse">—</span>
+              : typeof value === 'number'
+                ? <AnimatedCounter value={value} />
+                : value}
           </p>
           {subValue && <p className="text-[10px] text-muted mt-0.5">{subValue}</p>}
         </div>
@@ -1415,7 +1420,7 @@ export default function AITrading() {
   const [liveMode, setLiveMode] = useState(true);
   const { toast } = useToast();
   
-  const { data, isLoading, refetch, isFetching } = useQuery<{ success: boolean; signals: TradingSignal[] }>({
+  const { data, isLoading, refetch, isFetching, dataUpdatedAt } = useQuery<{ success: boolean; signals: TradingSignal[] }>({
     queryKey: ['/api/ai-trading-signals'],
     refetchInterval: liveMode ? 30000 : false,
   });
@@ -1504,11 +1509,11 @@ export default function AITrading() {
         </motion.div>
 
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-          <GlowingStatCard icon={Network} label="Active Signals" value={signals.length} subValue="Real-time analysis" color="cyan" delay={0} />
-          <GlowingStatCard icon={TrendingUp} label="Bullish" value={bullishCount} subValue="Buy signals" color="emerald" delay={0.1} />
-          <GlowingStatCard icon={TrendingDown} label="Bearish" value={bearishCount} subValue="Sell signals" color="red" delay={0.2} />
-          <GlowingStatCard icon={Cpu} label="Confluence" value={`${avgConfluence}%`} subValue="Multi-factor score" color="purple" delay={0.3} />
-          <GlowingStatCard icon={Zap} label="High Priority" value={highPriorityCount} subValue="Urgent alerts" color="amber" delay={0.4} />
+          <GlowingStatCard icon={Network} label="Active Signals" value={signals.length} subValue="Real-time analysis" color="cyan" delay={0} isLoading={isLoading} />
+          <GlowingStatCard icon={TrendingUp} label="Bullish" value={bullishCount} subValue="Buy signals" color="emerald" delay={0.1} isLoading={isLoading} />
+          <GlowingStatCard icon={TrendingDown} label="Bearish" value={bearishCount} subValue="Sell signals" color="red" delay={0.2} isLoading={isLoading} />
+          <GlowingStatCard icon={Cpu} label="Confluence" value={`${avgConfluence}%`} subValue="Multi-factor score" color="purple" delay={0.3} isLoading={isLoading} />
+          <GlowingStatCard icon={Zap} label="High Priority" value={highPriorityCount} subValue="Urgent alerts" color="amber" delay={0.4} isLoading={isLoading} />
         </div>
 
         <div className="flex gap-2 mb-8 p-1 bg-ink-raised/60 backdrop-blur-xl rounded-xl border border-ink-edge">
@@ -1644,6 +1649,11 @@ export default function AITrading() {
                           <p className="text-sm text-muted">
                             {activeTab === 'watchlist' ? 'Star assets from the signals to track them here' : 'Click refresh to fetch the latest AI analysis'}
                           </p>
+                          {dataUpdatedAt > 0 && (
+                            <p className="text-xs text-muted/60 mt-3" data-testid="last-analyzed-ts">
+                              Last analyzed: {new Date(dataUpdatedAt).toLocaleTimeString()}
+                            </p>
+                          )}
                         </div>
                       </Surface>
                     </motion.div>
