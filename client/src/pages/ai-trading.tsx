@@ -1252,6 +1252,7 @@ function MyWatchlistSection() {
 
   const watchlistItems = watchlistData?.items || [];
   const watchlistSignals = signalsData?.signals || [];
+  const watchlistIsDefault = (signalsData as any)?.isDefault === true;
   const hasResults = cryptoResults.length > 0 || stockResults.length > 0;
 
   return (
@@ -1363,18 +1364,34 @@ function MyWatchlistSection() {
           {[...Array(2)].map((_, i) => (<div key={i} className="h-96 bg-ink-raised/60 rounded-xl animate-pulse" />))}
         </div>
       ) : watchlistSignals.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {watchlistSignals.map((signal) => (
-            <SignalCard 
-              key={signal.asset.symbol} 
-              signal={signal} 
-              isWatchlisted={true}
-              onWatchlistToggle={() => {
-                const item = watchlistItems.find(w => w.symbol === signal.asset.symbol);
-                if (item) removeMutation.mutate(item.id);
-              }}
-            />
-          ))}
+        <div className="space-y-4">
+          {watchlistIsDefault && (
+            <div
+              className="flex items-start gap-3 rounded-xl border border-accent-core/30 bg-accent-core/10 px-4 py-3"
+              data-testid="banner-starter-watchlist"
+            >
+              <Sparkles className="w-4 h-4 text-accent-bright mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-accent-bright">Starter watchlist</p>
+                <p className="text-xs text-secondary mt-0.5">
+                  These are our top-picked assets. Search and add your own to replace them.
+                </p>
+              </div>
+            </div>
+          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {watchlistSignals.map((signal) => (
+              <SignalCard 
+                key={signal.asset.symbol} 
+                signal={signal} 
+                isWatchlisted={!watchlistIsDefault}
+                onWatchlistToggle={() => {
+                  const item = watchlistItems.find(w => w.symbol === signal.asset.symbol);
+                  if (item) removeMutation.mutate(item.id);
+                }}
+              />
+            ))}
+          </div>
         </div>
       ) : watchlistItems.length > 0 ? (
         <Surface>

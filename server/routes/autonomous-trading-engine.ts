@@ -35,6 +35,7 @@ import {
   testTtsAudioSchema,
   generateReplayAudioSchema,
   emptyBodySchema,
+  commentBodySchema,
   streamWatchSchema,
   voiceConversationSchema,
   bountyClaimSchema,
@@ -360,7 +361,7 @@ export async function registerAutonomousTradingEngineRoutes(app: Express): Promi
     }
   }));
 
-  app.post('/api/summaries/:id/comment', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/summaries/:id/comment', authenticateToken, validateBody(commentBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required' });
     
     const { content } = req.body;
@@ -489,7 +490,7 @@ export async function registerAutonomousTradingEngineRoutes(app: Express): Promi
     }
   }));
 
-  app.post('/api/news/:id/comment', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/news/:id/comment', authenticateToken, validateBody(commentBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required' });
     
     const { content } = req.body;

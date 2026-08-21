@@ -105,7 +105,7 @@ export async function registerUsersRoutes(app: Express): Promise<void> {
   // =============================================================================
 
   // Update user profile
-  app.patch('/api/users/me', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.patch('/api/users/me', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     const validation = validateRequest(updateUserSchema, req.body);
     if (!validation.success) {
       return res.status(400).json({ error: validation.error });

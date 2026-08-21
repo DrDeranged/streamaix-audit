@@ -135,7 +135,7 @@ export async function registerUserNotesRoutes(app: Express): Promise<void> {
   }));
 
   // Create new user note
-  app.post('/api/notes', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/notes', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     const validation = validateRequest(createUserNoteSchema, {
       ...req.body,
       userId: req.user!.id
@@ -163,7 +163,7 @@ export async function registerUserNotesRoutes(app: Express): Promise<void> {
   }));
 
   // Update user note
-  app.patch('/api/notes/:id', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.patch('/api/notes/:id', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     const existingNote = await storage.getUserNote(req.params.id);
     if (!existingNote) {
       return res.status(404).json({ error: 'Note not found' });

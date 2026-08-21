@@ -87,6 +87,37 @@ export const generateReplayAudioSchema = z.object({
 // Empty-body endpoints — accept any object, but reject string/array/null bodies
 export const emptyBodySchema = z.object({}).passthrough();
 
+// Trading watchlist — add an asset
+export const addToWatchlistSchema = z.object({
+  symbol: z.string().min(1).max(12),
+  assetName: z.string().min(1).max(200),
+  assetType: z.enum(['crypto', 'stock']),
+  coingeckoId: z.string().max(100).nullish(),
+  notes: z.string().max(500).nullish(),
+});
+
+// Generic comment body used by summaries and news comment routes
+export const commentBodySchema = z.object({
+  content: z.string().min(1).max(5000),
+}).passthrough();
+
+// Governance: create a proposal
+export const createProposalSchema = z.object({
+  title: z.string().min(1).max(500),
+  description: z.string().min(1).max(10000),
+  category: z.string().max(100).optional(),
+  endTime: z.string().max(50).optional(),
+}).passthrough();
+
+// Governance: cast a vote
+export const castVoteSchema = z.object({
+  support: z.enum(['FOR', 'AGAINST', 'ABSTAIN']),
+  reason: z.string().max(2000).optional(),
+}).passthrough();
+
+// Cross-market signals config update — accepts any JSON object
+export const signalConfigSchema = z.record(z.unknown());
+
 export const voiceAssistantSchema = z.object({
   audioBase64: z.string().min(100).max(2_500_000),
   mimeType: z.string().min(3).max(100).default('audio/webm'),

@@ -35,6 +35,7 @@ import {
   testTtsAudioSchema,
   generateReplayAudioSchema,
   emptyBodySchema,
+  signalConfigSchema,
   streamWatchSchema,
   voiceConversationSchema,
   bountyClaimSchema,
@@ -1609,7 +1610,7 @@ export async function registerAlphaIntelligenceRoutes(app: Express): Promise<voi
   }));
 
   // Update signal configuration (admin only)
-  app.post('/api/cross-market-signals/config', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/cross-market-signals/config', authenticateToken, validateBody(signalConfigSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
       // In production, you'd want proper admin authentication
       const newConfig = req.body;

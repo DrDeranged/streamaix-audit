@@ -37,6 +37,8 @@ import {
   testTtsAudioSchema,
   generateReplayAudioSchema,
   emptyBodySchema,
+  createProposalSchema,
+  castVoteSchema,
   streamWatchSchema,
   voiceConversationSchema,
   bountyClaimSchema,
@@ -1297,7 +1299,7 @@ export async function registerWaitlistRoutes(app: Express): Promise<void> {
   }));
 
   // Create a new proposal (requires auth)
-  app.post("/api/governance/proposals", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/governance/proposals", authenticateToken, validateBody(createProposalSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }
@@ -1322,7 +1324,7 @@ export async function registerWaitlistRoutes(app: Express): Promise<void> {
   }));
 
   // Cast a vote (requires auth)
-  app.post("/api/governance/proposals/:id/vote", authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post("/api/governance/proposals/:id/vote", authenticateToken, validateBody(castVoteSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Authentication required' });
     }

@@ -34,6 +34,7 @@ import {
   testTtsSchema,
   testTtsAudioSchema,
   emptyBodySchema,
+  addToWatchlistSchema,
   streamWatchSchema,
   voiceConversationSchema,
   bountyClaimSchema,
@@ -206,7 +207,7 @@ export async function registerDiagnosticRoutes(app: Express): Promise<void> {
     }
   }));
 
-  app.post('/api/trading-watchlist', authenticateToken, validateBody(emptyBodySchema), asyncHandler(async (req: AuthRequest, res: Response) => {
+  app.post('/api/trading-watchlist', authenticateToken, validateBody(addToWatchlistSchema), asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -258,6 +259,22 @@ export async function registerDiagnosticRoutes(app: Express): Promise<void> {
     }
   }));
 
+  // Platform default starter set — shown when a user has no personal watchlist items.
+  // Never written to the database; always computed on demand.
+  const PLATFORM_DEFAULT_ASSETS: Array<{
+    symbol: string;
+    assetName: string;
+    assetType: 'crypto' | 'stock';
+    coingeckoId: string | null;
+  }> = [
+    { symbol: 'BTC',  assetName: 'Bitcoin',  assetType: 'crypto', coingeckoId: 'bitcoin'  },
+    { symbol: 'ETH',  assetName: 'Ethereum', assetType: 'crypto', coingeckoId: 'ethereum' },
+    { symbol: 'SOL',  assetName: 'Solana',   assetType: 'crypto', coingeckoId: 'solana'   },
+    { symbol: 'NVDA', assetName: 'NVIDIA',   assetType: 'stock',  coingeckoId: null        },
+    { symbol: 'AMD',  assetName: 'AMD',      assetType: 'stock',  coingeckoId: null        },
+    { symbol: 'MSFT', assetName: 'Microsoft',assetType: 'stock',  coingeckoId: null        },
+  ];
+
   app.get('/api/trading-watchlist/signals', authenticateToken, asyncHandler(async (req: AuthRequest, res: Response) => {
     try {
       const userId = req.user?.id;
@@ -266,32 +283,39 @@ export async function registerDiagnosticRoutes(app: Express): Promise<void> {
       }
       
       const items = await storage.getUserWatchlist(userId);
+
+      // When the personal watchlist is empty, fall back to the computed platform
+      // defaults. These are never written to the database — isDefault: true tells
+      // the client to show the "Starter watchlist — customize" affordance.
+      const sourceItems = items.length > 0
+        ? items.map(i => ({ ...i, isDefault: false }))
+        : PLATFORM_DEFAULT_ASSETS.map(a => ({ ...a, id: '', isDefault: true, createdAt: new Date() }));
+      const isDefaultSet = items.length === 0;
+
       const signals = [];
       
-      for (const item of items) {
+      for (const item of sourceItems) {
         if (item.assetType === 'stock') {
-          // Handle stock assets
           const signal = await aiTradingSignalsService.getSignalForCustomStock(
             item.symbol,
             item.assetName
           );
           if (signal) {
-            signals.push({ ...signal, watchlistId: item.id });
+            signals.push({ ...signal, watchlistId: item.id, isDefault: item.isDefault });
           }
         } else if (item.coingeckoId) {
-          // Handle crypto assets
           const signal = await aiTradingSignalsService.getSignalForCustomAsset(
             item.coingeckoId,
             item.symbol,
             item.assetName
           );
           if (signal) {
-            signals.push({ ...signal, watchlistId: item.id });
+            signals.push({ ...signal, watchlistId: item.id, isDefault: item.isDefault });
           }
         }
       }
       
-      res.json({ success: true, signals });
+      res.json({ success: true, signals, isDefault: isDefaultSet });
     } catch (error: any) {
       console.error('Get watchlist signals error:', error);
       res.status(500).json({ success: false, signals: [], error: error.message });
