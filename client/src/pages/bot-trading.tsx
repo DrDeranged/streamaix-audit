@@ -77,7 +77,7 @@ function MiniSparkline({ values, positive }: { values: number[]; positive: boole
   const w = 80;
   const h = 28;
   const pts = values.map((v, i) => `${(i / (values.length - 1)) * w},${h - ((v - min) / range) * h}`).join(' ');
-  const color = positive ? '#3DD68C' : '#FF7B7B';
+  const color = positive ? '#00E39C' : '#FF5C7A';
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="inline-block">
       <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -115,7 +115,7 @@ function PerformanceChart({ snapshots }: { snapshots: any[] }) {
   const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
   const areaPath = `${linePath} L${points[points.length - 1].x},${padding.top + chartH} L${points[0].x},${padding.top + chartH} Z`;
   const isPositive = values[values.length - 1] >= values[0];
-  const color = isPositive ? '#3DD68C' : '#FF7B7B';
+  const color = isPositive ? '#00E39C' : '#FF5C7A';
 
   const yTicks = 5;
   const yLabels = Array.from({ length: yTicks }, (_, i) => minVal + (range / (yTicks - 1)) * i);
@@ -132,7 +132,7 @@ function PerformanceChart({ snapshots }: { snapshots: any[] }) {
         const y = padding.top + chartH - ((val - minVal) / range) * chartH;
         return (
           <g key={i}>
-            <line x1={padding.left} y1={y} x2={width - padding.right} y2={y} stroke="#232B45" strokeWidth="0.5" />
+            <line x1={padding.left} y1={y} x2={width - padding.right} y2={y} stroke="#3A46A8" strokeWidth="0.5" />
             <text x={padding.left - 5} y={y + 3} textAnchor="end" fill="#9BA3B7" fontSize="10">{val.toFixed(1)}%</text>
           </g>
         );
@@ -140,7 +140,7 @@ function PerformanceChart({ snapshots }: { snapshots: any[] }) {
       <path d={areaPath} fill="url(#perfChartGrad)" />
       <path d={linePath} fill="none" stroke={color} strokeWidth="2" />
       {points.length > 0 && (
-         <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="4" fill={color} stroke="#080B14" strokeWidth="2" />
+         <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="4" fill={color} stroke="#0A0E23" strokeWidth="2" />
       )}
     </svg>
   );

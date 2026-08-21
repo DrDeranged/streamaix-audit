@@ -99,7 +99,7 @@ export function Bounties() {
 
   return (
     <section id="bounties" className="relative overflow-hidden bg-ink-page py-24">
-      <div className="pointer-events-none absolute inset-0 opacity-40" style={{ backgroundImage: "radial-gradient(#232B45 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+      <div className="pointer-events-none absolute inset-0 opacity-40" style={{ backgroundImage: "radial-gradient(#3A46A8 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
       <div className="container mx-auto px-6 relative z-10">
         <motion.div 
           className="text-center mb-16"

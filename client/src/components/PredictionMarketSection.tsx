@@ -136,7 +136,7 @@ const PredictionMarketCard = ({ market }: { market: PredictionMarket }) => {
                <div className="flex items-center gap-1.5 text-secondary">
                  <Activity className="w-3.5 h-3.5 text-accent-bright" />
                  <span className="tabular font-medium">{volumeKSTREAM.toFixed(1)}K</span>
-                 <Sparkline data={mockVolumeData} width={40} height={16} color="#8B7CF6" />
+                 <Sparkline data={mockVolumeData} width={40} height={16} color="#7C5CFF" />
               </div>
                <div className="flex items-center gap-1.5 text-secondary">
                 <Users className="w-3.5 h-3.5" />

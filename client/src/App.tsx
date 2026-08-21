@@ -12,6 +12,7 @@ import { ChatWidget } from "@/components/chat/ChatWidget";
 import { OnboardingTour } from "@/components/OnboardingTour";
 import { PWAInstallPrompt, PWAUpdatePrompt } from "@/components/pwa/PWAInstallPrompt";
 import { GlobalMobileHeader } from "@/components/GlobalMobileHeader";
+import { AmbientBackground } from "@/components/ds/AmbientBackground";
 import { WidgetSettingsProvider } from "@/contexts/WidgetSettingsContext";
 import { WagmiProvider } from "wagmi";
 import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
@@ -379,12 +380,13 @@ function App() {
     <ErrorBoundary>
       <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider theme={darkTheme({ accentColor: "#8B7CF6" })} modalSize="compact">
+        <RainbowKitProvider theme={darkTheme({ accentColor: "#7C5CFF" })} modalSize="compact">
         <ThemeProvider defaultTheme="dark" storageKey="streamaix-theme">
           <WidgetSettingsProvider>
             <TooltipProvider>
               <Toaster />
               <GlobalMobileHeader />
+              <AmbientBackground mode="app" />
               <Router />
               <ChatWidget />
               <VoiceAssistant />

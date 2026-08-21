@@ -125,7 +125,7 @@ function NeuralNetworkStatic() {
             y1={`${conn.from.y}%`}
             x2={`${conn.to.x}%`}
             y2={`${conn.to.y}%`}
-            stroke="#8B7CF6"
+            stroke="#7C5CFF"
             strokeOpacity="0.35"
             strokeWidth="1"
             initial={{ opacity: 0 }}
@@ -148,7 +148,7 @@ function NeuralNetworkStatic() {
             top: `${node.y}%`,
             width: node.size,
             height: node.size,
-            background: node.color === 'purple' ? '#8B7CF6' : '#3DD68C',
+            background: node.color === 'purple' ? '#7C5CFF' : '#00E39C',
              boxShadow: node.color === 'purple'
                ? '0 0 15px rgba(139, 124, 246, 0.45)'
                : '0 0 15px rgba(61, 214, 140, 0.4)'
@@ -198,7 +198,7 @@ function GlowingCore() {
         <div 
           className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-24 lg:h-24 rounded-full flex items-center justify-center"
           style={{
-             background: '#181F38',
+             background: '#1E2650',
             backdropFilter: 'blur(10px)',
              border: '1px solid rgba(139, 124, 246, 0.35)',
              boxShadow: '0 0 40px rgba(139, 124, 246, 0.3), inset 0 0 30px rgba(61, 214, 140, 0.16)'
@@ -215,7 +215,7 @@ function GlowingCore() {
           style={{
             left: '50%',
             top: '50%',
-             background: i % 2 === 0 ? '#8B7CF6' : '#3DD68C',
+             background: i % 2 === 0 ? '#7C5CFF' : '#00E39C',
              boxShadow: i % 2 === 0 
                ? '0 0 10px rgba(139, 124, 246, 0.7)'
                : '0 0 10px rgba(61, 214, 140, 0.65)',
@@ -250,19 +250,19 @@ function StatPill({
   const colorMap = {
     purple: {
        bg: 'rgba(139, 124, 246, 0.12)',
-       border: '#8B7CF6',
+       border: '#7C5CFF',
        text: 'text-accent-bright',
        glow: 'rgba(139, 124, 246, 0.2)'
     },
     cyan: {
        bg: 'rgba(61, 214, 140, 0.1)',
-       border: '#3DD68C',
+       border: '#00E39C',
        text: 'text-gain',
        glow: 'rgba(61, 214, 140, 0.16)'
     },
     amber: {
        bg: 'rgba(255, 180, 84, 0.1)',
-       border: '#FFB454',
+       border: '#FFB020',
        text: 'text-warn',
        glow: 'rgba(255, 180, 84, 0.16)'
     }

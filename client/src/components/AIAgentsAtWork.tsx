@@ -131,8 +131,8 @@ export default function AIAgentsAtWork() {
           <svg className="absolute inset-0 w-full h-full opacity-20">
             <defs>
               <linearGradient id="neural-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#8B7CF6" stopOpacity="0.3" />
-                <stop offset="100%" stopColor="#8B7CF6" stopOpacity="0.3" />
+                <stop offset="0%" stopColor="#7C5CFF" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="#7C5CFF" stopOpacity="0.3" />
               </linearGradient>
             </defs>
             {[...Array(8)].map((_, i) => (

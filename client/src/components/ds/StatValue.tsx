@@ -14,6 +14,9 @@ export interface StatValueProps extends HTMLAttributes<HTMLDivElement> {
 /**
  * The ONE way numbers are displayed (see DESIGN.md).
  * label: muted uppercase micro-label; value: display serif, tabular.
+ *
+ * Neon Signal: when `delta` is provided the value number and delta line both
+ * receive a soft text-shadow halo in the semantic color (halo-gain / halo-loss).
  */
 export function StatValue({
   label,
@@ -24,6 +27,9 @@ export function StatValue({
   valueClassName,
   ...props
 }: StatValueProps) {
+  const hasDelta = typeof delta === "number" && Number.isFinite(delta);
+  const isPositive = hasDelta && delta! >= 0;
+
   return (
     <div className={cn("min-w-0", className)} {...props}>
       <div className="text-[10px] font-semibold uppercase tracking-widest text-muted">
@@ -31,21 +37,26 @@ export function StatValue({
       </div>
       <div
         className={cn(
-          "tabular font-display text-xl text-primary sm:text-2xl",
+          "tabular font-display text-xl sm:text-2xl",
+          hasDelta
+            ? isPositive
+              ? "text-gain halo-gain"
+              : "text-loss halo-loss"
+            : "text-primary",
           valueClassName,
         )}
       >
         {value}
       </div>
-      {typeof delta === "number" && Number.isFinite(delta) && (
+      {hasDelta && (
         <div
           className={cn(
             "tabular text-xs font-medium",
-            delta >= 0 ? "text-gain" : "text-loss",
+            isPositive ? "text-gain halo-gain" : "text-loss halo-loss",
           )}
         >
-          {delta >= 0 ? "+" : ""}
-          {delta.toFixed(2)}
+          {isPositive ? "+" : ""}
+          {delta!.toFixed(2)}
           {deltaSuffix}
         </div>
       )}

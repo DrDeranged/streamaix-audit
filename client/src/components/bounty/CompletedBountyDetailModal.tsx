@@ -291,7 +291,7 @@ export default function CompletedBountyDetailModal({ bounty, isOpen, onClose }: 
         </div>
 
         {/* Scrollable Content - with always visible scrollbar */}
-        <div className="flex-1 max-h-[calc(90vh-180px)] overflow-y-auto scrollbar-thin" style={{ scrollbarWidth: 'thin', scrollbarColor: '#3DD68C #181F38' }}>
+        <div className="flex-1 max-h-[calc(90vh-180px)] overflow-y-auto scrollbar-thin" style={{ scrollbarWidth: 'thin', scrollbarColor: '#00E39C #1E2650' }}>
           <div className="px-6 py-4 space-y-6">
             {/* Winner Section */}
             <Surface variant="raised" className="border border-gain/30 p-4">

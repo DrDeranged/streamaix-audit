@@ -160,7 +160,7 @@ function FloatingParticles() {
             top: `${Math.random() * 100}%`,
             width: 2 + Math.random() * 3,
             height: 2 + Math.random() * 3,
-            background: '#8B7CF6',
+            background: '#7C5CFF',
           }}
           animate={{
             y: [-20, -50, -20],

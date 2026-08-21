@@ -38,6 +38,13 @@ const toneRing: Record<MetricTone, string> = {
   rose: "border-loss/40 text-loss",
 };
 
+/**
+ * Standard page header (see DESIGN.md).
+ *
+ * Neon Signal: eyebrow gets text-grad-eyebrow (cyan→violet gradient);
+ * title gets text-grad-title (white→lavender gradient). Both utilities
+ * are universal primitives in index.css — no per-page override needed.
+ */
 export function PageHeader({
   eyebrow,
   title,
@@ -71,7 +78,10 @@ export function PageHeader({
           )}
         >
           {eyebrow && (
-            <div className="text-overline" data-testid="page-header-eyebrow">
+            <div
+              className="text-[10px] font-semibold uppercase tracking-widest text-grad-eyebrow"
+              data-testid="page-header-eyebrow"
+            >
               {eyebrow}
             </div>
           )}
@@ -91,7 +101,7 @@ export function PageHeader({
             )}
             <h1
               className={cn(
-                "min-w-0 break-words font-display text-2xl leading-tight text-primary sm:text-3xl lg:text-4xl",
+                "min-w-0 break-words font-display text-grad-title text-2xl leading-tight sm:text-3xl lg:text-4xl",
               )}
               data-testid="page-header-title"
             >

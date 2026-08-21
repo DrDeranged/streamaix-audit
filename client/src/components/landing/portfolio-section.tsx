@@ -56,10 +56,10 @@ function HealthScoreDemo() {
   return (
     <div className="relative w-24 h-24">
       <svg className="w-full h-full transform -rotate-90">
-        <circle cx="48" cy="48" r="40" stroke="#232B45" strokeWidth="6" fill="none" />
+        <circle cx="48" cy="48" r="40" stroke="#3A46A8" strokeWidth="6" fill="none" />
         <motion.circle
           cx="48" cy="48" r="40"
-          stroke="#3DD68C"
+          stroke="#00E39C"
           strokeWidth="6"
           fill="none"
           strokeLinecap="round"
@@ -86,10 +86,10 @@ function HealthScoreDemo() {
 
 function AllocationPreview() {
   const allocations = [
-    { type: 'Crypto', percent: 45, color: '#FFB454' },
-    { type: 'Stocks', percent: 30, color: '#8B7CF6' },
-    { type: 'ETFs', percent: 15, color: '#A99DF8' },
-    { type: 'Cash', percent: 10, color: '#3DD68C' },
+    { type: 'Crypto', percent: 45, color: '#FFB020' },
+    { type: 'Stocks', percent: 30, color: '#7C5CFF' },
+    { type: 'ETFs', percent: 15, color: '#9F7FFF' },
+    { type: 'Cash', percent: 10, color: '#00E39C' },
   ];
 
   return (

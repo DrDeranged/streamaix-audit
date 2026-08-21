@@ -57,25 +57,25 @@
 .dark {
   /* Repointed at the StreamAiX ink token palette (see DESIGN.md) so all
      shadcn primitives inherit the design system automatically. */
-  --background: #080B14;            /* ink-page */
+  --background: #0A0E23;            /* ink-page */
   --foreground: hsl(0, 0%, 98%);
-  --muted: #181F38;                 /* ink-raised */
-  --muted-foreground: #9BA3B7;      /* label color */
-  --popover: #10162A;               /* ink-surface */
+  --muted: #1E2650;                 /* ink-raised */
+  --muted-foreground: #B9C2EE;      /* label color */
+  --popover: #151B3D;               /* ink-surface */
   --popover-foreground: hsl(0, 0%, 98%);
-  --card: #10162A;                  /* ink-surface */
+  --card: #151B3D;                  /* ink-surface */
   --card-foreground: hsl(0, 0%, 98%);
-  --border: #232B45;                /* ink-edge */
-  --input: #232B45;                 /* ink-edge */
-  --primary: #8B7CF6;               /* accent-core */
+  --border: #3A46A8;                /* ink-edge */
+  --input: #3A46A8;                 /* ink-edge */
+  --primary: #7C5CFF;               /* accent-core */
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: #181F38;             /* ink-raised */
+  --secondary: #1E2650;             /* ink-raised */
   --secondary-foreground: hsl(0, 0%, 98%);
-  --accent: #181F38;                /* ink-raised (subtle hover) */
+  --accent: #1E2650;                /* ink-raised (subtle hover) */
   --accent-foreground: hsl(0, 0%, 98%);
-  --destructive: #FF7B7B;           /* loss */
+  --destructive: #FF5C7A;           /* loss */
   --destructive-foreground: hsl(0, 0%, 100%);
-  --ring: #8B7CF6;                  /* accent-core */
+  --ring: #7C5CFF;                  /* accent-core */
   --radius: 0.625rem;
   
   /* Enhanced dark mode glass with vibrant tints */
@@ -1926,26 +1926,27 @@
    StreamAiX Design System — "The AI trading ledger"
    Tokens per DESIGN.md. Additive; shadcn vars remain untouched.
    ============================================================ */
+/* === Neon Signal palette — updated from Ink Ledger === */
 :root {
-  --ink-page: #080B14;      /* app background */
-  --ink-surface: #10162A;   /* cards, panels */
-  --ink-raised: #181F38;    /* hover states, nested surfaces */
-  --ink-edge: #232B45;      /* borders */
-  --ink-divider: #1A2138;   /* row separators */
+  --ink-page: #0A0E23;      /* app background */
+  --ink-surface: #151B3D;   /* cards, panels */
+  --ink-raised: #1E2650;    /* hover states, nested surfaces */
+  --ink-edge: #3A46A8;      /* borders */
+  --ink-divider: #232B5C;   /* row separators */
   --text-primary: #F2F4FA;
   --text-body: #C9CEDC;
-  --text-secondary: #9BA3B7;
-  --text-muted: #7A8299;
-  --accent-core: #8B7CF6;   /* buttons, active states */
-  --accent-bright: #A99DF8; /* links, highlights on dark */
-  --accent-deep: #6D5BE0;   /* pressed states */
+  --text-secondary: #B9C2EE;
+  --text-muted: #9AA6D8;
+  --accent-core: #7C5CFF;   /* buttons, active states */
+  --accent-bright: #9F7FFF; /* links, highlights on dark */
+  --accent-deep: #5A48D6;   /* pressed states */
   --live: #FF6B81;
-  --gain: #3DD68C;
-  --loss: #FF7B7B;
-  --warn: #FFB454;
+  --gain: #00E39C;
+  --loss: #FF5C7A;
+  --warn: #FFB020;
   /* Expressive layer — aurora accents (landing/auth only, see DESIGN.md) */
-  --aurora-cyan: #22D3EE;
-  --aurora-magenta: #E879F9;
+  --aurora-cyan: #00E5FF;
+  --aurora-magenta: #FF4FD8;
 }
 
 /* ==========================================================================
@@ -1975,8 +1976,8 @@
   filter: blur(64px);
   pointer-events: none;
 }
-.orb-violet { background: color-mix(in srgb, var(--accent-core) 12%, transparent); }
-.orb-cyan { background: color-mix(in srgb, var(--aurora-cyan) 12%, transparent); }
+.orb-violet { background: color-mix(in srgb, var(--accent-core) 15%, transparent); }
+.orb-cyan { background: color-mix(in srgb, var(--aurora-cyan) 15%, transparent); }
 .orb-magenta { background: color-mix(in srgb, var(--aurora-magenta) 12%, transparent); }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -2019,7 +2020,7 @@
 
 /* Expressive glows matching .glow-accent */
 .glow-cyan {
-  box-shadow: 0 0 24px rgba(34, 211, 238, 0.25);
+  box-shadow: 0 0 22px rgba(0, 229, 255, 0.18);
 }
 .scrim {
   background-color: color-mix(in srgb, var(--ink-page) 70%, transparent);
@@ -2028,7 +2029,7 @@
 }
 
 .glow-magenta {
-  box-shadow: 0 0 24px rgba(232, 121, 249, 0.25);
+  box-shadow: 0 0 22px rgba(255, 79, 216, 0.16);
 }
 
 /* Tabular numerals for all data contexts */
@@ -2038,16 +2039,44 @@
 
 /* The ONLY two sanctioned gradients */
 .grad-accent {
-  background-image: linear-gradient(135deg, #8B7CF6 0%, #6D5BE0 100%);
+  background-image: linear-gradient(135deg, #7C5CFF 0%, #FF4FD8 100%);
 }
 .grad-surface {
-  background-image: linear-gradient(180deg, #10162A 0%, #0C1122 100%);
+  background-image: linear-gradient(180deg, #151B3D 0%, #0E1228 100%);
 }
 
 /* The ONLY glow token — primary CTAs and active states */
 .glow-accent {
-  box-shadow: 0 0 24px rgba(139, 124, 246, 0.25);
+  box-shadow: 0 0 30px rgba(124, 92, 255, 0.5), 0 0 60px rgba(255, 79, 216, 0.25);
 }
+
+/* === Neon Signal — universal gradient text primitives (consumed by SectionTitle / PageHeader) === */
+/* Title: white → lavender (matches preview .neon .title) */
+.text-grad-title {
+  background: linear-gradient(90deg, #FFFFFF 30%, #C9B8FF);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+/* Eyebrow: cyan → violet (matches preview .neon .eyebrow) */
+.text-grad-eyebrow {
+  background: linear-gradient(90deg, var(--aurora-cyan), var(--accent-bright));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* === Neon Signal — stat value halos (applied in StatValue for gain/loss deltas) === */
+.halo-gain { text-shadow: 0 0 14px rgba(0, 227, 156, 0.45); }
+.halo-loss { text-shadow: 0 0 14px rgba(255, 92, 122, 0.40); }
+
+/* === Neon Signal — domain edge glows (automatic via data-domain on Surface) === */
+[data-domain="cyan"]  { border-color: #0E7C9E; box-shadow: 0 0 22px rgba(0, 229, 255, 0.18); }
+[data-domain="vio"]   { border-color: #5A48D6; box-shadow: 0 0 22px rgba(124, 92, 255, 0.22); }
+[data-domain="mag"]   { border-color: #B03A99; box-shadow: 0 0 22px rgba(255, 79, 216, 0.16); }
+[data-domain="warn"]  { border-color: #B07A1A; box-shadow: 0 0 22px rgba(255, 176, 32, 0.15); }
 
 /* Text token classes. Declared un-layered after Tailwind's utilities so
    they win over the legacy shadcn-generated text-primary/secondary/muted. */

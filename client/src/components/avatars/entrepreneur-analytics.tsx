@@ -107,7 +107,7 @@ export function EntrepreneurAnalytics({ entrepreneur, showThesis = true, showMet
 
   // Colors for charts
   const COLORS = {
-    primary: '#8B7CF6'
+    primary: '#7C5CFF'
   };
 
   // Risk score interpretation

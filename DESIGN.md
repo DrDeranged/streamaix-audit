@@ -1,8 +1,9 @@
-# StreamAiX Design System — "The AI trading ledger"
+# StreamAiX Design System — "Neon Signal"
 
-This document is the **contract** for all UI work. Dark ink surfaces, violet
-intelligence accent, editorial serif display type — visually matched to the
-shipped email newsletter (`server/services/newsletterTemplate.ts`).
+This document is the **contract** for all UI work. Deep indigo surfaces,
+violet-to-magenta intelligence accent, editorial serif display type — the
+Neon Signal palette replaces Ink Ledger at the token layer only; all system
+rules, primitives, and enforcement remain unchanged.
 
 Enforced by `npm run design:lint` (see Enforcement below).
 
@@ -10,21 +11,21 @@ Enforced by `npm run design:lint` (see Enforcement below).
 
 | Token | Hex | Tailwind class(es) | Usage |
 |---|---|---|---|
-| `--ink-page` | `#080B14` | `bg-ink-page` | App/page background. The only page background. |
-| `--ink-surface` | `#10162A` | `bg-ink-surface` | Cards, panels (via `<Surface>`). |
-| `--ink-raised` | `#181F38` | `bg-ink-raised` | Hover states, nested surfaces (`<Surface variant="raised">`). |
-| `--ink-edge` | `#232B45` | `border-ink-edge` | Borders. |
-| `--ink-divider` | `#1A2138` | `border-ink-divider` | Row separators. |
+| `--ink-page` | `#0A0E23` | `bg-ink-page` | App/page background. The only page background. |
+| `--ink-surface` | `#151B3D` | `bg-ink-surface` | Cards, panels (via `<Surface>`). |
+| `--ink-raised` | `#1E2650` | `bg-ink-raised` | Hover states, nested surfaces (`<Surface variant="raised">`). |
+| `--ink-edge` | `#3A46A8` | `border-ink-edge` | Borders. |
+| `--ink-divider` | `#232B5C` | `border-ink-divider` | Row separators. |
 | `--text-primary` | `#F2F4FA` | `text-primary` | Headings, key values. |
 | `--text-body` | `#C9CEDC` | `text-body` | Body copy. |
-| `--text-secondary` | `#9BA3B7` | `text-secondary` | Supporting copy, secondary values. |
-| `--text-muted` | `#7A8299` | `text-muted` | Labels, captions, de-emphasized text. |
-| `--accent-core` | `#8B7CF6` | `bg-accent-core`, `border-accent-core` | Buttons, active states. |
-| `--accent-bright` | `#A99DF8` | `text-accent-bright` | Links, highlights on dark. |
-| `--accent-deep` | `#6D5BE0` | `bg-accent-deep` | Pressed states. |
-| `--gain` | `#3DD68C` | `text-gain` | Positive numbers, gains, success. |
-| `--loss` | `#FF7B7B` | `text-loss` | Negative numbers, losses, errors. |
-| `--warn` | `#FFB454` | `text-warn` | Warnings, caution states. |
+| `--text-secondary` | `#B9C2EE` | `text-secondary` | Supporting copy, secondary values. |
+| `--text-muted` | `#9AA6D8` | `text-muted` | Labels, captions, de-emphasized text. |
+| `--accent-core` | `#7C5CFF` | `bg-accent-core`, `border-accent-core` | Buttons, active states. |
+| `--accent-bright` | `#9F7FFF` | `text-accent-bright` | Links, highlights on dark. |
+| `--accent-deep` | `#5A48D6` | `bg-accent-deep` | Pressed states. |
+| `--gain` | `#00E39C` | `text-gain` | Positive numbers, gains, success. |
+| `--loss` | `#FF5C7A` | `text-loss` | Negative numbers, losses, errors. |
+| `--warn` | `#FFB020` | `text-warn` | Warnings, caution states. |
 | `--live` | `#FF6B81` | `text-live` | Live/broadcast status indicators (LIVE badges, pulse dots, stream counters). Not for errors — that is `loss`. |
 
 Note: the token CSS vars are additive; the legacy shadcn vars (`--primary`,
@@ -50,13 +51,19 @@ Note: the token CSS vars are additive; the legacy shadcn vars (`--primary`,
 
 Exactly TWO sanctioned gradients (utilities in `index.css`):
 
-- `.grad-accent` — violet `#8B7CF6 → #6D5BE0`. Primary CTAs and the onboarding tour only.
-- `.grad-surface` — barely-there `#10162A → #0C1122`. Hero panels only.
+- `.grad-accent` — violet→magenta `#7C5CFF → #FF4FD8`. Primary CTAs and the onboarding tour only.
+- `.grad-surface` — barely-there `#151B3D → #0E1228`. Hero panels only.
+- `.text-grad-title` — white→lavender title gradient. Consumed by `<SectionTitle>` / `<PageHeader>`; no per-page work needed.
+- `.text-grad-eyebrow` — cyan→violet eyebrow gradient. Consumed by `<SectionTitle>` / `<PageHeader>`; no per-page work needed.
 
 No other gradients anywhere (`from-*` / `to-*` classes are banned).
 
-One glow token: `.glow-accent` (`0 0 24px rgba(139,124,246,.25)`), used only
-on primary CTAs and active states.
+Three glow tokens:
+- `.glow-accent` (`0 0 30px rgba(124,92,255,.5), 0 0 60px rgba(255,79,216,.25)`), used only on primary CTAs and active states.
+- `.glow-cyan` / `.glow-magenta` — expressive layer only (landing/auth).
+- Domain glows via `data-domain` on `<Surface>` (`"cyan"` / `"vio"` / `"mag"` / `"warn"`) — automatic, no per-page class.
+
+Stat halos: `.halo-gain` / `.halo-loss` — soft text-shadow for semantic value numbers; consumed by `<StatValue>` automatically.
 
 ## Primitives (`client/src/components/ds/`)
 

@@ -99,7 +99,7 @@ export function RecentActivity() {
                       className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin"
                       style={{
                         scrollbarWidth: 'thin',
-                        scrollbarColor: '#8B7CF6 #1A2138'
+                        scrollbarColor: '#7C5CFF #232B5C'
                       }}
                       data-testid="activity-scroll-container"
                     >
@@ -181,15 +181,15 @@ export function RecentActivity() {
           height: 8px;
         }
         .scrollbar-thin::-webkit-scrollbar-track {
-           background: #1A2138;
+           background: #232B5C;
            border-radius: 8px;
         }
         .scrollbar-thin::-webkit-scrollbar-thumb {
-           background: #8B7CF6;
+           background: #7C5CFF;
            border-radius: 8px;
         }
         .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-           background: #A99DF8;
+           background: #9F7FFF;
         }
       `}</style>
     </section>

@@ -97,7 +97,7 @@ export default function ProcessingResults({ params }: { params?: { id: string } 
     const root = document.documentElement;
     root.classList.remove('light');
     root.classList.add('dark');
-    root.style.backgroundColor = '#080B14';
+    root.style.backgroundColor = '#0A0E23';
     root.style.color = '#F2F4FA';
     
     return () => {
