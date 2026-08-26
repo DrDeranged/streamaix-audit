@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
@@ -375,6 +375,17 @@ function Router() {
   );
 }
 
+// Routes that render their own AmbientBackground (mode="landing") locally —
+// the global app-wide background must not also render on these, or the two
+// large blurred/animated layers stack and tank performance.
+const SELF_AMBIENT_ROUTES = new Set(["/", "/auth", "/auth-success"]);
+
+function GlobalAmbientBackground() {
+  const [location] = useLocation();
+  if (SELF_AMBIENT_ROUTES.has(location)) return null;
+  return <AmbientBackground mode="app" />;
+}
+
 function App() {
   return (
     <ErrorBoundary>
@@ -386,7 +397,7 @@ function App() {
             <TooltipProvider>
               <Toaster />
               <GlobalMobileHeader />
-              <AmbientBackground mode="app" />
+              <GlobalAmbientBackground />
               <Router />
               <ChatWidget />
               <VoiceAssistant />
