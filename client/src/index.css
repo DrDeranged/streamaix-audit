@@ -1949,6 +1949,33 @@
   --aurora-magenta: #FF4FD8;
 }
 
+/* Light-mode overrides for the Neon Signal tokens above. Added by the
+   theme toggle (ThemeProvider adds/removes the "light"/"dark" class on
+   <html>) — without this block every ink-, text-, and accent- consumer
+   stayed pinned to dark values regardless of theme, which is why switching
+   to light mode looked broken. Deeper per-page contrast polish is tracked
+   separately; this block makes the toggle functional and legible. */
+.light {
+  --ink-page: #F5F6FB;
+  --ink-surface: #FFFFFF;
+  --ink-raised: #ECEEF7;
+  --ink-edge: #D8DBEE;
+  --ink-divider: #E3E5F2;
+  --text-primary: #1B1E3D;
+  --text-body: #383C63;
+  --text-secondary: #565A85;
+  --text-muted: #767AA3;
+  --accent-core: #6A47F0;
+  --accent-bright: #5636D6;
+  --accent-deep: #4629B8;
+  --live: #E23A5A;
+  --gain: #00966E;
+  --loss: #D6335A;
+  --warn: #B36B00;
+  --aurora-cyan: #0090A8;
+  --aurora-magenta: #C43BA8;
+}
+
 /* ==========================================================================
    Expressive layer — allowed ONLY on landing/auth surfaces per DESIGN.md.
    ========================================================================== */

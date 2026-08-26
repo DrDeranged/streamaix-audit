@@ -219,7 +219,7 @@ function BotCard({ bot, onSelect, rank }: { bot: any; onSelect: () => void; rank
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <div className="bg-ink-raised/40 rounded-xl p-2 text-center border border-ink-edge/30">
               <p className="text-[10px] text-muted">Staked</p>
               <p className="text-xs font-semibold text-primary">{totalStaked >= 1000 ? `${(totalStaked / 1000).toFixed(0)}k` : totalStaked}</p>

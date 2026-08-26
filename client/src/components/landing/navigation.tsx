@@ -93,17 +93,15 @@ export function Navigation() {
 
   return (
       <nav className="fixed top-0 w-full z-50 transition-all duration-300 text-body">
-      {/* Glass background layer */}
+      {/* Glass background layer — follows the theme via --ink-page, not a hardcoded dark navy */}
       <div 
-        className="absolute inset-0 bg-ink-page/90 border-b border-ink-edge"
+        className="absolute inset-0 border-b border-ink-edge"
         style={{
-           background: 'rgba(16,22,42,0.88)',
+          background: 'color-mix(in srgb, var(--ink-page) 88%, transparent)',
           backdropFilter: 'blur(20px) saturate(180%)',
           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
         }}
       />
-      {/* Light mode background */}
-      <div className="absolute inset-0 bg-ink-page/40" />
       {/* Gradient bottom border */}
       <div className="absolute bottom-0 left-0 right-0 h-px bg-ink-edge" />
       {/* Top highlight */}
