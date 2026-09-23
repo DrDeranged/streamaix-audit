@@ -6,6 +6,8 @@ export interface CryptoQuote {
   symbol: string;
   name: string;
   price: number;
+  /** True when a failed provider forced a last-known-good quote. */
+  delayed?: boolean;
   percentChange24h: number;
   percentChange7d: number;
   percentChange30d: number;
@@ -218,6 +220,11 @@ export class MarketDataService {
     return MarketDataService.instance;
   }
 
+  /** Symbols covered by the existing Finnhub stock integration. */
+  getCoveredStockSymbols(limit = 20): string[] {
+    return this.cryptoStocks.slice(0, limit).map(symbol => symbol.toUpperCase());
+  }
+
   /**
    * Log an error with suppression to prevent spam (only logs same error type once per hour)
    */
@@ -338,7 +345,10 @@ export class MarketDataService {
     }
 
     // Tier 2: CoinGecko Demo (fallback)
-    if (this.coingeckoApiKey && !this.coingeckoDemoDisabled && quotes.length === 0) {
+    // A configured Pro key is the primary CoinGecko credential. Do not retry
+    // the separately configured Demo key as a fallback: its plan is rejected
+    // with 10010 on this project. Other providers and stamped cache remain.
+    if (!this.coingeckoProApiKey && this.coingeckoApiKey && !this.coingeckoDemoDisabled && quotes.length === 0) {
       try {
         quotes = await this.getCryptoQuotesFromCoinGecko(symbols);
         dataSource = 'CoinGecko Demo';
@@ -415,8 +425,12 @@ export class MarketDataService {
     if (quotes.length === 0) {
       const staleData = this.getFromStaleCache(cacheKey);
       if (staleData) {
-        console.log('📦 [Tier 7] Using stale cache data (all APIs failed)');
-        return staleData;
+        this.logErrorOnce('crypto_quotes_stale', 'Market quotes delayed; serving last known good data');
+        return (staleData as CryptoQuote[]).map(quote => ({
+          ...quote,
+          delayed: true,
+          // Preserve the provider's original lastUpdated timestamp.
+        }));
       }
     }
 

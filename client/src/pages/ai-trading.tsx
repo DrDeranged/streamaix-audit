@@ -378,6 +378,7 @@ interface TradingSignal {
   reasoning: string;
   keyLevels: { support: number[]; resistance: number[] };
   volumeAnalysis: string;
+  /** Optional stock-calendar context supplied by the signal service. */
   technicalIndicators: TechnicalIndicators;
   onChainMetrics: OnChainMetrics | null;
   sentiment: SentimentData;
@@ -391,6 +392,22 @@ interface TradingSignal {
   };
   alertPriority: 'high' | 'medium' | 'low';
   generatedAt: string;
+}
+
+interface PulseContext {
+  movers?: { data?: Array<{ symbol?: string; unusual?: boolean; unusualVolume?: boolean; volumeFlag?: string; change24h?: number; volumePercentile30d?: number; distance30dHigh?: number; distance30dLow?: number }> | undefined; asOf?: string; delayed?: boolean };
+  earnings?: { data?: Array<{ symbol?: string; date?: string; hour?: string; epsEstimate?: number }> | undefined; asOf?: string; delayed?: boolean };
+}
+
+function daysUntilUtc(dateValue?: string): number | undefined {
+  if (!dateValue) return undefined;
+  const target = new Date(dateValue);
+  if (Number.isNaN(target.getTime())) return undefined;
+  const targetDay = Date.UTC(target.getUTCFullYear(), target.getUTCMonth(), target.getUTCDate());
+  const now = new Date();
+  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const days = Math.round((targetDay - today) / 86_400_000);
+  return days >= 0 && days <= 7 ? days : undefined;
 }
 
 function ConfidenceRing({ value, size = 60 }: { value: number; size?: number }) {
@@ -777,6 +794,11 @@ function WhaleAlertCard() {
 }
 
 function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: TradingSignal; onWatchlistToggle: () => void; isWatchlisted: boolean }) {
+  const pulseQuery = useQuery<PulseContext>({ queryKey: ['/api/market-pulse'], queryFn: async () => {
+    const response = await fetch('/api/market-pulse', { credentials: 'include' });
+    if (!response.ok) throw new Error(`Failed to load market pulse (${response.status})`);
+    return response.json();
+  }, staleTime: 60_000, retry: false });
   const [expanded, setExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   
@@ -831,6 +853,17 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
   const ti = signal.technicalIndicators;
   const onChain = signal.onChainMetrics;
   const sentiment = signal.sentiment;
+  const moverSection = pulseQuery.data?.movers;
+  const earningsSection = pulseQuery.data?.earnings;
+  const mover = moverSection?.data?.find((item) => item.symbol?.toUpperCase() === signal.asset.symbol.toUpperCase());
+  const earnings = signal.asset.type === 'stock'
+    ? earningsSection?.data?.find((item) => item.symbol?.toUpperCase() === signal.asset.symbol.toUpperCase())
+    : undefined;
+  const volumeFlag = mover?.volumeFlag || (mover?.unusual || mover?.unusualVolume ? 'Unusual' : undefined);
+  const volumePercentile = mover?.volumePercentile30d;
+  const earningsDays = daysUntilUtc(earnings?.date);
+  const earningsDate = earnings?.date;
+  const earningsDateValid = !!earningsDate && !Number.isNaN(Date.parse(earningsDate));
 
   return (
     <motion.div layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={`relative overflow-hidden rounded-xl border  ${getDirectionColor()} backdrop-blur-xl`}>
@@ -895,6 +928,20 @@ function SignalCard({ signal, onWatchlistToggle, isWatchlisted }: { signal: Trad
           <Badge className="bg-accent-core/20 text-accent-bright border-accent-core/30 text-xs">{signal.marketRegime?.type?.replace('_', ' ').toUpperCase() || 'RANGING'}</Badge>
           <Badge className="bg-ink-raised text-body border-ink-edge text-xs">{signal.timeframe}</Badge>
         </div>
+        {(signal.volumeAnalysis || volumeFlag || mover?.change24h !== undefined || volumePercentile !== undefined || mover?.distance30dHigh !== undefined || mover?.distance30dLow !== undefined || earningsDateValid) && (
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted mb-3" data-testid={`signal-context-${signal.asset.symbol}`}>
+            {signal.volumeAnalysis && <span><span className="text-secondary">Volume:</span> {signal.volumeAnalysis}</span>}
+            {volumeFlag && <span><span className="text-secondary">Flag:</span> {volumeFlag}</span>}
+            {mover?.change24h !== undefined && <span><span className="text-secondary">24h:</span> {mover.change24h >= 0 ? '+' : ''}{mover.change24h.toFixed(2)}%</span>}
+            {volumePercentile !== undefined && <span><span className="text-secondary">30d vol pctl:</span> {volumePercentile}%</span>}
+            {mover?.distance30dHigh !== undefined && Number.isFinite(mover.distance30dHigh) && <span><span className="text-secondary">30d high:</span> {((mover.distance30dHigh) * 100).toFixed(1)}% away</span>}
+            {mover?.distance30dLow !== undefined && Number.isFinite(mover.distance30dLow) && <span><span className="text-secondary">30d low:</span> {((mover.distance30dLow) * 100).toFixed(1)}% away</span>}
+            {earningsDateValid && <span><span className="text-secondary">Earnings:</span> {earningsDays !== undefined ? (earningsDays === 0 ? 'today' : `${earningsDays}d`) : 'scheduled'} · {new Date(earningsDate as string).toLocaleDateString([], { month: 'short', day: 'numeric', timeZone: 'UTC' })}</span>}
+            {(moverSection?.asOf || earningsSection?.asOf) && <span className="text-muted/70">As of {new Date(moverSection?.asOf || earningsSection?.asOf || '').toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>}
+            {earningsSection?.asOf && <span className="text-muted/70">Earnings as of {new Date(earningsSection.asOf).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>}
+            {(moverSection?.delayed || earningsSection?.delayed) && <span className="text-warn">Delayed</span>}
+          </div>
+        )}
 
         <div className="bg-ink-raised/60 rounded-xl p-3 mb-3">
           <div className="flex items-center justify-between mb-2">

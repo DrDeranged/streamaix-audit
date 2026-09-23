@@ -128,17 +128,25 @@ function tickerCell(label: string, price: number, change: number, last: boolean)
 }
 
 function buildTickerTape(content: NewsletterContent): string {
+  const cells = [
+    content.btcPrice > 0 ? tickerCell('BITCOIN', content.btcPrice, content.btcChange, false) : '',
+    content.ethPrice > 0 ? tickerCell('ETHEREUM', content.ethPrice, content.ethChange, false) : '',
+    content.spyPrice > 0 ? tickerCell('SPY&nbsp;(S&amp;P&nbsp;500&nbsp;ETF)', content.spyPrice, content.spyChange, true) : ''
+  ].filter(Boolean);
+  if (cells.length === 0) return '';
   return `
   <tr><td class="px" style="padding:0 28px;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="nl-card nl-bdr" bgcolor="${C.card}" style="background-color:${C.card};border:1px solid ${C.border};border-radius:10px;">
-      <tr>${tickerCell('BITCOIN', content.btcPrice, content.btcChange, false)}${tickerCell('ETHEREUM', content.ethPrice, content.ethChange, false)}${tickerCell('SPY&nbsp;(S&amp;P&nbsp;500&nbsp;ETF)', content.spyPrice, content.spyChange, true)}
+      <tr>${cells.join('')}
       </tr>
     </table>
+    ${content.cryptoAsOf && (content.btcPrice > 0 || content.ethPrice > 0) ? `<div class="nl-muted" style="font-family:${SANS};font-size:10px;color:${C.muted};padding:6px 0;">Crypto data as of ${escapeHtml(content.cryptoAsOf)}${content.cryptoDelayed ? ' · Delayed' : ''}</div>` : ''}
   </td></tr>`;
 }
 
-function buildFearGreed(index: number): string {
-  const value = Math.min(Math.max(Math.round(index || 50), 0), 100);
+function buildFearGreed(index: number | null | undefined): string {
+  if (index === null || index === undefined) return '';
+  const value = Math.min(Math.max(Math.round(index), 0), 100);
   const fill = Math.min(Math.max(value, 1), 99);
   return `
   <tr><td class="px" style="padding:14px 28px 0 28px;">
@@ -228,6 +236,23 @@ function buildMovers(content: NewsletterContent): string {
   </td></tr>`;
 }
 
+function buildAlphaDesk(content: NewsletterContent): string {
+  const observations = (content.alphaDesk || []).slice(0, 5);
+  if (observations.length === 0) return '';
+  const delayed = observations.some(observation => observation.delayed);
+  const bullets = observations.map(observation =>
+    `<li style="padding:0 0 8px 2px;font-family:${SANS};font-size:13px;line-height:19px;color:${C.text};">${escapeHtml(observation.text)}${observation.asOf ? ` <span class="nl-muted" style="font-size:10px;color:${C.muted};">· ${escapeHtml(new Date(observation.asOf).toISOString())}</span>` : ''}</li>`
+  ).join('');
+  return `
+  <tr><td class="px" style="padding:26px 28px 0 28px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="nl-card nl-bdr" bgcolor="${C.card}" style="background-color:${C.card};border:1px solid ${C.border};border-radius:10px;">
+      <tr><td class="nl-text" style="padding:16px 18px 4px 18px;font-family:${SERIF};font-size:19px;color:${C.text};">Alpha Desk</td></tr>
+      <tr><td class="nl-secondary" style="padding:0 18px 12px 18px;font-family:${SANS};font-size:11px;color:${C.secondary};">${delayed ? 'Provider data delayed' : 'Numeric market observations'}</td></tr>
+      <tr><td style="padding:0 18px 10px 18px;"><ul style="margin:0;padding:0 0 0 18px;">${bullets}</ul></td></tr>
+    </table>
+  </td></tr>`;
+}
+
 function buildPredictionMarkets(content: NewsletterContent): string {
   const markets = (content.hotMarkets || []).slice(0, 3);
   if (markets.length === 0) return '';
@@ -297,9 +322,11 @@ export function generateNewsletterHTML(content: NewsletterContent, unsubscribeTo
   // Hidden preheader built from BTC price, fear/greed and the top stock gainer.
   const topStockGainer = (content.stockGainers || [])[0];
   const preheaderParts = [
-    `BTC $${formatPrice(content.btcPrice || 0)}`,
-    `Fear ${content.fearGreedIndex || 50}`
+    ...(content.btcPrice > 0 ? [`BTC $${formatPrice(content.btcPrice)}`] : []),
   ];
+  if (content.fearGreedIndex !== null && content.fearGreedIndex !== undefined) {
+    preheaderParts.push(`Fear ${content.fearGreedIndex}`);
+  }
   if (topStockGainer) {
     preheaderParts.push(`${topStockGainer.symbol} ${pctText(topStockGainer.changePercent)}`);
   }
@@ -374,8 +401,9 @@ export function generateNewsletterHTML(content: NewsletterContent, unsubscribeTo
     </table>
   </td></tr>
 ${buildTickerTape(content)}
-${buildFearGreed(content.fearGreedIndex)}
+  ${buildFearGreed(content.fearGreedIndex)}
 ${buildAgentsBrief(content.agentsBrief)}
+${buildAlphaDesk(content)}
 ${buildMovers(content)}
 ${buildPredictionMarkets(content)}
 ${buildStreamsAndNews(content)}
@@ -413,13 +441,26 @@ export function generateNewsletterText(content: NewsletterContent): string {
   let text = `STREAMAIX — AUTONOMOUS MARKET INTELLIGENCE\nThe daily ledger, written by the agents.\n\n${'─'.repeat(40)}\n\n`;
 
   text += `MARKET TAPE\n`;
-  text += `Bitcoin: $${formatPrice(content.btcPrice || 0)} (${pctText(content.btcChange || 0)})\n`;
-  text += `Ethereum: $${formatPrice(content.ethPrice || 0)} (${pctText(content.ethChange || 0)})\n`;
-  text += `SPY (S&P 500 ETF): $${formatPrice(content.spyPrice || 0)} (${pctText(content.spyChange || 0)})\n\n`;
-  text += `Crypto Fear & Greed: ${content.fearGreedIndex || 50}/100 (${fearGreedLabel(content.fearGreedIndex || 50)})\n\n`;
+  if (content.btcPrice > 0) text += `Bitcoin: $${formatPrice(content.btcPrice)} (${pctText(content.btcChange)})\n`;
+  if (content.ethPrice > 0) text += `Ethereum: $${formatPrice(content.ethPrice)} (${pctText(content.ethChange)})\n`;
+  if (content.spyPrice > 0) text += `SPY (S&P 500 ETF): $${formatPrice(content.spyPrice)} (${pctText(content.spyChange)})\n`;
+  if (content.cryptoAsOf && (content.btcPrice > 0 || content.ethPrice > 0)) text += `Crypto data: ${content.cryptoAsOf}${content.cryptoDelayed ? ' (delayed)' : ''}\n`;
+  text += '\n';
+  if (content.fearGreedIndex !== null && content.fearGreedIndex !== undefined) {
+    text += `Crypto Fear & Greed: ${content.fearGreedIndex}/100 (${fearGreedLabel(content.fearGreedIndex)})\n\n`;
+  }
 
   if (content.agentsBrief) {
     text += `THE AGENTS' BRIEF\n${content.agentsBrief}\n\n`;
+  }
+
+  if (content.alphaDesk && content.alphaDesk.length > 0) {
+    text += `ALPHA DESK\n`;
+    content.alphaDesk.slice(0, 5).forEach(observation => {
+      text += `  • ${observation.text}\n`;
+      if (observation.asOf) text += `    Data: ${new Date(observation.asOf).toISOString()}\n`;
+    });
+    text += '\n';
   }
 
   const cryptoMovers = [...(content.topGainers || []).slice(0, 3), ...(content.topLosers || []).slice(0, 2)];

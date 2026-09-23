@@ -25,6 +25,7 @@ import BountyBoardSection from '@/components/bounty/BountyBoardSection';
 import RelatedBountiesWidget from '@/components/bounty/RelatedBountiesWidget';
 import ActivePredictionMarkets from '@/components/dashboard/ActivePredictionMarkets';
 import HotAvatarTrades from '@/components/dashboard/HotAvatarTrades';
+import { MarketPulse } from '@/components/dashboard/MarketPulse';
 import { motion, AnimatePresence, animate } from 'framer-motion';
 import { 
   Plus, 
@@ -652,6 +653,10 @@ export default function Dashboard() {
           </div>
           </StatGrid>
         </motion.div>
+
+        <div className="mb-6">
+          <MarketPulse />
+        </div>
 
         {/* Mobile-First Main Content Layout */}
         <div className="space-y-6 lg:grid lg:grid-cols-4 lg:gap-6 lg:space-y-0">

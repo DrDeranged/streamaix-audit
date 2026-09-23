@@ -1,6 +1,58 @@
 import axios from 'axios';
 import { duneAnalyticsService } from './duneAnalyticsService';
 import { MarketDataService } from './marketDataService';
+import { macroDataService } from './macroDataService';
+
+export interface MarketPulseSection<T> {
+  data: T;
+  asOf?: string;
+  delayed?: boolean;
+}
+
+export interface MarketPulse {
+  asOf: string;
+  delayed: boolean;
+  btcDominance?: MarketPulseSection<{ value: number; trend?: number }>;
+  totalMarketCap?: MarketPulseSection<{ value: number; trend?: number }>;
+  fearGreed?: MarketPulseSection<any>;
+  unusualVolumeCount?: MarketPulseSection<number>;
+  movers?: MarketPulseSection<any[]>;
+  sectorSplit?: MarketPulseSection<Array<{ sector: string; gainers: number; losers: number }>>;
+  earnings?: MarketPulseSection<any[]>;
+}
+
+/** Kept pure/exported so the volume policy can be tested without HTTP calls. */
+export function percentileRank(value: number, sample: number[]): number {
+  const values = sample.filter(Number.isFinite).sort((a, b) => a - b);
+  if (!values.length || !Number.isFinite(value)) return 0;
+  return Math.round((values.filter(v => v <= value).length / values.length) * 100);
+}
+
+export function isUnusualVolume(volume24h: number, average30d: number): boolean {
+  return Number.isFinite(volume24h) && Number.isFinite(average30d) &&
+    average30d > 0 && volume24h >= average30d * 1.5;
+}
+
+export function selectMarketMovers(coins: any[], count = 5): any[] {
+  const stable = new Set(['USDT', 'USDC', 'DAI', 'FDUSD', 'TUSD', 'USDE', 'USDS']);
+  const valid = coins.filter(coin => !stable.has(String(coin.symbol || '').toUpperCase()) &&
+    Number.isFinite(Number(coin.price_change_percentage_24h)));
+  const gainers = [...valid].sort((a, b) => Number(b.price_change_percentage_24h) - Number(a.price_change_percentage_24h)).slice(0, count);
+  const losers = [...valid].sort((a, b) => Number(a.price_change_percentage_24h) - Number(b.price_change_percentage_24h)).slice(0, count);
+  return [...gainers, ...losers].filter((coin, index, all) => all.findIndex(item => item.id === coin.id) === index);
+}
+
+export function previousDominanceShift(currentDominance: number, totalCapChange: number, btcCapChange: number): number | undefined {
+  if (![currentDominance, totalCapChange, btcCapChange].every(Number.isFinite) ||
+      currentDominance < 0 || currentDominance > 100 ||
+      1 + totalCapChange / 100 <= 0 || 1 + btcCapChange / 100 <= 0) return undefined;
+  const currentTotal = 1;
+  const previousTotal = currentTotal / (1 + totalCapChange / 100);
+  const currentBtc = currentDominance / 100;
+  const previousBtc = currentBtc / (1 + btcCapChange / 100);
+  const previousDominance = (previousBtc / previousTotal) * 100;
+  return Number.isFinite(previousDominance) ? currentDominance - previousDominance : undefined;
+}
 
 interface UnifiedMarketData {
   // Asset identification
@@ -80,6 +132,15 @@ export class ComprehensiveMarketService {
   private readonly fredApiKey = process.env.FRED_API_KEY;
   private readonly alphaVantageKey = process.env.ALPHA_VANTAGE_API_KEY;
   private readonly commoditiesApiKey = process.env.COMMODITIES_API_KEY;
+  private readonly coingeckoProKey = process.env.COINGECKO_PRO_API_KEY || '';
+  private readonly finnhubKey = process.env.FINNHUB_API_KEY || '';
+  private pulseCache = new Map<string, { data: any; timestamp: number }>();
+  private pulseWarnings = new Set<string>();
+  private pulseFailures = new Map<string, number>();
+  private pulseDisabled = new Set<string>();
+  private readonly pulseFailureCooldown = 5 * 60 * 1000;
+  private pulseHistoryCache = new Map<string, { data: { volumes: number[]; high: number; low: number }; timestamp: number }>();
+  private readonly pulseCacheTimeout = 10 * 60 * 1000;
   
   constructor() {
     this.marketDataService = MarketDataService.getInstance();
@@ -102,6 +163,216 @@ export class ComprehensiveMarketService {
 
   private setCache(key: string, data: any): void {
     this.cache.set(key, { data, timestamp: Date.now() });
+  }
+
+  private warnPulseProvider(provider: string, error: unknown): void {
+    if (!this.pulseWarnings.has(provider)) {
+      this.pulseWarnings.add(provider);
+      console.warn(`[market-pulse] ${provider} unavailable; using last good data`);
+    }
+  }
+
+  private async pulseProvider<T>(key: string, provider: string, fetcher: () => Promise<T>): Promise<MarketPulseSection<T> | undefined> {
+    const current = this.pulseCache.get(key);
+    if (current && Date.now() - current.timestamp < this.pulseCacheTimeout) {
+      return { data: current.data, asOf: new Date(current.timestamp).toISOString(), delayed: false };
+    }
+    const failedAt = this.pulseFailures.get(key) || this.pulseFailures.get(provider);
+    if (this.pulseDisabled.has(provider) || (failedAt && Date.now() - failedAt < this.pulseFailureCooldown)) {
+      return current ? { data: current.data, asOf: new Date(current.timestamp).toISOString(), delayed: true } : undefined;
+    }
+    try {
+      const data = await fetcher();
+      if (data === undefined || data === null) return undefined;
+      const timestamp = Date.now();
+      this.pulseCache.set(key, { data, timestamp });
+      return { data, asOf: new Date(timestamp).toISOString(), delayed: false };
+    } catch (error) {
+      const errorCode = Number((error as any)?.response?.data?.error_code);
+      if (errorCode === 10010) this.pulseDisabled.add(provider);
+      this.pulseFailures.set(key, Date.now());
+      this.pulseFailures.set(provider, Date.now());
+      this.warnPulseProvider(provider, error);
+      return current ? { data: current.data, asOf: new Date(current.timestamp).toISOString(), delayed: true } : undefined;
+    }
+  }
+
+  /**
+   * Provider-backed, best-effort market snapshot. A failed provider never turns
+   * into fabricated zeros: only a previously successful section is returned.
+   */
+  async getMarketPulse(): Promise<MarketPulse> {
+    // Use the existing static coverage list. Do not load the broad quote
+    // universe here: that path can hit Finnhub's rate limiter and block pulse.
+    const covered = this.finnhubKey ? this.marketDataService.getCoveredStockSymbols(20) : [];
+    if (covered.length) this.pulseCache.set('covered-stock-symbols', { data: covered, timestamp: Date.now() });
+    const sections = await Promise.all([
+      this.pulseProvider('global', 'CoinGecko', async () => {
+        if (!this.coingeckoProKey) return undefined as any;
+        const response = await axios.get('https://pro-api.coingecko.com/api/v3/global', {
+          headers: { 'x-cg-pro-api-key': this.coingeckoProKey }, timeout: 8000
+        });
+        const d = response.data?.data;
+        if (!d?.market_cap_percentage?.btc || !d?.total_market_cap?.usd) throw new Error('invalid global response');
+        let btc: any;
+        try {
+          const btcResponse = await axios.get('https://pro-api.coingecko.com/api/v3/coins/bitcoin/market_chart', {
+            headers: { 'x-cg-pro-api-key': this.coingeckoProKey },
+            params: { vs_currency: 'usd', days: 2, interval: 'daily' },
+            timeout: 8000
+          });
+          const caps = (btcResponse.data?.market_caps || []).map((row: any[]) => Number(row[1])).filter(Number.isFinite);
+          if (caps.length >= 2) btc = { usd_24h_market_cap_change: ((caps[caps.length - 1] - caps[caps.length - 2]) / caps[caps.length - 2]) * 100 };
+        } catch (error) {
+          const errorCode = Number((error as any)?.response?.data?.error_code);
+          if (errorCode === 10010) this.pulseDisabled.add('CoinGecko');
+          this.pulseFailures.set('CoinGecko', Date.now());
+          this.warnPulseProvider('CoinGecko', error);
+        }
+        const totalTrend = Number(d.market_cap_change_percentage_24h_usd);
+        const btcTrend = Number(btc?.usd_24h_market_cap_change);
+        const dominance = Number(d.market_cap_percentage.btc);
+        return {
+          btc: { value: dominance, trend: previousDominanceShift(dominance, totalTrend, btcTrend) },
+          cap: { value: Number(d.total_market_cap.usd), trend: Number.isFinite(totalTrend) ? totalTrend : undefined }
+        };
+      }),
+      this.pulseProvider('fear-greed', 'Fear & Greed', () => macroDataService.getFearGreedIndex()),
+      this.pulseProvider('movers', 'CoinGecko', async () => {
+        if (!this.coingeckoProKey) return undefined as any;
+        return this.fetchPulseMovers();
+      }),
+      this.pulseProvider('stock-sectors', 'Finnhub', async () => {
+        if (!this.finnhubKey) return undefined as any;
+        return this.fetchStockSectorSplit();
+      }),
+      this.pulseProvider('earnings', 'Finnhub', async () => {
+        if (!this.finnhubKey) return undefined as any;
+        return this.fetchPulseEarnings(covered);
+      }),
+    ]);
+    const [global, fearGreed, movers, stockSectors, earnings] = sections;
+    const result: MarketPulse = { asOf: new Date().toISOString(), delayed: sections.some(s => !!s?.delayed) };
+    if (global) {
+      result.btcDominance = { data: global.data.btc, asOf: global.asOf, delayed: global.delayed };
+      result.totalMarketCap = { data: global.data.cap, asOf: global.asOf, delayed: global.delayed };
+    }
+    if (fearGreed) result.fearGreed = fearGreed;
+    if (movers) {
+      result.movers = { data: movers.data.items, asOf: movers.asOf, delayed: movers.delayed };
+      const unusual = movers.data.items.filter((m: any) => m.unusualVolume).length;
+      result.unusualVolumeCount = { data: unusual, asOf: movers.asOf, delayed: movers.delayed };
+    }
+    if (stockSectors) result.sectorSplit = stockSectors;
+    if (earnings) result.earnings = earnings;
+    return result;
+  }
+
+  private async fetchPulseMovers(): Promise<{ items: any[]; sectorSplit: Array<{ sector: string; gainers: number; losers: number }> }> {
+    if (!this.coingeckoProKey) throw new Error('CoinGecko Pro key unavailable');
+    const response = await axios.get('https://pro-api.coingecko.com/api/v3/coins/markets', {
+      headers: { 'x-cg-pro-api-key': this.coingeckoProKey },
+      params: { vs_currency: 'usd', order: 'market_cap_desc', per_page: 100, page: 1, sparkline: false },
+      timeout: 10000
+    });
+    // CoinGecko may ignore change-based ordering; rank the market-cap batch
+    // locally and use the documented 24h field returned by this endpoint.
+    const coins = selectMarketMovers(response.data || []);
+    if (!Array.isArray(coins) || !coins.length) throw new Error('invalid movers response');
+    const items = await Promise.all(coins.map(async (coin: any) => {
+      const history = await this.getPulseHistory(coin.id);
+      const average30d = history?.volumes.length ? history.volumes.reduce((a, b) => a + b, 0) / history.volumes.length : undefined;
+      const values = history?.volumes || [];
+      return {
+        symbol: String(coin.symbol || '').toUpperCase(), name: coin.name,
+        change24h: Number(coin.price_change_percentage_24h),
+        volume24h: coin.total_volume, averageVolume30d: average30d,
+        volumePercentile30d: average30d === undefined ? undefined : percentileRank(coin.total_volume, values),
+        unusualVolume: average30d === undefined ? undefined : isUnusualVolume(coin.total_volume, average30d),
+        distance30dHigh: history && coin.current_price ? (coin.current_price - history.high) / coin.current_price : undefined,
+        distance30dLow: history && coin.current_price ? (coin.current_price - history.low) / coin.current_price : undefined,
+        sector: coin.category || undefined
+      };
+    }));
+    const split = new Map<string, { sector: string; gainers: number; losers: number }>();
+    items.forEach(item => {
+      if (!item.sector) return;
+      const existing = split.get(item.sector) || { sector: item.sector, gainers: 0, losers: 0 };
+      item.change24h >= 0 ? existing.gainers++ : existing.losers++;
+      split.set(item.sector, existing);
+    });
+    return { items, sectorSplit: Array.from(split.values()) };
+  }
+
+  private async fetchPulseEarnings(covered: string[]): Promise<any[]> {
+    if (!this.finnhubKey || !covered.length) throw new Error('Finnhub coverage unavailable');
+    const now = new Date();
+    const end = new Date(now.getTime() + 7 * 86400000);
+    const response = await axios.get('https://finnhub.io/api/v1/calendar/earnings', {
+      params: { from: now.toISOString().slice(0, 10), to: end.toISOString().slice(0, 10), token: this.finnhubKey }, timeout: 8000
+    });
+    const rows = response.data?.earningsCalendar;
+    if (!Array.isArray(rows)) throw new Error('invalid earnings response');
+    return rows.filter((row: any) => row.symbol && covered.includes(String(row.symbol).toUpperCase())).map((row: any) => ({
+      symbol: row.symbol, date: row.date, hour: row.hour, epsEstimate: row.epsEstimate,
+      revenueEstimate: row.revenueEstimate
+    }));
+  }
+
+  /** Finnhub-only stock sector breadth for the small covered universe. */
+  private async fetchStockSectorSplit(): Promise<Array<{ sector: string; gainers: number; losers: number }>> {
+    const symbols = this.marketDataService.getCoveredStockSymbols(8);
+    if (!symbols.length) throw new Error('no covered stock movers');
+    const rows = await Promise.allSettled(symbols.map(async (symbol: string) => {
+      const stock = await this.marketDataService.getStockQuote(symbol);
+      if (!stock || !Number.isFinite(Number(stock.percentChange24h))) return undefined;
+      const response = await axios.get('https://finnhub.io/api/v1/stock/profile2', {
+        params: { symbol, token: this.finnhubKey }, timeout: 4000
+      });
+      const sector = response.data?.finnhubIndustry;
+      return sector ? { sector, change: Number(stock.percentChange24h) } : undefined;
+    }));
+    const grouped = new Map<string, { sector: string; gainers: number; losers: number }>();
+    rows.filter(row => row.status === 'fulfilled').map(row => row.value).filter(Boolean).forEach(row => {
+      const value = row as { sector: string; change: number };
+      const item = grouped.get(value.sector) || { sector: value.sector, gainers: 0, losers: 0 };
+      value.change >= 0 ? item.gainers++ : item.losers++;
+      grouped.set(value.sector, item);
+    });
+    const result = Array.from(grouped.values());
+    if (!result.length) throw new Error('Finnhub returned no stock sectors');
+    return result;
+  }
+
+  private async getPulseHistory(id: string): Promise<{ volumes: number[]; high: number; low: number } | undefined> {
+    const cached = this.pulseHistoryCache.get(id);
+    if (cached && Date.now() - cached.timestamp < 60 * 60 * 1000) return cached.data;
+    try {
+      const chart = await axios.get(`https://pro-api.coingecko.com/api/v3/coins/${id}/market_chart`, {
+        headers: { 'x-cg-pro-api-key': this.coingeckoProKey }, params: { vs_currency: 'usd', days: 31, interval: 'daily' }, timeout: 8000
+      });
+      const cutoff = new Date();
+      cutoff.setUTCHours(0, 0, 0, 0);
+      const daily = new Map<string, { volume: number; high: number; low: number }>();
+      (chart.data?.total_volumes || []).forEach((v: any[]) => {
+        const date = new Date(Number(v[0])); date.setUTCHours(0, 0, 0, 0);
+        if (date >= cutoff || !Number.isFinite(Number(v[1]))) return;
+        const key = date.toISOString();
+        const row = daily.get(key) || { volume: 0, high: -Infinity, low: Infinity };
+        row.volume += Number(v[1]); daily.set(key, row);
+      });
+      (chart.data?.prices || []).forEach((v: any[]) => {
+        const date = new Date(Number(v[0])); date.setUTCHours(0, 0, 0, 0);
+        if (date >= cutoff || !Number.isFinite(Number(v[1]))) return;
+        const row = daily.get(date.toISOString()) || { volume: 0, high: -Infinity, low: Infinity };
+        row.high = Math.max(row.high, Number(v[1])); row.low = Math.min(row.low, Number(v[1])); daily.set(date.toISOString(), row);
+      });
+      const rows = Array.from(daily.values()).filter(row => row.volume > 0 && row.high > -Infinity).slice(-30);
+      if (!rows.length) return undefined;
+      const data = { volumes: rows.map(row => row.volume), high: Math.max(...rows.map(row => row.high)), low: Math.min(...rows.map(row => row.low)) };
+      this.pulseHistoryCache.set(id, { data, timestamp: Date.now() });
+      return data;
+    } catch (error) { this.warnPulseProvider('CoinGecko history', error); return undefined; }
   }
 
   /**
@@ -740,3 +1011,8 @@ export class ComprehensiveMarketService {
 }
 
 export const comprehensiveMarketService = ComprehensiveMarketService.getInstance();
+
+/** Compatibility entry point used by newsletter and HTTP consumers. */
+export async function getMarketPulse(): Promise<any> {
+  return comprehensiveMarketService.getMarketPulse();
+}

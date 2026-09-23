@@ -28,6 +28,9 @@ vi.mock("../../lib/modelGateway", () => ({
       if (gatewayState.impl) return gatewayState.impl();
       return Promise.resolve({ content: "mocked brief", model: "test" });
     },
+    completeJson: (req: any) => gatewayState.impl
+      ? gatewayState.impl()
+      : Promise.resolve({ bullets: ["Buy these 18 assets", "18 assets are flagged for unusual volume."] }),
   },
 }));
 
@@ -42,8 +45,9 @@ import {
   fetchHotMarkets,
   fetchUpcomingStreams,
   generateAgentsBrief,
+  generateAlphaDesk,
 } from "../newsletterContentGenerator";
-import { generateNewsletterHTML } from "../newsletterTemplate";
+import { generateNewsletterHTML, generateNewsletterText } from "../newsletterTemplate";
 import type { NewsletterContent } from "../newsletterContentGenerator";
 
 const NOW = new Date("2026-08-01T12:00:00Z");
@@ -155,6 +159,7 @@ describe("generateAgentsBrief", () => {
     btcChange: 0.29,
     ethPrice: 1873,
     ethChange: 0.66,
+    spyPrice: 738.93,
     spyChange: 0.1,
     fearGreedIndex: 27,
     stockGainers: [],
@@ -173,6 +178,40 @@ describe("generateAgentsBrief", () => {
     expect(brief.length).toBeGreaterThan(0);
     expect(brief).toContain("64,334");
     expect(brief).toContain("27/100");
+  });
+
+  it("does not describe an unavailable quote as a zero-price move", async () => {
+    gatewayState.impl = () => Promise.reject(new Error("gateway down"));
+    const brief = await generateAgentsBrief({ ...inputs, btcPrice: 0, ethPrice: 0, spyPrice: 0 });
+    expect(brief).not.toMatch(/Bitcoin|Ether|SPY|\$0/);
+  });
+});
+
+describe("generateAlphaDesk", () => {
+  it("rejects a banned bullet individually without rewriting it", async () => {
+    const result = await generateAlphaDesk({
+      asOf: "2026-08-01T00:00:00Z",
+      delayed: false,
+      unusualVolumeCount: {
+        asOf: "2026-08-01T00:00:00Z",
+        delayed: false,
+        data: 18,
+      },
+    } as any);
+    expect(result.map(item => item.text)).toEqual(["18 assets are flagged for unusual volume."]);
+    expect(result.map(item => item.text).join(" ")).not.toContain("Buy");
+  });
+
+  it("rejects a hallucinated sentence even when its number and symbol match", async () => {
+    gatewayState.impl = () => Promise.resolve({ bullets: [{ id: 0, text: "BTC will rise 18%" }] });
+    const result = await generateAlphaDesk({
+      movers: {
+        asOf: "2026-08-01T00:00:00Z",
+        delayed: false,
+        data: [{ symbol: "BTC", change24h: 18 }],
+      },
+    } as any);
+    expect(result).toEqual([]);
   });
 });
 
@@ -198,6 +237,18 @@ describe("generateNewsletterHTML", () => {
     upcomingStreams: [],
     newsStories: [],
   };
+
+  it("omits unavailable quotes and labels last-good crypto data", () => {
+    const unavailable = { ...content, btcPrice: 0, ethPrice: 0, spyPrice: 0 };
+    const html = generateNewsletterHTML(unavailable, "tok123");
+    const text = generateNewsletterText(unavailable);
+    expect(html).not.toContain("BTC $0");
+    expect(text).not.toMatch(/Bitcoin:|Ethereum:|SPY \(S&P 500 ETF\):/);
+
+    const delayed = { ...content, cryptoAsOf: "2026-08-01T12:00:00.000Z", cryptoDelayed: true };
+    expect(generateNewsletterHTML(delayed, "tok123")).toContain("· Delayed");
+    expect(generateNewsletterText(delayed)).toContain("(delayed)");
+  });
 
   it("contains both color-scheme meta tags", () => {
     const html = generateNewsletterHTML(content, "tok123");

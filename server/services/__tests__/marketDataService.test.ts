@@ -121,4 +121,21 @@ describe("CoinGecko provider degradation", () => {
       ),
     ).toHaveLength(1);
   });
+
+  it("serves last-good quotes with their original timestamp and a delayed flag", async () => {
+    delete process.env.COINGECKO_API_KEY;
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    axiosGet.mockRejectedValue(new Error("provider unavailable"));
+
+    const service = new MarketDataService() as any;
+    const lastUpdated = "2026-09-22T09:00:00.000Z";
+    service.staleCache.set("crypto_BTC", {
+      data: [{ symbol: "BTC", name: "Bitcoin", price: 80_000, lastUpdated }],
+      timestamp: Date.now() - 60_000,
+    });
+    const quotes = await service.getCryptoQuotes(["BTC"]);
+    expect(quotes).toMatchObject([{ symbol: "BTC", price: 80_000, lastUpdated, delayed: true }]);
+  });
 });

@@ -56,6 +56,7 @@ import RebuiltContentProcessor from "../services/rebuiltContentProcessor";
 import { AIService } from "../services/aiService";
 import { Web3Service } from "../services/web3Service";
 import { MarketDataService, marketDataService } from "../services/marketDataService";
+import { comprehensiveMarketService } from "../services/comprehensiveMarketService";
 import { youtubeService } from "../services/youtubeService";
 import { PredictiveAnalyticsService } from "../services/predictiveAnalyticsService";
 import { onChainAnalyticsService } from "../services/onChainAnalyticsService";
@@ -127,6 +128,9 @@ export async function registerMarketDataApiRoutes(app: Express): Promise<void> {
   // =============================================================================
   // MARKET DATA API ROUTES
   // =============================================================================
+  app.get('/api/market-pulse', asyncHandler(async (_req: Request, res: Response) => {
+    res.json(await comprehensiveMarketService.getMarketPulse());
+  }));
 
   // Get live cryptocurrency quotes
   app.get('/api/market/crypto/quotes', asyncHandler(async (req: Request, res: Response) => {
